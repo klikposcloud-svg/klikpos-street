@@ -1,0 +1,19 @@
+[package]
+name = "venematic-desktop"
+version = "2.0.0"
+description = "Venematic POS - Sistema de Ventas de Escritorio Local para Comercios"
+authors = ["Venematic Team"]
+license = ""
+repository = ""
+edition = "2021"
+
+[build-dependencies]
+tauri-build = { version = "1.5", features = [] }
+
+[dependencies]
+tauri = { version = "1.5", features = ["shell-open", "window-all"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+[features]
+custom-protocol = ["tauri/custom-protocol"]

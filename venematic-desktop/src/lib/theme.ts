@@ -1,0 +1,383 @@
+export interface ThemePalette {
+  id: string;
+  name: string;
+  tagline: string;
+  primary: string;
+  primaryHover: string;
+  primaryLight: string;
+  primaryBorder: string;
+  accent: string;
+  colorName: string; // Tailwind color family
+  swatchGradient: string;
+}
+
+export const THEME_PALETTES: ThemePalette[] = [
+  {
+    id: 'sky',
+    name: 'Azul Industrial',
+    tagline: 'Por defecto • Minimarkets y Comercio General',
+    primary: '#0369a1',
+    primaryHover: '#075985',
+    primaryLight: '#f0f9ff',
+    primaryBorder: '#7dd3fc',
+    accent: '#0284c7',
+    colorName: 'sky',
+    swatchGradient: 'from-sky-500 to-sky-700',
+  },
+  {
+    id: 'emerald',
+    name: 'Verde Esmeralda',
+    tagline: 'Supermercados, Fruterías y Abastos Frescos',
+    primary: '#047857',
+    primaryHover: '#065f46',
+    primaryLight: '#ecfdf5',
+    primaryBorder: '#6ee7b7',
+    accent: '#059669',
+    colorName: 'emerald',
+    swatchGradient: 'from-emerald-500 to-emerald-700',
+  },
+  {
+    id: 'blue',
+    name: 'Azul Corporativo',
+    tagline: 'Banca, Retail y Distribuidoras Mayoristas',
+    primary: '#1d4ed8',
+    primaryHover: '#1e40af',
+    primaryLight: '#eff6ff',
+    primaryBorder: '#93c5fd',
+    accent: '#2563eb',
+    colorName: 'blue',
+    swatchGradient: 'from-blue-500 to-blue-700',
+  },
+  {
+    id: 'amber',
+    name: 'Ámbar Dorado',
+    tagline: 'Panaderías, Pastelerías, Cafés y Dulcerías',
+    primary: '#b45309',
+    primaryHover: '#92400e',
+    primaryLight: '#fffbeb',
+    primaryBorder: '#fcd34d',
+    accent: '#d97706',
+    colorName: 'amber',
+    swatchGradient: 'from-amber-500 to-amber-700',
+  },
+  {
+    id: 'ruby',
+    name: 'Rojo Rubí',
+    tagline: 'Carnicerías, Charcuterías y Bodegones',
+    primary: '#b91c1c',
+    primaryHover: '#991b1b',
+    primaryLight: '#fef2f2',
+    primaryBorder: '#fca5a5',
+    accent: '#dc2626',
+    colorName: 'red',
+    swatchGradient: 'from-red-500 to-red-700',
+  },
+  {
+    id: 'purple',
+    name: 'Púrpura Amatista',
+    tagline: 'Perfumerías, Cosmética, Boutiques y Moda',
+    primary: '#6d28d9',
+    primaryHover: '#5b21b6',
+    primaryLight: '#f5f3ff',
+    primaryBorder: '#d8b4fe',
+    accent: '#7c3aed',
+    colorName: 'purple',
+    swatchGradient: 'from-purple-500 to-purple-700',
+  },
+  {
+    id: 'slate',
+    name: 'Gris Grafito Titán',
+    tagline: 'Ferreterías, Repuestos y Construcción',
+    primary: '#334155',
+    primaryHover: '#1e293b',
+    primaryLight: '#f8fafc',
+    primaryBorder: '#cbd5e1',
+    accent: '#475569',
+    colorName: 'slate',
+    swatchGradient: 'from-slate-600 to-slate-800',
+  },
+  {
+    id: 'teal',
+    name: 'Turquesa Salud',
+    tagline: 'Farmacias, Droguerías, Clínicas y Ópticas',
+    primary: '#0f766e',
+    primaryHover: '#115e59',
+    primaryLight: '#f0fdfa',
+    primaryBorder: '#5eead4',
+    accent: '#0d9488',
+    colorName: 'teal',
+    swatchGradient: 'from-teal-500 to-teal-700',
+  },
+  {
+    id: 'coral',
+    name: 'Coral Sunset',
+    tagline: 'Pizzerías, Fast Food, Snacks y Juguerías',
+    primary: '#c2410c',
+    primaryHover: '#9a3412',
+    primaryLight: '#fff7ed',
+    primaryBorder: '#fdba74',
+    accent: '#ea580c',
+    colorName: 'orange',
+    swatchGradient: 'from-orange-500 to-orange-700',
+  },
+  {
+    id: 'indigo',
+    name: 'Índigo Tech',
+    tagline: 'Electrónica, Computación y Celulares',
+    primary: '#4338ca',
+    primaryHover: '#3730a3',
+    primaryLight: '#eef2ff',
+    primaryBorder: '#a5b4fc',
+    accent: '#4f46e5',
+    colorName: 'indigo',
+    swatchGradient: 'from-indigo-500 to-indigo-700',
+  },
+];
+
+export type UIStyleMode = 'industrial' | 'glassmorphism';
+
+export type IndustrialBgPreset = 'white' | 'teal' | 'blue' | 'gray' | 'custom';
+
+export interface IndustrialBgOption {
+  id: IndustrialBgPreset;
+  name: string;
+  tagline: string;
+  bgColor: string;
+  previewColor: string;
+  borderPreview: string;
+}
+
+export const INDUSTRIAL_BG_PRESETS: IndustrialBgOption[] = [
+  {
+    id: 'white',
+    name: 'Blanco Clínico Clásico',
+    tagline: 'Máxima claridad y contraste tradicional (#ffffff / #f8fafc)',
+    bgColor: '#f8fafc',
+    previewColor: '#ffffff',
+    borderPreview: '#cbd5e1',
+  },
+  {
+    id: 'teal',
+    name: 'Turquesa Suave (Menta)',
+    tagline: 'Frescura visual que relaja la vista en jornadas de caja largas (#f0fdfa)',
+    bgColor: '#f0fdfa',
+    previewColor: '#14b8a6',
+    borderPreview: '#99f6e4',
+  },
+  {
+    id: 'blue',
+    name: 'Azul Hielo Ejecutivo',
+    tagline: 'Tono azul corporativo suave para retail y farmacias (#f0f9ff)',
+    bgColor: '#f0f9ff',
+    previewColor: '#38bdf8',
+    borderPreview: '#bae6fd',
+  },
+  {
+    id: 'gray',
+    name: 'Gris Titán Neutro',
+    tagline: 'Gris moderno para ferreterías, repuestos y depósitos (#f1f5f9)',
+    bgColor: '#f1f5f9',
+    previewColor: '#94a3b8',
+    borderPreview: '#cbd5e1',
+  },
+  {
+    id: 'custom',
+    name: 'Color Picker Personalizado',
+    tagline: 'Selecciona libremente cualquier tono de color de fondo con el selector',
+    bgColor: '#f8fafc',
+    previewColor: '#6366f1',
+    borderPreview: '#818cf8',
+  },
+];
+
+export interface BrandingConfig {
+  paletteId: string;
+  uiStyle: UIStyleMode;
+  industrialBg?: IndustrialBgPreset;
+  customBgColor?: string;
+}
+
+export const DEFAULT_BRANDING: BrandingConfig = {
+  paletteId: 'sky',
+  uiStyle: 'industrial',
+  industrialBg: 'white',
+  customBgColor: '#f8fafc',
+};
+
+export function getLuminance(hex: string): number {
+  try {
+    let clean = hex.replace('#', '');
+    if (clean.length === 3) {
+      clean = clean.split('').map((c) => c + c).join('');
+    }
+    const num = parseInt(clean, 16);
+    const r = (num >> 16) & 255;
+    const g = (num >> 8) & 255;
+    const b = num & 255;
+    return (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  } catch {
+    return 1;
+  }
+}
+
+export interface IndustrialThemeVariables {
+  bgColor: string;
+  cardColor: string;
+  textColor: string;
+  textMuted: string;
+  borderColor: string;
+  primaryBg: string;
+  primaryHover: string;
+  secondaryBg: string;
+  secondaryBorder: string;
+  secondaryText: string;
+}
+
+export function computeIndustrialThemeVariables(
+  preset: IndustrialBgPreset,
+  customHex?: string,
+  activePalettePrimary?: string,
+  activePaletteHover?: string
+): IndustrialThemeVariables {
+  const brandPrimary = activePalettePrimary || '#0369a1';
+  const brandHover = activePaletteHover || '#075985';
+
+  if (preset === 'teal') {
+    return {
+      bgColor: '#f0fdfa', // Mint soft
+      cardColor: '#ffffff',
+      textColor: '#042f2e', // Deep teal 950
+      textMuted: '#115e59', // Teal 800
+      borderColor: '#99f6e4', // Teal 200
+      primaryBg: brandPrimary,
+      primaryHover: brandHover,
+      secondaryBg: '#ffffff',
+      secondaryBorder: '#5eead4',
+      secondaryText: '#0f766e',
+    };
+  }
+  if (preset === 'blue') {
+    return {
+      bgColor: '#f0f9ff', // Ice blue soft
+      cardColor: '#ffffff',
+      textColor: '#082f49', // Sky 950
+      textMuted: '#0369a1', // Sky 700
+      borderColor: '#bae6fd', // Sky 200
+      primaryBg: brandPrimary,
+      primaryHover: brandHover,
+      secondaryBg: '#ffffff',
+      secondaryBorder: '#7dd3fc',
+      secondaryText: '#0284c7',
+    };
+  }
+  if (preset === 'gray') {
+    return {
+      bgColor: '#f1f5f9', // Slate soft
+      cardColor: '#ffffff',
+      textColor: '#0f172a', // Slate 900
+      textMuted: '#334155', // Slate 700
+      borderColor: '#cbd5e1', // Slate 300
+      primaryBg: brandPrimary,
+      primaryHover: brandHover,
+      secondaryBg: '#ffffff',
+      secondaryBorder: '#cbd5e1',
+      secondaryText: '#1e293b',
+    };
+  }
+  if (preset === 'custom' && customHex) {
+    const isLight = getLuminance(customHex) > 0.5;
+    if (isLight) {
+      return {
+        bgColor: customHex,
+        cardColor: '#ffffff',
+        textColor: '#0f172a',
+        textMuted: '#334155',
+        borderColor: '#cbd5e1',
+        primaryBg: brandPrimary,
+        primaryHover: brandHover,
+        secondaryBg: '#ffffff',
+        secondaryBorder: '#cbd5e1',
+        secondaryText: '#0f172a',
+      };
+    } else {
+      // Dark background custom
+      return {
+        bgColor: customHex,
+        cardColor: '#1e293b',
+        textColor: '#f8fafc',
+        textMuted: '#cbd5e1',
+        borderColor: '#334155',
+        primaryBg: brandPrimary,
+        primaryHover: brandHover,
+        secondaryBg: '#0f172a',
+        secondaryBorder: '#475569',
+        secondaryText: '#f8fafc',
+      };
+    }
+  }
+
+  // Default 'white'
+  return {
+    bgColor: '#f8fafc',
+    cardColor: '#ffffff',
+    textColor: '#0f172a',
+    textMuted: '#475569',
+    borderColor: '#e2e8f0',
+    primaryBg: brandPrimary,
+    primaryHover: brandHover,
+    secondaryBg: '#ffffff',
+    secondaryBorder: '#cbd5e1',
+    secondaryText: '#334155',
+  };
+}
+
+export function applyBrandingToDOM(config: BrandingConfig) {
+  if (typeof window === 'undefined') return;
+
+  const palette = THEME_PALETTES.find((p) => p.id === config.paletteId) || THEME_PALETTES[0];
+  const root = document.documentElement;
+
+  root.setAttribute('data-theme-palette', palette.id);
+  root.setAttribute('data-ui-style', config.uiStyle);
+
+  // Background y Adaptabilidad Dinámica para Modo Industrial Profesional
+  const industrialBgPreset = config.industrialBg || 'white';
+  const customHex = config.customBgColor || '#f8fafc';
+  const themeVars = computeIndustrialThemeVariables(
+    industrialBgPreset,
+    customHex,
+    palette.primary,
+    palette.primaryHover
+  );
+
+  root.setAttribute('data-industrial-bg', industrialBgPreset);
+  root.style.setProperty('--industrial-bg', themeVars.bgColor);
+  root.style.setProperty('--industrial-card', themeVars.cardColor);
+  root.style.setProperty('--industrial-text', themeVars.textColor);
+  root.style.setProperty('--industrial-text-muted', themeVars.textMuted);
+  root.style.setProperty('--industrial-border', themeVars.borderColor);
+  root.style.setProperty('--btn-primary-bg', themeVars.primaryBg);
+  root.style.setProperty('--btn-primary-hover', themeVars.primaryHover);
+  root.style.setProperty('--btn-secondary-bg', themeVars.secondaryBg);
+  root.style.setProperty('--btn-secondary-border', themeVars.secondaryBorder);
+  root.style.setProperty('--btn-secondary-text', themeVars.secondaryText);
+
+  // Set CSS Variables de Marca
+  root.style.setProperty('--brand-primary', palette.primary);
+  root.style.setProperty('--brand-hover', palette.primaryHover);
+  root.style.setProperty('--brand-light', palette.primaryLight);
+  root.style.setProperty('--brand-border', palette.primaryBorder);
+  root.style.setProperty('--brand-accent', palette.accent);
+
+  if (document.body) {
+    if (config.uiStyle === 'industrial') {
+      document.body.style.backgroundColor = themeVars.bgColor;
+    } else {
+      document.body.style.backgroundColor = '';
+    }
+  }
+
+  // Trigger event for listeners
+  window.dispatchEvent(new CustomEvent('venematic:branding_updated', { detail: config }));
+}
+
