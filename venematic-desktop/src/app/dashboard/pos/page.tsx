@@ -1209,7 +1209,7 @@ export default function DesktopPosPage() {
                       <span className="text-base font-black font-mono text-slate-900 tabular-numbers">
                         {formatUSD(p.priceUSD)}
                       </span>
-                      <span className="text-[11px] text-slate-500 font-mono tabular-numbers">
+                      <span className="text-xs font-bold text-slate-600 font-mono tabular-numbers">
                         {formatVES(p.priceUSD * bcvRate)}
                       </span>
                     </div>
@@ -1248,7 +1248,7 @@ export default function DesktopPosPage() {
                     <span className="text-base font-black font-mono text-slate-900 tabular-numbers leading-none block">
                       {formatUSD(p.priceUSD)}
                     </span>
-                    <span className="text-[10px] text-slate-500 font-mono font-medium tabular-numbers block mt-0.5">
+                    <span className="text-xs font-bold text-slate-600 font-mono tabular-numbers block mt-1">
                       {formatVES(p.priceUSD * bcvRate)}
                     </span>
                   </div>
@@ -1382,10 +1382,10 @@ export default function DesktopPosPage() {
 
                 {/* Total por línea */}
                 <div className="text-right min-w-[70px]">
-                  <span className="text-xs font-mono font-bold text-slate-900 block tabular-numbers">
+                  <span className="text-xs font-mono font-black text-slate-900 block tabular-numbers">
                     {formatUSD(item.totalUSD)}
                   </span>
-                  <span className="text-[10px] font-mono text-slate-600 font-semibold block tabular-numbers">
+                  <span className="text-[11px] font-mono text-slate-700 font-bold block tabular-numbers">
                     {formatVES(item.totalUSD * bcvRate)}
                   </span>
                 </div>

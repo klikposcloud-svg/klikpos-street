@@ -7,6 +7,8 @@ export interface ThemePalette {
   primaryLight: string;
   primaryBorder: string;
   accent: string;
+  glow: string;
+  glassBorder: string;
   colorName: string; // Tailwind color family
   swatchGradient: string;
 }
@@ -21,6 +23,8 @@ export const THEME_PALETTES: ThemePalette[] = [
     primaryLight: '#f0f9ff',
     primaryBorder: '#7dd3fc',
     accent: '#0284c7',
+    glow: 'rgba(2, 132, 199, 0.35)',
+    glassBorder: 'rgba(56, 189, 248, 0.30)',
     colorName: 'sky',
     swatchGradient: 'from-sky-500 to-sky-700',
   },
@@ -33,6 +37,8 @@ export const THEME_PALETTES: ThemePalette[] = [
     primaryLight: '#ecfdf5',
     primaryBorder: '#6ee7b7',
     accent: '#059669',
+    glow: 'rgba(5, 150, 105, 0.35)',
+    glassBorder: 'rgba(52, 211, 153, 0.30)',
     colorName: 'emerald',
     swatchGradient: 'from-emerald-500 to-emerald-700',
   },
@@ -45,6 +51,8 @@ export const THEME_PALETTES: ThemePalette[] = [
     primaryLight: '#eff6ff',
     primaryBorder: '#93c5fd',
     accent: '#2563eb',
+    glow: 'rgba(37, 99, 235, 0.35)',
+    glassBorder: 'rgba(96, 165, 250, 0.30)',
     colorName: 'blue',
     swatchGradient: 'from-blue-500 to-blue-700',
   },
@@ -57,6 +65,8 @@ export const THEME_PALETTES: ThemePalette[] = [
     primaryLight: '#fffbeb',
     primaryBorder: '#fcd34d',
     accent: '#d97706',
+    glow: 'rgba(217, 119, 6, 0.35)',
+    glassBorder: 'rgba(251, 191, 36, 0.30)',
     colorName: 'amber',
     swatchGradient: 'from-amber-500 to-amber-700',
   },
@@ -69,6 +79,8 @@ export const THEME_PALETTES: ThemePalette[] = [
     primaryLight: '#fef2f2',
     primaryBorder: '#fca5a5',
     accent: '#dc2626',
+    glow: 'rgba(220, 38, 38, 0.35)',
+    glassBorder: 'rgba(248, 113, 113, 0.30)',
     colorName: 'red',
     swatchGradient: 'from-red-500 to-red-700',
   },
@@ -81,6 +93,8 @@ export const THEME_PALETTES: ThemePalette[] = [
     primaryLight: '#f5f3ff',
     primaryBorder: '#d8b4fe',
     accent: '#7c3aed',
+    glow: 'rgba(124, 58, 237, 0.35)',
+    glassBorder: 'rgba(192, 132, 252, 0.30)',
     colorName: 'purple',
     swatchGradient: 'from-purple-500 to-purple-700',
   },
@@ -93,6 +107,8 @@ export const THEME_PALETTES: ThemePalette[] = [
     primaryLight: '#f8fafc',
     primaryBorder: '#cbd5e1',
     accent: '#475569',
+    glow: 'rgba(71, 85, 105, 0.35)',
+    glassBorder: 'rgba(148, 163, 184, 0.30)',
     colorName: 'slate',
     swatchGradient: 'from-slate-600 to-slate-800',
   },
@@ -105,6 +121,8 @@ export const THEME_PALETTES: ThemePalette[] = [
     primaryLight: '#f0fdfa',
     primaryBorder: '#5eead4',
     accent: '#0d9488',
+    glow: 'rgba(13, 148, 136, 0.35)',
+    glassBorder: 'rgba(45, 212, 191, 0.30)',
     colorName: 'teal',
     swatchGradient: 'from-teal-500 to-teal-700',
   },
@@ -117,6 +135,8 @@ export const THEME_PALETTES: ThemePalette[] = [
     primaryLight: '#fff7ed',
     primaryBorder: '#fdba74',
     accent: '#ea580c',
+    glow: 'rgba(234, 88, 12, 0.35)',
+    glassBorder: 'rgba(251, 146, 60, 0.30)',
     colorName: 'orange',
     swatchGradient: 'from-orange-500 to-orange-700',
   },
@@ -129,6 +149,8 @@ export const THEME_PALETTES: ThemePalette[] = [
     primaryLight: '#eef2ff',
     primaryBorder: '#a5b4fc',
     accent: '#4f46e5',
+    glow: 'rgba(79, 70, 229, 0.35)',
+    glassBorder: 'rgba(129, 140, 248, 0.30)',
     colorName: 'indigo',
     swatchGradient: 'from-indigo-500 to-indigo-700',
   },
@@ -368,12 +390,16 @@ export function applyBrandingToDOM(config: BrandingConfig) {
   root.style.setProperty('--brand-light', palette.primaryLight);
   root.style.setProperty('--brand-border', palette.primaryBorder);
   root.style.setProperty('--brand-accent', palette.accent);
+  root.style.setProperty('--brand-glow', palette.glow);
+  root.style.setProperty('--brand-glass-border', palette.glassBorder);
 
   if (document.body) {
     if (config.uiStyle === 'industrial') {
       document.body.style.backgroundColor = themeVars.bgColor;
+      document.body.style.color = themeVars.textColor;
     } else {
       document.body.style.backgroundColor = '';
+      document.body.style.color = '';
     }
   }
 

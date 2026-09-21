@@ -5,7 +5,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap');
 
 :root {
-  color-scheme: only light !important;
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 }
@@ -24,13 +23,11 @@ input, textarea {
 }
 
 html {
-  color-scheme: only light !important;
   background-color: #ffffff;
   color: #0f172a;
 }
 
 body {
-  color-scheme: only light !important;
   background-color: #f8fafc;
   color: #0f172a;
   font-family: var(--font-sans);
@@ -111,6 +108,8 @@ body {
   --brand-light: #f0f9ff;
   --brand-border: #7dd3fc;
   --brand-accent: #0284c7;
+  --brand-glow: rgba(2, 132, 199, 0.35);
+  --brand-glass-border: rgba(56, 189, 248, 0.30);
 
   /* Modo Industrial Adaptativo */
   --industrial-bg: #f8fafc;
@@ -125,35 +124,62 @@ body {
   --btn-secondary-text: #334155;
 }
 
-/* Botón Dinámico de Marca */
-.btn-brand {
+/* ========================================================================= */
+/* CONEXIÓN UNIVERSAL DE MARCA Y PALETA ACTIVA (Aplica en todos los modos)   */
+/* ========================================================================= */
+button.bg-sky-700,
+button.bg-sky-600,
+button.bg-sky-800,
+.btn-brand,
+.pos-btn-primary {
   background-color: var(--brand-primary) !important;
   color: #ffffff !important;
   border-color: var(--brand-hover) !important;
+  box-shadow: 0 2px 8px var(--brand-glow) !important;
   transition: all 0.15s ease-in-out;
 }
 
-.btn-brand:hover {
+button.bg-sky-700:hover,
+button.bg-sky-600:hover,
+button.bg-sky-800:hover,
+.btn-brand:hover,
+.pos-btn-primary:hover {
   background-color: var(--brand-hover) !important;
+  border-color: var(--brand-primary) !important;
+  filter: brightness(1.08);
 }
 
-.text-brand {
+.text-brand,
+.text-sky-700,
+.text-sky-600,
+.text-sky-800 {
   color: var(--brand-primary) !important;
 }
 
-.border-brand {
+.group:hover .group-hover\:text-sky-700,
+.group:hover .group-hover\:text-sky-600 {
+  color: var(--brand-primary) !important;
+}
+
+.border-brand,
+.border-sky-500,
+.border-sky-600,
+.border-sky-400 {
   border-color: var(--brand-border) !important;
 }
 
-.bg-brand-light {
-  background-color: var(--brand-light) !important;
+.brand-badge {
+  background-color: var(--brand-primary) !important;
+  color: #ffffff !important;
+  border-color: var(--brand-hover) !important;
 }
 
-/* Conexión de elementos activos con el Brand Primary */
+/* Enlaces y Navegación Activa */
 .nav-item-active {
   background-color: var(--brand-light) !important;
   color: var(--brand-primary) !important;
   border-color: var(--brand-border) !important;
+  box-shadow: 0 0 10px var(--brand-glow) !important;
 }
 
 .nav-item-active span {
@@ -166,12 +192,23 @@ body {
   border-color: var(--brand-border) !important;
 }
 
-.brand-badge {
-  background-color: var(--brand-primary) !important;
-  color: #ffffff !important;
+/* Anillos de Foco Reactivos a la Paleta */
+input:focus,
+select:focus,
+textarea:focus,
+.focus\:ring-sky-500:focus,
+.focus\:ring-cyan-500:focus {
+  --tw-ring-color: var(--brand-border) !important;
 }
 
-/* MODO INDUSTRIAL PROFESIONAL - ADAPTABILIDAD DINÁMICA DE FONDO Y CONTRASTE */
+/* ========================================================================= */
+/* MODO INDUSTRIAL PROFESIONAL (Sólido, Claro y Limpio)                      */
+/* ========================================================================= */
+html[data-ui-style="industrial"],
+html:not([data-ui-style]) {
+  color-scheme: light;
+}
+
 html[data-ui-style="industrial"],
 html[data-ui-style="industrial"] body,
 html[data-ui-style="industrial"] main,
@@ -205,21 +242,11 @@ html[data-ui-style="industrial"] .text-slate-500 {
   color: var(--industrial-text-muted, #475569) !important;
 }
 
-/* Botones de acción principal conectados dinámicamente a la marca activa */
-html[data-ui-style="industrial"] button.bg-sky-700,
-html[data-ui-style="industrial"] button.bg-sky-600,
-html[data-ui-style="industrial"] .btn-brand,
-html[data-ui-style="industrial"] .pos-btn-primary {
-  background-color: var(--brand-primary) !important;
-  border-color: var(--brand-hover) !important;
-  color: #ffffff !important;
-}
-
-html[data-ui-style="industrial"] button.bg-sky-700:hover,
-html[data-ui-style="industrial"] button.bg-sky-600:hover,
-html[data-ui-style="industrial"] .btn-brand:hover,
-html[data-ui-style="industrial"] .pos-btn-primary:hover {
-  background-color: var(--brand-hover) !important;
+html[data-ui-style="industrial"] .bg-brand-light,
+html[data-ui-style="industrial"] .bg-sky-50,
+html[data-ui-style="industrial"] .bg-sky-100 {
+  background-color: var(--brand-light) !important;
+  color: var(--brand-primary) !important;
 }
 
 html[data-ui-style="industrial"] .pos-btn-secondary {
@@ -228,78 +255,64 @@ html[data-ui-style="industrial"] .pos-btn-secondary {
   color: var(--btn-secondary-text, #334155) !important;
 }
 
-html[data-ui-style="industrial"] .text-brand,
-html[data-ui-style="industrial"] .text-sky-700,
-html[data-ui-style="industrial"] .text-sky-600 {
-  color: var(--brand-primary) !important;
-}
-
-html[data-ui-style="industrial"] .border-brand,
-html[data-ui-style="industrial"] .border-sky-500,
-html[data-ui-style="industrial"] .border-sky-600 {
-  border-color: var(--brand-border) !important;
-}
-
-html[data-ui-style="industrial"] .bg-brand-light,
-html[data-ui-style="industrial"] .bg-sky-50,
-html[data-ui-style="industrial"] .bg-sky-100 {
-  background-color: var(--brand-light) !important;
-}
-
-/* MODO GLASSMORPHISM MODERNO - Fondo Negro-Azulado Sleek Dark Navy con Frosted Glass */
+/* ========================================================================= */
+/* MODO GLASSMORPHISM REFINADO (Apple Frosted Glass + Brand Reactive Glow)   */
+/* ========================================================================= */
 html[data-ui-style="glassmorphism"] {
   color-scheme: dark !important;
-  background-color: #0b0f19 !important;
-  color: #f1f5f9 !important;
+  background-color: #070a12 !important;
+  color: #f8fafc !important;
 }
 
 html[data-ui-style="glassmorphism"] body {
   background: 
-    radial-gradient(ellipse 90% 70% at 10% 10%, rgba(14, 165, 233, 0.12) 0%, transparent 60%),
-    radial-gradient(ellipse 80% 60% at 90% 90%, rgba(99, 102, 241, 0.10) 0%, transparent 65%),
-    radial-gradient(ellipse 60% 40% at 50% 50%, rgba(16, 185, 129, 0.06) 0%, transparent 55%),
-    linear-gradient(180deg, #090d16 0%, #0d1527 50%, #0a0f1d 100%) !important;
+    radial-gradient(ellipse 90% 70% at 10% 10%, var(--brand-glow, rgba(14, 165, 233, 0.15)) 0%, transparent 60%),
+    radial-gradient(ellipse 80% 60% at 90% 90%, rgba(99, 102, 241, 0.08) 0%, transparent 65%),
+    linear-gradient(180deg, #070b14 0%, #0c1220 50%, #080d18 100%) !important;
   background-attachment: fixed !important;
   color: #f8fafc !important;
 }
 
+/* Cabecera y Barra Lateral con Iluminación Especular Física */
 html[data-ui-style="glassmorphism"] header,
 html[data-ui-style="glassmorphism"] aside {
-  background-color: rgba(13, 21, 39, 0.85) !important;
-  backdrop-filter: blur(20px) saturate(180%) !important;
-  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
-  border-color: rgba(56, 189, 248, 0.20) !important;
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37) !important;
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.90) 0%, rgba(10, 16, 31, 0.92) 100%) !important;
+  backdrop-filter: blur(16px) saturate(170%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(170%) !important;
+  border-color: var(--brand-glass-border, rgba(255, 255, 255, 0.15)) !important;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
   color: #f8fafc !important;
 }
 
+/* Contenedores y Paneles Principales en Glassmorphism */
 html[data-ui-style="glassmorphism"] .bg-white {
-  background-color: rgba(11, 17, 32, 0.85) !important;
-  backdrop-filter: blur(20px) saturate(170%) !important;
-  -webkit-backdrop-filter: blur(20px) saturate(170%) !important;
-  border-color: rgba(56, 189, 248, 0.15) !important;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45) !important;
+  background: linear-gradient(145deg, rgba(17, 26, 46, 0.90) 0%, rgba(11, 18, 33, 0.93) 100%) !important;
+  backdrop-filter: blur(14px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(14px) saturate(160%) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.40), inset 0 1px 0 rgba(255, 255, 255, 0.10) !important;
   color: #f1f5f9 !important;
 }
 
-/* Tarjetas individuales de Productos (Botones): Más claras y elevadas que el fondo del canvas */
+/* Tarjetas Individuales de Productos (Botones): Elevación y Specular Highlight */
 html[data-ui-style="glassmorphism"] button.bg-white {
-  background: linear-gradient(180deg, rgba(26, 38, 64, 0.95) 0%, rgba(18, 28, 48, 0.95) 100%) !important;
-  border-color: rgba(94, 115, 150, 0.40) !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
-  backdrop-filter: blur(12px) !important;
-  -webkit-backdrop-filter: blur(12px) !important;
+  background: linear-gradient(180deg, rgba(26, 38, 66, 0.92) 0%, rgba(17, 27, 48, 0.95) 100%) !important;
+  border-color: rgba(255, 255, 255, 0.14) !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  color: #f8fafc !important;
 }
 
 html[data-ui-style="glassmorphism"] button.bg-white:hover {
-  background: linear-gradient(180deg, rgba(34, 50, 84, 0.98) 0%, rgba(24, 37, 64, 0.98) 100%) !important;
-  border-color: rgba(56, 189, 248, 0.70) !important;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.50), 0 0 16px rgba(56, 189, 248, 0.30), inset 0 1px 0 rgba(255, 255, 255, 0.20) !important;
+  background: linear-gradient(180deg, rgba(35, 52, 88, 0.96) 0%, rgba(22, 35, 60, 0.98) 100%) !important;
+  border-color: var(--brand-border) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.50), 0 0 18px var(--brand-glow), inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
   transform: translateY(-2px);
 }
 
 html[data-ui-style="glassmorphism"] .bg-slate-50 {
-  background-color: rgba(13, 20, 36, 0.85) !important;
+  background-color: rgba(13, 20, 36, 0.88) !important;
   backdrop-filter: blur(12px) !important;
   -webkit-backdrop-filter: blur(12px) !important;
   border-color: rgba(255, 255, 255, 0.10) !important;
@@ -312,40 +325,38 @@ html[data-ui-style="glassmorphism"] .bg-slate-100 {
   color: #f1f5f9 !important;
 }
 
-/* Tarjetas y botones interactivos en modo Glassmorphism */
+/* Bordes y Separadores de Cristal */
 html[data-ui-style="glassmorphism"] .border-slate-200,
 html[data-ui-style="glassmorphism"] .border-slate-300 {
-  border-color: rgba(100, 116, 139, 0.4) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
 }
 
 html[data-ui-style="glassmorphism"] .border-slate-900 {
-  border-color: #38bdf8 !important;
-  box-shadow: 0 0 15px rgba(56, 189, 248, 0.3) !important;
+  border-color: var(--brand-border) !important;
+  box-shadow: 0 0 15px var(--brand-glow) !important;
 }
 
-/* Tarjeta activa en selección */
+/* Elementos Activos en Glassmorphism (Sincronizados con la Marca) */
 html[data-ui-style="glassmorphism"] .border-sky-600 {
-  border-color: #38bdf8 !important;
-  background-color: rgba(14, 165, 233, 0.22) !important;
-  box-shadow: 0 0 18px rgba(56, 189, 248, 0.35) !important;
+  border-color: var(--brand-border) !important;
+  background-color: var(--brand-glow) !important;
+  box-shadow: 0 0 18px var(--brand-glow) !important;
 }
 
 html[data-ui-style="glassmorphism"] .border-sky-600 * {
   color: #ffffff !important;
 }
 
-/* Botón de Fotos ON activo */
 html[data-ui-style="glassmorphism"] .bg-sky-50 {
-  background-color: rgba(14, 165, 233, 0.25) !important;
-  border-color: rgba(56, 189, 248, 0.50) !important;
-  color: #38bdf8 !important;
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  border-color: var(--brand-glass-border) !important;
+  color: #ffffff !important;
 }
 
-/* Ítem seleccionado en el Ticket de Venta en Modo Oscuro / Glassmorphism */
 html[data-ui-style="glassmorphism"] .bg-sky-50\/80 {
-  background-color: rgba(14, 165, 233, 0.28) !important;
-  border-color: #38bdf8 !important;
-  box-shadow: 0 0 14px rgba(56, 189, 248, 0.25) !important;
+  background-color: var(--brand-glow) !important;
+  border-color: var(--brand-border) !important;
+  box-shadow: 0 0 14px var(--brand-glow) !important;
 }
 
 html[data-ui-style="glassmorphism"] .bg-sky-50\/80 p,
@@ -354,82 +365,25 @@ html[data-ui-style="glassmorphism"] .bg-sky-50\/80 span {
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
 }
 
-/* Botón Celular Conectado */
-html[data-ui-style="glassmorphism"] .bg-emerald-50 {
-  background-color: rgba(16, 185, 129, 0.22) !important;
-  border-color: rgba(52, 211, 153, 0.50) !important;
-  color: #34d399 !important;
-}
-
-/* Calculadora de Vuelto de Alto Contraste en Glassmorphism */
-html[data-ui-style="glassmorphism"] .bg-emerald-950\/80,
-html[data-ui-style="glassmorphism"] .bg-emerald-600,
-html[data-ui-style="glassmorphism"] .bg-emerald-700 {
-  background-color: #047857 !important;
-  border-color: #34d399 !important;
-  box-shadow: 0 0 25px rgba(16, 185, 129, 0.40) !important;
-}
-
-html[data-ui-style="glassmorphism"] .bg-emerald-950\/80 *,
-html[data-ui-style="glassmorphism"] .bg-emerald-600 *,
-html[data-ui-style="glassmorphism"] .bg-emerald-700 * {
+/* Navegación Activa en Glassmorphism */
+html[data-ui-style="glassmorphism"] .nav-item-active {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.05) 100%) !important;
+  border-color: var(--brand-border) !important;
   color: #ffffff !important;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6) !important;
+  box-shadow: 0 4px 16px var(--brand-glow), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
 }
 
-html[data-ui-style="glassmorphism"] .bg-emerald-950\/80 .text-emerald-300,
-html[data-ui-style="glassmorphism"] .bg-emerald-600 .text-emerald-300,
-html[data-ui-style="glassmorphism"] .bg-emerald-700 .text-emerald-300 {
-  color: #a7f3d0 !important;
-  text-shadow: 0 0 10px rgba(167, 243, 208, 0.6) !important;
-}
-
-html[data-ui-style="glassmorphism"] .bg-rose-950\/80,
-html[data-ui-style="glassmorphism"] .bg-rose-600,
-html[data-ui-style="glassmorphism"] .bg-rose-700 {
-  background-color: #be123c !important;
-  border-color: #fb7185 !important;
-  box-shadow: 0 0 25px rgba(244, 63, 94, 0.40) !important;
-}
-
-html[data-ui-style="glassmorphism"] .bg-rose-950\/80 *,
-html[data-ui-style="glassmorphism"] .bg-rose-600 *,
-html[data-ui-style="glassmorphism"] .bg-rose-700 * {
+html[data-ui-style="glassmorphism"] .nav-item-active span {
   color: #ffffff !important;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6) !important;
 }
 
-html[data-ui-style="glassmorphism"] .bg-rose-950\/80 .text-rose-300,
-html[data-ui-style="glassmorphism"] .bg-rose-600 .text-rose-300,
-html[data-ui-style="glassmorphism"] .bg-rose-700 .text-rose-300 {
-  color: #fecdd3 !important;
-  text-shadow: 0 0 10px rgba(254, 205, 211, 0.6) !important;
-}
-
-/* Botones de categoría en catálogo */
-html[data-ui-style="glassmorphism"] .brand-badge {
-  background-color: var(--brand-primary) !important;
-  color: #ffffff !important;
-  border-color: rgba(255, 255, 255, 0.3) !important;
-  box-shadow: 0 0 10px rgba(56, 189, 248, 0.25) !important;
-}
-
-
-/* Pastillas informativas inferiores */
-html[data-ui-style="glassmorphism"] .bg-white\/80,
-html[data-ui-style="glassmorphism"] .bg-white\/90 {
+html[data-ui-style="glassmorphism"] .nav-item-active kbd {
   background-color: rgba(255, 255, 255, 0.15) !important;
-  border-color: rgba(255, 255, 255, 0.25) !important;
+  border-color: var(--brand-border) !important;
   color: #ffffff !important;
 }
 
-/* Tarjetas de paleta seleccionadas */
-html[data-ui-style="glassmorphism"] button.border-slate-900 {
-  background-color: rgba(14, 165, 233, 0.16) !important;
-  border-color: #38bdf8 !important;
-  box-shadow: 0 0 14px rgba(56, 189, 248, 0.3) !important;
-}
-
+/* Jerarquía Textual y Contraste en Glassmorphism (WCAG AA) */
 html[data-ui-style="glassmorphism"] .text-slate-900,
 html[data-ui-style="glassmorphism"] .text-slate-800,
 html[data-ui-style="glassmorphism"] .text-slate-700 {
@@ -445,11 +399,25 @@ html[data-ui-style="glassmorphism"] .text-slate-400 {
   color: #94a3b8 !important;
 }
 
+/* Inputs y Selectores de Formulario */
 html[data-ui-style="glassmorphism"] input,
-html[data-ui-style="glassmorphism"] select {
-  background-color: rgba(15, 23, 42, 0.90) !important;
+html[data-ui-style="glassmorphism"] select,
+html[data-ui-style="glassmorphism"] textarea {
+  background-color: rgba(11, 18, 33, 0.95) !important;
   color: #ffffff !important;
-  border-color: rgba(56, 189, 248, 0.35) !important;
+  border-color: var(--brand-glass-border) !important;
+}
+
+html[data-ui-style="glassmorphism"] input::placeholder,
+html[data-ui-style="glassmorphism"] textarea::placeholder {
+  color: #64748b !important;
+}
+
+html[data-ui-style="glassmorphism"] input:focus,
+html[data-ui-style="glassmorphism"] select:focus,
+html[data-ui-style="glassmorphism"] textarea:focus {
+  border-color: var(--brand-primary) !important;
+  box-shadow: 0 0 0 3px var(--brand-glow) !important;
 }
 
 /* Modal Buttons y Estados Activos */
@@ -548,9 +516,9 @@ html[data-ui-style="glassmorphism"] td button {
 
 html[data-ui-style="glassmorphism"] td button:hover {
   background-color: #0284c7 !important;
-  border-color: #38bdf8 !important;
+  border-color: var(--brand-border) !important;
   color: #ffffff !important;
-  box-shadow: 0 0 12px rgba(56, 189, 248, 0.4) !important;
+  box-shadow: 0 0 12px var(--brand-glow) !important;
 }
 
 /* Tipografía limpia, nítida y legible para la lista de productos */
@@ -567,7 +535,7 @@ html[data-ui-style="glassmorphism"] td button:hover {
 
 html[data-ui-style="glassmorphism"] thead.bg-slate-100 {
   background-color: rgba(15, 23, 42, 0.95) !important;
-  border-bottom: 2px solid rgba(56, 189, 248, 0.35) !important;
+  border-bottom: 2px solid var(--brand-glass-border) !important;
 }
 
 /* Botones de Ajuste Rápido (+ / -) con visibilidad nítida en todos los modos */
