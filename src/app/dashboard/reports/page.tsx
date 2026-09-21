@@ -83,6 +83,8 @@ export default function DesktopReportsPage() {
 
   // Tipo de corte para imprimir ('X' o 'Z')
   const [printReportType, setPrintReportType] = useState<'X' | 'Z' | null>(null);
+  const [isMounted, setIsMounted] = useState(false);
+  const [printDateTime, setPrintDateTime] = useState('');
 
   const loadData = async () => {
     const allSales = await db.sales.reverse().toArray();
@@ -131,6 +133,8 @@ export default function DesktopReportsPage() {
   };
 
   useEffect(() => {
+    setIsMounted(true);
+    setPrintDateTime(new Date().toLocaleString('es-VE'));
     loadData();
   }, []);
 
@@ -262,6 +266,7 @@ export default function DesktopReportsPage() {
 
   // Imprimir reporte (Corte X o Corte Z)
   const triggerPrintCorte = (tipo: 'X' | 'Z') => {
+    setPrintDateTime(new Date().toLocaleString('es-VE'));
     setPrintReportType(tipo);
     setTimeout(() => {
       window.print();
@@ -1460,7 +1465,7 @@ export default function DesktopReportsPage() {
           <p className="font-black text-sm pt-1">
             {printReportType === 'Z' ? '*** CIERRE DE CAJA (CORTE Z) ***' : '*** ARQUEO DE CAJA (CORTE X) ***'}
           </p>
-          <p>Fecha/Hora: {new Date().toLocaleString('es-VE')}</p>
+          <p suppressHydrationWarning>Fecha/Hora: {printDateTime || (isMounted ? new Date().toLocaleString('es-VE') : '')}</p>
           <p>Cajero: {activeShiftData?.cashierName || 'Caja 1'}</p>
           <p>Apertura: {activeShiftData?.openedAt ? formatDateShort(activeShiftData.openedAt) : '--'}</p>
         </div>
