@@ -3,6 +3,10 @@ use ed25519_dalek::{Signature, Verifier, VerifyingKey};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
+// Esta es la ÚNICA clave que vive en el binario del cliente. 
+// Es matemáticamente imposible generar licencias con ella, solo verificarlas.
+pub const EMBEDDED_PUBLIC_KEY_HEX: &str = "2efad00db8074a49088705bda159541f973db2f1adc4bba374120032c00b6972";
+
 #[derive(Error, Debug)]
 pub enum LicenseVerificationError {
     #[error("Formato de licencia inválido (se requiere PAYLOAD.SIGNATURE)")]

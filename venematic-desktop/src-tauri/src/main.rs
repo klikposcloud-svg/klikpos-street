@@ -4,14 +4,10 @@ mod crypto;
 mod db;
 mod sales;
 
-use crypto::licensing::{verify_license_token, LicensePayload};
+use crypto::licensing::{verify_license_token, LicensePayload, EMBEDDED_PUBLIC_KEY_HEX};
 use sales::transaction::{execute_atomic_sale, CreateSalePayload, TransactionSuccess};
 use std::sync::Mutex;
 use tauri::State;
-
-// Clave pública maestra incrustada de la firma desarrolladora (32 bytes en Hex Ed25519)
-const EMBEDDED_PUBLIC_KEY_HEX: &str =
-    "2efad00db8074a49088705bda159541f973db2f1adc4bba374120032c00b6972";
 
 struct AppState {
     db_conn: Mutex<rusqlite::Connection>,
