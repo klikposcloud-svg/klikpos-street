@@ -13,6 +13,8 @@
     "tauri:build": "next build && tauri build"
   },
   "dependencies": {
+    "@capacitor/cli": "^8.5.2",
+    "@capacitor/core": "^8.5.2",
     "@google/genai": "^2.23.0",
     "@tauri-apps/api": "^1.6.0",
     "@types/qrcode": "^1.5.6",

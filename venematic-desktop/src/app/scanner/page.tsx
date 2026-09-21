@@ -31,6 +31,8 @@ import {
   ChevronDown,
   Coins,
   Receipt,
+  Scale,
+  Copy,
 } from 'lucide-react';
 import { removeBackgroundToWhiteCanvas } from '@/lib/background-remover';
 
@@ -62,7 +64,7 @@ interface MobileCartItem {
 
 export default function MobileScannerPage() {
   const [session, setSession] = useState('caja-1');
-  const [activeTab, setActiveTab] = useState<'pos' | 'gun' | 'create' | 'inventory'>('pos');
+  const [activeTab, setActiveTab] = useState<'pos' | 'scale' | 'gun' | 'inventory' | 'create'>('pos');
   const [scannerActive, setScannerActive] = useState(false);
   const [history, setHistory] = useState<ScannedHistoryItem[]>([]);
   const [lastScanned, setLastScanned] = useState<string | null>(null);
@@ -76,12 +78,24 @@ export default function MobileScannerPage() {
   const [selectedMobileCategory, setSelectedMobileCategory] = useState('Todos');
   const [showCartDrawer, setShowCartDrawer] = useState(false);
   const [showMobilePaymentModal, setShowMobilePaymentModal] = useState(false);
-  const [mobilePaymentMethod, setMobilePaymentMethod] = useState<'cash_usd' | 'cash_ves' | 'pago_movil'>('cash_usd');
+  const [mobilePaymentMethod, setMobilePaymentMethod] = useState<'cash_usd' | 'cash_ves' | 'pago_movil' | 'punto_venta' | 'zelle'>('cash_usd');
   const [mobileAmountGiven, setMobileAmountGiven] = useState('');
   const [mobilePagoMovilRef, setMobilePagoMovilRef] = useState('');
+  const [mobileCardRef, setMobileCardRef] = useState('');
+  const [mobileZelleRef, setMobileZelleRef] = useState('');
   const [isProcessingMobileSale, setIsProcessingMobileSale] = useState(false);
   const [mobileSaleSuccess, setMobileSaleSuccess] = useState<any | null>(null);
   const [offlinePendingSalesCount, setOfflinePendingSalesCount] = useState(0);
+
+  // Balanza Digital Comercial (Pesaje por Kilo / Gramos)
+  const [scaleWeight, setScaleWeight] = useState<number>(0.000);
+  const [scaleTare, setScaleTare] = useState<number>(0);
+  const [scaleUnit, setScaleUnit] = useState<'kg' | 'g' | 'lb'>('kg');
+  const [scaleSelectedProduct, setScaleSelectedProduct] = useState<MobileCatalogItem | null>(null);
+  const [scaleSearch, setScaleSearch] = useState('');
+  const [scaleAddedToast, setScaleAddedToast] = useState<string | null>(null);
+  const [isSyncingSales, setIsSyncingSales] = useState(false);
+  const [copiedAmountToast, setCopiedAmountToast] = useState(false);
 
   // PWA Install prompt state
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
@@ -116,6 +130,17 @@ export default function MobileScannerPage() {
   const barcodeFileInputRef = useRef<HTMLInputElement>(null);
   const [cameraBlockedByHttp, setCameraBlockedByHttp] = useState(false);
   const [isScanningPhoto, setIsScanningPhoto] = useState(false);
+
+  // Sub-pestaña de la pantalla de Venta: Catálogo de artículos o Módulo de Ticket / Cobro
+  const [posViewTab, setPosViewTab] = useState<'catalog' | 'ticket'>('catalog');
+  // Auto-agregar al ticket en el escáner continuo
+  const [autoAddOnScan, setAutoAddOnScan] = useState(true);
+  // Producto detectado para el HUD de escáner
+  const [scannedProductToast, setScannedProductToast] = useState<MobileCatalogItem | null>(null);
+  // Referencias para el video directo y BarcodeDetector
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const scanIntervalRef = useRef<any>(null);
 
   // Modal de Teclado Numérico Táctil (Numpad) para cantidades y precios
   const [numpadModal, setNumpadModal] = useState<{
@@ -404,6 +429,18 @@ export default function MobileScannerPage() {
 
   // Acciones de Carrito de Venta Móvil (POS en Celular)
   const addToMobileCart = (product: MobileCatalogItem) => {
+    // Verificar si el stock en vivo está agotado
+    const existing = mobileCart.find((item) => item.barcode === product.barcode);
+    const inCartQty = existing ? existing.qty : 0;
+    if (product.stock > 0 && inCartQty >= product.stock) {
+      if (typeof navigator !== 'undefined' && navigator.vibrate) {
+        navigator.vibrate([80, 40, 80]);
+      }
+      setStatusMessage(`⚠️ Stock disponible agotado (${product.name}: ${product.stock})`);
+      setTimeout(() => setStatusMessage('Listo para operar'), 2500);
+      return;
+    }
+
     playMobileBeep();
     if (typeof navigator !== 'undefined' && navigator.vibrate) {
       navigator.vibrate(60);
@@ -439,11 +476,20 @@ export default function MobileScannerPage() {
   };
 
   const updateMobileCartQty = (barcode: string, delta: number) => {
+    const product = inventoryList.find((p) => p.barcode === barcode);
     setMobileCart((prev) =>
       prev
         .map((item) => {
           if (item.barcode === barcode) {
-            const newQty = item.qty + delta;
+            let newQty = item.qty + delta;
+            if (delta > 0 && product && product.stock > 0 && newQty > product.stock) {
+              if (typeof navigator !== 'undefined' && navigator.vibrate) {
+                navigator.vibrate([80, 40, 80]);
+              }
+              setStatusMessage(`⚠️ Stock máximo alcanzado (${product.name}: ${product.stock})`);
+              setTimeout(() => setStatusMessage('Listo para operar'), 2500);
+              newQty = product.stock;
+            }
             return newQty > 0
               ? { ...item, qty: newQty, totalUSD: newQty * item.priceUSD }
               : null;
@@ -466,6 +512,82 @@ export default function MobileScannerPage() {
   const mobileSubtotalUSD = mobileCart.reduce((sum, i) => sum + i.totalUSD, 0);
   const mobileTotalUSD = mobileSubtotalUSD;
   const mobileTotalVES = mobileTotalUSD * inventoryBcvRate;
+
+  // Agregar producto pesado desde la Balanza al Carrito Móvil
+  const handleAddWeighedToCart = (goToCheckout: boolean = false) => {
+    if (!scaleSelectedProduct) {
+      alert('Por favor selecciona un producto para pesar.');
+      return;
+    }
+    const netWeight = Math.max(0, scaleWeight - scaleTare);
+    if (netWeight <= 0) {
+      alert('El peso debe ser mayor a 0 kg para agregar a la venta.');
+      return;
+    }
+
+    playMobileBeep();
+    if (typeof navigator !== 'undefined' && navigator.vibrate) {
+      navigator.vibrate([60, 40, 60]);
+    }
+
+    const lineTotalUSD = Number((netWeight * scaleSelectedProduct.priceUSD).toFixed(2));
+    const uniqueBarcode = `${scaleSelectedProduct.barcode}-W${Math.round(netWeight * 1000)}`;
+
+    setMobileCart((prev) => [
+      ...prev,
+      {
+        productId: scaleSelectedProduct.id || Date.now(),
+        barcode: uniqueBarcode,
+        name: `${scaleSelectedProduct.name} (${netWeight.toFixed(3)} ${scaleUnit})`,
+        qty: 1,
+        priceUSD: lineTotalUSD,
+        totalUSD: lineTotalUSD,
+        image: scaleSelectedProduct.image,
+      },
+    ]);
+
+    setScaleAddedToast(`⚖️ ${netWeight.toFixed(3)} ${scaleUnit} de ${scaleSelectedProduct.name} agregado ($${lineTotalUSD.toFixed(2)})`);
+    setTimeout(() => setScaleAddedToast(null), 3000);
+
+    if (goToCheckout) {
+      setShowMobilePaymentModal(true);
+    }
+  };
+
+  // Enviar peso/producto a la PC (Control Remoto en Vivo)
+  const handleSendWeightToPC = async () => {
+    if (!scaleSelectedProduct) {
+      alert('Selecciona un producto primero en la balanza.');
+      return;
+    }
+    const netWeight = Math.max(0, scaleWeight - scaleTare);
+    if (netWeight <= 0) {
+      alert('Fija un peso mayor a 0 kg.');
+      return;
+    }
+    try {
+      const res = await fetch('/api/scanner/scan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          session,
+          barcode: scaleSelectedProduct.barcode,
+          format: 'SCALE',
+          weight: netWeight,
+        }),
+      });
+      if (res.ok) {
+        playMobileBeep();
+        if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(80);
+        setScaleAddedToast(`📡 Enviado a PC: ${scaleSelectedProduct.name} (${netWeight.toFixed(3)} kg)`);
+        setTimeout(() => setScaleAddedToast(null), 3000);
+      } else {
+        alert('No se pudo enviar a la PC.');
+      }
+    } catch {
+      alert('Sin conexión con la computadora local.');
+    }
+  };
 
   // Procesar cobro móvil (Autónomo / Sin Luz)
   const handleProcessMobileSale = async () => {
@@ -509,7 +631,14 @@ export default function MobileScannerPage() {
           method: mobilePaymentMethod,
           amountUSD: mobilePaymentMethod === 'cash_usd' && numGiven >= mobileTotalUSD ? numGiven : mobileTotalUSD,
           amountVES: mobilePaymentMethod === 'cash_ves' && numGiven >= mobileTotalVES ? numGiven : mobileTotalVES,
-          reference: mobilePaymentMethod === 'pago_movil' ? mobilePagoMovilRef : undefined,
+          reference:
+            mobilePaymentMethod === 'pago_movil'
+              ? mobilePagoMovilRef
+              : mobilePaymentMethod === 'punto_venta'
+              ? mobileCardRef
+              : mobilePaymentMethod === 'zelle'
+              ? mobileZelleRef
+              : undefined,
         },
       ],
       changeUSD: finalChangeUSD,
@@ -624,100 +753,151 @@ export default function MobileScannerPage() {
     }
   };
 
-  // Escanear código mediante foto nativa (100% compatible sin permisos de navegador / sin HTTPS)
+  // Helper para redimensionar fotos de cámara de alta resolución (evita error 'Low memory' de Android)
+  const downscaleImageForScan = (file: File, maxDimension = 1024): Promise<Blob> => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          let { width, height } = img;
+          if (width > maxDimension || height > maxDimension) {
+            if (width > height) {
+              height = Math.round((height * maxDimension) / width);
+              width = maxDimension;
+            } else {
+              width = Math.round((width * maxDimension) / height);
+              height = maxDimension;
+            }
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            resolve(file);
+            return;
+          }
+          ctx.drawImage(img, 0, 0, width, height);
+          canvas.toBlob((blob) => {
+            if (blob) resolve(blob);
+            else resolve(file);
+          }, 'image/jpeg', 0.85);
+        };
+        img.onerror = () => resolve(file);
+        img.src = e.target?.result as string;
+      };
+      reader.onerror = () => resolve(file);
+      reader.readAsDataURL(file);
+    });
+  };
+
+  // Escanear código mediante foto nativa (Optimizada contra Low Memory en Android)
   const handleScanFromPhoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     setIsScanningPhoto(true);
-    setStatusMessage('Analizando código de barras...');
+    setStatusMessage('Optimizando y analizando código...');
 
     try {
-      // 1. Intentar con Html5Qrcode.scanFile
+      // 1. Redimensionar foto de alta resolución para evitar saturar la RAM de Android
+      const downscaledBlob = await downscaleImageForScan(file, 1024);
+      const downscaledFile = new File([downscaledBlob], 'scan.jpg', { type: 'image/jpeg' });
+
+      // 2. Intentar primero con BarcodeDetector nativo (Ultra rápido y sin uso extra de memoria en Android)
+      if (typeof window !== 'undefined' && 'BarcodeDetector' in window) {
+        try {
+          const barcodeDetector = new (window as any).BarcodeDetector({
+            formats: ['ean_13', 'ean_8', 'upc_a', 'upc_e', 'code_128', 'code_39', 'qr_code'],
+          });
+          const bitmap = await createImageBitmap(downscaledBlob);
+          const detected = await barcodeDetector.detect(bitmap);
+          if (detected && detected.length > 0 && detected[0].rawValue) {
+            sendBarcodeToPC(detected[0].rawValue);
+            setStatusMessage(`✓ ¡Código detectado: ${detected[0].rawValue}!`);
+            setIsScanningPhoto(false);
+            e.target.value = '';
+            return;
+          }
+        } catch (detectorErr) {
+          console.warn('BarcodeDetector fallback a scanFile:', detectorErr);
+        }
+      }
+
+      // 3. Fallback con Html5Qrcode.scanFile usando el archivo liviano
       let qrScanner = html5QrCodeRef.current;
       if (!qrScanner) {
         qrScanner = new Html5Qrcode('mobile-camera-reader');
         html5QrCodeRef.current = qrScanner;
       }
-      const decoded = await qrScanner.scanFile(file, false);
+      const decoded = await qrScanner.scanFile(downscaledFile, false);
       if (decoded) {
         sendBarcodeToPC(decoded);
         setStatusMessage(`✓ ¡Código detectado: ${decoded}!`);
         setIsScanningPhoto(false);
-        // Limpiar input para permitir tomar otra foto del mismo producto
         e.target.value = '';
         return;
       }
     } catch (err) {
-      console.warn('scanFile no detectó en primer paso, probando detector nativo:', err);
+      console.warn('scanFile no detectó código en foto:', err);
+    } finally {
+      setIsScanningPhoto(false);
+      try {
+        e.target.value = '';
+      } catch {}
     }
 
-    // 2. Fallback de BarcodeDetector si está disponible en Chrome Android
-    try {
-      if (typeof window !== 'undefined' && 'BarcodeDetector' in window) {
-        const barcodeDetector = new (window as any).BarcodeDetector();
-        const bitmap = await createImageBitmap(file);
-        const detected = await barcodeDetector.detect(bitmap);
-        if (detected && detected.length > 0 && detected[0].rawValue) {
-          sendBarcodeToPC(detected[0].rawValue);
-          setStatusMessage(`✓ ¡Código detectado: ${detected[0].rawValue}!`);
-          setIsScanningPhoto(false);
-          e.target.value = '';
-          return;
-        }
-      }
-    } catch (e) {
-      console.warn('BarcodeDetector fallback error:', e);
-    }
-
-    setStatusMessage('No se detectó código en la foto. Intenta enfocar más cerca.');
-    setIsScanningPhoto(false);
-    e.target.value = '';
+    setStatusMessage('No se detectó código en la foto. Prueba apuntar con el Visor Continuo.');
   };
 
-  // Initialize and clean up camera scanner
-  const startScanner = async () => {
-    try {
-      if (html5QrCodeRef.current) {
-        await stopScanner();
-      }
-
-      const qrCode = new Html5Qrcode('mobile-camera-reader');
-      html5QrCodeRef.current = qrCode;
-
-      await qrCode.start(
-        { facingMode: 'environment' },
-        {
-          fps: 15,
-          qrbox: { width: 280, height: 160 },
-          aspectRatio: 1.0,
-        },
-        (decodedText) => {
-          const now = Date.now();
-          // Debounce same code 1.5s
-          if (decodedText === lastScanned && now - lastScannedTimeRef.current < 1500) {
-            return;
-          }
-          lastScannedTimeRef.current = now;
-          sendBarcodeToPC(decodedText);
-        },
-        () => {
-          // Ignore parse errors on each frame
-        }
-      );
-
-      setScannerActive(true);
-      setCameraBlockedByHttp(false);
-      setStatusMessage('Cámara activa: Apunta al código de barras');
-    } catch (err: any) {
-      console.error('Error starting camera:', err);
-      setStatusMessage('Cámara bloqueada por el navegador. Usa el botón nativo.');
-      setScannerActive(false);
-      setCameraBlockedByHttp(true);
+  // Procesar código detectado en tiempo real (Autónomo y en PC)
+  const processDetectedBarcode = (code: string) => {
+    const cleanCode = code.trim();
+    if (!cleanCode) return;
+    const now = Date.now();
+    if (cleanCode === lastScanned && now - lastScannedTimeRef.current < 2000) {
+      return;
     }
+    lastScannedTimeRef.current = now;
+    setLastScanned(cleanCode);
+
+    // Audio Beep & Vibración háptica instantánea
+    playMobileBeep();
+    if (typeof navigator !== 'undefined' && navigator.vibrate) {
+      navigator.vibrate([80, 40, 80]);
+    }
+
+    // Verificar en el inventario local de la aplicación
+    const matched = inventoryList.find((p) => p.barcode === cleanCode);
+    if (matched) {
+      setScannedProductToast(matched);
+      setStatusMessage(`✓ ¡Detectado: ${matched.name}!`);
+      if (autoAddOnScan) {
+        addToMobileCart(matched);
+      }
+    } else {
+      setScannedProductToast(null);
+      setStatusMessage(`✓ Código detectado: ${cleanCode}`);
+    }
+
+    // Enviar a la PC
+    sendBarcodeToPC(cleanCode);
   };
 
+  // Detener cámara y limpiar recursos
   const stopScanner = async () => {
+    if (scanIntervalRef.current) {
+      clearInterval(scanIntervalRef.current);
+      scanIntervalRef.current = null;
+    }
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => track.stop());
+      streamRef.current = null;
+    }
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
     if (html5QrCodeRef.current) {
       try {
         await html5QrCodeRef.current.stop();
@@ -730,19 +910,101 @@ export default function MobileScannerPage() {
     setScannerActive(false);
   };
 
+  // Iniciar visor de cámara continua (60 FPS, sin lag, como lector de código QR)
+  const startScanner = async () => {
+    try {
+      await stopScanner();
+
+      // Verificar si el navegador móvil permite getUserMedia
+      if (typeof navigator === 'undefined' || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        setCameraBlockedByHttp(true);
+        setStatusMessage('Cámara bloqueada por el navegador. Activa insecure-origin en Chrome.');
+        setScannerActive(false);
+        return;
+      }
+
+      setCameraBlockedByHttp(false);
+
+      // 1. Obtener stream directo de video con la cámara trasera
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: { ideal: 'environment' },
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+        },
+        audio: false,
+      });
+
+      streamRef.current = stream;
+
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        await videoRef.current.play().catch(() => {});
+      }
+
+      setScannerActive(true);
+      setStatusMessage('Visor óptico continuo activo: Apunta a cualquier código');
+
+      // 2. BarcodeDetector nativo por hardware (Presente en Android Chrome, 0% CPU, 60 FPS)
+      if (typeof window !== 'undefined' && 'BarcodeDetector' in window) {
+        try {
+          const barcodeDetector = new (window as any).BarcodeDetector({
+            formats: ['ean_13', 'ean_8', 'code_128', 'code_39', 'upc_a', 'upc_e', 'qr_code', 'itf'],
+          });
+
+          const scanLoop = async () => {
+            if (!videoRef.current || videoRef.current.readyState < 2) return;
+            try {
+              const barcodes = await barcodeDetector.detect(videoRef.current);
+              if (barcodes && barcodes.length > 0 && barcodes[0].rawValue) {
+                processDetectedBarcode(barcodes[0].rawValue);
+              }
+            } catch {}
+          };
+
+          scanIntervalRef.current = setInterval(scanLoop, 120);
+          return;
+        } catch (detectorErr) {
+          console.warn('BarcodeDetector error, fallback a Html5Qrcode:', detectorErr);
+        }
+      }
+
+      // 3. Fallback con Html5Qrcode si el dispositivo no tiene BarcodeDetector nativo
+      const qrCode = new Html5Qrcode('mobile-camera-reader');
+      html5QrCodeRef.current = qrCode;
+
+      await qrCode.start(
+        { facingMode: 'environment' },
+        {
+          fps: 15,
+          qrbox: { width: 280, height: 160 },
+          aspectRatio: 1.0,
+        },
+        (decodedText) => {
+          processDetectedBarcode(decodedText);
+        },
+        () => {}
+      );
+    } catch (err: any) {
+      console.error('Error starting camera:', err);
+      setStatusMessage('Cámara bloqueada por el navegador.');
+      setScannerActive(false);
+      setCameraBlockedByHttp(true);
+    }
+  };
+
   useEffect(() => {
     if (activeTab === 'gun') {
-      startScanner();
-    } else {
-      // Detener cámara en segundo plano sin congelar la interfaz
-      setTimeout(() => {
+      const timer = setTimeout(() => {
+        startScanner();
+      }, 150);
+      return () => {
+        clearTimeout(timer);
         stopScanner();
-      }, 0);
-    }
-
-    return () => {
+      };
+    } else {
       stopScanner();
-    };
+    }
   }, [activeTab]);
 
   // Handle Photo selection and compression with low memory footprint
@@ -956,9 +1218,9 @@ export default function MobileScannerPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-100 flex flex-col font-sans text-slate-900 select-none pb-10">
+    <div className="h-[100dvh] max-h-[100dvh] w-full bg-slate-100 flex flex-col font-sans text-slate-900 select-none overflow-hidden pb-[60px]">
       {/* Top Mobile Bar */}
-      <header className="bg-white border-b border-slate-300 px-4 py-3 sticky top-0 z-50 flex items-center justify-between shadow-xs">
+      <header className="bg-white border-b border-slate-300 px-4 py-2.5 sticky top-0 z-40 flex items-center justify-between shadow-xs shrink-0">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-lg bg-sky-700 text-white flex items-center justify-center font-black text-sm">
             V
@@ -975,13 +1237,24 @@ export default function MobileScannerPage() {
         </div>
 
         <div className="flex items-center gap-2">
+          {/* Tasa BCV Visible en la esquina superior derecha */}
+          <div className="flex items-center gap-1.5 px-2.5 py-1 bg-sky-50 border border-sky-300 rounded-xl shadow-2xs">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <div className="text-right leading-none">
+              <span className="text-[9px] uppercase font-bold text-sky-700 block tracking-tight">Tasa BCV</span>
+              <span className="font-mono font-black text-xs text-sky-950 tabular-numbers">
+                Bs. {inventoryBcvRate.toFixed(2)}
+              </span>
+            </div>
+          </div>
+
           {isInstallable && !isInstalled && (
             <button
               onClick={handleInstallApp}
               className="px-2.5 py-1 bg-sky-600 hover:bg-sky-700 text-white rounded-full text-[11px] font-black flex items-center gap-1 shadow-xs animate-bounce"
             >
               <Download className="w-3 h-3" />
-              <span>Instalar App</span>
+              <span>Instalar</span>
             </button>
           )}
 
@@ -1027,298 +1300,287 @@ export default function MobileScannerPage() {
         </div>
       )}
 
-      {/* Tabs Selector: 4 Pestañas (Venta Móvil, Pistola, + Foto, Inventario) */}
-      <div className="p-2 bg-white border-b border-slate-200 grid grid-cols-4 gap-1.5 sticky top-12 z-40">
-        <button
-          onClick={() => setActiveTab('pos')}
-          className={`py-2 px-1 rounded-lg font-bold text-[11px] flex flex-col items-center justify-center gap-1 border transition-all relative ${
-            activeTab === 'pos'
-              ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm'
-              : 'bg-slate-50 text-slate-700 border-slate-300 hover:bg-slate-100'
-          }`}
-        >
-          <ShoppingCart className="w-3.5 h-3.5" />
-          <span>Venta Móvil</span>
-          {mobileCart.length > 0 && (
-            <span className="absolute -top-1 -right-1 bg-rose-500 text-white text-[9px] font-black rounded-full w-4 h-4 flex items-center justify-center border border-white">
-              {mobileCart.reduce((sum, i) => sum + i.qty, 0)}
-            </span>
-          )}
-        </button>
-
-        <button
-          onClick={() => setActiveTab('gun')}
-          className={`py-2 px-1 rounded-lg font-bold text-[11px] flex flex-col items-center justify-center gap-1 border transition-all ${
-            activeTab === 'gun'
-              ? 'bg-sky-700 text-white border-sky-700 shadow-sm'
-              : 'bg-slate-50 text-slate-700 border-slate-300 hover:bg-slate-100'
-          }`}
-        >
-          <ScanLine className="w-3.5 h-3.5" />
-          <span>Pistola</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab('create')}
-          className={`py-2 px-1 rounded-lg font-bold text-[11px] flex flex-col items-center justify-center gap-1 border transition-all ${
-            activeTab === 'create'
-              ? 'bg-sky-700 text-white border-sky-700 shadow-sm'
-              : 'bg-slate-50 text-slate-700 border-slate-300 hover:bg-slate-100'
-          }`}
-        >
-          <PackagePlus className="w-3.5 h-3.5" />
-          <span>+ Foto</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab('inventory')}
-          className={`py-2 px-1 rounded-lg font-bold text-[11px] flex flex-col items-center justify-center gap-1 border transition-all ${
-            activeTab === 'inventory'
-              ? 'bg-sky-700 text-white border-sky-700 shadow-sm'
-              : 'bg-slate-50 text-slate-700 border-slate-300 hover:bg-slate-100'
-          }`}
-        >
-          <ShoppingBag className="w-3.5 h-3.5" />
-          <span>Inventario</span>
-        </button>
+      {/* Subheader: Estado del Sistema Dual y Modo Activo */}
+      <div className="px-4 py-1.5 bg-slate-900 text-white flex items-center justify-between shadow-xs text-xs sticky top-12 z-30 shrink-0">
+        <div className="flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+          <span className="font-extrabold text-[11px] uppercase tracking-wider text-slate-200">
+            {activeTab === 'pos' && '🛒 Punto de Venta Móvil'}
+            {activeTab === 'scale' && '⚖️ Balanza Digital Pesaje'}
+            {activeTab === 'gun' && '⚡ Pistola Escáner 60 FPS'}
+            {activeTab === 'create' && '📸 Captura Foto & IA'}
+            {activeTab === 'inventory' && '📦 Conteo de Stock & Pasillo'}
+          </span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] font-mono text-slate-400">BCV:</span>
+          <span className="font-mono font-black text-xs text-emerald-400">
+            Bs. {inventoryBcvRate.toFixed(2)}
+          </span>
+        </div>
       </div>
 
       {/* ========================================================================= */}
-      {/* TAB 0: VENTA MÓVIL (POS AUTÓNOMO EN CELULAR / CONTINGENCIA SIN LUZ)        */}
+      {/* PESTAÑA 1 (NAV DOCK 1): PANTALLA COMPLETA DE VENTA ACTUAL / COBRO         */}
       {/* ========================================================================= */}
       {activeTab === 'pos' && (
-        <main className="flex-1 flex flex-col overflow-hidden relative">
-          {/* CABECERA FIJA SUPERIOR: Tasa BCV + Buscador + Filtros por Categoría */}
-          <div className="p-3 bg-white border-b border-slate-200 shadow-2xs space-y-2 shrink-0">
-            {/* Header y Tasa BCV */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-emerald-600 text-white flex items-center justify-center shadow-xs">
-                  <ShoppingCart className="w-4 h-4" />
-                </div>
-                <div>
-                  <h3 className="text-xs font-black text-slate-900 leading-tight">Caja Móvil Venematic</h3>
-                  <span className="text-[10px] text-emerald-700 font-bold">100% Autónomo con o sin Luz</span>
-                </div>
-              </div>
+        <main className="flex-1 min-h-0 flex flex-col overflow-hidden relative">
+          {/* Cabecera Fija Superior: Sincronizar + Ticket ID + Tasa BCV */}
+          <div className="p-2.5 bg-white border-b border-slate-200 shadow-2xs shrink-0 flex items-center justify-between">
+            {/* Parte Superior Izquierda: Botón Sincronizar */}
+            <button
+              type="button"
+              onClick={async () => {
+                if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(30);
+                setIsSyncingSales(true);
+                await syncOfflineSalesToPC();
+                await fetchInventory();
+                setIsSyncingSales(false);
+                setStatusMessage('✓ Sincronizado con éxito');
+                setTimeout(() => setStatusMessage('Listo para operar'), 2000);
+              }}
+              disabled={isSyncingSales}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 bg-slate-900 hover:bg-slate-800 active:scale-95 text-white rounded-xl shadow-xs text-xs font-black transition-all border border-slate-700 disabled:opacity-50"
+              title="Sincronizar ventas y catálogo con la PC"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 text-emerald-400 ${isSyncingSales ? 'animate-spin' : ''}`} />
+              <span>{isSyncingSales ? 'Sincronizando...' : 'Sincronizar'}</span>
+              {offlinePendingSalesCount > 0 && (
+                <span className="px-1.5 py-0.2 bg-amber-500 text-slate-950 text-[10px] font-black rounded-full animate-pulse">
+                  {offlinePendingSalesCount}
+                </span>
+              )}
+            </button>
 
-              <div className="text-right">
-                <span className="text-[10px] font-mono font-bold text-slate-500 block">Tasa BCV</span>
-                <span className="text-xs font-mono font-black text-sky-800 bg-sky-50 px-2 py-0.5 rounded-full border border-sky-200">
+            {/* Identificador de Ticket en Curso */}
+            <div className="text-center">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200 block">
+                Venta Activa
+              </span>
+            </div>
+
+            {/* Parte Superior Derecha: Tasa BCV Visible */}
+            <div className="flex items-center gap-1.5 px-2 py-1 bg-sky-50 border border-sky-300 rounded-xl shadow-2xs">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <div className="text-right leading-tight">
+                <span className="text-[9px] font-bold uppercase text-sky-700 block tracking-tight">Tasa BCV</span>
+                <span className="text-xs font-mono font-black text-sky-950 tabular-numbers">
                   Bs. {inventoryBcvRate.toFixed(2)}
                 </span>
               </div>
             </div>
-
-            {/* Buscador Rápido de Productos para Venta */}
-            <div className="relative">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-              <input
-                type="text"
-                placeholder="Buscar por nombre o código de barras..."
-                value={posSearch}
-                onChange={(e) => setPosSearch(e.target.value)}
-                className="w-full pl-9 pr-8 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-              />
-              {posSearch && (
-                <button
-                  onClick={() => setPosSearch('')}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 font-bold text-xs"
-                >
-                  ✕
-                </button>
-              )}
-            </div>
-
-            {/* Pastillas de Categorías Deslizables Horizontalmente */}
-            <div className="flex gap-1.5 overflow-x-auto pb-0.5 no-scrollbar text-[11px]">
-              {['Todos', ...Array.from(new Set(inventoryList.map((p) => p.category).filter(Boolean)))].map((cat) => (
-                <button
-                  key={cat}
-                  onClick={() => setSelectedMobileCategory(cat)}
-                  className={`px-2.5 py-1 rounded-lg font-bold shrink-0 transition-all ${
-                    selectedMobileCategory === cat
-                      ? 'bg-emerald-600 text-white shadow-2xs'
-                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                  }`}
-                >
-                  {cat}
-                </button>
-              ))}
-            </div>
           </div>
 
-          {/* CATÁLOGO DE PRODUCTOS (Ocupa el 100% del alto, scroll fluido y permanente) */}
-          <div className="flex-1 overflow-y-auto px-3 pt-2 pb-28">
-            <div className="flex items-center justify-between px-1 py-1 mb-1">
-              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                Productos ({
-                  inventoryList.filter((p) => {
-                    const matchCategory = selectedMobileCategory === 'Todos' || p.category === selectedMobileCategory;
-                    if (!matchCategory) return false;
-                    if (!posSearch.trim()) return true;
-                    const q = posSearch.toLowerCase();
-                    return (
-                      p.name.toLowerCase().includes(q) ||
-                      p.barcode.toLowerCase().includes(q) ||
-                      (p.category && p.category.toLowerCase().includes(q))
-                    );
-                  }).length
-                })
-              </span>
-              <span className="text-[10px] text-slate-400">Toca para agregar a la venta</span>
-            </div>
+          {/* CUERPO CENTRAL SCROLEABLE: SOLO LOS ARTÍCULOS */}
+          <div className="flex-1 min-h-0 overflow-y-auto p-3 space-y-2.5 touch-pan-y overscroll-contain">
+            {/* Estado cuando el carrito está vacío */}
+            {mobileCart.length === 0 ? (
+              <div className="bg-white p-6 rounded-3xl border border-dashed border-slate-300 text-center space-y-3 mt-4 shadow-xs">
+                <div className="w-14 h-14 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto text-2xl shadow-xs">
+                  🧾
+                </div>
+                <div className="space-y-1">
+                  <h4 className="font-black text-base text-slate-900">Venta Lista para Cobrar</h4>
+                  <p className="text-xs text-slate-500 max-w-xs mx-auto leading-relaxed">
+                    Aún no hay productos en esta compra. Toca <b>Stock</b> para agregarlos con un toque, usa la <b>Balanza</b> o el <b>Escáner</b>.
+                  </p>
+                </div>
+                <div className="flex flex-col gap-2 pt-1 max-w-xs mx-auto">
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('inventory')}
+                    className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white text-xs font-black rounded-xl shadow-md flex items-center justify-center gap-2 transition-all"
+                  >
+                    <ShoppingBag className="w-4 h-4" />
+                    <span>📦 Ir a Stock para Agregar Productos</span>
+                  </button>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab('gun')}
+                      className="py-2 bg-sky-600 hover:bg-sky-700 text-white text-xs font-black rounded-xl shadow-xs flex items-center justify-center gap-1.5"
+                    >
+                      <ScanLine className="w-4 h-4" />
+                      <span>⚡ Escáner</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab('scale')}
+                      className="py-2 bg-cyan-700 hover:bg-cyan-800 text-white text-xs font-black rounded-xl shadow-xs flex items-center justify-center gap-1.5"
+                    >
+                      <Scale className="w-4 h-4" />
+                      <span>⚖️ Balanza</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              /* Lista de Renglones de la Venta en Pantalla Completa */
+              <div className="space-y-2">
+                <div className="flex items-center justify-between px-1">
+                  <span className="text-xs font-black text-slate-800 uppercase tracking-tight flex items-center gap-1.5">
+                    <ShoppingCart className="w-4 h-4 text-emerald-600" />
+                    <span>Productos en Venta ({mobileCart.reduce((sum, i) => sum + i.qty, 0)} unidades)</span>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={clearMobileCart}
+                    className="px-2 py-0.5 text-[11px] font-bold text-rose-600 bg-rose-50 hover:bg-rose-100 rounded-lg flex items-center gap-1 transition-all active:scale-95"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Vaciar</span>
+                  </button>
+                </div>
 
-            <div className="space-y-1.5">
-              {inventoryList
-                .filter((p) => {
-                  const matchCategory = selectedMobileCategory === 'Todos' || p.category === selectedMobileCategory;
-                  if (!matchCategory) return false;
-                  if (!posSearch.trim()) return true;
-                  const q = posSearch.toLowerCase();
-                  return (
-                    p.name.toLowerCase().includes(q) ||
-                    p.barcode.toLowerCase().includes(q) ||
-                    (p.category && p.category.toLowerCase().includes(q))
-                  );
-                })
-                .map((p, idx) => {
-                  const priceVES = p.priceUSD * inventoryBcvRate;
-                  const inCart = mobileCart.find((c) => c.barcode === p.barcode);
-                  return (
+                <div className="space-y-2">
+                  {mobileCart.map((item) => (
                     <div
-                      key={p.id || idx}
-                      onClick={() => addToMobileCart(p)}
-                      className={`p-2.5 rounded-2xl border transition-all flex items-center gap-2.5 active:scale-[0.99] cursor-pointer ${
-                        inCart
-                          ? 'bg-emerald-50/90 border-emerald-400 shadow-xs'
-                          : 'bg-white border-slate-200 shadow-2xs hover:border-slate-300'
-                      }`}
+                      key={item.barcode}
+                      className="py-2.5 px-3 min-h-[58px] bg-white rounded-xl border border-slate-200/90 shadow-2xs hover:border-slate-300 flex items-center justify-between gap-2.5 transition-all"
                     >
                       {/* Imagen o Ícono */}
-                      <div className="w-12 h-12 rounded-xl bg-slate-100 border border-slate-200 shrink-0 overflow-hidden flex items-center justify-center">
-                        {p.image ? (
-                          <img src={p.image} alt={p.name} className="w-full h-full object-contain" />
+                      <div className="w-11 h-11 rounded-lg bg-slate-100 border border-slate-200 shrink-0 overflow-hidden flex items-center justify-center shadow-2xs">
+                        {item.image ? (
+                          <img src={item.image} alt={item.name} className="w-full h-full object-contain" />
                         ) : (
                           <Tag className="w-5 h-5 text-slate-400" />
                         )}
                       </div>
 
-                      {/* Información de Producto */}
+                      {/* Información del Ítem: Nombre y Precio Unitario */}
                       <div className="flex-1 min-w-0">
-                        <h4 className="font-bold text-xs text-slate-900 truncate leading-tight">{p.name}</h4>
-                        <div className="flex items-center gap-1.5 mt-0.5">
-                          <span className="text-[10px] font-mono text-slate-400 truncate">{p.barcode}</span>
-                          <span className="text-[10px] text-slate-500 font-medium">Stock: {p.stock}</span>
-                        </div>
+                        <p className="text-xs font-bold text-slate-900 truncate leading-tight">
+                          {item.name}
+                        </p>
+                        <p className="text-[10px] font-mono text-slate-500 mt-0.5">
+                          ${item.priceUSD.toFixed(2)} c/u
+                          <span className="text-slate-400 ml-1">
+                            ≈ Bs. {(item.priceUSD * inventoryBcvRate).toFixed(2)}
+                          </span>
+                        </p>
                       </div>
 
-                      {/* Precios */}
-                      <div className="text-right shrink-0">
-                        <span className="font-mono font-black text-sm text-emerald-700 block tabular-numbers">
-                          ${p.priceUSD.toFixed(2)}
+                      {/* Control de Cantidad (+ / - / Numpad) */}
+                      <div className="flex items-center gap-0.5 bg-slate-100 p-0.5 rounded-lg border border-slate-200 shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => updateMobileCartQty(item.barcode, -1)}
+                          className="w-7 h-7 rounded-md bg-white text-slate-800 font-bold text-xs flex items-center justify-center shadow-2xs active:scale-90"
+                          title="Restar 1"
+                        >
+                          <Minus className="w-3 h-3" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            openNumpad(
+                              `Cantidad: ${item.name}`,
+                              item.qty,
+                              false,
+                              (val) => {
+                                const newQty = Math.max(1, Math.round(val));
+                                setMobileCart((prev) =>
+                                  prev.map((c) =>
+                                    c.barcode === item.barcode
+                                      ? { ...c, qty: newQty, totalUSD: newQty * c.priceUSD }
+                                      : c
+                                  )
+                                );
+                              }
+                            )
+                          }
+                          className="min-w-[28px] px-1 h-7 rounded-md bg-emerald-50 border border-emerald-300 text-emerald-900 font-mono font-bold text-xs flex items-center justify-center active:scale-95"
+                          title="Tocar para editar con teclado"
+                        >
+                          {item.qty}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => updateMobileCartQty(item.barcode, 1)}
+                          className="w-7 h-7 rounded-md bg-emerald-600 text-white font-bold text-xs flex items-center justify-center shadow-xs active:scale-90"
+                          title="Sumar 1"
+                        >
+                          <Plus className="w-3 h-3" />
+                        </button>
+                      </div>
+
+                      {/* Subtotal del Renglón */}
+                      <div className="text-right shrink-0 min-w-[65px]">
+                        <span className="font-mono font-bold text-xs text-slate-900 block tabular-numbers leading-tight">
+                          ${item.totalUSD.toFixed(2)}
                         </span>
-                        <span className="font-mono font-bold text-[10px] text-slate-500 block tabular-numbers">
-                          Bs. {priceVES.toFixed(2)}
+                        <span className="font-mono text-[10px] text-slate-500 block tabular-numbers mt-0.5">
+                          Bs. {(item.totalUSD * inventoryBcvRate).toFixed(2)}
                         </span>
                       </div>
 
-                      {/* Control de Cantidad (+/- en la tarjeta o botón agregar) */}
-                      <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
-                        {inCart ? (
-                          <div className="flex items-center gap-1 bg-white p-0.5 rounded-xl border border-emerald-400 shadow-xs">
-                            <button
-                              onClick={() => updateMobileCartQty(p.barcode, -1)}
-                              className="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-black text-xs flex items-center justify-center active:scale-90"
-                            >
-                              <Minus className="w-3 h-3" />
-                            </button>
-                            <span className="min-w-[22px] text-center font-mono font-black text-xs text-emerald-800">
-                              {inCart.qty}
-                            </span>
-                            <button
-                              onClick={() => updateMobileCartQty(p.barcode, 1)}
-                              className="w-7 h-7 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs flex items-center justify-center active:scale-90"
-                            >
-                              <Plus className="w-3 h-3" />
-                            </button>
-                          </div>
-                        ) : (
-                          <button
-                            onClick={() => addToMobileCart(p)}
-                            className="w-8 h-8 rounded-xl bg-slate-100 hover:bg-emerald-600 hover:text-white text-slate-600 flex items-center justify-center transition-all active:scale-90"
-                          >
-                            <Plus className="w-4 h-4" />
-                          </button>
-                        )}
-                      </div>
+                      {/* Botón Devolución / Eliminar Ítem */}
+                      <button
+                        type="button"
+                        onClick={() => removeMobileCartItem(item.barcode)}
+                        className="text-slate-400 hover:text-rose-600 hover:bg-rose-50 p-1.5 rounded-lg transition-colors active:scale-90"
+                        title="Quitar de la venta"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
                     </div>
-                  );
-                })}
-
-              {isLoadingInventory && inventoryList.length === 0 && (
-                <div className="flex items-center justify-center py-12 gap-2">
-                  <div className="w-4 h-4 rounded-full border-2 border-emerald-500 border-t-transparent animate-spin" />
-                  <span className="text-xs text-slate-500 font-medium">Sincronizando catálogo con la PC...</span>
+                  ))}
                 </div>
-              )}
-
-              {!isLoadingInventory && inventoryList.length === 0 && (
-                <div className="bg-white p-8 rounded-2xl border border-slate-200 text-center space-y-2 mt-4">
-                  <p className="text-3xl">📦</p>
-                  <p className="text-xs font-bold text-slate-700">Sin productos cargados</p>
-                  <p className="text-[11px] text-slate-500">Abre el POS en tu computadora para sincronizar.</p>
-                  <button onClick={fetchInventory} className="px-4 py-2 bg-sky-700 text-white text-xs font-bold rounded-xl mt-2">
-                    Cargar Catálogo
-                  </button>
-                </div>
-              )}
-            </div>
+              </div>
+            )}
           </div>
 
-          {/* ========================================================================= */}
-          {/* BARRA FLOTANTE INFERIOR DE TICKET (Aparece cuando hay productos)          */}
-          {/* ========================================================================= */}
+          {/* CONTENEDOR FIJADO EN LA PARTE INFERIOR: MONTO TOTAL Y COBRAR VENTA */}
           {mobileCart.length > 0 && (
-            <div className="fixed bottom-3 inset-x-3 z-40 animate-in slide-in-from-bottom-3 duration-200">
-              <div
-                onClick={() => setShowCartDrawer(true)}
-                className="bg-slate-900 text-white p-3 rounded-2xl shadow-2xl border border-slate-700 flex items-center justify-between cursor-pointer active:scale-[0.99] transition-all"
-              >
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="relative w-9 h-9 rounded-xl bg-emerald-600 flex items-center justify-center text-white shrink-0 shadow-xs">
-                    <ShoppingCart className="w-5 h-5" />
-                    <span className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-amber-400 text-slate-950 font-black text-[10px] flex items-center justify-center border-2 border-slate-900">
-                      {mobileCart.reduce((sum, i) => sum + i.qty, 0)}
-                    </span>
-                  </div>
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="font-mono font-black text-base text-white tabular-numbers">
-                        ${mobileTotalUSD.toFixed(2)}
-                      </span>
-                      <span className="text-[11px] font-mono text-emerald-400 font-bold tabular-numbers">
-                        ≈ Bs. {mobileTotalVES.toFixed(2)}
-                      </span>
-                    </div>
-                    <span className="text-[10px] text-slate-300 font-medium block truncate">
-                      Toca para ver ticket y cobrar
-                    </span>
-                  </div>
+            <div className="shrink-0 bg-slate-950 text-white p-3 border-t border-slate-800 shadow-[0_-8px_30px_rgba(0,0,0,0.5)] z-20 space-y-2.5">
+              {/* Fila del Monto Total */}
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wide block">
+                    Total a Cobrar ({mobileCart.reduce((sum, i) => sum + i.qty, 0)} arts)
+                  </span>
+                  <span className="text-[10px] text-slate-400 block font-mono">
+                    Tasa BCV: Bs. {inventoryBcvRate.toFixed(2)}
+                  </span>
                 </div>
+                <div className="text-right">
+                  <span className="font-mono font-black text-2xl text-emerald-400 block tabular-numbers leading-tight">
+                    ${mobileTotalUSD.toFixed(2)}
+                  </span>
+                  <span className="font-mono font-bold text-[11px] text-emerald-200 block tabular-numbers">
+                    ≈ Bs. {mobileTotalVES.toFixed(2)}
+                  </span>
+                </div>
+              </div>
 
-                <div className="flex items-center gap-2 shrink-0">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setShowMobilePaymentModal(true);
-                    }}
-                    className="px-3.5 py-2 bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white font-black text-xs rounded-xl flex items-center gap-1.5 shadow-md transition-all"
-                  >
-                    <span>Cobrar</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </button>
-                </div>
+              {/* Botón Principal Fijado: Cobrar Venta */}
+              <button
+                type="button"
+                onClick={() => setShowMobilePaymentModal(true)}
+                className="w-full py-3 bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-600 hover:to-teal-700 active:scale-[0.98] text-white font-black text-sm rounded-xl shadow-lg flex items-center justify-center gap-2 transition-all ring-2 ring-emerald-400/30"
+              >
+                <Banknote className="w-5 h-5" />
+                <span>Cobrar Venta (${mobileTotalUSD.toFixed(2)} / Bs. {mobileTotalVES.toFixed(2)})</span>
+              </button>
+
+              {/* Acciones Rápidas para seguir sumando */}
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('inventory')}
+                  className="py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs rounded-lg flex items-center justify-center gap-1.5 transition-all active:scale-95"
+                >
+                  <Plus className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>+ Agregar Stock</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('scale')}
+                  className="py-1.5 bg-slate-800 hover:bg-slate-700 text-cyan-300 font-bold text-xs rounded-lg flex items-center justify-center gap-1.5 transition-all active:scale-95"
+                >
+                  <Scale className="w-3.5 h-3.5" />
+                  <span>Pesar en Balanza</span>
+                </button>
               </div>
             </div>
           )}
@@ -1330,7 +1592,7 @@ export default function MobileScannerPage() {
       {/* ========================================================================= */}
       {showCartDrawer && (
         <div
-          className="fixed inset-0 bg-slate-900/70 backdrop-blur-2xs z-50 flex items-end justify-center p-0"
+          className="fixed inset-0 bg-slate-900/70 backdrop-blur-2xs z-[90] flex items-end justify-center p-0"
           onClick={() => setShowCartDrawer(false)}
         >
           <div
@@ -1482,12 +1744,12 @@ export default function MobileScannerPage() {
       {/* MODAL DE COBRO MÓVIL CON CÁLCULO DE VUELTO ($ Y BS)                       */}
       {/* ========================================================================= */}
       {showMobilePaymentModal && (
-        <div className="fixed inset-0 bg-slate-900/75 backdrop-blur-2xs z-50 flex items-end sm:items-center justify-center p-3">
-          <div className="bg-white w-full max-w-sm rounded-3xl p-4 space-y-3.5 shadow-2xl border border-slate-200 animate-in slide-in-from-bottom duration-200 max-h-[92vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-slate-900/75 backdrop-blur-2xs z-[100] flex items-end sm:items-center justify-center p-3 pb-16 sm:pb-3">
+          <div className="bg-white w-full max-w-sm rounded-3xl p-4 pt-3.5 space-y-3.5 shadow-2xl border border-slate-200 animate-in slide-in-from-bottom duration-200 max-h-[88vh] overflow-y-auto">
             {/* Header del modal */}
             <div className="flex items-center justify-between border-b border-slate-200 pb-2.5">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-xs">
+                <div className="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-xs shrink-0">
                   <Banknote className="w-4 h-4" />
                 </div>
                 <div>
@@ -1496,61 +1758,79 @@ export default function MobileScannerPage() {
                 </div>
               </div>
               <button
+                type="button"
                 onClick={() => {
                   setShowMobilePaymentModal(false);
                   setMobileAmountGiven('');
                 }}
-                className="text-slate-400 hover:text-slate-700 font-bold text-lg"
+                className="text-slate-400 hover:text-slate-700 font-bold text-lg px-1"
               >
                 ✕
               </button>
             </div>
 
-            {/* Total a Pagar Destacado */}
-            <div className="bg-slate-900 text-white p-3 rounded-2xl text-center space-y-0.5">
-              <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Total de la Venta</span>
-              <p className="font-mono font-black text-2xl text-emerald-400 tabular-numbers">
-                ${mobileTotalUSD.toFixed(2)}
+            {/* Total a Pagar Destacado - Estilo Pantalla Calculadora Digital Verde Neón */}
+            <div
+              style={{
+                backgroundColor: '#050b07',
+                borderColor: '#00ff66',
+                boxShadow: 'inset 0 2px 12px rgba(0,0,0,0.95), 0 0 25px rgba(0, 255, 102, 0.3)',
+              }}
+              className="p-4 rounded-2xl text-center space-y-1 border-2 relative overflow-hidden"
+            >
+              <span
+                style={{ color: '#22c55e', WebkitTextFillColor: '#22c55e', letterSpacing: '0.15em' }}
+                className="text-[11px] uppercase font-mono font-black block text-emerald-400"
+              >
+                TOTAL DE LA VENTA
+              </span>
+              <p
+                style={{
+                  color: '#00ff66',
+                  WebkitTextFillColor: '#00ff66',
+                  textShadow: '0 0 1px #00ff66, 0 0 12px rgba(0, 255, 102, 0.85)',
+                }}
+                className="font-mono font-black text-4xl tabular-numbers tracking-tight leading-none my-1 text-emerald-400"
+              >
+                <span style={{ color: '#00ff66', WebkitTextFillColor: '#00ff66' }}>
+                  ${mobileTotalUSD.toFixed(2)}
+                </span>
               </p>
-              <p className="font-mono font-bold text-xs text-slate-300 tabular-numbers">
-                ≈ Bs. {mobileTotalVES.toFixed(2)} (Tasa: {inventoryBcvRate.toFixed(2)})
-              </p>
+              <div
+                style={{
+                  color: '#86efac',
+                  WebkitTextFillColor: '#86efac',
+                  borderColor: 'rgba(0, 255, 102, 0.2)',
+                }}
+                className="flex items-center justify-center gap-1.5 font-mono text-sm font-bold pt-1.5 border-t text-emerald-300"
+              >
+                <span style={{ color: '#86efac', WebkitTextFillColor: '#86efac' }}>
+                  ≈ Bs. {mobileTotalVES.toFixed(2)}
+                </span>
+                <span style={{ color: '#4ade80', WebkitTextFillColor: '#4ade80' }} className="text-xs font-semibold text-emerald-400">
+                  (Tasa: {inventoryBcvRate.toFixed(2)})
+                </span>
+              </div>
             </div>
 
             {/* Selector de Método de Pago */}
-            <div className="space-y-1">
+            <div className="space-y-1.5">
               <label className="block text-[11px] font-bold text-slate-700">Forma de Pago:</label>
-              <div className="grid grid-cols-3 gap-1.5">
+              <div className="grid grid-cols-3 sm:grid-cols-5 gap-1">
                 <button
                   type="button"
                   onClick={() => {
                     setMobilePaymentMethod('cash_usd');
                     setMobileAmountGiven('');
                   }}
-                  className={`p-2 rounded-xl text-xs font-bold border flex flex-col items-center gap-1 transition-all ${
+                  className={`p-2 rounded-xl text-[11px] font-bold border flex flex-col items-center gap-1 transition-all ${
                     mobilePaymentMethod === 'cash_usd'
-                      ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
-                      : 'bg-slate-50 text-slate-700 border-slate-200'
+                      ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs scale-102'
+                      : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
                   }`}
                 >
-                  <DollarSign className="w-4 h-4" />
+                  <DollarSign className="w-3.5 h-3.5" />
                   <span>Efectivo $</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMobilePaymentMethod('cash_ves');
-                    setMobileAmountGiven('');
-                  }}
-                  className={`p-2 rounded-xl text-xs font-bold border flex flex-col items-center gap-1 transition-all ${
-                    mobilePaymentMethod === 'cash_ves'
-                      ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
-                      : 'bg-slate-50 text-slate-700 border-slate-200'
-                  }`}
-                >
-                  <Banknote className="w-4 h-4" />
-                  <span>Efectivo Bs.</span>
                 </button>
 
                 <button
@@ -1559,14 +1839,62 @@ export default function MobileScannerPage() {
                     setMobilePaymentMethod('pago_movil');
                     setMobileAmountGiven('');
                   }}
-                  className={`p-2 rounded-xl text-xs font-bold border flex flex-col items-center gap-1 transition-all ${
+                  className={`p-2 rounded-xl text-[11px] font-bold border flex flex-col items-center gap-1 transition-all ${
                     mobilePaymentMethod === 'pago_movil'
-                      ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
-                      : 'bg-slate-50 text-slate-700 border-slate-200'
+                      ? 'bg-sky-600 text-white border-sky-600 shadow-xs scale-102'
+                      : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
                   }`}
                 >
-                  <CreditCard className="w-4 h-4" />
+                  <CreditCard className="w-3.5 h-3.5" />
                   <span>Pago Móvil</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMobilePaymentMethod('punto_venta');
+                    setMobileAmountGiven('');
+                  }}
+                  className={`p-2 rounded-xl text-[11px] font-bold border flex flex-col items-center gap-1 transition-all ${
+                    mobilePaymentMethod === 'punto_venta'
+                      ? 'bg-indigo-600 text-white border-indigo-600 shadow-xs scale-102'
+                      : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                  }`}
+                >
+                  <CreditCard className="w-3.5 h-3.5" />
+                  <span>Punto / Débito</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMobilePaymentMethod('cash_ves');
+                    setMobileAmountGiven('');
+                  }}
+                  className={`p-2 rounded-xl text-[11px] font-bold border flex flex-col items-center gap-1 transition-all ${
+                    mobilePaymentMethod === 'cash_ves'
+                      ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs scale-102'
+                      : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                  }`}
+                >
+                  <Banknote className="w-3.5 h-3.5" />
+                  <span>Efectivo Bs.</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMobilePaymentMethod('zelle');
+                    setMobileAmountGiven('');
+                  }}
+                  className={`p-2 rounded-xl text-[11px] font-bold border flex flex-col items-center gap-1 transition-all ${
+                    mobilePaymentMethod === 'zelle'
+                      ? 'bg-purple-600 text-white border-purple-600 shadow-xs scale-102'
+                      : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                  }`}
+                >
+                  <DollarSign className="w-3.5 h-3.5" />
+                  <span>Zelle</span>
                 </button>
               </div>
             </div>
@@ -1584,7 +1912,7 @@ export default function MobileScannerPage() {
                   <button
                     type="button"
                     onClick={() => setMobileAmountGiven(String(mobileTotalUSD.toFixed(2)))}
-                    className="text-[10px] font-black text-emerald-700 bg-emerald-100 hover:bg-emerald-200 px-2 py-0.5 rounded-md"
+                    className="text-[10px] font-black text-emerald-700 bg-emerald-100 hover:bg-emerald-200 px-2 py-0.5 rounded-md active:scale-95 transition-transform"
                   >
                     Exacto (${mobileTotalUSD.toFixed(2)})
                   </button>
@@ -1609,14 +1937,14 @@ export default function MobileScannerPage() {
                       key={bill}
                       type="button"
                       onClick={() => setMobileAmountGiven(String(bill))}
-                      className="px-2 py-1 bg-white hover:bg-slate-100 border border-slate-300 rounded-lg text-[10px] font-mono font-black text-slate-800 shrink-0"
+                      className="px-2.5 py-1.5 bg-white hover:bg-slate-100 border border-slate-300 rounded-lg text-xs font-mono font-black text-slate-800 shrink-0 shadow-2xs active:scale-95"
                     >
                       ${bill}
                     </button>
                   ))}
                 </div>
 
-                {/* Tarjeta de Vuelto Calculado */}
+                {/* Tarjeta de Vuelto Calculado en Dólares Y Bolívares */}
                 {(() => {
                   const given = parseFloat(mobileAmountGiven) || 0;
                   if (given >= mobileTotalUSD) {
@@ -1625,15 +1953,15 @@ export default function MobileScannerPage() {
                     return (
                       <div className="bg-emerald-50 border border-emerald-300 p-2.5 rounded-xl space-y-0.5">
                         <span className="text-[10px] font-black text-emerald-700 uppercase tracking-wider block">
-                          {diffUSD === 0 ? 'Pago Exacto (Sin Vuelto)' : 'Vuelto a Entregar al Cliente:'}
+                          {diffUSD === 0 ? '✓ Pago Exacto (Sin Vuelto)' : 'Vuelto a Entregar:'}
                         </span>
                         {diffUSD > 0 && (
                           <>
-                            <p className="font-mono font-black text-lg text-emerald-800 leading-tight">
+                            <p className="font-mono font-black text-xl text-emerald-800 leading-tight">
                               ${diffUSD.toFixed(2)} USD
                             </p>
                             <p className="font-mono font-bold text-xs text-emerald-700">
-                              ≈ Bs. {diffVES.toFixed(2)} (al cambio)
+                              ≈ Bs. {diffVES.toFixed(2)} (al cambio BCV)
                             </p>
                           </>
                         )}
@@ -1643,7 +1971,7 @@ export default function MobileScannerPage() {
                     const missing = mobileTotalUSD - given;
                     return (
                       <div className="bg-rose-50 border border-rose-300 p-2.5 rounded-xl">
-                        <span className="text-[10px] font-black text-rose-700 uppercase block">Faltante:</span>
+                        <span className="text-[10px] font-black text-rose-700 uppercase block">Monto Faltante:</span>
                         <p className="font-mono font-black text-base text-rose-800">
                           ${missing.toFixed(2)} USD (Bs. {(missing * inventoryBcvRate).toFixed(2)})
                         </p>
@@ -1668,7 +1996,7 @@ export default function MobileScannerPage() {
                   <button
                     type="button"
                     onClick={() => setMobileAmountGiven(String(mobileTotalVES.toFixed(2)))}
-                    className="text-[10px] font-black text-emerald-700 bg-emerald-100 hover:bg-emerald-200 px-2 py-0.5 rounded-md"
+                    className="text-[10px] font-black text-emerald-700 bg-emerald-100 hover:bg-emerald-200 px-2 py-0.5 rounded-md active:scale-95 transition-transform"
                   >
                     Exacto (Bs. {mobileTotalVES.toFixed(2)})
                   </button>
@@ -1689,9 +2017,9 @@ export default function MobileScannerPage() {
                 {/* Botones de aproximación en Bs */}
                 <div className="flex gap-1 overflow-x-auto pb-0.5">
                   {[
-                    Math.ceil(mobileTotalVES / 10) * 10,
                     Math.ceil(mobileTotalVES / 50) * 50,
                     Math.ceil(mobileTotalVES / 100) * 100,
+                    Math.ceil(mobileTotalVES / 500) * 500,
                   ]
                     .filter((v, i, a) => v > mobileTotalVES && a.indexOf(v) === i)
                     .map((val) => (
@@ -1699,7 +2027,7 @@ export default function MobileScannerPage() {
                         key={val}
                         type="button"
                         onClick={() => setMobileAmountGiven(String(val))}
-                        className="px-2 py-1 bg-white hover:bg-slate-100 border border-slate-300 rounded-lg text-[10px] font-mono font-black text-slate-800 shrink-0"
+                        className="px-2.5 py-1.5 bg-white hover:bg-slate-100 border border-slate-300 rounded-lg text-xs font-mono font-black text-slate-800 shrink-0 shadow-2xs active:scale-95"
                       >
                         Bs. {val}
                       </button>
@@ -1715,11 +2043,11 @@ export default function MobileScannerPage() {
                     return (
                       <div className="bg-emerald-50 border border-emerald-300 p-2.5 rounded-xl space-y-0.5">
                         <span className="text-[10px] font-black text-emerald-700 uppercase tracking-wider block">
-                          {diffVES === 0 ? 'Pago Exacto (Sin Vuelto)' : 'Vuelto a Entregar al Cliente:'}
+                          {diffVES === 0 ? '✓ Pago Exacto (Sin Vuelto)' : 'Vuelto a Entregar:'}
                         </span>
                         {diffVES > 0 && (
                           <>
-                            <p className="font-mono font-black text-lg text-emerald-800 leading-tight">
+                            <p className="font-mono font-black text-xl text-emerald-800 leading-tight">
                               Bs. {diffVES.toFixed(2)} VES
                             </p>
                             <p className="font-mono font-bold text-xs text-emerald-700">
@@ -1750,23 +2078,94 @@ export default function MobileScannerPage() {
             {/* ========================================================================= */}
             {mobilePaymentMethod === 'pago_movil' && (
               <div className="space-y-2 bg-slate-50 p-3 rounded-2xl border border-slate-200">
-                <div className="bg-sky-50 border border-sky-200 p-2 rounded-xl text-center">
-                  <span className="text-[10px] font-bold text-sky-800 block">Monto exacto a transferir:</span>
-                  <span className="font-mono font-black text-base text-sky-900">
-                    Bs. {mobileTotalVES.toFixed(2)}
-                  </span>
+                <div className="bg-sky-50 border border-sky-200 p-2.5 rounded-xl flex items-center justify-between">
+                  <div>
+                    <span className="text-[10px] font-bold text-sky-800 block">Monto a Transferir:</span>
+                    <span className="font-mono font-black text-base text-sky-950">
+                      Bs. {mobileTotalVES.toFixed(2)}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (typeof navigator !== 'undefined' && navigator.clipboard) {
+                        navigator.clipboard.writeText(mobileTotalVES.toFixed(2));
+                        setCopiedAmountToast(true);
+                        setTimeout(() => setCopiedAmountToast(false), 2000);
+                      }
+                    }}
+                    className="px-2.5 py-1 bg-white hover:bg-sky-100 border border-sky-300 rounded-lg text-xs font-bold text-sky-800 flex items-center gap-1 shadow-2xs active:scale-95"
+                  >
+                    <Copy className="w-3.5 h-3.5" />
+                    <span>{copiedAmountToast ? '¡Copiado!' : 'Copiar'}</span>
+                  </button>
                 </div>
 
                 <div>
                   <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                    Últimos 4 dígitos o número de referencia:
+                    Últimos 4 dígitos o número de referencia bancaria:
                   </label>
                   <input
                     type="text"
                     placeholder="Ej: 9842"
                     value={mobilePagoMovilRef}
                     onChange={(e) => setMobilePagoMovilRef(e.target.value)}
-                    className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-mono font-bold text-slate-900 outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-mono font-bold text-slate-900 outline-none focus:ring-2 focus:ring-sky-500"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* ========================================================================= */}
+            {/* REFERENCIA SI ES PUNTO DE VENTA / DÉBITO                                  */}
+            {/* ========================================================================= */}
+            {mobilePaymentMethod === 'punto_venta' && (
+              <div className="space-y-2 bg-slate-50 p-3 rounded-2xl border border-slate-200">
+                <div className="bg-indigo-50 border border-indigo-200 p-2.5 rounded-xl text-center">
+                  <span className="text-[10px] font-bold text-indigo-800 block">Cobrar en Punto de Venta:</span>
+                  <span className="font-mono font-black text-xl text-indigo-950">
+                    Bs. {mobileTotalVES.toFixed(2)}
+                  </span>
+                  <span className="text-[10px] text-slate-500 block">Pase la tarjeta del cliente por el terminal bancario</span>
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                    Nro. de Aprobación o Voucher (Opcional):
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Ej: 014852"
+                    value={mobileCardRef}
+                    onChange={(e) => setMobileCardRef(e.target.value)}
+                    className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-mono font-bold text-slate-900 outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* ========================================================================= */}
+            {/* REFERENCIA SI ES ZELLE                                                    */}
+            {/* ========================================================================= */}
+            {mobilePaymentMethod === 'zelle' && (
+              <div className="space-y-2 bg-slate-50 p-3 rounded-2xl border border-slate-200">
+                <div className="bg-purple-50 border border-purple-200 p-2.5 rounded-xl text-center">
+                  <span className="text-[10px] font-bold text-purple-800 block">Monto a Enviar por Zelle:</span>
+                  <span className="font-mono font-black text-xl text-purple-950">
+                    ${mobileTotalUSD.toFixed(2)} USD
+                  </span>
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                    Nombre del titular o referencia Zelle:
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Ej: Juan Pérez / 4821"
+                    value={mobileZelleRef}
+                    onChange={(e) => setMobileZelleRef(e.target.value)}
+                    className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-mono font-bold text-slate-900 outline-none focus:ring-2 focus:ring-purple-500"
                   />
                 </div>
               </div>
@@ -1774,9 +2173,10 @@ export default function MobileScannerPage() {
 
             {/* Botón Confirmar Venta */}
             <button
+              type="button"
               onClick={handleProcessMobileSale}
               disabled={isProcessingMobileSale}
-              className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-black text-sm rounded-2xl shadow-lg flex items-center justify-center gap-2 transition-all disabled:opacity-50"
+              className="w-full py-3.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 active:scale-[0.98] text-white font-black text-sm rounded-2xl shadow-lg flex items-center justify-center gap-2 transition-all disabled:opacity-50 mt-2 mb-1"
             >
               <CheckCircle2 className="w-5 h-5" />
               <span>{isProcessingMobileSale ? 'Registrando y Sincronizando...' : 'Confirmar y Guardar Venta'}</span>
@@ -1787,7 +2187,7 @@ export default function MobileScannerPage() {
 
       {/* TOAST DE ÉXITO DE VENTA MÓVIL */}
       {mobileSaleSuccess && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-2xs z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-2xs z-[110] flex items-center justify-center p-4">
           <div className="bg-white w-full max-w-xs rounded-3xl p-5 text-center space-y-3 shadow-2xl border border-slate-200 animate-in zoom-in-95 duration-150">
             <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto">
               <CheckCircle2 className="w-7 h-7" />
@@ -1833,11 +2233,347 @@ export default function MobileScannerPage() {
       )}
 
       {/* ========================================================================= */}
-      {/* TAB 1: PISTOLA ESCÁNER DE CÓDIGO DE BARRAS                                 */}
+      {/* TAB 0.5: BALANZA DIGITAL COMERCIAL (PESAJE POR KILO / GRAMOS Y CONTROL PC) */}
+      {/* ========================================================================= */}
+      {activeTab === 'scale' && (
+        <main className="flex-1 min-h-0 flex flex-col overflow-y-auto p-3 space-y-3 pb-20 touch-pan-y animate-in fade-in duration-200">
+          {/* Toast de agregado a venta */}
+          {scaleAddedToast && (
+            <div className="p-3 bg-emerald-600 text-white rounded-2xl text-xs font-black shadow-lg flex items-center gap-2 animate-bounce">
+              <CheckCircle2 className="w-5 h-5 shrink-0" />
+              <span>{scaleAddedToast}</span>
+            </div>
+          )}
+
+          {/* DISPLAY DIGITAL TIPO BALANZA ELECTRÓNICA (TORREY / CAMRY / SYSTEL) */}
+          <div className="bg-slate-950 border-2 border-slate-800 rounded-3xl p-4 shadow-2xl relative overflow-hidden ring-1 ring-cyan-500/20 text-white">
+            {/* Luces Indicadoras Superiores */}
+            <div className="flex items-center justify-between border-b border-slate-800/80 pb-2 mb-3">
+              <div className="flex items-center gap-3">
+                <span className="flex items-center gap-1 text-[10px] font-bold tracking-wider uppercase text-emerald-400">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  ESTABLE
+                </span>
+                <span className={`flex items-center gap-1 text-[10px] font-bold tracking-wider uppercase ${
+                  scaleWeight === 0 ? 'text-cyan-400' : 'text-slate-600'
+                }`}>
+                  <span className={`w-1.5 h-1.5 rounded-full ${scaleWeight === 0 ? 'bg-cyan-400' : 'bg-slate-700'}`} />
+                  CERO
+                </span>
+                {scaleTare > 0 && (
+                  <span className="flex items-center gap-1 text-[10px] font-bold tracking-wider uppercase text-amber-400">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                    TARA: {scaleTare.toFixed(3)}kg
+                  </span>
+                )}
+              </div>
+
+              {/* Selector de Unidades */}
+              <div className="flex items-center gap-1 bg-slate-900 px-2 py-0.5 rounded-lg border border-slate-800">
+                {(['kg', 'g', 'lb'] as const).map((u) => (
+                  <button
+                    key={u}
+                    type="button"
+                    onClick={() => setScaleUnit(u)}
+                    className={`px-1.5 py-0.5 rounded text-[10px] font-black uppercase transition-all ${
+                      scaleUnit === u ? 'bg-cyan-500 text-slate-950' : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    {u}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Números Gigantes del Peso */}
+            <div className="py-2 flex items-baseline justify-center gap-2">
+              <span className="font-mono font-black text-6xl tracking-tight text-emerald-400 tabular-numbers drop-shadow-[0_0_20px_rgba(52,211,153,0.3)]">
+                {(() => {
+                  const net = Math.max(0, scaleWeight - scaleTare);
+                  if (scaleUnit === 'g') return (net * 1000).toFixed(0);
+                  if (scaleUnit === 'lb') return (net * 2.20462).toFixed(3);
+                  return net.toFixed(3);
+                })()}
+              </span>
+              <span className="font-black text-xl text-slate-400 uppercase tracking-widest">
+                {scaleUnit}
+              </span>
+            </div>
+
+            {/* Tarjeta de Producto Seleccionado y Cálculo en Tiempo Real */}
+            {scaleSelectedProduct ? (
+              <div className="mt-3 bg-slate-900/90 border border-slate-800 rounded-2xl p-3 flex items-center justify-between gap-2">
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-base">⚖️</span>
+                    <p className="font-black text-sm text-white truncate">
+                      {scaleSelectedProduct.name}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 mt-0.5 text-xs text-slate-400 font-mono">
+                    <span>${scaleSelectedProduct.priceUSD.toFixed(2)}/kg</span>
+                    <span>•</span>
+                    <span>Bs. {(scaleSelectedProduct.priceUSD * inventoryBcvRate).toFixed(2)}/kg</span>
+                  </div>
+                </div>
+
+                {/* Importe Calculado */}
+                {(() => {
+                  const net = Math.max(0, scaleWeight - scaleTare);
+                  const totalLineUSD = net * scaleSelectedProduct.priceUSD;
+                  const totalLineVES = totalLineUSD * inventoryBcvRate;
+                  return (
+                    <div className="text-right shrink-0">
+                      <p className="font-mono font-black text-xl text-emerald-400 tabular-numbers">
+                        ${totalLineUSD.toFixed(2)}
+                      </p>
+                      <p className="font-mono font-bold text-[11px] text-slate-400 tabular-numbers">
+                        Bs. {totalLineVES.toFixed(2)}
+                      </p>
+                    </div>
+                  );
+                })()}
+              </div>
+            ) : (
+              <div className="mt-3 bg-slate-900/50 border border-dashed border-slate-800 rounded-2xl p-2.5 text-center text-xs text-slate-400">
+                Selecciona un producto pesable abajo para calcular el precio
+              </div>
+            )}
+          </div>
+
+          {/* BOTONES RÁPIDOS DE OPERACIÓN DE BALANZA (CERO, TARA, NUMPAD, ENVIAR PC) */}
+          <div className="grid grid-cols-4 gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(20);
+                setScaleWeight(0);
+                setScaleTare(0);
+              }}
+              className="py-2.5 bg-white hover:bg-slate-50 border border-slate-300 rounded-2xl text-xs font-black text-slate-700 shadow-2xs active:scale-95 transition-all flex flex-col items-center"
+            >
+              <span className="text-sm">🔄</span>
+              <span>CERO</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(20);
+                if (scaleTare > 0) {
+                  setScaleTare(0);
+                } else {
+                  setScaleTare(scaleWeight);
+                }
+              }}
+              className={`py-2.5 rounded-2xl text-xs font-black shadow-2xs active:scale-95 transition-all flex flex-col items-center border ${
+                scaleTare > 0
+                  ? 'bg-amber-100 text-amber-900 border-amber-300'
+                  : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-300'
+              }`}
+            >
+              <span className="text-sm">⚖️</span>
+              <span>{scaleTare > 0 ? 'DES-TARAR' : 'TARAR'}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                openNumpad('Fijar Peso Exacto (Kg)', scaleWeight, true, (val) => {
+                  setScaleWeight(val);
+                });
+              }}
+              className="py-2.5 bg-white hover:bg-slate-50 border border-slate-300 rounded-2xl text-xs font-black text-slate-700 shadow-2xs active:scale-95 transition-all flex flex-col items-center"
+            >
+              <span className="text-sm">⌨️</span>
+              <span>TECLADO</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={handleSendWeightToPC}
+              className="py-2.5 bg-sky-50 hover:bg-sky-100 border border-sky-300 rounded-2xl text-xs font-black text-sky-800 shadow-2xs active:scale-95 transition-all flex flex-col items-center"
+              title="Enviar lectura a la PC en vivo"
+            >
+              <span className="text-sm">📡</span>
+              <span>ENVIAR PC</span>
+            </button>
+          </div>
+
+          {/* PRESETS RÁPIDOS DE PESO (100g, 250g, 500g, 1kg, 2kg, etc.) */}
+          <div className="bg-white p-3 rounded-2xl border border-slate-200 shadow-2xs space-y-2">
+            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
+              Pesos Rápidos / Frecuentes
+            </span>
+            <div className="grid grid-cols-4 sm:grid-cols-6 gap-1.5">
+              {[
+                { label: '100 g', val: 0.100 },
+                { label: '250 g', val: 0.250 },
+                { label: '500 g', val: 0.500 },
+                { label: '750 g', val: 0.750 },
+                { label: '1.0 kg', val: 1.000 },
+                { label: '1.5 kg', val: 1.500 },
+                { label: '2.0 kg', val: 2.000 },
+                { label: '3.0 kg', val: 3.000 },
+              ].map((preset) => (
+                <button
+                  key={preset.label}
+                  type="button"
+                  onClick={() => {
+                    if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(15);
+                    setScaleWeight(preset.val);
+                  }}
+                  className={`py-2 px-1 rounded-xl text-xs font-mono font-bold border transition-all ${
+                    Math.abs(scaleWeight - preset.val) < 0.001
+                      ? 'bg-emerald-600 text-white border-emerald-600 shadow-2xs scale-105'
+                      : 'bg-slate-50 hover:bg-slate-100 text-slate-800 border-slate-200'
+                  }`}
+                >
+                  {preset.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Ajuste fino (+10g, +50g, +100g, -100g) */}
+            <div className="flex items-center justify-between pt-1 border-t border-slate-100 text-xs">
+              <span className="text-[10px] text-slate-400 font-bold">Ajuste Fino:</span>
+              <div className="flex gap-1">
+                {[
+                  { label: '-100g', delta: -0.100 },
+                  { label: '-50g', delta: -0.050 },
+                  { label: '+50g', delta: 0.050 },
+                  { label: '+100g', delta: 0.100 },
+                ].map((step) => (
+                  <button
+                    key={step.label}
+                    type="button"
+                    onClick={() => {
+                      if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10);
+                      setScaleWeight((prev) => Math.max(0, Number((prev + step.delta).toFixed(3))));
+                    }}
+                    className="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[11px] font-mono font-bold"
+                  >
+                    {step.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* BOTONES DE ACCIÓN PRINCIPAL (AGREGAR AL CARRITO / COBRAR DIRECTO) */}
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => handleAddWeighedToCart(false)}
+              disabled={!scaleSelectedProduct || Math.max(0, scaleWeight - scaleTare) <= 0}
+              className="py-3 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-black text-xs rounded-2xl shadow-lg flex items-center justify-center gap-1.5 disabled:opacity-40 transition-all"
+            >
+              <ShoppingCart className="w-4 h-4" />
+              <span>Agregar a Venta</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleAddWeighedToCart(true)}
+              disabled={!scaleSelectedProduct || Math.max(0, scaleWeight - scaleTare) <= 0}
+              className="py-3 bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-700 hover:to-indigo-700 active:scale-[0.98] text-white font-black text-xs rounded-2xl shadow-lg flex items-center justify-center gap-1.5 disabled:opacity-40 transition-all"
+            >
+              <Banknote className="w-4 h-4" />
+              <span>Cobrar Directo</span>
+            </button>
+          </div>
+
+          {/* CATÁLOGO DE PRODUCTOS PESABLES (CHARCUTERÍA, QUESOS, CARNES, VERDURAS) */}
+          <div className="bg-white p-3 rounded-2xl border border-slate-200 shadow-2xs space-y-2.5">
+            <div className="flex items-center justify-between">
+              <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider">
+                Catálogo de Productos para Balanza
+              </h4>
+              <span className="text-[10px] text-slate-400 font-bold">
+                {inventoryList.length} disponibles
+              </span>
+            </div>
+
+            {/* Buscador de Producto a Pesar */}
+            <div className="relative">
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Buscar queso, jamón, carne, plátano..."
+                value={scaleSearch}
+                onChange={(e) => setScaleSearch(e.target.value)}
+                className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+              />
+              {scaleSearch && (
+                <button
+                  type="button"
+                  onClick={() => setScaleSearch('')}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 font-bold text-xs"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+
+            {/* Lista de Productos Pesables */}
+            <div className="space-y-1.5 max-h-72 overflow-y-auto">
+              {inventoryList
+                .filter((p) => {
+                  if (!scaleSearch.trim()) return true;
+                  const q = scaleSearch.toLowerCase();
+                  return (
+                    p.name.toLowerCase().includes(q) ||
+                    p.barcode.toLowerCase().includes(q) ||
+                    (p.category && p.category.toLowerCase().includes(q))
+                  );
+                })
+                .map((prod) => {
+                  const isSelected = scaleSelectedProduct?.barcode === prod.barcode;
+                  return (
+                    <button
+                      key={prod.barcode}
+                      type="button"
+                      onClick={() => {
+                        if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(20);
+                        setScaleSelectedProduct(prod);
+                      }}
+                      className={`w-full p-2.5 rounded-xl border text-left flex items-center justify-between gap-2 transition-all ${
+                        isSelected
+                          ? 'bg-cyan-50/80 border-cyan-500 ring-2 ring-cyan-400/30'
+                          : 'bg-slate-50/70 hover:bg-slate-100 border-slate-200'
+                      }`}
+                    >
+                      <div className="min-w-0 flex-1">
+                        <p className={`text-xs font-bold truncate ${isSelected ? 'text-cyan-950 font-black' : 'text-slate-800'}`}>
+                          {prod.name}
+                        </p>
+                        <p className="text-[10px] text-slate-400 font-mono">
+                          {prod.category || 'Rubro General'} • {prod.barcode}
+                        </p>
+                      </div>
+
+                      <div className="text-right shrink-0">
+                        <p className="font-mono font-black text-xs text-slate-900">
+                          ${prod.priceUSD.toFixed(2)}/kg
+                        </p>
+                        <p className="font-mono font-bold text-[10px] text-slate-500">
+                          Bs. {(prod.priceUSD * inventoryBcvRate).toFixed(2)}/kg
+                        </p>
+                      </div>
+                    </button>
+                  );
+                })}
+            </div>
+          </div>
+        </main>
+      )}
+
+      {/* ========================================================================= */}
+      {/* TAB 1: PISTOLA ESCÁNER DE CÓDIGO DE BARRAS (HUD INDUSTRIAL 60 FPS)       */}
       {/* ========================================================================= */}
       {activeTab === 'gun' && (
-        <main className="flex-1 flex flex-col p-3 gap-3">
-          {/* Input oculto para cámara nativa móvil (funciona en HTTP sin permisos ni HTTPS) */}
+        <main className="flex-1 min-h-0 flex flex-col p-3 gap-3 pb-20 overflow-y-auto touch-pan-y">
+          {/* Input oculto para cámara nativa móvil */}
           <input
             ref={barcodeFileInputRef}
             type="file"
@@ -1847,89 +2583,178 @@ export default function MobileScannerPage() {
             className="hidden"
           />
 
-          {/* Botón Principal de Alta Accesibilidad: Cámara Nativa Sin Permisos */}
-          <button
-            type="button"
-            disabled={isScanningPhoto}
-            onClick={() => barcodeFileInputRef.current?.click()}
-            className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-black text-sm rounded-2xl shadow-md flex items-center justify-center gap-2.5 transition-all disabled:opacity-50"
-          >
-            <Camera className="w-5 h-5" />
-            <span>{isScanningPhoto ? 'Analizando Código...' : '📸 Tomar Foto al Código (Cámara Nativa Sin Permisos)'}</span>
-          </button>
+          {/* Barra de Acciones Rápidas del Escáner */}
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(30);
+                if (scannerActive) stopScanner();
+                else startScanner();
+              }}
+              className={`flex-1 py-3 px-3 rounded-2xl font-black text-xs flex items-center justify-center gap-2 border transition-all active:scale-[0.98] ${
+                scannerActive
+                  ? 'bg-slate-900 text-slate-200 border-slate-700 shadow-xs'
+                  : 'bg-gradient-to-r from-sky-600 to-cyan-600 text-white border-sky-500 shadow-md'
+              }`}
+            >
+              <RefreshCw className={`w-4 h-4 ${scannerActive ? 'animate-spin text-cyan-400' : ''}`} />
+              <span>{scannerActive ? 'Pausar Visor' : '⚡ Activar Visor Continuo'}</span>
+            </button>
 
-          {/* Cámara Viewfinder */}
-          <div className="bg-black rounded-2xl overflow-hidden relative shadow-md border-2 border-slate-800 min-h-[240px] flex items-center justify-center">
-            <div id="mobile-camera-reader" className="w-full h-full min-h-[240px]"></div>
+            {/* Toggle: Auto-agregar a venta */}
+            <button
+              type="button"
+              onClick={() => {
+                if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(20);
+                setAutoAddOnScan((prev) => !prev);
+              }}
+              className={`py-3 px-3 rounded-2xl font-black text-xs flex items-center justify-center gap-1.5 border transition-all active:scale-[0.98] ${
+                autoAddOnScan
+                  ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
+                  : 'bg-slate-100 text-slate-600 border-slate-300'
+              }`}
+              title="Agregar automáticamente cada código detectado al ticket de venta"
+            >
+              <CheckCircle2 className={`w-4 h-4 ${autoAddOnScan ? 'text-emerald-600' : 'text-slate-400'}`} />
+              <span>Auto-Venta</span>
+            </button>
 
-            {/* Overlaid Target Reticle */}
-            <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-              <div className="w-64 h-36 border-2 border-sky-400/80 rounded-xl relative">
-                <div className="absolute top-0 left-0 w-4 h-4 border-t-4 border-l-4 border-sky-400 -mt-1 -ml-1"></div>
-                <div className="absolute top-0 right-0 w-4 h-4 border-t-4 border-r-4 border-sky-400 -mt-1 -mr-1"></div>
-                <div className="absolute bottom-0 left-0 w-4 h-4 border-b-4 border-l-4 border-sky-400 -mb-1 -ml-1"></div>
-                <div className="absolute bottom-0 right-0 w-4 h-4 border-b-4 border-r-4 border-sky-400 -mb-1 -mr-1"></div>
-                <div className="w-full h-0.5 bg-rose-500/80 absolute top-1/2 -translate-y-1/2 animate-pulse"></div>
+            {/* Acceso directo a Ticket si hay productos */}
+            {mobileCart.length > 0 && (
+              <button
+                type="button"
+                onClick={() => {
+                  setPosViewTab('ticket');
+                  setActiveTab('pos');
+                }}
+                className="py-3 px-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-black text-xs flex items-center gap-1.5 shadow-md active:scale-95"
+              >
+                <ShoppingCart className="w-4 h-4" />
+                <span>Ticket ({mobileCart.reduce((s, i) => s + i.qty, 0)})</span>
+              </button>
+            )}
+          </div>
+
+          {/* Guía en caso de que Chrome en Android bloquee la cámara por ser red local HTTP */}
+          {cameraBlockedByHttp && (
+            <div className="bg-amber-50 border-2 border-amber-300 rounded-3xl p-4 space-y-2.5 shadow-md animate-in zoom-in-95">
+              <div className="flex items-center gap-2">
+                <AlertCircle className="w-5 h-5 text-amber-600 shrink-0" />
+                <h4 className="font-extrabold text-xs text-amber-900">
+                  Activar Cámara Continua en Chrome (1 Sola Vez)
+                </h4>
+              </div>
+              <p className="text-[11px] text-slate-700 leading-relaxed">
+                Por seguridad, Chrome en Android bloquea la cámara continua en IPs locales (HTTP). Para activarla para siempre en 10 segundos:
+              </p>
+              <ol className="text-[11px] text-slate-800 list-decimal list-inside space-y-1 bg-white p-2.5 rounded-xl border border-amber-200 font-medium">
+                <li>Abre una nueva pestaña en Chrome: <span className="font-mono font-bold text-sky-700">chrome://flags</span></li>
+                <li>En la búsqueda escribe: <span className="font-mono font-bold text-sky-700">insecure</span></li>
+                <li>En <i>"Insecure origins treated as secure"</i>, pega tu IP: <span className="font-mono font-bold text-emerald-700">http://192.168.5.49:3002</span></li>
+                <li>Cambia a <b>Enabled</b> y toca el botón azul <b>Relaunch</b> abajo.</li>
+              </ol>
+              <button
+                type="button"
+                onClick={() => {
+                  if (typeof navigator !== 'undefined' && navigator.clipboard) {
+                    navigator.clipboard.writeText('http://192.168.5.49:3002');
+                    alert('✓ URL copiada: http://192.168.5.49:3002\nPégala en chrome://flags');
+                  }
+                }}
+                className="w-full py-2.5 bg-amber-600 hover:bg-amber-700 active:scale-95 text-white font-black text-xs rounded-xl flex items-center justify-center gap-1.5 shadow-xs transition-all"
+              >
+                <Copy className="w-4 h-4" />
+                <span>📋 Copiar Dirección IP para Chrome Flags</span>
+              </button>
+
+              <div className="pt-1 text-center">
+                <button
+                  type="button"
+                  onClick={() => barcodeFileInputRef.current?.click()}
+                  className="text-[11px] text-slate-500 underline font-bold"
+                >
+                  O usa el selector nativo temporalmente
+                </button>
               </div>
             </div>
+          )}
 
-            {/* Camera Controls Floating Overlay */}
-            <div className="absolute bottom-3 inset-x-3 flex items-center justify-between pointer-events-auto">
-              <button
-                onClick={scannerActive ? stopScanner : startScanner}
-                className="px-3 py-1.5 bg-black/75 backdrop-blur-md text-white border border-white/20 rounded-lg text-xs font-bold flex items-center gap-1.5"
-              >
-                <RefreshCw className={`w-3.5 h-3.5 ${scannerActive ? '' : 'text-amber-400'}`} />
-                <span>{scannerActive ? 'Reiniciar Video' : 'Reintentar Video'}</span>
-              </button>
+          {/* Cámara Viewfinder HUD Industrial (Video Stream Directo a 60 FPS con BarcodeDetector) */}
+          <div className="bg-slate-950 rounded-3xl overflow-hidden relative shadow-2xl border-2 border-slate-800 min-h-[300px] flex items-center justify-center ring-1 ring-white/10">
+            {/* Elemento de Video Nativo para Stream de Hardware */}
+            <video
+              ref={videoRef}
+              playsInline
+              autoPlay
+              muted
+              className="w-full h-full min-h-[300px] object-cover"
+            />
+
+            {/* Contenedor Fallback para Html5Qrcode */}
+            <div id="mobile-camera-reader" className="hidden"></div>
+
+            {/* Overlaid Target Reticle con HUD Láser */}
+            <div className="absolute inset-0 pointer-events-none flex flex-col items-center justify-center p-4">
+              <div className="w-64 h-40 border-2 border-cyan-400/80 rounded-2xl relative shadow-[0_0_30px_rgba(34,211,238,0.3)]">
+                <div className="absolute top-0 left-0 w-6 h-6 border-t-4 border-l-4 border-cyan-400 rounded-tl-lg -mt-1 -ml-1"></div>
+                <div className="absolute top-0 right-0 w-6 h-6 border-t-4 border-r-4 border-cyan-400 rounded-tr-lg -mt-1 -mr-1"></div>
+                <div className="absolute bottom-0 left-0 w-6 h-6 border-b-4 border-l-4 border-cyan-400 rounded-bl-lg -mb-1 -ml-1"></div>
+                <div className="absolute bottom-0 right-0 w-6 h-6 border-b-4 border-r-4 border-cyan-400 rounded-br-lg -mb-1 -mr-1"></div>
+
+                {/* Haz Láser Animado Continuo */}
+                <div className="w-full h-0.5 bg-gradient-to-r from-transparent via-cyan-400 to-transparent absolute top-1/2 -translate-y-1/2 animate-pulse shadow-[0_0_14px_#22d3ee]"></div>
+              </div>
+
+              <div className="mt-3 bg-black/75 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/20 text-[11px] font-mono text-cyan-300 flex items-center gap-2 shadow-lg">
+                <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
+                <span>
+                  {scannerActive ? 'Visor Continuo Activo • Google Barcode Kit' : 'Presiona "Activar Visor Continuo"'}
+                </span>
+              </div>
             </div>
           </div>
 
-          {/* Guía Automática si la cámara continua fue bloqueada por HTTP */}
-          {cameraBlockedByHttp && (
-            <div className="bg-amber-50 border border-amber-300 p-3 rounded-2xl text-xs space-y-2">
-              <div className="flex items-start gap-2 text-amber-900 font-bold">
-                <AlertCircle className="w-4 h-4 shrink-0 text-amber-600 mt-0.5" />
-                <div>
-                  <p className="font-black text-xs">Cámara Web Bloqueada por Navegador Móvil</p>
-                  <p className="text-[11px] font-medium text-amber-800 leading-snug">
-                    Los navegadores móviles exigen HTTPS para video continuo en red Wi-Fi. Puedes usar el botón verde arriba <b>"Tomar Foto al Código"</b> que abre la cámara nativa de tu teléfono y escanea directamente sin pedir permisos ni requerir HTTPS.
-                  </p>
-                </div>
-              </div>
-
-              <details className="text-[11px] text-slate-700 bg-white/80 p-2.5 rounded-xl border border-amber-200">
-                <summary className="font-bold text-sky-800 cursor-pointer">
-                  ⚙️ ¿Deseas video continuo en vivo en Chrome Android? (Opcional)
-                </summary>
-                <div className="pt-2 space-y-1.5 text-[10px] text-slate-600">
-                  <p>1. En Chrome en tu celular, abre una pestaña y escribe:</p>
-                  <code className="bg-slate-100 px-2 py-1 rounded font-mono text-[9px] block text-slate-800 select-all">
-                    chrome://flags/#unsafely-treat-insecure-origin-as-secure
-                  </code>
-                  <p>2. Agrega la dirección IP de tu computadora POS:</p>
-                  <div className="flex items-center gap-2">
-                    <code className="bg-slate-100 px-2 py-1 rounded font-mono text-[10px] font-black text-slate-900 flex-1 truncate">
-                      {typeof window !== 'undefined' ? `${window.location.protocol}//${window.location.host}` : ''}
-                    </code>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (typeof window !== 'undefined') {
-                          navigator.clipboard.writeText(`${window.location.protocol}//${window.location.host}`);
-                          alert('¡Dirección copiada al portapapeles!');
-                        }
-                      }}
-                      className="px-2.5 py-1 bg-sky-600 hover:bg-sky-700 text-white rounded-lg text-[10px] font-bold shrink-0"
-                    >
-                      Copiar IP
-                    </button>
+          {/* Tarjeta de Producto Detectado en Vivo con Tasa BCV */}
+          {(() => {
+            const matched = inventoryList.find((p) => p.barcode === lastScanned);
+            if (matched) {
+              const inCart = mobileCart.find((c) => c.barcode === matched.barcode);
+              const priceVES = matched.priceUSD * inventoryBcvRate;
+              return (
+                <div className="p-3 bg-gradient-to-br from-white to-sky-50/70 rounded-2xl border-2 border-sky-400 shadow-lg flex items-center justify-between gap-3 animate-in zoom-in-95">
+                  <div className="w-12 h-12 rounded-xl bg-slate-100 border border-slate-200 overflow-hidden flex items-center justify-center shrink-0">
+                    {matched.image ? (
+                      <img src={matched.image} alt={matched.name} className="w-full h-full object-contain" />
+                    ) : (
+                      <Tag className="w-5 h-5 text-sky-600" />
+                    )}
                   </div>
-                  <p>3. Cambia a <b>Enabled</b> y pulsa <b>Relaunch</b>. ¡Listo! La cámara de video en vivo quedará activa permanentemente.</p>
+                  <div className="flex-1 min-w-0">
+                    <span className="text-[10px] font-bold text-sky-700 uppercase tracking-wider block">¡Producto Detectado!</span>
+                    <h4 className="font-extrabold text-xs text-slate-900 truncate">{matched.name}</h4>
+                    <div className="flex items-center gap-2 mt-0.5 font-mono text-xs">
+                      <span className="font-black text-emerald-700">${matched.priceUSD.toFixed(2)}</span>
+                      <span className="text-slate-400">•</span>
+                      <span className="text-[10px] text-slate-600 font-bold">Bs. {priceVES.toFixed(2)}</span>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(40);
+                      addToMobileCart(matched);
+                    }}
+                    className="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-extrabold text-xs rounded-xl shadow-md flex items-center gap-1 shrink-0"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>{inCart ? `+1 (${inCart.qty})` : 'A Venta'}</span>
+                  </button>
                 </div>
-              </details>
-            </div>
-          )}
+              );
+            }
+            return null;
+          })()}
 
           {/* Feedback Card */}
           <div className="bg-white p-3.5 rounded-xl border border-slate-300 shadow-xs flex items-center justify-between">
@@ -2035,7 +2860,7 @@ export default function MobileScannerPage() {
       {/* TAB 2: AGREGAR PRODUCTO CON FOTO AL INVENTARIO DE LA PC                    */}
       {/* ========================================================================= */}
       {activeTab === 'create' && (
-        <main className="flex-1 flex flex-col p-3">
+        <main className="flex-1 min-h-0 flex flex-col p-3 pb-20 overflow-y-auto touch-pan-y">
           {createSuccessToast && (
             <div className="mb-3 p-3 bg-emerald-600 text-white rounded-xl text-xs font-bold shadow-md flex items-center gap-2 animate-bounce">
               <CheckCircle2 className="w-5 h-5 shrink-0" />
@@ -2331,30 +3156,33 @@ export default function MobileScannerPage() {
       )}
 
       {/* ========================================================================= */}
-      {/* TAB 3: INVENTARIO & CONSULTA DE PRECIOS MÓVIL EN VIVO                     */}
+      {/* PESTAÑA 4 (NAV DOCK 4): ARTÍCULOS EN STOCK (SE AGREGAN A LA VENTA)       */}
       {/* ========================================================================= */}
       {activeTab === 'inventory' && (
-        <main className="flex-1 flex flex-col p-3 gap-3">
+        <main className="flex-1 min-h-0 flex flex-col p-2.5 gap-2 relative overflow-hidden">
           {/* Barra de Búsqueda y Tasa BCV */}
-          <div className="bg-white p-3 rounded-2xl border border-slate-300 shadow-xs space-y-2.5">
+          <div className="bg-white p-2.5 rounded-2xl border border-slate-200 shadow-2xs space-y-1.5 shrink-0">
             <div className="flex items-center justify-between">
               <span className="text-xs font-black text-slate-800 uppercase tracking-tight flex items-center gap-1.5">
-                <ShoppingBag className="w-4 h-4 text-sky-700" />
-                <span>Consulta de Inventario</span>
+                <ShoppingBag className="w-4 h-4 text-emerald-600" />
+                <span>Stock ({inventoryList.length} productos)</span>
               </span>
-              <span className="text-[11px] font-mono font-black text-sky-800 bg-sky-50 px-2 py-0.5 rounded-full border border-sky-200">
-                Tasa BCV: Bs. {inventoryBcvRate.toFixed(2)}
-              </span>
+              <div className="flex items-center gap-1.5 px-2 py-0.5 bg-sky-50 border border-sky-300 rounded-lg">
+                <span className="text-[10px] font-mono font-black text-sky-950">
+                  Tasa: Bs. {inventoryBcvRate.toFixed(2)}
+                </span>
+              </div>
             </div>
 
+            {/* Buscador */}
             <div className="relative">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
                 type="text"
                 placeholder="Buscar por nombre o código de barras..."
                 value={inventorySearch}
                 onChange={(e) => setInventorySearch(e.target.value)}
-                className="w-full pl-9 pr-8 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                className="w-full pl-8 pr-8 py-1.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500"
               />
               {inventorySearch && (
                 <button
@@ -2366,95 +3194,133 @@ export default function MobileScannerPage() {
               )}
             </div>
 
-            <div className="flex items-center justify-between text-[11px] text-slate-500">
-              <span>{inventoryList.length} productos registrados</span>
+            {/* Pastillas de Categorías */}
+            <div className="flex gap-1.5 overflow-x-auto pb-0.5 no-scrollbar text-[10px]">
+              {['Todos', ...Array.from(new Set(inventoryList.map((p) => p.category).filter(Boolean)))].map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setSelectedMobileCategory(cat)}
+                  className={`px-2.5 py-1 rounded-lg font-bold shrink-0 transition-all ${
+                    selectedMobileCategory === cat
+                      ? 'bg-emerald-600 text-white shadow-2xs'
+                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+
+            <div className="flex items-center justify-between text-[10px] text-slate-400 pt-0.5">
+              <span>Toca un producto para sumarlo a la venta</span>
               <button
+                type="button"
                 onClick={fetchInventory}
                 disabled={isLoadingInventory}
-                className="text-sky-700 font-bold flex items-center gap-1 hover:underline"
+                className="text-emerald-700 font-bold flex items-center gap-1 hover:underline"
               >
                 <RefreshCw className={`w-3 h-3 ${isLoadingInventory ? 'animate-spin' : ''}`} />
-                <span>Actualizar</span>
+                <span>Actualizar Stock</span>
               </button>
             </div>
           </div>
 
-          {/* Lista de Productos con Tarjetas Táctiles */}
-          <div className="space-y-2 overflow-y-auto max-h-[calc(100vh-230px)] pb-6">
-            {inventoryList
-              .filter((p) => {
-                if (!inventorySearch.trim()) return true;
-                const q = inventorySearch.toLowerCase();
-                return (
-                  p.name.toLowerCase().includes(q) ||
-                  p.barcode.toLowerCase().includes(q) ||
-                  (p.category && p.category.toLowerCase().includes(q))
-                );
-              })
-              .map((p, idx) => {
-                const priceVES = p.priceUSD * inventoryBcvRate;
-                return (
-                  <div
-                    key={p.id || idx}
-                    className="bg-white p-3 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-3"
-                  >
-                    {/* Imagen o Ícono del Producto */}
-                    <div className="w-14 h-14 rounded-xl bg-slate-100 border border-slate-200 shrink-0 overflow-hidden flex items-center justify-center">
-                      {p.image ? (
-                        <img
-                          src={p.image}
-                          alt={p.name}
-                          className="w-full h-full object-contain"
-                        />
-                      ) : (
-                        <Tag className="w-6 h-6 text-slate-400" />
-                      )}
-                    </div>
+          {/* Cuadrícula de Productos de Stock (Tap directo para sumar a la venta) */}
+          <div className="flex-1 min-h-0 overflow-y-auto p-0.5 pb-24 touch-pan-y overscroll-contain">
+            <div className="grid grid-cols-2 gap-2.5">
+              {inventoryList
+                .filter((p) => {
+                  const matchCategory = selectedMobileCategory === 'Todos' || p.category === selectedMobileCategory;
+                  if (!matchCategory) return false;
+                  if (!inventorySearch.trim()) return true;
+                  const q = inventorySearch.toLowerCase();
+                  return (
+                    p.name.toLowerCase().includes(q) ||
+                    p.barcode.toLowerCase().includes(q) ||
+                    (p.category && p.category.toLowerCase().includes(q))
+                  );
+                })
+                .map((p, idx) => {
+                  const priceVES = p.priceUSD * inventoryBcvRate;
+                  const inCartQty = mobileCart.find((c) => c.barcode === p.barcode)?.qty || 0;
+                  const liveStock = Math.max(0, p.stock - inCartQty);
+                  const isOutOfStock = p.stock > 0 && liveStock === 0;
+                  return (
+                    <div
+                      key={p.id || idx}
+                      onClick={() => addToMobileCart(p)}
+                      className={`p-2.5 bg-white rounded-2xl border transition-all flex flex-col justify-between cursor-pointer group select-none relative overflow-hidden ${
+                        isOutOfStock
+                          ? 'border-rose-200 opacity-80 shadow-none'
+                          : 'border-slate-200 shadow-2xs hover:border-emerald-400 active:scale-[0.97]'
+                      }`}
+                    >
+                      {/* Imagen con badges de Categoría y Stock en Vivo */}
+                      <div className="w-full h-24 rounded-xl bg-slate-50 border border-slate-100 overflow-hidden flex items-center justify-center mb-2 relative shrink-0">
+                        {p.image ? (
+                          <img src={p.image} alt={p.name} className="w-full h-full object-contain p-1" />
+                        ) : (
+                          <Tag className="w-8 h-8 text-slate-300" />
+                        )}
 
-                    {/* Información y Precios */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-1.5 mb-0.5">
-                        <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">
+                        {/* Categoría Badge */}
+                        <span className="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded-md bg-white/90 backdrop-blur-xs text-[9px] font-bold text-slate-600 border border-slate-200/80 shadow-2xs truncate max-w-[85px]">
                           {p.category || 'General'}
                         </span>
-                        <span className="text-[10px] font-mono text-slate-400 truncate">
+
+                        {/* Stock Badge en Vivo (Resta en tiempo real los artículos en venta) */}
+                        <span
+                          className={`absolute top-1.5 right-1.5 px-1.5 py-0.5 rounded-md text-[9px] font-black shadow-2xs transition-all ${
+                            isOutOfStock
+                              ? 'bg-rose-600 text-white animate-pulse'
+                              : liveStock <= 3
+                              ? 'bg-amber-500 text-white'
+                              : 'bg-slate-900/85 backdrop-blur-xs text-white'
+                          }`}
+                        >
+                          {isOutOfStock ? 'Agotado (0)' : `Stk: ${liveStock}`}
+                        </span>
+                      </div>
+
+                      {/* Nombre y Código */}
+                      <div className="flex-1 min-w-0 mb-2">
+                        <h4 className="font-bold text-xs text-slate-900 line-clamp-2 leading-snug min-h-[30px]">
+                          {p.name}
+                        </h4>
+                        <span className="text-[9px] font-mono text-slate-400 truncate block mt-0.5">
                           {p.barcode}
                         </span>
                       </div>
-                      <h4 className="font-bold text-xs text-slate-900 truncate leading-tight">
-                        {p.name}
-                      </h4>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span
-                          className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
-                            p.stock <= 3
-                              ? 'bg-rose-50 text-rose-700 border border-rose-200'
-                              : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+
+                      {/* Fila Inferior: Precios y Botón Directo de Sumar */}
+                      <div className="flex items-center justify-between pt-1 border-t border-slate-100">
+                        <div>
+                          <span className="font-mono font-black text-xs text-emerald-700 block tabular-numbers leading-tight">
+                            ${p.priceUSD.toFixed(2)}
+                          </span>
+                          <span className="font-mono text-[9px] text-slate-500 block tabular-numbers">
+                            Bs. {priceVES.toFixed(2)}
+                          </span>
+                        </div>
+
+                        {/* Botón táctil + */}
+                        <div
+                          className={`w-7 h-7 rounded-xl border flex items-center justify-center transition-all shadow-2xs shrink-0 ${
+                            isOutOfStock
+                              ? 'bg-slate-100 text-slate-400 border-slate-200'
+                              : 'bg-emerald-50 text-emerald-700 border border-emerald-300 group-hover:bg-emerald-600 group-hover:text-white group-active:scale-90'
                           }`}
                         >
-                          Stock: {p.stock}
-                        </span>
-                        <span className="text-[10px] text-slate-500 font-medium">
-                          Consulta de Inventario
-                        </span>
+                          <Plus className="w-4 h-4 stroke-[2.5]" />
+                        </div>
                       </div>
                     </div>
-
-                    {/* Precios en Monedas */}
-                    <div className="text-right shrink-0">
-                      <span className="font-mono font-black text-sm text-emerald-700 block tabular-numbers">
-                        ${p.priceUSD.toFixed(2)}
-                      </span>
-                      <span className="font-mono font-bold text-[11px] text-slate-500 block tabular-numbers">
-                        Bs. {priceVES.toFixed(2)}
-                      </span>
-                    </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+            </div>
 
             {inventoryList.length === 0 && !isLoadingInventory && (
-              <div className="bg-white p-8 rounded-2xl border border-slate-200 text-center space-y-2">
+              <div className="bg-white p-8 rounded-2xl border border-slate-200 text-center space-y-2 mt-4">
                 <p className="text-3xl">📦</p>
                 <p className="text-xs font-bold text-slate-700">Sin productos cargados</p>
                 <p className="text-[11px] text-slate-500">
@@ -2469,6 +3335,52 @@ export default function MobileScannerPage() {
               </div>
             )}
           </div>
+
+          {/* Barra Flotante de Acceso Inmediato a la Pantalla de Venta (situada arriba del nav fijo) */}
+          {mobileCart.length > 0 && (
+            <div className="fixed bottom-16 inset-x-2.5 z-40 animate-in slide-in-from-bottom-2 duration-200">
+              <div
+                onClick={() => setActiveTab('pos')}
+                className="bg-slate-900 text-white py-2 px-3 rounded-xl shadow-xl border border-slate-700 flex items-center justify-between cursor-pointer active:scale-[0.99] transition-all"
+              >
+                <div className="flex items-center gap-2 min-w-0">
+                  <div className="relative w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center text-white shrink-0 shadow-xs">
+                    <ShoppingCart className="w-4 h-4" />
+                    <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-amber-400 text-slate-950 font-black text-[9px] flex items-center justify-center border border-slate-900">
+                      {mobileCart.reduce((sum, i) => sum + i.qty, 0)}
+                    </span>
+                  </div>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-1.5">
+                      <span className="font-mono font-black text-sm text-white tabular-numbers">
+                        ${mobileTotalUSD.toFixed(2)}
+                      </span>
+                      <span className="text-[10px] font-mono text-emerald-400 font-bold tabular-numbers">
+                        ≈ Bs. {mobileTotalVES.toFixed(2)}
+                      </span>
+                    </div>
+                    <span className="text-[9px] text-slate-300 font-medium block truncate">
+                      {mobileCart.reduce((sum, i) => sum + i.qty, 0)} artículos • Toca para ir a Cobrar
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setActiveTab('pos');
+                    }}
+                    className="px-2.5 py-1.5 bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white font-black text-[11px] rounded-lg flex items-center gap-1 shadow-xs transition-all"
+                  >
+                    <span>Ver Venta</span>
+                    <ArrowRight className="w-3 h-3" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </main>
       )}
 
@@ -2542,6 +3454,131 @@ export default function MobileScannerPage() {
           </div>
         </div>
       )}
+
+      {/* ========================================================================= */}
+      {/* NAV INFERIOR FIJADO AL FONDO (NO FLOTANTE)                                */}
+      {/* ========================================================================= */}
+      <nav className="fixed bottom-0 inset-x-0 z-50 bg-slate-950 border-t border-slate-800/90 shadow-[0_-4px_25px_rgba(0,0,0,0.5)] select-none pb-[max(env(safe-area-inset-bottom,0px),4px)]">
+        <div className="max-w-md mx-auto px-1 flex items-center justify-around h-14">
+          
+          {/* 1. IZQUIERDA: VENTA POS */}
+          <button
+            type="button"
+            onClick={() => {
+              if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(25);
+              setActiveTab('pos');
+            }}
+            className={`flex flex-col items-center justify-center py-1 px-2.5 rounded-xl transition-all duration-150 relative ${
+              activeTab === 'pos'
+                ? 'text-emerald-400 font-extrabold'
+                : 'text-slate-400 hover:text-white active:scale-95'
+            }`}
+          >
+            <div className={`p-1 rounded-lg transition-all ${
+              activeTab === 'pos' ? 'bg-emerald-500/20 text-emerald-400' : ''
+            }`}>
+              <ShoppingCart className="w-5 h-5" />
+            </div>
+            <span className="text-[10px] font-bold tracking-tight">Venta</span>
+            {mobileCart.length > 0 && (
+              <span className="absolute top-0 right-1 bg-rose-500 text-white text-[9px] font-black rounded-full w-4 h-4 flex items-center justify-center border border-slate-950 animate-pulse">
+                {mobileCart.reduce((sum, i) => sum + i.qty, 0)}
+              </span>
+            )}
+          </button>
+
+          {/* 2. IZQUIERDA: BALANZA DIGITAL */}
+          <button
+            type="button"
+            onClick={() => {
+              if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(25);
+              setActiveTab('scale');
+            }}
+            className={`flex flex-col items-center justify-center py-1 px-2.5 rounded-xl transition-all duration-150 relative ${
+              activeTab === 'scale'
+                ? 'text-cyan-400 font-extrabold'
+                : 'text-slate-400 hover:text-white active:scale-95'
+            }`}
+          >
+            <div className={`p-1 rounded-lg transition-all ${
+              activeTab === 'scale' ? 'bg-cyan-500/20 text-cyan-400' : ''
+            }`}>
+              <Scale className="w-5 h-5" />
+            </div>
+            <span className="text-[10px] font-bold tracking-tight">Balanza</span>
+          </button>
+
+          {/* 3. CENTRO: ESCÁNER DE CÓDIGOS DE BARRAS */}
+          <button
+            type="button"
+            onClick={async () => {
+              if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate([40, 20, 40]);
+              setActiveTab('gun');
+              if (!scannerActive) {
+                startScanner();
+              }
+            }}
+            className="flex flex-col items-center justify-center -mt-3.5 relative group"
+            title="Escáner Láser de Códigos de Barra"
+          >
+            <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200 shadow-xl ring-2 ring-slate-950 ${
+              activeTab === 'gun'
+                ? 'bg-gradient-to-tr from-sky-500 to-emerald-400 text-white ring-2 ring-cyan-300 shadow-[0_0_20px_rgba(56,189,248,0.6)] scale-105'
+                : 'bg-gradient-to-tr from-slate-900 via-slate-800 to-sky-950 text-cyan-400 border border-cyan-500/50 hover:scale-105 active:scale-95'
+            }`}>
+              <ScanLine className="w-6 h-6 stroke-[2.5]" />
+            </div>
+            <span className={`text-[9px] font-black tracking-wider uppercase mt-0.5 ${
+              activeTab === 'gun' ? 'text-cyan-300 font-extrabold' : 'text-slate-400'
+            }`}>
+              Escanear
+            </span>
+          </button>
+
+          {/* 4. DERECHA: STOCK */}
+          <button
+            type="button"
+            onClick={() => {
+              if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(25);
+              setActiveTab('inventory');
+            }}
+            className={`flex flex-col items-center justify-center py-1 px-2.5 rounded-xl transition-all duration-150 relative ${
+              activeTab === 'inventory'
+                ? 'text-amber-400 font-extrabold'
+                : 'text-slate-400 hover:text-white active:scale-95'
+            }`}
+          >
+            <div className={`p-1 rounded-lg transition-all ${
+              activeTab === 'inventory' ? 'bg-amber-500/20 text-amber-400' : ''
+            }`}>
+              <ShoppingBag className="w-5 h-5" />
+            </div>
+            <span className="text-[10px] font-bold tracking-tight">Stock</span>
+          </button>
+
+          {/* 5. DERECHA: +ARTÍCULO */}
+          <button
+            type="button"
+            onClick={() => {
+              if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(25);
+              setActiveTab('create');
+            }}
+            className={`flex flex-col items-center justify-center py-1 px-2.5 rounded-xl transition-all duration-150 relative ${
+              activeTab === 'create'
+                ? 'text-indigo-400 font-extrabold'
+                : 'text-slate-400 hover:text-white active:scale-95'
+            }`}
+          >
+            <div className={`p-1 rounded-lg transition-all ${
+              activeTab === 'create' ? 'bg-indigo-500/20 text-indigo-400' : ''
+            }`}>
+              <Camera className="w-5 h-5" />
+            </div>
+            <span className="text-[10px] font-bold tracking-tight">+Artículo</span>
+          </button>
+
+        </div>
+      </nav>
     </div>
   );
 }
