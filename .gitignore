@@ -49,4 +49,6 @@ next-env.d.ts
 *.sqlite
 *.sqlite-wal
 *.sqlite-shm
-
+# Claves Maestras de Licenciamiento (NUNCA subir a Git)
+master_private_key.txt
+master_public_key.txt

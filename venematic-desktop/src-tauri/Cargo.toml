@@ -1,7 +1,7 @@
 [package]
 name = "venematic-desktop"
 version = "2.0.0"
-description = "Venematic POS - Sistema de Ventas de Escritorio Local para Comercios"
+description = "Venematic POS Enterprise - Local Engine"
 authors = ["Venematic Team"]
 license = ""
 repository = ""
@@ -14,6 +14,13 @@ tauri-build = { version = "1.5", features = [] }
 tauri = { version = "1.5", features = ["shell-open", "window-all"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
+rusqlite = { version = "0.31", features = ["bundled", "chrono", "uuid"] }
+ed25519-dalek = { version = "2.1", features = ["rand_core"] }
+hex = "0.4"
+base64 = "0.22"
+chrono = { version = "0.4", features = ["serde"] }
+uuid = { version = "1.8", features = ["v4", "serde"] }
+thiserror = "1.0"
 
 [features]
 custom-protocol = ["tauri/custom-protocol"]
