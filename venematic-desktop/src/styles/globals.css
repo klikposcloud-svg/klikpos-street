@@ -270,134 +270,196 @@ html[data-ui-style="professional"] .pos-btn-secondary {
 }
 
 /* ========================================================================= */
-/* MODO GLASSMORPHISM REFINADO (Apple Frosted Glass + Brand Reactive Glow)   */
+/* MODO GLASSMORPHISM PRO (Diseño Táctico Blueprint / Slate-Navy de Base)     */
 /* ========================================================================= */
 html[data-ui-style="glassmorphism"] {
   color-scheme: dark !important;
-  background-color: #070a12 !important;
+  background-color: #121b27 !important;
   color: #f8fafc !important;
 }
 
 html[data-ui-style="glassmorphism"] body {
-  background: 
-    radial-gradient(ellipse 90% 70% at 10% 10%, var(--brand-glow, rgba(14, 165, 233, 0.15)) 0%, transparent 60%),
-    radial-gradient(ellipse 80% 60% at 90% 90%, rgba(99, 102, 241, 0.08) 0%, transparent 65%),
-    linear-gradient(180deg, #070b14 0%, #0c1220 50%, #080d18 100%) !important;
+  background-color: #121b27 !important;
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px) !important;
+  background-size: 28px 28px !important;
   background-attachment: fixed !important;
   color: #f8fafc !important;
 }
 
-/* Cabecera y Barra Lateral con Iluminación Especular Física */
-html[data-ui-style="glassmorphism"] header,
+/* Cabecera Superior */
+html[data-ui-style="glassmorphism"] header {
+  background: #141e2b !important;
+  border-color: #1f2d40 !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+  color: #f8fafc !important;
+}
+
+html[data-ui-style="glassmorphism"] .brand-badge {
+  background-color: #8b5cf6 !important;
+  border-color: #a78bfa !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.4) !important;
+}
+
+/* Barra Lateral (Sidebar) */
 html[data-ui-style="glassmorphism"] aside {
-  background: linear-gradient(180deg, rgba(15, 23, 42, 0.90) 0%, rgba(10, 16, 31, 0.92) 100%) !important;
-  backdrop-filter: blur(16px) saturate(170%) !important;
-  -webkit-backdrop-filter: blur(16px) saturate(170%) !important;
-  border-color: var(--brand-glass-border, rgba(255, 255, 255, 0.15)) !important;
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
-  color: #f8fafc !important;
+  background: #101722 !important;
+  border-color: #1f2d40 !important;
+  color: #94a3b8 !important;
 }
 
-/* Contenedores y Paneles Principales en Glassmorphism */
-html[data-ui-style="glassmorphism"] .bg-white {
-  background: linear-gradient(145deg, rgba(17, 26, 46, 0.90) 0%, rgba(11, 18, 33, 0.93) 100%) !important;
-  backdrop-filter: blur(14px) saturate(160%) !important;
-  -webkit-backdrop-filter: blur(14px) saturate(160%) !important;
-  border-color: rgba(255, 255, 255, 0.12) !important;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.40), inset 0 1px 0 rgba(255, 255, 255, 0.10) !important;
-  color: #f1f5f9 !important;
+/* Etiqueta de Operaciones de Caja en Neon Cyan */
+html[data-ui-style="glassmorphism"] aside div.text-\[11px\].font-bold.uppercase {
+  color: #22d3ee !important;
+  letter-spacing: 0.06em !important;
 }
 
-/* Tarjetas Individuales de Productos (Botones): Elevación y Specular Highlight */
-html[data-ui-style="glassmorphism"] button.bg-white {
-  background: linear-gradient(180deg, rgba(26, 38, 66, 0.92) 0%, rgba(17, 27, 48, 0.95) 100%) !important;
-  border-color: rgba(255, 255, 255, 0.14) !important;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
-  backdrop-filter: blur(10px) !important;
-  -webkit-backdrop-filter: blur(10px) !important;
-  color: #f8fafc !important;
-}
-
-html[data-ui-style="glassmorphism"] button.bg-white:hover {
-  background: linear-gradient(180deg, rgba(35, 52, 88, 0.96) 0%, rgba(22, 35, 60, 0.98) 100%) !important;
-  border-color: var(--brand-border) !important;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.50), 0 0 18px var(--brand-glow), inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
-  transform: translateY(-2px);
-}
-
-html[data-ui-style="glassmorphism"] .bg-slate-50 {
-  background-color: rgba(13, 20, 36, 0.88) !important;
-  backdrop-filter: blur(12px) !important;
-  -webkit-backdrop-filter: blur(12px) !important;
-  border-color: rgba(255, 255, 255, 0.10) !important;
-  color: #e2e8f0 !important;
-}
-
-html[data-ui-style="glassmorphism"] .bg-slate-100 {
-  background-color: #080d1a !important;
-  border-color: rgba(255, 255, 255, 0.12) !important;
-  color: #f1f5f9 !important;
-}
-
-/* Bordes y Separadores de Cristal */
-html[data-ui-style="glassmorphism"] .border-slate-200,
-html[data-ui-style="glassmorphism"] .border-slate-300 {
-  border-color: rgba(255, 255, 255, 0.12) !important;
-}
-
-html[data-ui-style="glassmorphism"] .border-slate-900 {
-  border-color: var(--brand-border) !important;
-  box-shadow: 0 0 15px var(--brand-glow) !important;
-}
-
-/* Elementos Activos en Glassmorphism (Sincronizados con la Marca) */
-html[data-ui-style="glassmorphism"] .border-sky-600 {
-  border-color: var(--brand-border) !important;
-  background-color: var(--brand-glow) !important;
-  box-shadow: 0 0 18px var(--brand-glow) !important;
-}
-
-html[data-ui-style="glassmorphism"] .border-sky-600 * {
-  color: #ffffff !important;
-}
-
-html[data-ui-style="glassmorphism"] .bg-sky-50 {
-  background-color: rgba(255, 255, 255, 0.08) !important;
-  border-color: var(--brand-glass-border) !important;
-  color: #ffffff !important;
-}
-
-html[data-ui-style="glassmorphism"] .bg-sky-50\/80 {
-  background-color: var(--brand-glow) !important;
-  border-color: var(--brand-border) !important;
-  box-shadow: 0 0 14px var(--brand-glow) !important;
-}
-
-html[data-ui-style="glassmorphism"] .bg-sky-50\/80 p,
-html[data-ui-style="glassmorphism"] .bg-sky-50\/80 span {
-  color: #ffffff !important;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
-}
-
-/* Navegación Activa en Glassmorphism */
+/* Navegación Activa en Sidebar */
 html[data-ui-style="glassmorphism"] .nav-item-active {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.05) 100%) !important;
-  border-color: var(--brand-border) !important;
+  background: #1c2738 !important;
+  border-color: #7c3aed !important;
   color: #ffffff !important;
-  box-shadow: 0 4px 16px var(--brand-glow), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 0 14px rgba(124, 58, 237, 0.35) !important;
 }
 
 html[data-ui-style="glassmorphism"] .nav-item-active span {
   color: #ffffff !important;
 }
 
+html[data-ui-style="glassmorphism"] .nav-item-active svg {
+  color: #c084fc !important;
+}
+
 html[data-ui-style="glassmorphism"] .nav-item-active kbd {
-  background-color: rgba(255, 255, 255, 0.15) !important;
-  border-color: var(--brand-border) !important;
+  background-color: #162232 !important;
+  border-color: #27394f !important;
+  color: #7890ad !important;
+}
+
+/* Paneles y Contenedores Principales (White cards -> Deep Slate Navy) */
+html[data-ui-style="glassmorphism"] .bg-white {
+  background: #182333 !important;
+  border-color: #283a50 !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35) !important;
+  color: #f8fafc !important;
+}
+
+/* Cabeceras de paneles (bg-slate-50 / bg-slate-100) */
+html[data-ui-style="glassmorphism"] .bg-slate-50,
+html[data-ui-style="glassmorphism"] .bg-slate-100 {
+  background-color: #141e2b !important;
+  border-color: #202e40 !important;
+  color: #e2e8f0 !important;
+}
+
+html[data-ui-style="glassmorphism"] .border-slate-200,
+html[data-ui-style="glassmorphism"] .border-slate-300 {
+  border-color: #26384e !important;
+}
+
+/* Barra de Búsqueda */
+html[data-ui-style="glassmorphism"] input {
+  background-color: #162232 !important;
+  border-color: #293c52 !important;
   color: #ffffff !important;
 }
 
-/* Jerarquía Textual y Contraste en Glassmorphism (WCAG AA) */
+html[data-ui-style="glassmorphism"] input::placeholder {
+  color: #64748b !important;
+}
+
+/* Botones de Acción Superiores (Gaveta, Fotos, Celular Escáner) */
+html[data-ui-style="glassmorphism"] .p-3.border-b button {
+  background-color: #133240 !important;
+  border-color: #0891b2 !important;
+  color: #22d3ee !important;
+}
+
+html[data-ui-style="glassmorphism"] .p-3.border-b button:hover {
+  background-color: #164255 !important;
+  border-color: #06b6d4 !important;
+  color: #67e8f9 !important;
+}
+
+/* Pastillas de Filtro de Categoría */
+html[data-ui-style="glassmorphism"] .overflow-x-auto {
+  background-color: #151f2c !important;
+  border-color: #202e40 !important;
+}
+
+html[data-ui-style="glassmorphism"] .overflow-x-auto button {
+  background-color: #112d3d !important;
+  border-color: #0e7490 !important;
+  color: #38bdf8 !important;
+}
+
+html[data-ui-style="glassmorphism"] .overflow-x-auto button:hover {
+  background-color: #163a4d !important;
+  color: #67e8f9 !important;
+}
+
+html[data-ui-style="glassmorphism"] .overflow-x-auto button.brand-badge {
+  background-color: #8b5cf6 !important;
+  border-color: #a78bfa !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 10px rgba(139, 92, 246, 0.45) !important;
+}
+
+/* Tarjetas de Producto */
+html[data-ui-style="glassmorphism"] button.h-48,
+html[data-ui-style="glassmorphism"] button.min-h-\[135px\] {
+  background: linear-gradient(180deg, #1d2b3d 0%, #172232 100%) !important;
+  border: 1px solid #2d405b !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35) !important;
+}
+
+html[data-ui-style="glassmorphism"] button.h-48:hover,
+html[data-ui-style="glassmorphism"] button.min-h-\[135px\]:hover {
+  background: linear-gradient(180deg, #24354c 0%, #1a2739 100%) !important;
+  border-color: #3b5376 !important;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5) !important;
+  transform: translateY(-2px);
+}
+
+html[data-ui-style="glassmorphism"] button.h-48 h4,
+html[data-ui-style="glassmorphism"] button.min-h-\[135px\] h4 {
+  color: #ffffff !important;
+}
+
+/* Barcode */
+html[data-ui-style="glassmorphism"] button.min-h-\[135px\] .font-mono.text-slate-400 {
+  color: #6b829e !important;
+}
+
+/* Category Badge */
+html[data-ui-style="glassmorphism"] button.min-h-\[135px\] span.border,
+html[data-ui-style="glassmorphism"] button.h-48 span.border {
+  background-color: #1f2e42 !important;
+  border-color: #344b67 !important;
+  color: #94a3b8 !important;
+}
+
+/* Precios: USD blanco, VES cyan */
+html[data-ui-style="glassmorphism"] button.h-48 .text-slate-900,
+html[data-ui-style="glassmorphism"] button.min-h-\[135px\] .text-slate-900 {
+  color: #ffffff !important;
+}
+
+html[data-ui-style="glassmorphism"] button.h-48 .text-slate-600,
+html[data-ui-style="glassmorphism"] button.min-h-\[135px\] .text-slate-600 {
+  color: #38bdf8 !important;
+}
+
+/* Stock Pill */
+html[data-ui-style="glassmorphism"] button.min-h-\[135px\] span.bg-slate-100 {
+  background-color: #223348 !important;
+  border: 1px solid #2f435d !important;
+  color: #8fa7c4 !important;
+}
+
+/* Jerarquía de Textos en Glassmorphism */
 html[data-ui-style="glassmorphism"] .text-slate-900,
 html[data-ui-style="glassmorphism"] .text-slate-800,
 html[data-ui-style="glassmorphism"] .text-slate-700 {
@@ -405,60 +467,106 @@ html[data-ui-style="glassmorphism"] .text-slate-700 {
 }
 
 html[data-ui-style="glassmorphism"] .text-slate-600 {
-  color: #cbd5e1 !important;
+  color: #38bdf8 !important;
 }
 
 html[data-ui-style="glassmorphism"] .text-slate-500,
 html[data-ui-style="glassmorphism"] .text-slate-400 {
-  color: #94a3b8 !important;
+  color: #7890ad !important;
 }
 
-/* Inputs y Selectores de Formulario */
-html[data-ui-style="glassmorphism"] input,
-html[data-ui-style="glassmorphism"] select,
-html[data-ui-style="glassmorphism"] textarea {
-  background-color: rgba(11, 18, 33, 0.95) !important;
+/* Total a Cobrar en Bolívares en morado/rosa */
+html[data-ui-style="glassmorphism"] span.text-sky-700 {
+  color: #c084fc !important;
+}
+
+/* Botón Cobrar Venta F12 */
+html[data-ui-style="glassmorphism"] button.bg-emerald-600 {
+  background-color: #1b4b5e !important;
+  border: 1px solid #0891b2 !important;
   color: #ffffff !important;
-  border-color: var(--brand-glass-border) !important;
+  box-shadow: 0 4px 14px rgba(8, 145, 178, 0.3) !important;
 }
 
-html[data-ui-style="glassmorphism"] input::placeholder,
-html[data-ui-style="glassmorphism"] textarea::placeholder {
-  color: #64748b !important;
+html[data-ui-style="glassmorphism"] button.bg-emerald-600:hover {
+  background-color: #165a73 !important;
+  border-color: #06b6d4 !important;
 }
 
-html[data-ui-style="glassmorphism"] input:focus,
-html[data-ui-style="glassmorphism"] select:focus,
-html[data-ui-style="glassmorphism"] textarea:focus {
-  border-color: var(--brand-primary) !important;
-  box-shadow: 0 0 0 3px var(--brand-glow) !important;
+html[data-ui-style="glassmorphism"] button.bg-emerald-600 kbd {
+  background-color: #113645 !important;
+  color: #67e8f9 !important;
+  border: 1px solid #0e7490 !important;
 }
 
-/* Modal Buttons y Estados Activos */
-html[data-ui-style="glassmorphism"] button:disabled,
-html[data-ui-style="glassmorphism"] button[disabled] {
-  opacity: 0.85 !important;
+/* ========================================================================= */
+/* TECLADO NUMÉRICO TÁCTIL (BLUEPRINT / SLATE-NAVY)                          */
+/* ========================================================================= */
+html[data-ui-style="glassmorphism"] .pos-numpad-key {
+  background-color: #2b4052 !important;
+  border-color: #39556c !important;
+  color: #ffffff !important;
+  font-size: 1.25rem !important;
+  font-weight: 700 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
 }
 
-/* Botón Auto-llenar con IA / Detectando */
-html[data-ui-style="glassmorphism"] .bg-indigo-50,
-html[data-ui-style="glassmorphism"] .bg-sky-50 {
-  background-color: #1e1b4b !important;
-  border-color: #6366f1 !important;
-  color: #a5b4fc !important;
+html[data-ui-style="glassmorphism"] .pos-numpad-key:hover {
+  background-color: #344d62 !important;
+  border-color: #486a86 !important;
 }
 
-html[data-ui-style="glassmorphism"] .bg-indigo-50 *,
-html[data-ui-style="glassmorphism"] .bg-sky-50 * {
-  color: #c7d2fe !important;
+/* Tecla Borrar y Limpiar (Coral Red) */
+html[data-ui-style="glassmorphism"] .pos-numpad-action.text-rose-600,
+html[data-ui-style="glassmorphism"] .pos-numpad-action.text-slate-600 {
+  background-color: #b24747 !important;
+  border-color: #c45656 !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  font-size: 1.15rem !important;
 }
 
-/* Botón Fondo Blanco IA */
-html[data-ui-style="glassmorphism"] .bg-slate-100 button,
-html[data-ui-style="glassmorphism"] button.bg-slate-100 {
-  background-color: rgba(30, 41, 59, 0.9) !important;
-  border-color: rgba(148, 163, 184, 0.3) !important;
-  color: #f1f5f9 !important;
+html[data-ui-style="glassmorphism"] .pos-numpad-action.text-rose-600:hover,
+html[data-ui-style="glassmorphism"] .pos-numpad-action.text-slate-600:hover {
+  background-color: #c95151 !important;
+  border-color: #d86565 !important;
+}
+
+/* Tecla Enter / Aplicar (Purple / Violet) */
+html[data-ui-style="glassmorphism"] .pos-numpad-action.bg-sky-700 {
+  background-color: #8b5cf6 !important;
+  border-color: #a78bfa !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4) !important;
+}
+
+html[data-ui-style="glassmorphism"] .pos-numpad-action.bg-sky-700:hover {
+  background-color: #9d72f9 !important;
+}
+
+html[data-ui-style="glassmorphism"] .pos-numpad-action.bg-sky-700 span {
+  color: #ffffff !important;
+}
+
+/* Display del Teclado Numérico */
+html[data-ui-style="glassmorphism"] .h-9.bg-slate-100 {
+  background-color: #15202e !important;
+  border-color: #27394d !important;
+}
+
+html[data-ui-style="glassmorphism"] .h-9.bg-slate-100 span.text-sky-700 {
+  color: #c084fc !important;
+}
+
+/* Tabs Cantidad / Código en Teclado */
+html[data-ui-style="glassmorphism"] .bg-slate-100 button {
+  color: #7890ad !important;
+}
+
+html[data-ui-style="glassmorphism"] .bg-slate-100 button.bg-white {
+  background-color: #264152 !important;
+  color: #38bdf8 !important;
+  border: 1px solid #33566d !important;
 }
 
 /* Contenedor de preview de foto en modal con fondo neutro de contraste */
@@ -468,23 +576,6 @@ html[data-ui-style="glassmorphism"] button.bg-slate-100 {
 html[data-ui-style="glassmorphism"] .product-preview-box {
   background-color: #1e293b !important;
   border-color: rgba(56, 189, 248, 0.3) !important;
-}
-
-html[data-ui-style="glassmorphism"] .pos-numpad-key {
-  background-color: rgba(24, 37, 66, 0.85) !important;
-  border-color: rgba(255, 255, 255, 0.15) !important;
-  color: #ffffff !important;
-}
-
-html[data-ui-style="glassmorphism"] .pos-numpad-key:hover {
-  background-color: rgba(37, 56, 96, 0.95) !important;
-  border-color: rgba(56, 189, 248, 0.5) !important;
-}
-
-html[data-ui-style="glassmorphism"] .pos-numpad-action {
-  background-color: rgba(15, 23, 42, 0.85) !important;
-  border-color: rgba(255, 255, 255, 0.15) !important;
-  color: #cbd5e1 !important;
 }
 
 /* Zebra Striping sutil y Contraste de Filas en Tablas (Inventario) */
