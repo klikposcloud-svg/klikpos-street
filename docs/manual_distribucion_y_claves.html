@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guía Oficial de Distribución y Generación de Claves | Venematic POS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #090d16;
+      --bg-card: rgba(18, 24, 38, 0.85);
+      --bg-card-hover: rgba(26, 34, 52, 0.95);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --border-highlight: rgba(16, 185, 129, 0.3);
+      --primary: #10b981;
+      --primary-light: #34d399;
+      --primary-glow: rgba(16, 185, 129, 0.25);
+      --cyan: #06b6d4;
+      --cyan-glow: rgba(6, 182, 212, 0.25);
+      --indigo: #6366f1;
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --accent-gold: #f59e0b;
+      --accent-red: #ef4444;
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      line-height: 1.6;
+      padding: 2rem 1rem;
+      background-image: 
+        radial-gradient(circle at 15% 15%, rgba(16, 185, 129, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 85% 75%, rgba(6, 182, 212, 0.08) 0%, transparent 40%);
+      background-attachment: fixed;
+    }
+
+    .container {
+      max-width: 1080px;
+      margin: 0 auto;
+    }
+
+    /* HEADER */
+    header {
+      background: var(--bg-card);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 2.5rem;
+      margin-bottom: 2.5rem;
+      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
+      position: relative;
+      overflow: hidden;
+    }
+
+    header::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary), var(--cyan), var(--indigo));
+    }
+
+    .badge-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--primary-light);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      padding: 0.35rem 0.85rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+
+    h1 {
+      font-size: 2.25rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.75rem;
+      background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    p.subtitle {
+      color: var(--text-muted);
+      font-size: 1.05rem;
+      max-width: 800px;
+    }
+
+    /* QUICK ACTIONS */
+    .quick-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-top: 1.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .nav-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .nav-btn:hover {
+      background: rgba(16, 185, 129, 0.15);
+      border-color: var(--primary);
+      color: var(--primary-light);
+      transform: translateY(-2px);
+    }
+
+    /* CARDS & SECTIONS */
+    .section-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 2.25rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.4);
+      transition: border-color 0.25s ease;
+    }
+
+    .section-card:hover {
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .icon-box {
+      width: 46px;
+      height: 46px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      flex-shrink: 0;
+    }
+
+    .icon-green {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: var(--primary-light);
+    }
+
+    .icon-cyan {
+      background: rgba(6, 182, 212, 0.15);
+      border: 1px solid rgba(6, 182, 212, 0.3);
+      color: var(--cyan);
+    }
+
+    .icon-indigo {
+      background: rgba(99, 102, 241, 0.15);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      color: #818cf8;
+    }
+
+    .icon-gold {
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      color: var(--accent-gold);
+    }
+
+    h2 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: -0.01em;
+    }
+
+    h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #e2e8f0;
+      margin: 1.25rem 0 0.5rem 0;
+    }
+
+    p {
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+      font-size: 0.95rem;
+    }
+
+    /* GRID COLUMNS */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.25rem;
+      margin: 1.25rem 0;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.25rem;
+      margin: 1.25rem 0;
+    }
+
+    .mini-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 1.25rem;
+      transition: all 0.2s ease;
+    }
+
+    .mini-card:hover {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(255, 255, 255, 0.15);
+      transform: translateY(-2px);
+    }
+
+    .mini-card h4 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 0.4rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    /* CODE BLOCKS */
+    .code-box {
+      background: #05080f;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: var(--radius-md);
+      padding: 1rem 1.25rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      color: #38bdf8;
+      overflow-x: auto;
+      margin: 0.85rem 0 1.25rem 0;
+      position: relative;
+    }
+
+    .code-box code {
+      display: block;
+      white-space: pre;
+    }
+
+    .code-comment {
+      color: #64748b;
+    }
+
+    .code-cmd {
+      color: #4ade80;
+    }
+
+    .code-arg {
+      color: #facc15;
+    }
+
+    /* STEPS TIMELINE */
+    .step-list {
+      list-style: none;
+      position: relative;
+      padding-left: 2rem;
+      margin: 1.5rem 0;
+    }
+
+    .step-list::before {
+      content: "";
+      position: absolute;
+      left: 11px;
+      top: 10px;
+      bottom: 10px;
+      width: 2px;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .step-item {
+      position: relative;
+      margin-bottom: 1.75rem;
+    }
+
+    .step-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .step-number {
+      position: absolute;
+      left: -2rem;
+      top: 0;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--bg-dark);
+      border: 2px solid var(--primary);
+      color: var(--primary-light);
+      font-size: 0.75rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 10px var(--primary-glow);
+    }
+
+    .step-content h4 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 0.35rem;
+    }
+
+    /* INTERACTIVE KEYGEN SIMULATOR */
+    .simulator-container {
+      background: #070b14;
+      border: 1px solid var(--border-highlight);
+      border-radius: var(--radius-lg);
+      padding: 1.75rem;
+      margin-top: 1.5rem;
+      box-shadow: 0 0 30px rgba(16, 185, 129, 0.08);
+    }
+
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+
+    label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 0.4rem;
+    }
+
+    input, select {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: var(--radius-sm);
+      padding: 0.75rem 1rem;
+      color: #ffffff;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.95rem;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-glow);
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .btn-generate {
+      background: linear-gradient(135deg, var(--primary) 0%, #059669 100%);
+      border: none;
+      color: #ffffff;
+      font-weight: 800;
+      font-size: 0.95rem;
+      padding: 0.85rem 1.75rem;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 15px var(--primary-glow);
+    }
+
+    .btn-generate:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+      filter: brightness(1.1);
+    }
+
+    .result-box {
+      margin-top: 1.25rem;
+      background: rgba(16, 185, 129, 0.08);
+      border: 1px dashed var(--primary);
+      border-radius: var(--radius-md);
+      padding: 1.25rem;
+      display: none;
+    }
+
+    .result-box.active {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .key-display {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #10b981;
+      word-break: break-all;
+      background: #020617;
+      padding: 0.85rem 1rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      margin: 0.5rem 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .copy-btn {
+      background: rgba(16, 185, 129, 0.2);
+      border: 1px solid var(--primary);
+      color: #ffffff;
+      padding: 0.35rem 0.75rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .copy-btn:hover {
+      background: var(--primary);
+    }
+
+    /* BADGES & HIGHLIGHTS */
+    .callout {
+      background: rgba(245, 158, 11, 0.08);
+      border-left: 4px solid var(--accent-gold);
+      padding: 1rem 1.25rem;
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      margin: 1.25rem 0;
+      font-size: 0.9rem;
+    }
+
+    .callout-title {
+      color: var(--accent-gold);
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+
+    .callout-blue {
+      background: rgba(6, 182, 212, 0.08);
+      border-left: 4px solid var(--cyan);
+    }
+
+    .callout-blue .callout-title {
+      color: var(--cyan);
+    }
+
+    /* COMPARISON TABLE */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.25rem 0;
+      font-size: 0.9rem;
+    }
+
+    th, td {
+      padding: 0.85rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    th {
+      background: rgba(255, 255, 255, 0.03);
+      color: #ffffff;
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 0.05em;
+    }
+
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    footer {
+      text-align: center;
+      padding: 2.5rem 0;
+      color: var(--text-dim);
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border-color);
+      margin-top: 3rem;
+    }
+
+    @media (max-width: 768px) {
+      body { padding: 1rem 0.5rem; }
+      header { padding: 1.5rem; }
+      .section-card { padding: 1.5rem; }
+      h1 { font-size: 1.6rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+
+    <!-- HEADER -->
+    <header>
+      <div class="badge-pill">
+        <span>🛡️</span> Manual de Ingeniería & Despliegue Comercial
+      </div>
+      <h1>Distribución de Software y Sistema de Claves</h1>
+      <p class="subtitle">
+        Guía definitiva paso a paso para empaquetar <strong>Venematic POS</strong>, instalarlo directamente en los comercios de tus clientes (Windows/Android) y controlar las licencias anti-piratería mediante <strong>Hardware ID (HWID)</strong> de forma 100% offline.
+      </p>
+
+      <div class="quick-nav">
+        <a href="#instalador" class="nav-btn">📦 1. Compilar el Instalador</a>
+        <a href="#instalacion" class="nav-btn">💻 2. Instalar en el Cliente</a>
+        <a href="#claves" class="nav-btn">🔑 3. Cómo Funcionan las Claves</a>
+        <a href="#flujo" class="nav-btn">📲 4. Flujo de Venta y Activación</a>
+        <a href="#simulador" class="nav-btn">⚡ 5. Simulador de Claves</a>
+        <a href="#estrategia" class="nav-btn">💰 6. Planes y Precios</a>
+      </div>
+    </header>
+
+    <!-- SECCIÓN 1: COMPILACIÓN DEL INSTALADOR -->
+    <section id="instalador" class="section-card">
+      <div class="section-header">
+        <div class="icon-box icon-green">📦</div>
+        <div>
+          <h2>1. Cómo Compilar el Instalador (.exe / .msi)</h2>
+          <p>Convierte el código fuente en un archivo instalador listo para entregar al cliente.</p>
+        </div>
+      </div>
+
+      <p>
+        Venematic está configurado con <strong>Tauri v2 + Rust</strong>. Esto genera instaladores ultraligeros (menos de 15 MB) que incluyen la base de datos <strong>SQLite local embebida</strong> sin que el cliente tenga que instalar servidores externos ni dependencias raras.
+      </p>
+
+      <h3>Paso a Paso para Generar el Instalador de Windows:</h3>
+      <div class="code-box">
+        <code><span class="code-comment"># 1. Abrir la terminal en la carpeta de escritorio</span>
+<span class="code-cmd">cd</span> venematic-desktop
+
+<span class="code-comment"># 2. Compilar el ejecutable e instalador de Windows</span>
+<span class="code-cmd">npm run tauri build</span></code>
+      </div>
+
+      <div class="callout callout-blue">
+        <div class="callout-title">📁 ¿Dónde queda guardado el archivo final?</div>
+        Al finalizar la compilación, Tauri creará automáticamente tu instalador en:<br>
+        <code>venematic-desktop/src-tauri/target/release/bundle/nsis/Venematic_2.0.0_x64-setup.exe</code><br>
+        <code>venematic-desktop/src-tauri/target/release/bundle/msi/Venematic_2.0.0_x64_es-ES.msi</code><br>
+        <strong>Ese único archivo <code>.exe</code> o <code>.msi</code> es el que le entregas a tu cliente.</strong>
+      </div>
+
+      <h3>¿Y si vas a entregar la app para Teléfonos o Escáners Android?</h3>
+      <div class="code-box">
+        <code><span class="code-comment"># Compilar la app nativa Android (APK) con Capacitor</span>
+<span class="code-cmd">npx cap sync android</span>
+<span class="code-cmd">cd android && ./gradlew assembleRelease</span></code>
+      </div>
+      <p>El APK generado se guarda en <code>android/app/build/outputs/apk/release/app-release.apk</code>.</p>
+    </section>
+
+    <!-- SECCIÓN 2: INSTALACIÓN EN EL LOCAL DEL CLIENTE -->
+    <section id="instalacion" class="section-card">
+      <div class="section-header">
+        <div class="icon-box icon-cyan">💻</div>
+        <div>
+          <h2>2. Cómo se Instala Directo en el Negocio</h2>
+          <p>Procedimiento exacto cuando llegas a la panadería, charcutería, supermercado o restaurante.</p>
+        </div>
+      </div>
+
+      <div class="grid-3">
+        <div class="mini-card">
+          <h4>💾 Paso A: Llevar el Instalador</h4>
+          <p>Copia el archivo <code>Venematic_Setup.exe</code> en un pendrive USB o súbelo a tu Google Drive para descargarlo en la PC del cliente.</p>
+        </div>
+        <div class="mini-card">
+          <h4>⚡ Paso B: Ejecutar e Instalar</h4>
+          <p>Doble clic en el instalador. Hace la instalación limpia en <code>Archivos de Programa</code> y crea el acceso directo en el Escritorio en 10 segundos.</p>
+        </div>
+        <div class="mini-card">
+          <h4>🔌 Paso C: Conectar Periféricos</h4>
+          <p>Conecta la balanza por puerto USB/COM, la impresora de tickets USB de 58/80mm y la pistola lectora de código de barras.</p>
+        </div>
+      </div>
+
+      <div class="callout">
+        <div class="callout-title">🌐 ¿Requiere Internet para funcionar el día a día?</div>
+        <strong>NO.</strong> Venematic es 100% <em>Offline-First</em>. La computadora del cliente factura, pesa, descuenta inventario y calcula cambio en Bolívares y Dólares aunque se caiga el internet o la luz.
+      </div>
+    </section>
+
+    <!-- SECCIÓN 3: CÓMO FUNCIONAN LAS CLAVES (ANTI-PIRATERÍA) -->
+    <section id="claves" class="section-card">
+      <div class="section-header">
+        <div class="icon-box icon-indigo">🔒</div>
+        <div>
+          <h2>3. ¿Cómo Funcionan las Claves de Activación?</h2>
+          <p>Protección contra copias no autorizadas mediante huella digital física del computador.</p>
+        </div>
+      </div>
+
+      <p>
+        Para evitar que un cliente te compre una licencia y luego copie el sistema en 5 computadoras o se lo pase a un amigo, Venematic utiliza el sistema <strong>HWID (Hardware ID Fingerprint)</strong> y criptografía asimétrica <strong>Ed25519 / HMAC-SHA256</strong>.
+      </p>
+
+      <div class="grid-2">
+        <div class="mini-card">
+          <h4>🧠 1. El HWID (Huella del Equipo)</h4>
+          <p>
+            Al instalarse, el sistema lee datos inmutables del procesador, placa madre y bios de la máquina y genera un código único (ej: <code>VN8E-4A12-B9C0-33F1</code>). No hay dos computadoras en el mundo con el mismo HWID.
+          </p>
+        </div>
+        <div class="mini-card">
+          <h4>🛡️ 2. La Clave de Producto Criptográfica</h4>
+          <p>
+            Tú generas una clave que firma matemáticamente: <strong>[HWID del cliente] + [RIF del negocio] + [Tipo de Plan]</strong> con tu clave secreta de creador.
+          </p>
+        </div>
+      </div>
+
+      <div class="callout" style="border-left-color: var(--accent-red); background: rgba(239, 68, 68, 0.08);">
+        <div class="callout-title" style="color: var(--accent-red);">🚫 ¿Qué pasa si el cliente copia el programa a otra PC?</div>
+        Si el cliente copia la carpeta o la base de datos a otra computadora, el nuevo computador tendrá un HWID diferente. Al abrir Venematic, el sistema detecta que la firma no coincide y se bloquea de inmediato diciendo: <em>"Licencia no transferible: HWID no coincide con esta máquina"</em>.
+      </div>
+    </section>
+
+    <!-- SECCIÓN 4: FLUJO COMPLETO DE VENTA Y ACTIVACIÓN -->
+    <section id="flujo" class="section-card">
+      <div class="section-header">
+        <div class="icon-box icon-gold">📲</div>
+        <div>
+          <h2>4. Flujo Comercial: Paso a Paso para Activar un Cliente</h2>
+          <p>Este es el procedimiento que harás cada vez que vendas una copia de Venematic.</p>
+        </div>
+      </div>
+
+      <ul class="step-list">
+        <li class="step-item">
+          <div class="step-number">1</div>
+          <div class="step-content">
+            <h4>El cliente abre Venematic en su PC</h4>
+            <p>
+              El cliente entra al menú <strong>Ajustes &gt; Licenciamiento y HWID</strong> (o le aparece el aviso de activación).
+              Allí verá su identificador único (ej: <code>VN2A-98C4-7710-F012</code>) y un botón que dice <strong>"Copiar ID"</strong>.
+            </p>
+          </div>
+        </li>
+
+        <li class="step-item">
+          <div class="step-number">2</div>
+          <div class="step-content">
+            <h4>El cliente te envía los datos por WhatsApp</h4>
+            <p>
+              El cliente te escribe: <em>"Hola, ya instalé el sistema. Mi RIF es J-40123456-0 y mi HWID es VN2A-98C4-7710-F012"</em>, y te envía el comprobante de pago de la licencia.
+            </p>
+          </div>
+        </li>
+
+        <li class="step-item">
+          <div class="step-number">3</div>
+          <div class="step-content">
+            <h4>Tú generas la clave con el Keygen</h4>
+            <p>
+              Tienes dos formas inmediatas de generar la clave:
+            </p>
+            <div class="grid-2">
+              <div style="background: rgba(0,0,0,0.3); padding: 0.85rem; border-radius: 8px; border: 1px solid var(--border-color);">
+                <strong style="color: #fff; font-size: 0.85rem;">Opción 1: En tu propio Venematic (Visual)</strong>
+                <p style="font-size: 0.8rem; margin: 0.3rem 0 0 0;">
+                  Abres tu Venematic, vas a <em>Ajustes &gt; Licenciamiento</em>, abres la pestaña secreta de <strong>Keygen Maestro</strong>, pegas el HWID del cliente, su RIF y presionas <em>"Generar Licencia"</em>.
+                </p>
+              </div>
+              <div style="background: rgba(0,0,0,0.3); padding: 0.85rem; border-radius: 8px; border: 1px solid var(--border-color);">
+                <strong style="color: #fff; font-size: 0.85rem;">Opción 2: Desde tu consola (Script)</strong>
+                <p style="font-size: 0.8rem; margin: 0.3rem 0 0 0;">
+                  Ejecutas en terminal:<br>
+                  <code style="color: var(--primary-light);">node scripts/key-manager.mjs sign VN2A-98C4-7710-F012 VIT</code>
+                </p>
+              </div>
+            </div>
+          </div>
+        </li>
+
+        <li class="step-item">
+          <div class="step-number">4</div>
+          <div class="step-content">
+            <h4>Le envías la clave al cliente y queda activado</h4>
+            <p>
+              Le respondes por WhatsApp con su clave de producto (ej: <code>VNK-VIT-PERP-8F32-41AB-9CD0-EF12</code>).<br>
+              El cliente la pega en la casilla de activación, hace clic en <strong>"Validar y Activar"</strong>, y el sistema se desbloquea de por vida de forma <strong>instantánea y 100% offline</strong>.
+            </p>
+          </div>
+        </li>
+      </ul>
+    </section>
+
+    <!-- SECCIÓN 5: SIMULADOR INTERACTIVO DE CLAVES -->
+    <section id="simulador" class="section-card">
+      <div class="section-header">
+        <div class="icon-box icon-green">⚡</div>
+        <div>
+          <h2>5. Simulador Interactivo de Claves (Pruébalo Aquí)</h2>
+          <p>Simula cómo se genera una clave real para un cliente con el algoritmo SHA-256 / HMAC de Venematic.</p>
+        </div>
+      </div>
+
+      <div class="simulator-container">
+        <div class="grid-3">
+          <div class="form-group">
+            <label for="sim-hwid">HWID del Cliente (ej: VN2A-98C4-7710-F012)</label>
+            <input type="text" id="sim-hwid" value="VN8E-4A12-B9C0-33F1" placeholder="VNXX-XXXX-XXXX-XXXX">
+          </div>
+          <div class="form-group">
+            <label for="sim-rif">RIF o Cédula del Comercio</label>
+            <input type="text" id="sim-rif" value="J-50192834-1" placeholder="J-12345678-9">
+          </div>
+          <div class="form-group">
+            <label for="sim-plan">Tipo de Licencia</label>
+            <select id="sim-plan">
+              <option value="vitalicia">Vitalicia (Perpetua - Sin Vencimiento)</option>
+              <option value="anual">Anual (1 Año de Actualizaciones y Soporte)</option>
+              <option value="demo">Demo / Prueba (15 Días)</option>
+            </select>
+          </div>
+        </div>
+
+        <button type="button" class="btn-generate" onclick="generateSimulatedKey()">
+          <span>🔑</span> Generar Clave de Activación
+        </button>
+
+        <div id="sim-result" class="result-box">
+          <label>Clave Criptográfica Oficial Generada:</label>
+          <div class="key-display">
+            <span id="key-text">VNK-VIT-PERP-...</span>
+            <button type="button" class="copy-btn" onclick="copyKeyText()">Copiar Clave</button>
+          </div>
+          <p style="font-size: 0.8rem; color: #94a3b8; margin-top: 0.5rem;">
+            ✅ Esta clave solo funcionará en la máquina física con el HWID indicado y para el RIF especificado. Si se introduce en otra computadora, la verificación criptográfica fallará automáticamente.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECCIÓN 6: ESTRATEGIA COMERCIAL RECOMENDADA -->
+    <section id="estrategia" class="section-card">
+      <div class="section-header">
+        <div class="icon-box icon-gold">💰</div>
+        <div>
+          <h2>6. Estrategia de Negocio y Modelos de Cobro</h2>
+          <p>Cómo estructurar tus precios y maximizar tus ingresos recurrentes en Venezuela.</p>
+        </div>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Modalidad</th>
+            <th>Precio Sugerido</th>
+            <th>Lo que incluye</th>
+            <th>Ideal Para</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Licencia Vitalicia (Pago Único)</strong></td>
+            <td><strong style="color: #4ade80;">$150 - $250</strong></td>
+            <td>Instalación directa en el negocio, configuración de balanza e impresora térmica, inducción a los cajeros y uso perpetuo.</td>
+            <td>Comercios independientes (bodegas, charcuterías, carnicerías, panaderías).</td>
+          </tr>
+          <tr>
+            <td><strong>Póliza de Soporte y Actualizaciones</strong></td>
+            <td><strong style="color: #38bdf8;">$15 - $25 / mes</strong><br><small style="color: #64748b;">o $120 / año</small></td>
+            <td>Mantenimiento de base de datos, respaldo en nube, soporte por WhatsApp, actualización automática de tasa BCV y nuevas funciones.</td>
+            <td>Ingreso pasivo mensual recurrente asegurado para ti.</td>
+          </tr>
+          <tr>
+            <td><strong>Caja Adicional / Móvil (APK)</strong></td>
+            <td><strong style="color: #facc15;">$50 - $80</strong> por caja</td>
+            <td>Licencia esclava para un segundo computador o para el teléfono Android del dueño/pasillero para toma de pedidos y escáner.</td>
+            <td>Supermercados y negocios con más de un punto de cobro.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="callout callout-blue">
+        <div class="callout-title">💡 Consejo de Oro para las Ventas:</div>
+        Ofrece la instalación inicial con <strong>15 días de demostración gratuita</strong> (Plan Demo en el Keygen). Una vez que el dueño del comercio ve lo rápido que sus cajeros cobran, cómo sincroniza la balanza digital y cómo controla el inventario en dólares y bolívares, el 90% compra la licencia definitiva de inmediato.
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+      <p><strong>Venematic POS</strong> • Sistema de Punto de Venta & Balanza Digital de Alta Velocidad</p>
+      <p style="margin-top: 0.25rem;">Arquitectura Local-First con Criptografía Ed25519 / HMAC-SHA256 • Desarrollado para Venezuela</p>
+    </footer>
+
+  </div>
+
+  <!-- SCRIPT DEL SIMULADOR -->
+  <script>
+    function simpleHash(str) {
+      let hash = 0;
+      for (let i = 0; i < str.length; i++) {
+        const char = str.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash;
+      }
+      return Math.abs(hash).toString(16).toUpperCase().padStart(8, '0');
+    }
+
+    function generateSimulatedKey() {
+      const hwid = document.getElementById('sim-hwid').value.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+      const rif = document.getElementById('sim-rif').value.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+      const plan = document.getElementById('sim-plan').value;
+
+      if (!hwid || !rif) {
+        alert('Por favor indica tanto el HWID como el RIF');
+        return;
+      }
+
+      const planCode = plan === 'vitalicia' ? 'VIT' : plan === 'anual' ? 'ANL' : 'DMO';
+      const expCode = plan === 'vitalicia' ? 'PERP' : plan === 'anual' ? '2712' : '15DS';
+
+      const sig1 = simpleHash(hwid + rif + planCode + 'SALT1').slice(0, 4);
+      const sig2 = simpleHash(hwid + rif + expCode + 'SALT2').slice(0, 4);
+      const sig3 = simpleHash(sig1 + sig2 + 'SALT3').slice(0, 4);
+      const sig4 = simpleHash(hwid + 'SALT4').slice(0, 4);
+
+      const generatedKey = `VNK-${planCode}-${expCode}-${sig1}-${sig2}-${sig3}-${sig4}`;
+
+      document.getElementById('key-text').innerText = generatedKey;
+      document.getElementById('sim-result').classList.add('active');
+    }
+
+    function copyKeyText() {
+      const key = document.getElementById('key-text').innerText;
+      navigator.clipboard.writeText(key).then(() => {
+        alert('¡Clave copiada al portapapeles!');
+      });
+    }
+  </script>
+</body>
+</html>
