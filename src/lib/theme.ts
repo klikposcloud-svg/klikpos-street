@@ -158,7 +158,7 @@ export const THEME_PALETTES: ThemePalette[] = [
 
 export type UIStyleMode = 'industrial' | 'glassmorphism';
 
-export type IndustrialBgPreset = 'white' | 'teal' | 'blue' | 'gray' | 'custom';
+export type IndustrialBgPreset = 'white' | 'cream' | 'teal' | 'blue' | 'gray' | 'custom';
 
 export interface IndustrialBgOption {
   id: IndustrialBgPreset;
@@ -173,10 +173,18 @@ export const INDUSTRIAL_BG_PRESETS: IndustrialBgOption[] = [
   {
     id: 'white',
     name: 'Blanco Puro Profesional',
-    tagline: 'Fondo blanco 100% limpio, máxima nitidez y cero fatiga (#ffffff)',
+    tagline: 'Fondo blanco 100% nítido, tarjetas elevadas y máxima claridad visual (#ffffff)',
     bgColor: '#ffffff',
     previewColor: '#ffffff',
     borderPreview: '#cbd5e1',
+  },
+  {
+    id: 'cream',
+    name: 'Crema Suave / Soft Warm',
+    tagline: 'Tono marfil cálido elegante que reduce el cansancio visual (#f3eee7)',
+    bgColor: '#f3eee7',
+    previewColor: '#f3eee7',
+    borderPreview: '#ded8cd',
   },
   {
     id: 'teal',
@@ -205,7 +213,7 @@ export const INDUSTRIAL_BG_PRESETS: IndustrialBgOption[] = [
   {
     id: 'custom',
     name: 'Color Picker Personalizado',
-    tagline: 'Selecciona libremente cualquier tono de color de fondo con el selector',
+    tagline: 'Selecciona libremente cualquier tono con contraste automático calibrado',
     bgColor: '#ffffff',
     previewColor: '#6366f1',
     borderPreview: '#818cf8',
@@ -226,20 +234,67 @@ export const DEFAULT_BRANDING: BrandingConfig = {
   customBgColor: '#f8fafc',
 };
 
-export function getLuminance(hex: string): number {
+/**
+ * Calcula la luminancia relativa conforme al estándar WCAG 2.1 (sRGB)
+ */
+export function getRelativeLuminance(hex: string): number {
   try {
-    let clean = hex.replace('#', '');
+    let clean = hex.replace('#', '').trim();
     if (clean.length === 3) {
       clean = clean.split('').map((c) => c + c).join('');
     }
     const num = parseInt(clean, 16);
-    const r = (num >> 16) & 255;
-    const g = (num >> 8) & 255;
-    const b = num & 255;
-    return (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+    if (isNaN(num)) return 1;
+    const r8 = (num >> 16) & 255;
+    const g8 = (num >> 8) & 255;
+    const b8 = num & 255;
+
+    const toLinear = (c: number) => {
+      const v = c / 255;
+      return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+    };
+
+    const r = toLinear(r8);
+    const g = toLinear(g8);
+    const b = toLinear(b8);
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
   } catch {
     return 1;
   }
+}
+
+export function getLuminance(hex: string): number {
+  return getRelativeLuminance(hex);
+}
+
+/**
+ * Calcula el ratio de contraste WCAG entre dos colores hex (ej: 4.5:1, 7:1)
+ */
+export function getContrastRatio(hex1: string, hex2: string): number {
+  const lum1 = getRelativeLuminance(hex1);
+  const lum2 = getRelativeLuminance(hex2);
+  const brightest = Math.max(lum1, lum2);
+  const darkest = Math.min(lum1, lum2);
+  return (brightest + 0.05) / (darkest + 0.05);
+}
+
+/**
+ * Determina si el texto debe ser blanco (#ffffff) o ultra-oscuro (#090d16)
+ * para garantizar el ratio de contraste máximo según WCAG AAA.
+ */
+export function getHighContrastTextColor(bgHex: string): string {
+  const ratioWithWhite = getContrastRatio(bgHex, '#ffffff');
+  const ratioWithDark = getContrastRatio(bgHex, '#090d16');
+  return ratioWithWhite >= ratioWithDark ? '#ffffff' : '#090d16';
+}
+
+/**
+ * Determina el color atenuado (subtítulos/bordes secundarios) con contraste verificado
+ */
+export function getHighContrastMutedColor(bgHex: string): string {
+  const ratioWithWhite = getContrastRatio(bgHex, '#ffffff');
+  const ratioWithDark = getContrastRatio(bgHex, '#090d16');
+  return ratioWithWhite >= ratioWithDark ? '#cbd5e1' : '#475569';
 }
 
 export interface IndustrialThemeVariables {
@@ -250,6 +305,7 @@ export interface IndustrialThemeVariables {
   borderColor: string;
   primaryBg: string;
   primaryHover: string;
+  primaryText: string;
   secondaryBg: string;
   secondaryBorder: string;
   secondaryText: string;
@@ -263,93 +319,150 @@ export function computeIndustrialThemeVariables(
 ): IndustrialThemeVariables {
   const brandPrimary = activePalettePrimary || '#0369a1';
   const brandHover = activePaletteHover || '#075985';
+  const primaryText = getHighContrastTextColor(brandPrimary);
 
-  if (preset === 'teal') {
+  // 1. Blanco Puro Profesional (#ffffff)
+  if (preset === 'white') {
+    const secBg = '#f1f5f9'; // Slate 100 suave para botones secundarios e inputs
     return {
-      bgColor: '#f0fdfa', // Mint soft
-      cardColor: '#ffffff',
-      textColor: '#042f2e', // Deep teal 950
-      textMuted: '#115e59', // Teal 800
-      borderColor: '#99f6e4', // Teal 200
-      primaryBg: brandPrimary,
-      primaryHover: brandHover,
-      secondaryBg: '#ffffff',
-      secondaryBorder: '#5eead4',
-      secondaryText: '#0f766e',
-    };
-  }
-  if (preset === 'blue') {
-    return {
-      bgColor: '#f0f9ff', // Ice blue soft
-      cardColor: '#ffffff',
-      textColor: '#082f49', // Sky 950
-      textMuted: '#0369a1', // Sky 700
-      borderColor: '#bae6fd', // Sky 200
-      primaryBg: brandPrimary,
-      primaryHover: brandHover,
-      secondaryBg: '#ffffff',
-      secondaryBorder: '#7dd3fc',
-      secondaryText: '#0284c7',
-    };
-  }
-  if (preset === 'gray') {
-    return {
-      bgColor: '#f1f5f9', // Slate soft
+      bgColor: '#ffffff',
       cardColor: '#ffffff',
       textColor: '#0f172a', // Slate 900
       textMuted: '#334155', // Slate 700
-      borderColor: '#cbd5e1', // Slate 300
+      borderColor: '#cbd5e1', // Slate 300 nítido
       primaryBg: brandPrimary,
       primaryHover: brandHover,
-      secondaryBg: '#ffffff',
+      primaryText,
+      secondaryBg: secBg,
       secondaryBorder: '#cbd5e1',
-      secondaryText: '#1e293b',
+      secondaryText: getHighContrastTextColor(secBg),
     };
   }
+
+  // 2. Crema Cálido Soft UI (#f3eee7)
+  if (preset === 'cream') {
+    const secBg = '#ede8df';
+    return {
+      bgColor: '#f3eee7',
+      cardColor: '#ffffff',
+      textColor: '#0f172a',
+      textMuted: '#475569',
+      borderColor: '#ded8cd',
+      primaryBg: brandPrimary,
+      primaryHover: brandHover,
+      primaryText,
+      secondaryBg: secBg,
+      secondaryBorder: '#ded8cd',
+      secondaryText: getHighContrastTextColor(secBg),
+    };
+  }
+
+  // 3. Turquesa Suave (Menta) (#f0fdfa)
+  if (preset === 'teal') {
+    const secBg = '#e6fffa';
+    return {
+      bgColor: '#f0fdfa',
+      cardColor: '#ffffff',
+      textColor: '#042f2e',
+      textMuted: '#115e59',
+      borderColor: '#99f6e4',
+      primaryBg: brandPrimary,
+      primaryHover: brandHover,
+      primaryText,
+      secondaryBg: secBg,
+      secondaryBorder: '#5eead4',
+      secondaryText: getHighContrastTextColor(secBg),
+    };
+  }
+
+  // 4. Azul Hielo Ejecutivo (#f0f9ff)
+  if (preset === 'blue') {
+    const secBg = '#e0f2fe';
+    return {
+      bgColor: '#f0f9ff',
+      cardColor: '#ffffff',
+      textColor: '#082f49',
+      textMuted: '#0369a1',
+      borderColor: '#bae6fd',
+      primaryBg: brandPrimary,
+      primaryHover: brandHover,
+      primaryText,
+      secondaryBg: secBg,
+      secondaryBorder: '#7dd3fc',
+      secondaryText: getHighContrastTextColor(secBg),
+    };
+  }
+
+  // 5. Gris Titán Neutro (#f1f5f9)
+  if (preset === 'gray') {
+    const secBg = '#e2e8f0';
+    return {
+      bgColor: '#f1f5f9',
+      cardColor: '#ffffff',
+      textColor: '#0f172a',
+      textMuted: '#334155',
+      borderColor: '#cbd5e1',
+      primaryBg: brandPrimary,
+      primaryHover: brandHover,
+      primaryText,
+      secondaryBg: secBg,
+      secondaryBorder: '#94a3b8',
+      secondaryText: getHighContrastTextColor(secBg),
+    };
+  }
+
+  // 6. Color Picker Personalizado (Calibración Dinámica de Alto Contraste)
   if (preset === 'custom' && customHex) {
-    const isLight = getLuminance(customHex) > 0.5;
+    const lum = getRelativeLuminance(customHex);
+    const isLight = lum > 0.45;
     if (isLight) {
+      const secBg = '#f1f5f9';
       return {
         bgColor: customHex,
         cardColor: '#ffffff',
-        textColor: '#0f172a',
+        textColor: '#090d16',
         textMuted: '#334155',
         borderColor: '#cbd5e1',
         primaryBg: brandPrimary,
         primaryHover: brandHover,
-        secondaryBg: '#ffffff',
+        primaryText,
+        secondaryBg: secBg,
         secondaryBorder: '#cbd5e1',
-        secondaryText: '#0f172a',
+        secondaryText: getHighContrastTextColor(secBg),
       };
     } else {
-      // Dark background custom
+      // Fondo Oscuro Personalizado
+      const secBg = '#243447';
       return {
         bgColor: customHex,
-        cardColor: '#1e293b',
+        cardColor: '#1a2636',
         textColor: '#f8fafc',
         textMuted: '#cbd5e1',
-        borderColor: '#334155',
+        borderColor: '#334a66',
         primaryBg: brandPrimary,
         primaryHover: brandHover,
-        secondaryBg: '#0f172a',
+        primaryText,
+        secondaryBg: secBg,
         secondaryBorder: '#475569',
-        secondaryText: '#f8fafc',
+        secondaryText: getHighContrastTextColor(secBg),
       };
     }
   }
 
-  // Default 'white' (Modo Profesional Blanco / Enhanced Contrast Soft UI)
+  // Fallback seguro: Blanco Puro Profesional
+  const fallbackSecBg = '#f1f5f9';
   return {
-    bgColor: '#f3eee7',
+    bgColor: '#ffffff',
     cardColor: '#ffffff',
     textColor: '#0f172a',
-    textMuted: '#475569',
-    borderColor: '#ded8cd',
+    textMuted: '#334155',
+    borderColor: '#cbd5e1',
     primaryBg: brandPrimary,
     primaryHover: brandHover,
-    secondaryBg: '#ede8df',
-    secondaryBorder: '#ded8cd',
-    secondaryText: '#334155',
+    primaryText,
+    secondaryBg: fallbackSecBg,
+    secondaryBorder: '#cbd5e1',
+    secondaryText: getHighContrastTextColor(fallbackSecBg),
   };
 }
 
@@ -380,6 +493,7 @@ export function applyBrandingToDOM(config: BrandingConfig) {
   root.style.setProperty('--industrial-border', themeVars.borderColor);
   root.style.setProperty('--btn-primary-bg', themeVars.primaryBg);
   root.style.setProperty('--btn-primary-hover', themeVars.primaryHover);
+  root.style.setProperty('--btn-primary-text', themeVars.primaryText);
   root.style.setProperty('--btn-secondary-bg', themeVars.secondaryBg);
   root.style.setProperty('--btn-secondary-border', themeVars.secondaryBorder);
   root.style.setProperty('--btn-secondary-text', themeVars.secondaryText);
@@ -387,6 +501,7 @@ export function applyBrandingToDOM(config: BrandingConfig) {
   // Set CSS Variables de Marca
   root.style.setProperty('--brand-primary', palette.primary);
   root.style.setProperty('--brand-hover', palette.primaryHover);
+  root.style.setProperty('--brand-contrast-text', themeVars.primaryText);
   root.style.setProperty('--brand-light', palette.primaryLight);
   root.style.setProperty('--brand-border', palette.primaryBorder);
   root.style.setProperty('--brand-accent', palette.accent);

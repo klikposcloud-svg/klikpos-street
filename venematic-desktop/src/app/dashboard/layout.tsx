@@ -126,9 +126,9 @@ export default function DesktopDashboardLayout({
     try {
       const s = (localStorage.getItem('venematic_ui_style') as 'industrial' | 'glassmorphism') || 'industrial';
       setCurrentUIStyle(s);
-      const palette = localStorage.getItem('venematic_branding_palette') || 'purple';
+      const palette = localStorage.getItem('venematic_branding_palette') || 'sky';
       const industrialBg = (localStorage.getItem('venematic_industrial_bg') as any) || 'white';
-      const customBg = localStorage.getItem('venematic_custom_bg_color') || '#f3eee7';
+      const customBg = localStorage.getItem('venematic_custom_bg_color') || '#ffffff';
       applyBrandingToDOM({
         paletteId: palette,
         uiStyle: s,
@@ -149,9 +149,9 @@ export default function DesktopDashboardLayout({
   const handleToggleUIStyle = () => {
     const nextStyle = currentUIStyle === 'glassmorphism' ? 'industrial' : 'glassmorphism';
     setCurrentUIStyle(nextStyle);
-    const palette = localStorage.getItem('venematic_branding_palette') || 'purple';
+    const palette = localStorage.getItem('venematic_branding_palette') || 'sky';
     const industrialBg = (localStorage.getItem('venematic_industrial_bg') as any) || 'white';
-    const customBg = localStorage.getItem('venematic_custom_bg_color') || '#f3eee7';
+    const customBg = localStorage.getItem('venematic_custom_bg_color') || '#ffffff';
     applyBrandingToDOM({
       paletteId: palette,
       uiStyle: nextStyle,

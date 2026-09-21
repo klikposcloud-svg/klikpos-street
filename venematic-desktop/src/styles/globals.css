@@ -112,16 +112,18 @@ body {
   --brand-glass-border: rgba(56, 189, 248, 0.30);
 
   /* Modo Industrial Soft UI Adaptativo */
-  --industrial-bg: #f3eee7;
+  --industrial-bg: #ffffff;
   --industrial-card: #ffffff;
   --industrial-text: #0f172a;
-  --industrial-text-muted: #475569;
-  --industrial-border: #ded8cd;
-  --btn-primary-bg: #6d28d9;
-  --btn-primary-hover: #5b21b6;
-  --btn-secondary-bg: #ede8df;
-  --btn-secondary-border: #ded8cd;
-  --btn-secondary-text: #334155;
+  --industrial-text-muted: #334155;
+  --industrial-border: #cbd5e1;
+  --btn-primary-bg: #0369a1;
+  --btn-primary-hover: #075985;
+  --btn-primary-text: #ffffff;
+  --brand-contrast-text: #ffffff;
+  --btn-secondary-bg: #f1f5f9;
+  --btn-secondary-border: #cbd5e1;
+  --btn-secondary-text: #0f172a;
 }
 
 /* ========================================================================= */
@@ -133,7 +135,7 @@ button.bg-sky-800,
 .btn-brand,
 .pos-btn-primary {
   background-color: var(--brand-primary) !important;
-  color: #ffffff !important;
+  color: var(--btn-primary-text, var(--brand-contrast-text, #ffffff)) !important;
   border-color: var(--brand-hover) !important;
   box-shadow: 0 2px 8px var(--brand-glow) !important;
   transition: all 0.15s ease-in-out;
@@ -170,7 +172,7 @@ button.bg-sky-800:hover,
 
 .brand-badge {
   background-color: var(--brand-primary) !important;
-  color: #ffffff !important;
+  color: var(--btn-primary-text, var(--brand-contrast-text, #ffffff)) !important;
   border-color: var(--brand-hover) !important;
 }
 
@@ -209,7 +211,7 @@ html[data-ui-style="industrial"],
 html[data-ui-style="professional"],
 html:not([data-ui-style="glassmorphism"]) {
   color-scheme: light;
-  background-color: var(--industrial-bg, #f3eee7) !important;
+  background-color: var(--industrial-bg, #ffffff) !important;
   color: var(--industrial-text, #0f172a) !important;
 }
 
@@ -219,7 +221,7 @@ html:not([data-ui-style="glassmorphism"]) body,
 html[data-ui-style="industrial"] main,
 html[data-ui-style="professional"] main,
 html:not([data-ui-style="glassmorphism"]) main {
-  background-color: var(--industrial-bg, #f3eee7) !important;
+  background-color: var(--industrial-bg, #ffffff) !important;
   color: var(--industrial-text, #0f172a) !important;
 }
 
@@ -230,8 +232,8 @@ html:not([data-ui-style="glassmorphism"]) header,
 html[data-ui-style="industrial"] aside,
 html[data-ui-style="professional"] aside,
 html:not([data-ui-style="glassmorphism"]) aside {
-  background-color: var(--industrial-bg, #f3eee7) !important;
-  border-color: var(--industrial-border, #ded8cd) !important;
+  background-color: var(--industrial-bg, #ffffff) !important;
+  border-color: var(--industrial-border, #cbd5e1) !important;
   color: var(--industrial-text, #0f172a) !important;
 }
 
@@ -242,21 +244,21 @@ html:not([data-ui-style="glassmorphism"]) aside a:not(.nav-item-active) {
 }
 html[data-ui-style="industrial"] aside a:not(.nav-item-active):hover,
 html:not([data-ui-style="glassmorphism"]) aside a:not(.nav-item-active):hover {
-  background-color: var(--btn-secondary-bg, #ede8df) !important;
+  background-color: var(--btn-secondary-bg, #f1f5f9) !important;
   color: var(--industrial-text, #0f172a) !important;
 }
 html[data-ui-style="industrial"] aside a:not(.nav-item-active) span,
 html:not([data-ui-style="glassmorphism"]) aside a:not(.nav-item-active) span {
-  color: var(--industrial-text-muted, #475569) !important;
+  color: var(--industrial-text-muted, #334155) !important;
 }
 
-/* Ítem Activo en Sidebar: Pill Blanca con Color Primario de la Paleta */
+/* Ítem Activo en Sidebar: Pill con Color Primario de la Paleta */
 html[data-ui-style="industrial"] aside .nav-item-active,
 html[data-ui-style="professional"] aside .nav-item-active,
 html:not([data-ui-style="glassmorphism"]) aside .nav-item-active {
   background-color: var(--industrial-card, #ffffff) !important;
-  color: var(--brand-primary, #6d28d9) !important;
-  border-color: var(--industrial-border, #ded8cd) !important;
+  color: var(--brand-primary, #0369a1) !important;
+  border-color: var(--industrial-border, #cbd5e1) !important;
   border-radius: 9999px !important;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
 }
@@ -266,30 +268,30 @@ html:not([data-ui-style="glassmorphism"]) aside .nav-item-active span,
 html[data-ui-style="industrial"] aside .nav-item-active svg,
 html[data-ui-style="professional"] aside .nav-item-active svg,
 html:not([data-ui-style="glassmorphism"]) aside .nav-item-active svg {
-  color: var(--brand-primary, #6d28d9) !important;
+  color: var(--brand-primary, #0369a1) !important;
 }
 html[data-ui-style="industrial"] aside .nav-item-active kbd,
 html[data-ui-style="professional"] aside .nav-item-active kbd,
 html:not([data-ui-style="glassmorphism"]) aside .nav-item-active kbd {
-  background-color: var(--btn-secondary-bg, #ede8df) !important;
-  color: var(--industrial-text-muted, #475569) !important;
-  border-color: var(--industrial-border, #ded8cd) !important;
+  background-color: var(--btn-secondary-bg, #f1f5f9) !important;
+  color: var(--industrial-text-muted, #334155) !important;
+  border-color: var(--industrial-border, #cbd5e1) !important;
 }
 
 /* Header Brand Badge */
 html[data-ui-style="industrial"] header .brand-badge,
 html[data-ui-style="industrial"] .brand-badge,
 html:not([data-ui-style="glassmorphism"]) header .brand-badge {
-  background-color: var(--brand-primary, #6d28d9) !important;
-  border-color: var(--brand-hover, #5b21b6) !important;
-  color: #ffffff !important;
+  background-color: var(--brand-primary, #0369a1) !important;
+  border-color: var(--brand-hover, #075985) !important;
+  color: var(--btn-primary-text, var(--brand-contrast-text, #ffffff)) !important;
 }
 
 /* Tasa BCV Header */
 html[data-ui-style="industrial"] header button.bg-slate-50,
 html:not([data-ui-style="glassmorphism"]) header button.bg-slate-50 {
-  background-color: var(--btn-secondary-bg, #ede8df) !important;
-  border-color: var(--industrial-border, #ded8cd) !important;
+  background-color: var(--btn-secondary-bg, #f1f5f9) !important;
+  border-color: var(--industrial-border, #cbd5e1) !important;
 }
 html[data-ui-style="industrial"] header button.bg-slate-50 span.underline,
 html:not([data-ui-style="glassmorphism"]) header button.bg-slate-50 span.underline {
@@ -299,16 +301,16 @@ html:not([data-ui-style="glassmorphism"]) header button.bg-slate-50 span.underli
 /* Toggle de Tema */
 html[data-ui-style="industrial"] .pos-theme-toggle,
 html:not([data-ui-style="glassmorphism"]) .pos-theme-toggle {
-  background-color: var(--btn-secondary-bg, #ede8df) !important;
-  border-color: var(--industrial-border, #ded8cd) !important;
-  color: var(--brand-primary, #6d28d9) !important;
+  background-color: var(--btn-secondary-bg, #f1f5f9) !important;
+  border-color: var(--industrial-border, #cbd5e1) !important;
+  color: var(--brand-primary, #0369a1) !important;
 }
 
 /* Barra Superior del POS (Buscador y Herramientas) */
 html[data-ui-style="industrial"] .border-b.border-slate-200.bg-white,
 html:not([data-ui-style="glassmorphism"]) .border-b.border-slate-200.bg-white {
-  background-color: var(--industrial-bg, #f3eee7) !important;
-  border-color: var(--industrial-border, #ded8cd) !important;
+  background-color: var(--industrial-bg, #ffffff) !important;
+  border-color: var(--industrial-border, #cbd5e1) !important;
 }
 
 /* Input de Búsqueda */
@@ -316,8 +318,8 @@ html[data-ui-style="industrial"] .pos-search-input,
 html[data-ui-style="industrial"] input[type="text"],
 html:not([data-ui-style="glassmorphism"]) .pos-search-input,
 html:not([data-ui-style="glassmorphism"]) input[type="text"] {
-  background-color: var(--btn-secondary-bg, #ede8df) !important;
-  border-color: var(--industrial-border, #ded8cd) !important;
+  background-color: var(--btn-secondary-bg, #f1f5f9) !important;
+  border-color: var(--btn-secondary-border, #cbd5e1) !important;
   color: var(--industrial-text, #0f172a) !important;
   border-radius: 9999px !important;
 }
@@ -325,7 +327,7 @@ html[data-ui-style="industrial"] .pos-search-input::placeholder,
 html[data-ui-style="industrial"] input[type="text"]::placeholder,
 html:not([data-ui-style="glassmorphism"]) .pos-search-input::placeholder,
 html:not([data-ui-style="glassmorphism"]) input[type="text"]::placeholder {
-  color: var(--industrial-text-muted, #64748b) !important;
+  color: var(--industrial-text-muted, #475569) !important;
 }
 
 /* Botón Gaveta (Ámbar / Naranja Cálido) */
@@ -342,37 +344,37 @@ html:not([data-ui-style="glassmorphism"]) .pos-btn-gaveta:hover {
   background-color: #c9781c !important;
 }
 
-/* Botones Superiores Soft Cream (Fotos, Celular) */
+/* Botones Superiores Soft (Fotos, Celular) */
 html[data-ui-style="industrial"] .pos-header-btn-cream,
 html:not([data-ui-style="glassmorphism"]) .pos-header-btn-cream {
-  background-color: var(--btn-secondary-bg, #ede8df) !important;
-  border-color: var(--industrial-border, #ded8cd) !important;
-  color: var(--industrial-text, #1e293b) !important;
+  background-color: var(--btn-secondary-bg, #f1f5f9) !important;
+  border-color: var(--btn-secondary-border, #cbd5e1) !important;
+  color: var(--btn-secondary-text, #0f172a) !important;
   border-radius: 10px !important;
 }
 
 /* Barra de Categorías */
 html[data-ui-style="industrial"] .pos-categories-bar,
 html:not([data-ui-style="glassmorphism"]) .pos-categories-bar {
-  background-color: var(--industrial-bg, #f3eee7) !important;
-  border-color: var(--industrial-border, #ded8cd) !important;
+  background-color: var(--industrial-bg, #ffffff) !important;
+  border-color: var(--industrial-border, #cbd5e1) !important;
 }
 
 /* Categoría Activa: Dinámica según Paleta del Rubro */
 html[data-ui-style="industrial"] .pos-category-active,
 html:not([data-ui-style="glassmorphism"]) .pos-category-active {
-  background-color: var(--brand-primary, #6d28d9) !important;
-  border-color: var(--brand-hover, #5b21b6) !important;
-  color: #ffffff !important;
-  box-shadow: 0 2px 8px var(--brand-glow, rgba(109, 40, 217, 0.3)) !important;
+  background-color: var(--brand-primary, #0369a1) !important;
+  border-color: var(--brand-hover, #075985) !important;
+  color: var(--btn-primary-text, var(--brand-contrast-text, #ffffff)) !important;
+  box-shadow: 0 2px 8px var(--brand-glow, rgba(3, 105, 161, 0.3)) !important;
 }
 
-/* Categorías Inactivas: Soft con Texto Oscuro */
+/* Categorías Inactivas: Soft con Texto de Alto Contraste */
 html[data-ui-style="industrial"] .pos-category-inactive,
 html:not([data-ui-style="glassmorphism"]) .pos-category-inactive {
-  background-color: var(--btn-secondary-bg, #ede8df) !important;
-  border-color: var(--industrial-border, #ded8cd) !important;
-  color: var(--industrial-text-muted, #334155) !important;
+  background-color: var(--btn-secondary-bg, #f1f5f9) !important;
+  border-color: var(--btn-secondary-border, #cbd5e1) !important;
+  color: var(--btn-secondary-text, #334155) !important;
 }
 html[data-ui-style="industrial"] .pos-category-inactive:hover,
 html:not([data-ui-style="glassmorphism"]) .pos-category-inactive:hover {
@@ -384,7 +386,7 @@ html:not([data-ui-style="glassmorphism"]) .pos-category-inactive:hover {
 html[data-ui-style="industrial"] .pos-product-card,
 html:not([data-ui-style="glassmorphism"]) .pos-product-card {
   background-color: var(--industrial-card, #ffffff) !important;
-  border: 1px solid var(--industrial-border, #ded8cd) !important;
+  border: 1px solid var(--industrial-border, #cbd5e1) !important;
   border-radius: 14px !important;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.03) !important;
 }
@@ -392,21 +394,21 @@ html[data-ui-style="industrial"] .pos-product-card:hover,
 html:not([data-ui-style="glassmorphism"]) .pos-product-card:hover {
   transform: translateY(-2px) !important;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08) !important;
-  border-color: var(--brand-border, #ded8cd) !important;
+  border-color: var(--brand-border, #cbd5e1) !important;
 }
 
 /* Código de Barras */
 html[data-ui-style="industrial"] .pos-card-barcode,
 html:not([data-ui-style="glassmorphism"]) .pos-card-barcode {
-  color: var(--industrial-text-muted, #64748b) !important;
+  color: var(--industrial-text-muted, #475569) !important;
 }
 
 /* Pastilla de Rubro / Categoría */
 html[data-ui-style="industrial"] .pos-card-category-pill,
 html:not([data-ui-style="glassmorphism"]) .pos-card-category-pill {
-  background-color: var(--brand-light, #f5f3ff) !important;
-  border-color: var(--brand-border, #d8b4fe) !important;
-  color: var(--brand-primary, #6d28d9) !important;
+  background-color: var(--brand-light, #f0f9ff) !important;
+  border-color: var(--brand-border, #7dd3fc) !important;
+  color: var(--brand-primary, #0369a1) !important;
   font-weight: 800 !important;
   border-radius: 6px !important;
 }
@@ -414,7 +416,7 @@ html:not([data-ui-style="glassmorphism"]) .pos-card-category-pill {
 /* Nombre de Producto */
 html[data-ui-style="industrial"] .pos-product-title,
 html:not([data-ui-style="glassmorphism"]) .pos-product-title {
-  color: var(--industrial-text, #1e293b) !important;
+  color: var(--industrial-text, #0f172a) !important;
   font-weight: 700 !important;
 }
 
@@ -435,8 +437,8 @@ html:not([data-ui-style="glassmorphism"]) .pos-price-ves {
 /* Pastilla de Stock */
 html[data-ui-style="industrial"] .pos-card-stock-pill,
 html:not([data-ui-style="glassmorphism"]) .pos-card-stock-pill {
-  background-color: var(--btn-secondary-bg, #ede8df) !important;
-  border-color: var(--industrial-border, #ded8cd) !important;
+  background-color: var(--btn-secondary-bg, #f1f5f9) !important;
+  border-color: var(--industrial-border, #cbd5e1) !important;
   color: var(--industrial-text-muted, #334155) !important;
   font-weight: 700 !important;
   border-radius: 6px !important;
@@ -445,17 +447,17 @@ html:not([data-ui-style="glassmorphism"]) .pos-card-stock-pill {
 /* Panel Derecho (Ticket y Numpad) */
 html[data-ui-style="industrial"] .pos-cart-panel,
 html:not([data-ui-style="glassmorphism"]) .pos-cart-panel {
-  background-color: var(--industrial-bg, #f3eee7) !important;
+  background-color: var(--industrial-bg, #ffffff) !important;
 }
 html[data-ui-style="industrial"] .pos-tab-cart,
 html:not([data-ui-style="glassmorphism"]) .pos-tab-cart {
-  background-color: var(--btn-secondary-bg, #ede8df) !important;
+  background-color: var(--btn-secondary-bg, #f1f5f9) !important;
   color: var(--industrial-text, #0f172a) !important;
 }
 html[data-ui-style="industrial"] .pos-cart-container,
 html:not([data-ui-style="glassmorphism"]) .pos-cart-container {
   background-color: var(--industrial-card, #ffffff) !important;
-  border: 1px solid var(--industrial-border, #ded8cd) !important;
+  border: 1px solid var(--industrial-border, #cbd5e1) !important;
   border-radius: 18px !important;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05) !important;
 }
@@ -502,8 +504,8 @@ html:not([data-ui-style="glassmorphism"]) .pos-btn-cobrar:hover {
 /* Numpad Soft UI */
 html[data-ui-style="industrial"] .pos-numpad-container,
 html:not([data-ui-style="glassmorphism"]) .pos-numpad-container {
-  background-color: var(--btn-secondary-bg, #ede8df) !important;
-  border: 1px solid var(--industrial-border, #ded8cd) !important;
+  background-color: var(--btn-secondary-bg, #f1f5f9) !important;
+  border: 1px solid var(--btn-secondary-border, #cbd5e1) !important;
   border-radius: 18px !important;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
 }
@@ -511,21 +513,21 @@ html[data-ui-style="industrial"] .pos-numpad-key,
 html:not([data-ui-style="glassmorphism"]) .pos-numpad-key {
   background-color: var(--industrial-card, #ffffff) !important;
   color: var(--industrial-text, #0f172a) !important;
-  border: 1px solid var(--industrial-border, #ded8cd) !important;
+  border: 1px solid var(--industrial-border, #cbd5e1) !important;
   border-radius: 12px !important;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06) !important;
   font-weight: 800 !important;
 }
 html[data-ui-style="industrial"] .pos-numpad-key:hover,
 html:not([data-ui-style="glassmorphism"]) .pos-numpad-key:hover {
-  background-color: var(--btn-secondary-bg, #ede8df) !important;
+  background-color: var(--btn-secondary-bg, #f1f5f9) !important;
   transform: translateY(-1px) !important;
 }
 html[data-ui-style="industrial"] .pos-numpad-action,
 html:not([data-ui-style="glassmorphism"]) .pos-numpad-action {
   background-color: var(--industrial-card, #ffffff) !important;
-  color: var(--industrial-text-muted, #334155) !important;
-  border: 1px solid var(--industrial-border, #ded8cd) !important;
+  color: var(--btn-secondary-text, #334155) !important;
+  border: 1px solid var(--industrial-border, #cbd5e1) !important;
   border-radius: 12px !important;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06) !important;
 }

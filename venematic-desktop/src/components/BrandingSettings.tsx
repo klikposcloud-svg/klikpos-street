@@ -547,8 +547,8 @@ export default function BrandingSettings() {
               </span>
             </div>
 
-            {/* Grid de 5 opciones de Fondo */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5 pt-1">
+            {/* Grid de 6 opciones de Fondo */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-2.5 pt-1">
               {INDUSTRIAL_BG_PRESETS.map((opt) => {
                 const isSelected = selectedIndustrialBg === opt.id;
                 const isCustom = opt.id === 'custom';
@@ -694,7 +694,7 @@ export default function BrandingSettings() {
 
         return (
           <div
-            className="p-4 rounded-xl border space-y-3 transition-colors duration-200"
+            className="p-4 rounded-xl border space-y-3 transition-colors duration-200 shadow-xs"
             style={{
               backgroundColor: selectedUIStyle === 'industrial' ? themeVars.bgColor : 'rgba(15, 23, 42, 0.65)',
               borderColor: selectedUIStyle === 'industrial' ? themeVars.borderColor : 'rgba(56, 189, 248, 0.3)',
@@ -705,10 +705,10 @@ export default function BrandingSettings() {
                 className="text-[10px] font-black uppercase tracking-wider block"
                 style={{ color: selectedUIStyle === 'industrial' ? themeVars.textMuted : '#94a3b8' }}
               >
-                Vista Previa Adaptativa: Botones, Textos y Contraste en Tiempo Real
+                ✓ Verificación de Contraste Activa: Textos, Botones y Superficies
               </span>
               <span
-                className="text-[10px] font-bold px-2 py-0.5 rounded"
+                className="text-[10px] font-bold px-2 py-0.5 rounded shadow-2xs"
                 style={{
                   backgroundColor: selectedUIStyle === 'industrial' ? themeVars.cardColor : '#0f172a',
                   color: selectedUIStyle === 'industrial' ? themeVars.textColor : '#f8fafc',
@@ -726,7 +726,7 @@ export default function BrandingSettings() {
                 className="px-4 py-2 rounded-lg font-bold text-xs shadow-sm flex items-center gap-1.5 transition-transform active:scale-95"
                 style={{
                   backgroundColor: selectedUIStyle === 'industrial' ? themeVars.primaryBg : activePalette.primary,
-                  color: '#ffffff',
+                  color: selectedUIStyle === 'industrial' ? themeVars.primaryText : '#ffffff',
                 }}
               >
                 <span>Botón Principal (Acción)</span>
@@ -757,14 +757,17 @@ export default function BrandingSettings() {
                 Badge / Etiqueta Activa
               </span>
 
-              {/* Texto de Precio con Contraste Seguro */}
+              {/* Tarjeta de Producto / Precios con Contraste Seguro */}
               <div
-                className="p-2 rounded-lg border shadow-2xs"
+                className="p-2.5 rounded-xl border shadow-xs"
                 style={{
                   backgroundColor: selectedUIStyle === 'industrial' ? themeVars.cardColor : 'rgba(15, 23, 42, 0.8)',
                   borderColor: selectedUIStyle === 'industrial' ? themeVars.borderColor : 'rgba(56, 189, 248, 0.25)',
                 }}
               >
+                <div className="text-[10px] font-bold" style={{ color: selectedUIStyle === 'industrial' ? themeVars.textMuted : '#94a3b8' }}>
+                  Fondo Tarjeta
+                </div>
                 <span
                   className="text-sm font-black font-mono tabular-numbers"
                   style={{ color: selectedUIStyle === 'industrial' ? themeVars.textColor : '#ffffff' }}
