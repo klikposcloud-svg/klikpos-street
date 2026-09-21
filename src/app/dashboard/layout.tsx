@@ -515,27 +515,22 @@ export default function DesktopDashboardLayout({
 
         {/* Tasa BCV & Reloj de Sistema */}
         <div className="flex items-center gap-2.5">
-          {/* Botón de Alternar Modo: Profesional Blanco vs Glassmorphism */}
+          {/* Botón de Alternar Modo: Soft UI Blanco vs Glassmorphism */}
           <button
             type="button"
             onClick={handleToggleUIStyle}
-            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold transition-all shadow-xs border select-none ${
-              currentUIStyle === 'industrial'
-                ? 'bg-white border-slate-300 text-slate-800 hover:bg-slate-50 ring-1 ring-slate-200'
-                : 'bg-sky-500/20 border-sky-400 text-sky-100 hover:bg-sky-500/30 ring-1 ring-sky-400/50'
-            }`}
-            title="Haz clic para alternar al instante entre Modo Profesional Blanco y Glassmorphism"
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold transition-all shadow-xs border select-none pos-theme-toggle"
+            title={`Alternar tema: Actualmente en ${currentUIStyle === 'glassmorphism' ? 'Glassmorphism' : 'Modo Blanco'}`}
           >
-            {currentUIStyle === 'industrial' ? (
+            {currentUIStyle === 'glassmorphism' ? (
               <>
-                <Sun className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-                <span>Modo Blanco</span>
-                <span className="text-[9px] bg-emerald-100 text-emerald-800 px-1.5 py-0.2 rounded font-bold border border-emerald-300 uppercase">Activo</span>
+                <Sun className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                <span className="text-[11px] font-bold">Modo Blanco</span>
               </>
             ) : (
               <>
-                <Sparkles className="w-3.5 h-3.5 text-sky-300 shrink-0" />
-                <span className="font-semibold">☀️ Activar Modo Blanco</span>
+                <Sparkles className="w-3.5 h-3.5 text-purple-600 shrink-0" />
+                <span className="text-[11px] font-bold text-purple-700">Glassmorphism</span>
               </>
             )}
           </button>

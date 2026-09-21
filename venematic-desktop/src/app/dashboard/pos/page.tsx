@@ -1030,7 +1030,7 @@ export default function DesktopPosPage() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={handleSearchKeyDown}
-              className="w-full pl-9 pr-3 py-2 bg-white border border-slate-300 rounded-lg text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 font-medium"
+              className="pos-search-input w-full pl-9 pr-3 py-2 bg-white border border-slate-300 rounded-lg text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 font-medium"
             />
           </div>
           {searchQuery && (
@@ -1084,9 +1084,9 @@ export default function DesktopPosPage() {
               showToast(res.message, 'success');
             }}
             title="Abrir gaveta de dinero manualmente (F10)"
-            className="px-2.5 py-2 rounded-lg text-xs font-bold border border-slate-300 bg-white hover:bg-amber-50 hover:border-amber-400 text-slate-700 hover:text-amber-900 flex items-center gap-1.5 transition-colors shrink-0 shadow-2xs"
+            className="pos-btn-gaveta px-2.5 py-2 rounded-lg text-xs font-bold border border-slate-300 bg-white hover:bg-amber-50 hover:border-amber-400 text-slate-700 hover:text-amber-900 flex items-center gap-1.5 transition-colors shrink-0 shadow-2xs"
           >
-            <Banknote className="w-3.5 h-3.5 text-amber-600" />
+            <Banknote className="w-3.5 h-3.5" />
             <span>Gaveta</span>
             <kbd className="text-[9px] font-mono px-1 py-0.2 rounded bg-slate-100 text-slate-500 border border-slate-200">
               F10
@@ -1098,7 +1098,7 @@ export default function DesktopPosPage() {
             type="button"
             onClick={toggleShowImages}
             title="Mostrar u ocultar fotos en el catálogo"
-            className={`px-3 py-2 rounded-lg text-xs font-bold border flex items-center gap-1.5 transition-colors shrink-0 ${
+            className={`pos-header-btn-cream px-3 py-2 rounded-lg text-xs font-bold border flex items-center gap-1.5 transition-colors shrink-0 ${
               showImages
                 ? 'bg-sky-50 text-sky-800 border-sky-300 shadow-2xs'
                 : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-100'
@@ -1113,7 +1113,7 @@ export default function DesktopPosPage() {
             type="button"
             onClick={openScannerModal}
             title="Vincular celular como lector de código de barras inalámbrico"
-            className={`px-3 py-2 rounded-lg text-xs font-bold border flex items-center gap-1.5 transition-all shrink-0 ${
+            className={`pos-header-btn-cream px-3 py-2 rounded-lg text-xs font-bold border flex items-center gap-1.5 transition-all shrink-0 ${
               phoneConnected
                 ? 'bg-emerald-50 text-emerald-800 border-emerald-400 shadow-2xs'
                 : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-100'
@@ -1128,7 +1128,7 @@ export default function DesktopPosPage() {
         </div>
 
         {/* Categorías Rápidas */}
-        <div className="px-3 py-2 border-b border-slate-200 bg-white flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+        <div className="pos-categories-bar px-3 py-2 border-b border-slate-200 bg-white flex items-center gap-1.5 overflow-x-auto no-scrollbar">
           {categories.map((cat) => {
             const isSelected = selectedCategory === cat;
             return (
@@ -1136,10 +1136,10 @@ export default function DesktopPosPage() {
                 key={cat}
                 type="button"
                 onClick={() => setSelectedCategory(cat)}
-                className={`px-3 py-1.5 rounded-md text-xs font-semibold whitespace-nowrap transition-colors duration-75 select-none active:scale-[0.97] border ${
+                className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors duration-75 select-none active:scale-[0.97] border ${
                   isSelected
-                    ? 'brand-badge border-transparent shadow-xs font-bold'
-                    : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50 hover:text-slate-900 active:bg-slate-100'
+                    ? 'pos-category-active brand-badge border-transparent shadow-xs font-bold'
+                    : 'pos-category-inactive bg-white text-slate-600 border-slate-300 hover:bg-slate-50 hover:text-slate-900 active:bg-slate-100'
                 }`}
               >
                 {cat}
@@ -1166,10 +1166,25 @@ export default function DesktopPosPage() {
                 <button
                   key={p.id}
                   onClick={() => addToCart(p, 1)}
-                  className={`h-48 p-2.5 bg-white border border-slate-300 ${theme.cardBorder} hover:shadow-lg rounded-xl text-left flex flex-col justify-between transition-all active:scale-[0.98] group overflow-hidden shadow-xs`}
+                  className={`pos-product-card h-48 p-2.5 bg-white border border-slate-300 ${theme.cardBorder} hover:shadow-lg rounded-xl text-left flex flex-col justify-between transition-all active:scale-[0.98] group overflow-hidden shadow-xs`}
                 >
+                  {/* Encabezado: Barcode + Categoría */}
+                  <div className="flex items-center justify-between gap-1 w-full">
+                    <span className="pos-card-barcode text-[10px] font-mono font-semibold text-slate-400 truncate tracking-tight">
+                      {p.barcode}
+                    </span>
+                    <span className={`pos-card-category-pill text-[9px] font-black px-2 py-0.5 rounded-md border uppercase tracking-wide shrink-0 ${theme.badge}`}>
+                      {p.category}
+                    </span>
+                  </div>
+
+                  {/* Nombre */}
+                  <h4 className="pos-product-title font-bold text-xs text-slate-900 line-clamp-1 group-hover:text-sky-700 leading-tight">
+                    {p.name}
+                  </h4>
+
                   {/* Contenedor de Imagen */}
-                  <div className="w-full h-28 rounded-lg bg-slate-100 overflow-hidden relative border border-slate-200">
+                  <div className="w-full h-20 rounded-lg bg-slate-100 overflow-hidden relative border border-slate-200/60 my-1">
                     {p.image ? (
                       <img
                         src={p.image}
@@ -1179,40 +1194,30 @@ export default function DesktopPosPage() {
                       />
                     ) : (
                       <div className="w-full h-full flex flex-col items-center justify-center text-slate-300">
-                        <Package className="w-8 h-8 stroke-1" />
+                        <Package className="w-7 h-7 stroke-1" />
                       </div>
                     )}
-                    {/* Badge de Rubro / Categoría */}
+                  </div>
+
+                  {/* Precios y Stock */}
+                  <div className="flex items-end justify-between w-full pt-1">
+                    <div>
+                      <span className="pos-price-usd text-base font-black font-mono text-slate-900 tabular-numbers leading-none block">
+                        {formatUSD(p.priceUSD)}
+                      </span>
+                      <span className="pos-price-ves text-xs font-bold text-slate-600 font-mono tabular-numbers block mt-0.5">
+                        {formatVES(p.priceUSD * bcvRate)}
+                      </span>
+                    </div>
                     <span
-                      className={`absolute top-1.5 left-1.5 max-w-[60%] truncate text-[9px] font-black px-2 py-0.5 rounded-md border shadow-sm uppercase tracking-wide ${theme.badge}`}
-                    >
-                      {p.category}
-                    </span>
-                    {/* Badge de Stock */}
-                    <span
-                      className={`absolute top-1.5 right-1.5 text-[9px] font-mono font-bold px-2 py-0.5 rounded-md shadow-sm border ${
+                      className={`pos-card-stock-pill text-[10px] font-mono font-bold px-2 py-0.5 rounded-md border shadow-2xs shrink-0 ${
                         isLowStock
-                          ? 'bg-rose-600 text-white border-rose-400'
-                          : 'bg-slate-900/90 text-white border-slate-700/80'
+                          ? 'bg-rose-50 text-rose-700 border-rose-200'
+                          : 'bg-slate-100 text-slate-700 border-slate-200'
                       }`}
                     >
                       {p.stock} {p.unit}
                     </span>
-                  </div>
-
-                  {/* Info */}
-                  <div className="pt-2 flex-1 flex flex-col justify-between">
-                    <h4 className="font-bold text-xs text-slate-900 line-clamp-1 group-hover:text-sky-700 leading-tight">
-                      {p.name}
-                    </h4>
-                    <div className="flex items-baseline justify-between mt-1">
-                      <span className="text-base font-black font-mono text-slate-900 tabular-numbers">
-                        {formatUSD(p.priceUSD)}
-                      </span>
-                      <span className="text-xs font-bold text-slate-600 font-mono tabular-numbers">
-                        {formatVES(p.priceUSD * bcvRate)}
-                      </span>
-                    </div>
                   </div>
                 </button>
               );
@@ -1223,21 +1228,21 @@ export default function DesktopPosPage() {
               <button
                 key={p.id}
                 onClick={() => addToCart(p, 1)}
-                className={`min-h-[135px] p-3 bg-white border border-slate-300 ${theme.cardBorder} hover:shadow-md hover:border-sky-400 rounded-xl text-left flex flex-col justify-between transition-all active:scale-[0.98] shadow-xs group relative overflow-hidden`}
+                className={`pos-product-card min-h-[135px] p-3 bg-white border border-slate-300 ${theme.cardBorder} hover:shadow-md hover:border-sky-400 rounded-xl text-left flex flex-col justify-between transition-all active:scale-[0.98] shadow-xs group relative overflow-hidden`}
               >
                 <div className="space-y-1">
                   {/* Encabezado de la card: Código + Pastilla de Categoría */}
                   <div className="flex items-center justify-between gap-1">
-                    <span className="text-[10px] font-mono font-semibold text-slate-400 truncate tracking-tight">
+                    <span className="pos-card-barcode text-[10px] font-mono font-semibold text-slate-400 truncate tracking-tight">
                       {p.barcode}
                     </span>
-                    <span className={`text-[9px] font-black px-2 py-0.5 rounded-md border uppercase tracking-wide shrink-0 ${theme.badge}`}>
+                    <span className={`pos-card-category-pill text-[9px] font-black px-2 py-0.5 rounded-md border uppercase tracking-wide shrink-0 ${theme.badge}`}>
                       {p.category}
                     </span>
                   </div>
 
                   {/* Nombre del Producto */}
-                  <h4 className="font-bold text-xs text-slate-900 line-clamp-2 leading-snug group-hover:text-sky-700 pt-0.5">
+                  <h4 className="pos-product-title font-bold text-xs text-slate-900 line-clamp-2 leading-snug group-hover:text-sky-700 pt-0.5">
                     {p.name}
                   </h4>
                 </div>
@@ -1245,16 +1250,16 @@ export default function DesktopPosPage() {
                 {/* Pie de la card: Precios en USD y Bs + Pastilla de Existencia */}
                 <div className="flex items-end justify-between pt-2 border-t border-slate-200/80 mt-2">
                   <div>
-                    <span className="text-base font-black font-mono text-slate-900 tabular-numbers leading-none block">
+                    <span className="pos-price-usd text-base font-black font-mono text-slate-900 tabular-numbers leading-none block">
                       {formatUSD(p.priceUSD)}
                     </span>
-                    <span className="text-xs font-bold text-slate-600 font-mono tabular-numbers block mt-1">
+                    <span className="pos-price-ves text-xs font-bold text-slate-600 font-mono tabular-numbers block mt-1">
                       {formatVES(p.priceUSD * bcvRate)}
                     </span>
                   </div>
 
                   <span
-                    className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-md border shadow-2xs shrink-0 ${
+                    className={`pos-card-stock-pill text-[10px] font-mono font-bold px-2 py-0.5 rounded-md border shadow-2xs shrink-0 ${
                       isLowStock
                         ? 'bg-rose-50 text-rose-700 border-rose-200'
                         : 'bg-slate-100 text-slate-700 border-slate-200'
@@ -1276,14 +1281,14 @@ export default function DesktopPosPage() {
       </div>
 
       {/* ========================================================================= */}
-      {/* PANEL DERECHO: Ticket de Venta & Teclado Numérico Industrial               */}
+      {/* PANEL DERECHO: Ticket de Venta & Teclado Numérico Industrial */}
       {/* ========================================================================= */}
-      <div className="w-[480px] flex flex-col gap-3 shrink-0">
+      <div className="pos-cart-panel w-[480px] flex flex-col gap-3 shrink-0">
         {/* Tabs: Ticket Activo | Ventas del Turno */}
         <div className="flex bg-white rounded-xl border border-slate-300 shadow-xs overflow-hidden">
           <button
             onClick={() => setRightPanelTab('cart')}
-            className={`flex-1 py-2.5 text-xs font-black transition-colors flex items-center justify-center gap-1.5 ${
+            className={`pos-tab-cart flex-1 py-2.5 text-xs font-black transition-colors flex items-center justify-center gap-1.5 ${
               rightPanelTab === 'cart'
                 ? 'bg-slate-900 text-white'
                 : 'text-slate-600 hover:bg-slate-50'
@@ -1296,7 +1301,7 @@ export default function DesktopPosPage() {
           </button>
           <button
             onClick={() => setRightPanelTab('shift')}
-            className={`flex-1 py-2.5 text-xs font-black transition-colors flex items-center justify-center gap-1.5 border-l border-slate-200 ${
+            className={`pos-tab-shift flex-1 py-2.5 text-xs font-black transition-colors flex items-center justify-center gap-1.5 border-l border-slate-200 ${
               rightPanelTab === 'shift'
                 ? 'bg-emerald-700 text-white'
                 : 'text-slate-600 hover:bg-slate-50'
@@ -1311,11 +1316,11 @@ export default function DesktopPosPage() {
 
         {/* ---- TAB: TICKET ACTIVO ---- */}
         {rightPanelTab === 'cart' && (
-        <div className="flex-1 bg-white rounded-xl border border-slate-300 shadow-xs flex flex-col overflow-hidden">
+        <div className="pos-cart-container flex-1 bg-white rounded-xl border border-slate-300 shadow-xs flex flex-col overflow-hidden">
           {/* Cabecera del Ticket */}
           <div className="p-3 border-b border-slate-200 bg-slate-100/95 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="font-black text-xs uppercase tracking-wider px-2 py-0.5 rounded bg-amber-400 text-slate-950 shadow-xs border border-amber-500">
+              <span className="pos-ticket-badge font-black text-xs uppercase tracking-wider px-2 py-0.5 rounded bg-amber-400 text-slate-950 shadow-xs border border-amber-500">
                 Ticket Activo
               </span>
               <span className="px-2.5 py-0.5 rounded-full bg-slate-900 text-white border border-slate-700 text-[11px] font-mono font-bold shadow-2xs">
@@ -1419,10 +1424,10 @@ export default function DesktopPosPage() {
                 Total a Cobrar:
               </span>
               <div className="text-right">
-                <span className="text-2xl font-black font-mono text-slate-900 block tabular-numbers">
+                <span className="pos-total-usd text-2xl font-black font-mono text-slate-900 block tabular-numbers">
                   {formatUSD(totalUSD)}
                 </span>
-                <span className="text-xs font-bold font-mono text-sky-700 block tabular-numbers">
+                <span className="pos-total-ves text-xs font-bold font-mono text-sky-700 block tabular-numbers">
                   {formatVES(totalVES)}
                 </span>
               </div>
@@ -1432,7 +1437,7 @@ export default function DesktopPosPage() {
             <button
               onClick={openPaymentModal}
               disabled={cart.length === 0}
-              className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-black text-sm rounded-lg shadow-sm flex items-center justify-center gap-2 uppercase tracking-wide transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+              className="pos-btn-cobrar w-full h-12 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-black text-sm rounded-lg shadow-sm flex items-center justify-center gap-2 uppercase tracking-wide transition-all disabled:opacity-40 disabled:cursor-not-allowed"
             >
               <span>Cobrar Venta</span>
               <kbd className="bg-emerald-700 text-emerald-100 text-xs px-2 py-0.5 rounded font-mono font-bold">
@@ -1524,7 +1529,7 @@ export default function DesktopPosPage() {
         {/* ========================================================================= */}
         {/* TECLADO NUMÉRICO TÁCTIL INDUSTRIAL                                       */}
         {/* ========================================================================= */}
-        <div className="bg-white rounded-xl border border-slate-300 shadow-xs p-3 space-y-2">
+        <div className="pos-numpad-container bg-white rounded-xl border border-slate-300 shadow-xs p-3 space-y-2">
           {/* Display & Selector de Modo */}
           <div className="flex items-center justify-between gap-2">
             <div className="flex bg-slate-100 p-0.5 rounded-lg border border-slate-200 text-xs font-semibold">
@@ -1616,7 +1621,7 @@ export default function DesktopPosPage() {
             ))}
             <button
               onClick={handleNumpadApply}
-              className="pos-numpad-action row-span-2 bg-sky-700 hover:bg-sky-800 text-white font-bold border-sky-800 flex flex-col items-center justify-center text-xs"
+              className="pos-numpad-enter pos-numpad-action row-span-2 bg-sky-700 hover:bg-sky-800 text-white font-bold border-sky-800 flex flex-col items-center justify-center text-xs"
             >
               <span>Enter</span>
               <span className="text-[10px] text-sky-200">Aplicar</span>

@@ -338,18 +338,18 @@ export function computeIndustrialThemeVariables(
     }
   }
 
-  // Default 'white' (Modo Profesional Blanco Puro)
+  // Default 'white' (Modo Profesional Blanco / Enhanced Contrast Soft UI)
   return {
-    bgColor: '#ffffff',
+    bgColor: '#f3eee7',
     cardColor: '#ffffff',
     textColor: '#0f172a',
     textMuted: '#475569',
-    borderColor: '#e2e8f0',
+    borderColor: '#ded8cd',
     primaryBg: brandPrimary,
     primaryHover: brandHover,
-    secondaryBg: '#f8fafc',
-    secondaryBorder: '#cbd5e1',
-    secondaryText: '#1e293b',
+    secondaryBg: '#ede8df',
+    secondaryBorder: '#ded8cd',
+    secondaryText: '#334155',
   };
 }
 

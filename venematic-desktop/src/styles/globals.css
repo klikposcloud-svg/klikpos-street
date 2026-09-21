@@ -111,16 +111,16 @@ body {
   --brand-glow: rgba(2, 132, 199, 0.35);
   --brand-glass-border: rgba(56, 189, 248, 0.30);
 
-  /* Modo Industrial Adaptativo */
-  --industrial-bg: #f8fafc;
+  /* Modo Industrial Soft UI Adaptativo */
+  --industrial-bg: #f3eee7;
   --industrial-card: #ffffff;
   --industrial-text: #0f172a;
   --industrial-text-muted: #475569;
-  --industrial-border: #e2e8f0;
-  --btn-primary-bg: #0369a1;
-  --btn-primary-hover: #075985;
-  --btn-secondary-bg: #ffffff;
-  --btn-secondary-border: #cbd5e1;
+  --industrial-border: #ded8cd;
+  --btn-primary-bg: #6d28d9;
+  --btn-primary-hover: #5b21b6;
+  --btn-secondary-bg: #ede8df;
+  --btn-secondary-border: #ded8cd;
   --btn-secondary-text: #334155;
 }
 
@@ -202,71 +202,344 @@ textarea:focus,
 }
 
 /* ========================================================================= */
-/* MODO INDUSTRIAL PROFESIONAL (Sólido, Claro y Limpio)                      */
+/* ========================================================================= */
+/* MODO BLANCO SOFT UI (REFINE: ENHANCED CONTRAST SOFT UI)                   */
 /* ========================================================================= */
 html[data-ui-style="industrial"],
 html[data-ui-style="professional"],
 html:not([data-ui-style="glassmorphism"]) {
   color-scheme: light;
+  background-color: #f3eee7 !important;
+  color: #0f172a !important;
 }
 
-html[data-ui-style="industrial"],
 html[data-ui-style="industrial"] body,
-html[data-ui-style="industrial"] main,
-html[data-ui-style="industrial"] .bg-slate-50,
-html[data-ui-style="industrial"] [class*="bg-slate-50"],
-html[data-ui-style="industrial"] .bg-slate-100,
-html[data-ui-style="industrial"] [class*="bg-slate-100"],
-html[data-ui-style="professional"],
 html[data-ui-style="professional"] body,
-html[data-ui-style="professional"] main {
-  background-color: var(--industrial-bg, #ffffff) !important;
+html:not([data-ui-style="glassmorphism"]) body,
+html[data-ui-style="industrial"] main,
+html[data-ui-style="professional"] main,
+html:not([data-ui-style="glassmorphism"]) main {
+  background-color: #f3eee7 !important;
+  color: #0f172a !important;
 }
 
-html[data-ui-style="industrial"] body,
-html[data-ui-style="professional"] body {
-  color: var(--industrial-text, #0f172a) !important;
+/* Cabecera y Barra Lateral */
+html[data-ui-style="industrial"] header,
+html[data-ui-style="professional"] header,
+html:not([data-ui-style="glassmorphism"]) header,
+html[data-ui-style="industrial"] aside,
+html[data-ui-style="professional"] aside,
+html:not([data-ui-style="glassmorphism"]) aside {
+  background-color: #f3eee7 !important;
+  border-color: #ded8cd !important;
+  color: #0f172a !important;
 }
 
-html[data-ui-style="industrial"] .bg-white,
-html[data-ui-style="professional"] .bg-white {
-  background-color: var(--industrial-card, #ffffff) !important;
+/* Enlaces del Menú Lateral */
+html[data-ui-style="industrial"] aside a:not(.nav-item-active),
+html:not([data-ui-style="glassmorphism"]) aside a:not(.nav-item-active) {
+  color: #334155 !important;
+}
+html[data-ui-style="industrial"] aside a:not(.nav-item-active):hover,
+html:not([data-ui-style="glassmorphism"]) aside a:not(.nav-item-active):hover {
+  background-color: #ede8df !important;
+  color: #0f172a !important;
+}
+html[data-ui-style="industrial"] aside a:not(.nav-item-active) span,
+html:not([data-ui-style="glassmorphism"]) aside a:not(.nav-item-active) span {
+  color: #475569 !important;
 }
 
-html[data-ui-style="industrial"] .border-slate-200,
-html[data-ui-style="industrial"] .border-slate-300,
-html[data-ui-style="professional"] .border-slate-200,
-html[data-ui-style="professional"] .border-slate-300 {
-  border-color: var(--industrial-border, #e2e8f0) !important;
+/* Ítem Activo en Sidebar: Pill Blanca con Texto e Ícono Púrpura */
+html[data-ui-style="industrial"] aside .nav-item-active,
+html[data-ui-style="professional"] aside .nav-item-active,
+html:not([data-ui-style="glassmorphism"]) aside .nav-item-active {
+  background-color: #ffffff !important;
+  color: #6d28d9 !important;
+  border-color: #ded8cd !important;
+  border-radius: 9999px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
+}
+html[data-ui-style="industrial"] aside .nav-item-active span,
+html[data-ui-style="professional"] aside .nav-item-active span,
+html:not([data-ui-style="glassmorphism"]) aside .nav-item-active span,
+html[data-ui-style="industrial"] aside .nav-item-active svg,
+html[data-ui-style="professional"] aside .nav-item-active svg,
+html:not([data-ui-style="glassmorphism"]) aside .nav-item-active svg {
+  color: #6d28d9 !important;
+}
+html[data-ui-style="industrial"] aside .nav-item-active kbd,
+html[data-ui-style="professional"] aside .nav-item-active kbd,
+html:not([data-ui-style="glassmorphism"]) aside .nav-item-active kbd {
+  background-color: #ede8df !important;
+  color: #475569 !important;
+  border-color: #ded8cd !important;
 }
 
-html[data-ui-style="industrial"] .text-slate-900,
-html[data-ui-style="industrial"] .text-slate-800,
-html[data-ui-style="professional"] .text-slate-900,
-html[data-ui-style="professional"] .text-slate-800 {
-  color: var(--industrial-text, #0f172a) !important;
+/* Header Brand Badge */
+html[data-ui-style="industrial"] header .brand-badge,
+html:not([data-ui-style="glassmorphism"]) header .brand-badge {
+  background-color: #6d28d9 !important;
+  border-color: #5b21b6 !important;
+  color: #ffffff !important;
 }
 
-html[data-ui-style="industrial"] .text-slate-600,
-html[data-ui-style="industrial"] .text-slate-500,
-html[data-ui-style="professional"] .text-slate-600,
-html[data-ui-style="professional"] .text-slate-500 {
-  color: var(--industrial-text-muted, #475569) !important;
+/* Tasa BCV Header */
+html[data-ui-style="industrial"] header button.bg-slate-50,
+html:not([data-ui-style="glassmorphism"]) header button.bg-slate-50 {
+  background-color: #ede8df !important;
+  border-color: #ded8cd !important;
+}
+html[data-ui-style="industrial"] header button.bg-slate-50 span.underline,
+html:not([data-ui-style="glassmorphism"]) header button.bg-slate-50 span.underline {
+  color: #b91c1c !important;
 }
 
-html[data-ui-style="industrial"] .bg-brand-light,
-html[data-ui-style="industrial"] .bg-sky-50,
-html[data-ui-style="industrial"] .bg-sky-100,
-html[data-ui-style="professional"] .bg-brand-light {
-  background-color: var(--brand-light) !important;
-  color: var(--brand-primary) !important;
+/* Toggle de Tema */
+html[data-ui-style="industrial"] .pos-theme-toggle,
+html:not([data-ui-style="glassmorphism"]) .pos-theme-toggle {
+  background-color: #ede8df !important;
+  border-color: #ded8cd !important;
+  color: #6d28d9 !important;
 }
 
-html[data-ui-style="industrial"] .pos-btn-secondary,
-html[data-ui-style="professional"] .pos-btn-secondary {
-  background-color: var(--btn-secondary-bg, #ffffff) !important;
-  border-color: var(--btn-secondary-border, #cbd5e1) !important;
-  color: var(--btn-secondary-text, #334155) !important;
+/* Barra Superior del POS (Buscador y Herramientas) */
+html[data-ui-style="industrial"] .border-b.border-slate-200.bg-white,
+html:not([data-ui-style="glassmorphism"]) .border-b.border-slate-200.bg-white {
+  background-color: #f3eee7 !important;
+  border-color: #ded8cd !important;
+}
+
+/* Input de Búsqueda */
+html[data-ui-style="industrial"] .pos-search-input,
+html[data-ui-style="industrial"] input[type="text"],
+html:not([data-ui-style="glassmorphism"]) .pos-search-input,
+html:not([data-ui-style="glassmorphism"]) input[type="text"] {
+  background-color: #ede8df !important;
+  border-color: #ded8cd !important;
+  color: #0f172a !important;
+  border-radius: 9999px !important;
+}
+html[data-ui-style="industrial"] .pos-search-input::placeholder,
+html[data-ui-style="industrial"] input[type="text"]::placeholder,
+html:not([data-ui-style="glassmorphism"]) .pos-search-input::placeholder,
+html:not([data-ui-style="glassmorphism"]) input[type="text"]::placeholder {
+  color: #64748b !important;
+}
+
+/* Botón Gaveta (Ámbar / Naranja Cálido) */
+html[data-ui-style="industrial"] .pos-btn-gaveta,
+html:not([data-ui-style="glassmorphism"]) .pos-btn-gaveta {
+  background-color: #df8c2a !important;
+  border-color: #c9781c !important;
+  color: #ffffff !important;
+  border-radius: 10px !important;
+  box-shadow: 0 2px 6px rgba(223, 140, 42, 0.25) !important;
+}
+html[data-ui-style="industrial"] .pos-btn-gaveta:hover,
+html:not([data-ui-style="glassmorphism"]) .pos-btn-gaveta:hover {
+  background-color: #c9781c !important;
+}
+
+/* Botones Superiores Soft Cream (Fotos, Celular) */
+html[data-ui-style="industrial"] .pos-header-btn-cream,
+html:not([data-ui-style="glassmorphism"]) .pos-header-btn-cream {
+  background-color: #ede8df !important;
+  border-color: #ded8cd !important;
+  color: #1e293b !important;
+  border-radius: 10px !important;
+}
+
+/* Barra de Categorías */
+html[data-ui-style="industrial"] .pos-categories-bar,
+html:not([data-ui-style="glassmorphism"]) .pos-categories-bar {
+  background-color: #f3eee7 !important;
+  border-color: #ded8cd !important;
+}
+
+/* Categoría Activa: Púrpura Sólido con Texto Blanco */
+html[data-ui-style="industrial"] .pos-category-active,
+html:not([data-ui-style="glassmorphism"]) .pos-category-active {
+  background-color: #6d28d9 !important;
+  border-color: #5b21b6 !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(109, 40, 217, 0.3) !important;
+}
+
+/* Categorías Inactivas: Soft Cream con Texto Oscuro */
+html[data-ui-style="industrial"] .pos-category-inactive,
+html:not([data-ui-style="glassmorphism"]) .pos-category-inactive {
+  background-color: #ede8df !important;
+  border-color: #ded8cd !important;
+  color: #334155 !important;
+}
+html[data-ui-style="industrial"] .pos-category-inactive:hover,
+html:not([data-ui-style="glassmorphism"]) .pos-category-inactive:hover {
+  background-color: #e5dfd5 !important;
+  color: #0f172a !important;
+}
+
+/* Tarjetas de Producto Soft UI */
+html[data-ui-style="industrial"] .pos-product-card,
+html:not([data-ui-style="glassmorphism"]) .pos-product-card {
+  background-color: #ffffff !important;
+  border: 1px solid #e5ded4 !important;
+  border-radius: 14px !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.03) !important;
+}
+html[data-ui-style="industrial"] .pos-product-card:hover,
+html:not([data-ui-style="glassmorphism"]) .pos-product-card:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08) !important;
+  border-color: #d6cdc1 !important;
+}
+
+/* Código de Barras */
+html[data-ui-style="industrial"] .pos-card-barcode,
+html:not([data-ui-style="glassmorphism"]) .pos-card-barcode {
+  color: #64748b !important;
+}
+
+/* Pastilla de Rubro / Categoría */
+html[data-ui-style="industrial"] .pos-card-category-pill,
+html:not([data-ui-style="glassmorphism"]) .pos-card-category-pill {
+  background-color: #e2e8f0 !important;
+  border-color: #cbd5e1 !important;
+  color: #1e293b !important;
+  font-weight: 800 !important;
+  border-radius: 6px !important;
+}
+
+/* Nombre de Producto */
+html[data-ui-style="industrial"] .pos-product-title,
+html:not([data-ui-style="glassmorphism"]) .pos-product-title {
+  color: #1e293b !important;
+  font-weight: 700 !important;
+}
+
+/* Precios: USD en Negro Profundo, VES en Rojo Terracota */
+html[data-ui-style="industrial"] .pos-price-usd,
+html:not([data-ui-style="glassmorphism"]) .pos-price-usd {
+  color: #0f172a !important;
+  font-weight: 900 !important;
+  font-size: 1.25rem !important;
+}
+html[data-ui-style="industrial"] .pos-price-ves,
+html:not([data-ui-style="glassmorphism"]) .pos-price-ves {
+  color: #b91c1c !important;
+  font-weight: 800 !important;
+  font-size: 0.85rem !important;
+}
+
+/* Pastilla de Stock */
+html[data-ui-style="industrial"] .pos-card-stock-pill,
+html:not([data-ui-style="glassmorphism"]) .pos-card-stock-pill {
+  background-color: #ede8df !important;
+  border-color: #ded8cd !important;
+  color: #334155 !important;
+  font-weight: 700 !important;
+  border-radius: 6px !important;
+}
+
+/* Panel Derecho (Ticket y Numpad) */
+html[data-ui-style="industrial"] .pos-cart-panel,
+html:not([data-ui-style="glassmorphism"]) .pos-cart-panel {
+  background-color: #f3eee7 !important;
+}
+html[data-ui-style="industrial"] .pos-tab-cart,
+html:not([data-ui-style="glassmorphism"]) .pos-tab-cart {
+  background-color: #ede8df !important;
+  color: #0f172a !important;
+}
+html[data-ui-style="industrial"] .pos-cart-container,
+html:not([data-ui-style="glassmorphism"]) .pos-cart-container {
+  background-color: #ffffff !important;
+  border: 1px solid #e5ded4 !important;
+  border-radius: 18px !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Badge TICKET ACTIVO Dorado Caramelo */
+html[data-ui-style="industrial"] .pos-ticket-badge,
+html:not([data-ui-style="glassmorphism"]) .pos-ticket-badge {
+  background-color: #c28b24 !important;
+  border-color: #b47818 !important;
+  color: #ffffff !important;
+  font-weight: 900 !important;
+  border-radius: 6px !important;
+}
+
+/* Gran Total */
+html[data-ui-style="industrial"] .pos-total-usd,
+html:not([data-ui-style="glassmorphism"]) .pos-total-usd {
+  color: #0f172a !important;
+  font-weight: 900 !important;
+  font-size: 1.65rem !important;
+}
+html[data-ui-style="industrial"] .pos-total-ves,
+html:not([data-ui-style="glassmorphism"]) .pos-total-ves {
+  color: #b91c1c !important;
+  font-weight: 800 !important;
+  font-size: 1rem !important;
+}
+
+/* Botón COBRAR VENTA Verde Bosque Esmeralda */
+html[data-ui-style="industrial"] .pos-btn-cobrar,
+html:not([data-ui-style="glassmorphism"]) .pos-btn-cobrar {
+  background-color: #047857 !important;
+  border-color: #065f46 !important;
+  color: #ffffff !important;
+  font-weight: 900 !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 14px rgba(4, 120, 87, 0.25) !important;
+}
+html[data-ui-style="industrial"] .pos-btn-cobrar:hover,
+html:not([data-ui-style="glassmorphism"]) .pos-btn-cobrar:hover {
+  background-color: #059669 !important;
+}
+
+/* Numpad Soft UI */
+html[data-ui-style="industrial"] .pos-numpad-container,
+html:not([data-ui-style="glassmorphism"]) .pos-numpad-container {
+  background-color: #ede8df !important;
+  border: 1px solid #ded8cd !important;
+  border-radius: 18px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+}
+html[data-ui-style="industrial"] .pos-numpad-key,
+html:not([data-ui-style="glassmorphism"]) .pos-numpad-key {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border: 1px solid #ded8cd !important;
+  border-radius: 12px !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06) !important;
+  font-weight: 800 !important;
+}
+html[data-ui-style="industrial"] .pos-numpad-key:hover,
+html:not([data-ui-style="glassmorphism"]) .pos-numpad-key:hover {
+  background-color: #faf9f6 !important;
+  transform: translateY(-1px) !important;
+}
+html[data-ui-style="industrial"] .pos-numpad-action,
+html:not([data-ui-style="glassmorphism"]) .pos-numpad-action {
+  background-color: #ffffff !important;
+  color: #334155 !important;
+  border: 1px solid #ded8cd !important;
+  border-radius: 12px !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06) !important;
+}
+html[data-ui-style="industrial"] .pos-numpad-enter,
+html:not([data-ui-style="glassmorphism"]) .pos-numpad-enter {
+  background-color: #c2410c !important;
+  border-color: #9a3412 !important;
+  color: #ffffff !important;
+  font-weight: 800 !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 10px rgba(194, 65, 12, 0.25) !important;
+}
+html[data-ui-style="industrial"] .pos-numpad-enter:hover,
+html:not([data-ui-style="glassmorphism"]) .pos-numpad-enter:hover {
+  background-color: #ea580c !important;
 }
 
 /* ========================================================================= */
@@ -274,15 +547,15 @@ html[data-ui-style="professional"] .pos-btn-secondary {
 /* ========================================================================= */
 html[data-ui-style="glassmorphism"] {
   color-scheme: dark !important;
-  background-color: #121b27 !important;
+  background-color: #1a2636 !important;
   color: #f8fafc !important;
 }
 
 html[data-ui-style="glassmorphism"] body {
-  background-color: #121b27 !important;
+  background-color: #1a2636 !important;
   background-image: 
-    linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px) !important;
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px) !important;
   background-size: 28px 28px !important;
   background-attachment: fixed !important;
   color: #f8fafc !important;
@@ -290,8 +563,8 @@ html[data-ui-style="glassmorphism"] body {
 
 /* Cabecera Superior */
 html[data-ui-style="glassmorphism"] header {
-  background: #141e2b !important;
-  border-color: #1f2d40 !important;
+  background: #15202e !important;
+  border-color: #24354b !important;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
   color: #f8fafc !important;
 }
@@ -303,14 +576,20 @@ html[data-ui-style="glassmorphism"] .brand-badge {
   box-shadow: 0 2px 8px rgba(139, 92, 246, 0.4) !important;
 }
 
+/* Toggle de Tema en Glassmorphism */
+html[data-ui-style="glassmorphism"] .pos-theme-toggle {
+  background-color: #1c2b3d !important;
+  border-color: #2d425c !important;
+  color: #fbbf24 !important;
+}
+
 /* Barra Lateral (Sidebar) */
 html[data-ui-style="glassmorphism"] aside {
-  background: #101722 !important;
-  border-color: #1f2d40 !important;
+  background: #131c28 !important;
+  border-color: #223246 !important;
   color: #94a3b8 !important;
 }
 
-/* Etiqueta de Operaciones de Caja en Neon Cyan */
 html[data-ui-style="glassmorphism"] aside div.text-\[11px\].font-bold.uppercase {
   color: #22d3ee !important;
   letter-spacing: 0.06em !important;
@@ -318,88 +597,87 @@ html[data-ui-style="glassmorphism"] aside div.text-\[11px\].font-bold.uppercase 
 
 /* Navegación Activa en Sidebar */
 html[data-ui-style="glassmorphism"] .nav-item-active {
-  background: #1c2738 !important;
+  background: #1f2f45 !important;
   border-color: #7c3aed !important;
   color: #ffffff !important;
   box-shadow: 0 0 14px rgba(124, 58, 237, 0.35) !important;
+  border-radius: 9999px !important;
 }
-
 html[data-ui-style="glassmorphism"] .nav-item-active span {
   color: #ffffff !important;
 }
-
 html[data-ui-style="glassmorphism"] .nav-item-active svg {
   color: #c084fc !important;
 }
-
 html[data-ui-style="glassmorphism"] .nav-item-active kbd {
   background-color: #162232 !important;
   border-color: #27394f !important;
   color: #7890ad !important;
 }
 
-/* Paneles y Contenedores Principales (White cards -> Deep Slate Navy) */
+/* Paneles y Contenedores Principales */
 html[data-ui-style="glassmorphism"] .bg-white {
   background: #182333 !important;
   border-color: #283a50 !important;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35) !important;
   color: #f8fafc !important;
 }
-
-/* Cabeceras de paneles (bg-slate-50 / bg-slate-100) */
 html[data-ui-style="glassmorphism"] .bg-slate-50,
 html[data-ui-style="glassmorphism"] .bg-slate-100 {
   background-color: #141e2b !important;
   border-color: #202e40 !important;
   color: #e2e8f0 !important;
 }
-
 html[data-ui-style="glassmorphism"] .border-slate-200,
 html[data-ui-style="glassmorphism"] .border-slate-300 {
   border-color: #26384e !important;
 }
 
 /* Barra de Búsqueda */
+html[data-ui-style="glassmorphism"] .pos-search-input,
 html[data-ui-style="glassmorphism"] input {
   background-color: #162232 !important;
   border-color: #293c52 !important;
   color: #ffffff !important;
 }
-
 html[data-ui-style="glassmorphism"] input::placeholder {
   color: #64748b !important;
 }
 
-/* Botones de Acción Superiores (Gaveta, Fotos, Celular Escáner) */
+/* Botones Superiores */
+html[data-ui-style="glassmorphism"] .pos-header-btn-cream,
+html[data-ui-style="glassmorphism"] .pos-btn-gaveta,
 html[data-ui-style="glassmorphism"] .p-3.border-b button {
   background-color: #133240 !important;
   border-color: #0891b2 !important;
   color: #22d3ee !important;
 }
-
+html[data-ui-style="glassmorphism"] .pos-header-btn-cream:hover,
+html[data-ui-style="glassmorphism"] .pos-btn-gaveta:hover,
 html[data-ui-style="glassmorphism"] .p-3.border-b button:hover {
   background-color: #164255 !important;
   border-color: #06b6d4 !important;
   color: #67e8f9 !important;
 }
 
-/* Pastillas de Filtro de Categoría */
+/* Categorías en Glassmorphism */
+html[data-ui-style="glassmorphism"] .pos-categories-bar,
 html[data-ui-style="glassmorphism"] .overflow-x-auto {
   background-color: #151f2c !important;
   border-color: #202e40 !important;
 }
-
+html[data-ui-style="glassmorphism"] .pos-category-inactive,
 html[data-ui-style="glassmorphism"] .overflow-x-auto button {
   background-color: #112d3d !important;
   border-color: #0e7490 !important;
   color: #38bdf8 !important;
 }
-
+html[data-ui-style="glassmorphism"] .pos-category-inactive:hover,
 html[data-ui-style="glassmorphism"] .overflow-x-auto button:hover {
   background-color: #163a4d !important;
   color: #67e8f9 !important;
 }
-
+html[data-ui-style="glassmorphism"] .pos-category-active,
 html[data-ui-style="glassmorphism"] .overflow-x-auto button.brand-badge {
   background-color: #8b5cf6 !important;
   border-color: #a78bfa !important;
@@ -407,167 +685,133 @@ html[data-ui-style="glassmorphism"] .overflow-x-auto button.brand-badge {
   box-shadow: 0 2px 10px rgba(139, 92, 246, 0.45) !important;
 }
 
-/* Tarjetas de Producto */
+/* Tarjetas de Producto en Glassmorphism */
+html[data-ui-style="glassmorphism"] .pos-product-card,
 html[data-ui-style="glassmorphism"] button.h-48,
 html[data-ui-style="glassmorphism"] button.min-h-\[135px\] {
-  background: linear-gradient(180deg, #1d2b3d 0%, #172232 100%) !important;
-  border: 1px solid #2d405b !important;
+  background: linear-gradient(180deg, #223348 0%, #1a2738 100%) !important;
+  border: 1px solid #334a66 !important;
+  border-radius: 14px !important;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35) !important;
 }
-
+html[data-ui-style="glassmorphism"] .pos-product-card:hover,
 html[data-ui-style="glassmorphism"] button.h-48:hover,
 html[data-ui-style="glassmorphism"] button.min-h-\[135px\]:hover {
-  background: linear-gradient(180deg, #24354c 0%, #1a2739 100%) !important;
-  border-color: #3b5376 !important;
+  background: linear-gradient(180deg, #283d57 0%, #1e2e42 100%) !important;
+  border-color: #38bdf8 !important;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5) !important;
   transform: translateY(-2px);
 }
-
+html[data-ui-style="glassmorphism"] .pos-product-title,
 html[data-ui-style="glassmorphism"] button.h-48 h4,
 html[data-ui-style="glassmorphism"] button.min-h-\[135px\] h4 {
   color: #ffffff !important;
 }
-
-/* Barcode */
+html[data-ui-style="glassmorphism"] .pos-card-barcode,
 html[data-ui-style="glassmorphism"] button.min-h-\[135px\] .font-mono.text-slate-400 {
-  color: #6b829e !important;
+  color: #7890ad !important;
 }
-
-/* Category Badge */
+html[data-ui-style="glassmorphism"] .pos-card-category-pill,
 html[data-ui-style="glassmorphism"] button.min-h-\[135px\] span.border,
 html[data-ui-style="glassmorphism"] button.h-48 span.border {
-  background-color: #1f2e42 !important;
-  border-color: #344b67 !important;
+  background-color: #1b2a3a !important;
+  border-color: #334a66 !important;
   color: #94a3b8 !important;
 }
-
-/* Precios: USD blanco, VES cyan */
+html[data-ui-style="glassmorphism"] .pos-price-usd,
 html[data-ui-style="glassmorphism"] button.h-48 .text-slate-900,
 html[data-ui-style="glassmorphism"] button.min-h-\[135px\] .text-slate-900 {
   color: #ffffff !important;
+  font-weight: 900 !important;
 }
-
+html[data-ui-style="glassmorphism"] .pos-price-ves,
 html[data-ui-style="glassmorphism"] button.h-48 .text-slate-600,
 html[data-ui-style="glassmorphism"] button.min-h-\[135px\] .text-slate-600 {
   color: #38bdf8 !important;
+  font-weight: 800 !important;
 }
-
-/* Stock Pill */
+html[data-ui-style="glassmorphism"] .pos-card-stock-pill,
 html[data-ui-style="glassmorphism"] button.min-h-\[135px\] span.bg-slate-100 {
-  background-color: #223348 !important;
-  border: 1px solid #2f435d !important;
-  color: #8fa7c4 !important;
+  background-color: #172332 !important;
+  border: 1px solid #2b3e55 !important;
+  color: #94a3b8 !important;
 }
 
-/* Jerarquía de Textos en Glassmorphism */
-html[data-ui-style="glassmorphism"] .text-slate-900,
-html[data-ui-style="glassmorphism"] .text-slate-800,
-html[data-ui-style="glassmorphism"] .text-slate-700 {
-  color: #f8fafc !important;
+/* Panel Derecho Cart en Glassmorphism */
+html[data-ui-style="glassmorphism"] .pos-cart-panel {
+  background-color: #1a2636 !important;
 }
-
-html[data-ui-style="glassmorphism"] .text-slate-600 {
-  color: #38bdf8 !important;
+html[data-ui-style="glassmorphism"] .pos-cart-container {
+  background-color: #182333 !important;
+  border-color: #283a50 !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35) !important;
 }
-
-html[data-ui-style="glassmorphism"] .text-slate-500,
-html[data-ui-style="glassmorphism"] .text-slate-400 {
-  color: #7890ad !important;
+html[data-ui-style="glassmorphism"] .pos-ticket-badge {
+  background-color: #8b5cf6 !important;
+  border-color: #a78bfa !important;
+  color: #ffffff !important;
 }
-
-/* Total a Cobrar en Bolívares en morado/rosa */
+html[data-ui-style="glassmorphism"] .pos-total-usd {
+  color: #ffffff !important;
+  font-weight: 900 !important;
+}
+html[data-ui-style="glassmorphism"] .pos-total-ves,
 html[data-ui-style="glassmorphism"] span.text-sky-700 {
-  color: #c084fc !important;
+  color: #38bdf8 !important;
+  font-weight: 800 !important;
 }
-
-/* Botón Cobrar Venta F12 */
+html[data-ui-style="glassmorphism"] .pos-btn-cobrar,
 html[data-ui-style="glassmorphism"] button.bg-emerald-600 {
-  background-color: #1b4b5e !important;
+  background-color: #164e63 !important;
   border: 1px solid #0891b2 !important;
   color: #ffffff !important;
   box-shadow: 0 4px 14px rgba(8, 145, 178, 0.3) !important;
 }
-
+html[data-ui-style="glassmorphism"] .pos-btn-cobrar:hover,
 html[data-ui-style="glassmorphism"] button.bg-emerald-600:hover {
-  background-color: #165a73 !important;
+  background-color: #0e7490 !important;
   border-color: #06b6d4 !important;
 }
 
-html[data-ui-style="glassmorphism"] button.bg-emerald-600 kbd {
-  background-color: #113645 !important;
-  color: #67e8f9 !important;
-  border: 1px solid #0e7490 !important;
+/* Teclado Numérico en Glassmorphism */
+html[data-ui-style="glassmorphism"] .pos-numpad-container {
+  background-color: #15202e !important;
+  border-color: #24354b !important;
 }
-
-/* ========================================================================= */
-/* TECLADO NUMÉRICO TÁCTIL (BLUEPRINT / SLATE-NAVY)                          */
-/* ========================================================================= */
 html[data-ui-style="glassmorphism"] .pos-numpad-key {
-  background-color: #2b4052 !important;
-  border-color: #39556c !important;
+  background-color: #233448 !important;
+  border-color: #334a66 !important;
   color: #ffffff !important;
   font-size: 1.25rem !important;
   font-weight: 700 !important;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
 }
-
 html[data-ui-style="glassmorphism"] .pos-numpad-key:hover {
-  background-color: #344d62 !important;
-  border-color: #486a86 !important;
+  background-color: #2d435c !important;
+  border-color: #3b5376 !important;
 }
-
-/* Tecla Borrar y Limpiar (Coral Red) */
-html[data-ui-style="glassmorphism"] .pos-numpad-action.text-rose-600,
-html[data-ui-style="glassmorphism"] .pos-numpad-action.text-slate-600 {
+html[data-ui-style="glassmorphism"] .pos-numpad-action {
+  background-color: #1c2a3b !important;
+  border-color: #2d425c !important;
+  color: #94a3b8 !important;
+}
+html[data-ui-style="glassmorphism"] .pos-numpad-action.text-rose-600 {
   background-color: #b24747 !important;
   border-color: #c45656 !important;
   color: #ffffff !important;
-  font-weight: 700 !important;
-  font-size: 1.15rem !important;
 }
-
-html[data-ui-style="glassmorphism"] .pos-numpad-action.text-rose-600:hover,
-html[data-ui-style="glassmorphism"] .pos-numpad-action.text-slate-600:hover {
-  background-color: #c95151 !important;
-  border-color: #d86565 !important;
-}
-
-/* Tecla Enter / Aplicar (Purple / Violet) */
+html[data-ui-style="glassmorphism"] .pos-numpad-enter,
 html[data-ui-style="glassmorphism"] .pos-numpad-action.bg-sky-700 {
-  background-color: #8b5cf6 !important;
-  border-color: #a78bfa !important;
+  background-color: #7c3aed !important;
+  border-color: #8b5cf6 !important;
   color: #ffffff !important;
-  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4) !important;
+  box-shadow: 0 4px 14px rgba(124, 58, 237, 0.4) !important;
 }
-
+html[data-ui-style="glassmorphism"] .pos-numpad-enter:hover,
 html[data-ui-style="glassmorphism"] .pos-numpad-action.bg-sky-700:hover {
   background-color: #9d72f9 !important;
 }
 
-html[data-ui-style="glassmorphism"] .pos-numpad-action.bg-sky-700 span {
-  color: #ffffff !important;
-}
-
-/* Display del Teclado Numérico */
-html[data-ui-style="glassmorphism"] .h-9.bg-slate-100 {
-  background-color: #15202e !important;
-  border-color: #27394d !important;
-}
-
-html[data-ui-style="glassmorphism"] .h-9.bg-slate-100 span.text-sky-700 {
-  color: #c084fc !important;
-}
-
-/* Tabs Cantidad / Código en Teclado */
-html[data-ui-style="glassmorphism"] .bg-slate-100 button {
-  color: #7890ad !important;
-}
-
-html[data-ui-style="glassmorphism"] .bg-slate-100 button.bg-white {
-  background-color: #264152 !important;
-  color: #38bdf8 !important;
-  border: 1px solid #33566d !important;
-}
 
 /* Contenedor de preview de foto en modal con fondo neutro de contraste */
 .product-preview-box {
@@ -686,57 +930,7 @@ html[data-ui-style="glassmorphism"] thead.bg-slate-100 {
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5));
 }
 
-/* MODO INDUSTRIAL PROFESIONAL (Sólido táctil, máxima visibilidad y contraste dinámico) */
-html[data-ui-style="industrial"] body {
-  background-color: var(--industrial-bg, #f8fafc) !important;
-  color: var(--industrial-text, #0f172a) !important;
-}
 
-html[data-ui-style="industrial"] header,
-html[data-ui-style="industrial"] aside,
-html[data-ui-style="industrial"] .bg-white {
-  background-color: var(--industrial-card, #ffffff) !important;
-  border-color: var(--industrial-border, #cbd5e1) !important;
-  color: var(--industrial-text, #0f172a) !important;
-}
-
-html[data-ui-style="industrial"] h1,
-html[data-ui-style="industrial"] h2,
-html[data-ui-style="industrial"] h3,
-html[data-ui-style="industrial"] h4,
-html[data-ui-style="industrial"] h5 {
-  color: var(--industrial-text, #0f172a) !important;
-}
-
-html[data-ui-style="industrial"] .text-slate-900,
-html[data-ui-style="industrial"] .text-slate-800,
-html[data-ui-style="industrial"] .text-slate-700 {
-  color: var(--industrial-text, #0f172a) !important;
-}
-
-html[data-ui-style="industrial"] .text-slate-600,
-html[data-ui-style="industrial"] .text-slate-500 {
-  color: var(--industrial-text-muted, #475569) !important;
-}
-
-html[data-ui-style="industrial"] .text-slate-400 {
-  color: var(--industrial-text-muted, #64748b) !important;
-}
-
-html[data-ui-style="industrial"] p {
-  color: var(--industrial-text-muted, #334155) !important;
-}
-
-html[data-ui-style="industrial"] button.bg-white {
-  background-color: var(--btn-secondary-bg, #ffffff) !important;
-  color: var(--btn-secondary-text, #0f172a) !important;
-  border-color: var(--btn-secondary-border, #cbd5e1) !important;
-}
-
-html[data-ui-style="industrial"] button.bg-white:hover {
-  background-color: var(--industrial-bg, #f8fafc) !important;
-  border-color: var(--industrial-border, #94a3b8) !important;
-}
 
 /* Forzar contraste máximo y nitidez en la tabla de inventario */
 html[data-ui-style="industrial"] .inventory-table-row td,
