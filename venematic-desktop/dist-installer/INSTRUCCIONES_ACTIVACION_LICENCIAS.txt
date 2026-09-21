@@ -1,0 +1,102 @@
+================================================================================
+         VENEMATIC POS ENTERPRISE - MANUAL DE GESTIÓN Y ACTIVACIÓN DE LICENCIAS
+================================================================================
+
+Este documento detalla el procedimiento completo para activar terminales de punto
+de venta en computadoras de clientes, así como la forma en que tú (como dueño o
+distribuidor del software) generas las claves de activación.
+
+El sistema funciona de forma 100% OFFLINE (fuera de línea), lo que significa que
+las terminales se activan inmediatamente sin necesidad de que la PC tenga acceso
+a internet.
+
+================================================================================
+1. ¿CÓMO SOLICITA LA LICENCIA EL CLIENTE? (PASO A PASO)
+================================================================================
+
+Cuando el cliente instala Venematic POS en su computadora:
+
+1. Abre la aplicación haciendo doble clic en el icono "Venematic POS" del Escritorio.
+2. En el menú lateral izquierdo, hace clic en "Configuración" (icono de engranaje ⚙️).
+3. Selecciona la opción "Licenciamiento y Activación".
+4. Verá una tarjeta informativa con su "Hardware ID de la Máquina" (HWID).
+   Ejemplo de código: VN8F-3A12-9C84-7F21
+5. El cliente pulsa el botón "Copiar HWID" y te envía por WhatsApp, mensaje o correo:
+   - Su código HWID copiado.
+   - El RIF o Cédula de su negocio (ejemplo: J-12345678-9).
+
+================================================================================
+2. ¿CÓMO GENERAS TÚ LA CLAVE DE ACTIVACIÓN? (DUEÑO / DISTRIBUIDOR)
+================================================================================
+
+Tienes dos formas sumamente sencillas de generar la clave para tu cliente:
+
+--------------------------------------------------------------------------------
+MÉTODO A: MEDIANTE EL GENERADOR DE 1 CLIC (RECOMENDADO)
+--------------------------------------------------------------------------------
+1. En tu computadora principal, ve a la carpeta del proyecto y haz doble clic sobre:
+   "GENERAR_LICENCIA.bat"
+
+2. Se abrirá una ventana interactiva que te solicitará:
+   - Paso 1: Pega el HWID del cliente (ej: VN8F-3A12-9C84-7F21).
+   - Paso 2: Escribe el RIF o Cédula del comercio (ej: J-12345678-9).
+   - Paso 3: Selecciona el plan:
+       [1] Vitalicia / Perpetua (Pago único, sin vencimiento).
+       [2] Anual (Suscripción válida por 365 días con contador regresivo).
+       [3] Demo / Prueba (Válida por 30 días para demostración).
+
+3. El sistema generará instantáneamente una clave criptográfica como esta:
+   VNK-VIT-PERP-4A9F-2B81-70CE-8842
+
+4. Copia esa clave y envíasela a tu cliente.
+
+--------------------------------------------------------------------------------
+MÉTODO B: DESDE LA MISMA APLICACIÓN VENEMATIC POS
+--------------------------------------------------------------------------------
+1. Abre Venematic POS y ve a "Configuración" ➔ "Licenciamiento".
+2. En la parte superior de la ventana modal, haz clic en la pestaña oculta:
+   "Generador Privado (Keygen Propietario)".
+3. Escribe o pega el HWID del cliente y su RIF.
+4. Selecciona el tipo de plan y haz clic en "Generar Licencia Criptográfica".
+5. Copia la clave generada y envíala al cliente.
+
+================================================================================
+3. ¿CÓMO ACTIVA LA TERMINAL EL CLIENTE? (FINALIZACIÓN)
+================================================================================
+
+Una vez que el cliente recibe la clave:
+
+1. Abre "Configuración" ➔ "Licenciamiento".
+2. En la pestaña "Activar Terminal":
+   - Se asegura de que su RIF esté colocado correctamente.
+   - Pega la clave recibida en el campo "Clave de Producto (Product Key)".
+   - Pulsa el botón "Activar Ahora".
+3. El sistema verificará la firma criptográfica en milisegundos.
+4. El indicador cambiará a color verde:
+   "✓ Licencia Activa y Verificada"
+   La terminal queda activada y desbloqueada inmediatamente.
+
+================================================================================
+4. SEGURIDAD Y PREGUNTAS FRECUENTES (FAQ)
+================================================================================
+
+P: ¿Qué pasa si el cliente copia la carpeta o clona el disco duro a otra PC?
+R: La nueva PC generará un Hardware ID (HWID) distinto. Al no coincidir el HWID
+   con la firma criptográfica de la clave, la aplicación detectará la alteración
+   y exigirá una nueva licencia para esa máquina. Esto protege tus ingresos.
+
+P: ¿Qué ocurre si la computadora del cliente no tiene internet?
+R: No importa en absoluto. Toda la validación matemática se ejecuta en el chip
+   local mediante HMAC-SHA256. Funciona en zonas remotas o sin conexión.
+
+P: ¿Qué ocurre si el cliente intenta atrasar la fecha de Windows para burlar la
+   licencia anual?
+R: El motor anti-tamper compara la fecha del reloj contra la fecha de las últimas
+   ventas registradas en la base de datos SQLite. Si detecta discrepancias en el
+   tiempo, bloquea temporalmente las ventas hasta normalizar el reloj.
+
+P: ¿Cómo renovar una licencia anual vencida?
+R: Cuando el contador de días llegue a 0, el cliente te solicitará la renovación.
+   Tú simplemente ejecutas "GENERAR_LICENCIA.bat", seleccionas opción 2 (Anual) y
+   le entregas la nueva clave para otros 365 días.
+================================================================================
