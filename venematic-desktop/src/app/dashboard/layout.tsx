@@ -12,6 +12,7 @@ import LockScreenModal from '@/components/LockScreenModal';
 import { LogOut, ShieldCheck, User, Lock, RefreshCw, CheckCircle2, Sun, Sparkles } from 'lucide-react';
 import { STANDARD_RUBROS, StandardRubroId } from '@/lib/utils/business-rubros';
 import { applyBrandingToDOM } from '@/lib/theme';
+import CloudSyncWidget from '@/components/CloudSyncWidget';
 
 interface NavItem {
   key: string;
@@ -508,6 +509,8 @@ export default function DesktopDashboardLayout({
               <span className="w-2 h-2 rounded-full bg-emerald-500" />
               Terminal Offline 100% Local
             </span>
+            <span className="text-slate-400">|</span>
+            <CloudSyncWidget />
             <span className="text-slate-400">|</span>
             {phoneConnected ? (
               <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-300 font-bold text-[11px] shadow-2xs animate-in fade-in">

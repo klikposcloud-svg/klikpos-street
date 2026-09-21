@@ -5,6 +5,7 @@ import { db } from '@/lib/db';
 import { initializeDatabaseIfNeeded } from '@/lib/seed-data';
 import BrandingSettings from '@/components/BrandingSettings';
 import LicenseActivationModal from '@/components/LicenseActivationModal';
+import CloudSyncSettingsCard from '@/components/CloudSyncSettingsCard';
 import { useAuth } from '@/context/AuthContext';
 import { ShieldAlert, ShieldCheck, ArrowLeft, Scale, CheckCircle2, AlertCircle, RefreshCw, Zap } from 'lucide-react';
 import Link from 'next/link';
@@ -368,6 +369,9 @@ export default function DesktopSettingsPage() {
           </div>
         </div>
       </div>
+
+      {/* Panel de Sincronización en la Nube Firestore */}
+      <CloudSyncSettingsCard />
 
       {/* Sección Periféricos: Balanza Electrónica Digital */}
       <DigitalScaleSettingsSection />
