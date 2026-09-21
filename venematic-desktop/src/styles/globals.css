@@ -203,14 +203,14 @@ textarea:focus,
 
 /* ========================================================================= */
 /* ========================================================================= */
-/* MODO BLANCO SOFT UI (REFINE: ENHANCED CONTRAST SOFT UI)                   */
+/* MODO INDUSTRIAL PROFESIONAL (SOFT UI DINÁMICO SEGÚN PALETA Y RUBRO)       */
 /* ========================================================================= */
 html[data-ui-style="industrial"],
 html[data-ui-style="professional"],
 html:not([data-ui-style="glassmorphism"]) {
   color-scheme: light;
-  background-color: #f3eee7 !important;
-  color: #0f172a !important;
+  background-color: var(--industrial-bg, #f3eee7) !important;
+  color: var(--industrial-text, #0f172a) !important;
 }
 
 html[data-ui-style="industrial"] body,
@@ -219,8 +219,8 @@ html:not([data-ui-style="glassmorphism"]) body,
 html[data-ui-style="industrial"] main,
 html[data-ui-style="professional"] main,
 html:not([data-ui-style="glassmorphism"]) main {
-  background-color: #f3eee7 !important;
-  color: #0f172a !important;
+  background-color: var(--industrial-bg, #f3eee7) !important;
+  color: var(--industrial-text, #0f172a) !important;
 }
 
 /* Cabecera y Barra Lateral */
@@ -230,33 +230,33 @@ html:not([data-ui-style="glassmorphism"]) header,
 html[data-ui-style="industrial"] aside,
 html[data-ui-style="professional"] aside,
 html:not([data-ui-style="glassmorphism"]) aside {
-  background-color: #f3eee7 !important;
-  border-color: #ded8cd !important;
-  color: #0f172a !important;
+  background-color: var(--industrial-bg, #f3eee7) !important;
+  border-color: var(--industrial-border, #ded8cd) !important;
+  color: var(--industrial-text, #0f172a) !important;
 }
 
 /* Enlaces del Menú Lateral */
 html[data-ui-style="industrial"] aside a:not(.nav-item-active),
 html:not([data-ui-style="glassmorphism"]) aside a:not(.nav-item-active) {
-  color: #334155 !important;
+  color: var(--industrial-text-muted, #334155) !important;
 }
 html[data-ui-style="industrial"] aside a:not(.nav-item-active):hover,
 html:not([data-ui-style="glassmorphism"]) aside a:not(.nav-item-active):hover {
-  background-color: #ede8df !important;
-  color: #0f172a !important;
+  background-color: var(--btn-secondary-bg, #ede8df) !important;
+  color: var(--industrial-text, #0f172a) !important;
 }
 html[data-ui-style="industrial"] aside a:not(.nav-item-active) span,
 html:not([data-ui-style="glassmorphism"]) aside a:not(.nav-item-active) span {
-  color: #475569 !important;
+  color: var(--industrial-text-muted, #475569) !important;
 }
 
-/* Ítem Activo en Sidebar: Pill Blanca con Texto e Ícono Púrpura */
+/* Ítem Activo en Sidebar: Pill Blanca con Color Primario de la Paleta */
 html[data-ui-style="industrial"] aside .nav-item-active,
 html[data-ui-style="professional"] aside .nav-item-active,
 html:not([data-ui-style="glassmorphism"]) aside .nav-item-active {
-  background-color: #ffffff !important;
-  color: #6d28d9 !important;
-  border-color: #ded8cd !important;
+  background-color: var(--industrial-card, #ffffff) !important;
+  color: var(--brand-primary, #6d28d9) !important;
+  border-color: var(--industrial-border, #ded8cd) !important;
   border-radius: 9999px !important;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
 }
@@ -266,29 +266,30 @@ html:not([data-ui-style="glassmorphism"]) aside .nav-item-active span,
 html[data-ui-style="industrial"] aside .nav-item-active svg,
 html[data-ui-style="professional"] aside .nav-item-active svg,
 html:not([data-ui-style="glassmorphism"]) aside .nav-item-active svg {
-  color: #6d28d9 !important;
+  color: var(--brand-primary, #6d28d9) !important;
 }
 html[data-ui-style="industrial"] aside .nav-item-active kbd,
 html[data-ui-style="professional"] aside .nav-item-active kbd,
 html:not([data-ui-style="glassmorphism"]) aside .nav-item-active kbd {
-  background-color: #ede8df !important;
-  color: #475569 !important;
-  border-color: #ded8cd !important;
+  background-color: var(--btn-secondary-bg, #ede8df) !important;
+  color: var(--industrial-text-muted, #475569) !important;
+  border-color: var(--industrial-border, #ded8cd) !important;
 }
 
 /* Header Brand Badge */
 html[data-ui-style="industrial"] header .brand-badge,
+html[data-ui-style="industrial"] .brand-badge,
 html:not([data-ui-style="glassmorphism"]) header .brand-badge {
-  background-color: #6d28d9 !important;
-  border-color: #5b21b6 !important;
+  background-color: var(--brand-primary, #6d28d9) !important;
+  border-color: var(--brand-hover, #5b21b6) !important;
   color: #ffffff !important;
 }
 
 /* Tasa BCV Header */
 html[data-ui-style="industrial"] header button.bg-slate-50,
 html:not([data-ui-style="glassmorphism"]) header button.bg-slate-50 {
-  background-color: #ede8df !important;
-  border-color: #ded8cd !important;
+  background-color: var(--btn-secondary-bg, #ede8df) !important;
+  border-color: var(--industrial-border, #ded8cd) !important;
 }
 html[data-ui-style="industrial"] header button.bg-slate-50 span.underline,
 html:not([data-ui-style="glassmorphism"]) header button.bg-slate-50 span.underline {
@@ -298,16 +299,16 @@ html:not([data-ui-style="glassmorphism"]) header button.bg-slate-50 span.underli
 /* Toggle de Tema */
 html[data-ui-style="industrial"] .pos-theme-toggle,
 html:not([data-ui-style="glassmorphism"]) .pos-theme-toggle {
-  background-color: #ede8df !important;
-  border-color: #ded8cd !important;
-  color: #6d28d9 !important;
+  background-color: var(--btn-secondary-bg, #ede8df) !important;
+  border-color: var(--industrial-border, #ded8cd) !important;
+  color: var(--brand-primary, #6d28d9) !important;
 }
 
 /* Barra Superior del POS (Buscador y Herramientas) */
 html[data-ui-style="industrial"] .border-b.border-slate-200.bg-white,
 html:not([data-ui-style="glassmorphism"]) .border-b.border-slate-200.bg-white {
-  background-color: #f3eee7 !important;
-  border-color: #ded8cd !important;
+  background-color: var(--industrial-bg, #f3eee7) !important;
+  border-color: var(--industrial-border, #ded8cd) !important;
 }
 
 /* Input de Búsqueda */
@@ -315,16 +316,16 @@ html[data-ui-style="industrial"] .pos-search-input,
 html[data-ui-style="industrial"] input[type="text"],
 html:not([data-ui-style="glassmorphism"]) .pos-search-input,
 html:not([data-ui-style="glassmorphism"]) input[type="text"] {
-  background-color: #ede8df !important;
-  border-color: #ded8cd !important;
-  color: #0f172a !important;
+  background-color: var(--btn-secondary-bg, #ede8df) !important;
+  border-color: var(--industrial-border, #ded8cd) !important;
+  color: var(--industrial-text, #0f172a) !important;
   border-radius: 9999px !important;
 }
 html[data-ui-style="industrial"] .pos-search-input::placeholder,
 html[data-ui-style="industrial"] input[type="text"]::placeholder,
 html:not([data-ui-style="glassmorphism"]) .pos-search-input::placeholder,
 html:not([data-ui-style="glassmorphism"]) input[type="text"]::placeholder {
-  color: #64748b !important;
+  color: var(--industrial-text-muted, #64748b) !important;
 }
 
 /* Botón Gaveta (Ámbar / Naranja Cálido) */
@@ -344,46 +345,46 @@ html:not([data-ui-style="glassmorphism"]) .pos-btn-gaveta:hover {
 /* Botones Superiores Soft Cream (Fotos, Celular) */
 html[data-ui-style="industrial"] .pos-header-btn-cream,
 html:not([data-ui-style="glassmorphism"]) .pos-header-btn-cream {
-  background-color: #ede8df !important;
-  border-color: #ded8cd !important;
-  color: #1e293b !important;
+  background-color: var(--btn-secondary-bg, #ede8df) !important;
+  border-color: var(--industrial-border, #ded8cd) !important;
+  color: var(--industrial-text, #1e293b) !important;
   border-radius: 10px !important;
 }
 
 /* Barra de Categorías */
 html[data-ui-style="industrial"] .pos-categories-bar,
 html:not([data-ui-style="glassmorphism"]) .pos-categories-bar {
-  background-color: #f3eee7 !important;
-  border-color: #ded8cd !important;
+  background-color: var(--industrial-bg, #f3eee7) !important;
+  border-color: var(--industrial-border, #ded8cd) !important;
 }
 
-/* Categoría Activa: Púrpura Sólido con Texto Blanco */
+/* Categoría Activa: Dinámica según Paleta del Rubro */
 html[data-ui-style="industrial"] .pos-category-active,
 html:not([data-ui-style="glassmorphism"]) .pos-category-active {
-  background-color: #6d28d9 !important;
-  border-color: #5b21b6 !important;
+  background-color: var(--brand-primary, #6d28d9) !important;
+  border-color: var(--brand-hover, #5b21b6) !important;
   color: #ffffff !important;
-  box-shadow: 0 2px 8px rgba(109, 40, 217, 0.3) !important;
+  box-shadow: 0 2px 8px var(--brand-glow, rgba(109, 40, 217, 0.3)) !important;
 }
 
-/* Categorías Inactivas: Soft Cream con Texto Oscuro */
+/* Categorías Inactivas: Soft con Texto Oscuro */
 html[data-ui-style="industrial"] .pos-category-inactive,
 html:not([data-ui-style="glassmorphism"]) .pos-category-inactive {
-  background-color: #ede8df !important;
-  border-color: #ded8cd !important;
-  color: #334155 !important;
+  background-color: var(--btn-secondary-bg, #ede8df) !important;
+  border-color: var(--industrial-border, #ded8cd) !important;
+  color: var(--industrial-text-muted, #334155) !important;
 }
 html[data-ui-style="industrial"] .pos-category-inactive:hover,
 html:not([data-ui-style="glassmorphism"]) .pos-category-inactive:hover {
-  background-color: #e5dfd5 !important;
-  color: #0f172a !important;
+  background-color: var(--industrial-card, #ffffff) !important;
+  color: var(--industrial-text, #0f172a) !important;
 }
 
 /* Tarjetas de Producto Soft UI */
 html[data-ui-style="industrial"] .pos-product-card,
 html:not([data-ui-style="glassmorphism"]) .pos-product-card {
-  background-color: #ffffff !important;
-  border: 1px solid #e5ded4 !important;
+  background-color: var(--industrial-card, #ffffff) !important;
+  border: 1px solid var(--industrial-border, #ded8cd) !important;
   border-radius: 14px !important;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.03) !important;
 }
@@ -391,21 +392,21 @@ html[data-ui-style="industrial"] .pos-product-card:hover,
 html:not([data-ui-style="glassmorphism"]) .pos-product-card:hover {
   transform: translateY(-2px) !important;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08) !important;
-  border-color: #d6cdc1 !important;
+  border-color: var(--brand-border, #ded8cd) !important;
 }
 
 /* Código de Barras */
 html[data-ui-style="industrial"] .pos-card-barcode,
 html:not([data-ui-style="glassmorphism"]) .pos-card-barcode {
-  color: #64748b !important;
+  color: var(--industrial-text-muted, #64748b) !important;
 }
 
 /* Pastilla de Rubro / Categoría */
 html[data-ui-style="industrial"] .pos-card-category-pill,
 html:not([data-ui-style="glassmorphism"]) .pos-card-category-pill {
-  background-color: #e2e8f0 !important;
-  border-color: #cbd5e1 !important;
-  color: #1e293b !important;
+  background-color: var(--brand-light, #f5f3ff) !important;
+  border-color: var(--brand-border, #d8b4fe) !important;
+  color: var(--brand-primary, #6d28d9) !important;
   font-weight: 800 !important;
   border-radius: 6px !important;
 }
@@ -413,14 +414,14 @@ html:not([data-ui-style="glassmorphism"]) .pos-card-category-pill {
 /* Nombre de Producto */
 html[data-ui-style="industrial"] .pos-product-title,
 html:not([data-ui-style="glassmorphism"]) .pos-product-title {
-  color: #1e293b !important;
+  color: var(--industrial-text, #1e293b) !important;
   font-weight: 700 !important;
 }
 
 /* Precios: USD en Negro Profundo, VES en Rojo Terracota */
 html[data-ui-style="industrial"] .pos-price-usd,
 html:not([data-ui-style="glassmorphism"]) .pos-price-usd {
-  color: #0f172a !important;
+  color: var(--industrial-text, #0f172a) !important;
   font-weight: 900 !important;
   font-size: 1.25rem !important;
 }
@@ -434,9 +435,9 @@ html:not([data-ui-style="glassmorphism"]) .pos-price-ves {
 /* Pastilla de Stock */
 html[data-ui-style="industrial"] .pos-card-stock-pill,
 html:not([data-ui-style="glassmorphism"]) .pos-card-stock-pill {
-  background-color: #ede8df !important;
-  border-color: #ded8cd !important;
-  color: #334155 !important;
+  background-color: var(--btn-secondary-bg, #ede8df) !important;
+  border-color: var(--industrial-border, #ded8cd) !important;
+  color: var(--industrial-text-muted, #334155) !important;
   font-weight: 700 !important;
   border-radius: 6px !important;
 }
@@ -444,17 +445,17 @@ html:not([data-ui-style="glassmorphism"]) .pos-card-stock-pill {
 /* Panel Derecho (Ticket y Numpad) */
 html[data-ui-style="industrial"] .pos-cart-panel,
 html:not([data-ui-style="glassmorphism"]) .pos-cart-panel {
-  background-color: #f3eee7 !important;
+  background-color: var(--industrial-bg, #f3eee7) !important;
 }
 html[data-ui-style="industrial"] .pos-tab-cart,
 html:not([data-ui-style="glassmorphism"]) .pos-tab-cart {
-  background-color: #ede8df !important;
-  color: #0f172a !important;
+  background-color: var(--btn-secondary-bg, #ede8df) !important;
+  color: var(--industrial-text, #0f172a) !important;
 }
 html[data-ui-style="industrial"] .pos-cart-container,
 html:not([data-ui-style="glassmorphism"]) .pos-cart-container {
-  background-color: #ffffff !important;
-  border: 1px solid #e5ded4 !important;
+  background-color: var(--industrial-card, #ffffff) !important;
+  border: 1px solid var(--industrial-border, #ded8cd) !important;
   border-radius: 18px !important;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05) !important;
 }
@@ -472,7 +473,7 @@ html:not([data-ui-style="glassmorphism"]) .pos-ticket-badge {
 /* Gran Total */
 html[data-ui-style="industrial"] .pos-total-usd,
 html:not([data-ui-style="glassmorphism"]) .pos-total-usd {
-  color: #0f172a !important;
+  color: var(--industrial-text, #0f172a) !important;
   font-weight: 900 !important;
   font-size: 1.65rem !important;
 }
@@ -501,30 +502,30 @@ html:not([data-ui-style="glassmorphism"]) .pos-btn-cobrar:hover {
 /* Numpad Soft UI */
 html[data-ui-style="industrial"] .pos-numpad-container,
 html:not([data-ui-style="glassmorphism"]) .pos-numpad-container {
-  background-color: #ede8df !important;
-  border: 1px solid #ded8cd !important;
+  background-color: var(--btn-secondary-bg, #ede8df) !important;
+  border: 1px solid var(--industrial-border, #ded8cd) !important;
   border-radius: 18px !important;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
 }
 html[data-ui-style="industrial"] .pos-numpad-key,
 html:not([data-ui-style="glassmorphism"]) .pos-numpad-key {
-  background-color: #ffffff !important;
-  color: #0f172a !important;
-  border: 1px solid #ded8cd !important;
+  background-color: var(--industrial-card, #ffffff) !important;
+  color: var(--industrial-text, #0f172a) !important;
+  border: 1px solid var(--industrial-border, #ded8cd) !important;
   border-radius: 12px !important;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06) !important;
   font-weight: 800 !important;
 }
 html[data-ui-style="industrial"] .pos-numpad-key:hover,
 html:not([data-ui-style="glassmorphism"]) .pos-numpad-key:hover {
-  background-color: #faf9f6 !important;
+  background-color: var(--btn-secondary-bg, #ede8df) !important;
   transform: translateY(-1px) !important;
 }
 html[data-ui-style="industrial"] .pos-numpad-action,
 html:not([data-ui-style="glassmorphism"]) .pos-numpad-action {
-  background-color: #ffffff !important;
-  color: #334155 !important;
-  border: 1px solid #ded8cd !important;
+  background-color: var(--industrial-card, #ffffff) !important;
+  color: var(--industrial-text-muted, #334155) !important;
+  border: 1px solid var(--industrial-border, #ded8cd) !important;
   border-radius: 12px !important;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06) !important;
 }

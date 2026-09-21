@@ -128,11 +128,12 @@ export default function DesktopDashboardLayout({
       setCurrentUIStyle(s);
       const palette = localStorage.getItem('venematic_branding_palette') || 'purple';
       const industrialBg = (localStorage.getItem('venematic_industrial_bg') as any) || 'white';
+      const customBg = localStorage.getItem('venematic_custom_bg_color') || '#f3eee7';
       applyBrandingToDOM({
         paletteId: palette,
         uiStyle: s,
         industrialBg: industrialBg,
-        customBgColor: '#f3eee7',
+        customBgColor: customBg,
       });
     } catch {}
 
@@ -149,22 +150,23 @@ export default function DesktopDashboardLayout({
     const nextStyle = currentUIStyle === 'glassmorphism' ? 'industrial' : 'glassmorphism';
     setCurrentUIStyle(nextStyle);
     const palette = localStorage.getItem('venematic_branding_palette') || 'purple';
+    const industrialBg = (localStorage.getItem('venematic_industrial_bg') as any) || 'white';
+    const customBg = localStorage.getItem('venematic_custom_bg_color') || '#f3eee7';
     applyBrandingToDOM({
       paletteId: palette,
       uiStyle: nextStyle,
-      industrialBg: 'white',
-      customBgColor: '#f3eee7',
+      industrialBg: industrialBg,
+      customBgColor: customBg,
     });
     try {
       localStorage.setItem('venematic_ui_style', nextStyle);
-      localStorage.setItem('venematic_industrial_bg', 'white');
       db.settings.put({
         key: 'branding_config',
         value: {
           paletteId: palette,
           uiStyle: nextStyle,
-          industrialBg: 'white',
-          customBgColor: '#f3eee7',
+          industrialBg: industrialBg,
+          customBgColor: customBg,
         },
       }).catch(() => {});
     } catch {}
