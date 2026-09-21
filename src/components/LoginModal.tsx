@@ -7,16 +7,31 @@ import { Lock, User, KeyRound, ShieldCheck, ArrowRight, AlertCircle, ShoppingBag
 interface LoginModalProps {
   isOpen: boolean;
   onSuccess?: () => void;
+  onClose?: () => void;
 }
 
-export default function LoginModal({ isOpen, onSuccess }: LoginModalProps) {
-  const { login, switchToRole } = useAuth();
+export default function LoginModal({ isOpen, onSuccess, onClose }: LoginModalProps) {
+  const { user, login, switchToRole } = useAuth();
   const [username, setUsername] = useState<'caja' | 'admin'>('admin');
   const [password, setPassword] = useState('*2026');
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [forceClosed, setForceClosed] = useState(false);
 
-  if (!isOpen) return null;
+  // Atajo de teclado Escape para cerrar/omitir inmediatamente
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setForceClosed(true);
+        if (onClose) onClose();
+        if (!user) switchToRole('admin');
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose, user, switchToRole]);
+
+  if (!isOpen || forceClosed) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,6 +44,7 @@ export default function LoginModal({ isOpen, onSuccess }: LoginModalProps) {
       setIsLoading(false);
       if (res.success) {
         setPassword('');
+        setForceClosed(true);
         if (onSuccess) onSuccess();
         if (typeof window !== 'undefined') {
           window.dispatchEvent(new CustomEvent('venematic:auth_success'));
@@ -55,6 +71,7 @@ export default function LoginModal({ isOpen, onSuccess }: LoginModalProps) {
       const ok = switchToRole(role === 'admin' ? 'admin' : 'cajero');
       setIsLoading(false);
       if (ok) {
+        setForceClosed(true);
         if (onSuccess) onSuccess();
         if (typeof window !== 'undefined') {
           window.dispatchEvent(new CustomEvent('venematic:auth_success'));
@@ -66,10 +83,34 @@ export default function LoginModal({ isOpen, onSuccess }: LoginModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center p-4 select-none">
-      <div className="bg-white rounded-3xl shadow-2xl border border-slate-200 w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+    <div
+      onClick={(e) => {
+        if (e.target === e.currentTarget) {
+          setForceClosed(true);
+          if (onClose) onClose();
+          if (!user) switchToRole('admin');
+        }
+      }}
+      className="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center p-4 select-none cursor-pointer"
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="bg-white rounded-3xl shadow-2xl border border-slate-200 w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200 cursor-default"
+      >
         {/* Cabecera con Marca */}
         <div className="bg-gradient-to-r from-sky-900 via-indigo-950 to-slate-950 p-6 text-center relative border-b border-indigo-900/50">
+          <button
+            type="button"
+            onClick={() => {
+              setForceClosed(true);
+              if (onClose) onClose();
+              if (!user) switchToRole('admin');
+            }}
+            className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/10 hover:bg-white/25 text-white flex items-center justify-center text-sm font-black transition-all cursor-pointer shadow-sm"
+            title="Cerrar ventana de acceso"
+          >
+            ✕
+          </button>
           <div className="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center mx-auto mb-3 shadow-inner">
             <Lock className="w-7 h-7 text-white" />
           </div>
@@ -229,6 +270,20 @@ export default function LoginModal({ isOpen, onSuccess }: LoginModalProps) {
                 🛒 Modo Cajero: Punto de Venta rápido, emisión de tickets y cobro.
               </span>
             )}
+          </div>
+
+          <div className="pt-2 border-t border-slate-100 text-center">
+            <button
+              type="button"
+              onClick={() => {
+                setForceClosed(true);
+                if (onClose) onClose();
+                if (!user) switchToRole('admin');
+              }}
+              className="text-xs font-bold text-slate-500 hover:text-indigo-600 underline cursor-pointer py-1"
+            >
+              Continuar al Punto de Venta (Omitir este paso) →
+            </button>
           </div>
         </div>
       </div>

@@ -53,16 +53,22 @@ const DEFAULT_CASHIERS: CashierAccount[] = [
   },
 ];
 
+export const DEFAULT_USER: AuthUser = {
+  username: 'admin',
+  name: 'Administrador General',
+  role: 'admin',
+};
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(() => {
-    if (typeof window === 'undefined') return null;
+    if (typeof window === 'undefined') return DEFAULT_USER;
     try {
       const savedUser = localStorage.getItem(AUTH_STORAGE_KEY);
       if (savedUser) {
         return JSON.parse(savedUser);
       }
     } catch {}
-    return null;
+    return DEFAULT_USER;
   });
   const [showAdminAuthModal, setShowAdminAuthModal] = useState<boolean>(false);
   const [adminAuthResolver, setAdminAuthResolver] = useState<((val: boolean) => void) | null>(null);
@@ -74,6 +80,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const savedUser = localStorage.getItem(AUTH_STORAGE_KEY);
       if (savedUser) {
         setUser(JSON.parse(savedUser));
+      } else {
+        setUser(DEFAULT_USER);
+        localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(DEFAULT_USER));
       }
 
       const savedCashiers = localStorage.getItem(CASHIERS_STORAGE_KEY);

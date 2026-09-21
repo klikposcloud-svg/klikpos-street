@@ -112,6 +112,7 @@ export default function DesktopDashboardLayout({
   const [phoneDeviceName, setPhoneDeviceName] = useState<string>('');
   const [currentTime, setCurrentTime] = useState('');
   const [isScreenLocked, setIsScreenLocked] = useState(false);
+  const [isLoginDismissed, setIsLoginDismissed] = useState(false);
   const [activeRubroInfo, setActiveRubroInfo] = useState<{ id: string; name: string; icon: string }>({
     id: 'bodega',
     name: 'Bodega',
@@ -586,7 +587,10 @@ export default function DesktopDashboardLayout({
               </button>
               <button
                 type="button"
-                onClick={() => logout()}
+                onClick={() => {
+                  setIsLoginDismissed(false);
+                  logout();
+                }}
                 className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
                 title="Cerrar Sesión / Cambiar Usuario"
               >
@@ -603,7 +607,14 @@ export default function DesktopDashboardLayout({
       </div>
 
       {/* Modal de Inicio de Sesión Obligatorio */}
-      <LoginModal isOpen={!user} />
+      <LoginModal
+        isOpen={!user && !isLoginDismissed}
+        onSuccess={() => setIsLoginDismissed(true)}
+        onClose={() => {
+          setIsLoginDismissed(true);
+          if (!user) switchToRole('admin');
+        }}
+      />
 
       {/* Modal de Bloqueo Rápido de Pantalla */}
       <LockScreenModal
