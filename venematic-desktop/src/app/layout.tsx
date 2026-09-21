@@ -48,7 +48,7 @@ export default function RootLayout({
                   root.setAttribute('data-industrial-bg', bgPreset);
 
                   var bgThemes = {
-                    white: { bg: '#ffffff', card: '#ffffff', text: '#0f172a', muted: '#475569', border: '#e2e8f0', secBg: '#f8fafc', secBorder: '#cbd5e1', secText: '#1e293b' },
+                    white: { bg: '#f3eee7', card: '#ffffff', text: '#0f172a', muted: '#475569', border: '#ded8cd', secBg: '#ede8df', secBorder: '#ded8cd', secText: '#334155' },
                     teal: { bg: '#f0fdfa', card: '#ffffff', text: '#042f2e', muted: '#115e59', border: '#99f6e4', secBg: '#ffffff', secBorder: '#5eead4', secText: '#0f766e' },
                     blue: { bg: '#f0f9ff', card: '#ffffff', text: '#082f49', muted: '#0369a1', border: '#bae6fd', secBg: '#ffffff', secBorder: '#7dd3fc', secText: '#0284c7' },
                     gray: { bg: '#f1f5f9', card: '#ffffff', text: '#0f172a', muted: '#334155', border: '#cbd5e1', secBg: '#ffffff', secBorder: '#cbd5e1', secText: '#1e293b' }

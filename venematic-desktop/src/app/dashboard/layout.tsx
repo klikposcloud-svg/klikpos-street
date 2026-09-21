@@ -126,6 +126,14 @@ export default function DesktopDashboardLayout({
     try {
       const s = (localStorage.getItem('venematic_ui_style') as 'industrial' | 'glassmorphism') || 'industrial';
       setCurrentUIStyle(s);
+      const palette = localStorage.getItem('venematic_branding_palette') || 'purple';
+      const industrialBg = (localStorage.getItem('venematic_industrial_bg') as any) || 'white';
+      applyBrandingToDOM({
+        paletteId: palette,
+        uiStyle: s,
+        industrialBg: industrialBg,
+        customBgColor: '#f3eee7',
+      });
     } catch {}
 
     const handleBrandingUpdated = (e: any) => {
@@ -140,12 +148,12 @@ export default function DesktopDashboardLayout({
   const handleToggleUIStyle = () => {
     const nextStyle = currentUIStyle === 'glassmorphism' ? 'industrial' : 'glassmorphism';
     setCurrentUIStyle(nextStyle);
-    const palette = localStorage.getItem('venematic_branding_palette') || 'sky';
+    const palette = localStorage.getItem('venematic_branding_palette') || 'purple';
     applyBrandingToDOM({
       paletteId: palette,
       uiStyle: nextStyle,
       industrialBg: 'white',
-      customBgColor: '#ffffff',
+      customBgColor: '#f3eee7',
     });
     try {
       localStorage.setItem('venematic_ui_style', nextStyle);
@@ -156,7 +164,7 @@ export default function DesktopDashboardLayout({
           paletteId: palette,
           uiStyle: nextStyle,
           industrialBg: 'white',
-          customBgColor: '#ffffff',
+          customBgColor: '#f3eee7',
         },
       }).catch(() => {});
     } catch {}
