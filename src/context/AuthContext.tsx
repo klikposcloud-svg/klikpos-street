@@ -54,7 +54,16 @@ const DEFAULT_CASHIERS: CashierAccount[] = [
 ];
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<AuthUser | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(() => {
+    if (typeof window === 'undefined') return null;
+    try {
+      const savedUser = localStorage.getItem(AUTH_STORAGE_KEY);
+      if (savedUser) {
+        return JSON.parse(savedUser);
+      }
+    } catch {}
+    return null;
+  });
   const [showAdminAuthModal, setShowAdminAuthModal] = useState<boolean>(false);
   const [adminAuthResolver, setAdminAuthResolver] = useState<((val: boolean) => void) | null>(null);
   const [cashiers, setCashiers] = useState<CashierAccount[]>(DEFAULT_CASHIERS);

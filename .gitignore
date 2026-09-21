@@ -42,3 +42,11 @@ next-env.d.ts
 /venematic-desktop/node_modules/
 /venematic-desktop/.next/
 /venematic-desktop/src-tauri/target/
+
+# security & secrets
+*private_key*
+*.key
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+

@@ -20,19 +20,26 @@ export default function LoginModal({ isOpen, onSuccess }: LoginModalProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     setError(null);
     setIsLoading(true);
 
-    setTimeout(() => {
+    try {
       const res = login(username, password);
       setIsLoading(false);
       if (res.success) {
         setPassword('');
         if (onSuccess) onSuccess();
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('venematic:auth_success'));
+        }
       } else {
         setError(res.error || 'Credenciales inválidas');
       }
-    }, 150);
+    } catch (err: any) {
+      setIsLoading(false);
+      setError('Error interno al autenticar.');
+    }
   };
 
   const handleSelectRole = (role: 'caja' | 'admin') => {
@@ -44,11 +51,18 @@ export default function LoginModal({ isOpen, onSuccess }: LoginModalProps) {
   const handleDirectLogin = (role: 'caja' | 'admin') => {
     setError(null);
     setIsLoading(true);
-    setTimeout(() => {
+    try {
       const ok = switchToRole(role === 'admin' ? 'admin' : 'cajero');
       setIsLoading(false);
-      if (ok && onSuccess) onSuccess();
-    }, 150);
+      if (ok) {
+        if (onSuccess) onSuccess();
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('venematic:auth_success'));
+        }
+      }
+    } catch {
+      setIsLoading(false);
+    }
   };
 
   return (
