@@ -9,9 +9,9 @@ use sales::transaction::{execute_atomic_sale, CreateSalePayload, TransactionSucc
 use std::sync::Mutex;
 use tauri::State;
 
-// Clave pública incrustada de la firma desarrolladora (32 bytes en Hex)
+// Clave pública maestra incrustada de la firma desarrolladora (32 bytes en Hex Ed25519)
 const EMBEDDED_PUBLIC_KEY_HEX: &str =
-    "a5c88c740a340798e1694f4c281df6f8bb151e60f2bb9dcf4682498dbfb3ff75";
+    "2efad00db8074a49088705bda159541f973db2f1adc4bba374120032c00b6972";
 
 struct AppState {
     db_conn: Mutex<rusqlite::Connection>,
