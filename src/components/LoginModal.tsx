@@ -55,12 +55,14 @@ export default function LoginModal({ isOpen, onSuccess }: LoginModalProps) {
     <div className="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center p-4 select-none">
       <div className="bg-white rounded-3xl shadow-2xl border border-slate-200 w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
         {/* Cabecera con Marca */}
-        <div className="bg-gradient-to-r from-sky-800 via-indigo-900 to-slate-950 p-6 text-white text-center relative">
+        <div className="bg-gradient-to-r from-sky-900 via-indigo-950 to-slate-950 p-6 text-center relative border-b border-indigo-900/50">
           <div className="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center mx-auto mb-3 shadow-inner">
             <Lock className="w-7 h-7 text-white" />
           </div>
-          <h2 className="text-xl font-black tracking-tight">Acceso al Sistema Venematic</h2>
-          <p className="text-xs text-sky-200 mt-1">
+          <h2 className="text-xl font-black tracking-tight !text-white" style={{ color: '#ffffff' }}>
+            Acceso al Sistema Venematic
+          </h2>
+          <p className="text-xs font-semibold !text-sky-200 mt-1" style={{ color: '#bae6fd' }}>
             Selecciona tu perfil de usuario para iniciar operaciones
           </p>
         </div>

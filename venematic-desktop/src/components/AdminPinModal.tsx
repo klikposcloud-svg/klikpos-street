@@ -35,7 +35,9 @@ export default function AdminPinModal() {
         <div className="bg-slate-900 text-white p-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <ShieldAlert className="w-5 h-5 text-amber-400" />
-            <h3 className="font-bold text-sm tracking-tight">Autorización de Administrador</h3>
+            <h3 className="font-bold text-sm tracking-tight text-white !text-white" style={{ color: '#ffffff' }}>
+              Autorización de Administrador
+            </h3>
           </div>
           <button
             onClick={handleClose}

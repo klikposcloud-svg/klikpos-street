@@ -4,8 +4,9 @@ import React, { useState, useEffect } from 'react';
 import { db } from '@/lib/db';
 import { initializeDatabaseIfNeeded } from '@/lib/seed-data';
 import BrandingSettings from '@/components/BrandingSettings';
+import LicenseActivationModal from '@/components/LicenseActivationModal';
 import { useAuth } from '@/context/AuthContext';
-import { ShieldAlert, ArrowLeft, Scale, CheckCircle2, AlertCircle, RefreshCw, Zap } from 'lucide-react';
+import { ShieldAlert, ShieldCheck, ArrowLeft, Scale, CheckCircle2, AlertCircle, RefreshCw, Zap } from 'lucide-react';
 import Link from 'next/link';
 import { scaleService, ScaleProtocol, WeightReading, PriceMultiplierBasis } from '@/lib/hardware/scale';
 import { getScaleBarcodeConfig, saveScaleBarcodeConfig, ScaleBarcodeConfig } from '@/lib/hardware/scale-barcode';
@@ -13,6 +14,7 @@ import { getScaleBarcodeConfig, saveScaleBarcodeConfig, ScaleBarcodeConfig } fro
 export default function DesktopSettingsPage() {
   const { isAdmin, switchToRole } = useAuth();
   const [unlockPass, setUnlockPass] = useState('*2026');
+  const [showLicenseModal, setShowLicenseModal] = useState(false);
   const [storeName, setStoreName] = useState('');
   const [rif, setRif] = useState('');
   const [phone, setPhone] = useState('');
@@ -176,11 +178,22 @@ export default function DesktopSettingsPage() {
           </p>
         </div>
 
-        {savedSuccess && (
-          <span className="text-xs font-bold text-emerald-700 bg-emerald-100 px-3 py-1.5 rounded-lg">
-            ✓ Configuración guardada correctamente
-          </span>
-        )}
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setShowLicenseModal(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-800 text-xs font-bold transition-all shadow-xs"
+          >
+            <ShieldCheck className="w-4 h-4 text-indigo-600" />
+            <span>Licenciamiento y HWID</span>
+          </button>
+
+          {savedSuccess && (
+            <span className="text-xs font-bold text-emerald-700 bg-emerald-100 px-3 py-1.5 rounded-lg">
+              ✓ Guardado
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Selector de Marca y Modo de Interfaz (10 Paletas + Industrial vs Glassmorphism) */}
@@ -361,6 +374,12 @@ export default function DesktopSettingsPage() {
 
       {/* Sección Exclusiva Administrador: Gestión de Cajeros y Credenciales de Seguridad */}
       <CashiersManagementSection />
+
+      {/* Modal de Licenciamiento y HWID */}
+      <LicenseActivationModal
+        isOpen={showLicenseModal}
+        onClose={() => setShowLicenseModal(false)}
+      />
     </div>
   );
 }

@@ -25,14 +25,14 @@ input, textarea {
 
 html {
   color-scheme: only light !important;
-  background-color: #ffffff !important;
-  color: #0f172a !important;
+  background-color: #ffffff;
+  color: #0f172a;
 }
 
 body {
   color-scheme: only light !important;
   background-color: #f8fafc;
-  color: #0f172a !important;
+  color: #0f172a;
   font-family: var(--font-sans);
   height: 100%;
   width: 100%;
