@@ -2,7 +2,7 @@
 const nextConfig = {
   reactStrictMode: true,
   // Para Tauri podemos habilitar export estático cuando se haga el build final
-  output: process.env.TAURI_BUILD === 'true' ? 'export' : undefined,
+  output: 'standalone',
   images: {
     unoptimized: true,
   },

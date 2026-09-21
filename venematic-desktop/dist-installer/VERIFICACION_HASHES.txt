@@ -1,0 +1,15 @@
+================================================================================
+             INTEGRIDAD Y SUMAS DE VERIFICACION CRIPTOGRAFICA (HASHES)
+================================================================================
+
+Paquete: Venematic-POS-Setup-v2.0.0.exe
+Version: 2.0.0
+Fecha de emision: 21 de Septiembre de 2026
+
+Algoritmo SHA256:
+9082BC235D0F24AB2AE1B66817281FA6D64B008620FCA91AEFD1A635FD68A8C6
+
+Para verificar la integridad del instalador en cualquier computadora:
+PowerShell:
+  Get-FileHash Venematic-POS-Setup-v2.0.0.exe -Algorithm SHA256
+================================================================================

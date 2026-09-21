@@ -42,6 +42,7 @@ next-env.d.ts
 /venematic-desktop/node_modules/
 /venematic-desktop/.next/
 /venematic-desktop/src-tauri/target/
+/venematic-desktop/build-staging/
 
 # security & secrets
 *private_key*
