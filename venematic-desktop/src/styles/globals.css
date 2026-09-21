@@ -205,7 +205,8 @@ textarea:focus,
 /* MODO INDUSTRIAL PROFESIONAL (Sólido, Claro y Limpio)                      */
 /* ========================================================================= */
 html[data-ui-style="industrial"],
-html:not([data-ui-style]) {
+html[data-ui-style="professional"],
+html:not([data-ui-style="glassmorphism"]) {
   color-scheme: light;
 }
 
@@ -215,41 +216,54 @@ html[data-ui-style="industrial"] main,
 html[data-ui-style="industrial"] .bg-slate-50,
 html[data-ui-style="industrial"] [class*="bg-slate-50"],
 html[data-ui-style="industrial"] .bg-slate-100,
-html[data-ui-style="industrial"] [class*="bg-slate-100"] {
-  background-color: var(--industrial-bg, #f8fafc) !important;
+html[data-ui-style="industrial"] [class*="bg-slate-100"],
+html[data-ui-style="professional"],
+html[data-ui-style="professional"] body,
+html[data-ui-style="professional"] main {
+  background-color: var(--industrial-bg, #ffffff) !important;
 }
 
-html[data-ui-style="industrial"] body {
+html[data-ui-style="industrial"] body,
+html[data-ui-style="professional"] body {
   color: var(--industrial-text, #0f172a) !important;
 }
 
-html[data-ui-style="industrial"] .bg-white {
+html[data-ui-style="industrial"] .bg-white,
+html[data-ui-style="professional"] .bg-white {
   background-color: var(--industrial-card, #ffffff) !important;
 }
 
 html[data-ui-style="industrial"] .border-slate-200,
-html[data-ui-style="industrial"] .border-slate-300 {
+html[data-ui-style="industrial"] .border-slate-300,
+html[data-ui-style="professional"] .border-slate-200,
+html[data-ui-style="professional"] .border-slate-300 {
   border-color: var(--industrial-border, #e2e8f0) !important;
 }
 
 html[data-ui-style="industrial"] .text-slate-900,
-html[data-ui-style="industrial"] .text-slate-800 {
+html[data-ui-style="industrial"] .text-slate-800,
+html[data-ui-style="professional"] .text-slate-900,
+html[data-ui-style="professional"] .text-slate-800 {
   color: var(--industrial-text, #0f172a) !important;
 }
 
 html[data-ui-style="industrial"] .text-slate-600,
-html[data-ui-style="industrial"] .text-slate-500 {
+html[data-ui-style="industrial"] .text-slate-500,
+html[data-ui-style="professional"] .text-slate-600,
+html[data-ui-style="professional"] .text-slate-500 {
   color: var(--industrial-text-muted, #475569) !important;
 }
 
 html[data-ui-style="industrial"] .bg-brand-light,
 html[data-ui-style="industrial"] .bg-sky-50,
-html[data-ui-style="industrial"] .bg-sky-100 {
+html[data-ui-style="industrial"] .bg-sky-100,
+html[data-ui-style="professional"] .bg-brand-light {
   background-color: var(--brand-light) !important;
   color: var(--brand-primary) !important;
 }
 
-html[data-ui-style="industrial"] .pos-btn-secondary {
+html[data-ui-style="industrial"] .pos-btn-secondary,
+html[data-ui-style="professional"] .pos-btn-secondary {
   background-color: var(--btn-secondary-bg, #ffffff) !important;
   border-color: var(--btn-secondary-border, #cbd5e1) !important;
   color: var(--btn-secondary-text, #334155) !important;

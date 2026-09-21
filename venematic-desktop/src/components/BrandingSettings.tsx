@@ -405,33 +405,69 @@ export default function BrandingSettings() {
       </div>
 
       {/* ========================================================================= */}
-      {/* 1. SELECCIÓN DE MODO DE INTERFAZ: INDUSTRIAL VS GLASSMORPHISM             */}
+      {/* 1. SELECCIÓN DE MODO DE INTERFAZ: MODO PROFESIONAL BLANCO VS GLASSMORPHISM */}
       {/* ========================================================================= */}
       <div className="space-y-2.5">
-        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
-          Modo de Apariencia de la Interfaz
-        </label>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+            Modo de Apariencia de la Interfaz
+          </label>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                handleIndustrialBgSelect('white');
+                handleUIStyleSelect('industrial');
+              }}
+              className={`px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all ${
+                selectedUIStyle === 'industrial' && selectedIndustrialBg === 'white'
+                  ? 'bg-slate-900 text-white shadow-xs'
+                  : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300'
+              }`}
+            >
+              <span>☀️ Modo Profesional Blanco</span>
+              {selectedUIStyle === 'industrial' && selectedIndustrialBg === 'white' && <span>✓</span>}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleUIStyleSelect('glassmorphism')}
+              className={`px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all ${
+                selectedUIStyle === 'glassmorphism'
+                  ? 'bg-sky-600 text-white shadow-xs'
+                  : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300'
+              }`}
+            >
+              <Sparkles className="w-3 h-3" />
+              <span>Modo Glassmorphism</span>
+              {selectedUIStyle === 'glassmorphism' && <span>✓</span>}
+            </button>
+          </div>
+        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {/* MODO INDUSTRIAL PROFESIONAL */}
+          {/* MODO PROFESIONAL BLANCO (INDUSTRIAL) */}
           <div
-            onClick={() => handleUIStyleSelect('industrial')}
+            onClick={() => {
+              handleIndustrialBgSelect('white');
+              handleUIStyleSelect('industrial');
+            }}
             className={`p-4 rounded-xl border-2 cursor-pointer transition-all flex flex-col justify-between select-none ${
               selectedUIStyle === 'industrial'
-                ? 'border-sky-600 bg-sky-50/70 shadow-sm'
+                ? 'border-sky-600 bg-white shadow-md ring-1 ring-sky-500'
                 : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50'
             }`}
           >
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-slate-800 text-white flex items-center justify-center">
+                <div className="w-7 h-7 rounded-lg bg-slate-900 text-white flex items-center justify-center">
                   <ShieldCheck className="w-4 h-4" />
                 </div>
                 <div>
                   <h4 className="text-xs font-bold text-slate-900">
-                    Modo Industrial Profesional
+                    Modo Profesional Blanco
                   </h4>
-                  <span className="text-[10px] text-slate-500 font-medium">Alta Densidad • Alto Contraste</span>
+                  <span className="text-[10px] text-emerald-700 font-bold">Fondo Blanco Puro • Máximo Contraste (#ffffff)</span>
                 </div>
               </div>
               {selectedUIStyle === 'industrial' && (
@@ -442,12 +478,13 @@ export default function BrandingSettings() {
             </div>
 
             <p className="text-[11px] text-slate-600 mt-2 leading-relaxed">
-              Superficies sólidas, bordes nítidos de 1px, máximo contraste y respuesta táctil instantánea. Ideal para cajeros de alta rotación y monitores tradicionales.
+              Superficie 100% blanca y limpia, bordes nítidos de 1px, máximo contraste con tipografía oscura profunda y respuesta táctil instantánea. Diseñado para evitar fatiga visual en jornadas largas de caja.
             </p>
 
             <div className="mt-3 pt-2 border-t border-slate-200 flex items-center gap-1.5 text-[10px] font-bold">
-              <span className="px-2 py-0.5 rounded bg-slate-100 border border-slate-300 text-slate-700">Blanco Sólido</span>
+              <span className="px-2 py-0.5 rounded bg-emerald-50 border border-emerald-300 text-emerald-800">Blanco Puro Sólido</span>
               <span className="px-2 py-0.5 rounded bg-slate-100 border border-slate-300 text-slate-700">0% Distracciones</span>
+              <span className="px-2 py-0.5 rounded bg-slate-100 border border-slate-300 text-slate-700">Alta Densidad POS</span>
             </div>
           </div>
 

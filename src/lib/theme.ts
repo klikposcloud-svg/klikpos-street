@@ -172,9 +172,9 @@ export interface IndustrialBgOption {
 export const INDUSTRIAL_BG_PRESETS: IndustrialBgOption[] = [
   {
     id: 'white',
-    name: 'Blanco Clínico Clásico',
-    tagline: 'Máxima claridad y contraste tradicional (#ffffff / #f8fafc)',
-    bgColor: '#f8fafc',
+    name: 'Blanco Puro Profesional',
+    tagline: 'Fondo blanco 100% limpio, máxima nitidez y cero fatiga (#ffffff)',
+    bgColor: '#ffffff',
     previewColor: '#ffffff',
     borderPreview: '#cbd5e1',
   },
@@ -206,7 +206,7 @@ export const INDUSTRIAL_BG_PRESETS: IndustrialBgOption[] = [
     id: 'custom',
     name: 'Color Picker Personalizado',
     tagline: 'Selecciona libremente cualquier tono de color de fondo con el selector',
-    bgColor: '#f8fafc',
+    bgColor: '#ffffff',
     previewColor: '#6366f1',
     borderPreview: '#818cf8',
   },
@@ -338,18 +338,18 @@ export function computeIndustrialThemeVariables(
     }
   }
 
-  // Default 'white'
+  // Default 'white' (Modo Profesional Blanco Puro)
   return {
-    bgColor: '#f8fafc',
+    bgColor: '#ffffff',
     cardColor: '#ffffff',
     textColor: '#0f172a',
     textMuted: '#475569',
     borderColor: '#e2e8f0',
     primaryBg: brandPrimary,
     primaryHover: brandHover,
-    secondaryBg: '#ffffff',
+    secondaryBg: '#f8fafc',
     secondaryBorder: '#cbd5e1',
-    secondaryText: '#334155',
+    secondaryText: '#1e293b',
   };
 }
 
