@@ -1133,6 +1133,27 @@ export default function MobileScannerPage() {
     }
   };
 
+  // Limpiar y resetear el formulario de creación de producto
+  const handleResetCreateForm = () => {
+    setProdPhoto(null);
+    setProdBarcode('');
+    setProdName('');
+    setProdCategory('Víveres');
+    setProdPriceUSD('');
+    setProdCostUSD('');
+    setProdStock('10');
+    setIsCreatingProd(false);
+    setIsSendingPhoto(false);
+    setIsEnhancingMobileBg(false);
+    setIsAnalyzingMobileAI(false);
+    setPhotoSentToast(false);
+    setCreateSuccessToast(false);
+    setAiDetectedToast(null);
+    try {
+      localStorage.removeItem('venematic_last_photo');
+    } catch {}
+  };
+
   // Submit new product with photo from phone
   const handleCreateProduct = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -1167,13 +1188,8 @@ export default function MobileScannerPage() {
           navigator.vibrate([100, 50, 100]);
         }
         setCreateSuccessToast(true);
-        // Reset form
-        setProdPhoto(null);
-        setProdBarcode('');
-        setProdName('');
-        setProdPriceUSD('');
-        setProdCostUSD('');
-        setProdStock('10');
+        // Reset form completely
+        handleResetCreateForm();
         setTimeout(() => setCreateSuccessToast(false), 3000);
       } else {
         alert('Error al enviar el producto a la computadora.');
@@ -2245,37 +2261,36 @@ export default function MobileScannerPage() {
             </div>
           )}
 
-          {/* DISPLAY DIGITAL TIPO BALANZA ELECTRÓNICA (TORREY / CAMRY / SYSTEL) */}
-          <div className="bg-slate-950 border-2 border-slate-800 rounded-3xl p-4 shadow-2xl relative overflow-hidden ring-1 ring-cyan-500/20 text-white">
-            {/* Luces Indicadoras Superiores */}
-            <div className="flex items-center justify-between border-b border-slate-800/80 pb-2 mb-3">
-              <div className="flex items-center gap-3">
-                <span className="flex items-center gap-1 text-[10px] font-bold tracking-wider uppercase text-emerald-400">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  ESTABLE
+          {/* DISPLAY DIGITAL TIPO BALANZA ELECTRÓNICA SLIM & ERGONÓMICA */}
+          <div className="bg-slate-950 border-2 border-slate-800 rounded-2xl p-3 shadow-xl relative overflow-hidden ring-1 ring-cyan-500/20 text-white space-y-2">
+            {/* Luces Indicadoras y Unidades en una sola fila compacta */}
+            <div className="flex items-center justify-between border-b border-slate-800/80 pb-1.5">
+              <div className="flex items-center gap-2">
+                <span className="flex items-center gap-1 text-[9px] font-bold uppercase text-emerald-400">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  Estable
                 </span>
-                <span className={`flex items-center gap-1 text-[10px] font-bold tracking-wider uppercase ${
+                <span className={`flex items-center gap-1 text-[9px] font-bold uppercase ${
                   scaleWeight === 0 ? 'text-cyan-400' : 'text-slate-600'
                 }`}>
                   <span className={`w-1.5 h-1.5 rounded-full ${scaleWeight === 0 ? 'bg-cyan-400' : 'bg-slate-700'}`} />
-                  CERO
+                  Cero
                 </span>
                 {scaleTare > 0 && (
-                  <span className="flex items-center gap-1 text-[10px] font-bold tracking-wider uppercase text-amber-400">
-                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-                    TARA: {scaleTare.toFixed(3)}kg
+                  <span className="text-[9px] font-bold text-amber-400">
+                    Tara: {scaleTare.toFixed(3)}kg
                   </span>
                 )}
               </div>
 
               {/* Selector de Unidades */}
-              <div className="flex items-center gap-1 bg-slate-900 px-2 py-0.5 rounded-lg border border-slate-800">
+              <div className="flex items-center gap-0.5 bg-slate-900 px-1.5 py-0.5 rounded-lg border border-slate-800">
                 {(['kg', 'g', 'lb'] as const).map((u) => (
                   <button
                     key={u}
                     type="button"
                     onClick={() => setScaleUnit(u)}
-                    className={`px-1.5 py-0.5 rounded text-[10px] font-black uppercase transition-all ${
+                    className={`px-1.5 py-0.5 rounded text-[9px] font-black uppercase transition-all ${
                       scaleUnit === u ? 'bg-cyan-500 text-slate-950' : 'text-slate-400 hover:text-white'
                     }`}
                   >
@@ -2285,64 +2300,79 @@ export default function MobileScannerPage() {
               </div>
             </div>
 
-            {/* Números Gigantes del Peso */}
-            <div className="py-2 flex items-baseline justify-center gap-2">
-              <span className="font-mono font-black text-6xl tracking-tight text-emerald-400 tabular-numbers drop-shadow-[0_0_20px_rgba(52,211,153,0.3)]">
-                {(() => {
-                  const net = Math.max(0, scaleWeight - scaleTare);
-                  if (scaleUnit === 'g') return (net * 1000).toFixed(0);
-                  if (scaleUnit === 'lb') return (net * 2.20462).toFixed(3);
-                  return net.toFixed(3);
-                })()}
-              </span>
-              <span className="font-black text-xl text-slate-400 uppercase tracking-widest">
-                {scaleUnit}
-              </span>
-            </div>
+            {/* Números del Peso y Total en layout balanceado */}
+            <div className="flex items-center justify-between py-0.5">
+              {/* Peso Lectura */}
+              <div className="flex items-baseline gap-1.5">
+                <span
+                  style={{
+                    color: '#00ff66',
+                    WebkitTextFillColor: '#00ff66',
+                    textShadow: '0 0 12px rgba(0, 255, 102, 0.7)',
+                  }}
+                  className="font-mono font-black text-4xl sm:text-5xl tracking-tight tabular-numbers"
+                >
+                  {(() => {
+                    const net = Math.max(0, scaleWeight - scaleTare);
+                    if (scaleUnit === 'g') return (net * 1000).toFixed(0);
+                    if (scaleUnit === 'lb') return (net * 2.20462).toFixed(3);
+                    return net.toFixed(3);
+                  })()}
+                </span>
+                <span className="font-bold text-xs text-slate-400 uppercase tracking-wider">
+                  {scaleUnit}
+                </span>
+              </div>
 
-            {/* Tarjeta de Producto Seleccionado y Cálculo en Tiempo Real */}
-            {scaleSelectedProduct ? (
-              <div className="mt-3 bg-slate-900/90 border border-slate-800 rounded-2xl p-3 flex items-center justify-between gap-2">
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-base">⚖️</span>
-                    <p className="font-black text-sm text-white truncate">
-                      {scaleSelectedProduct.name}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2 mt-0.5 text-xs text-slate-400 font-mono">
-                    <span>${scaleSelectedProduct.priceUSD.toFixed(2)}/kg</span>
-                    <span>•</span>
-                    <span>Bs. {(scaleSelectedProduct.priceUSD * inventoryBcvRate).toFixed(2)}/kg</span>
-                  </div>
-                </div>
-
-                {/* Importe Calculado */}
-                {(() => {
+              {/* Importe Calculado */}
+              {scaleSelectedProduct ? (
+                (() => {
                   const net = Math.max(0, scaleWeight - scaleTare);
                   const totalLineUSD = net * scaleSelectedProduct.priceUSD;
                   const totalLineVES = totalLineUSD * inventoryBcvRate;
                   return (
-                    <div className="text-right shrink-0">
-                      <p className="font-mono font-black text-xl text-emerald-400 tabular-numbers">
+                    <div className="text-right">
+                      <p
+                        style={{ color: '#00ff66', WebkitTextFillColor: '#00ff66' }}
+                        className="font-mono font-black text-2xl tabular-numbers leading-tight"
+                      >
                         ${totalLineUSD.toFixed(2)}
                       </p>
-                      <p className="font-mono font-bold text-[11px] text-slate-400 tabular-numbers">
-                        Bs. {totalLineVES.toFixed(2)}
+                      <p className="font-mono font-bold text-[10px] text-emerald-300 tabular-numbers">
+                        ≈ Bs. {totalLineVES.toFixed(2)}
                       </p>
                     </div>
                   );
-                })()}
+                })()
+              ) : (
+                <div className="text-right">
+                  <span className="text-[10px] text-slate-500 font-medium block">Sin producto</span>
+                  <span className="text-[11px] text-slate-400 font-mono font-bold">$0.00</span>
+                </div>
+              )}
+            </div>
+
+            {/* Fila del Producto Seleccionado */}
+            {scaleSelectedProduct ? (
+              <div className="pt-1.5 border-t border-slate-800/80 flex items-center justify-between text-xs">
+                <span className="font-bold text-white truncate max-w-[200px]">
+                  ⚖️ {scaleSelectedProduct.name}
+                </span>
+                <span className="text-slate-400 font-mono text-[11px]">
+                  ${scaleSelectedProduct.priceUSD.toFixed(2)}/kg
+                </span>
               </div>
             ) : (
-              <div className="mt-3 bg-slate-900/50 border border-dashed border-slate-800 rounded-2xl p-2.5 text-center text-xs text-slate-400">
-                Selecciona un producto pesable abajo para calcular el precio
+              <div className="pt-1 border-t border-slate-800/60 text-center">
+                <span className="text-[10px] text-slate-400">
+                  Selecciona un rubro en la lista inferior para calcular importe
+                </span>
               </div>
             )}
           </div>
 
-          {/* BOTONES RÁPIDOS DE OPERACIÓN DE BALANZA (CERO, TARA, NUMPAD, ENVIAR PC) */}
-          <div className="grid grid-cols-4 gap-2">
+          {/* BOTONES DE OPERACIÓN: CERO, TARA, TECLADO, ENVIAR PC (SLIM) */}
+          <div className="grid grid-cols-4 gap-1.5">
             <button
               type="button"
               onClick={() => {
@@ -2350,10 +2380,10 @@ export default function MobileScannerPage() {
                 setScaleWeight(0);
                 setScaleTare(0);
               }}
-              className="py-2.5 bg-white hover:bg-slate-50 border border-slate-300 rounded-2xl text-xs font-black text-slate-700 shadow-2xs active:scale-95 transition-all flex flex-col items-center"
+              className="py-2 bg-white hover:bg-slate-100 border border-slate-200 rounded-xl text-[11px] font-black text-slate-700 shadow-2xs active:scale-95 transition-all flex items-center justify-center gap-1"
             >
-              <span className="text-sm">🔄</span>
-              <span>CERO</span>
+              <span>🔄</span>
+              <span>Cero</span>
             </button>
 
             <button
@@ -2366,14 +2396,14 @@ export default function MobileScannerPage() {
                   setScaleTare(scaleWeight);
                 }
               }}
-              className={`py-2.5 rounded-2xl text-xs font-black shadow-2xs active:scale-95 transition-all flex flex-col items-center border ${
+              className={`py-2 rounded-xl text-[11px] font-black shadow-2xs active:scale-95 transition-all flex items-center justify-center gap-1 border ${
                 scaleTare > 0
                   ? 'bg-amber-100 text-amber-900 border-amber-300'
-                  : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-300'
+                  : 'bg-white hover:bg-slate-100 text-slate-700 border-slate-200'
               }`}
             >
-              <span className="text-sm">⚖️</span>
-              <span>{scaleTare > 0 ? 'DES-TARAR' : 'TARAR'}</span>
+              <span>⚖️</span>
+              <span>{scaleTare > 0 ? 'Des-tarar' : 'Tarar'}</span>
             </button>
 
             <button
@@ -2383,80 +2413,68 @@ export default function MobileScannerPage() {
                   setScaleWeight(val);
                 });
               }}
-              className="py-2.5 bg-white hover:bg-slate-50 border border-slate-300 rounded-2xl text-xs font-black text-slate-700 shadow-2xs active:scale-95 transition-all flex flex-col items-center"
+              className="py-2 bg-white hover:bg-slate-100 border border-slate-200 rounded-xl text-[11px] font-black text-slate-700 shadow-2xs active:scale-95 transition-all flex items-center justify-center gap-1"
             >
-              <span className="text-sm">⌨️</span>
-              <span>TECLADO</span>
+              <span>⌨️</span>
+              <span>Manual</span>
             </button>
 
             <button
               type="button"
               onClick={handleSendWeightToPC}
-              className="py-2.5 bg-sky-50 hover:bg-sky-100 border border-sky-300 rounded-2xl text-xs font-black text-sky-800 shadow-2xs active:scale-95 transition-all flex flex-col items-center"
-              title="Enviar lectura a la PC en vivo"
+              className="py-2 bg-sky-50 hover:bg-sky-100 border border-sky-300 rounded-xl text-[11px] font-black text-sky-800 shadow-2xs active:scale-95 transition-all flex items-center justify-center gap-1"
+              title="Enviar lectura a la PC"
             >
-              <span className="text-sm">📡</span>
-              <span>ENVIAR PC</span>
+              <span>📡</span>
+              <span>Enviar PC</span>
             </button>
           </div>
 
-          {/* PRESETS RÁPIDOS DE PESO (100g, 250g, 500g, 1kg, 2kg, etc.) */}
-          <div className="bg-white p-3 rounded-2xl border border-slate-200 shadow-2xs space-y-2">
-            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
-              Pesos Rápidos / Frecuentes
+          {/* PRESETS RÁPIDOS DE PESO: CHIPS COMPACTOS CON SCROLL HORIZONTAL */}
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 no-scrollbar">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wide shrink-0 pl-0.5">
+              Frecuentes:
             </span>
-            <div className="grid grid-cols-4 sm:grid-cols-6 gap-1.5">
-              {[
-                { label: '100 g', val: 0.100 },
-                { label: '250 g', val: 0.250 },
-                { label: '500 g', val: 0.500 },
-                { label: '750 g', val: 0.750 },
-                { label: '1.0 kg', val: 1.000 },
-                { label: '1.5 kg', val: 1.500 },
-                { label: '2.0 kg', val: 2.000 },
-                { label: '3.0 kg', val: 3.000 },
-              ].map((preset) => (
-                <button
-                  key={preset.label}
-                  type="button"
-                  onClick={() => {
-                    if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(15);
-                    setScaleWeight(preset.val);
-                  }}
-                  className={`py-2 px-1 rounded-xl text-xs font-mono font-bold border transition-all ${
-                    Math.abs(scaleWeight - preset.val) < 0.001
-                      ? 'bg-emerald-600 text-white border-emerald-600 shadow-2xs scale-105'
-                      : 'bg-slate-50 hover:bg-slate-100 text-slate-800 border-slate-200'
-                  }`}
-                >
-                  {preset.label}
-                </button>
-              ))}
-            </div>
-
-            {/* Ajuste fino (+10g, +50g, +100g, -100g) */}
-            <div className="flex items-center justify-between pt-1 border-t border-slate-100 text-xs">
-              <span className="text-[10px] text-slate-400 font-bold">Ajuste Fino:</span>
-              <div className="flex gap-1">
-                {[
-                  { label: '-100g', delta: -0.100 },
-                  { label: '-50g', delta: -0.050 },
-                  { label: '+50g', delta: 0.050 },
-                  { label: '+100g', delta: 0.100 },
-                ].map((step) => (
-                  <button
-                    key={step.label}
-                    type="button"
-                    onClick={() => {
-                      if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10);
-                      setScaleWeight((prev) => Math.max(0, Number((prev + step.delta).toFixed(3))));
-                    }}
-                    className="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[11px] font-mono font-bold"
-                  >
-                    {step.label}
-                  </button>
-                ))}
-              </div>
+            {[
+              { label: '100g', val: 0.100 },
+              { label: '250g', val: 0.250 },
+              { label: '500g', val: 0.500 },
+              { label: '750g', val: 0.750 },
+              { label: '1kg', val: 1.000 },
+              { label: '1.5kg', val: 1.500 },
+              { label: '2kg', val: 2.000 },
+            ].map((preset) => (
+              <button
+                key={preset.label}
+                type="button"
+                onClick={() => {
+                  if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(15);
+                  setScaleWeight(preset.val);
+                }}
+                className={`py-1 px-2.5 rounded-lg text-xs font-mono font-bold shrink-0 border transition-all ${
+                  Math.abs(scaleWeight - preset.val) < 0.001
+                    ? 'bg-emerald-600 text-white border-emerald-600 shadow-2xs'
+                    : 'bg-white hover:bg-slate-100 text-slate-700 border-slate-200'
+                }`}
+              >
+                {preset.label}
+              </button>
+            ))}
+            <div className="flex items-center gap-1 pl-1 border-l border-slate-200 shrink-0">
+              <button
+                type="button"
+                onClick={() => setScaleWeight((p) => Math.max(0, Number((p - 0.050).toFixed(3))))}
+                className="px-2 py-1 bg-slate-100 text-slate-600 font-mono text-[11px] font-bold rounded-lg"
+              >
+                -50g
+              </button>
+              <button
+                type="button"
+                onClick={() => setScaleWeight((p) => Number((p + 0.050).toFixed(3)))}
+                className="px-2 py-1 bg-slate-100 text-slate-600 font-mono text-[11px] font-bold rounded-lg"
+              >
+                +50g
+              </button>
             </div>
           </div>
 
@@ -2466,22 +2484,23 @@ export default function MobileScannerPage() {
               type="button"
               onClick={() => handleAddWeighedToCart(false)}
               disabled={!scaleSelectedProduct || Math.max(0, scaleWeight - scaleTare) <= 0}
-              className="py-3 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-black text-xs rounded-2xl shadow-lg flex items-center justify-center gap-1.5 disabled:opacity-40 transition-all"
+              className="py-2.5 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-black text-xs rounded-xl shadow-md flex items-center justify-center gap-1.5 disabled:opacity-40 transition-all"
             >
               <ShoppingCart className="w-4 h-4" />
-              <span>Agregar a Venta</span>
+              <span>+ Agregar a Venta</span>
             </button>
 
             <button
               type="button"
               onClick={() => handleAddWeighedToCart(true)}
               disabled={!scaleSelectedProduct || Math.max(0, scaleWeight - scaleTare) <= 0}
-              className="py-3 bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-700 hover:to-indigo-700 active:scale-[0.98] text-white font-black text-xs rounded-2xl shadow-lg flex items-center justify-center gap-1.5 disabled:opacity-40 transition-all"
+              className="py-2.5 bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-700 hover:to-indigo-700 active:scale-[0.98] text-white font-black text-xs rounded-xl shadow-md flex items-center justify-center gap-1.5 disabled:opacity-40 transition-all"
             >
               <Banknote className="w-4 h-4" />
               <span>Cobrar Directo</span>
             </button>
           </div>
+
 
           {/* CATÁLOGO DE PRODUCTOS PESABLES (CHARCUTERÍA, QUESOS, CARNES, VERDURAS) */}
           <div className="bg-white p-3 rounded-2xl border border-slate-200 shadow-2xs space-y-2.5">
@@ -2861,6 +2880,25 @@ export default function MobileScannerPage() {
       {/* ========================================================================= */}
       {activeTab === 'create' && (
         <main className="flex-1 min-h-0 flex flex-col p-3 pb-20 overflow-y-auto touch-pan-y">
+          {/* Barra Superior con botón Limpiar / Cancelar */}
+          <div className="flex items-center justify-between mb-2.5 px-0.5">
+            <div>
+              <h2 className="text-xs font-black text-slate-900 uppercase tracking-wide">
+                Registrar Producto
+              </h2>
+              <p className="text-[10px] text-slate-500 font-medium">Foto, código y precio sincronizado con PC</p>
+            </div>
+            <button
+              type="button"
+              onClick={handleResetCreateForm}
+              className="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 text-[11px] font-bold rounded-lg border border-rose-200 flex items-center gap-1 active:scale-95 transition-all shadow-2xs"
+              title="Limpiar y comenzar de cero"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              <span>Limpiar / Cancelar</span>
+            </button>
+          </div>
+
           {createSuccessToast && (
             <div className="mb-3 p-3 bg-emerald-600 text-white rounded-xl text-xs font-bold shadow-md flex items-center gap-2 animate-bounce">
               <CheckCircle2 className="w-5 h-5 shrink-0" />
@@ -2905,7 +2943,12 @@ export default function MobileScannerPage() {
                       </button>
                       <button
                         type="button"
-                        onClick={() => setProdPhoto(null)}
+                        onClick={() => {
+                          setProdPhoto(null);
+                          try {
+                            localStorage.removeItem('venematic_last_photo');
+                          } catch {}
+                        }}
                         className="px-3 py-1.5 bg-rose-600 text-white text-xs font-bold rounded-lg shadow"
                       >
                         Quitar
@@ -3141,16 +3184,25 @@ export default function MobileScannerPage() {
               </div>
             </div>
 
-            <button
-              type="submit"
-              disabled={isCreatingProd}
-              className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-bold text-sm rounded-xl shadow-md flex items-center justify-center gap-2 transition-all disabled:opacity-50 mt-2"
-            >
-              <PackagePlus className="w-5 h-5" />
-              <span>
-                {isCreatingProd ? 'Guardando en PC...' : 'Guardar Producto en Inventario'}
-              </span>
-            </button>
+            <div className="flex gap-2 pt-2">
+              <button
+                type="button"
+                onClick={handleResetCreateForm}
+                className="py-3 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl border border-slate-300 active:scale-95 transition-all"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                disabled={isCreatingProd}
+                className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-bold text-sm rounded-xl shadow-md flex items-center justify-center gap-2 transition-all disabled:opacity-50"
+              >
+                <PackagePlus className="w-5 h-5" />
+                <span>
+                  {isCreatingProd ? 'Guardando en PC...' : 'Guardar Producto en Inventario'}
+                </span>
+              </button>
+            </div>
           </form>
         </main>
       )}
