@@ -9,8 +9,9 @@ import { useAuth } from '@/context/AuthContext';
 import LoginModal from '@/components/LoginModal';
 import AdminPinModal from '@/components/AdminPinModal';
 import LockScreenModal from '@/components/LockScreenModal';
-import { LogOut, ShieldCheck, User, Lock, RefreshCw, CheckCircle2 } from 'lucide-react';
+import { LogOut, ShieldCheck, User, Lock, RefreshCw, CheckCircle2, Sun, Sparkles } from 'lucide-react';
 import { STANDARD_RUBROS, StandardRubroId } from '@/lib/utils/business-rubros';
+import { applyBrandingToDOM } from '@/lib/theme';
 
 interface NavItem {
   key: string;
@@ -118,6 +119,48 @@ export default function DesktopDashboardLayout({
     name: 'Bodega',
     icon: '🏪',
   });
+
+  const [currentUIStyle, setCurrentUIStyle] = useState<'industrial' | 'glassmorphism'>('industrial');
+
+  useEffect(() => {
+    try {
+      const s = (localStorage.getItem('venematic_ui_style') as 'industrial' | 'glassmorphism') || 'industrial';
+      setCurrentUIStyle(s);
+    } catch {}
+
+    const handleBrandingUpdated = (e: any) => {
+      if (e.detail?.uiStyle) {
+        setCurrentUIStyle(e.detail.uiStyle);
+      }
+    };
+    window.addEventListener('venematic:branding_updated', handleBrandingUpdated);
+    return () => window.removeEventListener('venematic:branding_updated', handleBrandingUpdated);
+  }, []);
+
+  const handleToggleUIStyle = () => {
+    const nextStyle = currentUIStyle === 'glassmorphism' ? 'industrial' : 'glassmorphism';
+    setCurrentUIStyle(nextStyle);
+    const palette = localStorage.getItem('venematic_branding_palette') || 'sky';
+    applyBrandingToDOM({
+      paletteId: palette,
+      uiStyle: nextStyle,
+      industrialBg: 'white',
+      customBgColor: '#ffffff',
+    });
+    try {
+      localStorage.setItem('venematic_ui_style', nextStyle);
+      localStorage.setItem('venematic_industrial_bg', 'white');
+      db.settings.put({
+        key: 'branding_config',
+        value: {
+          paletteId: palette,
+          uiStyle: nextStyle,
+          industrialBg: 'white',
+          customBgColor: '#ffffff',
+        },
+      }).catch(() => {});
+    } catch {}
+  };
 
   // Escuchar atajo global de bloqueo rápido de pantalla (Ctrl+L) y eventos
   useEffect(() => {
@@ -471,7 +514,34 @@ export default function DesktopDashboardLayout({
         </div>
 
         {/* Tasa BCV & Reloj de Sistema */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5">
+          {/* Botón de Alternar Modo: Profesional Blanco vs Glassmorphism */}
+          <button
+            type="button"
+            onClick={handleToggleUIStyle}
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold transition-all shadow-xs border select-none ${
+              currentUIStyle === 'industrial'
+                ? 'bg-white border-slate-300 text-slate-800 hover:bg-slate-50 ring-1 ring-slate-200'
+                : 'bg-sky-500/20 border-sky-400 text-sky-100 hover:bg-sky-500/30 ring-1 ring-sky-400/50'
+            }`}
+            title="Haz clic para alternar al instante entre Modo Profesional Blanco y Glassmorphism"
+          >
+            {currentUIStyle === 'industrial' ? (
+              <>
+                <Sun className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                <span>Modo Blanco</span>
+                <span className="text-[9px] bg-emerald-100 text-emerald-800 px-1.5 py-0.2 rounded font-bold border border-emerald-300 uppercase">Activo</span>
+              </>
+            ) : (
+              <>
+                <Sparkles className="w-3.5 h-3.5 text-sky-300 shrink-0" />
+                <span className="font-semibold">☀️ Activar Modo Blanco</span>
+              </>
+            )}
+          </button>
+
+          <span className="h-4 w-px bg-slate-200" />
+
           {/* Tasa BCV con Botón de Ajuste Rápido */}
           <button
             onClick={() => {
