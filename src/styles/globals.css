@@ -955,3 +955,183 @@ html[data-ui-style="industrial"] .inventory-table-row .btn-stock-plus svg {
   color: #ffffff !important;
 }
 
+/* ========================================================================= */
+/* ALTO CONTRASTE Y LEGIBILIDAD TÁCTICA EN MODO GLASSMORPHISM (GLOBAL)       */
+/* ========================================================================= */
+
+/* Títulos, encabezados y textos oscuros por defecto de Tailwind */
+html[data-ui-style="glassmorphism"] h1,
+html[data-ui-style="glassmorphism"] h2,
+html[data-ui-style="glassmorphism"] h3,
+html[data-ui-style="glassmorphism"] h4,
+html[data-ui-style="glassmorphism"] h5,
+html[data-ui-style="glassmorphism"] h6,
+html[data-ui-style="glassmorphism"] .text-slate-900,
+html[data-ui-style="glassmorphism"] .text-slate-800,
+html[data-ui-style="glassmorphism"] .text-gray-900,
+html[data-ui-style="glassmorphism"] .text-gray-800 {
+  color: #f8fafc !important;
+}
+
+html[data-ui-style="glassmorphism"] .text-slate-700,
+html[data-ui-style="glassmorphism"] .text-gray-700 {
+  color: #e2e8f0 !important;
+}
+
+html[data-ui-style="glassmorphism"] .text-slate-600,
+html[data-ui-style="glassmorphism"] .text-gray-600 {
+  color: #cbd5e1 !important;
+}
+
+html[data-ui-style="glassmorphism"] .text-slate-500,
+html[data-ui-style="glassmorphism"] .text-gray-500,
+html[data-ui-style="glassmorphism"] .text-slate-400,
+html[data-ui-style="glassmorphism"] .text-gray-400 {
+  color: #94a3b8 !important;
+}
+
+/* Tablas en Glassmorphism (Inventario, Ventas, Clientes, Reportes) */
+html[data-ui-style="glassmorphism"] table {
+  color: #f8fafc !important;
+}
+
+html[data-ui-style="glassmorphism"] table thead,
+html[data-ui-style="glassmorphism"] table thead.bg-slate-100,
+html[data-ui-style="glassmorphism"] table thead th {
+  background-color: #0f172a !important;
+  color: #38bdf8 !important;
+  border-color: #24354b !important;
+  font-weight: 800 !important;
+}
+
+html[data-ui-style="glassmorphism"] tbody tr {
+  border-color: #1e2c3e !important;
+}
+
+html[data-ui-style="glassmorphism"] tbody tr:hover {
+  background-color: rgba(56, 189, 248, 0.12) !important;
+}
+
+html[data-ui-style="glassmorphism"] tbody td {
+  color: #f1f5f9 !important;
+}
+
+/* Nombres de producto en filas de tabla */
+html[data-ui-style="glassmorphism"] .inventory-table-row td:nth-child(3) span:first-child,
+html[data-ui-style="glassmorphism"] tbody td .text-slate-900,
+html[data-ui-style="glassmorphism"] tbody td span.text-slate-900,
+html[data-ui-style="glassmorphism"] tbody td div.text-slate-900 {
+  color: #ffffff !important;
+  font-weight: 700 !important;
+}
+
+/* Columna Precio USD: Resaltado Cyan Táctico de Alto Contraste */
+html[data-ui-style="glassmorphism"] .inventory-table-row td:nth-child(5) div:first-child,
+html[data-ui-style="glassmorphism"] tbody td.font-mono.text-slate-900,
+html[data-ui-style="glassmorphism"] tbody td.font-mono.font-bold,
+html[data-ui-style="glassmorphism"] tbody td .text-slate-900.font-mono {
+  color: #38bdf8 !important;
+  font-weight: 800 !important;
+}
+
+/* Columna Precio VES: Azul Suave */
+html[data-ui-style="glassmorphism"] .inventory-table-row td:nth-child(6) div:first-child,
+html[data-ui-style="glassmorphism"] tbody td.font-mono.text-slate-600,
+html[data-ui-style="glassmorphism"] tbody td .text-slate-600.font-mono {
+  color: #93c5fd !important;
+  font-weight: 600 !important;
+}
+
+/* Columna Código / Barras: Slate Claro */
+html[data-ui-style="glassmorphism"] .inventory-table-row td:nth-child(2),
+html[data-ui-style="glassmorphism"] tbody td.font-mono.text-slate-700,
+html[data-ui-style="glassmorphism"] tbody td .text-slate-700.font-mono {
+  color: #94a3b8 !important;
+}
+
+/* Botones de acción en filas de tabla (Motivo, Editar, Eliminar) */
+html[data-ui-style="glassmorphism"] tbody td button {
+  background-color: #1c2b3d !important;
+  border-color: #2d425c !important;
+  color: #e2e8f0 !important;
+}
+html[data-ui-style="glassmorphism"] tbody td button:hover {
+  background-color: #283d57 !important;
+  border-color: #38bdf8 !important;
+  color: #ffffff !important;
+}
+
+/* Botones secundarios generales (Auditoría, Importar, Exportar, etc.) */
+html[data-ui-style="glassmorphism"] button.bg-white,
+html[data-ui-style="glassmorphism"] button.bg-slate-50,
+html[data-ui-style="glassmorphism"] button.bg-slate-100 {
+  background-color: #1c2b3d !important;
+  border-color: #2d425c !important;
+  color: #f1f5f9 !important;
+}
+html[data-ui-style="glassmorphism"] button.bg-white:hover,
+html[data-ui-style="glassmorphism"] button.bg-slate-50:hover,
+html[data-ui-style="glassmorphism"] button.bg-slate-100:hover {
+  background-color: #25394f !important;
+  border-color: #38bdf8 !important;
+  color: #ffffff !important;
+}
+
+/* Barra superior y Tasa BCV */
+html[data-ui-style="glassmorphism"] header button.bg-slate-50 {
+  background-color: #1c2b3d !important;
+  border-color: #2d425c !important;
+}
+html[data-ui-style="glassmorphism"] header button.bg-slate-50 span.text-slate-500 {
+  color: #94a3b8 !important;
+}
+html[data-ui-style="glassmorphism"] header button.bg-slate-50 span.font-black,
+html[data-ui-style="glassmorphism"] header button.bg-slate-50 span.text-slate-900 {
+  color: #38bdf8 !important;
+}
+html[data-ui-style="glassmorphism"] header span.text-slate-400 {
+  color: #64748b !important;
+}
+
+/* Inputs de Búsqueda y Formularios en Glassmorphism */
+html[data-ui-style="glassmorphism"] input[type="text"],
+html[data-ui-style="glassmorphism"] input[type="number"],
+html[data-ui-style="glassmorphism"] input[type="search"],
+html[data-ui-style="glassmorphism"] select,
+html[data-ui-style="glassmorphism"] textarea {
+  background-color: #141f2d !important;
+  border-color: #27394e !important;
+  color: #f8fafc !important;
+}
+html[data-ui-style="glassmorphism"] input::placeholder,
+html[data-ui-style="glassmorphism"] textarea::placeholder {
+  color: #7890ad !important;
+}
+
+/* Sidebar Enlaces Inactivos */
+html[data-ui-style="glassmorphism"] aside a:not(.nav-item-active) {
+  color: #94a3b8 !important;
+}
+html[data-ui-style="glassmorphism"] aside a:not(.nav-item-active):hover {
+  background-color: #1a2738 !important;
+  color: #ffffff !important;
+}
+html[data-ui-style="glassmorphism"] aside a:not(.nav-item-active) span {
+  color: #94a3b8 !important;
+}
+html[data-ui-style="glassmorphism"] aside a:not(.nav-item-active):hover span {
+  color: #ffffff !important;
+}
+html[data-ui-style="glassmorphism"] aside a:not(.nav-item-active) svg {
+  color: #64748b !important;
+}
+html[data-ui-style="glassmorphism"] aside a:not(.nav-item-active):hover svg {
+  color: #38bdf8 !important;
+}
+html[data-ui-style="glassmorphism"] aside .text-slate-400 {
+  color: #64748b !important;
+}
+html[data-ui-style="glassmorphism"] aside .text-slate-700 {
+  color: #cbd5e1 !important;
+}
+
