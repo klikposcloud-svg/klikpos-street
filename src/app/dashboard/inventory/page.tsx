@@ -32,6 +32,7 @@ import {
 import QRCode from 'qrcode';
 import { useAuth } from '@/context/AuthContext';
 import { removeBackgroundToWhiteCanvas } from '@/lib/background-remover';
+import ProductCostCalculator from '@/components/ProductCostCalculator';
 
 export default function DesktopInventoryPage() {
   const { user, isAdmin, isCajero, requireAdminAuth } = useAuth();
@@ -49,6 +50,9 @@ export default function DesktopInventoryPage() {
   const [unit, setUnit] = useState<string>('unidad');
   const [priceUSD, setPriceUSD] = useState('');
   const [costUSD, setCostUSD] = useState('');
+  const [costPerBox, setCostPerBox] = useState('');
+  const [packageUnits, setPackageUnits] = useState('');
+  const [profitMarginPercent, setProfitMarginPercent] = useState('');
   const [stock, setStock] = useState('10');
   const [minStock, setMinStock] = useState('3');
   const [image, setImage] = useState('');
@@ -423,6 +427,9 @@ export default function DesktopInventoryPage() {
       category,
       priceUSD: parseFloat(priceUSD.replace(',', '.')),
       costUSD: parseFloat(costUSD.replace(',', '.')) || 0,
+      costPerBox: costPerBox ? parseFloat(costPerBox.replace(',', '.')) : undefined,
+      packageUnits: packageUnits ? parseFloat(packageUnits.replace(',', '.')) : undefined,
+      profitMarginPercent: profitMarginPercent ? parseFloat(profitMarginPercent.replace(',', '.')) : undefined,
       stock: parseFloat(stock.replace(',', '.')) || 0,
       minStock: parseFloat(minStock.replace(',', '.')) || 0,
       unit: unit || 'unidad',
@@ -442,6 +449,9 @@ export default function DesktopInventoryPage() {
     setUnit('unidad');
     setPriceUSD('');
     setCostUSD('');
+    setCostPerBox('');
+    setPackageUnits('');
+    setProfitMarginPercent('');
     setImage('');
     setShowAddModal(false);
     await loadProducts();
@@ -461,6 +471,9 @@ export default function DesktopInventoryPage() {
     setUnit(product.unit || 'unidad');
     setPriceUSD(product.priceUSD.toString());
     setCostUSD(product.costUSD ? product.costUSD.toString() : '');
+    setCostPerBox(product.costPerBox ? product.costPerBox.toString() : '');
+    setPackageUnits(product.packageUnits ? product.packageUnits.toString() : '');
+    setProfitMarginPercent(product.profitMarginPercent ? product.profitMarginPercent.toString() : '');
     setStock(product.stock.toString());
     setMinStock(product.minStock ? product.minStock.toString() : '3');
     setImage(product.image || '');
@@ -483,6 +496,9 @@ export default function DesktopInventoryPage() {
       category,
       priceUSD: parseFloat(priceUSD.replace(',', '.')),
       costUSD: parseFloat(costUSD.replace(',', '.')) || 0,
+      costPerBox: costPerBox ? parseFloat(costPerBox.replace(',', '.')) : undefined,
+      packageUnits: packageUnits ? parseFloat(packageUnits.replace(',', '.')) : undefined,
+      profitMarginPercent: profitMarginPercent ? parseFloat(profitMarginPercent.replace(',', '.')) : undefined,
       stock: parseFloat(stock.replace(',', '.')) || 0,
       minStock: parseFloat(minStock.replace(',', '.')) || 0,
       unit: unit || 'unidad',
@@ -498,6 +514,9 @@ export default function DesktopInventoryPage() {
     setUnit('unidad');
     setPriceUSD('');
     setCostUSD('');
+    setCostPerBox('');
+    setPackageUnits('');
+    setProfitMarginPercent('');
     setImage('');
     await loadProducts();
     broadcastInventoryToMobile();
@@ -1317,7 +1336,7 @@ export default function DesktopInventoryPage() {
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <div>
                   <label className="block font-semibold text-slate-700 mb-1">
                     Categoría:
@@ -1354,20 +1373,6 @@ export default function DesktopInventoryPage() {
                     <option value="gr">⚖️ Pesable por Gramos (gr)</option>
                   </select>
                 </div>
-
-                <div>
-                  <label className="block font-semibold text-slate-700 mb-1 truncate">
-                    {unit === 'kg' ? 'Precio por Kg ($ USD) *:' : unit === 'gr' ? 'Precio por Gr ($ USD) *:' : 'Precio Venta ($ USD) *:'}
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder={unit === 'kg' ? 'Ej: 6.50 /kg' : '1.50'}
-                    value={priceUSD}
-                    onChange={(e) => setPriceUSD(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg font-mono font-bold text-slate-900 focus:ring-2 focus:ring-sky-500 outline-none text-sm"
-                  />
-                </div>
               </div>
 
               {(unit === 'kg' || unit === 'gr') && (
@@ -1379,20 +1384,26 @@ export default function DesktopInventoryPage() {
                 </div>
               )}
 
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="block font-semibold text-slate-700 mb-1">
-                    {unit === 'kg' ? 'Costo por Kg ($ USD):' : unit === 'gr' ? 'Costo por Gr ($ USD):' : 'Costo ($ USD):'}
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="1.10"
-                    value={costUSD}
-                    onChange={(e) => setCostUSD(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg font-mono focus:ring-2 focus:ring-sky-500 outline-none"
-                  />
-                </div>
+              {/* Calculadora Inteligente de Costos y Ganancia */}
+              <ProductCostCalculator
+                costUSD={costUSD}
+                priceUSD={priceUSD}
+                costPerBox={costPerBox}
+                packageUnits={packageUnits}
+                profitMarginPercent={profitMarginPercent}
+                unit={unit}
+                bcvRate={bcvRate}
+                accentColor="sky"
+                onChange={({ costUSD: c, priceUSD: p, costPerBox: cBox, packageUnits: pUnits, profitMarginPercent: pMargin }) => {
+                  setCostUSD(c);
+                  setPriceUSD(p);
+                  setCostPerBox(cBox);
+                  setPackageUnits(pUnits);
+                  setProfitMarginPercent(pMargin);
+                }}
+              />
 
+              <div className="grid grid-cols-2 gap-2">
                 <div>
                   <label className="block font-semibold text-slate-700 mb-1">
                     {unit === 'kg' ? 'Stock Inicial (Kilos):' : unit === 'gr' ? 'Stock Inicial (Gramos):' : 'Stock Inicial (Unidades):'}
@@ -1403,6 +1414,20 @@ export default function DesktopInventoryPage() {
                     placeholder={unit === 'kg' ? 'Ej: 15.5' : '10'}
                     value={stock}
                     onChange={(e) => setStock(e.target.value)}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg font-mono focus:ring-2 focus:ring-sky-500 outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">
+                    Stock Mínimo (Alerta):
+                  </label>
+                  <input
+                    type="number"
+                    step="any"
+                    placeholder="3"
+                    value={minStock}
+                    onChange={(e) => setMinStock(e.target.value)}
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg font-mono focus:ring-2 focus:ring-sky-500 outline-none"
                   />
                 </div>
@@ -1656,7 +1681,7 @@ export default function DesktopInventoryPage() {
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <div>
                   <label className="block font-semibold text-slate-700 mb-1">
                     Categoría:
@@ -1693,20 +1718,6 @@ export default function DesktopInventoryPage() {
                     <option value="gr">⚖️ Pesable por Gramos (gr)</option>
                   </select>
                 </div>
-
-                <div>
-                  <label className="block font-semibold text-slate-700 mb-1 truncate">
-                    {unit === 'kg' ? 'Precio por Kg ($ USD) *:' : unit === 'gr' ? 'Precio por Gr ($ USD) *:' : 'Precio Venta ($ USD) *:'}
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder={unit === 'kg' ? 'Ej: 6.50 /kg' : '1.50'}
-                    value={priceUSD}
-                    onChange={(e) => setPriceUSD(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg font-mono font-bold text-slate-900 focus:ring-2 focus:ring-indigo-500 outline-none text-sm"
-                  />
-                </div>
               </div>
 
               {(unit === 'kg' || unit === 'gr') && (
@@ -1718,20 +1729,26 @@ export default function DesktopInventoryPage() {
                 </div>
               )}
 
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="block font-semibold text-slate-700 mb-1">
-                    {unit === 'kg' ? 'Costo por Kg ($ USD):' : unit === 'gr' ? 'Costo por Gr ($ USD):' : 'Costo ($ USD):'}
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="1.10"
-                    value={costUSD}
-                    onChange={(e) => setCostUSD(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg font-mono focus:ring-2 focus:ring-indigo-500 outline-none"
-                  />
-                </div>
+              {/* Calculadora Inteligente de Costos y Ganancia */}
+              <ProductCostCalculator
+                costUSD={costUSD}
+                priceUSD={priceUSD}
+                costPerBox={costPerBox}
+                packageUnits={packageUnits}
+                profitMarginPercent={profitMarginPercent}
+                unit={unit}
+                bcvRate={bcvRate}
+                accentColor="indigo"
+                onChange={({ costUSD: c, priceUSD: p, costPerBox: cBox, packageUnits: pUnits, profitMarginPercent: pMargin }) => {
+                  setCostUSD(c);
+                  setPriceUSD(p);
+                  setCostPerBox(cBox);
+                  setPackageUnits(pUnits);
+                  setProfitMarginPercent(pMargin);
+                }}
+              />
 
+              <div className="grid grid-cols-2 gap-2">
                 <div>
                   <label className="block font-semibold text-slate-700 mb-1">
                     {unit === 'kg' ? 'Stock Actual (Kilos):' : unit === 'gr' ? 'Stock Actual (Gramos):' : 'Stock Actual (Unidades):'}
@@ -1743,6 +1760,20 @@ export default function DesktopInventoryPage() {
                     value={stock}
                     onChange={(e) => setStock(e.target.value)}
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg font-mono font-bold text-slate-900 focus:ring-2 focus:ring-indigo-500 outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">
+                    Stock Mínimo (Alerta):
+                  </label>
+                  <input
+                    type="number"
+                    step="any"
+                    placeholder="3"
+                    value={minStock}
+                    onChange={(e) => setMinStock(e.target.value)}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg font-mono focus:ring-2 focus:ring-indigo-500 outline-none"
                   />
                 </div>
               </div>

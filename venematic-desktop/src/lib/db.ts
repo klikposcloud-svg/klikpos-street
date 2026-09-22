@@ -12,6 +12,9 @@ export interface LocalProduct {
   unit: string;
   image?: string;
   updatedAt: string;
+  costPerBox?: number;
+  packageUnits?: number;
+  profitMarginPercent?: number;
 }
 
 export interface SaleItem {

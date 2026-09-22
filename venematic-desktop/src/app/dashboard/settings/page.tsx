@@ -7,7 +7,7 @@ import BrandingSettings from '@/components/BrandingSettings';
 import LicenseActivationModal from '@/components/LicenseActivationModal';
 import CloudSyncSettingsCard from '@/components/CloudSyncSettingsCard';
 import { useAuth } from '@/context/AuthContext';
-import { ShieldAlert, ShieldCheck, ArrowLeft, Scale, CheckCircle2, AlertCircle, RefreshCw, Zap } from 'lucide-react';
+import { ShieldAlert, ShieldCheck, ArrowLeft, Scale, CheckCircle2, AlertCircle, RefreshCw, Zap, Banknote } from 'lucide-react';
 import Link from 'next/link';
 import { scaleService, ScaleProtocol, WeightReading, PriceMultiplierBasis } from '@/lib/hardware/scale';
 import { getScaleBarcodeConfig, saveScaleBarcodeConfig, ScaleBarcodeConfig } from '@/lib/hardware/scale-barcode';
@@ -23,6 +23,7 @@ export default function DesktopSettingsPage() {
   const [footerMessage, setFooterMessage] = useState('');
   const [paperWidth, setPaperWidth] = useState<'80mm' | '58mm'>('80mm');
   const [geminiApiKey, setGeminiApiKey] = useState('');
+  const [primaryCurrency, setPrimaryCurrency] = useState<'VES' | 'USD'>('VES');
   const [savedSuccess, setSavedSuccess] = useState(false);
 
   useEffect(() => {
@@ -42,6 +43,15 @@ export default function DesktopSettingsPage() {
 
     db.settings.get('gemini_api_key').then((k) => {
       if (k) setGeminiApiKey(k.value);
+    });
+
+    db.settings.get('primary_currency').then((c) => {
+      if (c && (c.value === 'VES' || c.value === 'USD')) {
+        setPrimaryCurrency(c.value);
+      } else {
+        const stored = typeof window !== 'undefined' ? localStorage.getItem('venematic_primary_currency') : null;
+        if (stored === 'USD' || stored === 'VES') setPrimaryCurrency(stored);
+      }
     });
   }, []);
 
@@ -67,6 +77,14 @@ export default function DesktopSettingsPage() {
       key: 'gemini_api_key',
       value: geminiApiKey.trim(),
     });
+
+    await db.settings.put({
+      key: 'primary_currency',
+      value: primaryCurrency,
+    });
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('venematic_primary_currency', primaryCurrency);
+    }
 
     setSavedSuccess(true);
     setTimeout(() => setSavedSuccess(false), 3000);
@@ -199,6 +217,99 @@ export default function DesktopSettingsPage() {
 
       {/* Selector de Marca y Modo de Interfaz (10 Paletas + Industrial vs Glassmorphism) */}
       <BrandingSettings />
+
+      {/* Selector de Moneda Principal de Exhibición y Cobro */}
+      <div className="bg-white p-5 rounded-xl border border-slate-300 shadow-xs space-y-3">
+        <div className="flex items-center justify-between border-b border-slate-200 pb-2.5">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold">
+              <Banknote className="w-4 h-4" />
+            </div>
+            <div>
+              <h3 className="font-bold text-slate-900 text-sm">
+                Moneda Principal de Visualización en Caja y Cobros
+              </h3>
+              <p className="text-[11px] text-slate-500">
+                Define qué moneda verá el cajero y el cliente en tamaño gigante prioritario
+              </p>
+            </div>
+          </div>
+
+          <span className="text-xs bg-emerald-100 text-emerald-800 font-bold px-3 py-1 rounded-full border border-emerald-300">
+            {primaryCurrency === 'VES' ? '🇻🇪 Bolívares (Bs.) Prioritario' : '💵 Dólares ($ USD) Prioritario'}
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs pt-1">
+          <div
+            onClick={async () => {
+              setPrimaryCurrency('VES');
+              await db.settings.put({ key: 'primary_currency', value: 'VES' });
+              if (typeof window !== 'undefined') localStorage.setItem('venematic_primary_currency', 'VES');
+              setSavedSuccess(true);
+              setTimeout(() => setSavedSuccess(false), 2500);
+            }}
+            className={`cursor-pointer p-3.5 rounded-xl border-2 transition-all ${
+              primaryCurrency === 'VES'
+                ? 'border-emerald-600 bg-emerald-50/50 ring-2 ring-emerald-500/20 shadow-xs'
+                : 'border-slate-200 hover:border-slate-300 bg-slate-50'
+            }`}
+          >
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="font-black text-slate-900 text-sm flex items-center gap-1.5">
+                <span className="text-base">🇻🇪</span> Bolívares (Bs.) Prioritario
+              </span>
+              <input
+                type="radio"
+                name="primaryCurrency"
+                checked={primaryCurrency === 'VES'}
+                onChange={() => {}}
+                className="w-4 h-4 text-emerald-600 accent-emerald-600 cursor-pointer"
+              />
+            </div>
+            <p className="text-[11px] text-slate-600 leading-snug">
+              El total a cobrar del ticket, los botones rápidos y el modal de cobro se muestran en <strong>fuente gigante en Bolívares (Bs.)</strong>, con el equivalente en $ en vivo como referencia secundaria.
+            </p>
+            <div className="mt-2 text-[10px] font-black text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-md inline-block">
+              ★ RECOMENDADO PARA VENEZUELA (Pago Móvil / Punto)
+            </div>
+          </div>
+
+          <div
+            onClick={async () => {
+              setPrimaryCurrency('USD');
+              await db.settings.put({ key: 'primary_currency', value: 'USD' });
+              if (typeof window !== 'undefined') localStorage.setItem('venematic_primary_currency', 'USD');
+              setSavedSuccess(true);
+              setTimeout(() => setSavedSuccess(false), 2500);
+            }}
+            className={`cursor-pointer p-3.5 rounded-xl border-2 transition-all ${
+              primaryCurrency === 'USD'
+                ? 'border-emerald-600 bg-emerald-50/50 ring-2 ring-emerald-500/20 shadow-xs'
+                : 'border-slate-200 hover:border-slate-300 bg-slate-50'
+            }`}
+          >
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="font-black text-slate-900 text-sm flex items-center gap-1.5">
+                <span className="text-base">💵</span> Dólares ($ USD) Prioritario
+              </span>
+              <input
+                type="radio"
+                name="primaryCurrency"
+                checked={primaryCurrency === 'USD'}
+                onChange={() => {}}
+                className="w-4 h-4 text-emerald-600 accent-emerald-600 cursor-pointer"
+              />
+            </div>
+            <p className="text-[11px] text-slate-600 leading-snug">
+              El total del ticket y los cobros se exhiben en <strong>fuente gigante en Dólares ($)</strong>, manteniendo la conversión en Bolívares en vivo calculada según la tasa del BCV.
+            </p>
+            <div className="mt-2 text-[10px] font-semibold text-slate-600 bg-slate-200 px-2 py-0.5 rounded-md inline-block">
+              Ideal para cobro en divisas efectivo
+            </div>
+          </div>
+        </div>
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Formulario de Datos del Comercio */}

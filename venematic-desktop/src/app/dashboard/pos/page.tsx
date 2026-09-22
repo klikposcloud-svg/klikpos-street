@@ -38,6 +38,7 @@ export default function DesktopPosPage() {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [cart, setCart] = useState<CartItem[]>([]);
   const [bcvRate, setBcvRate] = useState<number>(848.55);
+  const [primaryCurrency, setPrimaryCurrency] = useState<'VES' | 'USD'>('VES');
 
   // Toggle de visualización de fotos (persistente en localStorage)
   const [showImages, setShowImages] = useState<boolean>(true);
@@ -211,6 +212,14 @@ export default function DesktopPosPage() {
     const rateSetting = await db.settings.get('bcv_rate');
     const currentRate = rateSetting ? rateSetting.value : 848.55;
     if (rateSetting) setBcvRate(rateSetting.value);
+
+    const currencySetting = await db.settings.get('primary_currency');
+    if (currencySetting && (currencySetting.value === 'VES' || currencySetting.value === 'USD')) {
+      setPrimaryCurrency(currencySetting.value);
+    } else {
+      const stored = typeof window !== 'undefined' ? localStorage.getItem('venematic_primary_currency') : null;
+      if (stored === 'USD' || stored === 'VES') setPrimaryCurrency(stored);
+    }
 
     // Cargar ventas del turno (hoy) desde la base de datos local
     try {
@@ -851,12 +860,32 @@ export default function DesktopPosPage() {
     }
   };
 
+  // Alternar moneda principal en caliente (Bs. vs $)
+  const togglePrimaryCurrency = async () => {
+    const next: 'VES' | 'USD' = primaryCurrency === 'VES' ? 'USD' : 'VES';
+    setPrimaryCurrency(next);
+    await db.settings.put({ key: 'primary_currency', value: next });
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('venematic_primary_currency', next);
+    }
+    showToast(
+      next === 'VES'
+        ? '🇻🇪 Moneda principal: Bolívares (Bs.)'
+        : '💵 Moneda principal: Dólares ($ USD)',
+      'info'
+    );
+  };
+
   // Abrir Modal de Cobro
   const openPaymentModal = () => {
-    // Al abrir dejamos el monto entregado en blanco o con el exacto para que el cajero ingrese lo recibido
+    // Al abrir dejamos el monto entregado con el exacto de la cuenta en ambas monedas
     setCashGivenUSD(totalUSD.toFixed(2));
     setCashGivenVES(totalVES.toFixed(2));
-    setSelectedPaymentMethod('cash_usd');
+    if (primaryCurrency === 'VES') {
+      setSelectedPaymentMethod('pago_movil');
+    } else {
+      setSelectedPaymentMethod('cash_usd');
+    }
     setShowPaymentModal(true);
   };
 
@@ -1091,6 +1120,21 @@ export default function DesktopPosPage() {
             <kbd className="text-[9px] font-mono px-1 py-0.2 rounded bg-slate-100 text-slate-500 border border-slate-200">
               F10
             </kbd>
+          </button>
+
+          {/* Toggle Rápido de Moneda Principal (Bs. vs $) */}
+          <button
+            type="button"
+            onClick={togglePrimaryCurrency}
+            title="Alternar moneda principal de cobro entre Bolívares (Bs.) y Dólares ($)"
+            className={`pos-header-btn-cream px-3 py-2 rounded-lg text-xs font-bold border flex items-center gap-1.5 transition-all shrink-0 ${
+              primaryCurrency === 'VES'
+                ? 'bg-emerald-50 text-emerald-800 border-emerald-300 shadow-2xs hover:bg-emerald-100'
+                : 'bg-amber-50 text-amber-800 border-amber-300 shadow-2xs hover:bg-amber-100'
+            }`}
+          >
+            <Banknote className="w-3.5 h-3.5" />
+            <span>{primaryCurrency === 'VES' ? '🇻🇪 Bs. Principal' : '💵 USD Principal'}</span>
           </button>
 
           {/* Toggle de Fotos */}
@@ -1386,13 +1430,26 @@ export default function DesktopPosPage() {
                 </div>
 
                 {/* Total por línea */}
-                <div className="text-right min-w-[70px]">
-                  <span className="text-xs font-mono font-black text-slate-900 block tabular-numbers">
-                    {formatUSD(item.totalUSD)}
-                  </span>
-                  <span className="text-[11px] font-mono text-slate-700 font-bold block tabular-numbers">
-                    {formatVES(item.totalUSD * bcvRate)}
-                  </span>
+                <div className="text-right min-w-[75px]">
+                  {primaryCurrency === 'VES' ? (
+                    <>
+                      <span className="text-xs font-mono font-black text-slate-900 block tabular-numbers">
+                        {formatVES(item.totalUSD * bcvRate)}
+                      </span>
+                      <span className="text-[10px] font-mono text-slate-500 font-semibold block tabular-numbers">
+                        {formatUSD(item.totalUSD)}
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-xs font-mono font-black text-slate-900 block tabular-numbers">
+                        {formatUSD(item.totalUSD)}
+                      </span>
+                      <span className="text-[11px] font-mono text-slate-700 font-bold block tabular-numbers">
+                        {formatVES(item.totalUSD * bcvRate)}
+                      </span>
+                    </>
+                  )}
                 </div>
 
                 {/* Eliminar */}
@@ -1424,12 +1481,25 @@ export default function DesktopPosPage() {
                 Total a Cobrar:
               </span>
               <div className="text-right">
-                <span className="pos-total-usd text-2xl font-black font-mono text-slate-900 block tabular-numbers">
-                  {formatUSD(totalUSD)}
-                </span>
-                <span className="pos-total-ves text-xs font-bold font-mono text-sky-700 block tabular-numbers">
-                  {formatVES(totalVES)}
-                </span>
+                {primaryCurrency === 'VES' ? (
+                  <>
+                    <span className="pos-total-ves text-2xl font-black font-mono text-emerald-700 block tabular-numbers">
+                      {formatVES(totalVES)}
+                    </span>
+                    <span className="pos-total-usd text-xs font-bold font-mono text-slate-600 block tabular-numbers">
+                      {formatUSD(totalUSD)} USD · Tasa: {formatVES(bcvRate)}
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <span className="pos-total-usd text-2xl font-black font-mono text-slate-900 block tabular-numbers">
+                      {formatUSD(totalUSD)}
+                    </span>
+                    <span className="pos-total-ves text-xs font-bold font-mono text-sky-700 block tabular-numbers">
+                      {formatVES(totalVES)}
+                    </span>
+                  </>
+                )}
               </div>
             </div>
 
@@ -1849,16 +1919,29 @@ export default function DesktopPosPage() {
                     TOTAL A COBRAR
                   </span>
                   <span className="text-xs text-slate-300 font-medium">
-                    (Valor exacto de la cuenta)
+                    (Tasa BCV: {formatVES(bcvRate)})
                   </span>
                 </div>
                 <div className="text-right">
-                  <span className="text-2xl font-black font-mono text-emerald-400 block tabular-numbers">
-                    {formatUSD(totalUSD)}
-                  </span>
-                  <span className="text-xs font-mono font-bold text-slate-300 block tabular-numbers">
-                    {formatVES(totalVES)}
-                  </span>
+                  {primaryCurrency === 'VES' ? (
+                    <>
+                      <span className="text-2xl font-black font-mono text-emerald-400 block tabular-numbers">
+                        {formatVES(totalVES)}
+                      </span>
+                      <span className="text-xs font-mono font-bold text-slate-300 block tabular-numbers">
+                        {formatUSD(totalUSD)} USD
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-2xl font-black font-mono text-emerald-400 block tabular-numbers">
+                        {formatUSD(totalUSD)}
+                      </span>
+                      <span className="text-xs font-mono font-bold text-slate-300 block tabular-numbers">
+                        {formatVES(totalVES)}
+                      </span>
+                    </>
+                  )}
                 </div>
               </div>
 
