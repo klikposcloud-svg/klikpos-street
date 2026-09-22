@@ -31,8 +31,13 @@ export async function POST(req: NextRequest) {
       timestamp: Date.now(),
     });
 
-    return NextResponse.json({ success: true, connected: isConnected });
+    return NextResponse.json({ success: true });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
+}
+
+export async function GET(req: NextRequest) {
+  const session = req.nextUrl.searchParams.get('session') || 'caja-1';
+  return NextResponse.json({ success: true, session, status: 'ready' });
 }
