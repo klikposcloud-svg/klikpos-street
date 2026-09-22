@@ -28,6 +28,7 @@ import {
   ClipboardCheck,
   AlertTriangle,
   Scale,
+  Save,
 } from 'lucide-react';
 import QRCode from 'qrcode';
 import { useAuth } from '@/context/AuthContext';
@@ -1171,279 +1172,276 @@ export default function DesktopInventoryPage() {
       {/* MODAL REGISTRAR NUEVO PRODUCTO (CON FOTO)                                 */}
       {/* ========================================================================= */}
       {showAddModal && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-2xs z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-xl border border-slate-300 w-full max-w-lg p-5 space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-2xs z-50 flex items-center justify-center p-3 sm:p-4">
+          <div className="bg-white rounded-2xl shadow-2xl border border-slate-300 w-full max-w-lg max-h-[92vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+            {/* Cabecera Fija */}
+            <div className="flex items-center justify-between border-b border-slate-200 px-5 py-3.5 bg-slate-50 shrink-0">
               <h3 className="font-bold text-slate-900 text-sm">Registrar Nuevo Producto</h3>
               <button
                 onClick={() => setShowAddModal(false)}
-                className="text-slate-400 hover:text-slate-600 text-lg leading-none"
+                className="text-slate-400 hover:text-slate-600 text-xl leading-none"
               >
                 &times;
               </button>
             </div>
 
-            <form onSubmit={handleSaveProduct} className="space-y-3.5 text-xs">
-              {/* Foto del Producto con Doble Opción */}
-              <div>
-                <label className="block font-semibold text-slate-700 mb-1">
-                  Foto del Producto:
-                </label>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageFileChange}
-                  className="hidden"
-                />
+            {/* Formulario con cuerpo scrolleable y barra de acciones fija al pie */}
+            <form onSubmit={handleSaveProduct} className="flex-1 min-h-0 flex flex-col overflow-hidden">
+              <div className="p-4 sm:p-5 overflow-y-auto flex-1 min-h-0 space-y-3.5 text-xs">
+                {/* Foto del Producto con Doble Opción */}
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">
+                    Foto del Producto:
+                  </label>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageFileChange}
+                    className="hidden"
+                  />
 
-                {/* Banner de sincronización si llega foto del teléfono */}
-                {photoSyncMsg && (
-                  <div className="mb-2 p-2 bg-emerald-50 border border-emerald-300 rounded-lg flex items-center gap-2 text-emerald-800 text-[11px] font-semibold animate-bounce">
-                    <Sparkles className="w-4 h-4 text-emerald-600 shrink-0" />
-                    <span>{photoSyncMsg}</span>
+                  {/* Banner de sincronización si llega foto del teléfono */}
+                  {photoSyncMsg && (
+                    <div className="mb-2 p-2 bg-emerald-50 border border-emerald-300 rounded-lg flex items-center gap-2 text-emerald-800 text-[11px] font-semibold animate-bounce">
+                      <Sparkles className="w-4 h-4 text-emerald-600 shrink-0" />
+                      <span>{photoSyncMsg}</span>
+                    </div>
+                  )}
+
+                  <div className="flex items-center gap-3">
+                    <div className="w-20 h-20 rounded-xl bg-slate-100 border border-slate-300 overflow-hidden flex items-center justify-center shrink-0 relative group">
+                      {image ? (
+                        <>
+                          <img src={image} alt="Preview" className="w-full h-full object-cover" />
+                          <button
+                            type="button"
+                            onClick={() => setImage('')}
+                            className="absolute inset-0 bg-black/50 text-white opacity-0 group-hover:opacity-100 flex items-center justify-center text-[10px] font-bold transition-opacity"
+                          >
+                            Quitar
+                          </button>
+                        </>
+                      ) : (
+                        <ImageIcon className="w-8 h-8 text-slate-400" />
+                      )}
+                    </div>
+
+                    <div className="flex-1 space-y-2">
+                      {/* Las 2 opciones pedidas por el usuario */}
+                      <div className="grid grid-cols-2 gap-2">
+                        {/* Opción 1: Subir desde PC */}
+                        <button
+                          type="button"
+                          onClick={() => fileInputRef.current?.click()}
+                          className="px-2.5 py-2 bg-white hover:bg-slate-50 border border-slate-300 rounded-lg text-xs font-bold text-slate-700 flex items-center justify-center gap-1.5 shadow-sm transition-all active:scale-[0.98]"
+                          title="Selecciona una imagen almacenada en tu computadora"
+                        >
+                          <Camera className="w-3.5 h-3.5 text-sky-600" />
+                          <span>Subir de PC</span>
+                        </button>
+
+                        {/* Opción 2: Tomar / Subir con Celular */}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            loadScannerInfo();
+                            setShowMobileModal(true);
+                          }}
+                          className={`px-2.5 py-2 border rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm transition-all active:scale-[0.98] ${
+                            phoneConnected
+                              ? 'bg-emerald-50 hover:bg-emerald-100 border-emerald-300 text-emerald-800'
+                              : 'bg-slate-50 hover:bg-slate-100 border-slate-300 text-slate-700'
+                          }`}
+                          title={
+                            phoneConnected
+                              ? `Celular conectado (${phoneDevice || 'Móvil'}). Toma la foto en tu teléfono y aparecerá aquí automáticamente.`
+                              : 'Ver código QR para vincular o abrir la App en tu móvil'
+                          }
+                        >
+                          <Smartphone className={`w-3.5 h-3.5 ${phoneConnected ? 'text-emerald-600 animate-pulse' : 'text-slate-500'}`} />
+                          <span>{phoneConnected ? 'Móvil Listo ✓' : 'Vincular Móvil'}</span>
+                        </button>
+                      </div>
+
+                      {/* Opción auxiliar: Pegar URL de internet */}
+                      <input
+                        type="text"
+                        placeholder="O pega URL de imagen..."
+                        value={image.startsWith('data:') ? '' : image}
+                        onChange={(e) => setImage(e.target.value)}
+                        className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg text-[11px] outline-none focus:ring-1 focus:ring-sky-500"
+                      />
+
+                      {/* Botones Mágicos de IA */}
+                      {image && (
+                        <div className="flex gap-1.5 pt-0.5">
+                          <button
+                            type="button"
+                            onClick={() => handleAutoEnhancePhoto()}
+                            disabled={isRemovingBg}
+                            className="flex-1 py-1.5 px-2 bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-700 font-bold text-[10px] rounded-lg flex items-center justify-center gap-1 transition-all"
+                            title="Remueve el fondo oscuro o ruidoso y deja el fondo blanco comercial de catálogo"
+                          >
+                            <Sparkles className="w-3 h-3 text-amber-500" />
+                            <span>{isRemovingBg ? 'Limpiando...' : 'Fondo Blanco IA'}</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => handleAnalyzeWithVision()}
+                            disabled={isAnalyzingAI}
+                            className="flex-1 py-1.5 px-2 bg-sky-50 hover:bg-sky-100 border border-sky-300 text-sky-800 font-bold text-[10px] rounded-lg flex items-center justify-center gap-1 transition-all"
+                            title="Usa Gemini Vision para leer el nombre y código del producto desde la foto"
+                          >
+                            <Package className="w-3 h-3 text-sky-600" />
+                            <span>{isAnalyzingAI ? 'Detectando...' : 'Auto-llenar con IA'}</span>
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">
+                    Código de Barras / SKU *:
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    autoFocus
+                    placeholder="Ej: 759100100099"
+                    value={barcode}
+                    onChange={(e) => setBarcode(e.target.value)}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg font-mono focus:ring-2 focus:ring-sky-500 outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">
+                    Nombre del Producto *:
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Ej: Leche Completa 1L"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 outline-none"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <div>
+                    <label className="block font-semibold text-slate-700 mb-1">
+                      Categoría:
+                    </label>
+                    <select
+                      value={category}
+                      onChange={(e) => setCategory(e.target.value)}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white focus:ring-2 focus:ring-sky-500 outline-none text-sm"
+                    >
+                      <option value="Víveres">Víveres</option>
+                      <option value="Charcutería">Charcutería</option>
+                      <option value="Carnicería">Carnicería</option>
+                      <option value="Frutería / Verduras">Frutería / Verduras</option>
+                      <option value="Bebidas">Bebidas</option>
+                      <option value="Limpieza">Limpieza</option>
+                      <option value="Cuidado Personal">Cuidado Personal</option>
+                      <option value="Panadería">Panadería</option>
+                      <option value="Snacks">Snacks</option>
+                      <option value="Otros">Otros</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block font-semibold text-slate-700 mb-1">
+                      Tipo de Venta / Unidad:
+                    </label>
+                    <select
+                      value={unit}
+                      onChange={(e) => setUnit(e.target.value)}
+                      className="w-full px-3 py-2 border border-amber-300 bg-amber-50/50 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none text-sm font-semibold text-slate-800"
+                    >
+                      <option value="unidad">📦 Por Unidad (pza)</option>
+                      <option value="kg">⚖️ Pesable por Kilo (kg)</option>
+                      <option value="gr">⚖️ Pesable por Gramos (gr)</option>
+                    </select>
+                  </div>
+                </div>
+
+                {(unit === 'kg' || unit === 'gr') && (
+                  <div className="p-2.5 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-900 flex items-start gap-2">
+                    <Scale className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                    <div>
+                      <strong>Producto Pesable configurado:</strong> En la caja registradora o balanza, el cobro se calculará automáticamente: <code className="bg-amber-100/80 px-1 py-0.5 rounded font-mono font-bold text-amber-950">Total USD = Peso ({unit}) × Precio fijado</code>.
+                    </div>
                   </div>
                 )}
 
-                <div className="flex items-center gap-3">
-                  <div className="w-20 h-20 rounded-xl bg-slate-100 border border-slate-300 overflow-hidden flex items-center justify-center shrink-0 relative group">
-                    {image ? (
-                      <>
-                        <img src={image} alt="Preview" className="w-full h-full object-cover" />
-                        <button
-                          type="button"
-                          onClick={() => setImage('')}
-                          className="absolute inset-0 bg-black/50 text-white opacity-0 group-hover:opacity-100 flex items-center justify-center text-[10px] font-bold transition-opacity"
-                        >
-                          Quitar
-                        </button>
-                      </>
-                    ) : (
-                      <ImageIcon className="w-8 h-8 text-slate-400" />
-                    )}
-                  </div>
-
-                  <div className="flex-1 space-y-2">
-                    {/* Las 2 opciones pedidas por el usuario */}
-                    <div className="grid grid-cols-2 gap-2">
-                      {/* Opción 1: Subir desde PC */}
-                      <button
-                        type="button"
-                        onClick={() => fileInputRef.current?.click()}
-                        className="px-2.5 py-2 bg-white hover:bg-slate-50 border border-slate-300 rounded-lg text-xs font-bold text-slate-700 flex items-center justify-center gap-1.5 shadow-sm transition-all active:scale-[0.98]"
-                        title="Selecciona una imagen almacenada en tu computadora"
-                      >
-                        <Camera className="w-3.5 h-3.5 text-sky-600" />
-                        <span>Subir de PC</span>
-                      </button>
-
-                      {/* Opción 2: Tomar / Subir con Celular */}
-                      <button
-                        type="button"
-                        onClick={() => {
-                          loadScannerInfo();
-                          setShowMobileModal(true);
-                        }}
-                        className={`px-2.5 py-2 border rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm transition-all active:scale-[0.98] ${
-                          phoneConnected
-                            ? 'bg-emerald-50 hover:bg-emerald-100 border-emerald-300 text-emerald-800'
-                            : 'bg-slate-50 hover:bg-slate-100 border-slate-300 text-slate-700'
-                        }`}
-                        title={
-                          phoneConnected
-                            ? `Celular conectado (${phoneDevice || 'Móvil'}). Toma la foto en tu teléfono y aparecerá aquí automáticamente.`
-                            : 'Ver código QR para vincular o abrir la App en tu móvil'
-                        }
-                      >
-                        <Smartphone className={`w-3.5 h-3.5 ${phoneConnected ? 'text-emerald-600 animate-pulse' : 'text-slate-500'}`} />
-                        <span>{phoneConnected ? 'Móvil Listo ✓' : 'Vincular Móvil'}</span>
-                      </button>
-                    </div>
-
-                    {/* Estado del celular e indicador */}
-                    <div className="flex items-center justify-between text-[11px] text-slate-500 bg-slate-50 px-2 py-1 rounded border border-slate-200">
-                      <span className="flex items-center gap-1">
-                        <span className={`w-2 h-2 rounded-full ${phoneConnected ? 'bg-emerald-500' : 'bg-amber-400'}`}></span>
-                        {phoneConnected ? `Móvil activo (${phoneDevice || 'Conectado'})` : 'Móvil no detectado'}
-                      </span>
-                      <span className="text-[10px] text-slate-400">Sync auto</span>
-                    </div>
-
-                    <input
-                      type="text"
-                      placeholder="O pega URL directa de imagen..."
-                      value={image.startsWith('data:') ? '' : image}
-                      onChange={(e) => setImage(e.target.value)}
-                      className="w-full px-2 py-1 border border-slate-300 rounded-lg text-[11px] outline-none focus:ring-1 focus:ring-sky-500"
-                    />
-
-                    {/* Acciones Inteligentes de IA / Fondo Blanco */}
-                    {image && (
-                      <div className="flex gap-1.5 pt-0.5">
-                        <button
-                          type="button"
-                          onClick={() => handleAutoEnhancePhoto()}
-                          disabled={isRemovingBg}
-                          className="flex-1 py-1.5 px-2 bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-700 font-bold text-[10px] rounded-lg flex items-center justify-center gap-1 transition-all"
-                          title="Remueve el fondo y centra el producto en fondo blanco limpio"
-                        >
-                          <Sparkles className="w-3 h-3 text-amber-500" />
-                          <span>{isRemovingBg ? 'Limpiando...' : 'Fondo Blanco IA'}</span>
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() => handleAnalyzeWithVision()}
-                          disabled={isAnalyzingAI}
-                          className="flex-1 py-1.5 px-2 bg-sky-50 hover:bg-sky-100 border border-sky-300 text-sky-800 font-bold text-[10px] rounded-lg flex items-center justify-center gap-1 transition-all"
-                          title="Auto-detecta nombre, marca y categoría con Google Vision / Gemini"
-                        >
-                          <Package className="w-3 h-3 text-sky-600" />
-                          <span>{isAnalyzingAI ? 'Detectando...' : 'Auto-llenar con IA'}</span>
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <label className="block font-semibold text-slate-700 mb-1">
-                  Código de Barras / SKU *:
-                </label>
-                <input
-                  type="text"
-                  required
-                  autoFocus
-                  placeholder="Ej: 759100100099"
-                  value={barcode}
-                  onChange={(e) => setBarcode(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg font-mono focus:ring-2 focus:ring-sky-500 outline-none"
+                {/* Calculadora Inteligente de Costos y Ganancia */}
+                <ProductCostCalculator
+                  costUSD={costUSD}
+                  priceUSD={priceUSD}
+                  costPerBox={costPerBox}
+                  packageUnits={packageUnits}
+                  profitMarginPercent={profitMarginPercent}
+                  unit={unit}
+                  bcvRate={bcvRate}
+                  accentColor="sky"
+                  onChange={({ costUSD: c, priceUSD: p, costPerBox: cBox, packageUnits: pUnits, profitMarginPercent: pMargin }) => {
+                    setCostUSD(c);
+                    setPriceUSD(p);
+                    setCostPerBox(cBox);
+                    setPackageUnits(pUnits);
+                    setProfitMarginPercent(pMargin);
+                  }}
                 />
-              </div>
 
-              <div>
-                <label className="block font-semibold text-slate-700 mb-1">
-                  Nombre del Producto *:
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Ej: Leche Completa 1L"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 outline-none"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                <div>
-                  <label className="block font-semibold text-slate-700 mb-1">
-                    Categoría:
-                  </label>
-                  <select
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white focus:ring-2 focus:ring-sky-500 outline-none text-sm"
-                  >
-                    <option value="Víveres">Víveres</option>
-                    <option value="Charcutería">Charcutería</option>
-                    <option value="Carnicería">Carnicería</option>
-                    <option value="Frutería / Verduras">Frutería / Verduras</option>
-                    <option value="Bebidas">Bebidas</option>
-                    <option value="Limpieza">Limpieza</option>
-                    <option value="Cuidado Personal">Cuidado Personal</option>
-                    <option value="Panadería">Panadería</option>
-                    <option value="Snacks">Snacks</option>
-                    <option value="Otros">Otros</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block font-semibold text-slate-700 mb-1">
-                    Tipo de Venta / Unidad:
-                  </label>
-                  <select
-                    value={unit}
-                    onChange={(e) => setUnit(e.target.value)}
-                    className="w-full px-3 py-2 border border-amber-300 bg-amber-50/50 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none text-sm font-semibold text-slate-800"
-                  >
-                    <option value="unidad">📦 Por Unidad (pza)</option>
-                    <option value="kg">⚖️ Pesable por Kilo (kg)</option>
-                    <option value="gr">⚖️ Pesable por Gramos (gr)</option>
-                  </select>
-                </div>
-              </div>
-
-              {(unit === 'kg' || unit === 'gr') && (
-                <div className="p-2.5 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-900 flex items-start gap-2">
-                  <Scale className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <strong>Producto Pesable configurado:</strong> En la caja registradora o balanza, el cobro se calculará automáticamente: <code className="bg-amber-100/80 px-1 py-0.5 rounded font-mono font-bold text-amber-950">Total USD = Peso ({unit}) × Precio fijado</code>.
+                    <label className="block font-semibold text-slate-700 mb-1">
+                      {unit === 'kg' ? 'Stock Inicial (Kilos):' : unit === 'gr' ? 'Stock Inicial (Gramos):' : 'Stock Inicial (Unidades):'}
+                    </label>
+                    <input
+                      type="number"
+                      step="any"
+                      placeholder={unit === 'kg' ? 'Ej: 15.5' : '10'}
+                      value={stock}
+                      onChange={(e) => setStock(e.target.value)}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg font-mono focus:ring-2 focus:ring-sky-500 outline-none"
+                    />
                   </div>
-                </div>
-              )}
 
-              {/* Calculadora Inteligente de Costos y Ganancia */}
-              <ProductCostCalculator
-                costUSD={costUSD}
-                priceUSD={priceUSD}
-                costPerBox={costPerBox}
-                packageUnits={packageUnits}
-                profitMarginPercent={profitMarginPercent}
-                unit={unit}
-                bcvRate={bcvRate}
-                accentColor="sky"
-                onChange={({ costUSD: c, priceUSD: p, costPerBox: cBox, packageUnits: pUnits, profitMarginPercent: pMargin }) => {
-                  setCostUSD(c);
-                  setPriceUSD(p);
-                  setCostPerBox(cBox);
-                  setPackageUnits(pUnits);
-                  setProfitMarginPercent(pMargin);
-                }}
-              />
-
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="block font-semibold text-slate-700 mb-1">
-                    {unit === 'kg' ? 'Stock Inicial (Kilos):' : unit === 'gr' ? 'Stock Inicial (Gramos):' : 'Stock Inicial (Unidades):'}
-                  </label>
-                  <input
-                    type="number"
-                    step="any"
-                    placeholder={unit === 'kg' ? 'Ej: 15.5' : '10'}
-                    value={stock}
-                    onChange={(e) => setStock(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg font-mono focus:ring-2 focus:ring-sky-500 outline-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="block font-semibold text-slate-700 mb-1">
-                    Stock Mínimo (Alerta):
-                  </label>
-                  <input
-                    type="number"
-                    step="any"
-                    placeholder="3"
-                    value={minStock}
-                    onChange={(e) => setMinStock(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg font-mono focus:ring-2 focus:ring-sky-500 outline-none"
-                  />
+                  <div>
+                    <label className="block font-semibold text-slate-700 mb-1">
+                      Stock Mínimo (Alerta):
+                    </label>
+                    <input
+                      type="number"
+                      step="any"
+                      placeholder="3"
+                      value={minStock}
+                      onChange={(e) => setMinStock(e.target.value)}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg font-mono focus:ring-2 focus:ring-sky-500 outline-none"
+                    />
+                  </div>
                 </div>
               </div>
 
-              <div className="flex gap-2 justify-end pt-3 border-t border-slate-200">
+              {/* Botones Fijos al Fondo: Siempre Visibles */}
+              <div className="flex gap-2 justify-end px-5 py-3 border-t border-slate-200 bg-slate-50 shrink-0">
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="px-3 py-2 rounded-lg border border-slate-300 font-semibold text-slate-700 hover:bg-slate-100"
+                  className="px-4 py-2 rounded-lg border border-slate-300 font-semibold text-slate-700 hover:bg-slate-100"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-sky-700 hover:bg-sky-800 text-white font-bold rounded-lg shadow-sm"
+                  className="px-5 py-2 bg-sky-700 hover:bg-sky-800 text-white font-bold rounded-lg shadow-sm"
                 >
                   Guardar Producto
                 </button>
@@ -1556,9 +1554,9 @@ export default function DesktopInventoryPage() {
       {/* MODAL EDITAR PRODUCTO (SOLO ROL ADMINISTRADOR)                            */}
       {/* ========================================================================= */}
       {showEditModal && editingProduct && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-2xs z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-xl border border-slate-300 w-full max-w-lg p-5 space-y-4 animate-in fade-in zoom-in-95 duration-150">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-2xs z-50 flex items-center justify-center p-3 sm:p-4">
+          <div className="bg-white rounded-2xl shadow-2xl border border-slate-300 w-full max-w-lg max-h-[92vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between border-b border-slate-200 px-5 py-3.5 bg-slate-50 shrink-0">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-lg bg-indigo-700 text-white flex items-center justify-center">
                   <Edit2 className="w-4 h-4" />
@@ -1573,212 +1571,215 @@ export default function DesktopInventoryPage() {
                   setShowEditModal(false);
                   setEditingProduct(null);
                 }}
-                className="text-slate-400 hover:text-slate-600 text-lg leading-none"
+                className="text-slate-400 hover:text-slate-600 text-xl leading-none"
               >
                 &times;
               </button>
             </div>
 
-            <form onSubmit={handleUpdateProduct} className="space-y-3.5 text-xs">
-              {/* Foto del Producto */}
-              <div>
-                <label className="block font-semibold text-slate-700 mb-1">
-                  Foto del Producto:
-                </label>
-                <input
-                  ref={editFileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageFileChange}
-                  className="hidden"
-                />
-
-                <div className="flex items-center gap-3">
-                  <div className="w-20 h-20 rounded-xl bg-slate-100 border border-slate-300 overflow-hidden flex items-center justify-center shrink-0 relative group">
-                    {image ? (
-                      <>
-                        <img src={image} alt="Preview" className="w-full h-full object-cover" />
-                        <button
-                          type="button"
-                          onClick={() => setImage('')}
-                          className="absolute inset-0 bg-black/50 text-white opacity-0 group-hover:opacity-100 flex items-center justify-center text-[10px] font-bold transition-opacity"
-                        >
-                          Quitar
-                        </button>
-                      </>
-                    ) : (
-                      <ImageIcon className="w-8 h-8 text-slate-400" />
-                    )}
-                  </div>
-
-                  <div className="flex-1 space-y-2">
-                    <button
-                      type="button"
-                      onClick={() => editFileInputRef.current?.click()}
-                      className="px-3 py-2 bg-white hover:bg-slate-50 border border-slate-300 rounded-lg text-xs font-bold text-slate-700 flex items-center gap-1.5 shadow-sm transition-all"
-                    >
-                      <Camera className="w-3.5 h-3.5 text-indigo-600" />
-                      <span>Cambiar Foto desde PC</span>
-                    </button>
-                    <input
-                      type="text"
-                      placeholder="O pega URL de imagen..."
-                      value={image.startsWith('data:') ? '' : image}
-                      onChange={(e) => setImage(e.target.value)}
-                      className="w-full px-2 py-1 border border-slate-300 rounded-lg text-[11px] outline-none focus:ring-1 focus:ring-indigo-500"
-                    />
-
-                    {image && (
-                      <div className="flex gap-1.5 pt-0.5">
-                        <button
-                          type="button"
-                          onClick={() => handleAutoEnhancePhoto()}
-                          disabled={isRemovingBg}
-                          className="flex-1 py-1.5 px-2 bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-700 font-bold text-[10px] rounded-lg flex items-center justify-center gap-1 transition-all"
-                        >
-                          <Sparkles className="w-3 h-3 text-amber-500" />
-                          <span>{isRemovingBg ? 'Limpiando...' : 'Fondo Blanco IA'}</span>
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() => handleAnalyzeWithVision()}
-                          disabled={isAnalyzingAI}
-                          className="flex-1 py-1.5 px-2 bg-indigo-50 hover:bg-indigo-100 border border-indigo-300 text-indigo-800 font-bold text-[10px] rounded-lg flex items-center justify-center gap-1 transition-all"
-                        >
-                          <Package className="w-3 h-3 text-indigo-600" />
-                          <span>{isAnalyzingAI ? 'Detectando...' : 'Auto-llenar con IA'}</span>
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <label className="block font-semibold text-slate-700 mb-1">
-                  Código de Barras / SKU *:
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={barcode}
-                  onChange={(e) => setBarcode(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg font-mono focus:ring-2 focus:ring-indigo-500 outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="block font-semibold text-slate-700 mb-1">
-                  Nombre del Producto *:
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none font-semibold text-slate-900"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <form onSubmit={handleUpdateProduct} className="flex-1 min-h-0 flex flex-col overflow-hidden">
+              <div className="p-4 sm:p-5 overflow-y-auto flex-1 min-h-0 space-y-3.5 text-xs">
+                {/* Foto del Producto */}
                 <div>
                   <label className="block font-semibold text-slate-700 mb-1">
-                    Categoría:
-                  </label>
-                  <select
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white focus:ring-2 focus:ring-indigo-500 outline-none font-medium text-sm"
-                  >
-                    <option value="Víveres">Víveres</option>
-                    <option value="Charcutería">Charcutería</option>
-                    <option value="Carnicería">Carnicería</option>
-                    <option value="Frutería / Verduras">Frutería / Verduras</option>
-                    <option value="Bebidas">Bebidas</option>
-                    <option value="Limpieza">Limpieza</option>
-                    <option value="Cuidado Personal">Cuidado Personal</option>
-                    <option value="Panadería">Panadería</option>
-                    <option value="Snacks">Snacks</option>
-                    <option value="Otros">Otros</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block font-semibold text-slate-700 mb-1">
-                    Tipo de Venta / Unidad:
-                  </label>
-                  <select
-                    value={unit}
-                    onChange={(e) => setUnit(e.target.value)}
-                    className="w-full px-3 py-2 border border-amber-300 bg-amber-50/50 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none text-sm font-semibold text-slate-800"
-                  >
-                    <option value="unidad">📦 Por Unidad (pza)</option>
-                    <option value="kg">⚖️ Pesable por Kilo (kg)</option>
-                    <option value="gr">⚖️ Pesable por Gramos (gr)</option>
-                  </select>
-                </div>
-              </div>
-
-              {(unit === 'kg' || unit === 'gr') && (
-                <div className="p-2.5 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-900 flex items-start gap-2">
-                  <Scale className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-                  <div>
-                    <strong>Producto Pesable configurado:</strong> En la caja registradora o balanza, el cobro se calculará automáticamente: <code className="bg-amber-100/80 px-1 py-0.5 rounded font-mono font-bold text-amber-950">Total USD = Peso ({unit}) × Precio fijado</code>.
-                  </div>
-                </div>
-              )}
-
-              {/* Calculadora Inteligente de Costos y Ganancia */}
-              <ProductCostCalculator
-                costUSD={costUSD}
-                priceUSD={priceUSD}
-                costPerBox={costPerBox}
-                packageUnits={packageUnits}
-                profitMarginPercent={profitMarginPercent}
-                unit={unit}
-                bcvRate={bcvRate}
-                accentColor="indigo"
-                onChange={({ costUSD: c, priceUSD: p, costPerBox: cBox, packageUnits: pUnits, profitMarginPercent: pMargin }) => {
-                  setCostUSD(c);
-                  setPriceUSD(p);
-                  setCostPerBox(cBox);
-                  setPackageUnits(pUnits);
-                  setProfitMarginPercent(pMargin);
-                }}
-              />
-
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="block font-semibold text-slate-700 mb-1">
-                    {unit === 'kg' ? 'Stock Actual (Kilos):' : unit === 'gr' ? 'Stock Actual (Gramos):' : 'Stock Actual (Unidades):'}
+                    Foto del Producto:
                   </label>
                   <input
-                    type="number"
-                    step="any"
-                    placeholder={unit === 'kg' ? 'Ej: 15.5' : '10'}
-                    value={stock}
-                    onChange={(e) => setStock(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg font-mono font-bold text-slate-900 focus:ring-2 focus:ring-indigo-500 outline-none"
+                    ref={editFileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageFileChange}
+                    className="hidden"
                   />
+
+                  <div className="flex items-center gap-3">
+                    <div className="w-20 h-20 rounded-xl bg-slate-100 border border-slate-300 overflow-hidden flex items-center justify-center shrink-0 relative group">
+                      {image ? (
+                        <>
+                          <img src={image} alt="Preview" className="w-full h-full object-cover" />
+                          <button
+                            type="button"
+                            onClick={() => setImage('')}
+                            className="absolute inset-0 bg-black/50 text-white opacity-0 group-hover:opacity-100 flex items-center justify-center text-[10px] font-bold transition-opacity"
+                          >
+                            Quitar
+                          </button>
+                        </>
+                      ) : (
+                        <ImageIcon className="w-8 h-8 text-slate-400" />
+                      )}
+                    </div>
+
+                    <div className="flex-1 space-y-2">
+                      <button
+                        type="button"
+                        onClick={() => editFileInputRef.current?.click()}
+                        className="px-3 py-2 bg-white hover:bg-slate-50 border border-slate-300 rounded-lg text-xs font-bold text-slate-700 flex items-center gap-1.5 shadow-sm transition-all"
+                      >
+                        <Camera className="w-3.5 h-3.5 text-indigo-600" />
+                        <span>Cambiar Foto desde PC</span>
+                      </button>
+                      <input
+                        type="text"
+                        placeholder="O pega URL de imagen..."
+                        value={image.startsWith('data:') ? '' : image}
+                        onChange={(e) => setImage(e.target.value)}
+                        className="w-full px-2 py-1 border border-slate-300 rounded-lg text-[11px] outline-none focus:ring-1 focus:ring-indigo-500"
+                      />
+
+                      {image && (
+                        <div className="flex gap-1.5 pt-0.5">
+                          <button
+                            type="button"
+                            onClick={() => handleAutoEnhancePhoto()}
+                            disabled={isRemovingBg}
+                            className="flex-1 py-1.5 px-2 bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-700 font-bold text-[10px] rounded-lg flex items-center justify-center gap-1 transition-all"
+                          >
+                            <Sparkles className="w-3 h-3 text-amber-500" />
+                            <span>{isRemovingBg ? 'Limpiando...' : 'Fondo Blanco IA'}</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => handleAnalyzeWithVision()}
+                            disabled={isAnalyzingAI}
+                            className="flex-1 py-1.5 px-2 bg-indigo-50 hover:bg-indigo-100 border border-indigo-300 text-indigo-800 font-bold text-[10px] rounded-lg flex items-center justify-center gap-1 transition-all"
+                          >
+                            <Package className="w-3 h-3 text-indigo-600" />
+                            <span>{isAnalyzingAI ? 'Detectando...' : 'Auto-llenar con IA'}</span>
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
 
                 <div>
                   <label className="block font-semibold text-slate-700 mb-1">
-                    Stock Mínimo (Alerta):
+                    Código de Barras / SKU *:
                   </label>
                   <input
-                    type="number"
-                    step="any"
-                    placeholder="3"
-                    value={minStock}
-                    onChange={(e) => setMinStock(e.target.value)}
+                    type="text"
+                    required
+                    value={barcode}
+                    onChange={(e) => setBarcode(e.target.value)}
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg font-mono focus:ring-2 focus:ring-indigo-500 outline-none"
                   />
                 </div>
+
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">
+                    Nombre del Producto *:
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <div>
+                    <label className="block font-semibold text-slate-700 mb-1">
+                      Categoría:
+                    </label>
+                    <select
+                      value={category}
+                      onChange={(e) => setCategory(e.target.value)}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white focus:ring-2 focus:ring-indigo-500 outline-none text-sm"
+                    >
+                      <option value="Víveres">Víveres</option>
+                      <option value="Charcutería">Charcutería</option>
+                      <option value="Carnicería">Carnicería</option>
+                      <option value="Frutería / Verduras">Frutería / Verduras</option>
+                      <option value="Bebidas">Bebidas</option>
+                      <option value="Limpieza">Limpieza</option>
+                      <option value="Cuidado Personal">Cuidado Personal</option>
+                      <option value="Panadería">Panadería</option>
+                      <option value="Snacks">Snacks</option>
+                      <option value="Otros">Otros</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block font-semibold text-slate-700 mb-1">
+                      Tipo de Venta / Unidad:
+                    </label>
+                    <select
+                      value={unit}
+                      onChange={(e) => setUnit(e.target.value)}
+                      className="w-full px-3 py-2 border border-amber-300 bg-amber-50/50 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none text-sm font-semibold text-slate-800"
+                    >
+                      <option value="unidad">📦 Por Unidad (pza)</option>
+                      <option value="kg">⚖️ Pesable por Kilo (kg)</option>
+                      <option value="gr">⚖️ Pesable por Gramos (gr)</option>
+                    </select>
+                  </div>
+                </div>
+
+                {(unit === 'kg' || unit === 'gr') && (
+                  <div className="p-2.5 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-900 flex items-start gap-2">
+                    <Scale className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                    <div>
+                      <strong>Producto Pesable configurado:</strong> En la caja registradora o balanza, el cobro se calculará automáticamente: <code className="bg-amber-100/80 px-1 py-0.5 rounded font-mono font-bold text-amber-950">Total USD = Peso ({unit}) × Precio fijado</code>.
+                    </div>
+                  </div>
+                )}
+
+                {/* Calculadora Inteligente de Costos y Ganancia */}
+                <ProductCostCalculator
+                  costUSD={costUSD}
+                  priceUSD={priceUSD}
+                  costPerBox={costPerBox}
+                  packageUnits={packageUnits}
+                  profitMarginPercent={profitMarginPercent}
+                  unit={unit}
+                  bcvRate={bcvRate}
+                  accentColor="indigo"
+                  onChange={({ costUSD: c, priceUSD: p, costPerBox: cBox, packageUnits: pUnits, profitMarginPercent: pMargin }) => {
+                    setCostUSD(c);
+                    setPriceUSD(p);
+                    setCostPerBox(cBox);
+                    setPackageUnits(pUnits);
+                    setProfitMarginPercent(pMargin);
+                  }}
+                />
+
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block font-semibold text-slate-700 mb-1">
+                      {unit === 'kg' ? 'Stock Actual (Kilos):' : unit === 'gr' ? 'Stock Actual (Gramos):' : 'Stock Actual (Unidades):'}
+                    </label>
+                    <input
+                      type="number"
+                      step="any"
+                      placeholder={unit === 'kg' ? 'Ej: 15.5' : '10'}
+                      value={stock}
+                      onChange={(e) => setStock(e.target.value)}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg font-mono font-bold text-slate-900 focus:ring-2 focus:ring-indigo-500 outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block font-semibold text-slate-700 mb-1">
+                      Stock Mínimo (Alerta):
+                    </label>
+                    <input
+                      type="number"
+                      step="any"
+                      placeholder="3"
+                      value={minStock}
+                      onChange={(e) => setMinStock(e.target.value)}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg font-mono focus:ring-2 focus:ring-indigo-500 outline-none"
+                    />
+                  </div>
+                </div>
               </div>
 
-              <div className="flex items-center justify-between pt-3 border-t border-slate-200">
+              {/* Barra de Acciones Fija al Pie */}
+              <div className="flex items-center justify-between px-5 py-3 border-t border-slate-200 bg-slate-50 shrink-0">
                 <button
                   type="button"
                   onClick={() => {
@@ -1801,15 +1802,16 @@ export default function DesktopInventoryPage() {
                       setShowEditModal(false);
                       setEditingProduct(null);
                     }}
-                    className="px-3 py-2 rounded-lg border border-slate-300 font-semibold text-slate-700 hover:bg-slate-100"
+                    className="px-4 py-2 rounded-lg border border-slate-300 font-semibold text-slate-700 hover:bg-slate-100"
                   >
                     Cancelar
                   </button>
                   <button
                     type="submit"
-                    className="px-4 py-2 bg-indigo-700 hover:bg-indigo-800 text-white font-bold rounded-lg shadow-sm"
+                    className="px-5 py-2 bg-indigo-700 hover:bg-indigo-800 text-white font-bold rounded-lg shadow-sm flex items-center gap-1.5"
                   >
-                    Guardar Cambios
+                    <Save className="w-4 h-4" />
+                    <span>Guardar Cambios</span>
                   </button>
                 </div>
               </div>
@@ -1820,9 +1822,9 @@ export default function DesktopInventoryPage() {
 
       {/* Modal de Ajuste de Inventario con Motivo */}
       {showAdjustmentModal && selectedProductForAdjustment && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-2xs z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl border border-slate-300 w-full max-w-md p-6 space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-2xs z-50 flex items-center justify-center p-3 sm:p-4">
+          <div className="bg-white rounded-2xl shadow-2xl border border-slate-300 w-full max-w-md max-h-[92vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between border-b border-slate-200 px-5 py-3.5 bg-slate-50 shrink-0">
               <div className="flex items-center gap-2">
                 <SlidersHorizontal className="w-5 h-5 text-amber-600" />
                 <h3 className="font-bold text-slate-900 text-sm">Ajustar Stock con Motivo</h3>
@@ -1832,14 +1834,14 @@ export default function DesktopInventoryPage() {
                   setShowAdjustmentModal(false);
                   setSelectedProductForAdjustment(null);
                 }}
-                className="text-slate-400 hover:text-slate-600 text-lg leading-none"
+                className="text-slate-400 hover:text-slate-600 text-xl leading-none"
               >
                 &times;
               </button>
             </div>
 
             {/* Info Producto */}
-            <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 flex justify-between items-center text-xs">
+            <div className="p-4 bg-slate-50 border-b border-slate-200 flex justify-between items-center text-xs shrink-0">
               <div>
                 <div className="font-bold text-slate-900">{selectedProductForAdjustment.name}</div>
                 <div className="font-mono text-[10px] text-slate-500">{selectedProductForAdjustment.barcode}</div>
@@ -1850,95 +1852,97 @@ export default function DesktopInventoryPage() {
               </div>
             </div>
 
-            <form onSubmit={handleSaveAdjustment} className="space-y-3.5 text-xs">
-              <div>
-                <label className="block font-semibold text-slate-700 mb-1">
-                  Motivo / Causa del Ajuste *:
-                </label>
-                <select
-                  value={adjustmentReason}
-                  onChange={(e) => setAdjustmentReason(e.target.value as any)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg font-medium text-xs focus:ring-2 focus:ring-amber-500 outline-none"
-                >
-                  <option value="spoilage_damaged">Merma / Producto Dañado o Roto</option>
-                  <option value="expiration">Vencimiento / Fecha de Caducidad</option>
-                  <option value="count_adjustment">Ajuste de Conteo Físico / Auditoría</option>
-                  <option value="internal_consumption">Autoconsumo / Gasto Interno</option>
-                  <option value="return_supplier">Devolución a Proveedor</option>
-                </select>
-              </div>
+            <form onSubmit={handleSaveAdjustment} className="flex-1 min-h-0 flex flex-col overflow-hidden">
+              <div className="p-4 sm:p-5 overflow-y-auto flex-1 min-h-0 space-y-3.5 text-xs">
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">
+                    Motivo / Causa del Ajuste *:
+                  </label>
+                  <select
+                    value={adjustmentReason}
+                    onChange={(e) => setAdjustmentReason(e.target.value as any)}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg font-medium text-xs focus:ring-2 focus:ring-amber-500 outline-none"
+                  >
+                    <option value="spoilage_damaged">Merma / Producto Dañado o Roto</option>
+                    <option value="expiration">Vencimiento / Fecha de Caducidad</option>
+                    <option value="count_adjustment">Ajuste de Conteo Físico / Auditoría</option>
+                    <option value="internal_consumption">Autoconsumo / Gasto Interno</option>
+                    <option value="return_supplier">Devolución a Proveedor</option>
+                  </select>
+                </div>
 
-              <div>
-                <label className="block font-semibold text-slate-700 mb-1">
-                  Tipo de Operación *:
-                </label>
-                <div className="grid grid-cols-3 gap-1.5">
-                  <button
-                    type="button"
-                    onClick={() => setAdjustmentMode('decrease')}
-                    className={`py-2 px-2 text-center rounded-lg border font-bold text-xs transition-colors ${
-                      adjustmentMode === 'decrease'
-                        ? 'bg-rose-600 text-white border-rose-700 shadow-xs'
-                        : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200'
-                    }`}
-                  >
-                    - Descontar
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setAdjustmentMode('increase')}
-                    className={`py-2 px-2 text-center rounded-lg border font-bold text-xs transition-colors ${
-                      adjustmentMode === 'increase'
-                        ? 'bg-emerald-600 text-white border-emerald-700 shadow-xs'
-                        : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200'
-                    }`}
-                  >
-                    + Ingresar
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setAdjustmentMode('exact')}
-                    className={`py-2 px-2 text-center rounded-lg border font-bold text-xs transition-colors ${
-                      adjustmentMode === 'exact'
-                        ? 'bg-sky-600 text-white border-sky-700 shadow-xs'
-                        : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200'
-                    }`}
-                  >
-                    Fijar Exacto
-                  </button>
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">
+                    Tipo de Operación *:
+                  </label>
+                  <div className="grid grid-cols-3 gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => setAdjustmentMode('decrease')}
+                      className={`py-2 px-2 text-center rounded-lg border font-bold text-xs transition-colors ${
+                        adjustmentMode === 'decrease'
+                          ? 'bg-rose-600 text-white border-rose-700 shadow-xs'
+                          : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200'
+                      }`}
+                    >
+                      - Descontar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setAdjustmentMode('increase')}
+                      className={`py-2 px-2 text-center rounded-lg border font-bold text-xs transition-colors ${
+                        adjustmentMode === 'increase'
+                          ? 'bg-emerald-600 text-white border-emerald-700 shadow-xs'
+                          : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200'
+                      }`}
+                    >
+                      + Ingresar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setAdjustmentMode('exact')}
+                      className={`py-2 px-2 text-center rounded-lg border font-bold text-xs transition-colors ${
+                        adjustmentMode === 'exact'
+                          ? 'bg-sky-600 text-white border-sky-700 shadow-xs'
+                          : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200'
+                      }`}
+                    >
+                      Fijar Exacto
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">
+                    {adjustmentMode === 'exact' ? 'Cantidad Exacta Contada:' : 'Cantidad a Modificar:'}
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="any"
+                    required
+                    value={adjustmentQty}
+                    onChange={(e) => setAdjustmentQty(e.target.value)}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg font-mono font-bold text-slate-900 focus:ring-2 focus:ring-amber-500 outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">
+                    Observaciones / Justificación:
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Ej: Empaque roto en transporte o caducado el 15/09"
+                    value={adjustmentNotes}
+                    onChange={(e) => setAdjustmentNotes(e.target.value)}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none"
+                  />
                 </div>
               </div>
 
-              <div>
-                <label className="block font-semibold text-slate-700 mb-1">
-                  {adjustmentMode === 'exact' ? 'Cantidad Exacta Contada:' : 'Cantidad a Modificar:'}
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  step="any"
-                  required
-                  autoFocus
-                  value={adjustmentQty}
-                  onChange={(e) => setAdjustmentQty(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg font-mono font-bold text-sm text-slate-900 focus:ring-2 focus:ring-amber-500 outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="block font-semibold text-slate-700 mb-1">
-                  Observaciones / Justificación:
-                </label>
-                <input
-                  type="text"
-                  placeholder="Ej: Empaque roto en transporte o caducado el 15/09"
-                  value={adjustmentNotes}
-                  onChange={(e) => setAdjustmentNotes(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none"
-                />
-              </div>
-
-              <div className="flex gap-2 justify-end pt-3 border-t border-slate-200">
+              {/* Botones Fijos al Pie */}
+              <div className="flex gap-2 justify-end px-5 py-3 border-t border-slate-200 bg-slate-50 shrink-0">
                 <button
                   type="button"
                   onClick={() => {
@@ -1951,7 +1955,7 @@ export default function DesktopInventoryPage() {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-lg shadow-sm flex items-center gap-1.5"
+                  className="px-5 py-2 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-lg shadow-sm flex items-center gap-1.5"
                 >
                   <CheckCircle2 className="w-4 h-4" />
                   <span>Aplicar Ajuste</span>

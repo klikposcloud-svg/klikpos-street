@@ -171,20 +171,20 @@ export default function ProductCostCalculator({
   const isSky = accentColor === 'sky';
 
   return (
-    <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-3">
+    <div className="bg-slate-50 border border-slate-200 rounded-xl p-2.5 space-y-2">
       {/* Encabezado con selector de modalidad */}
-      <div className="flex items-center justify-between flex-wrap gap-2 border-b border-slate-200 pb-2.5">
+      <div className="flex items-center justify-between flex-wrap gap-2 border-b border-slate-200 pb-1.5">
         <div className="flex items-center gap-1.5 text-xs font-bold text-slate-800">
-          <Calculator className={`w-4 h-4 ${isSky ? 'text-sky-600' : 'text-indigo-600'}`} />
-          <span>Calculadora Inteligente de Costos y Ganancia</span>
+          <Calculator className={`w-3.5 h-3.5 ${isSky ? 'text-sky-600' : 'text-indigo-600'}`} />
+          <span className="text-[11px] uppercase tracking-wide">Calculadora de Costos y Margen</span>
         </div>
 
         {/* Selector de Modalidad */}
-        <div className="flex items-center bg-white p-0.5 rounded-lg border border-slate-300 text-[11px] font-semibold">
+        <div className="flex items-center bg-white p-0.5 rounded-lg border border-slate-300 text-[10px] font-semibold">
           <button
             type="button"
             onClick={() => setPurchaseMode('unit')}
-            className={`px-2.5 py-1 rounded-md transition-all ${
+            className={`px-2 py-0.5 rounded-md transition-all ${
               purchaseMode === 'unit'
                 ? isSky
                   ? 'bg-sky-600 text-white shadow-xs'
@@ -197,7 +197,7 @@ export default function ProductCostCalculator({
           <button
             type="button"
             onClick={() => setPurchaseMode('box')}
-            className={`px-2.5 py-1 rounded-md transition-all flex items-center gap-1 ${
+            className={`px-2 py-0.5 rounded-md transition-all flex items-center gap-1 ${
               purchaseMode === 'box'
                 ? isSky
                   ? 'bg-sky-600 text-white shadow-xs'
@@ -213,9 +213,9 @@ export default function ProductCostCalculator({
 
       {/* Inputs de Costos */}
       {purchaseMode === 'box' ? (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 bg-white p-2.5 rounded-lg border border-slate-200">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 bg-white p-2 rounded-lg border border-slate-200">
           <div>
-            <label className="block text-[11px] font-bold text-slate-700 mb-0.5">
+            <label className="block text-[10px] font-bold text-slate-700 mb-0.5">
               Costo Caja / Bulto ($):
             </label>
             <div className="relative">
@@ -226,13 +226,13 @@ export default function ProductCostCalculator({
                 placeholder="Ej: 24.00"
                 value={costPerBox}
                 onChange={(e) => handleBoxCostChange(e.target.value)}
-                className="w-full pl-6 pr-2 py-1.5 border border-slate-300 rounded-lg text-xs font-mono font-bold text-slate-800 focus:ring-2 focus:ring-sky-500 outline-none"
+                className="w-full pl-6 pr-2 py-1 border border-slate-300 rounded-lg text-xs font-mono font-bold text-slate-800 focus:ring-2 focus:ring-sky-500 outline-none"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-[11px] font-bold text-slate-700 mb-0.5">
+            <label className="block text-[10px] font-bold text-slate-700 mb-0.5">
               Unidades por Caja:
             </label>
             <input
@@ -242,24 +242,24 @@ export default function ProductCostCalculator({
               placeholder="Ej: 12"
               value={packageUnits}
               onChange={(e) => handlePackageUnitsChange(e.target.value)}
-              className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg text-xs font-mono font-bold text-slate-800 focus:ring-2 focus:ring-sky-500 outline-none"
+              className="w-full px-2.5 py-1 border border-slate-300 rounded-lg text-xs font-mono font-bold text-slate-800 focus:ring-2 focus:ring-sky-500 outline-none"
             />
           </div>
 
           <div>
-            <label className="block text-[11px] font-bold text-slate-700 mb-0.5">
+            <label className="block text-[10px] font-bold text-slate-700 mb-0.5">
               Costo Resultante / Unit:
             </label>
-            <div className="px-2.5 py-1.5 bg-slate-100 border border-slate-200 rounded-lg text-xs font-mono font-black text-slate-900 flex items-center justify-between">
+            <div className="px-2 py-1 bg-slate-100 border border-slate-200 rounded-lg text-xs font-mono font-black text-slate-900 flex items-center justify-between">
               <span>{formatUSD(parsedCost)}</span>
               <span className="text-[10px] text-slate-500 font-normal">{formatVES(costVES)}</span>
             </div>
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 bg-white p-2.5 rounded-lg border border-slate-200">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 bg-white p-2 rounded-lg border border-slate-200">
           <div>
-            <label className="block text-[11px] font-bold text-slate-700 mb-0.5">
+            <label className="block text-[10px] font-bold text-slate-700 mb-0.5">
               Costo {unit === 'kg' ? 'por Kg' : unit === 'gr' ? 'por Gr' : 'Unitario'} ($ USD):
             </label>
             <div className="relative">
@@ -270,13 +270,13 @@ export default function ProductCostCalculator({
                 placeholder="Ej: 1.50"
                 value={costUSD}
                 onChange={(e) => handleUnitCostChange(e.target.value)}
-                className="w-full pl-6 pr-2 py-1.5 border border-slate-300 rounded-lg text-xs font-mono font-bold text-slate-800 focus:ring-2 focus:ring-sky-500 outline-none"
+                className="w-full pl-6 pr-2 py-1 border border-slate-300 rounded-lg text-xs font-mono font-bold text-slate-800 focus:ring-2 focus:ring-sky-500 outline-none"
               />
             </div>
           </div>
 
           <div className="flex flex-col justify-center">
-            <span className="text-[10px] text-slate-500 font-medium">Equivalente al BCV ({formatVES(bcvRate)}):</span>
+            <span className="text-[10px] text-slate-500 font-medium">Equivalente al BCV:</span>
             <span className="text-xs font-mono font-bold text-slate-700">
               {parsedCost > 0 ? formatVES(costVES) : 'Bs. 0,00'}
             </span>
@@ -285,17 +285,17 @@ export default function ProductCostCalculator({
       )}
 
       {/* Margen de Ganancia Rápido y Precio de Venta */}
-      <div className="space-y-2">
+      <div className="space-y-1.5">
         <div className="flex items-center justify-between flex-wrap gap-1">
-          <span className="text-[11px] font-bold text-slate-700 flex items-center gap-1">
-            <Percent className="w-3.5 h-3.5 text-emerald-600" />
+          <span className="text-[10px] font-bold text-slate-700 flex items-center gap-1">
+            <Percent className="w-3 h-3 text-emerald-600" />
             <span>Margen de Ganancia Deseado (%):</span>
           </span>
-          <span className="text-[10px] text-slate-500">Toca un porcentaje o escribe el precio directo abajo</span>
+          <span className="text-[9px] text-slate-500">Toca un % o escribe el precio abajo</span>
         </div>
 
         {/* Chips de Margen Rápido */}
-        <div className="flex items-center gap-1.5 flex-wrap">
+        <div className="flex items-center gap-1 flex-wrap">
           {[15, 20, 25, 30, 35, 50, 100].map((pct) => {
             const isSelected = Math.round(currentMargin) === pct;
             return (
@@ -303,7 +303,7 @@ export default function ProductCostCalculator({
                 key={pct}
                 type="button"
                 onClick={() => applyProfitMargin(pct)}
-                className={`px-2 py-1 rounded-lg text-xs font-bold font-mono transition-all border ${
+                className={`px-1.5 py-0.5 rounded text-[11px] font-bold font-mono transition-all border ${
                   isSelected
                     ? 'bg-emerald-600 text-white border-emerald-700 shadow-xs'
                     : 'bg-white hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 border-slate-300'
@@ -315,25 +315,25 @@ export default function ProductCostCalculator({
           })}
 
           {/* Campo manual de % */}
-          <div className="flex items-center bg-white border border-slate-300 rounded-lg px-2 py-0.5 focus-within:ring-2 focus-within:ring-emerald-500">
+          <div className="flex items-center bg-white border border-slate-300 rounded px-1.5 py-0.5 focus-within:ring-1 focus-within:ring-emerald-500">
             <input
               type="number"
               step="any"
               placeholder="Otro %"
               value={profitMarginPercent}
               onChange={(e) => applyProfitMargin(e.target.value)}
-              className="w-14 text-xs font-mono font-bold text-slate-800 outline-none text-right"
+              className="w-12 text-[11px] font-mono font-bold text-slate-800 outline-none text-right"
             />
-            <span className="text-[11px] font-bold text-slate-500 ml-0.5">%</span>
+            <span className="text-[10px] font-bold text-slate-500 ml-0.5">%</span>
           </div>
         </div>
       </div>
 
       {/* Precio de Venta Directo */}
-      <div className="bg-white p-2.5 rounded-lg border border-slate-200">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 items-center">
+      <div className="bg-white p-2 rounded-lg border border-slate-200">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 items-center">
           <div>
-            <label className="block text-xs font-bold text-slate-800 mb-0.5">
+            <label className="block text-[11px] font-bold text-slate-800 mb-0.5">
               Precio de Venta al Público ($ USD) *:
             </label>
             <div className="relative">
@@ -345,7 +345,7 @@ export default function ProductCostCalculator({
                 placeholder="Ej: 2.50"
                 value={priceUSD}
                 onChange={(e) => handleSellingPriceChange(e.target.value)}
-                className={`w-full pl-6 pr-2 py-2 border rounded-lg text-sm font-mono font-black text-slate-900 outline-none transition-all ${
+                className={`w-full pl-6 pr-2 py-1.5 border rounded-lg text-sm font-mono font-black text-slate-900 outline-none transition-all ${
                   isLoss
                     ? 'border-red-400 bg-red-50 focus:ring-2 focus:ring-red-500'
                     : isProfitable
@@ -356,9 +356,9 @@ export default function ProductCostCalculator({
             </div>
           </div>
 
-          <div className="bg-slate-50 p-2 rounded-lg border border-slate-200 text-center sm:text-left">
-            <span className="text-[10px] text-slate-500 font-semibold block uppercase tracking-wider">Precio en Bolívares al BCV:</span>
-            <span className="text-sm font-mono font-black text-emerald-700">
+          <div className="bg-slate-50 p-1.5 rounded-lg border border-slate-200 text-center sm:text-left">
+            <span className="text-[9px] text-slate-500 font-semibold block uppercase tracking-wider">Precio en Bolívares (BCV):</span>
+            <span className="text-xs font-mono font-black text-emerald-700">
               {parsedPrice > 0 ? formatVES(priceVES) : 'Bs. 0,00'}
             </span>
           </div>
@@ -368,7 +368,7 @@ export default function ProductCostCalculator({
       {/* Panel en Vivo de Ganancia Real y Rentabilidad */}
       {parsedCost > 0 && parsedPrice > 0 && (
         <div
-          className={`p-3 rounded-xl border text-xs transition-all ${
+          className={`p-2 rounded-lg border text-[11px] transition-all ${
             isLoss
               ? 'bg-red-50 border-red-200 text-red-900'
               : isAtCost
@@ -376,43 +376,43 @@ export default function ProductCostCalculator({
               : 'bg-emerald-50 border-emerald-200 text-emerald-900'
           }`}
         >
-          <div className="flex items-center justify-between flex-wrap gap-2">
-            <div className="flex items-center gap-2">
+          <div className="flex items-center justify-between flex-wrap gap-1.5">
+            <div className="flex items-center gap-1.5">
               {isLoss ? (
-                <AlertTriangle className="w-4 h-4 text-red-600 shrink-0" />
+                <AlertTriangle className="w-3.5 h-3.5 text-red-600 shrink-0" />
               ) : isAtCost ? (
-                <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+                <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
               ) : (
-                <TrendingUp className="w-4 h-4 text-emerald-600 shrink-0" />
+                <TrendingUp className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
               )}
               <div>
                 <span className="font-bold">
                   {isLoss
-                    ? '⚠️ ¡Atención! Estás vendiendo a pérdida:'
+                    ? '⚠️ Vendiendo a pérdida:'
                     : isAtCost
-                    ? '⚠️ Venta al costo (Sin margen de ganancia):'
-                    : 'Rentabilidad en Vivo:'}
+                    ? '⚠️ Venta al costo:'
+                    : 'Rentabilidad:'}
                 </span>
-                <span className="font-mono font-black ml-1.5 text-sm">
+                <span className="font-mono font-black ml-1 text-xs">
                   {currentMargin >= 0 ? `+${currentMargin.toFixed(1)}%` : `${currentMargin.toFixed(1)}%`}
                 </span>
               </div>
             </div>
 
             {/* Ganancia en Dinero Real */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               <div className="text-right">
-                <span className="text-[10px] opacity-75 block">Ganancia por unidad:</span>
-                <span className="font-mono font-black text-sm">
+                <span className="text-[9px] opacity-75 block">Ganancia neta / un:</span>
+                <span className="font-mono font-black text-xs">
                   {netProfitUnit >= 0 ? `+${formatUSD(netProfitUnit)}` : formatUSD(netProfitUnit)}
-                  <span className="text-[11px] font-normal ml-1">({formatVES(netProfitVES)})</span>
+                  <span className="text-[10px] font-normal ml-0.5">({formatVES(netProfitVES)})</span>
                 </span>
               </div>
 
               {purchaseMode === 'box' && parsedUnits > 1 && (
-                <div className="text-right pl-3 border-l border-emerald-300/60">
-                  <span className="text-[10px] opacity-75 block">Ganancia Caja ({parsedUnits} un.):</span>
-                  <span className="font-mono font-black text-sm text-emerald-800">
+                <div className="text-right pl-2 border-l border-emerald-300/60">
+                  <span className="text-[9px] opacity-75 block">Caja ({parsedUnits} un.):</span>
+                  <span className="font-mono font-black text-xs text-emerald-800">
                     +{formatUSD(netProfitBox)}
                   </span>
                 </div>

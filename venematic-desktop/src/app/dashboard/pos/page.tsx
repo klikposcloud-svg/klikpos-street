@@ -1035,11 +1035,11 @@ export default function DesktopPosPage() {
   };
 
   return (
-    <div className="flex-1 flex overflow-hidden p-3 gap-3 bg-slate-100 font-sans">
+    <div className="flex-1 min-h-0 flex overflow-hidden p-2 sm:p-2.5 gap-2 sm:gap-2.5 bg-slate-100 font-sans">
       {/* ========================================================================= */}
       {/* PANEL IZQUIERDO: Buscador, Categorías y Cuadrícula de Productos           */}
       {/* ========================================================================= */}
-      <div className="flex-1 flex flex-col bg-white rounded-xl border border-slate-300 shadow-xs overflow-hidden">
+      <div className="flex-1 min-h-0 flex flex-col bg-white rounded-xl border border-slate-300 shadow-xs overflow-hidden">
         {/* Barra de Búsqueda de Alta Visibilidad & Acciones Rápidas */}
         <div className="p-3 border-b border-slate-200 bg-slate-50 flex items-center gap-2.5">
           <div className="relative flex-1">
@@ -1245,13 +1245,26 @@ export default function DesktopPosPage() {
 
                   {/* Precios y Stock */}
                   <div className="flex items-end justify-between w-full pt-1">
-                    <div>
-                      <span className="pos-price-usd text-base font-black font-mono text-slate-900 tabular-numbers leading-none block">
-                        {formatUSD(p.priceUSD)}
-                      </span>
-                      <span className="pos-price-ves text-xs font-bold text-slate-600 font-mono tabular-numbers block mt-0.5">
-                        {formatVES(p.priceUSD * bcvRate)}
-                      </span>
+                    <div className="leading-tight">
+                      {primaryCurrency === 'VES' ? (
+                        <>
+                          <span className="text-sm sm:text-base font-black font-mono text-slate-900 tabular-numbers leading-tight block">
+                            {formatVES(p.priceUSD * bcvRate)}
+                          </span>
+                          <span className="text-[11px] font-bold text-slate-500 font-mono tabular-numbers leading-tight block mt-0.5">
+                            {formatUSD(p.priceUSD)}
+                          </span>
+                        </>
+                      ) : (
+                        <>
+                          <span className="text-sm sm:text-base font-black font-mono text-slate-900 tabular-numbers leading-tight block">
+                            {formatUSD(p.priceUSD)}
+                          </span>
+                          <span className="text-[11px] font-bold text-slate-500 font-mono tabular-numbers leading-tight block mt-0.5">
+                            {formatVES(p.priceUSD * bcvRate)}
+                          </span>
+                        </>
+                      )}
                     </div>
                     <span
                       className={`pos-card-stock-pill text-[10px] font-mono font-bold px-2 py-0.5 rounded-md border shadow-2xs shrink-0 ${
@@ -1293,13 +1306,26 @@ export default function DesktopPosPage() {
 
                 {/* Pie de la card: Precios en USD y Bs + Pastilla de Existencia */}
                 <div className="flex items-end justify-between pt-2 border-t border-slate-200/80 mt-2">
-                  <div>
-                    <span className="pos-price-usd text-base font-black font-mono text-slate-900 tabular-numbers leading-none block">
-                      {formatUSD(p.priceUSD)}
-                    </span>
-                    <span className="pos-price-ves text-xs font-bold text-slate-600 font-mono tabular-numbers block mt-1">
-                      {formatVES(p.priceUSD * bcvRate)}
-                    </span>
+                  <div className="leading-tight">
+                    {primaryCurrency === 'VES' ? (
+                      <>
+                        <span className="text-sm sm:text-base font-black font-mono text-slate-900 tabular-numbers leading-tight block">
+                          {formatVES(p.priceUSD * bcvRate)}
+                        </span>
+                        <span className="text-[11px] font-bold text-slate-500 font-mono tabular-numbers leading-tight block mt-0.5">
+                          {formatUSD(p.priceUSD)}
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="text-sm sm:text-base font-black font-mono text-slate-900 tabular-numbers leading-tight block">
+                          {formatUSD(p.priceUSD)}
+                        </span>
+                        <span className="text-[11px] font-bold text-slate-500 font-mono tabular-numbers leading-tight block mt-0.5">
+                          {formatVES(p.priceUSD * bcvRate)}
+                        </span>
+                      </>
+                    )}
                   </div>
 
                   <span
@@ -1327,31 +1353,31 @@ export default function DesktopPosPage() {
       {/* ========================================================================= */}
       {/* PANEL DERECHO: Ticket de Venta & Teclado Numérico Industrial */}
       {/* ========================================================================= */}
-      <div className="pos-cart-panel w-[480px] flex flex-col gap-3 shrink-0">
+      <div className="pos-cart-panel w-[380px] lg:w-[400px] xl:w-[420px] 2xl:w-[450px] h-full max-h-full min-h-0 flex flex-col gap-2 shrink-0 overflow-hidden">
         {/* Tabs: Ticket Activo | Ventas del Turno */}
-        <div className="flex bg-white rounded-xl border border-slate-300 shadow-xs overflow-hidden">
+        <div className="flex bg-white rounded-xl border border-slate-300 shadow-xs overflow-hidden shrink-0">
           <button
             onClick={() => setRightPanelTab('cart')}
-            className={`pos-tab-cart flex-1 py-2.5 text-xs font-black transition-colors flex items-center justify-center gap-1.5 ${
+            className={`pos-tab-cart flex-1 py-1.5 text-xs font-black transition-colors flex items-center justify-center gap-1.5 ${
               rightPanelTab === 'cart'
                 ? 'bg-slate-900 text-white'
                 : 'text-slate-600 hover:bg-slate-50'
             }`}
           >
-            <span>&#128722;</span> Ticket Activo
+            <span>🛒</span> Ticket Activo
             {cart.length > 0 && (
               <span className="ml-1 px-1.5 py-0.5 rounded-full bg-amber-400 text-slate-900 text-[10px] font-black">{cart.length}</span>
             )}
           </button>
           <button
             onClick={() => setRightPanelTab('shift')}
-            className={`pos-tab-shift flex-1 py-2.5 text-xs font-black transition-colors flex items-center justify-center gap-1.5 border-l border-slate-200 ${
+            className={`pos-tab-shift flex-1 py-1.5 text-xs font-black transition-colors flex items-center justify-center gap-1.5 border-l border-slate-200 ${
               rightPanelTab === 'shift'
                 ? 'bg-emerald-700 text-white'
                 : 'text-slate-600 hover:bg-slate-50'
             }`}
           >
-            <span>&#128203;</span> Ventas del Turno
+            <span>📋</span> Ventas del Turno
             {shiftSales.length > 0 && (
               <span className="ml-1 px-1.5 py-0.5 rounded-full bg-emerald-400 text-white text-[10px] font-black">{shiftSales.length}</span>
             )}
@@ -1360,7 +1386,7 @@ export default function DesktopPosPage() {
 
         {/* ---- TAB: TICKET ACTIVO ---- */}
         {rightPanelTab === 'cart' && (
-        <div className="pos-cart-container flex-1 bg-white rounded-xl border border-slate-300 shadow-xs flex flex-col overflow-hidden">
+        <div className="pos-cart-container flex-1 min-h-0 bg-white rounded-xl border border-slate-300 shadow-xs flex flex-col overflow-hidden">
           {/* Cabecera del Ticket */}
           <div className="p-3 border-b border-slate-200 bg-slate-100/95 flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -1475,27 +1501,27 @@ export default function DesktopPosPage() {
           </div>
 
           {/* Gran Total del Ticket */}
-          <div className="p-3 border-t border-slate-200 bg-slate-50 space-y-2">
+          <div className="p-2.5 border-t border-slate-200 bg-slate-50 space-y-1.5 shrink-0">
             <div className="flex items-baseline justify-between">
               <span className="text-xs font-bold uppercase tracking-wider text-slate-600">
                 Total a Cobrar:
               </span>
-              <div className="text-right">
+              <div className="text-right leading-tight">
                 {primaryCurrency === 'VES' ? (
                   <>
-                    <span className="pos-total-ves text-2xl font-black font-mono text-emerald-700 block tabular-numbers">
+                    <span className="pos-total-ves text-xl sm:text-2xl font-black font-mono text-emerald-700 block leading-tight tabular-numbers">
                       {formatVES(totalVES)}
                     </span>
-                    <span className="pos-total-usd text-xs font-bold font-mono text-slate-600 block tabular-numbers">
+                    <span className="pos-total-usd text-xs font-bold font-mono text-slate-600 block leading-tight mt-0.5 tabular-numbers">
                       {formatUSD(totalUSD)} USD · Tasa: {formatVES(bcvRate)}
                     </span>
                   </>
                 ) : (
                   <>
-                    <span className="pos-total-usd text-2xl font-black font-mono text-slate-900 block tabular-numbers">
+                    <span className="pos-total-usd text-xl sm:text-2xl font-black font-mono text-slate-900 block leading-tight tabular-numbers">
                       {formatUSD(totalUSD)}
                     </span>
-                    <span className="pos-total-ves text-xs font-bold font-mono text-sky-700 block tabular-numbers">
+                    <span className="pos-total-ves text-xs font-bold font-mono text-sky-700 block leading-tight mt-0.5 tabular-numbers">
                       {formatVES(totalVES)}
                     </span>
                   </>
@@ -1507,10 +1533,10 @@ export default function DesktopPosPage() {
             <button
               onClick={openPaymentModal}
               disabled={cart.length === 0}
-              className="pos-btn-cobrar w-full h-12 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-black text-sm rounded-lg shadow-sm flex items-center justify-center gap-2 uppercase tracking-wide transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+              className="pos-btn-cobrar w-full h-10 sm:h-11 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-black text-xs sm:text-sm rounded-lg shadow-sm flex items-center justify-center gap-2 uppercase tracking-wide transition-all disabled:opacity-40 disabled:cursor-not-allowed"
             >
               <span>Cobrar Venta</span>
-              <kbd className="bg-emerald-700 text-emerald-100 text-xs px-2 py-0.5 rounded font-mono font-bold">
+              <kbd className="bg-emerald-700 text-emerald-100 text-[11px] px-2 py-0.5 rounded font-mono font-bold">
                 F12
               </kbd>
             </button>
@@ -1599,13 +1625,13 @@ export default function DesktopPosPage() {
         {/* ========================================================================= */}
         {/* TECLADO NUMÉRICO TÁCTIL INDUSTRIAL                                       */}
         {/* ========================================================================= */}
-        <div className="pos-numpad-container bg-white rounded-xl border border-slate-300 shadow-xs p-3 space-y-2">
+        <div className="pos-numpad-container bg-white rounded-xl border border-slate-300 shadow-xs p-2 space-y-1.5 shrink-0">
           {/* Display & Selector de Modo */}
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex bg-slate-100 p-0.5 rounded-lg border border-slate-200 text-xs font-semibold">
+          <div className="flex items-center justify-between gap-1.5">
+            <div className="flex bg-slate-100 p-0.5 rounded-lg border border-slate-200 text-xs font-semibold shrink-0">
               <button
                 onClick={() => setNumpadMode('qty')}
-                className={`px-2.5 py-1 rounded-md transition-colors ${
+                className={`px-2 py-0.5 text-[11px] rounded-md transition-colors ${
                   numpadMode === 'qty'
                     ? 'bg-white text-slate-900 shadow-xs font-bold'
                     : 'text-slate-600 hover:text-slate-900'
@@ -1615,7 +1641,7 @@ export default function DesktopPosPage() {
               </button>
               <button
                 onClick={() => setNumpadMode('barcode')}
-                className={`px-2.5 py-1 rounded-md transition-colors ${
+                className={`px-2 py-0.5 text-[11px] rounded-md transition-colors ${
                   numpadMode === 'barcode'
                     ? 'bg-white text-slate-900 shadow-xs font-bold'
                     : 'text-slate-600 hover:text-slate-900'
@@ -1626,8 +1652,8 @@ export default function DesktopPosPage() {
             </div>
 
             {/* Display del valor tecleado y contexto de acción */}
-            <div className="h-9 px-3 bg-slate-100 text-slate-900 border border-slate-300 font-mono font-bold text-lg rounded-lg flex items-center justify-between flex-1 tabular-numbers">
-              <span className="text-[10px] font-sans font-bold uppercase tracking-wider text-slate-500 truncate max-w-[120px]">
+            <div className="h-8 px-2 bg-slate-100 text-slate-900 border border-slate-300 font-mono font-bold text-base rounded-lg flex items-center justify-between flex-1 min-w-0 tabular-numbers">
+              <span className="text-[9px] font-sans font-bold uppercase tracking-wider text-slate-500 truncate max-w-[100px]">
                 {pendingQuantity
                   ? `⚡ Próx: ×${pendingQuantity}`
                   : numpadMode === 'qty'
@@ -1645,7 +1671,7 @@ export default function DesktopPosPage() {
           </div>
 
           {/* Botonera 4x3 con respuesta táctil */}
-          <div className="grid grid-cols-4 gap-1.5">
+          <div className="grid grid-cols-4 gap-1">
             {['7', '8', '9'].map((k) => (
               <button
                 key={k}
@@ -1718,9 +1744,9 @@ export default function DesktopPosPage() {
       {/* ========================================================================= */}
       {showPaymentModal && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-2xs z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl border border-slate-300 w-full max-w-lg overflow-hidden flex flex-col">
+          <div className="bg-white rounded-2xl shadow-2xl border border-slate-300 w-full max-w-lg max-h-[92vh] overflow-hidden flex flex-col">
             {/* Header del Modal */}
-            <div className="p-4 bg-slate-50 border-b border-slate-200 text-slate-900 flex items-center justify-between">
+            <div className="p-3.5 bg-slate-50 border-b border-slate-200 text-slate-900 flex items-center justify-between shrink-0">
               <div>
                 <h3 className="font-black text-base uppercase tracking-wide text-slate-900">
                   Cobrar Venta
@@ -1729,17 +1755,17 @@ export default function DesktopPosPage() {
                   Tasa Oficial BCV: Bs. {bcvRate.toFixed(2)}
                 </p>
               </div>
-              <div className="text-right">
+              <div className="text-right leading-tight">
                 <span className="text-xl font-black font-mono text-emerald-700 block tabular-numbers">
                   {formatUSD(totalUSD)}
                 </span>
-                <span className="text-xs font-mono text-slate-600 block tabular-numbers">
+                <span className="text-xs font-mono text-slate-600 block mt-0.5 tabular-numbers">
                   {formatVES(totalVES)}
                 </span>
               </div>
             </div>
 
-            <div className="p-5 space-y-4">
+            <div className="p-4 space-y-3.5 flex-1 min-h-0 overflow-y-auto">
               {/* Métodos de Pago */}
               <div>
                 <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
@@ -2058,7 +2084,7 @@ export default function DesktopPosPage() {
             </div>
 
             {/* Acciones del Modal */}
-            <div className="p-4 bg-slate-50 border-t border-slate-200 flex gap-3">
+            <div className="p-3.5 bg-slate-50 border-t border-slate-200 flex gap-3 shrink-0">
               <button
                 type="button"
                 onClick={() => setShowPaymentModal(false)}

@@ -420,18 +420,16 @@ html:not([data-ui-style="glassmorphism"]) .pos-product-title {
   font-weight: 700 !important;
 }
 
-/* Precios: USD en Negro Profundo, VES en Rojo Terracota */
+/* Precios: USD y VES sin tamaños forzados con !important para permitir jerarquia fluida */
 html[data-ui-style="industrial"] .pos-price-usd,
 html:not([data-ui-style="glassmorphism"]) .pos-price-usd {
   color: var(--industrial-text, #0f172a) !important;
   font-weight: 900 !important;
-  font-size: 1.25rem !important;
 }
 html[data-ui-style="industrial"] .pos-price-ves,
 html:not([data-ui-style="glassmorphism"]) .pos-price-ves {
   color: #b91c1c !important;
   font-weight: 800 !important;
-  font-size: 0.85rem !important;
 }
 
 /* Pastilla de Stock */
@@ -458,8 +456,8 @@ html[data-ui-style="industrial"] .pos-cart-container,
 html:not([data-ui-style="glassmorphism"]) .pos-cart-container {
   background-color: var(--industrial-card, #ffffff) !important;
   border: 1px solid var(--industrial-border, #cbd5e1) !important;
-  border-radius: 18px !important;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
 }
 
 /* Badge TICKET ACTIVO Dorado Caramelo */
@@ -477,13 +475,11 @@ html[data-ui-style="industrial"] .pos-total-usd,
 html:not([data-ui-style="glassmorphism"]) .pos-total-usd {
   color: var(--industrial-text, #0f172a) !important;
   font-weight: 900 !important;
-  font-size: 1.65rem !important;
 }
 html[data-ui-style="industrial"] .pos-total-ves,
 html:not([data-ui-style="glassmorphism"]) .pos-total-ves {
-  color: #b91c1c !important;
+  color: #047857 !important;
   font-weight: 800 !important;
-  font-size: 1rem !important;
 }
 
 /* Botón COBRAR VENTA Verde Bosque Esmeralda */
@@ -493,30 +489,34 @@ html:not([data-ui-style="glassmorphism"]) .pos-btn-cobrar {
   border-color: #065f46 !important;
   color: #ffffff !important;
   font-weight: 900 !important;
-  border-radius: 12px !important;
-  box-shadow: 0 4px 14px rgba(4, 120, 87, 0.25) !important;
+  border-radius: 10px !important;
+  box-shadow: 0 3px 10px rgba(4, 120, 87, 0.2) !important;
 }
 html[data-ui-style="industrial"] .pos-btn-cobrar:hover,
 html:not([data-ui-style="glassmorphism"]) .pos-btn-cobrar:hover {
   background-color: #059669 !important;
 }
 
-/* Numpad Soft UI */
+/* Numpad Soft UI Compacto */
 html[data-ui-style="industrial"] .pos-numpad-container,
 html:not([data-ui-style="glassmorphism"]) .pos-numpad-container {
-  background-color: var(--btn-secondary-bg, #f1f5f9) !important;
+  background-color: var(--btn-secondary-bg, #f8fafc) !important;
   border: 1px solid var(--btn-secondary-border, #cbd5e1) !important;
-  border-radius: 18px !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03) !important;
 }
 html[data-ui-style="industrial"] .pos-numpad-key,
 html:not([data-ui-style="glassmorphism"]) .pos-numpad-key {
   background-color: var(--industrial-card, #ffffff) !important;
   color: var(--industrial-text, #0f172a) !important;
   border: 1px solid var(--industrial-border, #cbd5e1) !important;
-  border-radius: 12px !important;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
   font-weight: 800 !important;
+  height: 2.15rem !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 html[data-ui-style="industrial"] .pos-numpad-key:hover,
 html:not([data-ui-style="glassmorphism"]) .pos-numpad-key:hover {
@@ -528,21 +528,27 @@ html:not([data-ui-style="glassmorphism"]) .pos-numpad-action {
   background-color: var(--industrial-card, #ffffff) !important;
   color: var(--btn-secondary-text, #334155) !important;
   border: 1px solid var(--industrial-border, #cbd5e1) !important;
-  border-radius: 12px !important;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+  height: 2.15rem !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 html[data-ui-style="industrial"] .pos-numpad-enter,
 html:not([data-ui-style="glassmorphism"]) .pos-numpad-enter {
-  background-color: #c2410c !important;
-  border-color: #9a3412 !important;
+  background-color: #0369a1 !important;
+  border-color: #0284c7 !important;
   color: #ffffff !important;
   font-weight: 800 !important;
-  border-radius: 12px !important;
-  box-shadow: 0 4px 10px rgba(194, 65, 12, 0.25) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 2px 6px rgba(3, 105, 161, 0.25) !important;
+  height: auto !important;
+  min-height: 4.6rem !important;
 }
 html[data-ui-style="industrial"] .pos-numpad-enter:hover,
 html:not([data-ui-style="glassmorphism"]) .pos-numpad-enter:hover {
-  background-color: #ea580c !important;
+  background-color: #0284c7 !important;
 }
 
 /* ========================================================================= */

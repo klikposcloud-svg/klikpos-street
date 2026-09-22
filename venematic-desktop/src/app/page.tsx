@@ -7,7 +7,14 @@ export default function HomePage() {
   const router = useRouter();
 
   useEffect(() => {
-    router.replace('/dashboard/pos');
+    if (typeof window !== 'undefined') {
+      const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (window as any).Capacitor?.isNativePlatform();
+      if (isMobile) {
+        router.replace('/scanner');
+      } else {
+        router.replace('/dashboard/pos');
+      }
+    }
   }, [router]);
 
   return (

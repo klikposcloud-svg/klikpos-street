@@ -53,3 +53,13 @@ next-env.d.ts
 # Claves Maestras de Licenciamiento (NUNCA subir a Git)
 master_private_key.txt
 master_public_key.txt
+
+# android build
+.gradle/
+**/android/.gradle/
+**/android/app/build/
+**/android/build/
+**/android/capacitor-cordova-android-plugins/build/
+**/android/.idea/
+**/android/*.iml
+**/android/app/*.iml
