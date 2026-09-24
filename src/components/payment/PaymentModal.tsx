@@ -246,7 +246,7 @@ export function PaymentModal({
                         : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-slate-300 text-slate-700 dark:text-slate-300'
                     }`}
                   >
-                    <span className="text-[10px] font-bold text-slate-400 mb-1 tracking-wider uppercase">
+                    <span className="text-xs font-bold text-slate-500 mb-1 tracking-wider uppercase">
                       [EFECTIVO]
                     </span>
                     <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center text-xl mb-1 shadow-xs">
@@ -267,7 +267,7 @@ export function PaymentModal({
                         : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-slate-300 text-slate-700 dark:text-slate-300'
                     }`}
                   >
-                    <span className="text-[10px] font-bold text-slate-400 mb-1 tracking-wider uppercase">
+                    <span className="text-xs font-bold text-slate-500 mb-1 tracking-wider uppercase">
                       [TARJETA]
                     </span>
                     <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center text-xl mb-1 shadow-xs">
@@ -288,7 +288,7 @@ export function PaymentModal({
                         : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-slate-300 text-slate-700 dark:text-slate-300'
                     }`}
                   >
-                    <span className="text-[10px] font-bold text-slate-400 mb-1 tracking-wider uppercase">
+                    <span className="text-xs font-bold text-slate-500 mb-1 tracking-wider uppercase">
                       [MONEDERO DIGITAL]
                     </span>
                     <div className="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center text-xl mb-1 shadow-xs">
@@ -324,7 +324,7 @@ export function PaymentModal({
                   <div className="space-y-3 p-3 bg-slate-50 dark:bg-slate-700/40 rounded-2xl border border-slate-200 dark:border-slate-600 text-xs">
                     {/* Billetes Rápidos */}
                     <div>
-                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">
+                      <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">
                         Billetes Rápidos:
                       </span>
                       <div className="grid grid-cols-6 gap-1">
@@ -334,7 +334,7 @@ export function PaymentModal({
                             setReceivedUSD(totalUSD.toFixed(2));
                             setReceivedBS('');
                           }}
-                          className="py-1 px-1 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-lg text-[10px]"
+                          className="min-h-[44px] px-1 bg-amber-700 hover:bg-amber-800 text-white font-bold rounded-lg text-xs"
                         >
                           Exacto $
                         </button>
@@ -346,7 +346,7 @@ export function PaymentModal({
                               setReceivedUSD(b);
                               setReceivedBS('');
                             }}
-                            className="py-1 bg-white dark:bg-slate-600 border border-slate-300 dark:border-slate-500 font-bold rounded-lg text-[10px] text-slate-800 dark:text-white"
+                            className="min-h-[44px] bg-white dark:bg-slate-600 border border-slate-300 dark:border-slate-500 font-bold rounded-lg text-xs text-slate-800 dark:text-white"
                           >
                             ${b}
                           </button>
@@ -368,7 +368,7 @@ export function PaymentModal({
                             if (e.target.value) setReceivedBS('');
                           }}
                           onKeyDown={(e) => handleNumpadInputKeyDown(e, { onEnter: handleFinalize })}
-                          className="input-field py-2 text-sm font-black text-emerald-600 dark:text-emerald-400"
+                          className="input-field py-2 text-sm font-black text-emerald-700 dark:text-emerald-400"
                           placeholder="0.00"
                         />
                       </div>
@@ -384,7 +384,7 @@ export function PaymentModal({
                             if (e.target.value) setReceivedUSD('');
                           }}
                           onKeyDown={(e) => handleNumpadInputKeyDown(e, { onEnter: handleFinalize })}
-                          className="input-field py-2 text-sm font-black text-sky-600 dark:text-sky-400"
+                          className="input-field py-2 text-sm font-black text-sky-700 dark:text-sky-300"
                           placeholder="0.00"
                         />
                       </div>
@@ -405,8 +405,8 @@ export function PaymentModal({
                     <div
                       className={`p-3 rounded-xl border-2 flex items-center justify-between transition-all ${
                         isComplete
-                          ? 'bg-emerald-600 dark:bg-emerald-700 border-emerald-400 text-white shadow-lg'
-                          : 'bg-rose-600 dark:bg-rose-700 border-rose-400 text-white shadow-lg'
+                          ? 'bg-emerald-700 dark:bg-emerald-800 border-emerald-400 text-white shadow-lg'
+                          : 'bg-rose-700 dark:bg-rose-800 border-rose-400 text-white shadow-lg'
                       }`}
                     >
                       <div>
@@ -494,7 +494,7 @@ export function PaymentModal({
                 type="button"
                 onClick={handleFinalize}
                 disabled={isProcessing}
-                className="col-span-8 bg-[#10b981] hover:bg-[#059669] active:scale-[0.98] text-white font-extrabold text-base py-4 px-6 rounded-2xl flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/25 transition-all"
+                className="col-span-8 bg-pos-success hover:bg-pos-success-hover active:scale-[0.98] text-white font-extrabold text-base py-4 px-6 rounded-2xl flex items-center justify-center gap-2 shadow-lg shadow-emerald-700/25 transition-all"
               >
                 {isProcessing ? (
                   <span>PROCESANDO...</span>
@@ -509,7 +509,7 @@ export function PaymentModal({
               <button
                 type="button"
                 onClick={onClose}
-                className="col-span-4 bg-[#ef4444] hover:bg-[#dc2626] active:scale-[0.98] text-white font-bold text-sm py-4 px-3 rounded-2xl flex items-center justify-center transition-all shadow-md shadow-red-500/20"
+                className="col-span-4 bg-pos-danger hover:bg-pos-danger-hover active:scale-[0.98] text-white font-bold text-sm py-4 px-3 rounded-2xl flex items-center justify-center transition-all shadow-md shadow-red-700/20"
               >
                 Cancelar Venta
               </button>

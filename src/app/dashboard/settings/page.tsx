@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useEffect } from 'react';
 import { db } from '@/lib/db';
@@ -7,10 +7,13 @@ import BrandingSettings from '@/components/BrandingSettings';
 import LicenseActivationModal from '@/components/LicenseActivationModal';
 import CloudSyncSettingsCard from '@/components/CloudSyncSettingsCard';
 import { useAuth } from '@/context/AuthContext';
-import { ShieldAlert, ShieldCheck, ArrowLeft, Scale, CheckCircle2, AlertCircle, RefreshCw, Zap, Banknote } from 'lucide-react';
+import { ShieldAlert, ShieldCheck, ArrowLeft, Scale, CheckCircle2, AlertCircle, RefreshCw, Zap, Banknote, Upload, Image as ImageIcon, Trash2, Printer, Palette, Store, Users } from 'lucide-react';
 import Link from 'next/link';
 import { scaleService, ScaleProtocol, WeightReading, PriceMultiplierBasis } from '@/lib/hardware/scale';
 import { getScaleBarcodeConfig, saveScaleBarcodeConfig, ScaleBarcodeConfig } from '@/lib/hardware/scale-barcode';
+import { pagoMovilMonitor, initiateGmailOAuth, extractOAuthTokenFromUrl, verifyGmailToken } from '@/lib/payments/pago-movil-gmail-monitor';
+
+export type SettingsTabId = 'branding' | 'business' | 'printer' | 'scale' | 'cashiers' | 'cloud_backup' | 'payments';
 
 export default function DesktopSettingsPage() {
   const { isAdmin, switchToRole } = useAuth();
@@ -21,10 +24,28 @@ export default function DesktopSettingsPage() {
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
   const [footerMessage, setFooterMessage] = useState('');
+  const [logoUrl, setLogoUrl] = useState<string>('');
+  const [showLogoOnReceipt, setShowLogoOnReceipt] = useState<boolean>(true);
+  const [receiptFeedMargin, setReceiptFeedMargin] = useState<'0mm' | '3mm' | '6mm' | '10mm'>('3mm');
   const [paperWidth, setPaperWidth] = useState<'80mm' | '58mm'>('80mm');
   const [geminiApiKey, setGeminiApiKey] = useState('');
   const [primaryCurrency, setPrimaryCurrency] = useState<'VES' | 'USD'>('VES');
   const [savedSuccess, setSavedSuccess] = useState(false);
+  const [activeTab, setActiveTab] = useState<SettingsTabId>('branding');
+
+  // Gmail Pago Móvil Monitor
+  const [gmailConnected, setGmailConnected] = useState(false);
+  const [gmailEmail, setGmailEmail] = useState('');
+  const [gmailClientId, setGmailClientId] = useState(
+    process.env.NEXT_PUBLIC_GMAIL_CLIENT_ID || ''
+  );
+  const [gmailTolerance, setGmailTolerance] = useState(
+    parseInt(process.env.NEXT_PUBLIC_PAGO_MOVIL_TOLERANCE_PCT || '2')
+  );
+  const [gmailPollMs, setGmailPollMs] = useState(
+    parseInt(process.env.NEXT_PUBLIC_PAGO_MOVIL_POLL_MS || '8000')
+  );
+  const [gmailVerifying, setGmailVerifying] = useState(false);
 
   useEffect(() => {
     db.settings.get('store_info').then((s) => {
@@ -34,11 +55,29 @@ export default function DesktopSettingsPage() {
         setPhone(s.value.phone || '');
         setAddress(s.value.address || '');
         setFooterMessage(s.value.footerMessage || '');
+        setLogoUrl(s.value.logoUrl || '');
+        setShowLogoOnReceipt(s.value.showLogoOnReceipt !== false);
       }
     });
 
     db.settings.get('paper_width').then((p) => {
-      if (p) setPaperWidth(p.value);
+      if (p) {
+        setPaperWidth(p.value);
+        if (typeof document !== 'undefined') {
+          document.documentElement.setAttribute('data-paper-width', p.value);
+          const printableWidth = p.value === '58mm' ? '48mm' : '72mm';
+          document.documentElement.style.setProperty('--receipt-width', printableWidth);
+        }
+      }
+    });
+
+    db.settings.get('receipt_feed_margin').then((m) => {
+      if (m && m.value) {
+        setReceiptFeedMargin(m.value);
+        if (typeof document !== 'undefined') {
+          document.documentElement.style.setProperty('--receipt-feed-padding', m.value);
+        }
+      }
     });
 
     db.settings.get('gemini_api_key').then((k) => {
@@ -53,7 +92,60 @@ export default function DesktopSettingsPage() {
         if (stored === 'USD' || stored === 'VES') setPrimaryCurrency(stored);
       }
     });
+
+    // Verificar si hay token Gmail guardado o si viene de redirect OAuth
+    const oauthResult = extractOAuthTokenFromUrl();
+    if (oauthResult) {
+      setActiveTab('payments');
+      setGmailVerifying(true);
+      verifyGmailToken(oauthResult.accessToken).then((info) => {
+        if (info) {
+          const cfg = pagoMovilMonitor.getConfig();
+          pagoMovilMonitor.saveConfig({
+            accessToken: oauthResult.accessToken,
+            monitoredEmail: info.email,
+            pollingIntervalMs: cfg?.pollingIntervalMs || 8000,
+            tolerancePct: cfg?.tolerancePct || 2,
+          });
+          setGmailConnected(true);
+          setGmailEmail(info.email);
+        }
+        setGmailVerifying(false);
+      });
+    } else {
+      const saved = pagoMovilMonitor.getConfig();
+      if (saved?.accessToken) {
+        setGmailVerifying(true);
+        verifyGmailToken(saved.accessToken).then((info) => {
+          if (info) { setGmailConnected(true); setGmailEmail(info.email); }
+          else { pagoMovilMonitor.clearConfig(); }
+          setGmailVerifying(false);
+        });
+      }
+    }
   }, []);
+
+  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) {
+      alert('La imagen del logo no debe superar los 2MB');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === 'string') {
+        setLogoUrl(reader.result);
+        setShowLogoOnReceipt(true);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemoveLogo = () => {
+    setLogoUrl('');
+    setShowLogoOnReceipt(false);
+  };
 
   const handleSaveSettings = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,6 +157,8 @@ export default function DesktopSettingsPage() {
         phone,
         address,
         footerMessage,
+        logoUrl,
+        showLogoOnReceipt,
       },
     });
 
@@ -72,6 +166,18 @@ export default function DesktopSettingsPage() {
       key: 'paper_width',
       value: paperWidth,
     });
+
+    await db.settings.put({
+      key: 'receipt_feed_margin',
+      value: receiptFeedMargin,
+    });
+
+    if (typeof document !== 'undefined') {
+      document.documentElement.setAttribute('data-paper-width', paperWidth);
+      const printableWidth = paperWidth === '58mm' ? '48mm' : '72mm';
+      document.documentElement.style.setProperty('--receipt-width', printableWidth);
+      document.documentElement.style.setProperty('--receipt-feed-padding', receiptFeedMargin);
+    }
 
     await db.settings.put({
       key: 'gemini_api_key',
@@ -164,9 +270,9 @@ export default function DesktopSettingsPage() {
             <button
               type="button"
               onClick={() => switchToRole('admin')}
-              className="w-full py-2 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-800 text-xs font-bold rounded-xl transition-all"
+              className="w-full py-2 bg-indigo-50 hover:bg-indigo-100 border border-indigo-300 text-slate-900 font-black text-xs rounded-xl transition-all cursor-pointer"
             >
-              ⚡ Activar Administrador con 1 Clic
+              <span style={{ color: '#0f172a' }}>⚡ Activar Administrador con 1 Clic</span>
             </button>
           </div>
 
@@ -184,145 +290,197 @@ export default function DesktopSettingsPage() {
     );
   }
 
+  const SETTINGS_TABS: { id: SettingsTabId; label: string; icon: any }[] = [
+    { id: 'branding', label: 'Marca y Fondo', icon: Palette },
+    { id: 'business', label: 'Datos del Negocio', icon: Store },
+    { id: 'printer', label: 'Impresora y Logo', icon: Printer },
+    { id: 'scale', label: 'Balanza Digital', icon: Scale },
+    { id: 'cashiers', label: 'Cajeros y Seguridad', icon: Users },
+    { id: 'cloud_backup', label: 'Nube y Respaldos', icon: RefreshCw },
+    { id: 'payments', label: 'Pagos y Gmail', icon: Zap },
+  ];
+
   return (
     <div className="flex-1 flex flex-col p-4 gap-4 overflow-y-auto bg-slate-100 font-sans">
-      {/* Cabecera */}
-      <div className="bg-white p-4 rounded-xl border border-slate-300 shadow-xs flex items-center justify-between">
-        <div>
-          <h2 className="text-base font-black text-slate-900 uppercase tracking-tight">
-            Configuración del Terminal de Ventas
-          </h2>
-          <p className="text-xs text-slate-500">
-            Datos fiscales de impresión, formato de ticket térmico, marca y respaldos
-          </p>
-        </div>
+      {/* Cabecera y Barra de Pestañas Superior */}
+      <div className="bg-white p-4 rounded-xl border border-slate-300 shadow-xs flex flex-col gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 className="text-base font-black text-slate-900 uppercase tracking-tight">
+              Configuración del Sistema
+            </h2>
+            <p className="text-xs text-slate-500">
+              Personaliza el entorno visual, datos fiscales, comprobantes térmicos, balanza y seguridad
+            </p>
+          </div>
 
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setShowLicenseModal(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-800 text-xs font-bold transition-all shadow-xs"
-          >
-            <ShieldCheck className="w-4 h-4 text-indigo-600" />
-            <span>Licenciamiento y HWID</span>
-          </button>
-
-          {savedSuccess && (
-            <span className="text-xs font-bold text-emerald-700 bg-emerald-100 px-3 py-1.5 rounded-lg">
-              ✓ Guardado
-            </span>
-          )}
-        </div>
-      </div>
-
-      {/* Selector de Marca y Modo de Interfaz (10 Paletas + Industrial vs Glassmorphism) */}
-      <BrandingSettings />
-
-      {/* Selector de Moneda Principal de Exhibición y Cobro */}
-      <div className="bg-white p-5 rounded-xl border border-slate-300 shadow-xs space-y-3">
-        <div className="flex items-center justify-between border-b border-slate-200 pb-2.5">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold">
-              <Banknote className="w-4 h-4" />
-            </div>
-            <div>
-              <h3 className="font-bold text-slate-900 text-sm">
-                Moneda Principal de Visualización en Caja y Cobros
-              </h3>
-              <p className="text-[11px] text-slate-500">
-                Define qué moneda verá el cajero y el cliente en tamaño gigante prioritario
-              </p>
-            </div>
-          </div>
+            <button
+              type="button"
+              onClick={() => setShowLicenseModal(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-700 hover:bg-indigo-800 active:bg-indigo-900 text-white text-xs font-bold transition-all shadow-xs cursor-pointer"
+            >
+              <ShieldCheck className="w-4 h-4 text-white shrink-0" />
+              <span className="text-white font-bold">Licenciamiento y HWID</span>
+            </button>
 
-          <span className="text-xs bg-emerald-100 text-emerald-800 font-bold px-3 py-1 rounded-full border border-emerald-300">
-            {primaryCurrency === 'VES' ? '🇻🇪 Bolívares (Bs.) Prioritario' : '💵 Dólares ($ USD) Prioritario'}
-          </span>
+            {savedSuccess && (
+              <span className="text-xs font-bold text-emerald-700 bg-emerald-100 px-3 py-1.5 rounded-lg animate-in fade-in">
+                ✓ Guardado
+              </span>
+            )}
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs pt-1">
-          <div
-            onClick={async () => {
-              setPrimaryCurrency('VES');
-              await db.settings.put({ key: 'primary_currency', value: 'VES' });
-              if (typeof window !== 'undefined') localStorage.setItem('venematic_primary_currency', 'VES');
-              setSavedSuccess(true);
-              setTimeout(() => setSavedSuccess(false), 2500);
-            }}
-            className={`cursor-pointer p-3.5 rounded-xl border-2 transition-all ${
-              primaryCurrency === 'VES'
-                ? 'border-emerald-600 bg-emerald-50/50 ring-2 ring-emerald-500/20 shadow-xs'
-                : 'border-slate-200 hover:border-slate-300 bg-slate-50'
-            }`}
-          >
-            <div className="flex items-center justify-between mb-1.5">
-              <span className="font-black text-slate-900 text-sm flex items-center gap-1.5">
-                <span className="text-base">🇻🇪</span> Bolívares (Bs.) Prioritario
-              </span>
-              <input
-                type="radio"
-                name="primaryCurrency"
-                checked={primaryCurrency === 'VES'}
-                onChange={() => {}}
-                className="w-4 h-4 text-emerald-600 accent-emerald-600 cursor-pointer"
-              />
-            </div>
-            <p className="text-[11px] text-slate-600 leading-snug">
-              El total a cobrar del ticket, los botones rápidos y el modal de cobro se muestran en <strong>fuente gigante en Bolívares (Bs.)</strong>, con el equivalente en $ en vivo como referencia secundaria.
-            </p>
-            <div className="mt-2 text-[10px] font-black text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-md inline-block">
-              ★ RECOMENDADO PARA VENEZUELA (Pago Móvil / Punto)
-            </div>
-          </div>
-
-          <div
-            onClick={async () => {
-              setPrimaryCurrency('USD');
-              await db.settings.put({ key: 'primary_currency', value: 'USD' });
-              if (typeof window !== 'undefined') localStorage.setItem('venematic_primary_currency', 'USD');
-              setSavedSuccess(true);
-              setTimeout(() => setSavedSuccess(false), 2500);
-            }}
-            className={`cursor-pointer p-3.5 rounded-xl border-2 transition-all ${
-              primaryCurrency === 'USD'
-                ? 'border-emerald-600 bg-emerald-50/50 ring-2 ring-emerald-500/20 shadow-xs'
-                : 'border-slate-200 hover:border-slate-300 bg-slate-50'
-            }`}
-          >
-            <div className="flex items-center justify-between mb-1.5">
-              <span className="font-black text-slate-900 text-sm flex items-center gap-1.5">
-                <span className="text-base">💵</span> Dólares ($ USD) Prioritario
-              </span>
-              <input
-                type="radio"
-                name="primaryCurrency"
-                checked={primaryCurrency === 'USD'}
-                onChange={() => {}}
-                className="w-4 h-4 text-emerald-600 accent-emerald-600 cursor-pointer"
-              />
-            </div>
-            <p className="text-[11px] text-slate-600 leading-snug">
-              El total del ticket y los cobros se exhiben en <strong>fuente gigante en Dólares ($)</strong>, manteniendo la conversión en Bolívares en vivo calculada según la tasa del BCV.
-            </p>
-            <div className="mt-2 text-[10px] font-semibold text-slate-600 bg-slate-200 px-2 py-0.5 rounded-md inline-block">
-              Ideal para cobro en divisas efectivo
-            </div>
-          </div>
+        {/* Pestañas de Navegación Rápida */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pt-2 border-t border-slate-200 scrollbar-none">
+          {SETTINGS_TABS.map((tab) => {
+            const Icon = tab.icon;
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                  isActive
+                    ? 'bg-sky-700 text-white shadow-sm ring-1 ring-sky-600'
+                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200/80 hover:text-slate-900 border border-slate-200'
+                }`}
+              >
+                <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : 'text-slate-500'}`} />
+                <span>{tab.label}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Formulario de Datos del Comercio */}
+      {/* 1. PESTAÑA: MARCA Y FONDO DEL ENTORNO */}
+      {activeTab === 'branding' && (
+        <div className="space-y-4 animate-in fade-in duration-150">
+          <BrandingSettings />
+
+          {/* Selector de Moneda Principal de Exhibición y Cobro */}
+          <div className="bg-white p-5 rounded-xl border border-slate-300 shadow-xs space-y-3">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-2.5">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold">
+                  <Banknote className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-slate-900 text-sm">
+                    Moneda Principal de Visualización en Caja y Cobros
+                  </h3>
+                  <p className="text-[11px] text-slate-500">
+                    Define qué moneda verá el cajero y el cliente en tamaño gigante prioritario
+                  </p>
+                </div>
+              </div>
+
+              <span className="text-xs bg-emerald-100 text-emerald-800 font-bold px-3 py-1 rounded-full border border-emerald-300">
+                {primaryCurrency === 'VES' ? '🇻🇪 Bolívares (Bs.) Prioritario' : '💵 Dólares ($ USD) Prioritario'}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs pt-1">
+              <div
+                onClick={async () => {
+                  setPrimaryCurrency('VES');
+                  await db.settings.put({ key: 'primary_currency', value: 'VES' });
+                  if (typeof window !== 'undefined') localStorage.setItem('venematic_primary_currency', 'VES');
+                  setSavedSuccess(true);
+                  setTimeout(() => setSavedSuccess(false), 2500);
+                }}
+                className={`cursor-pointer p-3.5 rounded-xl border-2 transition-all ${
+                  primaryCurrency === 'VES'
+                    ? 'border-emerald-600 bg-emerald-50/50 ring-2 ring-emerald-500/20 shadow-xs'
+                    : 'border-slate-200 hover:border-slate-300 bg-slate-50'
+                }`}
+              >
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="font-black text-slate-900 text-sm flex items-center gap-1.5">
+                    <span className="text-base">🇻🇪</span> Bolívares (Bs.) Prioritario
+                  </span>
+                  <input
+                    type="radio"
+                    name="primaryCurrency"
+                    checked={primaryCurrency === 'VES'}
+                    onChange={() => {}}
+                    className="w-4 h-4 text-emerald-600 accent-emerald-600 cursor-pointer"
+                  />
+                </div>
+                <p className="text-[11px] text-slate-600 leading-snug">
+                  El total a cobrar del ticket, los botones rápidos y el modal de cobro se muestran en <strong>fuente gigante en Bolívares (Bs.)</strong>, con el equivalente en $ en vivo como referencia secundaria.
+                </p>
+                <div className="mt-2 text-[10px] font-black text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-md inline-block">
+                  ★ RECOMENDADO PARA VENEZUELA (Pago Móvil / Punto)
+                </div>
+              </div>
+
+              <div
+                onClick={async () => {
+                  setPrimaryCurrency('USD');
+                  await db.settings.put({ key: 'primary_currency', value: 'USD' });
+                  if (typeof window !== 'undefined') localStorage.setItem('venematic_primary_currency', 'USD');
+                  setSavedSuccess(true);
+                  setTimeout(() => setSavedSuccess(false), 2500);
+                }}
+                className={`cursor-pointer p-3.5 rounded-xl border-2 transition-all ${
+                  primaryCurrency === 'USD'
+                    ? 'border-emerald-600 bg-emerald-50/50 ring-2 ring-emerald-500/20 shadow-xs'
+                    : 'border-slate-200 hover:border-slate-300 bg-slate-50'
+                }`}
+              >
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="font-black text-slate-900 text-sm flex items-center gap-1.5">
+                    <span className="text-base">💵</span> Dólares ($ USD) Prioritario
+                  </span>
+                  <input
+                    type="radio"
+                    name="primaryCurrency"
+                    checked={primaryCurrency === 'USD'}
+                    onChange={() => {}}
+                    className="w-4 h-4 text-emerald-600 accent-emerald-600 cursor-pointer"
+                  />
+                </div>
+                <p className="text-[11px] text-slate-600 leading-snug">
+                  El total del ticket y los cobros se exhiben en <strong>fuente gigante en Dólares ($)</strong>, manteniendo la conversión en Bolívares en vivo calculada según la tasa del BCV.
+                </p>
+                <div className="mt-2 text-[10px] font-semibold text-slate-600 bg-slate-200 px-2 py-0.5 rounded-md inline-block">
+                  Ideal para cobro en divisas efectivo
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 2. PESTAÑA: DATOS DEL NEGOCIO */}
+      {activeTab === 'business' && (
         <form
           onSubmit={handleSaveSettings}
-          className="bg-white p-5 rounded-xl border border-slate-300 shadow-xs space-y-4"
+          className="bg-white p-5 rounded-xl border border-slate-300 shadow-xs space-y-4 animate-in fade-in duration-150"
         >
-          <h3 className="font-bold text-xs uppercase tracking-wider text-slate-700 border-b border-slate-200 pb-2">
-            Datos del Comercio (Encabezado de Ticket)
-          </h3>
-
-          <div className="space-y-3 text-xs">
+          <div className="flex items-center justify-between border-b border-slate-200 pb-2.5">
             <div>
+              <h3 className="font-bold text-sm text-slate-900 uppercase tracking-tight">
+                Datos Fiscales y Membrete del Negocio
+              </h3>
+              <p className="text-xs text-slate-500">
+                Información legal que se imprimirá en los tickets y facturas fiscales
+              </p>
+            </div>
+            <button
+              type="submit"
+              className="px-4 py-2 bg-sky-700 hover:bg-sky-800 text-white font-bold text-xs rounded-lg shadow-sm transition-all"
+            >
+              Guardar Datos
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+            <div className="md:col-span-2">
               <label className="block font-semibold text-slate-700 mb-1">
                 Nombre Comercial de la Tienda:
               </label>
@@ -335,34 +493,32 @@ export default function DesktopSettingsPage() {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block font-semibold text-slate-700 mb-1">
-                  RIF o Cédula Fiscal:
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={rif}
-                  onChange={(e) => setRif(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg font-mono focus:ring-2 focus:ring-sky-500 outline-none uppercase"
-                />
-              </div>
-
-              <div>
-                <label className="block font-semibold text-slate-700 mb-1">
-                  Teléfono de Contacto:
-                </label>
-                <input
-                  type="text"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg font-mono focus:ring-2 focus:ring-sky-500 outline-none"
-                />
-              </div>
+            <div>
+              <label className="block font-semibold text-slate-700 mb-1">
+                RIF o Cédula Fiscal:
+              </label>
+              <input
+                type="text"
+                required
+                value={rif}
+                onChange={(e) => setRif(e.target.value)}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg font-mono focus:ring-2 focus:ring-sky-500 outline-none uppercase"
+              />
             </div>
 
             <div>
+              <label className="block font-semibold text-slate-700 mb-1">
+                Teléfono de Contacto:
+              </label>
+              <input
+                type="text"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg font-mono focus:ring-2 focus:ring-sky-500 outline-none"
+              />
+            </div>
+
+            <div className="md:col-span-2">
               <label className="block font-semibold text-slate-700 mb-1">
                 Dirección Física:
               </label>
@@ -374,9 +530,9 @@ export default function DesktopSettingsPage() {
               />
             </div>
 
-            <div>
+            <div className="md:col-span-2">
               <label className="block font-semibold text-slate-700 mb-1">
-                Mensaje de Pie de Ticket:
+                Mensaje de Pie de Ticket (Agradecimiento o Política de Cambio):
               </label>
               <input
                 type="text"
@@ -386,78 +542,245 @@ export default function DesktopSettingsPage() {
               />
             </div>
 
-            <div>
-              <label className="block font-semibold text-slate-700 mb-1">
-                Ancho de Papel Térmico:
-              </label>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={() => setPaperWidth('80mm')}
-                  className={`py-2 rounded-lg border text-xs font-bold ${
-                    paperWidth === '80mm'
-                      ? 'bg-sky-700 text-white border-sky-700'
-                      : 'bg-white text-slate-700 border-slate-300'
-                  }`}
-                >
-                  80 mm (Estándar Punto)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setPaperWidth('58mm')}
-                  className={`py-2 rounded-lg border text-xs font-bold ${
-                    paperWidth === '58mm'
-                      ? 'bg-sky-700 text-white border-sky-700'
-                      : 'bg-white text-slate-700 border-slate-300'
-                  }`}
-                >
-                  58 mm (Mini Térmica)
-                </button>
-              </div>
-            </div>
-
-            <div>
-              <label className="block font-semibold text-slate-700 mb-1 flex items-center justify-between">
-                <span>Google Vision / Gemini API Key (Reconocimiento de Fotos):</span>
-                <span className="text-[10px] text-sky-600 font-normal">Opcional para auto-completar</span>
+            <div className="md:col-span-2 p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-1.5">
+              <label className="block font-semibold text-slate-700 flex items-center justify-between">
+                <span>Google Vision / Gemini API Key (Reconocimiento Automático de Productos):</span>
+                <span className="text-[10px] text-sky-600 font-normal">Opcional</span>
               </label>
               <input
                 type="password"
-                placeholder="AIzaSy... (Deja en blanco si usas variable de entorno o auto-remover local)"
+                placeholder="AIzaSy... (Opcional para autocompletar foto con IA)"
                 value={geminiApiKey}
                 onChange={(e) => setGeminiApiKey(e.target.value)}
                 className="w-full px-3 py-2 border border-slate-300 rounded-lg font-mono text-xs focus:ring-2 focus:ring-sky-500 outline-none"
               />
-              <p className="text-[10px] text-slate-400 mt-1">
-                Permite reconocer automáticamente el nombre, marca y categoría del producto con IA a partir de la foto tomada con la cámara.
+              <p className="text-[10px] text-slate-500">
+                Permite reconocer el nombre, marca y categoría del producto mediante inteligencia artificial al fotografiarlo.
               </p>
             </div>
+          </div>
 
-            <div className="pt-2">
-              <button
-                type="submit"
-                className="w-full py-2.5 bg-sky-700 hover:bg-sky-800 text-white font-bold text-xs rounded-lg shadow-sm"
-              >
-                Guardar Cambios
-              </button>
-            </div>
+          <div className="pt-2 flex justify-end">
+            <button
+              type="submit"
+              className="px-6 py-2.5 bg-sky-700 hover:bg-sky-800 text-white font-bold text-xs rounded-lg shadow-sm transition-all"
+            >
+              Guardar Cambios
+            </button>
           </div>
         </form>
+      )}
 
-        {/* Panel de Mantenimiento de Base de Datos y Respaldos */}
-        <div className="bg-white p-5 rounded-xl border border-slate-300 shadow-xs space-y-4 flex flex-col justify-between">
-          <div>
-            <h3 className="font-bold text-xs uppercase tracking-wider text-slate-700 border-b border-slate-200 pb-2 mb-3">
+      {/* 3. PESTAÑA: IMPRESORA TÉRMICA Y LOGO */}
+      {activeTab === 'printer' && (
+        <form
+          onSubmit={handleSaveSettings}
+          className="bg-white p-5 rounded-xl border border-slate-300 shadow-xs space-y-4 animate-in fade-in duration-150"
+        >
+          <div className="flex items-center justify-between border-b border-slate-200 pb-2.5">
+            <div>
+              <h3 className="font-bold text-sm text-slate-900 uppercase tracking-tight flex items-center gap-2">
+                <Printer className="w-4 h-4 text-sky-600" />
+                <span>Impresora Térmica y Logotipo del Ticket</span>
+              </h3>
+              <p className="text-xs text-slate-500">
+                Ajusta el logotipo de membrete, tamaño de rollo y avance para eliminar tiras en blanco
+              </p>
+            </div>
+            <button
+              type="submit"
+              className="px-4 py-2 bg-sky-700 hover:bg-sky-800 text-white font-bold text-xs rounded-lg shadow-sm transition-all"
+            >
+              Guardar Ajustes
+            </button>
+          </div>
+
+          <div className="space-y-4 text-xs">
+            {/* Logotipo del Negocio para Membrete de Tickets */}
+            <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3">
+              <div className="flex items-center justify-between">
+                <label className="font-bold text-slate-800 flex items-center gap-1.5 text-xs">
+                  <ImageIcon className="w-4 h-4 text-sky-600" />
+                  <span>Logotipo del Negocio (Encabezado de Ticket)</span>
+                </label>
+                {logoUrl && (
+                  <button
+                    type="button"
+                    onClick={handleRemoveLogo}
+                    className="text-[11px] text-rose-600 hover:text-rose-800 font-bold flex items-center gap-1 cursor-pointer"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Eliminar Logotipo</span>
+                  </button>
+                )}
+              </div>
+
+              {logoUrl ? (
+                <div className="flex items-center gap-3 bg-white p-3 rounded-lg border border-slate-300">
+                  <div className="w-20 h-16 bg-slate-100 rounded border border-slate-200 p-1 flex items-center justify-center shrink-0">
+                    <img
+                      src={logoUrl}
+                      alt="Logo Negocio"
+                      className="max-h-full max-w-full object-contain filter grayscale contrast-125"
+                    />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <span className="text-xs font-bold text-slate-800 block truncate">Logotipo Cargado Correctamente</span>
+                    <label className="flex items-center gap-1.5 mt-1 text-[11px] text-slate-600 font-medium cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={showLogoOnReceipt}
+                        onChange={(e) => setShowLogoOnReceipt(e.target.checked)}
+                        className="rounded accent-sky-600 cursor-pointer"
+                      />
+                      <span>Imprimir logotipo en el encabezado de los tickets</span>
+                    </label>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <label className="border-2 border-dashed border-slate-300 hover:border-sky-400 bg-white rounded-lg p-4 flex flex-col items-center justify-center cursor-pointer transition-colors text-center group">
+                    <Upload className="w-6 h-6 text-slate-400 group-hover:text-sky-600 transition-colors mb-1" />
+                    <span className="text-xs font-bold text-slate-700">Subir imagen de Logo (PNG / JPG / WebP)</span>
+                    <span className="text-[10px] text-slate-400">Tamaño recomendado: 300x120px (Monocromático o alto contraste)</span>
+                    <input
+                      type="file"
+                      accept="image/png,image/jpeg,image/webp"
+                      onChange={handleLogoUpload}
+                      className="hidden"
+                    />
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      placeholder="O pega aquí una URL directa de imagen..."
+                      value={logoUrl}
+                      onChange={(e) => {
+                        setLogoUrl(e.target.value);
+                        if (e.target.value) setShowLogoOnReceipt(true);
+                      }}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs outline-none focus:border-sky-500"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Ajustes de Impresora Térmica */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
+                <span className="block text-xs font-bold text-slate-800">
+                  Ancho de Papel / Rollo Térmico:
+                </span>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setPaperWidth('80mm')}
+                    className={`py-2 rounded-lg border text-xs font-bold cursor-pointer transition-all ${
+                      paperWidth === '80mm'
+                        ? 'bg-sky-700 text-white border-sky-700 shadow-2xs'
+                        : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-100'
+                    }`}
+                  >
+                    80 mm (Estándar Punto)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPaperWidth('58mm')}
+                    className={`py-2 rounded-lg border text-xs font-bold cursor-pointer transition-all ${
+                      paperWidth === '58mm'
+                        ? 'bg-sky-700 text-white border-sky-700 shadow-2xs'
+                        : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-100'
+                    }`}
+                  >
+                    58 mm (Mini Térmica)
+                  </button>
+                </div>
+              </div>
+
+              <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-slate-800">
+                    Avance Final de Papel (Sin espacio en blanco):
+                  </span>
+                  <span className="text-[10px] font-mono font-bold text-sky-700 bg-sky-100 px-1.5 py-0.5 rounded">
+                    {receiptFeedMargin}
+                  </span>
+                </div>
+                <div className="grid grid-cols-4 gap-1.5">
+                  {[
+                    { id: '0mm', label: '0 mm', desc: 'Sin espacio' },
+                    { id: '3mm', label: '3 mm', desc: 'Recomendado' },
+                    { id: '6mm', label: '6 mm', desc: 'Normal' },
+                    { id: '10mm', label: '10 mm', desc: 'Amplio' },
+                  ].map((f) => (
+                    <button
+                      key={f.id}
+                      type="button"
+                      onClick={() => setReceiptFeedMargin(f.id as any)}
+                      className={`py-1.5 px-1 rounded-lg border text-center transition-all cursor-pointer ${
+                        receiptFeedMargin === f.id
+                          ? 'bg-sky-700 text-white border-sky-700 font-bold shadow-2xs'
+                          : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-100'
+                      }`}
+                    >
+                      <span className="text-xs block font-bold">{f.label}</span>
+                      <span className={`text-[9px] block ${receiptFeedMargin === f.id ? 'text-sky-100' : 'text-slate-400'}`}>
+                        {f.desc}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+                <p className="text-[10px] text-slate-500 mt-1">
+                  Elimina las tiras excesivas de papel en blanco expulsadas tras terminar la impresión.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="pt-2 flex justify-end">
+            <button
+              type="submit"
+              className="px-6 py-2.5 bg-sky-700 hover:bg-sky-800 text-white font-bold text-xs rounded-lg shadow-sm transition-all"
+            >
+              Guardar Configuración de Impresión
+            </button>
+          </div>
+        </form>
+      )}
+
+      {/* 4. PESTAÑA: BALANZA DIGITAL */}
+      {activeTab === 'scale' && (
+        <div className="animate-in fade-in duration-150">
+          <DigitalScaleSettingsSection />
+        </div>
+      )}
+
+      {/* 5. PESTAÑA: CAJEROS Y SEGURIDAD */}
+      {activeTab === 'cashiers' && (
+        <div className="animate-in fade-in duration-150">
+          <CashiersManagementSection />
+        </div>
+      )}
+
+      {/* 6. PESTAÑA: NUBE Y RESPALDOS */}
+      {activeTab === 'cloud_backup' && (
+        <div className="space-y-4 animate-in fade-in duration-150">
+          <CloudSyncSettingsCard />
+
+          <div className="bg-white p-5 rounded-xl border border-slate-300 shadow-xs space-y-4">
+            <h3 className="font-bold text-xs uppercase tracking-wider text-slate-700 border-b border-slate-200 pb-2">
               Base de Datos Local (IndexedDB / Dexie)
             </h3>
-            <p className="text-xs text-slate-600 leading-relaxed mb-4">
+            <p className="text-xs text-slate-600 leading-relaxed">
               Toda la información de este terminal se almacena de forma segura en el disco local de tu computadora. Puedes generar un archivo de respaldo en cualquier momento para guardarlo en un pendrive o restaurarlo.
             </p>
 
-            <div className="space-y-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <button
+                type="button"
                 onClick={handleExportBackup}
-                className="w-full py-2.5 px-4 bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-800 font-bold text-xs rounded-lg flex items-center justify-center gap-2"
+                className="w-full py-2.5 px-4 bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-800 font-bold text-xs rounded-lg flex items-center justify-center gap-2 cursor-pointer transition-all"
               >
                 <svg className="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -466,29 +789,21 @@ export default function DesktopSettingsPage() {
               </button>
 
               <button
+                type="button"
                 onClick={handleResetCatalog}
-                className="w-full py-2.5 px-4 bg-white hover:bg-amber-50 border border-amber-300 text-amber-900 font-bold text-xs rounded-lg flex items-center justify-center gap-2"
+                className="w-full py-2.5 px-4 bg-white hover:bg-amber-50 border border-amber-300 text-amber-900 font-bold text-xs rounded-lg flex items-center justify-center gap-2 cursor-pointer transition-all"
               >
                 <span>Recargar Catálogo Inicial de Prueba</span>
               </button>
             </div>
-          </div>
 
-          <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg text-[11px] text-slate-500">
-            <strong>Terminal ID:</strong> POS-STANDALONE-01 <br />
-            <strong>Motor:</strong> Tauri Rust Native Wrapper + Next.js Local Engine
+            <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg text-[11px] text-slate-500">
+              <strong>Terminal ID:</strong> POS-STANDALONE-01 <br />
+              <strong>Motor:</strong> Tauri Rust Native Wrapper + Next.js Local Engine
+            </div>
           </div>
         </div>
-      </div>
-
-      {/* Panel de Sincronización en la Nube Firestore */}
-      <CloudSyncSettingsCard />
-
-      {/* Sección Periféricos: Balanza Electrónica Digital */}
-      <DigitalScaleSettingsSection />
-
-      {/* Sección Exclusiva Administrador: Gestión de Cajeros y Credenciales de Seguridad */}
-      <CashiersManagementSection />
+      )}
 
       {/* Modal de Licenciamiento y HWID */}
       <LicenseActivationModal
@@ -496,6 +811,60 @@ export default function DesktopSettingsPage() {
         onClose={() => setShowLicenseModal(false)}
       />
     </div>
+
+
+      {/* 7. PESTAÑA: PAGOS Y GMAIL */}
+      {activeTab === 'payments' && (
+        <div className="space-y-4 animate-in fade-in duration-150">
+          <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-300 dark:border-slate-700 shadow-xs p-5 space-y-5">
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shrink-0">
+                <span className="text-xl">&#x1F4E7;</span>
+              </div>
+              <div>
+                <h3 className="font-black text-sm text-slate-900 dark:text-white">Confirmaci&oacute;n Autom&aacute;tica de Pago M&oacute;vil por Gmail</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Conecta el Gmail del negocio que recibe las notificaciones bancarias. Venematic detectar&aacute; el pago autom&aacute;ticamente.</p>
+              </div>
+            </div>
+            <div className={`rounded-xl p-4 border-2 ${gmailConnected ? 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-300 dark:border-emerald-700' : 'bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-700'}`}>
+              {gmailVerifying ? (
+                <div className="flex items-center gap-3"><div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" /><span className="text-xs font-semibold text-slate-600 dark:text-slate-300">Verificando conexi&oacute;n Gmail...</span></div>
+              ) : gmailConnected ? (
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3"><div className="w-8 h-8 bg-emerald-100 dark:bg-emerald-900/50 rounded-full flex items-center justify-center"><CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400" /></div><div><p className="text-xs font-black text-emerald-800 dark:text-emerald-300">Gmail Conectado</p><p className="text-[11px] font-mono text-emerald-600 dark:text-emerald-500">{gmailEmail}</p></div></div>
+                  <button onClick={() => { pagoMovilMonitor.clearConfig(); setGmailConnected(false); setGmailEmail(''); }} className="px-3 py-1.5 text-xs font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-800 rounded-lg hover:bg-rose-100 transition-colors cursor-pointer">Desconectar</button>
+                </div>
+              ) : (
+                <div className="flex items-center justify-between gap-3 flex-wrap">
+                  <div className="flex items-center gap-3"><div className="w-8 h-8 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center"><AlertCircle className="w-5 h-5 text-slate-400" /></div><div><p className="text-xs font-bold text-slate-700 dark:text-slate-300">No conectado</p><p className="text-[11px] text-slate-500">Conecta tu Gmail para habilitar la detecci&oacute;n autom&aacute;tica</p></div></div>
+                  <button onClick={() => { if (!gmailClientId) { alert('Primero ingresa el Google Client ID.'); return; } pagoMovilMonitor.saveConfig({ accessToken: '', monitoredEmail: '', pollingIntervalMs: gmailPollMs, tolerancePct: gmailTolerance }); initiateGmailOAuth(gmailClientId); }} className="px-4 py-2 text-xs font-black text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 rounded-xl shadow-sm transition-all cursor-pointer flex items-center gap-2 shrink-0"><span>&#x1F517;</span><span>Conectar Gmail</span></button>
+                </div>
+              )}
+            </div>
+            <div className="space-y-4 pt-2 border-t border-slate-100 dark:border-slate-700">
+              <h4 className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">Configuraci&oacute;n Avanzada</h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5"><label className="block text-xs font-bold text-slate-700 dark:text-slate-300">Google Client ID (OAuth)</label><input type="text" value={gmailClientId} onChange={(e) => setGmailClientId(e.target.value)} placeholder="XXXXXXXXX.apps.googleusercontent.com" className="w-full h-10 px-3 border border-slate-300 dark:border-slate-600 rounded-lg text-xs font-mono text-slate-900 dark:text-white bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500" /><p className="text-[11px] text-slate-400">Obtenido en Google Cloud Console &rarr; Credenciales OAuth</p></div>
+                <div className="space-y-1.5"><label className="block text-xs font-bold text-slate-700 dark:text-slate-300">Tolerancia de monto (%)</label><div className="flex items-center gap-2"><input type="number" min={0} max={10} step={0.5} value={gmailTolerance} onChange={(e) => setGmailTolerance(parseFloat(e.target.value))} className="w-24 h-10 px-3 border border-slate-300 dark:border-slate-600 rounded-lg text-xs font-mono text-slate-900 dark:text-white bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500" /><span className="text-xs text-slate-500">Ej: 2 = acepta &plusmn;2%</span></div></div>
+                <div className="space-y-1.5"><label className="block text-xs font-bold text-slate-700 dark:text-slate-300">Frecuencia de verificaci&oacute;n</label><select value={gmailPollMs} onChange={(e) => setGmailPollMs(parseInt(e.target.value))} className="w-full h-10 px-3 border border-slate-300 dark:border-slate-600 rounded-lg text-xs text-slate-900 dark:text-white bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"><option value={5000}>Cada 5 segundos</option><option value={8000}>Cada 8 segundos (recomendado)</option><option value={15000}>Cada 15 segundos</option><option value={30000}>Cada 30 segundos</option></select></div>
+              </div>
+              <button onClick={() => { const e = pagoMovilMonitor.getConfig(); if (e) pagoMovilMonitor.saveConfig({ ...e, pollingIntervalMs: gmailPollMs, tolerancePct: gmailTolerance }); setSavedSuccess(true); setTimeout(() => setSavedSuccess(false), 2000); }} className="px-4 py-2 bg-slate-800 dark:bg-slate-700 text-white text-xs font-bold rounded-lg hover:bg-slate-700 transition-colors cursor-pointer">{savedSuccess ? '&#x2705; Guardado' : 'Guardar configuraci&oacute;n'}</button>
+            </div>
+            <div className="flex items-start gap-3 p-3 bg-blue-50 dark:bg-blue-950/30 rounded-xl border border-blue-200 dark:border-blue-800 text-[11px] text-blue-800 dark:text-blue-300"><span className="text-base">&#x1F512;</span><p><strong>Privacidad:</strong> Solo se leen emails de notificaci&oacute;n bancaria. Ning&uacute;n correo personal es accedido. El token se guarda &uacute;nicamente en este dispositivo.</p></div>
+          </div>
+          <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-300 dark:border-slate-700 shadow-xs p-5">
+            <h3 className="font-black text-xs uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-3 border-b border-slate-200 dark:border-slate-700 pb-2">M&eacute;todos de Pago Activos en el POS</h3>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              {[{icon:'&#x1F4B5;',label:'Efectivo USD'},{icon:'&#x1F1FB;&#x1F1EA;',label:'Efectivo Bs.'},{icon:'&#x1F4F2;',label:'Pago M&oacute;vil'},{icon:'&#x1F4B3;',label:'Punto D&eacute;bito'},{icon:'&#x1F7E1;',label:'Binance Pay'},{icon:'&#x1F91D;',label:'Cr&eacute;dito / Fiado'},{icon:'&#x1F504;',label:'Pago Mixto'}].map((m) => (
+                <div key={m.label} className="flex items-center gap-2 px-3 py-2 bg-slate-50 dark:bg-slate-900/50 rounded-lg border border-slate-200 dark:border-slate-700">
+                  <span dangerouslySetInnerHTML={{__html: m.icon}} /><span className="text-xs font-semibold text-slate-700 dark:text-slate-300" dangerouslySetInnerHTML={{__html: m.label}} /><CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 ml-auto" />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
   );
 }
 
@@ -932,6 +1301,60 @@ function CashiersManagementSection() {
         </div>
       )}
     </div>
+
+
+      {/* 7. PESTAÑA: PAGOS Y GMAIL */}
+      {activeTab === 'payments' && (
+        <div className="space-y-4 animate-in fade-in duration-150">
+          <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-300 dark:border-slate-700 shadow-xs p-5 space-y-5">
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shrink-0">
+                <span className="text-xl">&#x1F4E7;</span>
+              </div>
+              <div>
+                <h3 className="font-black text-sm text-slate-900 dark:text-white">Confirmaci&oacute;n Autom&aacute;tica de Pago M&oacute;vil por Gmail</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Conecta el Gmail del negocio que recibe las notificaciones bancarias. Venematic detectar&aacute; el pago autom&aacute;ticamente.</p>
+              </div>
+            </div>
+            <div className={`rounded-xl p-4 border-2 ${gmailConnected ? 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-300 dark:border-emerald-700' : 'bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-700'}`}>
+              {gmailVerifying ? (
+                <div className="flex items-center gap-3"><div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" /><span className="text-xs font-semibold text-slate-600 dark:text-slate-300">Verificando conexi&oacute;n Gmail...</span></div>
+              ) : gmailConnected ? (
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3"><div className="w-8 h-8 bg-emerald-100 dark:bg-emerald-900/50 rounded-full flex items-center justify-center"><CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400" /></div><div><p className="text-xs font-black text-emerald-800 dark:text-emerald-300">Gmail Conectado</p><p className="text-[11px] font-mono text-emerald-600 dark:text-emerald-500">{gmailEmail}</p></div></div>
+                  <button onClick={() => { pagoMovilMonitor.clearConfig(); setGmailConnected(false); setGmailEmail(''); }} className="px-3 py-1.5 text-xs font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-800 rounded-lg hover:bg-rose-100 transition-colors cursor-pointer">Desconectar</button>
+                </div>
+              ) : (
+                <div className="flex items-center justify-between gap-3 flex-wrap">
+                  <div className="flex items-center gap-3"><div className="w-8 h-8 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center"><AlertCircle className="w-5 h-5 text-slate-400" /></div><div><p className="text-xs font-bold text-slate-700 dark:text-slate-300">No conectado</p><p className="text-[11px] text-slate-500">Conecta tu Gmail para habilitar la detecci&oacute;n autom&aacute;tica</p></div></div>
+                  <button onClick={() => { if (!gmailClientId) { alert('Primero ingresa el Google Client ID.'); return; } pagoMovilMonitor.saveConfig({ accessToken: '', monitoredEmail: '', pollingIntervalMs: gmailPollMs, tolerancePct: gmailTolerance }); initiateGmailOAuth(gmailClientId); }} className="px-4 py-2 text-xs font-black text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 rounded-xl shadow-sm transition-all cursor-pointer flex items-center gap-2 shrink-0"><span>&#x1F517;</span><span>Conectar Gmail</span></button>
+                </div>
+              )}
+            </div>
+            <div className="space-y-4 pt-2 border-t border-slate-100 dark:border-slate-700">
+              <h4 className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">Configuraci&oacute;n Avanzada</h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5"><label className="block text-xs font-bold text-slate-700 dark:text-slate-300">Google Client ID (OAuth)</label><input type="text" value={gmailClientId} onChange={(e) => setGmailClientId(e.target.value)} placeholder="XXXXXXXXX.apps.googleusercontent.com" className="w-full h-10 px-3 border border-slate-300 dark:border-slate-600 rounded-lg text-xs font-mono text-slate-900 dark:text-white bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500" /><p className="text-[11px] text-slate-400">Obtenido en Google Cloud Console &rarr; Credenciales OAuth</p></div>
+                <div className="space-y-1.5"><label className="block text-xs font-bold text-slate-700 dark:text-slate-300">Tolerancia de monto (%)</label><div className="flex items-center gap-2"><input type="number" min={0} max={10} step={0.5} value={gmailTolerance} onChange={(e) => setGmailTolerance(parseFloat(e.target.value))} className="w-24 h-10 px-3 border border-slate-300 dark:border-slate-600 rounded-lg text-xs font-mono text-slate-900 dark:text-white bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500" /><span className="text-xs text-slate-500">Ej: 2 = acepta &plusmn;2%</span></div></div>
+                <div className="space-y-1.5"><label className="block text-xs font-bold text-slate-700 dark:text-slate-300">Frecuencia de verificaci&oacute;n</label><select value={gmailPollMs} onChange={(e) => setGmailPollMs(parseInt(e.target.value))} className="w-full h-10 px-3 border border-slate-300 dark:border-slate-600 rounded-lg text-xs text-slate-900 dark:text-white bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"><option value={5000}>Cada 5 segundos</option><option value={8000}>Cada 8 segundos (recomendado)</option><option value={15000}>Cada 15 segundos</option><option value={30000}>Cada 30 segundos</option></select></div>
+              </div>
+              <button onClick={() => { const e = pagoMovilMonitor.getConfig(); if (e) pagoMovilMonitor.saveConfig({ ...e, pollingIntervalMs: gmailPollMs, tolerancePct: gmailTolerance }); setSavedSuccess(true); setTimeout(() => setSavedSuccess(false), 2000); }} className="px-4 py-2 bg-slate-800 dark:bg-slate-700 text-white text-xs font-bold rounded-lg hover:bg-slate-700 transition-colors cursor-pointer">{savedSuccess ? '&#x2705; Guardado' : 'Guardar configuraci&oacute;n'}</button>
+            </div>
+            <div className="flex items-start gap-3 p-3 bg-blue-50 dark:bg-blue-950/30 rounded-xl border border-blue-200 dark:border-blue-800 text-[11px] text-blue-800 dark:text-blue-300"><span className="text-base">&#x1F512;</span><p><strong>Privacidad:</strong> Solo se leen emails de notificaci&oacute;n bancaria. Ning&uacute;n correo personal es accedido. El token se guarda &uacute;nicamente en este dispositivo.</p></div>
+          </div>
+          <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-300 dark:border-slate-700 shadow-xs p-5">
+            <h3 className="font-black text-xs uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-3 border-b border-slate-200 dark:border-slate-700 pb-2">M&eacute;todos de Pago Activos en el POS</h3>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              {[{icon:'&#x1F4B5;',label:'Efectivo USD'},{icon:'&#x1F1FB;&#x1F1EA;',label:'Efectivo Bs.'},{icon:'&#x1F4F2;',label:'Pago M&oacute;vil'},{icon:'&#x1F4B3;',label:'Punto D&eacute;bito'},{icon:'&#x1F7E1;',label:'Binance Pay'},{icon:'&#x1F91D;',label:'Cr&eacute;dito / Fiado'},{icon:'&#x1F504;',label:'Pago Mixto'}].map((m) => (
+                <div key={m.label} className="flex items-center gap-2 px-3 py-2 bg-slate-50 dark:bg-slate-900/50 rounded-lg border border-slate-200 dark:border-slate-700">
+                  <span dangerouslySetInnerHTML={{__html: m.icon}} /><span className="text-xs font-semibold text-slate-700 dark:text-slate-300" dangerouslySetInnerHTML={{__html: m.label}} /><CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 ml-auto" />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
   );
 }
 
@@ -1393,6 +1816,61 @@ function DigitalScaleSettingsSection() {
         </div>
       </div>
     </div>
+
+
+      {/* 7. PESTAÑA: PAGOS Y GMAIL */}
+      {activeTab === 'payments' && (
+        <div className="space-y-4 animate-in fade-in duration-150">
+          <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-300 dark:border-slate-700 shadow-xs p-5 space-y-5">
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shrink-0">
+                <span className="text-xl">&#x1F4E7;</span>
+              </div>
+              <div>
+                <h3 className="font-black text-sm text-slate-900 dark:text-white">Confirmaci&oacute;n Autom&aacute;tica de Pago M&oacute;vil por Gmail</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Conecta el Gmail del negocio que recibe las notificaciones bancarias. Venematic detectar&aacute; el pago autom&aacute;ticamente.</p>
+              </div>
+            </div>
+            <div className={`rounded-xl p-4 border-2 ${gmailConnected ? 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-300 dark:border-emerald-700' : 'bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-700'}`}>
+              {gmailVerifying ? (
+                <div className="flex items-center gap-3"><div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" /><span className="text-xs font-semibold text-slate-600 dark:text-slate-300">Verificando conexi&oacute;n Gmail...</span></div>
+              ) : gmailConnected ? (
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3"><div className="w-8 h-8 bg-emerald-100 dark:bg-emerald-900/50 rounded-full flex items-center justify-center"><CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400" /></div><div><p className="text-xs font-black text-emerald-800 dark:text-emerald-300">Gmail Conectado</p><p className="text-[11px] font-mono text-emerald-600 dark:text-emerald-500">{gmailEmail}</p></div></div>
+                  <button onClick={() => { pagoMovilMonitor.clearConfig(); setGmailConnected(false); setGmailEmail(''); }} className="px-3 py-1.5 text-xs font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-800 rounded-lg hover:bg-rose-100 transition-colors cursor-pointer">Desconectar</button>
+                </div>
+              ) : (
+                <div className="flex items-center justify-between gap-3 flex-wrap">
+                  <div className="flex items-center gap-3"><div className="w-8 h-8 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center"><AlertCircle className="w-5 h-5 text-slate-400" /></div><div><p className="text-xs font-bold text-slate-700 dark:text-slate-300">No conectado</p><p className="text-[11px] text-slate-500">Conecta tu Gmail para habilitar la detecci&oacute;n autom&aacute;tica</p></div></div>
+                  <button onClick={() => { if (!gmailClientId) { alert('Primero ingresa el Google Client ID.'); return; } pagoMovilMonitor.saveConfig({ accessToken: '', monitoredEmail: '', pollingIntervalMs: gmailPollMs, tolerancePct: gmailTolerance }); initiateGmailOAuth(gmailClientId); }} className="px-4 py-2 text-xs font-black text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 rounded-xl shadow-sm transition-all cursor-pointer flex items-center gap-2 shrink-0"><span>&#x1F517;</span><span>Conectar Gmail</span></button>
+                </div>
+              )}
+            </div>
+            <div className="space-y-4 pt-2 border-t border-slate-100 dark:border-slate-700">
+              <h4 className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">Configuraci&oacute;n Avanzada</h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5"><label className="block text-xs font-bold text-slate-700 dark:text-slate-300">Google Client ID (OAuth)</label><input type="text" value={gmailClientId} onChange={(e) => setGmailClientId(e.target.value)} placeholder="XXXXXXXXX.apps.googleusercontent.com" className="w-full h-10 px-3 border border-slate-300 dark:border-slate-600 rounded-lg text-xs font-mono text-slate-900 dark:text-white bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500" /><p className="text-[11px] text-slate-400">Obtenido en Google Cloud Console &rarr; Credenciales OAuth</p></div>
+                <div className="space-y-1.5"><label className="block text-xs font-bold text-slate-700 dark:text-slate-300">Tolerancia de monto (%)</label><div className="flex items-center gap-2"><input type="number" min={0} max={10} step={0.5} value={gmailTolerance} onChange={(e) => setGmailTolerance(parseFloat(e.target.value))} className="w-24 h-10 px-3 border border-slate-300 dark:border-slate-600 rounded-lg text-xs font-mono text-slate-900 dark:text-white bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500" /><span className="text-xs text-slate-500">Ej: 2 = acepta &plusmn;2%</span></div></div>
+                <div className="space-y-1.5"><label className="block text-xs font-bold text-slate-700 dark:text-slate-300">Frecuencia de verificaci&oacute;n</label><select value={gmailPollMs} onChange={(e) => setGmailPollMs(parseInt(e.target.value))} className="w-full h-10 px-3 border border-slate-300 dark:border-slate-600 rounded-lg text-xs text-slate-900 dark:text-white bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"><option value={5000}>Cada 5 segundos</option><option value={8000}>Cada 8 segundos (recomendado)</option><option value={15000}>Cada 15 segundos</option><option value={30000}>Cada 30 segundos</option></select></div>
+              </div>
+              <button onClick={() => { const e = pagoMovilMonitor.getConfig(); if (e) pagoMovilMonitor.saveConfig({ ...e, pollingIntervalMs: gmailPollMs, tolerancePct: gmailTolerance }); setSavedSuccess(true); setTimeout(() => setSavedSuccess(false), 2000); }} className="px-4 py-2 bg-slate-800 dark:bg-slate-700 text-white text-xs font-bold rounded-lg hover:bg-slate-700 transition-colors cursor-pointer">{savedSuccess ? '&#x2705; Guardado' : 'Guardar configuraci&oacute;n'}</button>
+            </div>
+            <div className="flex items-start gap-3 p-3 bg-blue-50 dark:bg-blue-950/30 rounded-xl border border-blue-200 dark:border-blue-800 text-[11px] text-blue-800 dark:text-blue-300"><span className="text-base">&#x1F512;</span><p><strong>Privacidad:</strong> Solo se leen emails de notificaci&oacute;n bancaria. Ning&uacute;n correo personal es accedido. El token se guarda &uacute;nicamente en este dispositivo.</p></div>
+          </div>
+          <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-300 dark:border-slate-700 shadow-xs p-5">
+            <h3 className="font-black text-xs uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-3 border-b border-slate-200 dark:border-slate-700 pb-2">M&eacute;todos de Pago Activos en el POS</h3>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              {[{icon:'&#x1F4B5;',label:'Efectivo USD'},{icon:'&#x1F1FB;&#x1F1EA;',label:'Efectivo Bs.'},{icon:'&#x1F4F2;',label:'Pago M&oacute;vil'},{icon:'&#x1F4B3;',label:'Punto D&eacute;bito'},{icon:'&#x1F7E1;',label:'Binance Pay'},{icon:'&#x1F91D;',label:'Cr&eacute;dito / Fiado'},{icon:'&#x1F504;',label:'Pago Mixto'}].map((m) => (
+                <div key={m.label} className="flex items-center gap-2 px-3 py-2 bg-slate-50 dark:bg-slate-900/50 rounded-lg border border-slate-200 dark:border-slate-700">
+                  <span dangerouslySetInnerHTML={{__html: m.icon}} /><span className="text-xs font-semibold text-slate-700 dark:text-slate-300" dangerouslySetInnerHTML={{__html: m.label}} /><CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 ml-auto" />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
   );
 }
+
 

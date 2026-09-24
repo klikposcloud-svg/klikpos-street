@@ -20,12 +20,14 @@ import {
   Scale,
   Banknote,
   Users,
+  Search,
 } from 'lucide-react';
 import { scaleService, WeightReading } from '@/lib/hardware/scale';
 import { kickCashDrawer } from '@/lib/hardware/cash-drawer';
 import { LocalCustomer } from '@/lib/db';
 import ManualWeightModal from '@/components/ManualWeightModal';
 import { parseScaleBarcode, findProductByScalePLU } from '@/lib/hardware/scale-barcode';
+import { pagoMovilMonitor, PagoMovilConfirmation } from '@/lib/payments/pago-movil-gmail-monitor';
 
 interface CartItem extends SaleItem {
   stock: number;
@@ -76,11 +78,32 @@ export default function DesktopPosPage() {
   const [cashGivenUSD, setCashGivenUSD] = useState<string>('');
   const [cashGivenVES, setCashGivenVES] = useState<string>('');
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<
-    'cash_usd' | 'cash_ves' | 'pago_movil' | 'card_debit' | 'mixed' | 'credit'
+    'cash_usd' | 'cash_ves' | 'pago_movil' | 'card_debit' | 'binance' | 'mixed' | 'credit'
   >('cash_usd');
   const [pagoMovilRef, setPagoMovilRef] = useState<string>('');
+  const [cardDebitRef, setCardDebitRef] = useState<string>('');
+  const [binanceRef, setBinanceRef] = useState<string>('');
   const [customersList, setCustomersList] = useState<LocalCustomer[]>([]);
   const [selectedCreditCustomer, setSelectedCreditCustomer] = useState<LocalCustomer | null>(null);
+
+  // Pago Móvil — Confirmación Automática por Gmail
+  const [pagoMovilAutoStatus, setPagoMovilAutoStatus] = useState<'idle' | 'monitoring' | 'confirmed' | 'error'>('idle');
+  const [pagoMovilAutoConfirmation, setPagoMovilAutoConfirmation] = useState<PagoMovilConfirmation | null>(null);
+  const [pagoMovilGmailConfigured] = useState<boolean>(() => pagoMovilMonitor.isConfigured());
+
+  // Pagos Mixtos Multimoneda
+  const [mixedPayments, setMixedPayments] = useState<{
+    id: string;
+    method: 'cash_usd' | 'cash_ves' | 'pago_movil' | 'card_debit' | 'zelle' | 'binance';
+    currency: 'USD' | 'VES';
+    amountUSD: number;
+    amountVES: number;
+    reference?: string;
+  }[]>([]);
+  const [mixedMethod, setMixedMethod] = useState<'cash_usd' | 'cash_ves' | 'pago_movil' | 'card_debit' | 'zelle' | 'binance'>('cash_usd');
+  const [mixedCurrency, setMixedCurrency] = useState<'USD' | 'VES'>('USD');
+  const [mixedAmount, setMixedAmount] = useState<string>('');
+  const [mixedRef, setMixedRef] = useState<string>('');
 
   // Refs mutables para evitar cierres obsoletos (stale closures) en listeners de teclado físico
   const cartRef = useRef<CartItem[]>([]);
@@ -95,68 +118,141 @@ export default function DesktopPosPage() {
   pendingQuantityRef.current = pendingQuantity;
   const processBarcodeScanRef = useRef<(code: string) => boolean>(() => false);
 
-  // Paleta de colores distintiva por rubro/categoría (Badges sólidos de alto contraste)
+  // Paleta de colores distintiva por rubro/categoría (Badges llamativos y de alto contraste)
   const getCategoryTheme = (categoryName: string) => {
     const cat = (categoryName || '').toLowerCase().trim();
-    if (cat.includes('víveres') || cat.includes('viveres') || cat.includes('alimento') || cat.includes('grano')) {
+
+    // 1. Cervezas y Maltas (Dorado cervecero)
+    if (cat.includes('cerveza') || cat.includes('malta')) {
       return {
-        badge: 'bg-amber-500 text-slate-950 font-black border-amber-300 shadow-sm',
+        badge: 'bg-amber-100 text-amber-950 font-black border-amber-300 shadow-2xs',
         cardBorder: 'border-l-4 border-l-amber-500 hover:border-amber-400',
         lightBg: 'bg-amber-50/40',
-        accentText: 'text-amber-500',
+        accentText: 'text-amber-700',
       };
     }
-    if (cat.includes('charcutería') || cat.includes('charcuteria') || cat.includes('queso') || cat.includes('carne') || cat.includes('pollo')) {
+    // 2. Rones y Destilados (Cobre / Naranja ronero)
+    if (cat.includes('ron') || cat.includes('destilado') || cat.includes('aguardiente') || cat.includes('anis')) {
       return {
-        badge: 'bg-rose-600 text-white font-black border-rose-400 shadow-sm',
-        cardBorder: 'border-l-4 border-l-rose-500 hover:border-rose-400',
-        lightBg: 'bg-rose-50/40',
-        accentText: 'text-rose-500',
-      };
-    }
-    if (cat.includes('bebida') || cat.includes('refresco') || cat.includes('jugo') || cat.includes('agua') || cat.includes('licor')) {
-      return {
-        badge: 'bg-sky-600 text-white font-black border-sky-400 shadow-sm',
-        cardBorder: 'border-l-4 border-l-sky-500 hover:border-sky-400',
-        lightBg: 'bg-sky-50/40',
-        accentText: 'text-sky-400',
-      };
-    }
-    if (cat.includes('limpieza') || cat.includes('hogar') || cat.includes('detergente')) {
-      return {
-        badge: 'bg-emerald-600 text-white font-black border-emerald-400 shadow-sm',
-        cardBorder: 'border-l-4 border-l-emerald-500 hover:border-emerald-400',
-        lightBg: 'bg-emerald-50/40',
-        accentText: 'text-emerald-400',
-      };
-    }
-    if (cat.includes('cuidado') || cat.includes('higiene') || cat.includes('personal') || cat.includes('salud') || cat.includes('farmacia')) {
-      return {
-        badge: 'bg-purple-600 text-white font-black border-purple-400 shadow-sm',
-        cardBorder: 'border-l-4 border-l-purple-500 hover:border-purple-400',
-        lightBg: 'bg-purple-50/40',
-        accentText: 'text-purple-400',
-      };
-    }
-    if (cat.includes('panadería') || cat.includes('panaderia') || cat.includes('dulce') || cat.includes('galleta') || cat.includes('snack')) {
-      return {
-        badge: 'bg-orange-500 text-white font-black border-orange-300 shadow-sm',
+        badge: 'bg-orange-100 text-orange-950 font-black border-orange-400 shadow-2xs',
         cardBorder: 'border-l-4 border-l-orange-500 hover:border-orange-400',
         lightBg: 'bg-orange-50/40',
-        accentText: 'text-orange-400',
+        accentText: 'text-orange-700',
       };
     }
+    // 3. Whisky y Licores Premium (Dorado lujo / Oro viejo)
+    if (cat.includes('whisky') || cat.includes('whiskey') || cat.includes('bourbon') || cat.includes('cognac')) {
+      return {
+        badge: 'bg-yellow-100 text-yellow-950 font-black border-yellow-400 shadow-2xs',
+        cardBorder: 'border-l-4 border-l-yellow-600 hover:border-yellow-500',
+        lightBg: 'bg-yellow-50/40',
+        accentText: 'text-yellow-800',
+      };
+    }
+    // 4. Vinos y Sangrías (Vino tinto / Borgoña / Rubí)
+    if (cat.includes('vino') || cat.includes('sangr') || cat.includes('champagne') || cat.includes('espumante')) {
+      return {
+        badge: 'bg-rose-100 text-rose-950 font-black border-rose-300 shadow-2xs',
+        cardBorder: 'border-l-4 border-l-rose-500 hover:border-rose-400',
+        lightBg: 'bg-rose-50/40',
+        accentText: 'text-rose-700',
+      };
+    }
+    // 5. Hielo y Mezcladores, Refrescos, Aguas (Cian fresco / Hielo)
+    if (cat.includes('hielo') || cat.includes('mezclador') || cat.includes('refresco') || cat.includes('agua') || cat.includes('soda') || cat.includes('jugo') || cat.includes('bebida')) {
+      return {
+        badge: 'bg-cyan-100 text-cyan-950 font-black border-cyan-300 shadow-2xs',
+        cardBorder: 'border-l-4 border-l-cyan-500 hover:border-cyan-400',
+        lightBg: 'bg-cyan-50/40',
+        accentText: 'text-cyan-700',
+      };
+    }
+    // 6. Snacks, Pasapalos, Golosinas (Púrpura / Violeta vibrante)
+    if (cat.includes('snack') || cat.includes('pasapalo') || cat.includes('dorito') || cat.includes('papa') || cat.includes('dulce') || cat.includes('galleta') || cat.includes('chocolate')) {
+      return {
+        badge: 'bg-purple-100 text-purple-950 font-black border-purple-300 shadow-2xs',
+        cardBorder: 'border-l-4 border-l-purple-500 hover:border-purple-400',
+        lightBg: 'bg-purple-50/40',
+        accentText: 'text-purple-700',
+      };
+    }
+    // 7. Víveres y Alimentos Básicos (Verde esmeralda fresco)
+    if (cat.includes('víveres') || cat.includes('viveres') || cat.includes('alimento') || cat.includes('grano') || cat.includes('arroz') || cat.includes('harina') || cat.includes('aceite')) {
+      return {
+        badge: 'bg-emerald-100 text-emerald-950 font-black border-emerald-300 shadow-2xs',
+        cardBorder: 'border-l-4 border-l-emerald-500 hover:border-emerald-400',
+        lightBg: 'bg-emerald-50/40',
+        accentText: 'text-emerald-700',
+      };
+    }
+    // 8. Charcutería, Quesos y Carnes (Rojo intenso carnicería)
+    if (cat.includes('charcutería') || cat.includes('charcuteria') || cat.includes('queso') || cat.includes('carne') || cat.includes('pollo') || cat.includes('embutido') || cat.includes('jamon')) {
+      return {
+        badge: 'bg-red-100 text-red-950 font-black border-red-300 shadow-2xs',
+        cardBorder: 'border-l-4 border-l-red-500 hover:border-red-400',
+        lightBg: 'bg-red-50/40',
+        accentText: 'text-red-700',
+      };
+    }
+    // 9. Limpieza y Cuidado del Hogar (Azul zafiro)
+    if (cat.includes('limpieza') || cat.includes('hogar') || cat.includes('detergente') || cat.includes('jabon')) {
+      return {
+        badge: 'bg-blue-100 text-blue-950 font-black border-blue-300 shadow-2xs',
+        cardBorder: 'border-l-4 border-l-blue-500 hover:border-blue-400',
+        lightBg: 'bg-blue-50/40',
+        accentText: 'text-blue-700',
+      };
+    }
+    // 10. Farmacia y Cuidado Personal (Verde azulado / Teal)
+    if (cat.includes('cuidado') || cat.includes('higiene') || cat.includes('personal') || cat.includes('salud') || cat.includes('farmacia')) {
+      return {
+        badge: 'bg-teal-100 text-teal-950 font-black border-teal-300 shadow-2xs',
+        cardBorder: 'border-l-4 border-l-teal-500 hover:border-teal-400',
+        lightBg: 'bg-teal-50/40',
+        accentText: 'text-teal-700',
+      };
+    }
+
+    // Fallback dinámico por hash: Asegura colores alegres para cualquier categoría no listada
+    const fallbackPalettes = [
+      { badge: 'bg-pink-100 text-pink-950 font-black border-pink-300', cardBorder: 'border-l-4 border-l-pink-500' },
+      { badge: 'bg-indigo-100 text-indigo-950 font-black border-indigo-300', cardBorder: 'border-l-4 border-l-indigo-500' },
+      { badge: 'bg-lime-100 text-lime-950 font-black border-lime-400', cardBorder: 'border-l-4 border-l-lime-600' },
+      { badge: 'bg-fuchsia-100 text-fuchsia-950 font-black border-fuchsia-300', cardBorder: 'border-l-4 border-l-fuchsia-500' },
+      { badge: 'bg-sky-100 text-sky-950 font-black border-sky-300', cardBorder: 'border-l-4 border-l-sky-500' },
+    ];
+    let hash = 0;
+    for (let i = 0; i < cat.length; i++) hash = cat.charCodeAt(i) + ((hash << 5) - hash);
+    const chosen = fallbackPalettes[Math.abs(hash) % fallbackPalettes.length];
     return {
-      badge: 'bg-slate-700 text-white font-bold border-slate-500 shadow-sm',
-      cardBorder: 'border-l-4 border-l-slate-400 hover:border-slate-400',
+      badge: `${chosen.badge} shadow-2xs`,
+      cardBorder: `${chosen.cardBorder} hover:border-slate-400`,
       lightBg: 'bg-slate-50/30',
-      accentText: 'text-slate-300',
+      accentText: 'text-slate-800',
     };
   };
 
-  // Ticket para Impresión
+  // Ticket para Impresión y Membrete
   const [lastCompletedSale, setLastCompletedSale] = useState<LocalSale | null>(null);
   const [showReceiptModal, setShowReceiptModal] = useState<boolean>(false);
+  const [receiptType, setReceiptType] = useState<'mixed' | 'fiscal_seniat'>('mixed');
+  const [storeInfo, setStoreInfo] = useState<{
+    name: string;
+    rif: string;
+    phone: string;
+    address: string;
+    footerMessage: string;
+    logoUrl?: string;
+    showLogoOnReceipt?: boolean;
+  }>({
+    name: 'COMERCIAL MI TIENDA C.A.',
+    rif: 'J-50123456-7',
+    phone: '0414-1234567',
+    address: 'Av. Principal, Caracas',
+    footerMessage: '¡Gracias por su compra! • Comprobante Oficial',
+    logoUrl: '',
+    showLogoOnReceipt: true,
+  });
 
   // Ventas del Turno (en memoria, se acumulan durante la sesión)
   const [shiftSales, setShiftSales] = useState<LocalSale[]>([]);
@@ -184,19 +280,58 @@ export default function DesktopPosPage() {
   const openScannerModal = async () => {
     setShowScannerModal(true);
     try {
-      const res = await fetch('/api/server-info');
-      const data = await res.json();
-      const url = data.scannerUrl || `http://${data.ip || 'localhost'}:${data.port || 3002}/scanner?session=caja-1`;
+      let url = '';
+      const statusRes = await fetch('/api/scanner/status?session=caja-1').catch(() => null);
+      if (statusRes && statusRes.ok) {
+        const d = await statusRes.json();
+        if (d.scannerUrl) url = d.scannerUrl;
+        if (d.phoneConnected) {
+          setPhoneConnected(true);
+          setPhoneDeviceName(d.deviceName || 'Caja Móvil');
+        }
+      }
+      if (!url) {
+        const res = await fetch('/api/server-info').catch(() => null);
+        if (res && res.ok) {
+          const data = await res.json();
+          url = data.scannerUrl || `http://${data.ip || 'localhost'}:${data.port || 3002}/scanner?session=caja-1`;
+        }
+      }
+      if (!url && typeof window !== 'undefined') {
+        url = `${window.location.origin}/scanner?session=caja-1`;
+      }
       setScannerUrl(url);
 
-      const qr = await QRCode.toDataURL(url, {
-        width: 280,
-        margin: 1.5,
-        color: { dark: '#0284c7', light: '#ffffff' },
-      });
-      setQrCodeDataUrl(qr);
+      if (url) {
+        const qr = await QRCode.toDataURL(url, {
+          width: 280,
+          margin: 1.5,
+          color: { dark: '#0e4f5a', light: '#ffffff' },
+        });
+        setQrCodeDataUrl(qr);
+      }
     } catch (e) {
       console.warn('Error loading scanner info:', e);
+    }
+  };
+
+  const handleTriggerMobileScanner = async () => {
+    soundEffects.playBeep();
+    try {
+      const res = await fetch('/api/scanner/trigger', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ session: 'caja-1', action: 'activate_camera' }),
+      });
+      if (res.ok) {
+        showToast('📱 Cámara del celular activada para escanear', 'success');
+      } else {
+        showToast('Abriendo vinculación móvil con código QR...', 'info');
+        openScannerModal();
+      }
+    } catch {
+      showToast('Abriendo vinculación móvil con código QR...', 'info');
+      openScannerModal();
     }
   };
 
@@ -220,6 +355,37 @@ export default function DesktopPosPage() {
       const stored = typeof window !== 'undefined' ? localStorage.getItem('venematic_primary_currency') : null;
       if (stored === 'USD' || stored === 'VES') setPrimaryCurrency(stored);
     }
+
+    // Cargar datos de membrete de comercio y logo
+    try {
+      const storeSetting = await db.settings.get('store_info');
+      if (storeSetting && storeSetting.value) {
+        setStoreInfo({
+          name: storeSetting.value.name || 'COMERCIAL MI TIENDA C.A.',
+          rif: storeSetting.value.rif || 'J-50123456-7',
+          phone: storeSetting.value.phone || '0414-1234567',
+          address: storeSetting.value.address || 'Av. Principal, Caracas',
+          footerMessage: storeSetting.value.footerMessage || '¡Gracias por su compra!',
+          logoUrl: storeSetting.value.logoUrl || '',
+          showLogoOnReceipt: storeSetting.value.showLogoOnReceipt !== false,
+        });
+      }
+    } catch {}
+
+    // Cargar configuración de papel térmico (58mm o 80mm) y margen
+    try {
+      const paperSetting = await db.settings.get('paper_width');
+      const paperVal = paperSetting?.value || '80mm';
+      if (typeof document !== 'undefined') {
+        document.documentElement.setAttribute('data-paper-width', paperVal);
+        const printableWidth = paperVal === '58mm' ? '48mm' : '72mm';
+        document.documentElement.style.setProperty('--receipt-width', printableWidth);
+      }
+      const marginSetting = await db.settings.get('receipt_feed_margin');
+      if (marginSetting?.value && typeof document !== 'undefined') {
+        document.documentElement.style.setProperty('--receipt-feed-padding', `${marginSetting.value}mm`);
+      }
+    } catch {}
 
     // Cargar ventas del turno (hoy) desde la base de datos local
     try {
@@ -532,9 +698,15 @@ export default function DesktopPosPage() {
       setScaleConnected(scaleService.isConnected());
     });
 
+    const handleOpenScannerEvent = () => {
+      openScannerModal();
+    };
+    window.addEventListener('venematic:open_scanner_modal', handleOpenScannerEvent);
+
     return () => {
       window.removeEventListener('pos:bcv_updated', handleBcvUpdate);
       window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('venematic:open_scanner_modal', handleOpenScannerEvent);
       clearInterval(pollMobileTimer);
       unsubScale();
       if (eventSource) {
@@ -878,19 +1050,41 @@ export default function DesktopPosPage() {
 
   // Abrir Modal de Cobro
   const openPaymentModal = () => {
-    // Al abrir dejamos el monto entregado con el exacto de la cuenta en ambas monedas
     setCashGivenUSD(totalUSD.toFixed(2));
     setCashGivenVES(totalVES.toFixed(2));
-    if (primaryCurrency === 'VES') {
-      setSelectedPaymentMethod('pago_movil');
-    } else {
-      setSelectedPaymentMethod('cash_usd');
-    }
+    setMixedPayments([]);
+    setMixedMethod('cash_usd');
+    setMixedCurrency('USD');
+    setMixedAmount(totalUSD.toFixed(2));
+    setMixedRef('');
+    setPagoMovilAutoStatus('idle');
+    setPagoMovilAutoConfirmation(null);
+    const method = primaryCurrency === 'VES' ? 'pago_movil' : 'cash_usd';
+    setSelectedPaymentMethod(method);
     setShowPaymentModal(true);
+
+    // Si se abre en Pago Móvil y Gmail está configurado, iniciar monitoreo automáticamente
+    if (method === 'pago_movil' && pagoMovilMonitor.isConfigured()) {
+      setPagoMovilAutoStatus('monitoring');
+      pagoMovilMonitor.startMonitoring(
+        totalVES,
+        (confirmation) => {
+          setPagoMovilAutoStatus('confirmed');
+          setPagoMovilAutoConfirmation(confirmation);
+          setPagoMovilRef(confirmation.referencia);
+          soundEffects.success();
+          showToast(`✅ Pago Móvil confirmado automáticamente: Bs. ${confirmation.monto.toFixed(2)} — Ref: ${confirmation.referencia}`, 'success');
+        },
+        (err) => {
+          setPagoMovilAutoStatus('error');
+          showToast(`⚠️ Gmail: ${err}`, 'error');
+        }
+      );
+    }
   };
 
   // Cálculos de vuelto y diferencia en tiempo real
-  const isVESPayment = selectedPaymentMethod === 'cash_ves' || selectedPaymentMethod === 'pago_movil';
+  const isVESPayment = selectedPaymentMethod === 'cash_ves' || selectedPaymentMethod === 'pago_movil' || selectedPaymentMethod === 'card_debit';
   
   const givenUSD = parseFloat(String(cashGivenUSD).replace(',', '.')) || 0;
   const givenVES = parseFloat(String(cashGivenVES).replace(',', '.')) || 0;
@@ -914,6 +1108,69 @@ export default function DesktopPosPage() {
   const pendingUSD = Math.max(0, -rawDiffUSD);
   const pendingVES = Math.max(0, -rawDiffVES);
 
+  // Cálculos de Pagos Mixtos Multimoneda
+  const mixedPaidUSD = mixedPayments.reduce((sum, p) => sum + p.amountUSD, 0);
+  const mixedPaidVES = mixedPaidUSD * bcvRate;
+  const mixedPendingUSD = Math.max(0, +(totalUSD - mixedPaidUSD).toFixed(2));
+  const mixedPendingVES = +(mixedPendingUSD * bcvRate).toFixed(2);
+  const mixedChangeUSD = Math.max(0, +(mixedPaidUSD - totalUSD).toFixed(2));
+  const mixedChangeVES = +(mixedChangeUSD * bcvRate).toFixed(2);
+  const isMixedComplete = mixedPendingUSD <= 0.009;
+
+  const handleAddMixedPayment = () => {
+    const raw = parseFloat(String(mixedAmount).replace(',', '.'));
+    if (isNaN(raw) || raw <= 0) {
+      showToast('Ingresa un monto válido mayor a 0', 'error');
+      return;
+    }
+
+    let amtUSD = 0;
+    let amtVES = 0;
+    if (mixedCurrency === 'USD') {
+      amtUSD = raw;
+      amtVES = +(raw * bcvRate).toFixed(2);
+    } else {
+      amtVES = raw;
+      amtUSD = bcvRate > 0 ? +(raw / bcvRate).toFixed(2) : 0;
+    }
+
+    const newEntry = {
+      id: `${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      method: mixedMethod,
+      currency: mixedCurrency,
+      amountUSD: amtUSD,
+      amountVES: amtVES,
+      reference: mixedRef.trim() || undefined,
+    };
+
+    const nextPayments = [...mixedPayments, newEntry];
+    setMixedPayments(nextPayments);
+
+    const nextPaidUSD = nextPayments.reduce((sum, p) => sum + p.amountUSD, 0);
+    const nextPendingUSD = Math.max(0, +(totalUSD - nextPaidUSD).toFixed(2));
+    const nextPendingVES = +(nextPendingUSD * bcvRate).toFixed(2);
+
+    if (mixedCurrency === 'USD') {
+      setMixedAmount(nextPendingUSD > 0.009 ? nextPendingUSD.toFixed(2) : '');
+    } else {
+      setMixedAmount(nextPendingVES > 0.009 ? nextPendingVES.toFixed(2) : '');
+    }
+    setMixedRef('');
+    soundEffects.playBeep();
+    showToast(`✓ Abono agregado: $${amtUSD.toFixed(2)} (Bs. ${amtVES.toFixed(2)})`, 'success');
+  };
+
+  const handleRemoveMixedPayment = (id: string) => {
+    const next = mixedPayments.filter(p => p.id !== id);
+    setMixedPayments(next);
+    const nextPaidUSD = next.reduce((sum, p) => sum + p.amountUSD, 0);
+    const nextPendingUSD = Math.max(0, +(totalUSD - nextPaidUSD).toFixed(2));
+    if (mixedCurrency === 'USD') {
+      setMixedAmount(nextPendingUSD > 0 ? nextPendingUSD.toFixed(2) : '');
+    } else {
+      setMixedAmount(nextPendingUSD > 0 ? (nextPendingUSD * bcvRate).toFixed(2) : '');
+    }
+  };
 
   // Registrar venta
   const handleCompleteSale = async () => {
@@ -925,7 +1182,20 @@ export default function DesktopPosPage() {
     const receiptNum = `TKT-${String(Date.now()).slice(-6)}`;
     const payments: SalePayment[] = [];
 
-    if (selectedPaymentMethod === 'cash_usd') {
+    if (selectedPaymentMethod === 'mixed') {
+      if (!isMixedComplete) {
+        showToast('Los pagos mixtos aún no cubren el total de la venta', 'error');
+        return;
+      }
+      mixedPayments.forEach((p) => {
+        payments.push({
+          method: p.method,
+          amountUSD: p.amountUSD,
+          amountVES: p.amountVES,
+          reference: p.reference,
+        });
+      });
+    } else if (selectedPaymentMethod === 'cash_usd') {
       payments.push({
         method: 'cash_usd',
         amountUSD: totalUSD,
@@ -949,6 +1219,14 @@ export default function DesktopPosPage() {
         method: 'card_debit',
         amountUSD: totalUSD,
         amountVES: totalVES,
+        reference: cardDebitRef,
+      });
+    } else if (selectedPaymentMethod === 'binance') {
+      payments.push({
+        method: 'binance',
+        amountUSD: totalUSD,
+        amountVES: totalVES,
+        reference: binanceRef.trim() ? `Binance Pay: ${binanceRef.trim()}` : 'Binance USDT',
       });
     } else if (selectedPaymentMethod === 'credit') {
       if (!selectedCreditCustomer) {
@@ -964,6 +1242,9 @@ export default function DesktopPosPage() {
       customerDoc = selectedCreditCustomer.docId;
       customerName = selectedCreditCustomer.name;
     }
+
+    const calculatedChangeUSD = selectedPaymentMethod === 'credit' ? 0 : selectedPaymentMethod === 'mixed' ? mixedChangeUSD : changeUSD;
+    const calculatedChangeVES = selectedPaymentMethod === 'credit' ? 0 : selectedPaymentMethod === 'mixed' ? mixedChangeVES : changeVES;
 
     const newSale: LocalSale = {
       receiptNumber: receiptNum,
@@ -982,23 +1263,39 @@ export default function DesktopPosPage() {
       totalVES,
       bcvRate,
       payments,
-      changeUSD: selectedPaymentMethod === 'credit' ? 0 : changeUSD,
-      changeVES: selectedPaymentMethod === 'credit' ? 0 : changeVES,
+      changeUSD: calculatedChangeUSD,
+      changeVES: calculatedChangeVES,
       cashierName: 'Caja 1',
       customerDoc,
       customerName,
       status: 'completed',
     };
 
-    // Guardar venta y descontar inventario (y sumar deuda al cliente si es crédito)
-    await db.transaction('rw', db.sales, db.products, db.customers, async () => {
+    // Guardar venta, descontar inventario y asentar en Auditoría / Kardex
+    await db.transaction('rw', db.sales, db.products, db.customers, db.inventoryMovements, async () => {
       await db.sales.add(newSale);
       for (const item of cart) {
         const prod = await db.products.get(item.productId);
         if (prod) {
+          const nextStock = Math.max(0, +(prod.stock - item.qty).toFixed(3));
           await db.products.update(item.productId, {
-            stock: Math.max(0, prod.stock - item.qty),
+            stock: nextStock,
             updatedAt: new Date().toISOString(),
+          });
+
+          // Registrar movimiento en el Kardex de Auditoría
+          await db.inventoryMovements.add({
+            productId: item.productId,
+            productName: item.name,
+            barcode: item.barcode,
+            type: 'out',
+            reason: 'sale',
+            qtyDelta: -item.qty,
+            previousStock: prod.stock,
+            newStock: nextStock,
+            timestamp: new Date().toISOString(),
+            performedBy: 'Caja 1',
+            notes: `Venta Ticket #${receiptNum} (${selectedPaymentMethod === 'mixed' ? 'Pago Mixto' : selectedPaymentMethod})`,
           });
         }
       }
@@ -1011,12 +1308,19 @@ export default function DesktopPosPage() {
       }
     });
 
-    // Abrir gaveta automáticamente si el pago fue en efectivo
-    if (selectedPaymentMethod === 'cash_usd' || selectedPaymentMethod === 'cash_ves') {
+    // Abrir gaveta automáticamente si algún pago incluyó efectivo
+    const hasCash = payments.some(p => p.method === 'cash_usd' || p.method === 'cash_ves');
+    if (hasCash) {
       try {
         await kickCashDrawer();
       } catch {}
     }
+
+    // Limpiar campos
+    setPagoMovilRef('');
+    setCardDebitRef('');
+    setMixedPayments([]);
+    setMixedRef('');
 
     // Acumular en ventas del turno
     setShiftSales((prev) => [newSale, ...prev]);
@@ -1030,149 +1334,192 @@ export default function DesktopPosPage() {
     setShowReceiptModal(true);
   };
 
-  const printReceipt = () => {
+  const printReceipt = async () => {
+    try {
+      const p = await db.settings.get('paper_width');
+      const width = p?.value || '80mm';
+      if (typeof document !== 'undefined') {
+        document.documentElement.setAttribute('data-paper-width', width);
+        const printableWidth = width === '58mm' ? '48mm' : '72mm';
+        document.documentElement.style.setProperty('--receipt-width', printableWidth);
+      }
+      const m = await db.settings.get('receipt_feed_margin');
+      if (m?.value && typeof document !== 'undefined') {
+        document.documentElement.style.setProperty('--receipt-feed-padding', `${m.value}mm`);
+      }
+    } catch {}
     window.print();
   };
 
   return (
-    <div className="flex-1 min-h-0 flex overflow-hidden p-2 sm:p-2.5 gap-2 sm:gap-2.5 bg-slate-100 font-sans">
+    <div className="flex-1 min-h-0 flex overflow-hidden p-3 gap-3 bg-[#eef2f5] font-sans">
       {/* ========================================================================= */}
       {/* PANEL IZQUIERDO: Buscador, Categorías y Cuadrícula de Productos           */}
       {/* ========================================================================= */}
-      <div className="flex-1 min-h-0 flex flex-col bg-white rounded-xl border border-slate-300 shadow-xs overflow-hidden">
-        {/* Barra de Búsqueda de Alta Visibilidad & Acciones Rápidas */}
-        <div className="p-3 border-b border-slate-200 bg-slate-50 flex items-center gap-2.5">
-          <div className="relative flex-1">
-            <svg
-              className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={2}
-              viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-            <input
-              ref={searchInputRef}
-              type="text"
-              placeholder="Escanear código de barras o escribir nombre (F3)..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={handleSearchKeyDown}
-              className="pos-search-input w-full pl-9 pr-3 py-2 bg-white border border-slate-300 rounded-lg text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 font-medium"
-            />
-          </div>
+      <div className="flex-1 min-h-0 flex flex-col gap-2.5 overflow-hidden">
+        {/* Barra de Búsqueda de Alta Visibilidad */}
+        <div className="relative w-full bg-white rounded-2xl border border-slate-200/90 shadow-2xs flex items-center px-4 py-2.5">
+          <Search className="w-4 h-4 text-slate-400 shrink-0 mr-3" />
+          <input
+            ref={searchInputRef}
+            type="text"
+            placeholder="Buscar producto o código de barras (F3)..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyDown={handleSearchKeyDown}
+            className="w-full bg-transparent text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none font-normal"
+          />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}
-              className="px-2.5 py-2 text-xs font-semibold text-slate-600 bg-slate-200 hover:bg-slate-300 rounded-lg"
+              className="px-2 py-0.5 text-xs text-slate-400 hover:text-slate-600 rounded-md shrink-0 cursor-pointer"
             >
-              Limpiar
+              ✕
             </button>
           )}
-
-          {/* Widget de Balanza Digital Comercial & Fijar Peso Manual */}
-          <div className="flex items-center gap-1.5 bg-slate-900 text-white px-2.5 py-1.5 rounded-xl border border-slate-700 text-xs shadow-xs shrink-0">
+          {/* Quick buttons */}
+          <div className="flex items-center gap-1.5 ml-2 pl-2 border-l border-slate-200 shrink-0">
+            {/* Botón Balanza Manual */}
             <button
               type="button"
               onClick={() => {
                 setManualWeightTargetProduct(null);
                 setShowManualWeightModal(true);
               }}
-              className="flex items-center gap-1.5 hover:text-amber-300 transition-colors"
-              title="Abrir ingreso manual de peso (Gramos o Kilos) para balanzas sin cable"
+              title="Balanza: Clic para peso manual"
+              className="p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded text-slate-600 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
             >
-              <Scale className="w-3.5 h-3.5 text-amber-400" />
-              <span className="font-mono font-black text-xs text-emerald-400 tabular-numbers">
-                {scaleReading.weight.toFixed(3)} {scaleReading.unit}
-              </span>
-              <span
-                className={`w-2 h-2 rounded-full ${scaleReading.isStable ? 'bg-emerald-400' : 'bg-amber-400 animate-ping'}`}
-                title={scaleReading.isStable ? 'Peso Estable' : 'Pesando...'}
-              />
+              <Scale className="w-3.5 h-3.5" />
             </button>
+            {/* Botón Gaveta */}
             <button
               type="button"
-              onClick={() => {
-                setManualWeightTargetProduct(null);
-                setShowManualWeightModal(true);
+              onClick={async () => {
+                const res = await kickCashDrawer();
+                showToast(res.message, 'success');
               }}
-              className="ml-1 px-2.5 py-1 rounded-md bg-amber-500 hover:bg-amber-400 active:bg-amber-600 text-[10px] font-black text-slate-950 shadow-xs transition-colors flex items-center gap-1"
-              title="Fijar peso manualmente en gramos o kilos (para balanzas convencionales)"
+              title="Abrir gaveta de dinero (F10)"
+              className="p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded text-slate-600 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
             >
-              <Scale className="w-3 h-3 text-slate-950" />
-              <span>Fijar Peso</span>
+              <Banknote className="w-3.5 h-3.5" />
             </button>
           </div>
+        </div>
 
-          {/* Botón Apertura Rápida de Gaveta RJ11 / ESC-POS (F10) */}
-          <button
-            type="button"
-            onClick={async () => {
-              const res = await kickCashDrawer();
-              showToast(res.message, 'success');
-            }}
-            title="Abrir gaveta de dinero manualmente (F10)"
-            className="pos-btn-gaveta px-2.5 py-2 rounded-lg text-xs font-bold border border-slate-300 bg-white hover:bg-amber-50 hover:border-amber-400 text-slate-700 hover:text-amber-900 flex items-center gap-1.5 transition-colors shrink-0 shadow-2xs"
-          >
-            <Banknote className="w-3.5 h-3.5" />
-            <span>Gaveta</span>
-            <kbd className="text-[9px] font-mono px-1 py-0.2 rounded bg-slate-100 text-slate-500 border border-slate-200">
-              F10
-            </kbd>
-          </button>
+        {/* ========================================================================= */}
+        {/* BARRA DE BOTONES GRANDES (ACCIONES RÁPIDAS TÁCTILES POS)                  */}
+        {/* ========================================================================= */}
+        <div className="bg-slate-200/70 dark:bg-slate-900/80 border border-slate-300/80 dark:border-slate-800 rounded-2xl p-2.5 shadow-2xs shrink-0">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 items-center">
+            {/* 1. Botón Grande: Escanear con Celular (Logo SVG de Código de Barras con Láser) */}
+            <button
+              type="button"
+              onClick={handleTriggerMobileScanner}
+              className="h-14 px-3.5 bg-[var(--brand-primary)] hover:bg-[var(--brand-hover)] text-white rounded-xl font-bold flex items-center justify-between gap-2.5 shadow-xs active:scale-[0.98] transition-all cursor-pointer border border-white/20 group"
+              title="Activar escáner de código de barras en el celular vinculado"
+            >
+              <div className="flex items-center gap-2.5 min-w-0">
+                {/* Logo en SVG de Código de Barras con Línea Láser Roja */}
+                <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center shrink-0 border border-white/20 group-hover:bg-white/25 transition-colors">
+                  <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none">
+                    <rect x="2" y="4" width="2" height="16" fill="currentColor" rx="0.5" />
+                    <rect x="5.5" y="4" width="1" height="16" fill="currentColor" rx="0.5" />
+                    <rect x="8" y="4" width="2.5" height="16" fill="currentColor" rx="0.5" />
+                    <rect x="12" y="4" width="1" height="16" fill="currentColor" rx="0.5" />
+                    <rect x="14.5" y="4" width="2" height="16" fill="currentColor" rx="0.5" />
+                    <rect x="18" y="4" width="1.5" height="16" fill="currentColor" rx="0.5" />
+                    <rect x="21" y="4" width="1" height="16" fill="currentColor" rx="0.5" />
+                    <line x1="0.5" y1="12" x2="23.5" y2="12" stroke="#ef4444" strokeWidth="2" strokeDasharray="2 1.5" />
+                  </svg>
+                </div>
+                <div className="flex flex-col justify-center text-left leading-tight min-w-0">
+                  <span className="text-xs font-black tracking-tight truncate text-white">Escanear Móvil</span>
+                  <span className="text-[10px] text-white/90 font-medium truncate">Activar Cámara</span>
+                </div>
+              </div>
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shrink-0 mr-1" />
+            </button>
 
-          {/* Toggle Rápido de Moneda Principal (Bs. vs $) */}
-          <button
-            type="button"
-            onClick={togglePrimaryCurrency}
-            title="Alternar moneda principal de cobro entre Bolívares (Bs.) y Dólares ($)"
-            className={`pos-header-btn-cream px-3 py-2 rounded-lg text-xs font-bold border flex items-center gap-1.5 transition-all shrink-0 ${
-              primaryCurrency === 'VES'
-                ? 'bg-emerald-50 text-emerald-800 border-emerald-300 shadow-2xs hover:bg-emerald-100'
-                : 'bg-amber-50 text-amber-800 border-amber-300 shadow-2xs hover:bg-amber-100'
-            }`}
-          >
-            <Banknote className="w-3.5 h-3.5" />
-            <span>{primaryCurrency === 'VES' ? '🇻🇪 Bs. Principal' : '💵 USD Principal'}</span>
-          </button>
+            {/* 2. Botón Grande: Vincular Celular (QR) */}
+            <button
+              type="button"
+              onClick={openScannerModal}
+              className={`h-14 px-3.5 rounded-xl font-bold flex items-center gap-2.5 shadow-2xs active:scale-[0.98] transition-all cursor-pointer border ${
+                phoneConnected
+                  ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border-emerald-300 dark:bg-emerald-950 dark:text-emerald-300 dark:border-emerald-800'
+                  : 'bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-900 dark:text-white border-slate-200/90 dark:border-slate-700'
+              }`}
+              title="Vincular teléfono como escáner inalámbrico con código QR"
+            >
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border ${
+                phoneConnected ? 'bg-emerald-600 text-white border-emerald-500' : 'bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-white border-slate-200 dark:border-slate-600'
+              }`}>
+                <Smartphone className="w-4 h-4" />
+              </div>
+              <div className="flex flex-col justify-center text-left leading-tight min-w-0">
+                <span className="text-xs font-black tracking-tight truncate text-slate-900 dark:text-white">
+                  {phoneConnected ? 'Móvil En Línea' : 'Vincular Móvil'}
+                </span>
+                <span className="text-[10.5px] text-slate-500 dark:text-slate-300 font-bold truncate">
+                  {phoneConnected ? phoneDeviceName || 'Conectado' : 'Escanear QR'}
+                </span>
+              </div>
+            </button>
 
-          {/* Toggle de Fotos */}
-          <button
-            type="button"
-            onClick={toggleShowImages}
-            title="Mostrar u ocultar fotos en el catálogo"
-            className={`pos-header-btn-cream px-3 py-2 rounded-lg text-xs font-bold border flex items-center gap-1.5 transition-colors shrink-0 ${
-              showImages
-                ? 'bg-sky-50 text-sky-800 border-sky-300 shadow-2xs'
-                : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-100'
-            }`}
-          >
-            <ImageIcon className="w-3.5 h-3.5" />
-            <span>{showImages ? 'Fotos ON' : 'Fotos OFF'}</span>
-          </button>
+            {/* 3. Botón Grande: Balanza Digital / Manual */}
+            <button
+              type="button"
+              onClick={() => {
+                setManualWeightTargetProduct(null);
+                setShowManualWeightModal(true);
+              }}
+              className={`h-14 px-3.5 rounded-xl font-bold flex items-center gap-2.5 shadow-2xs active:scale-[0.98] transition-all cursor-pointer border ${
+                scaleConnected || scaleReading.weight > 0
+                  ? 'bg-sky-50 hover:bg-sky-100 text-sky-900 border-sky-300 dark:bg-sky-950 dark:text-sky-300 dark:border-sky-800'
+                  : 'bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-900 dark:text-white border-slate-200/90 dark:border-slate-700'
+              }`}
+              title="Balanza: Clic para pesar producto o ingresar peso manual"
+            >
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border ${
+                scaleConnected || scaleReading.weight > 0
+                  ? 'bg-sky-600 text-white border-sky-500'
+                  : 'bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-white border-slate-200 dark:border-slate-600'
+              }`}>
+                <Scale className="w-4 h-4" />
+              </div>
+              <div className="flex flex-col justify-center text-left leading-tight min-w-0">
+                <span className="text-xs font-black tracking-tight truncate text-slate-900 dark:text-white">
+                  {scaleReading.weight > 0 ? `${scaleReading.weight.toFixed(3)} kg` : 'Balanza (kg)'}
+                </span>
+                <span className="text-[10.5px] text-slate-500 dark:text-slate-300 font-bold truncate">
+                  {scaleReading.weight > 0 ? 'Peso en vivo' : 'Pesar Producto'}
+                </span>
+              </div>
+            </button>
 
-          {/* Botón Vincular Celular */}
-          <button
-            type="button"
-            onClick={openScannerModal}
-            title="Vincular celular como lector de código de barras inalámbrico"
-            className={`pos-header-btn-cream px-3 py-2 rounded-lg text-xs font-bold border flex items-center gap-1.5 transition-all shrink-0 ${
-              phoneConnected
-                ? 'bg-emerald-50 text-emerald-800 border-emerald-400 shadow-2xs'
-                : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-100'
-            }`}
-          >
-            <Smartphone className="w-3.5 h-3.5" />
-            <span>{phoneConnected ? 'Celular OK' : 'Celular Escáner'}</span>
-            {phoneConnected && (
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            )}
-          </button>
+            {/* 4. Botón Grande: Abrir Gaveta de Dinero (F10) */}
+            <button
+              type="button"
+              onClick={async () => {
+                const res = await kickCashDrawer();
+                showToast(res.message, 'success');
+              }}
+              className="h-14 px-3.5 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-900 dark:text-white rounded-xl font-bold flex items-center gap-2.5 shadow-2xs active:scale-[0.98] transition-all cursor-pointer border border-slate-200/90 dark:border-slate-700 group"
+              title="Abrir gaveta de dinero conectada a la impresora (F10)"
+            >
+              <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-950 text-amber-900 dark:text-amber-300 flex items-center justify-center shrink-0 border border-amber-200 dark:border-amber-800 group-hover:bg-amber-200 transition-colors">
+                <Banknote className="w-4 h-4" />
+              </div>
+              <div className="flex flex-col justify-center text-left leading-tight min-w-0">
+                <span className="text-xs font-black tracking-tight truncate text-slate-900 dark:text-white">Gaveta (F10)</span>
+                <span className="text-[10.5px] text-slate-500 dark:text-slate-300 font-bold truncate">Abrir Caja</span>
+              </div>
+            </button>
+          </div>
         </div>
 
         {/* Categorías Rápidas */}
-        <div className="pos-categories-bar px-3 py-2 border-b border-slate-200 bg-white flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5 shrink-0">
           {categories.map((cat) => {
             const isSelected = selectedCategory === cat;
             return (
@@ -1180,10 +1527,10 @@ export default function DesktopPosPage() {
                 key={cat}
                 type="button"
                 onClick={() => setSelectedCategory(cat)}
-                className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors duration-75 select-none active:scale-[0.97] border ${
+                className={`px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-150 select-none active:scale-[0.97] cursor-pointer shadow-2xs ${
                   isSelected
-                    ? 'pos-category-active brand-badge border-transparent shadow-xs font-bold'
-                    : 'pos-category-inactive bg-white text-slate-600 border-slate-300 hover:bg-slate-50 hover:text-slate-900 active:bg-slate-100'
+                    ? 'bg-[var(--brand-primary)] text-white shadow-xs ring-2 ring-[var(--brand-primary)]/30 font-bold'
+                    : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200/90 font-medium'
                 }`}
               >
                 {cat}
@@ -1192,43 +1539,34 @@ export default function DesktopPosPage() {
           })}
         </div>
 
-        {/* Cuadrícula de Productos (Con Fotos o Modo Compacto según showImages) */}
-        <div
-          className={`flex-1 p-4 overflow-y-auto content-start ${
-            showImages
-              ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4'
-              : 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5'
-          }`}
-        >
-          {filteredProducts.map((p) => {
-            const isLowStock = p.stock <= p.minStock;
-            const theme = getCategoryTheme(p.category);
-
-            // MODO CON FOTOS
-            if (showImages) {
+        {/* Cuadrícula de Productos */}
+        <div className="flex-1 overflow-y-auto pr-1">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5 content-start">
+            {filteredProducts.map((p) => {
+              const isLowStock = p.stock <= p.minStock;
               return (
-                <button
+                <div
                   key={p.id}
                   onClick={() => addToCart(p, 1)}
-                  className={`pos-product-card h-48 p-2.5 bg-white border border-slate-300 ${theme.cardBorder} hover:shadow-lg rounded-xl text-left flex flex-col justify-between transition-all active:scale-[0.98] group overflow-hidden shadow-xs`}
+                  className="bg-white rounded-2xl border border-slate-200/90 p-3 shadow-2xs hover:shadow-md transition-all active:scale-[0.98] cursor-pointer flex flex-col justify-between group"
                 >
-                  {/* Encabezado: Barcode + Categoría */}
-                  <div className="flex items-center justify-between gap-1 w-full">
-                    <span className="pos-card-barcode text-[10px] font-mono font-semibold text-slate-400 truncate tracking-tight">
-                      {p.barcode}
+                  {/* Encabezado: Barcode Pill + Rubro Coloreado */}
+                  <div className="flex items-center justify-between gap-1.5 w-full mb-1">
+                    <span className="font-mono text-[9.5px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded border border-slate-200/60 truncate max-w-[100px]">
+                      {p.barcode || 'S/C'}
                     </span>
-                    <span className={`pos-card-category-pill text-[9px] font-black px-2 py-0.5 rounded-md border uppercase tracking-wide shrink-0 ${theme.badge}`}>
+                    <span className="text-[9.5px] font-extrabold px-2.5 py-0.5 rounded bg-[#0e4f5a] text-white uppercase tracking-wider shrink-0">
                       {p.category}
                     </span>
                   </div>
 
                   {/* Nombre */}
-                  <h4 className="pos-product-title font-bold text-xs text-slate-900 line-clamp-1 group-hover:text-sky-700 leading-tight">
+                  <h4 className="font-bold text-[13px] text-slate-900 truncate leading-snug my-1" title={p.name}>
                     {p.name}
                   </h4>
 
                   {/* Contenedor de Imagen */}
-                  <div className="w-full h-20 rounded-lg bg-slate-100 overflow-hidden relative border border-slate-200/60 my-1">
+                  <div className="w-full h-24 sm:h-28 rounded-xl bg-slate-100 overflow-hidden relative border border-slate-200/60 my-1">
                     {p.image ? (
                       <img
                         src={p.image}
@@ -1238,112 +1576,34 @@ export default function DesktopPosPage() {
                       />
                     ) : (
                       <div className="w-full h-full flex flex-col items-center justify-center text-slate-300">
-                        <Package className="w-7 h-7 stroke-1" />
+                        <Package className="w-8 h-8 stroke-1" />
                       </div>
                     )}
                   </div>
 
                   {/* Precios y Stock */}
-                  <div className="flex items-end justify-between w-full pt-1">
-                    <div className="leading-tight">
-                      {primaryCurrency === 'VES' ? (
-                        <>
-                          <span className="text-sm sm:text-base font-black font-mono text-slate-900 tabular-numbers leading-tight block">
-                            {formatVES(p.priceUSD * bcvRate)}
-                          </span>
-                          <span className="text-[11px] font-bold text-slate-500 font-mono tabular-numbers leading-tight block mt-0.5">
-                            {formatUSD(p.priceUSD)}
-                          </span>
-                        </>
-                      ) : (
-                        <>
-                          <span className="text-sm sm:text-base font-black font-mono text-slate-900 tabular-numbers leading-tight block">
-                            {formatUSD(p.priceUSD)}
-                          </span>
-                          <span className="text-[11px] font-bold text-slate-500 font-mono tabular-numbers leading-tight block mt-0.5">
-                            {formatVES(p.priceUSD * bcvRate)}
-                          </span>
-                        </>
-                      )}
+                  <div className="flex items-end justify-between gap-1.5 pt-1 mt-1">
+                    <div className="leading-tight flex flex-col">
+                      <span className="text-[15px] font-black font-sans text-slate-950 tabular-numbers leading-tight">
+                        {formatVES(p.priceUSD * bcvRate)}
+                      </span>
+                      <span className="text-xs text-slate-500 font-medium">
+                        ${p.priceUSD.toFixed(2)} USD
+                      </span>
                     </div>
-                    <span
-                      className={`pos-card-stock-pill text-[10px] font-mono font-bold px-2 py-0.5 rounded-md border shadow-2xs shrink-0 ${
-                        isLowStock
-                          ? 'bg-rose-50 text-rose-700 border-rose-200'
-                          : 'bg-slate-100 text-slate-700 border-slate-200'
-                      }`}
-                    >
-                      {p.stock} {p.unit}
+
+                    <span className="text-[11px] font-medium px-2.5 py-0.5 rounded-full border border-slate-200 bg-slate-50 text-slate-700 shrink-0 flex items-center gap-1.5">
+                      <span className={`w-1.5 h-1.5 rounded-full ${isLowStock ? 'bg-rose-500 animate-pulse' : 'bg-emerald-500'}`} />
+                      <span>{p.stock} {p.unit}</span>
                     </span>
                   </div>
-                </button>
+                </div>
               );
-            }
-
-            // MODO COMPACTO (Alta Densidad Textual con Separación Visual Impecable)
-            return (
-              <button
-                key={p.id}
-                onClick={() => addToCart(p, 1)}
-                className={`pos-product-card min-h-[135px] p-3 bg-white border border-slate-300 ${theme.cardBorder} hover:shadow-md hover:border-sky-400 rounded-xl text-left flex flex-col justify-between transition-all active:scale-[0.98] shadow-xs group relative overflow-hidden`}
-              >
-                <div className="space-y-1">
-                  {/* Encabezado de la card: Código + Pastilla de Categoría */}
-                  <div className="flex items-center justify-between gap-1">
-                    <span className="pos-card-barcode text-[10px] font-mono font-semibold text-slate-400 truncate tracking-tight">
-                      {p.barcode}
-                    </span>
-                    <span className={`pos-card-category-pill text-[9px] font-black px-2 py-0.5 rounded-md border uppercase tracking-wide shrink-0 ${theme.badge}`}>
-                      {p.category}
-                    </span>
-                  </div>
-
-                  {/* Nombre del Producto */}
-                  <h4 className="pos-product-title font-bold text-xs text-slate-900 line-clamp-2 leading-snug group-hover:text-sky-700 pt-0.5">
-                    {p.name}
-                  </h4>
-                </div>
-
-                {/* Pie de la card: Precios en USD y Bs + Pastilla de Existencia */}
-                <div className="flex items-end justify-between pt-2 border-t border-slate-200/80 mt-2">
-                  <div className="leading-tight">
-                    {primaryCurrency === 'VES' ? (
-                      <>
-                        <span className="text-sm sm:text-base font-black font-mono text-slate-900 tabular-numbers leading-tight block">
-                          {formatVES(p.priceUSD * bcvRate)}
-                        </span>
-                        <span className="text-[11px] font-bold text-slate-500 font-mono tabular-numbers leading-tight block mt-0.5">
-                          {formatUSD(p.priceUSD)}
-                        </span>
-                      </>
-                    ) : (
-                      <>
-                        <span className="text-sm sm:text-base font-black font-mono text-slate-900 tabular-numbers leading-tight block">
-                          {formatUSD(p.priceUSD)}
-                        </span>
-                        <span className="text-[11px] font-bold text-slate-500 font-mono tabular-numbers leading-tight block mt-0.5">
-                          {formatVES(p.priceUSD * bcvRate)}
-                        </span>
-                      </>
-                    )}
-                  </div>
-
-                  <span
-                    className={`pos-card-stock-pill text-[10px] font-mono font-bold px-2 py-0.5 rounded-md border shadow-2xs shrink-0 ${
-                      isLowStock
-                        ? 'bg-rose-50 text-rose-700 border-rose-200'
-                        : 'bg-slate-100 text-slate-700 border-slate-200'
-                    }`}
-                  >
-                    {p.stock} {p.unit}
-                  </span>
-                </div>
-              </button>
-            );
-          })}
+            })}
+          </div>
 
           {filteredProducts.length === 0 && (
-            <div className="col-span-full py-12 text-center text-slate-400 text-sm">
+            <div className="py-16 text-center text-slate-400 text-sm">
               No se encontraron productos coincidentes.
             </div>
           )}
@@ -1351,390 +1611,294 @@ export default function DesktopPosPage() {
       </div>
 
       {/* ========================================================================= */}
-      {/* PANEL DERECHO: Ticket de Venta & Teclado Numérico Industrial */}
+      {/* PANEL DERECHO: Ticket de Venta & Teclado Numérico Industrial               */}
       {/* ========================================================================= */}
-      <div className="pos-cart-panel w-[380px] lg:w-[400px] xl:w-[420px] 2xl:w-[450px] h-full max-h-full min-h-0 flex flex-col gap-2 shrink-0 overflow-hidden">
+      <div className="w-[380px] lg:w-[410px] xl:w-[430px] h-full max-h-full min-h-0 flex flex-col gap-2.5 shrink-0 overflow-hidden">
         {/* Tabs: Ticket Activo | Ventas del Turno */}
-        <div className="flex bg-white rounded-xl border border-slate-300 shadow-xs overflow-hidden shrink-0">
+        <div className="flex gap-2 shrink-0">
           <button
             onClick={() => setRightPanelTab('cart')}
-            className={`pos-tab-cart flex-1 py-1.5 text-xs font-black transition-colors flex items-center justify-center gap-1.5 ${
+            className={`flex-1 py-2 px-3 rounded-xl text-xs font-black transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-2xs ${
               rightPanelTab === 'cart'
-                ? 'bg-slate-900 text-white'
-                : 'text-slate-600 hover:bg-slate-50'
+                ? 'bg-[var(--brand-primary)] text-white shadow-xs'
+                : 'bg-white dark:bg-slate-800/90 text-slate-800 dark:text-white hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'
             }`}
           >
-            <span>🛒</span> Ticket Activo
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
+            </svg>
+            <span>Ticket Activo</span>
             {cart.length > 0 && (
-              <span className="ml-1 px-1.5 py-0.5 rounded-full bg-amber-400 text-slate-900 text-[10px] font-black">{cart.length}</span>
+              <span className="ml-1 px-1.5 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[10px] font-black">{cart.length}</span>
             )}
           </button>
           <button
             onClick={() => setRightPanelTab('shift')}
-            className={`pos-tab-shift flex-1 py-1.5 text-xs font-black transition-colors flex items-center justify-center gap-1.5 border-l border-slate-200 ${
+            className={`flex-1 py-2 px-3 rounded-xl text-xs font-black transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-2xs ${
               rightPanelTab === 'shift'
-                ? 'bg-emerald-700 text-white'
-                : 'text-slate-600 hover:bg-slate-50'
+                ? 'bg-[var(--brand-primary)] text-white shadow-xs'
+                : 'bg-white dark:bg-slate-800/90 text-slate-800 dark:text-white hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'
             }`}
           >
-            <span>📋</span> Ventas del Turno
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            <span>Ventas del Turno</span>
             {shiftSales.length > 0 && (
-              <span className="ml-1 px-1.5 py-0.5 rounded-full bg-emerald-400 text-white text-[10px] font-black">{shiftSales.length}</span>
+              <span className="ml-1 px-1.5 py-0.5 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-white text-[10px] font-black">{shiftSales.length}</span>
             )}
           </button>
         </div>
 
         {/* ---- TAB: TICKET ACTIVO ---- */}
         {rightPanelTab === 'cart' && (
-        <div className="pos-cart-container flex-1 min-h-0 bg-white rounded-xl border border-slate-300 shadow-xs flex flex-col overflow-hidden">
-          {/* Cabecera del Ticket */}
-          <div className="p-3 border-b border-slate-200 bg-slate-100/95 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="pos-ticket-badge font-black text-xs uppercase tracking-wider px-2 py-0.5 rounded bg-amber-400 text-slate-950 shadow-xs border border-amber-500">
-                Ticket Activo
-              </span>
-              <span className="px-2.5 py-0.5 rounded-full bg-slate-900 text-white border border-slate-700 text-[11px] font-mono font-bold shadow-2xs">
-                {cart.length} {cart.length === 1 ? 'ítem' : 'ítems'}
-              </span>
-            </div>
-
-            {cart.length > 0 && (
-              <button
-                onClick={clearCart}
-                className="text-[11px] font-semibold text-rose-600 hover:text-rose-700 hover:underline"
-              >
-                Vaciar
-              </button>
-            )}
-          </div>
-
-          {/* Lista de Artículos */}
-          <div className="flex-1 p-2 overflow-y-auto divide-y divide-slate-100">
-            {cart.map((item) => {
-              const isSelected = selectedCartItemId === item.productId;
-              return (
-                <div
-                  key={item.productId}
-                  onClick={() => setSelectedCartItemId(item.productId)}
-                  className={`py-2 px-2 flex items-center justify-between gap-2 rounded-lg cursor-pointer transition-all ${
-                    isSelected
-                      ? 'bg-sky-50/80 border border-sky-400 ring-2 ring-sky-400/30'
-                      : 'hover:bg-slate-50 border border-transparent'
-                  }`}
-                >
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-1.5">
-                      {isSelected && (
-                        <span className="w-1.5 h-1.5 rounded-full bg-sky-500 shrink-0 animate-pulse"></span>
-                      )}
-                      <p className="text-xs font-bold text-slate-800 truncate">
-                        {item.name}
-                      </p>
-                    </div>
-                    <p className="text-[11px] text-slate-600 font-mono font-medium">
-                      {formatUSD(item.priceUSD)} c/u × {item.qty}
-                    </p>
-                  </div>
-
-                {/* Controles de Cantidad */}
-                <div className="flex items-center gap-1">
-                  <button
-                    onClick={() => updateItemQty(item.productId, item.qty - 1)}
-                    className="w-7 h-7 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded flex items-center justify-center text-xs"
-                  >
-                    -
-                  </button>
-                  <span className="w-8 text-center font-mono font-bold text-xs tabular-numbers">
-                    {item.qty}
-                  </span>
-                  <button
-                    onClick={() => updateItemQty(item.productId, item.qty + 1)}
-                    className="w-7 h-7 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded flex items-center justify-center text-xs"
-                  >
-                    +
-                  </button>
-                </div>
-
-                {/* Total por línea */}
-                <div className="text-right min-w-[75px]">
-                  {primaryCurrency === 'VES' ? (
-                    <>
-                      <span className="text-xs font-mono font-black text-slate-900 block tabular-numbers">
-                        {formatVES(item.totalUSD * bcvRate)}
-                      </span>
-                      <span className="text-[10px] font-mono text-slate-500 font-semibold block tabular-numbers">
-                        {formatUSD(item.totalUSD)}
-                      </span>
-                    </>
-                  ) : (
-                    <>
-                      <span className="text-xs font-mono font-black text-slate-900 block tabular-numbers">
-                        {formatUSD(item.totalUSD)}
-                      </span>
-                      <span className="text-[11px] font-mono text-slate-700 font-bold block tabular-numbers">
-                        {formatVES(item.totalUSD * bcvRate)}
-                      </span>
-                    </>
-                  )}
-                </div>
-
-                {/* Eliminar */}
-                <button
-                  onClick={() => removeItem(item.productId)}
-                  className="text-slate-300 hover:text-rose-600 px-1 text-sm font-bold"
-                  title="Eliminar ítem"
-                >
-                  &times;
-                </button>
-              </div>
-            );
-          })}
-
-            {cart.length === 0 && (
-              <div className="h-full flex flex-col items-center justify-center text-slate-400 text-xs py-12 gap-2">
-                <svg className="w-8 h-8 text-slate-300" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                </svg>
-                <span>El ticket está vacío. Escanee o seleccione productos.</span>
-              </div>
-            )}
-          </div>
-
-          {/* Gran Total del Ticket */}
-          <div className="p-2.5 border-t border-slate-200 bg-slate-50 space-y-1.5 shrink-0">
-            <div className="flex items-baseline justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-600">
-                Total a Cobrar:
-              </span>
-              <div className="text-right leading-tight">
-                {primaryCurrency === 'VES' ? (
-                  <>
-                    <span className="pos-total-ves text-xl sm:text-2xl font-black font-mono text-emerald-700 block leading-tight tabular-numbers">
-                      {formatVES(totalVES)}
-                    </span>
-                    <span className="pos-total-usd text-xs font-bold font-mono text-slate-600 block leading-tight mt-0.5 tabular-numbers">
-                      {formatUSD(totalUSD)} USD · Tasa: {formatVES(bcvRate)}
-                    </span>
-                  </>
-                ) : (
-                  <>
-                    <span className="pos-total-usd text-xl sm:text-2xl font-black font-mono text-slate-900 block leading-tight tabular-numbers">
-                      {formatUSD(totalUSD)}
-                    </span>
-                    <span className="pos-total-ves text-xs font-bold font-mono text-sky-700 block leading-tight mt-0.5 tabular-numbers">
-                      {formatVES(totalVES)}
-                    </span>
-                  </>
-                )}
-              </div>
-            </div>
-
-            {/* Botón Principal COBRAR (F12) */}
-            <button
-              onClick={openPaymentModal}
-              disabled={cart.length === 0}
-              className="pos-btn-cobrar w-full h-10 sm:h-11 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-black text-xs sm:text-sm rounded-lg shadow-sm flex items-center justify-center gap-2 uppercase tracking-wide transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              <span>Cobrar Venta</span>
-              <kbd className="bg-emerald-700 text-emerald-100 text-[11px] px-2 py-0.5 rounded font-mono font-bold">
-                F12
-              </kbd>
-            </button>
-          </div>
-        </div>
-        )} {/* fin tab cart */}
-
-        {/* ---- TAB: VENTAS DEL TURNO ---- */}
-        {rightPanelTab === 'shift' && (
-          <div className="flex-1 bg-white rounded-xl border border-slate-300 shadow-xs flex flex-col overflow-hidden">
-            {/* Header del turno */}
-            <div className="p-3 border-b border-slate-200 bg-emerald-700 flex items-center justify-between">
-              <div>
-                <span className="text-xs font-black text-white uppercase tracking-wide">Ventas del Turno</span>
-                <p className="text-[10px] text-emerald-200">{shiftSales.length} ventas · Esta sesión</p>
-              </div>
-              <div className="text-right">
-                <span className="text-[10px] text-emerald-200 block">Total acumulado</span>
-                <span className="font-mono font-black text-sm text-white tabular-numbers">
-                  ${shiftSales.reduce((s, v) => s + v.totalUSD, 0).toFixed(2)}
+          <div className="flex-1 min-h-0 bg-white dark:bg-slate-800/70 rounded-2xl border-2 border-[var(--brand-primary)]/30 dark:border-slate-700 shadow-sm dark:shadow-none flex flex-col p-3.5 overflow-hidden" style={{ borderColor: 'color-mix(in srgb, var(--brand-primary) 35%, transparent)' }}>
+            {/* Cabecera del Ticket */}
+            <div className="flex items-center justify-between mb-2 shrink-0">
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-xs uppercase tracking-wider px-2.5 py-1 rounded-lg bg-slate-100 text-slate-800">
+                  Ticket Activo
+                </span>
+                <span className="px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-medium">
+                  {cart.length} {cart.length === 1 ? 'ítem' : 'items'}
                 </span>
               </div>
-            </div>
 
-            {/* Lista de ventas */}
-            <div className="flex-1 overflow-y-auto divide-y divide-slate-100">
-              {shiftSales.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-16 text-slate-400 gap-2">
-                  <span className="text-3xl">📋</span>
-                  <span className="text-xs font-medium">Sin ventas aún en este turno</span>
-                </div>
-              ) : (
-                shiftSales.map((sale, idx) => {
-                  const isMobile = (sale as any).source === 'mobile';
-                  const saleTime = new Date(sale.timestamp).toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit' });
-                  return (
-                    <div key={sale.receiptNumber || idx} className="px-3 py-2.5 flex items-center justify-between gap-2 hover:bg-slate-50 transition-colors">
-                      <div className="flex items-center gap-2 min-w-0">
-                        <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 text-xs font-black ${
-                          isMobile ? 'bg-sky-100 text-sky-700' : 'bg-emerald-100 text-emerald-700'
-                        }`}>
-                          {isMobile ? '📱' : '🖥️'}
-                        </div>
-                        <div className="min-w-0">
-                          <p className="text-xs font-bold text-slate-900 truncate">{sale.receiptNumber}</p>
-                          <p className="text-[10px] text-slate-500">
-                            {saleTime} · {sale.items.length} ítem{sale.items.length !== 1 ? 's' : ''}
-                            {isMobile && <span className="ml-1 text-sky-600 font-bold">· Móvil</span>}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="text-right shrink-0">
-                        <span className="font-mono font-black text-xs text-slate-900 block tabular-numbers">
-                          ${sale.totalUSD.toFixed(2)}
-                        </span>
-                        <span className="font-mono text-[10px] text-slate-500 block tabular-numbers">
-                          Bs. {sale.totalVES.toFixed(2)}
-                        </span>
-                      </div>
-                    </div>
-                  );
-                })
+              {cart.length > 0 && (
+                <button
+                  onClick={clearCart}
+                  className="text-xs font-semibold text-rose-600 hover:text-rose-700 hover:underline cursor-pointer"
+                >
+                  Vaciar
+                </button>
               )}
             </div>
 
-            {/* Resumen total pie */}
-            {shiftSales.length > 0 && (
-              <div className="p-3 bg-slate-50 border-t border-slate-200 grid grid-cols-2 gap-2 text-xs">
-                <div className="bg-white rounded-lg p-2 border border-slate-200 text-center">
-                  <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wide">Ventas Desktop</p>
-                  <p className="font-mono font-black text-slate-900 tabular-numbers">
-                    ${shiftSales.filter((s) => !(s as any).source).reduce((a, s) => a + s.totalUSD, 0).toFixed(2)}
-                  </p>
+            {/* Lista de Ítems */}
+            <div className="flex-1 min-h-0 overflow-y-auto divide-y divide-slate-100">
+              {cart.map((item) => {
+                const isSelected = selectedCartItemId === item.productId;
+                return (
+                  <div
+                    key={item.productId}
+                    onClick={() => setSelectedCartItemId(item.productId)}
+                    className={`py-2 px-2 flex items-center justify-between gap-2 rounded-lg cursor-pointer transition-all ${
+                      isSelected
+                        ? 'bg-sky-50 border border-sky-300'
+                        : 'hover:bg-slate-50'
+                    }`}
+                  >
+                    <div className="min-w-0 flex-1">
+                      <p className="font-bold text-xs text-slate-900 truncate">
+                        {item.name}
+                      </p>
+                      <p className="text-[11px] text-slate-500 font-mono">
+                        ${item.priceUSD.toFixed(2)} c/u × {item.qty}
+                      </p>
+                    </div>
+
+                    {/* Controles de Cantidad */}
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          updateItemQty(item.productId, item.qty - 1);
+                        }}
+                        className="w-6 h-6 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded flex items-center justify-center text-xs cursor-pointer"
+                      >
+                        -
+                      </button>
+                      <span className="w-7 text-center font-mono font-bold text-xs tabular-numbers">
+                        {item.qty}
+                      </span>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          updateItemQty(item.productId, item.qty + 1);
+                        }}
+                        className="w-6 h-6 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded flex items-center justify-center text-xs cursor-pointer"
+                      >
+                        +
+                      </button>
+                    </div>
+
+                    {/* Total por línea */}
+                    <div className="text-right min-w-[75px]">
+                      <span className="text-xs font-mono font-black text-slate-900 block tabular-numbers">
+                        {formatVES(item.totalUSD * bcvRate)}
+                      </span>
+                      <span className="text-[10px] font-mono text-slate-500 block tabular-numbers">
+                        ${item.totalUSD.toFixed(2)}
+                      </span>
+                    </div>
+
+                    {/* Eliminar */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        removeItem(item.productId);
+                      }}
+                      className="text-slate-300 hover:text-rose-600 px-1 text-sm font-bold cursor-pointer"
+                      title="Eliminar ítem"
+                    >
+                      &times;
+                    </button>
+                  </div>
+                );
+              })}
+
+              {cart.length === 0 && (
+                <div className="h-full flex flex-col items-center justify-center text-slate-400 py-10 gap-3 select-none">
+                  <svg className="w-16 h-16 text-slate-300 stroke-[1.25]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                  </svg>
+                  <div className="text-center space-y-1">
+                    <p className="text-sm font-semibold text-slate-600">El ticket está vacío.</p>
+                    <p className="text-xs text-slate-400">Escanee o seleccione productos.</p>
+                  </div>
                 </div>
-                <div className="bg-white rounded-lg p-2 border border-sky-200 text-center">
-                  <p className="text-[10px] text-sky-600 font-bold uppercase tracking-wide">Ventas Móvil</p>
-                  <p className="font-mono font-black text-sky-700 tabular-numbers">
-                    ${shiftSales.filter((s) => (s as any).source === 'mobile').reduce((a, s) => a + s.totalUSD, 0).toFixed(2)}
-                  </p>
+              )}
+            </div>
+
+            {/* Gran Total del Ticket con Separación Nítida Anti-Colisión */}
+            <div
+              className="pt-3 border-t-2 border-b border-x space-y-2 mt-auto shrink-0 -mx-3 -mb-3 p-3.5 rounded-b-2xl dark:bg-[#0e1826] dark:border-slate-700"
+              style={{
+                backgroundColor: 'color-mix(in srgb, var(--brand-primary) 6%, white)',
+                borderTopColor: 'color-mix(in srgb, var(--brand-primary) 45%, transparent)',
+                borderBottomColor: 'color-mix(in srgb, var(--brand-primary) 28%, transparent)',
+                borderLeftColor: 'color-mix(in srgb, var(--brand-primary) 28%, transparent)',
+                borderRightColor: 'color-mix(in srgb, var(--brand-primary) 28%, transparent)',
+              }}>
+
+              <div className="flex flex-col gap-1">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] sm:text-xs font-black uppercase tracking-wider text-slate-900 dark:text-slate-100">
+                    TOTAL A COBRAR (BS)
+                  </span>
+                  <span className="text-xs font-mono font-black text-sky-900 dark:text-sky-300 bg-sky-100 dark:bg-sky-950 px-2 py-0.5 rounded border border-sky-300 dark:border-sky-800">
+                    Tasa: Bs. {bcvRate.toFixed(2)}
+                  </span>
+                </div>
+                <div className="flex items-baseline justify-between gap-2">
+                  <span className="text-xl sm:text-2xl font-black font-sans text-emerald-700 dark:text-emerald-400 tracking-tight tabular-numbers break-all leading-tight">
+                    {formatVES(totalVES)}
+                  </span>
+                  <span className="text-sm sm:text-base font-black font-mono text-slate-900 dark:text-white shrink-0">
+                    {formatUSD(totalUSD)}
+                  </span>
                 </div>
               </div>
-            )}
+
+              {/* Botón Principal COBRAR (F12) */}
+              <button
+                onClick={openPaymentModal}
+                disabled={cart.length === 0}
+                className="w-full py-3.5 bg-[var(--brand-primary)] hover:bg-[var(--brand-hover)] active:scale-[0.99] text-white font-black text-sm rounded-xl uppercase tracking-wider shadow-md transition-all disabled:bg-slate-300 disabled:text-slate-600 disabled:cursor-not-allowed dark:disabled:bg-slate-800 dark:disabled:text-slate-400 dark:disabled:border dark:disabled:border-slate-700 disabled:opacity-100 cursor-pointer flex items-center justify-center gap-2 mt-2"
+              >
+                <span>COBRAR VENTA</span>
+                <span className="text-xs text-emerald-200 font-mono font-bold">F12</span>
+              </button>
+            </div>
           </div>
         )}
 
-        {/* ========================================================================= */}
-        {/* TECLADO NUMÉRICO TÁCTIL INDUSTRIAL                                       */}
-        {/* ========================================================================= */}
-        <div className="pos-numpad-container bg-white rounded-xl border border-slate-300 shadow-xs p-2 space-y-1.5 shrink-0">
-          {/* Display & Selector de Modo */}
-          <div className="flex items-center justify-between gap-1.5">
-            <div className="flex bg-slate-100 p-0.5 rounded-lg border border-slate-200 text-xs font-semibold shrink-0">
-              <button
-                onClick={() => setNumpadMode('qty')}
-                className={`px-2 py-0.5 text-[11px] rounded-md transition-colors ${
-                  numpadMode === 'qty'
-                    ? 'bg-white text-slate-900 shadow-xs font-bold'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                Cantidad
-              </button>
-              <button
-                onClick={() => setNumpadMode('barcode')}
-                className={`px-2 py-0.5 text-[11px] rounded-md transition-colors ${
-                  numpadMode === 'barcode'
-                    ? 'bg-white text-slate-900 shadow-xs font-bold'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                Código
-              </button>
+        {/* ---- TAB: VENTAS DEL TURNO ---- */}
+        {rightPanelTab === 'shift' && (
+          <div className="flex-1 bg-white rounded-2xl border border-slate-200/90 shadow-2xs flex flex-col overflow-hidden">
+            <div className="p-3 border-b border-slate-100 bg-[var(--brand-primary)] text-white flex items-center justify-between">
+              <div>
+                <span className="text-xs font-black uppercase tracking-wide">Ventas del Turno</span>
+                <p className="text-[10px] text-emerald-100">{shiftSales.length} ventas · Esta sesión</p>
+              </div>
             </div>
+            {/* Lista de ventas de turno */}
+            <div className="flex-1 overflow-y-auto divide-y divide-slate-100 text-xs">
+              {shiftSales.map((sale, idx) => (
+                <div key={sale.receiptNumber || idx} className="p-2.5 flex items-center justify-between">
+                  <div>
+                    <span className="font-bold text-slate-800 font-mono">{sale.receiptNumber}</span>
+                    <span className="text-[10px] text-slate-400 block">{sale.timestamp?.slice(11, 19)}</span>
+                  </div>
+                  <div className="text-right font-mono font-bold">
+                    <span className="text-slate-900">${sale.totalUSD.toFixed(2)}</span>
+                    <span className="text-[10px] text-slate-500 block">Bs. {sale.totalVES.toFixed(2)}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
-            {/* Display del valor tecleado y contexto de acción */}
-            <div className="h-8 px-2 bg-slate-100 text-slate-900 border border-slate-300 font-mono font-bold text-base rounded-lg flex items-center justify-between flex-1 min-w-0 tabular-numbers">
-              <span className="text-[9px] font-sans font-bold uppercase tracking-wider text-slate-500 truncate max-w-[100px]">
-                {pendingQuantity
-                  ? `⚡ Próx: ×${pendingQuantity}`
-                  : numpadMode === 'qty'
-                  ? selectedCartItemId
-                    ? `Item: ${cart.find((i) => i.productId === selectedCartItemId)?.name || 'Seleccionado'}`
-                    : cart.length > 0
-                    ? `Último: ${cart[cart.length - 1].name}`
-                    : 'Próximo Producto'
-                  : 'Buscar Código'}
-              </span>
-              <span className="text-sky-700 font-black">
-                {numpadValue || '0'}
-              </span>
+        {/* TECLADO NUMÉRICO TÁCTIL INDUSTRIAL */}
+        <div className="bg-white dark:bg-slate-800/70 rounded-2xl border-2 dark:border dark:border-slate-700 shadow-sm p-3 space-y-2 shrink-0" style={{ borderColor: 'color-mix(in srgb, var(--brand-primary) 30%, transparent)' }}>
+          {/* Top row: Cantidad | Código | Input */}
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setNumpadMode('qty')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
+                numpadMode === 'qty'
+                  ? 'bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-white'
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+              }`}
+            >
+              Cantidad
+            </button>
+            <button
+              type="button"
+              onClick={() => setNumpadMode('barcode')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
+                numpadMode === 'barcode'
+                  ? 'bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-white'
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+              }`}
+            >
+              Código
+            </button>
+            <div className="flex-1 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 text-xs text-slate-500 dark:text-slate-300 font-bold truncate uppercase">
+              {numpadValue ? (
+                <span className="text-[var(--brand-primary)] dark:text-emerald-400 font-bold font-mono text-sm">{numpadValue}</span>
+              ) : (
+                'PRÓXIMO PRODUC...'
+              )}
             </div>
           </div>
 
-          {/* Botonera 4x3 con respuesta táctil */}
-          <div className="grid grid-cols-4 gap-1">
-            {['7', '8', '9'].map((k) => (
-              <button
-                key={k}
-                onClick={() => handleNumpadKey(k)}
-                className="pos-numpad-key"
-              >
-                {k}
-              </button>
-            ))}
-            <button
-              onClick={() => handleNumpadKey('BACK')}
-              className="pos-numpad-action text-rose-600 font-bold"
-              title="Borrar dígito"
-            >
-              ⌫
+          {/* Grid de teclas */}
+          <div className="grid grid-cols-4 gap-1.5">
+            {/* Fila 1: 7, 8, 9, Backspace */}
+            <button type="button" onClick={() => handleNumpadKey('7')} className="h-10 rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white font-bold text-base transition-colors active:scale-95 shadow-2xs cursor-pointer">7</button>
+            <button type="button" onClick={() => handleNumpadKey('8')} className="h-10 rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white font-bold text-base transition-colors active:scale-95 shadow-2xs cursor-pointer">8</button>
+            <button type="button" onClick={() => handleNumpadKey('9')} className="h-10 rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white font-bold text-base transition-colors active:scale-95 shadow-2xs cursor-pointer">9</button>
+            <button type="button" onClick={() => handleNumpadKey('BACK')} className="h-10 rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-bold text-base transition-colors active:scale-95 shadow-2xs flex items-center justify-center cursor-pointer" title="Borrar">
+              <svg className="w-5 h-5 text-slate-600 dark:text-slate-300" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M3 12l6-7h12a2 2 0 012 2v10a2 2 0 01-2 2H9l-6-7z" />
+              </svg>
             </button>
 
-            {['4', '5', '6'].map((k) => (
-              <button
-                key={k}
-                onClick={() => handleNumpadKey(k)}
-                className="pos-numpad-key"
-              >
-                {k}
-              </button>
-            ))}
-            <button
-              onClick={() => handleNumpadKey('C')}
-              className="pos-numpad-action text-slate-600"
-              title="Limpiar"
-            >
-              C
-            </button>
+            {/* Fila 2: 4, 5, 6, C */}
+            <button type="button" onClick={() => handleNumpadKey('4')} className="h-10 rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white font-bold text-base transition-colors active:scale-95 shadow-2xs cursor-pointer">4</button>
+            <button type="button" onClick={() => handleNumpadKey('5')} className="h-10 rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white font-bold text-base transition-colors active:scale-95 shadow-2xs cursor-pointer">5</button>
+            <button type="button" onClick={() => handleNumpadKey('6')} className="h-10 rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white font-bold text-base transition-colors active:scale-95 shadow-2xs cursor-pointer">6</button>
+            <button type="button" onClick={() => handleNumpadKey('C')} className="h-10 rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-bold text-base transition-colors active:scale-95 shadow-2xs cursor-pointer" title="Limpiar">C</button>
 
-            {['1', '2', '3'].map((k) => (
-              <button
-                key={k}
-                onClick={() => handleNumpadKey(k)}
-                className="pos-numpad-key"
-              >
-                {k}
-              </button>
-            ))}
+            {/* Fila 3: 1, 2, 3, Enter */}
+            <button type="button" onClick={() => handleNumpadKey('1')} className="h-10 rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white font-bold text-base transition-colors active:scale-95 shadow-2xs cursor-pointer">1</button>
+            <button type="button" onClick={() => handleNumpadKey('2')} className="h-10 rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white font-bold text-base transition-colors active:scale-95 shadow-2xs cursor-pointer">2</button>
+            <button type="button" onClick={() => handleNumpadKey('3')} className="h-10 rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white font-bold text-base transition-colors active:scale-95 shadow-2xs cursor-pointer">3</button>
             <button
+              type="button"
               onClick={handleNumpadApply}
-              className="pos-numpad-enter pos-numpad-action row-span-2 bg-sky-700 hover:bg-sky-800 text-white font-bold border-sky-800 flex flex-col items-center justify-center text-xs"
+              className="row-span-2 rounded-xl bg-[var(--brand-primary)] hover:bg-[var(--brand-hover)] text-white font-bold text-xs flex flex-col items-center justify-center leading-tight transition-colors active:scale-95 shadow-2xs cursor-pointer p-1"
             >
-              <span>Enter</span>
-              <span className="text-[10px] text-sky-200">Aplicar</span>
+              <span className="font-bold text-sm">Enter</span>
+              <span className="text-[10px] text-emerald-200 font-normal">Aplicar</span>
             </button>
 
-            <button
-              onClick={() => handleNumpadKey('0')}
-              className="pos-numpad-key col-span-2"
-            >
-              0
-            </button>
-            <button
-              onClick={() => handleNumpadKey('.')}
-              className="pos-numpad-key"
-            >
-              .
-            </button>
+            {/* Fila 4: 0 (span 2), . */}
+            <button type="button" onClick={() => handleNumpadKey('0')} className="col-span-2 h-10 rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white font-bold text-base transition-colors active:scale-95 shadow-2xs cursor-pointer">0</button>
+            <button type="button" onClick={() => handleNumpadKey('.')} className="h-10 rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white font-bold text-base transition-colors active:scale-95 shadow-2xs cursor-pointer">.</button>
           </div>
         </div>
       </div>
@@ -1743,41 +1907,83 @@ export default function DesktopPosPage() {
       {/* MODAL DE LIQUIDACIÓN Y COBRO MULTIMONEDA (USD / BS)                       */}
       {/* ========================================================================= */}
       {showPaymentModal && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-2xs z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl border border-slate-300 w-full max-w-lg max-h-[92vh] overflow-hidden flex flex-col">
+        <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-6 animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 w-full max-w-4xl max-h-[94vh] overflow-hidden flex flex-col transition-all duration-200">
             {/* Header del Modal */}
-            <div className="p-3.5 bg-slate-50 border-b border-slate-200 text-slate-900 flex items-center justify-between shrink-0">
-              <div>
-                <h3 className="font-black text-base uppercase tracking-wide text-slate-900">
-                  Cobrar Venta
-                </h3>
-                <p className="text-xs text-slate-500 font-medium">
-                  Tasa Oficial BCV: Bs. {bcvRate.toFixed(2)}
-                </p>
+            <div className="px-5 sm:px-6 py-3.5 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white flex flex-wrap items-center justify-between gap-3 shrink-0 border-b border-slate-700/80 shadow-md">
+              <div className="flex items-center gap-3">
+                <div className="w-11 h-11 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-2xl shadow-inner shrink-0">
+                  💳
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-black text-lg sm:text-xl tracking-tight text-white uppercase">
+                      Cobrar Venta
+                    </h3>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                      POS Express
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5 mt-1">
+                    <span className="text-[11px] text-slate-400 font-medium">Tasa Oficial BCV:</span>
+                    <span className="font-bold text-xs text-sky-300 font-mono bg-slate-800 px-2 py-0.5 rounded-md border border-slate-700">
+                      Bs. {bcvRate.toFixed(2)} / USD
+                    </span>
+                  </div>
+                </div>
               </div>
-              <div className="text-right leading-tight">
-                <span className="text-xl font-black font-mono text-emerald-700 block tabular-numbers">
-                  {formatUSD(totalUSD)}
-                </span>
-                <span className="text-xs font-mono text-slate-600 block mt-0.5 tabular-numbers">
-                  {formatVES(totalVES)}
-                </span>
+
+              {/* Total Destacado */}
+              <div className="flex items-center gap-3 ml-auto">
+                <div className="text-right leading-tight bg-slate-800/95 px-4 py-2 rounded-2xl border border-slate-700 shadow-inner min-w-[170px]">
+                  <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider mb-0.5">
+                    Total a Cobrar
+                  </span>
+                  <span className="text-2xl sm:text-3xl font-black font-mono text-emerald-400 block tabular-numbers tracking-tight leading-none">
+                    {formatUSD(totalUSD)}
+                  </span>
+                  <span className="text-xs sm:text-sm font-mono font-bold text-amber-300 block mt-1.5 tabular-numbers border-t border-slate-700/70 pt-1">
+                    {formatVES(totalVES)}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowPaymentModal(false)}
+                  className="w-10 h-10 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center font-bold text-lg transition-colors border border-slate-700 cursor-pointer"
+                  title="Cerrar (Esc)"
+                >
+                  ✕
+                </button>
               </div>
             </div>
 
-            <div className="p-4 space-y-3.5 flex-1 min-h-0 overflow-y-auto">
-              {/* Métodos de Pago */}
+            <div className="p-5 sm:p-6 space-y-4 flex-1 min-h-0 overflow-y-auto">
+              {/* Selector de Métodos de Pago en Tarjetas Fluidas */}
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
-                  Método de Pago:
-                </label>
-                <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                    <span>Selecciona la Forma de Pago:</span>
+                  </label>
+                  <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400 font-medium hidden sm:inline-block">
+                    {selectedPaymentMethod === 'cash_usd' && '💵 Efectivo en Dólares ($)'}
+                    {selectedPaymentMethod === 'cash_ves' && '🇻🇪 Efectivo en Bolívares (Bs.)'}
+                    {selectedPaymentMethod === 'pago_movil' && '📲 Pago Móvil Interbancario'}
+                    {selectedPaymentMethod === 'card_debit' && '💳 Tarjeta de Débito / Punto de Venta'}
+                    {selectedPaymentMethod === 'binance' && '🟡 Binance Pay USDT (1:1)'}
+                    {selectedPaymentMethod === 'mixed' && '🔄 Pago Mixto / Combinado'}
+                    {selectedPaymentMethod === 'credit' && '🤝 Venta a Crédito / Fiado'}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2.5">
                   {[
-                    { id: 'cash_usd', label: 'Efectivo $' },
-                    { id: 'cash_ves', label: 'Efectivo Bs' },
-                    { id: 'pago_movil', label: 'Pago Móvil' },
-                    { id: 'card_debit', label: 'Punto Débito' },
-                    { id: 'credit', label: 'A Crédito / Fiado' },
+                    { id: 'cash_usd', icon: '💵', label: 'Efectivo $', sub: 'Dólares' },
+                    { id: 'cash_ves', icon: '🇻🇪', label: 'Efectivo Bs', sub: 'Bolívares' },
+                    { id: 'pago_movil', icon: '📲', label: 'Pago Móvil', sub: 'Inmediato' },
+                    { id: 'card_debit', icon: '💳', label: 'Punto Débito', sub: 'Voucher' },
+                    { id: 'binance', icon: '🟡', label: 'Binance', sub: 'USDT Pay' },
+                    { id: 'mixed', icon: '🔄', label: 'Pago Mixto', sub: 'Multimoneda' },
+                    { id: 'credit', icon: '🤝', label: 'Fiado', sub: 'A Crédito' },
                   ].map((m) => {
                     const isSelected = selectedPaymentMethod === m.id;
                     return (
@@ -1785,13 +1991,24 @@ export default function DesktopPosPage() {
                         key={m.id}
                         type="button"
                         onClick={() => setSelectedPaymentMethod(m.id as any)}
-                        className={`h-11 rounded-lg border font-bold text-xs transition-colors ${
+                        className={`h-20 rounded-2xl border-2 transition-all flex flex-col items-center justify-center p-2 text-center active:scale-95 cursor-pointer relative overflow-hidden group ${
                           isSelected
-                            ? 'bg-sky-700 text-white border-sky-700 shadow-xs'
-                            : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
+                            ? 'bg-sky-700 text-white border-sky-500 ring-4 ring-sky-500/25 shadow-lg font-black scale-[1.02]'
+                            : 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/60 hover:border-slate-300 shadow-2xs'
                         }`}
                       >
-                        {m.label}
+                        <span className="text-2xl mb-0.5 filter drop-shadow-xs group-hover:scale-110 transition-transform">
+                          {m.icon}
+                        </span>
+                        <span className="text-xs font-black leading-tight block truncate w-full">
+                          {m.label}
+                        </span>
+                        <span className={`text-[10px] font-medium leading-tight block opacity-80 ${isSelected ? 'text-sky-100' : 'text-slate-400'}`}>
+                          {m.sub}
+                        </span>
+                        {isSelected && (
+                          <div className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                        )}
                       </button>
                     );
                   })}
@@ -1800,305 +2017,681 @@ export default function DesktopPosPage() {
 
               {/* Selector de Cliente si es A Crédito (Fiado) */}
               {selectedPaymentMethod === 'credit' && (
-                <div className="bg-amber-50 border border-amber-300 rounded-xl p-3.5 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-black text-amber-900 uppercase tracking-tight flex items-center gap-1.5">
-                      <Users className="w-4 h-4 text-amber-700" />
+                <div className="bg-amber-50/70 dark:bg-amber-950/30 border-2 border-amber-300 dark:border-amber-700/60 rounded-2xl p-5 space-y-4 shadow-sm animate-in fade-in duration-200">
+                  <div className="flex items-center justify-between pb-2 border-b border-amber-200 dark:border-amber-800/40">
+                    <span className="text-sm font-black text-amber-900 dark:text-amber-200 uppercase tracking-tight flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-700 dark:text-amber-300">
+                        <Users className="w-5 h-5" />
+                      </div>
                       <span>Seleccionar Cliente para Venta a Crédito (Fiado)</span>
                     </span>
-                    <span className="text-[10px] font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded">
-                      Crédito Comercial
+                    <span className="text-xs font-black text-amber-800 dark:text-amber-300 bg-amber-200/60 dark:bg-amber-900/50 px-3 py-1 rounded-full border border-amber-300 dark:border-amber-700">
+                      Cuenta Corriente / Crédito
                     </span>
                   </div>
 
-                  <select
-                    value={selectedCreditCustomer?.id || ''}
-                    onChange={(e) => {
-                      const cid = Number(e.target.value);
-                      const c = customersList.find((item) => item.id === cid) || null;
-                      setSelectedCreditCustomer(c);
-                    }}
-                    className="w-full px-3 py-2 bg-white border border-amber-300 rounded-lg text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500"
-                  >
-                    <option value="">-- Selecciona un cliente registrado --</option>
-                    {customersList.map((cust) => (
-                      <option key={cust.id} value={cust.id}>
-                        {cust.name} ({cust.docId}) - Deuda: ${cust.currentDebtUSD || 0} / Límite: ${cust.creditLimitUSD || 100}
-                      </option>
-                    ))}
-                  </select>
+                  <div>
+                    <label className="block text-xs font-bold text-amber-900 dark:text-amber-300 mb-1.5">
+                      Buscar y seleccionar cliente registrado:
+                    </label>
+                    <select
+                      value={selectedCreditCustomer?.id || ''}
+                      onChange={(e) => {
+                        const cid = Number(e.target.value);
+                        const c = customersList.find((item) => item.id === cid) || null;
+                        setSelectedCreditCustomer(c);
+                      }}
+                      className="w-full h-12 px-4 bg-white dark:bg-slate-900 border-2 border-amber-300 dark:border-amber-700 rounded-xl text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-4 focus:ring-amber-500/20 shadow-xs cursor-pointer"
+                    >
+                      <option value="">-- Haz clic aquí para seleccionar el cliente --</option>
+                      {customersList.map((cust) => (
+                        <option key={cust.id} value={cust.id}>
+                          {cust.name} ({cust.docId}) — Deuda Actual: ${cust.currentDebtUSD || 0} / Límite: ${cust.creditLimitUSD || 100}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
 
-                  {selectedCreditCustomer && (
-                    <div className="p-2.5 bg-white rounded-lg border border-amber-200 text-xs space-y-1">
-                      <div className="flex justify-between font-medium text-slate-700">
-                        <span>Cliente:</span>
-                        <strong className="text-slate-900">{selectedCreditCustomer.name}</strong>
+                  {selectedCreditCustomer ? (
+                    <div className="p-4 bg-white dark:bg-slate-900/90 rounded-2xl border border-amber-200 dark:border-amber-800/60 shadow-xs space-y-3">
+                      <div className="flex flex-wrap items-center justify-between gap-2 pb-2.5 border-b border-slate-100 dark:border-slate-800">
+                        <div>
+                          <span className="text-[11px] uppercase font-bold text-slate-400 block">Titular del Crédito</span>
+                          <strong className="text-base text-slate-900 dark:text-white font-black">{selectedCreditCustomer.name}</strong>
+                        </div>
+                        <div className="text-right">
+                          <span className="text-[11px] uppercase font-bold text-slate-400 block">Documento / Cédula</span>
+                          <span className="font-mono font-black text-sm text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2.5 py-0.5 rounded-lg border border-slate-200 dark:border-slate-700">
+                            {selectedCreditCustomer.docId}
+                          </span>
+                        </div>
                       </div>
-                      <div className="flex justify-between text-slate-600">
-                        <span>Cédula / RIF:</span>
-                        <span className="font-mono font-bold">{selectedCreditCustomer.docId}</span>
-                      </div>
-                      <div className="flex justify-between text-slate-600">
-                        <span>Deuda Acumulada Actual:</span>
-                        <span className="font-mono font-bold text-rose-600">${(selectedCreditCustomer.currentDebtUSD || 0).toFixed(2)}</span>
-                      </div>
-                      <div className="flex justify-between text-slate-600">
-                        <span>Límite de Crédito Autorizado:</span>
-                        <span className="font-mono font-bold text-slate-800">${(selectedCreditCustomer.creditLimitUSD || 100).toFixed(2)}</span>
-                      </div>
-                      <div className="flex justify-between pt-1 border-t border-amber-100 font-bold">
-                        <span>Crédito Disponible:</span>
-                        <span className={`font-mono ${
-                          Math.max(0, (selectedCreditCustomer.creditLimitUSD || 100) - (selectedCreditCustomer.currentDebtUSD || 0)) >= totalUSD
-                            ? 'text-emerald-700'
-                            : 'text-rose-600'
-                        }`}>
-                          ${Math.max(0, (selectedCreditCustomer.creditLimitUSD || 100) - (selectedCreditCustomer.currentDebtUSD || 0)).toFixed(2)}
-                        </span>
+
+                      {/* Tarjetas KPI de Estado Financiero del Cliente */}
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700 text-center">
+                          <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase block">Deuda Acumulada</span>
+                          <span className="text-lg font-black font-mono text-rose-600 dark:text-rose-400 block mt-0.5">
+                            ${(selectedCreditCustomer.currentDebtUSD || 0).toFixed(2)}
+                          </span>
+                        </div>
+
+                        <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700 text-center">
+                          <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase block">Límite Aprobado</span>
+                          <span className="text-lg font-black font-mono text-slate-800 dark:text-slate-200 block mt-0.5">
+                            ${(selectedCreditCustomer.creditLimitUSD || 100).toFixed(2)}
+                          </span>
+                        </div>
+
+                        {(() => {
+                          const available = Math.max(0, (selectedCreditCustomer.creditLimitUSD || 100) - (selectedCreditCustomer.currentDebtUSD || 0));
+                          const canCover = available >= totalUSD;
+                          return (
+                            <div className={`p-3 rounded-xl border text-center ${
+                              canCover
+                                ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-700 text-emerald-900 dark:text-emerald-200'
+                                : 'bg-rose-50 dark:bg-rose-950/40 border-rose-300 dark:border-rose-700 text-rose-900 dark:text-rose-200'
+                            }`}>
+                              <span className="text-[11px] font-bold uppercase block">Crédito Disponible</span>
+                              <span className="text-lg font-black font-mono block mt-0.5">
+                                ${available.toFixed(2)}
+                              </span>
+                            </div>
+                          );
+                        })()}
                       </div>
 
                       {totalUSD > Math.max(0, (selectedCreditCustomer.creditLimitUSD || 100) - (selectedCreditCustomer.currentDebtUSD || 0)) && (
-                        <p className="text-[11px] font-bold text-rose-600 pt-1 flex items-center gap-1">
-                          <AlertTriangle className="w-3.5 h-3.5" />
-                          <span>¡Advertencia! El total supera el límite de crédito disponible del cliente.</span>
-                        </p>
+                        <div className="p-3 bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-800 rounded-xl flex items-center gap-2 text-rose-700 dark:text-rose-300 text-xs font-bold">
+                          <AlertTriangle className="w-5 h-5 shrink-0 text-rose-600" />
+                          <span>¡Atención! El monto total de la venta (${totalUSD.toFixed(2)}) supera el cupo de crédito disponible del cliente (${Math.max(0, (selectedCreditCustomer.creditLimitUSD || 100) - (selectedCreditCustomer.currentDebtUSD || 0)).toFixed(2)}).</span>
+                        </div>
                       )}
+                    </div>
+                  ) : (
+                    <div className="p-4 bg-amber-100/50 dark:bg-amber-900/20 border border-dashed border-amber-300 dark:border-amber-700/60 rounded-xl text-center">
+                      <p className="text-xs text-amber-800 dark:text-amber-300 font-semibold">
+                        Selecciona un cliente del menú desplegable para verificar su disponibilidad de crédito y cargar la cuenta.
+                      </p>
                     </div>
                   )}
 
                   {customersList.length === 0 && (
-                    <p className="text-xs text-amber-800 font-medium">
-                      No hay clientes registrados aún. Puedes registrarlos en el menú Clientes (F4).
+                    <p className="text-xs text-amber-800 dark:text-amber-300 font-medium bg-amber-100/60 dark:bg-amber-900/30 p-3 rounded-xl border border-amber-300">
+                      No hay clientes registrados en el sistema. Puedes agregarlos desde el menú Clientes (F4).
                     </p>
                   )}
                 </div>
               )}
 
-              {/* Billetes Rápidos en USD */}
-              {selectedPaymentMethod === 'cash_usd' && (
-                <div className="space-y-1.5">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                    Billetes Rápidos ($):
-                  </span>
-                  <div className="grid grid-cols-6 gap-1.5">
-                    <button
-                      type="button"
-                      onClick={() => setCashGivenUSD(totalUSD.toFixed(2))}
-                      className="py-1.5 rounded border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-900 font-bold text-xs"
-                    >
-                      Exacto
-                    </button>
-                    {['5', '10', '20', '50', '100'].map((bill) => (
-                      <button
-                        key={bill}
-                        type="button"
-                        onClick={() => setCashGivenUSD(bill)}
-                        className="py-1.5 rounded border border-slate-300 bg-slate-50 hover:bg-slate-100 font-mono font-bold text-xs text-slate-800"
-                      >
-                        ${bill}
-                      </button>
-                    ))}
+              {/* SECCIÓN PAGO MIXTO / MULTIMONEDA */}
+              {selectedPaymentMethod === 'mixed' && (
+                <div className="bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 space-y-4 animate-in fade-in duration-200">
+                  {/* Resumen de Montos en Pago Mixto */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-center">
+                    <div className="p-3.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-xs">
+                      <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Total Cuenta</span>
+                      <span className="text-xl font-black font-mono text-slate-900 dark:text-white block mt-0.5">${totalUSD.toFixed(2)}</span>
+                      <span className="text-xs font-mono font-bold text-slate-500 dark:text-slate-400 block mt-0.5">Bs. {totalVES.toFixed(2)}</span>
+                    </div>
+
+                    <div className="p-3.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-xs">
+                      <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Abonado</span>
+                      <span className="text-xl font-black font-mono text-emerald-600 dark:text-emerald-400 block mt-0.5">${mixedPaidUSD.toFixed(2)}</span>
+                      <span className="text-xs font-mono font-bold text-emerald-600/80 dark:text-emerald-400/80 block mt-0.5">Bs. {mixedPaidVES.toFixed(2)}</span>
+                    </div>
+
+                    <div className={`p-3.5 rounded-2xl border-2 transition-all ${
+                      isMixedComplete
+                        ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-400 text-emerald-900 dark:text-emerald-200 shadow-sm'
+                        : 'bg-rose-50 dark:bg-rose-950/40 border-rose-400 text-rose-900 dark:text-rose-200 shadow-sm'
+                    }`}>
+                      <span className="text-[10px] uppercase font-bold block tracking-wider">
+                        {isMixedComplete ? 'Vuelto / Cambio' : 'Falta por Cobrar'}
+                      </span>
+                      <span className="text-xl font-black font-mono block mt-0.5">
+                        {isMixedComplete ? `$${mixedChangeUSD.toFixed(2)}` : `$${mixedPendingUSD.toFixed(2)}`}
+                      </span>
+                      <span className="text-xs font-mono font-bold block mt-0.5 opacity-90">
+                        {isMixedComplete ? `Bs. ${mixedChangeVES.toFixed(2)}` : `Bs. ${mixedPendingVES.toFixed(2)}`}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Formulario para Agregar Nuevo Abono */}
+                  <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 space-y-3 shadow-xs">
+                    <span className="text-xs font-black uppercase text-slate-700 dark:text-slate-300 tracking-wider block">
+                      + Agregar Método y Monto de Abono:
+                    </span>
+
+                    <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                      {[
+                        { id: 'cash_usd', label: 'Efectivo $', cur: 'USD', icon: '💵' },
+                        { id: 'cash_ves', label: 'Efectivo Bs', cur: 'VES', icon: '🇻🇪' },
+                        { id: 'pago_movil', label: 'Pago Móvil', cur: 'VES', icon: '📲' },
+                        { id: 'card_debit', label: 'Punto Débito', cur: 'VES', icon: '💳' },
+                        { id: 'binance', label: 'Binance USDT', cur: 'USD', icon: '🟡' },
+                        { id: 'zelle', label: 'Zelle $', cur: 'USD', icon: '⚡' },
+                      ].map((item) => (
+                        <button
+                          key={item.id}
+                          type="button"
+                          onClick={() => {
+                            setMixedMethod(item.id as any);
+                            setMixedCurrency(item.cur as any);
+                            if (item.cur === 'USD') {
+                              setMixedAmount(mixedPendingUSD > 0 ? mixedPendingUSD.toFixed(2) : '');
+                            } else {
+                              setMixedAmount(mixedPendingVES > 0 ? mixedPendingVES.toFixed(2) : '');
+                            }
+                          }}
+                          className={`py-2 px-2 rounded-xl text-xs font-bold border-2 transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                            mixedMethod === item.id
+                              ? 'bg-sky-700 text-white border-sky-500 shadow-sm font-black'
+                              : 'bg-slate-50 dark:bg-slate-700 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-600 hover:bg-slate-100'
+                          }`}
+                        >
+                          <span>{item.icon}</span>
+                          <span>{item.label}</span>
+                        </button>
+                      ))}
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center">
+                      <div className="sm:col-span-5 relative">
+                        <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-black text-slate-400">
+                          {mixedCurrency === 'USD' ? '$' : 'Bs.'}
+                        </span>
+                        <input
+                          type="number"
+                          step="0.01"
+                          placeholder="Monto a abonar"
+                          value={mixedAmount}
+                          onChange={(e) => setMixedAmount(e.target.value)}
+                          className="w-full h-11 pl-9 pr-3 bg-slate-50 dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-600 rounded-xl text-base font-mono font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-sky-500"
+                        />
+                      </div>
+
+                      <div className="sm:col-span-4">
+                        <input
+                          type="text"
+                          maxLength={12}
+                          placeholder={
+                            mixedMethod === 'cash_usd' || mixedMethod === 'cash_ves'
+                              ? 'Sin ref. (Efectivo)'
+                              : 'Últimos 4 dígitos Ref.'
+                          }
+                          disabled={mixedMethod === 'cash_usd' || mixedMethod === 'cash_ves'}
+                          value={mixedRef}
+                          onChange={(e) => setMixedRef(e.target.value)}
+                          className="w-full h-11 px-3 bg-slate-50 dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-600 rounded-xl text-xs font-mono text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-sky-500 disabled:opacity-40"
+                        />
+                      </div>
+
+                      <div className="sm:col-span-3">
+                        <button
+                          type="button"
+                          onClick={handleAddMixedPayment}
+                          className="w-full h-11 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs uppercase tracking-wider rounded-xl shadow-md flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-95"
+                        >
+                          <span>+ Agregar Abono</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Pre-cálculo equivalente */}
+                    {parseFloat(mixedAmount) > 0 && (
+                      <div className="text-xs text-slate-500 dark:text-slate-400 flex justify-between px-1">
+                        <span>Equivalente en tasa oficial:</span>
+                        <span className="font-mono font-bold text-slate-800 dark:text-slate-200">
+                          {mixedCurrency === 'USD'
+                            ? `Bs. ${(parseFloat(mixedAmount) * bcvRate).toFixed(2)}`
+                            : `$${bcvRate > 0 ? (parseFloat(mixedAmount) / bcvRate).toFixed(2) : 0}`}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Lista de Abonos Registrados */}
+                  <div>
+                    <span className="text-xs uppercase font-bold text-slate-400 block mb-2">
+                      Abonos Registrados ({mixedPayments.length}):
+                    </span>
+                    {mixedPayments.length === 0 ? (
+                      <p className="text-xs text-slate-400 italic p-4 text-center bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700">
+                        Aún no has agregado abonos. Selecciona el método arriba, escribe el monto y presiona "+ Agregar Abono".
+                      </p>
+                    ) : (
+                      <div className="space-y-2 max-h-48 overflow-y-auto">
+                        {mixedPayments.map((p, idx) => (
+                          <div
+                            key={p.id}
+                            className="p-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl flex items-center justify-between shadow-2xs text-xs"
+                          >
+                            <div className="flex items-center gap-2.5">
+                              <span className="w-6 h-6 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold flex items-center justify-center text-xs">
+                                {idx + 1}
+                              </span>
+                              <div>
+                                <span className="font-bold text-slate-900 dark:text-white block text-sm">
+                                  {p.method === 'cash_usd' ? '💵 Efectivo $' :
+                                   p.method === 'cash_ves' ? '🇻🇪 Efectivo Bs' :
+                                   p.method === 'pago_movil' ? '📲 Pago Móvil' :
+                                   p.method === 'card_debit' ? '💳 Punto Débito' :
+                                   p.method === 'binance' ? '🟡 Binance USDT' :
+                                   p.method === 'zelle' ? '⚡ Zelle' : p.method}
+                                </span>
+                                {p.reference && (
+                                  <span className="text-[11px] font-mono text-slate-400">
+                                    Ref: {p.reference}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-3">
+                              <div className="text-right font-mono">
+                                <span className="font-black text-slate-900 dark:text-white block text-sm">${p.amountUSD.toFixed(2)}</span>
+                                <span className="text-xs text-amber-600 dark:text-amber-400 block">Bs. {p.amountVES.toFixed(2)}</span>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveMixedPayment(p.id)}
+                                className="w-8 h-8 rounded-lg text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 flex items-center justify-center font-bold text-base cursor-pointer transition-colors"
+                                title="Eliminar abono"
+                              >
+                                ✕
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
 
-              {/* Billetes Rápidos en Bolívares */}
-              {selectedPaymentMethod === 'cash_ves' && (
-                <div className="space-y-1.5">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                    Monto Rápido en Bolívares (Bs):
-                  </span>
-                  <div className="grid grid-cols-6 gap-1.5">
-                    <button
-                      type="button"
-                      onClick={() => setCashGivenVES(totalVES.toFixed(2))}
-                      className="py-1.5 rounded border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-900 font-bold text-xs"
-                    >
-                      Exacto
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setCashGivenVES(String(Math.ceil(totalVES)))}
-                      className="py-1.5 rounded border border-sky-300 bg-sky-50 hover:bg-sky-100 text-sky-900 font-bold text-xs"
-                      title="Redondear al entero superior"
-                    >
-                      Redondo
-                    </button>
-                    {['500', '1000', '2000', '5000'].map((amt) => (
-                      <button
-                        key={amt}
-                        type="button"
-                        onClick={() => setCashGivenVES(amt)}
-                        className="py-1.5 rounded border border-slate-300 bg-slate-50 hover:bg-slate-100 font-mono font-bold text-xs text-slate-800"
-                      >
-                        {amt}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Resumen del Monto a Cobrar */}
-              <div className="p-3.5 bg-slate-900/90 dark:bg-slate-950 text-white rounded-xl border border-slate-700 flex items-center justify-between shadow-inner">
-                <div>
-                  <span className="text-[10px] uppercase font-bold text-sky-400 tracking-wider block">
-                    TOTAL A COBRAR
-                  </span>
-                  <span className="text-xs text-slate-300 font-medium">
-                    (Tasa BCV: {formatVES(bcvRate)})
-                  </span>
-                </div>
-                <div className="text-right">
-                  {primaryCurrency === 'VES' ? (
-                    <>
-                      <span className="text-2xl font-black font-mono text-emerald-400 block tabular-numbers">
-                        {formatVES(totalVES)}
-                      </span>
-                      <span className="text-xs font-mono font-bold text-slate-300 block tabular-numbers">
-                        {formatUSD(totalUSD)} USD
-                      </span>
-                    </>
-                  ) : (
-                    <>
-                      <span className="text-2xl font-black font-mono text-emerald-400 block tabular-numbers">
-                        {formatUSD(totalUSD)}
-                      </span>
-                      <span className="text-xs font-mono font-bold text-slate-300 block tabular-numbers">
-                        {formatVES(totalVES)}
-                      </span>
-                    </>
-                  )}
-                </div>
-              </div>
-
-              {/* Campo de Monto Entregado por el Cliente con Conversor en Vivo */}
-              <div className="bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl p-3.5 space-y-3">
-                <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <label className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-tight block">
-                      {isVESPayment ? 'Monto Recibido del Cliente (Bs):' : 'Monto Recibido del Cliente ($):'}
-                    </label>
-                    <span className="text-[11px] text-slate-500 block">
-                      {isVESPayment ? 'Ingresa los Bolívares que entrega el cliente' : 'Ingresa los Dólares que entrega el cliente'}
-                    </span>
-                  </div>
-
-                  {isVESPayment ? (
-                    <div className="relative">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-black text-slate-500">Bs.</span>
-                      <input
-                        type="number"
-                        step="0.01"
-                        value={cashGivenVES}
-                        onChange={(e) => setCashGivenVES(e.target.value)}
-                        className="w-48 pl-10 pr-3 py-2 bg-white dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-600 rounded-xl text-right font-mono font-black text-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 shadow-xs"
-                      />
-                    </div>
-                  ) : (
-                    <div className="relative">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-black text-slate-500">$</span>
-                      <input
-                        type="number"
-                        step="0.01"
-                        value={cashGivenUSD}
-                        onChange={(e) => setCashGivenUSD(e.target.value)}
-                        className="w-40 pl-8 pr-3 py-2 bg-white dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-600 rounded-xl text-right font-mono font-black text-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 shadow-xs"
-                      />
+              {/* SECCIONES DE PAGO ÚNICO (Efectivo / Punto / Pago Móvil / Binance) */}
+              {selectedPaymentMethod !== 'mixed' && selectedPaymentMethod !== 'credit' && (
+                <div className="space-y-4 animate-in fade-in duration-200">
+                  {/* Billetes Rápidos en USD */}
+                  {selectedPaymentMethod === 'cash_usd' && (
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                          Billetes y Montos Rápidos ($):
+                        </span>
+                        <span className="text-[11px] text-slate-400 font-medium">Haz clic para auto-rellenar</span>
+                      </div>
+                      <div className="grid grid-cols-3 sm:grid-cols-7 gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setCashGivenUSD(totalUSD.toFixed(2))}
+                          className="h-11 rounded-xl border-2 border-emerald-400 dark:border-emerald-600 bg-emerald-50 dark:bg-emerald-950/50 hover:bg-emerald-100 text-emerald-900 dark:text-emerald-200 font-black text-xs shadow-2xs active:scale-95 transition-all cursor-pointer"
+                        >
+                          Exacto (${totalUSD.toFixed(2)})
+                        </button>
+                        {['1', '5', '10', '20', '50', '100'].map((bill) => (
+                          <button
+                            key={bill}
+                            type="button"
+                            onClick={() => setCashGivenUSD(bill)}
+                            className="h-11 rounded-xl border-2 border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 font-mono font-black text-sm text-slate-800 dark:text-white shadow-2xs active:scale-95 transition-all cursor-pointer"
+                          >
+                            ${bill}
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   )}
-                </div>
 
-                {/* Conversor en Tiempo Real: Muestra el equivalente en la otra moneda */}
-                <div className="flex items-center justify-between px-3 py-1.5 bg-sky-50 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-800 rounded-lg text-xs">
-                  <span className="text-sky-900 dark:text-sky-300 font-semibold flex items-center gap-1.5">
-                    <span>💱</span>
-                    <span>Equivalente en tiempo real:</span>
-                  </span>
-                  <span className="font-mono font-black text-sky-800 dark:text-sky-200 tabular-numbers">
-                    {isVESPayment ? (
-                      <>≈ {formatUSD(convertedGivenUSD)}</>
-                    ) : (
-                      <>≈ {formatVES(convertedGivenVES)}</>
-                    )}
-                  </span>
-                </div>
+                  {/* Billetes Rápidos en Bolívares */}
+                  {selectedPaymentMethod === 'cash_ves' && (
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                          Montos Rápidos en Bolívares (Bs.):
+                        </span>
+                        <span className="text-[11px] text-slate-400 font-medium">Haz clic para auto-rellenar</span>
+                      </div>
+                      <div className="grid grid-cols-2 sm:grid-cols-6 gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setCashGivenVES(totalVES.toFixed(2))}
+                          className="h-11 rounded-xl border-2 border-emerald-400 dark:border-emerald-600 bg-emerald-50 dark:bg-emerald-950/50 hover:bg-emerald-100 text-emerald-900 dark:text-emerald-200 font-black text-xs shadow-2xs active:scale-95 transition-all cursor-pointer"
+                        >
+                          Exacto (Bs. {totalVES.toFixed(2)})
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setCashGivenVES(String(Math.ceil(totalVES)))}
+                          className="h-11 rounded-xl border-2 border-sky-400 dark:border-sky-600 bg-sky-50 dark:bg-sky-950/50 hover:bg-sky-100 text-sky-900 dark:text-sky-200 font-black text-xs shadow-2xs active:scale-95 transition-all cursor-pointer"
+                          title="Redondear al entero superior"
+                        >
+                          Redondo (Bs. {Math.ceil(totalVES)})
+                        </button>
+                        {['500', '1000', '2000', '5000'].map((amt) => (
+                          <button
+                            key={amt}
+                            type="button"
+                            onClick={() => setCashGivenVES(amt)}
+                            className="h-11 rounded-xl border-2 border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 font-mono font-black text-xs text-slate-800 dark:text-white shadow-2xs active:scale-95 transition-all cursor-pointer"
+                          >
+                            Bs. {amt}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
-                {/* Cuadro de Vuelto / Diferencia de Alto Contraste */}
-                <div
-                  className={`p-3.5 rounded-xl border-2 flex items-center justify-between transition-all ${
-                    isCompletePayment
-                      ? 'bg-emerald-600 dark:bg-emerald-700 border-emerald-400 text-white shadow-lg'
-                      : 'bg-rose-600 dark:bg-rose-700 border-rose-400 text-white shadow-lg'
-                  }`}
-                >
-                  <div>
-                    <span className="text-xs font-black uppercase tracking-wider block text-white drop-shadow-sm">
-                      {isCompletePayment ? 'Vuelto a Entregar al Cliente:' : 'Monto Faltante por Pagar:'}
-                    </span>
-                    <span className="text-[11px] font-bold block text-white/90">
-                      {isCompletePayment ? 'Diferencia a favor del cliente' : 'Aún no cubre el total de la cuenta'}
-                    </span>
+                  {/* Panel Principal en 2 Columnas Fluidas: Entrada de Monto a la Izquierda y Vuelto a la Derecha */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
+                    {/* Columna Izquierda: Monto Entregado por el Cliente */}
+                    <div className="bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 space-y-3 flex flex-col justify-between shadow-xs">
+                      <div>
+                        <div className="flex items-center justify-between mb-1.5">
+                          <label className="text-xs font-black text-slate-800 dark:text-white uppercase tracking-wider block">
+                            {isVESPayment ? 'Monto Recibido del Cliente (Bs):' : 'Monto Recibido del Cliente ($):'}
+                          </label>
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
+                            {isVESPayment ? 'VES' : 'USD'}
+                          </span>
+                        </div>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">
+                          {isVESPayment
+                            ? 'Ingresa los bolívares que entrega el cliente en caja'
+                            : 'Ingresa los dólares que entrega el cliente en caja'}
+                        </p>
+
+                        <div className="relative">
+                          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xl font-black text-slate-400 font-mono">
+                            {isVESPayment ? 'Bs.' : '$'}
+                          </span>
+                          {isVESPayment ? (
+                            <input
+                              type="number"
+                              step="0.01"
+                              value={cashGivenVES}
+                              onChange={(e) => setCashGivenVES(e.target.value)}
+                              className="w-full h-16 pl-14 pr-4 bg-white dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-600 rounded-2xl text-right font-mono font-black text-2xl text-slate-900 dark:text-white focus:outline-none focus:ring-4 focus:ring-sky-500/20 focus:border-sky-500 shadow-xs"
+                              placeholder="0.00"
+                              autoFocus
+                            />
+                          ) : (
+                            <input
+                              type="number"
+                              step="0.01"
+                              value={cashGivenUSD}
+                              onChange={(e) => setCashGivenUSD(e.target.value)}
+                              className="w-full h-16 pl-12 pr-4 bg-white dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-600 rounded-2xl text-right font-mono font-black text-2xl text-slate-900 dark:text-white focus:outline-none focus:ring-4 focus:ring-sky-500/20 focus:border-sky-500 shadow-xs"
+                              placeholder="0.00"
+                              autoFocus
+                            />
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Conversor en Tiempo Real */}
+                      <div className="flex items-center justify-between px-3.5 py-2.5 bg-sky-50 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-800 rounded-xl text-xs">
+                        <span className="text-sky-900 dark:text-sky-300 font-bold flex items-center gap-1.5">
+                          <span>💱</span>
+                          <span>Equivalente en tiempo real:</span>
+                        </span>
+                        <span className="font-mono font-black text-sky-800 dark:text-sky-200 text-sm tabular-numbers">
+                          {isVESPayment ? (
+                            <>≈ {formatUSD(convertedGivenUSD)}</>
+                          ) : (
+                            <>≈ {formatVES(convertedGivenVES)}</>
+                          )}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Columna Derecha: Tarjeta de Vuelto o Diferencia */}
+                    <div
+                      className={`p-5 rounded-2xl border-2 flex flex-col justify-between transition-all shadow-md ${
+                        isCompletePayment
+                          ? 'bg-gradient-to-br from-emerald-600 to-emerald-700 border-emerald-400 text-white'
+                          : 'bg-gradient-to-br from-rose-600 to-rose-700 border-rose-400 text-white'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between pb-2 border-b border-white/20">
+                        <span className="text-xs font-black uppercase tracking-wider block text-white drop-shadow-sm">
+                          {isCompletePayment ? '✓ Vuelto / Cambio a Entregar:' : '⚠️ Monto Faltante por Pagar:'}
+                        </span>
+                        <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-white/20 text-white">
+                          {isCompletePayment ? 'Pago Completo' : 'Pendiente'}
+                        </span>
+                      </div>
+
+                      <div className="py-4 text-center">
+                        {isCompletePayment ? (
+                          <>
+                            <span className="text-4xl font-black font-mono text-white block tabular-numbers tracking-tight drop-shadow-md">
+                              {isVESPayment ? formatVES(changeVES) : formatUSD(changeUSD)}
+                            </span>
+                            <span className="text-sm font-bold font-mono text-emerald-100 block tabular-numbers mt-1.5 opacity-90">
+                              ≈ {isVESPayment ? formatUSD(changeUSD) : formatVES(changeVES)}
+                            </span>
+                          </>
+                        ) : (
+                          <>
+                            <span className="text-3xl font-black font-mono text-white block tabular-numbers tracking-tight drop-shadow-md">
+                              Faltan {isVESPayment ? formatVES(pendingVES) : formatUSD(pendingUSD)}
+                            </span>
+                            <span className="text-xs font-bold font-mono text-rose-100 block tabular-numbers mt-1.5 opacity-90">
+                              ≈ {isVESPayment ? formatUSD(pendingUSD) : formatVES(pendingVES)}
+                            </span>
+                          </>
+                        )}
+                      </div>
+
+                      <div className="pt-2 border-t border-white/20 text-center">
+                        <span className="text-xs font-semibold text-white/90">
+                          {isCompletePayment
+                            ? 'Diferencia a favor del cliente lista para entregar'
+                            : 'Ingresa el monto recibido completo para habilitar la confirmación'}
+                        </span>
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="text-right">
-                    {isCompletePayment ? (
-                      <>
-                        <span className="text-2xl font-black font-mono text-white block tabular-numbers leading-none drop-shadow-sm">
-                          {isVESPayment ? formatVES(changeVES) : formatUSD(changeUSD)}
-                        </span>
-                        <span className="text-xs font-bold font-mono text-emerald-100 block tabular-numbers mt-1 drop-shadow-xs">
-                          ≈ {isVESPayment ? formatUSD(changeUSD) : formatVES(changeVES)}
-                        </span>
-                      </>
-                    ) : (
-                      <>
-                        <span className="text-2xl font-black font-mono text-white block tabular-numbers leading-none drop-shadow-sm">
-                          Faltan {isVESPayment ? formatVES(pendingVES) : formatUSD(pendingUSD)}
-                        </span>
-                        <span className="text-xs font-bold font-mono text-rose-100 block tabular-numbers mt-1 drop-shadow-xs">
-                          ≈ {isVESPayment ? formatUSD(pendingUSD) : formatVES(pendingVES)}
-                        </span>
-                      </>
-                    )}
-                  </div>
-                </div>
-              </div>
+                  {/* Campos Opcionales de Referencia */}
+                  {selectedPaymentMethod === 'pago_movil' && (
+                    <div className={`p-4 rounded-2xl border-2 space-y-3 transition-colors ${
+                      pagoMovilAutoStatus === 'confirmed'
+                        ? 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-400 dark:border-emerald-600'
+                        : pagoMovilAutoStatus === 'monitoring'
+                        ? 'bg-blue-50 dark:bg-blue-950/30 border-blue-300 dark:border-blue-700'
+                        : 'bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700'
+                    }`}>
+
+                      {/* ESTADO: Confirmación automática exitosa */}
+                      {pagoMovilAutoStatus === 'confirmed' && pagoMovilAutoConfirmation && (
+                        <div className="flex items-start gap-3">
+                          <span className="text-2xl">✅</span>
+                          <div className="flex-1">
+                            <p className="text-sm font-black text-emerald-800 dark:text-emerald-300">¡Pago Móvil Confirmado Automáticamente!</p>
+                            <p className="text-xs text-emerald-700 dark:text-emerald-400 mt-0.5">
+                              Banco: {pagoMovilAutoConfirmation.bancoOrigen} · Bs. {pagoMovilAutoConfirmation.monto.toFixed(2)}
+                            </p>
+                            {pagoMovilAutoConfirmation.nombrePagador && (
+                              <p className="text-xs text-emerald-600 dark:text-emerald-500">Pagador: {pagoMovilAutoConfirmation.nombrePagador}</p>
+                            )}
+                            <p className="text-xs font-mono font-bold text-emerald-900 dark:text-emerald-200 mt-1">
+                              Ref: {pagoMovilAutoConfirmation.referencia}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* ESTADO: Monitoreando Gmail */}
+                      {pagoMovilAutoStatus === 'monitoring' && (
+                        <div className="flex items-center gap-3">
+                          <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin shrink-0" />
+                          <div>
+                            <p className="text-xs font-bold text-blue-800 dark:text-blue-300">Esperando confirmación por Gmail...</p>
+                            <p className="text-[11px] text-blue-600 dark:text-blue-400">El sistema verificará el email bancario automáticamente (±2% tolerancia)</p>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* ESTADO: Gmail no configurado o error — campo manual */}
+                      {(pagoMovilAutoStatus === 'idle' || pagoMovilAutoStatus === 'error') && (
+                        <>
+                          {!pagoMovilGmailConfigured && (
+                            <div className="flex items-center gap-2 text-[11px] text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 px-3 py-2 rounded-lg border border-amber-200 dark:border-amber-800">
+                              <span>💡</span>
+                              <span>Conecta Gmail en <b>Configuración → Pagos</b> para confirmación automática</span>
+                            </div>
+                          )}
+                          <div>
+                            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                              Comprobante / Referencia de Pago Móvil:
+                            </label>
+                            <input
+                              type="text"
+                              maxLength={20}
+                              placeholder="Ej: 00123456789"
+                              value={pagoMovilRef}
+                              onChange={(e) => setPagoMovilRef(e.target.value)}
+                              className="w-full h-11 px-4 border-2 border-slate-300 dark:border-slate-600 rounded-xl text-sm font-mono text-slate-900 dark:text-white bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                            />
+                          </div>
+                        </>
+                      )}
+
+                      {/* Campo de referencia siempre editable si se confirmó (para corrección) */}
+                      {pagoMovilAutoStatus === 'confirmed' && (
+                        <div>
+                          <label className="block text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 mb-1">
+                            Referencia detectada (editable si es necesario):
+                          </label>
+                          <input
+                            type="text"
+                            value={pagoMovilRef}
+                            onChange={(e) => setPagoMovilRef(e.target.value)}
+                            className="w-full h-9 px-3 border-2 border-emerald-300 dark:border-emerald-700 rounded-xl text-sm font-mono text-emerald-900 dark:text-emerald-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  )}
 
 
-              {/* Campo Opcional de Referencia si es Pago Móvil */}
-              {selectedPaymentMethod === 'pago_movil' && (
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Últimos 4 dígitos de Referencia:
-                  </label>
-                  <input
-                    type="text"
-                    maxLength={8}
-                    placeholder="Ej: 4921"
-                    value={pagoMovilRef}
-                    onChange={(e) => setPagoMovilRef(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-sky-500"
-                  />
+                  {selectedPaymentMethod === 'card_debit' && (
+                    <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-1.5">
+                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                        Últimos 4 dígitos del Voucher del Punto de Venta:
+                      </label>
+                      <input
+                        type="text"
+                        maxLength={8}
+                        placeholder="Ej: 4921"
+                        value={cardDebitRef}
+                        onChange={(e) => setCardDebitRef(e.target.value)}
+                        className="w-full h-11 px-4 border-2 border-slate-300 dark:border-slate-600 rounded-xl text-sm font-mono text-slate-900 dark:text-white bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                      />
+                    </div>
+                  )}
+
+                  {selectedPaymentMethod === 'binance' && (
+                    <div className="bg-amber-50/70 dark:bg-amber-950/40 p-4 rounded-2xl border border-amber-200 dark:border-amber-800/60 space-y-2">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xl">🟡</span>
+                        <div>
+                          <span className="text-xs font-bold text-amber-900 dark:text-amber-200 block">Binance Pay / USDT</span>
+                          <span className="text-[11px] text-amber-700 dark:text-amber-300">Tasa 1:1 con USD ({formatUSD(totalUSD)} ≈ {formatVES(totalVES)})</span>
+                        </div>
+                      </div>
+                      <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                        ID de Transacción / Order ID de Binance (Opcional):
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Ej: 284910284"
+                        value={binanceRef}
+                        onChange={(e) => setBinanceRef(e.target.value)}
+                        className="w-full h-11 px-4 border-2 border-amber-300 dark:border-amber-700 rounded-xl text-sm font-mono text-slate-900 dark:text-white bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                      />
+                    </div>
+                  )}
                 </div>
               )}
             </div>
+            {/* SELECTOR DE FORMATO DE COMPROBANTE AL MOMENTO DE COBRAR */}
+            <div className="px-5 sm:px-6 py-3 bg-slate-100 dark:bg-slate-800/90 border-t border-slate-200 dark:border-slate-700/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shrink-0">
+              <div className="flex items-center gap-2">
+                <span className="text-base">🖨️</span>
+                <span className="text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                  Formato de Comprobante / Ticket:
+                </span>
+              </div>
+
+              <div className="flex items-center gap-2 flex-wrap">
+                <button
+                  type="button"
+                  onClick={() => setReceiptType('mixed')}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 cursor-pointer ${
+                    receiptType === 'mixed'
+                      ? 'bg-sky-700 text-white shadow-sm ring-2 ring-sky-500/40'
+                      : 'bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-600 hover:bg-slate-100'
+                  }`}
+                >
+                  <span>🔄</span>
+                  <span>Ticket Transaccional (Multimoneda)</span>
+                  {receiptType === 'mixed' && <span>✓</span>}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setReceiptType('fiscal_seniat')}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 cursor-pointer ${
+                    receiptType === 'fiscal_seniat'
+                      ? 'bg-indigo-700 text-white shadow-sm ring-2 ring-indigo-500/40'
+                      : 'bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-600 hover:bg-slate-100'
+                  }`}
+                >
+                  <span>🏛️</span>
+                  <span>Factura Fiscal SENIAT (Bs)</span>
+                  {receiptType === 'fiscal_seniat' && <span>✓</span>}
+                </button>
+              </div>
+            </div>
 
             {/* Acciones del Modal */}
-            <div className="p-3.5 bg-slate-50 border-t border-slate-200 flex gap-3 shrink-0">
+            <div className="px-6 py-4 bg-slate-50 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between gap-4 shrink-0">
               <button
                 type="button"
                 onClick={() => setShowPaymentModal(false)}
-                className="flex-1 h-11 border border-slate-300 rounded-lg font-bold text-xs text-slate-700 hover:bg-slate-100"
+                className="h-12 px-6 border-2 border-slate-300 dark:border-slate-700 rounded-xl font-bold text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 active:scale-95 transition-all flex items-center gap-2 cursor-pointer"
               >
-                Cancelar (Esc)
+                <span>Cancelar</span>
+                <kbd className="text-[11px] font-mono px-1.5 py-0.5 bg-slate-200 dark:bg-slate-700 rounded text-slate-600 dark:text-slate-300">Esc</kbd>
               </button>
+
               <button
                 type="button"
                 onClick={handleCompleteSale}
-                disabled={selectedPaymentMethod === 'credit' ? !selectedCreditCustomer : !isCompletePayment}
-                className="flex-1 h-11 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-black text-xs uppercase tracking-wider shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={
+                  selectedPaymentMethod === 'credit'
+                    ? !selectedCreditCustomer
+                    : selectedPaymentMethod === 'mixed'
+                    ? !isMixedComplete
+                    : !isCompletePayment
+                }
+                className="h-12 px-8 flex-1 max-w-md bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white rounded-xl font-black text-sm uppercase tracking-wider shadow-lg shadow-emerald-600/30 hover:shadow-emerald-600/50 active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none cursor-pointer"
               >
-                Confirmar e Imprimir
+                <span>
+                  {selectedPaymentMethod === 'mixed'
+                    ? `Confirmar Cobro Mixto (${formatUSD(totalUSD)})`
+                    : selectedPaymentMethod === 'credit'
+                    ? `Autorizar Fiado (${formatUSD(totalUSD)})`
+                    : 'Confirmar e Imprimir Venta'}
+                </span>
+                <kbd className="text-[11px] font-mono px-2 py-0.5 bg-emerald-700/80 rounded text-emerald-100 border border-emerald-500/50">
+                  Enter ↵
+                </kbd>
               </button>
             </div>
           </div>
@@ -2106,99 +2699,338 @@ export default function DesktopPosPage() {
       )}
 
       {/* ========================================================================= */}
-      {/* MODAL / VISTA PREVIA DE TICKET DE VENTA (IMPRESIÓN TÉRMICA)               */}
+      {/* MODAL DUAL DE TICKETS: TICKET MIXTO (CLIENTE) Y FACTURA FISCAL SENIAT (BS) */}
       {/* ========================================================================= */}
       {showReceiptModal && lastCompletedSale && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-2xs z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl border border-slate-300 w-full max-w-sm overflow-hidden flex flex-col">
-            <div className="p-3 bg-slate-100 border-b border-slate-200 text-slate-900 flex items-center justify-between">
-              <span className="font-bold text-xs uppercase text-slate-800">Venta Registrada</span>
+        <div className="fixed inset-0 bg-slate-900/70 backdrop-blur-2xs z-50 flex items-center justify-center p-3 sm:p-4">
+          <div className="bg-white rounded-2xl shadow-2xl border border-slate-300 w-full max-w-md overflow-hidden flex flex-col max-h-[92vh]">
+            {/* Encabezado y Selector de Tipo de Ticket */}
+            <div className="p-3 bg-slate-900 border-b border-slate-800 text-white flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="font-black text-xs uppercase tracking-wider text-slate-100">
+                  Comprobantes de Venta
+                </span>
+              </div>
               <button
                 onClick={() => setShowReceiptModal(false)}
-                className="text-slate-400 hover:text-slate-700 font-bold text-lg leading-none"
+                className="text-slate-400 hover:text-white font-bold text-xl leading-none px-1.5 py-0.5 rounded-lg hover:bg-slate-800 transition-colors"
               >
                 &times;
               </button>
             </div>
 
-            {/* Ticket Térmico 80mm */}
-            <div className="p-4 bg-white font-mono text-xs text-slate-800 space-y-2 border-b border-slate-200 max-h-96 overflow-y-auto" id="thermal-receipt">
-              <div className="text-center space-y-0.5">
-                <h4 className="font-black text-sm text-slate-900 uppercase">
-                  Comercial Mi Tienda C.A.
-                </h4>
-                <p className="text-[10px] text-slate-500">RIF: J-50123456-7</p>
-                <p className="text-[10px] text-slate-500">Av. Principal, Local 4, Caracas</p>
-                <p className="text-[10px] text-slate-500">Telf: 0414-1234567</p>
-              </div>
-
-              <div className="border-t border-b border-dashed border-slate-300 py-1.5 space-y-0.5 text-[11px]">
-                <div className="flex justify-between">
-                  <span>Ticket:</span>
-                  <span className="font-bold">{lastCompletedSale.receiptNumber}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Fecha:</span>
-                  <span>{new Date(lastCompletedSale.timestamp).toLocaleString('es-VE')}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Tasa BCV:</span>
-                  <span>Bs. {lastCompletedSale.bcvRate.toFixed(2)}</span>
-                </div>
-              </div>
-
-              {/* Items */}
-              <div className="space-y-1 text-[11px]">
-                {lastCompletedSale.items.map((it, idx) => (
-                  <div key={idx} className="flex justify-between">
-                    <span className="truncate max-w-[180px]">
-                      {it.qty}x {it.name}
-                    </span>
-                    <span className="font-bold tabular-numbers">
-                      {formatUSD(it.totalUSD)}
-                    </span>
-                  </div>
-                ))}
-              </div>
-
-              <div className="border-t border-dashed border-slate-300 pt-2 space-y-1">
-                <div className="flex justify-between font-bold text-sm">
-                  <span>TOTAL USD:</span>
-                  <span>{formatUSD(lastCompletedSale.totalUSD)}</span>
-                </div>
-                <div className="flex justify-between font-bold text-xs text-slate-600">
-                  <span>TOTAL BS:</span>
-                  <span>{formatVES(lastCompletedSale.totalVES)}</span>
-                </div>
-                <div className="flex justify-between text-[10px] text-slate-500 pt-1">
-                  <span>Vuelto Entregado:</span>
-                  <span>{formatUSD(lastCompletedSale.changeUSD)} (Bs. {lastCompletedSale.changeVES.toFixed(2)})</span>
-                </div>
-              </div>
-
-              <div className="text-center pt-3 text-[10px] text-slate-400">
-                ¡Gracias por su compra!
-              </div>
+            {/* Pestañas de Selección de Ticket */}
+            <div className="flex border-b border-slate-200 bg-slate-100 p-1.5 gap-1.5 shrink-0">
+              <button
+                type="button"
+                onClick={() => setReceiptType('mixed')}
+                className={`flex-1 py-1.5 px-2 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 ${
+                  receiptType === 'mixed'
+                    ? 'bg-sky-700 text-white shadow-sm'
+                    : 'bg-white text-slate-700 hover:bg-slate-200 border border-slate-300'
+                }`}
+              >
+                <span>🔄</span>
+                <span>Ticket Mixto (Cliente)</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setReceiptType('fiscal_seniat')}
+                className={`flex-1 py-1.5 px-2 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 ${
+                  receiptType === 'fiscal_seniat'
+                    ? 'bg-indigo-700 text-white shadow-sm'
+                    : 'bg-white text-slate-700 hover:bg-slate-200 border border-slate-300'
+                }`}
+              >
+                <span>🏛️</span>
+                <span>Factura SENIAT (Bs)</span>
+              </button>
             </div>
 
-            {/* Botones de Impresión */}
-            <div className="p-3 bg-slate-50 flex gap-2">
+            {/* Cuerpo del Ticket con Scroll */}
+            <div className="p-4 bg-white font-mono text-xs text-slate-900 space-y-2 overflow-y-auto flex-1 border-b border-slate-200">
+              {receiptType === 'mixed' ? (
+                /* ------------------------------------------------------------- */
+                /* 1. TICKET MIXTO / OPERATIVO MULTIMONEDA                      */
+                /* ------------------------------------------------------------- */
+                <div id="thermal-receipt" className="space-y-2">
+                  <div className="text-center space-y-0.5">
+                    {storeInfo.showLogoOnReceipt && storeInfo.logoUrl && (
+                      <div className="flex justify-center pb-1">
+                        <img
+                          src={storeInfo.logoUrl}
+                          alt="Logo Negocio"
+                          className="max-h-14 max-w-[170px] object-contain filter grayscale contrast-125 mx-auto"
+                        />
+                      </div>
+                    )}
+                    <h4 className="font-black text-sm text-slate-950 uppercase">
+                      {storeInfo.name}
+                    </h4>
+                    <p className="text-[10px] text-slate-600 font-bold">RIF: {storeInfo.rif}</p>
+                    <p className="text-[10px] text-slate-600">{storeInfo.address}</p>
+                    {storeInfo.phone && <p className="text-[10px] text-slate-600">Telf: {storeInfo.phone}</p>}
+                    <span className="inline-block mt-1 px-2 py-0.5 rounded-full bg-sky-100 text-sky-900 text-[10px] font-black border border-sky-300">
+                      TICKET DE CONTROL MULTIMONEDA
+                    </span>
+                  </div>
+
+                  <div className="border-t border-b border-dashed border-slate-400 py-1.5 space-y-0.5 text-[11px]">
+                    <div className="flex justify-between">
+                      <span className="text-slate-600">Ticket N°:</span>
+                      <span className="font-black">{lastCompletedSale.receiptNumber}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-600">Fecha / Hora:</span>
+                      <span>{new Date(lastCompletedSale.timestamp).toLocaleString('es-VE')}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-600">Tasa Oficial BCV:</span>
+                      <span className="font-black">Bs. {lastCompletedSale.bcvRate.toFixed(2)}</span>
+                    </div>
+                  </div>
+
+                  {/* Listado de Productos */}
+                  <div className="space-y-1 text-[11px]">
+                    <div className="flex justify-between font-bold text-slate-500 border-b border-slate-200 pb-0.5 text-[10px]">
+                      <span>CANT / DESCRIPCIÓN</span>
+                      <span>TOTAL USD / BS</span>
+                    </div>
+                    {lastCompletedSale.items.map((it, idx) => (
+                      <div key={idx} className="flex justify-between items-baseline gap-1">
+                        <span className="flex-1 min-w-0 pr-1 truncate font-bold">
+                          {it.qty}x {it.name}
+                        </span>
+                        <div className="text-right shrink-0 whitespace-nowrap">
+                          <span className="font-bold tabular-numbers block">
+                            {formatUSD(it.totalUSD)}
+                          </span>
+                          <span className="text-[10px] text-slate-500 tabular-numbers">
+                            Bs. {(it.totalUSD * lastCompletedSale.bcvRate).toFixed(2)}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Desglose de Formas de Pago Mixto */}
+                  <div className="border-t border-dashed border-slate-400 pt-2 space-y-1">
+                    <div className="text-[10px] font-black uppercase text-slate-700 tracking-wider">
+                      Desglose de Formas de Pago:
+                    </div>
+                    {Array.isArray(lastCompletedSale.payments) && lastCompletedSale.payments.length > 0 ? (
+                      lastCompletedSale.payments.map((p, i) => (
+                        <div key={i} className="flex justify-between text-[11px] bg-slate-50 px-2 py-0.5 rounded border border-slate-200">
+                          <span className="font-semibold text-slate-700">
+                            {p.method === 'cash_usd' && '💵 Efectivo Divisa ($)'}
+                            {p.method === 'binance' && '🪙 Binance Pay (USDT)'}
+                            {p.method === 'cash_ves' && '💵 Efectivo Bolívares (Bs.)'}
+                            {p.method === 'pago_movil' && '📱 Pago Móvil (Bs.)'}
+                            {p.method === 'card_debit' && '💳 Tarjeta / Punto (Bs.)'}
+                            {p.method === 'card_credit' && '💳 Tarjeta Crédito (Bs.)'}
+                            {p.method === 'zelle' && '🏦 Zelle ($)'}
+                            {p.method === 'credit' && '📝 Crédito de Confianza'}
+                            {p.reference && <span className="text-[9px] text-slate-500 ml-1 font-mono">[{p.reference}]</span>}
+                          </span>
+                          <span className="font-mono font-bold">
+                            {p.amountUSD > 0 && formatUSD(p.amountUSD)}
+                            {p.amountVES > 0 && ` / Bs. ${p.amountVES.toFixed(2)}`}
+                          </span>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-[11px] text-slate-600">
+                        ✅ Venta Liquidada
+                      </div>
+                    )}
+
+                    {/* Totales */}
+                    <div className="border-t border-slate-300 pt-1.5 mt-1 space-y-0.5">
+                      <div className="flex justify-between font-black text-sm">
+                        <span>TOTAL USD ($):</span>
+                        <span className="text-slate-950">{formatUSD(lastCompletedSale.totalUSD)}</span>
+                      </div>
+                      <div className="flex justify-between font-black text-xs text-sky-900">
+                        <span>TOTAL BOLÍVARES (Bs.):</span>
+                        <span>{formatVES(lastCompletedSale.totalVES)}</span>
+                      </div>
+                      {(lastCompletedSale.changeUSD > 0 || lastCompletedSale.changeVES > 0) && (
+                        <div className="flex justify-between text-[11px] font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 mt-1">
+                          <span>Vuelto Entregado:</span>
+                          <span>{formatUSD(lastCompletedSale.changeUSD)} (Bs. {lastCompletedSale.changeVES.toFixed(2)})</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="text-center pt-2 text-[10px] text-slate-500 font-medium">
+                    {storeInfo.footerMessage || '¡Gracias por su compra! • Comprobante Multimoneda'}
+                  </div>
+                </div>
+              ) : (
+                /* ------------------------------------------------------------- */
+                /* 2. FACTURA FISCAL SENIAT EN BS TOTALES (CONTADOR / SENIAT)    */
+                /* ------------------------------------------------------------- */
+                <div id="seniat-receipt" className="space-y-2">
+                  <div className="text-center space-y-0.5 border-b border-slate-300 pb-2">
+                    {storeInfo.showLogoOnReceipt && storeInfo.logoUrl && (
+                      <div className="flex justify-center pb-1">
+                        <img
+                          src={storeInfo.logoUrl}
+                          alt="Logo Negocio"
+                          className="max-h-14 max-w-[170px] object-contain filter grayscale contrast-125 mx-auto"
+                        />
+                      </div>
+                    )}
+                    <h4 className="font-black text-sm text-slate-950 uppercase tracking-tight">
+                      {storeInfo.name}
+                    </h4>
+                    <p className="text-[11px] font-black text-slate-800">RIF: {storeInfo.rif}</p>
+                    <p className="text-[10px] text-slate-600">DOMICILIO FISCAL: {storeInfo.address.toUpperCase()}</p>
+                    {storeInfo.phone && <p className="text-[10px] text-slate-600">ZONA POSTAL 1010 • TELF: {storeInfo.phone}</p>}
+                    <div className="mt-1 pt-1 border-t border-slate-300">
+                      <span className="font-black text-xs tracking-wider bg-slate-900 text-white px-3 py-0.5 rounded uppercase">
+                        FACTURA FISCAL
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="border-b border-dashed border-slate-400 py-1.5 space-y-0.5 text-[11px]">
+                    <div className="flex justify-between font-bold">
+                      <span>FACTURA N°:</span>
+                      <span className="font-mono text-slate-950">FACT-{lastCompletedSale.receiptNumber.replace(/[^0-9]/g, '').slice(-8) || '00000042'}</span>
+                    </div>
+                    <div className="flex justify-between font-bold">
+                      <span>N° CONTROL:</span>
+                      <span className="font-mono text-slate-950">00-{lastCompletedSale.receiptNumber.replace(/[^0-9]/g, '').slice(-6) || '000042'}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-600">FECHA DE EMISIÓN:</span>
+                      <span>{new Date(lastCompletedSale.timestamp).toLocaleDateString('es-VE')}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-600">HORA DE EMISIÓN:</span>
+                      <span>{new Date(lastCompletedSale.timestamp).toLocaleTimeString('es-VE')}</span>
+                    </div>
+                    <div className="flex justify-between pt-1 border-t border-slate-200">
+                      <span className="text-slate-600">CLIENTE / RAZÓN SOCIAL:</span>
+                      <span className="font-bold">{lastCompletedSale.customerName || 'CLIENTE GENERAL'}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-600">RIF / C.I.:</span>
+                      <span className="font-mono font-bold">V-99999999-9</span>
+                    </div>
+                  </div>
+
+                  {/* Tabla de Renglones en 100% Bolívares */}
+                  <div className="space-y-1 text-[11px]">
+                    <div className="flex justify-between font-bold text-slate-700 border-b border-slate-300 pb-0.5 text-[10px]">
+                      <span>CANT / DESCRIPCIÓN</span>
+                      <span className="text-right">TOTAL BS. (ALÍC.)</span>
+                    </div>
+                    {lastCompletedSale.items.map((it, idx) => {
+                      const itemTotalBs = it.totalUSD * lastCompletedSale.bcvRate;
+                      return (
+                        <div key={idx} className="flex justify-between items-baseline gap-1">
+                          <span className="flex-1 min-w-0 pr-1 truncate font-bold">
+                            {it.qty}x {it.name}
+                          </span>
+                          <span className="font-bold tabular-numbers text-right shrink-0 whitespace-nowrap">
+                            Bs. {itemTotalBs.toFixed(2)} (G)
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Liquidación Impositiva SENIAT en Bolívares */}
+                  {(() => {
+                    const totalVES = lastCompletedSale.totalVES;
+                    const baseImponible = totalVES / 1.16;
+                    const iva16 = totalVES - baseImponible;
+                    // Verificar si hubo pagos en divisas o crypto para reflejar retención IGTF 3%
+                    const hasForeignPay = Array.isArray(lastCompletedSale.payments) &&
+                      lastCompletedSale.payments.some((p) => ['cash_usd', 'binance', 'zelle'].includes(p.method));
+                    const igtfMonto = hasForeignPay ? (totalVES * 0.03) : 0;
+                    const granTotalBs = totalVES + igtfMonto;
+
+                    return (
+                      <div className="border-t-2 border-slate-900 pt-2 space-y-1 text-[11px]">
+                        <div className="flex justify-between text-slate-700">
+                          <span>BASE IMPONIBLE (G 16.00%):</span>
+                          <span className="font-mono font-bold">Bs. {baseImponible.toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between text-slate-700">
+                          <span>IMPUESTO AL VALOR AGREGADO (16%):</span>
+                          <span className="font-mono font-bold">Bs. {iva16.toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between text-slate-500">
+                          <span>VENTAS EXENTAS / EXONERADAS (E):</span>
+                          <span className="font-mono">Bs. 0.00</span>
+                        </div>
+                        {hasForeignPay && (
+                          <div className="flex justify-between text-indigo-900 font-semibold bg-indigo-50 px-1 py-0.5 rounded">
+                            <span>IGTF PERCIBIDO (3.00% Divisa/Crypto):</span>
+                            <span className="font-mono font-bold">Bs. {igtfMonto.toFixed(2)}</span>
+                          </div>
+                        )}
+                        <div className="border-t border-slate-400 pt-1 flex justify-between font-black text-sm text-slate-950 bg-slate-100 p-1.5 rounded">
+                          <span>TOTAL FACTURADO BS:</span>
+                          <span className="font-mono text-base">Bs. {granTotalBs.toFixed(2)}</span>
+                        </div>
+
+                        {/* Datos Informativos del Banco Central de Venezuela */}
+                        <div className="pt-1.5 border-t border-dashed border-slate-300 space-y-0.5 text-[10px] text-slate-600">
+                          <div className="flex justify-between">
+                            <span>Tipo de Cambio Oficial BCV:</span>
+                            <span className="font-mono font-bold">Bs. {lastCompletedSale.bcvRate.toFixed(2)} / USD</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Equivalencia Referencial en USD:</span>
+                            <span className="font-mono font-bold">${lastCompletedSale.totalUSD.toFixed(2)} USD</span>
+                          </div>
+                        </div>
+
+                        <div className="text-center pt-2 text-[9px] text-slate-500 leading-tight">
+                          DOCUMENTO EMITIDO CONFORME A LA PROVIDENCIA ADMINISTRATIVA SENIAT SNAT/2011/00071 • VÁLIDO PARA EL LIBRO ESPECIAL DE VENTAS DEL CONTADOR
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </div>
+              )}
+            </div>
+
+            {/* Botones de Acción e Impresión */}
+            <div className="p-3 bg-slate-100 flex flex-wrap gap-2 shrink-0">
               <button
                 type="button"
                 onClick={() => setShowReceiptModal(false)}
-                className="flex-1 py-2 rounded-lg border border-slate-300 font-semibold text-xs text-slate-700 hover:bg-slate-100"
+                className="py-2 px-3 rounded-xl border border-slate-300 font-bold text-xs text-slate-700 hover:bg-slate-200 transition-colors"
               >
                 Cerrar
               </button>
               <button
                 type="button"
                 onClick={printReceipt}
-                className="flex-1 py-2 bg-sky-700 hover:bg-sky-800 text-white rounded-lg font-bold text-xs shadow-sm flex items-center justify-center gap-1"
+                className="flex-1 py-2 px-3 bg-sky-700 hover:bg-sky-800 text-white rounded-xl font-bold text-xs shadow-sm flex items-center justify-center gap-1.5 transition-colors"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
                 </svg>
-                Imprimir
+                <span>Imprimir Este Ticket</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setReceiptType(receiptType === 'mixed' ? 'fiscal_seniat' : 'mixed');
+                  setTimeout(() => printReceipt(), 200);
+                }}
+                className="py-2 px-3 bg-indigo-700 hover:bg-indigo-800 text-white rounded-xl font-bold text-xs shadow-sm flex items-center justify-center gap-1 transition-colors"
+                title="Cambiar al otro formato e imprimir"
+              >
+                <span>{receiptType === 'mixed' ? '📄 Imprimir Fiscal SENIAT' : '🔄 Imprimir Ticket Mixto'}</span>
               </button>
             </div>
           </div>
