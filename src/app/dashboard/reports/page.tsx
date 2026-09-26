@@ -524,7 +524,7 @@ export default function DesktopReportsPage() {
           {/* Tarjetas KPI Superiores */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
             <div className="bg-white p-4 rounded-2xl border border-slate-300 shadow-xs space-y-1">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block">
                 Total Ventas del Turno
               </span>
               <span className="text-2xl font-black font-mono text-slate-900 block tabular-numbers">
@@ -543,7 +543,7 @@ export default function DesktopReportsPage() {
             </div>
 
             <div className="bg-white p-4 rounded-2xl border border-slate-300 shadow-xs space-y-1">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block">
                 Efectivo en Dólares ($)
               </span>
               <span className="text-2xl font-black font-mono text-emerald-700 block tabular-numbers">
@@ -568,7 +568,7 @@ export default function DesktopReportsPage() {
             </div>
 
             <div className="bg-white p-4 rounded-2xl border border-slate-300 shadow-xs space-y-1">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block">
                 Efectivo en Bolívares (Bs.)
               </span>
               <span className="text-2xl font-black font-mono text-emerald-700 block tabular-numbers">
@@ -593,7 +593,7 @@ export default function DesktopReportsPage() {
             </div>
 
             <div className="bg-white p-4 rounded-2xl border border-slate-300 shadow-xs space-y-1">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block">
                 Electrónico y Bancario
               </span>
               <div className="space-y-1.5 pt-1 text-xs">
@@ -685,7 +685,7 @@ export default function DesktopReportsPage() {
           {/* Barra de Búsqueda y Filtro */}
           <div className="p-3 border-b border-slate-200 bg-slate-50 flex items-center justify-between gap-4">
             <div className="relative flex-1 max-w-md">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+              <Search className="w-4 h-4 text-slate-500 absolute left-3 top-2.5" />
               <input
                 type="text"
                 placeholder="Buscar por ticket, cliente o artículo..."
@@ -702,7 +702,7 @@ export default function DesktopReportsPage() {
           {/* Tabla de Ventas */}
           <div className="flex-1 overflow-y-auto">
             <table className="w-full text-left border-collapse text-xs">
-              <thead className="bg-slate-100 border-b border-slate-200 font-bold text-slate-700 uppercase tracking-wider text-[10px] sticky top-0 z-10">
+              <thead className="bg-slate-100 border-b border-slate-200 font-bold text-slate-700 uppercase tracking-wider text-xs sticky top-0 z-10">
                 <tr>
                   <th className="py-2.5 px-4 w-8"></th>
                   <th className="py-2.5 px-4">Ticket</th>
@@ -733,11 +733,11 @@ export default function DesktopReportsPage() {
                         onClick={() => setExpandedSaleId(isExpanded ? null : s.receiptNumber)}
                       >
                         {/* Botón Expansor */}
-                        <td className="py-2.5 px-2 text-center text-slate-400">
+                        <td className="py-2.5 px-2 text-center text-slate-500">
                           {isExpanded ? (
                             <ChevronUp className="w-4 h-4 text-slate-700 inline" />
                           ) : (
-                            <ChevronDown className="w-4 h-4 text-slate-400 inline" />
+                            <ChevronDown className="w-4 h-4 text-slate-500 inline" />
                           )}
                         </td>
 
@@ -773,7 +773,7 @@ export default function DesktopReportsPage() {
                           <span className="font-bold">
                             {s.items?.reduce((sum, i) => sum + i.qty, 0) || 0} ítems
                           </span>
-                          <span className="text-slate-400 text-[10px] ml-1.5">
+                          <span className="text-slate-500 text-[10px] ml-1.5">
                             ({s.items?.length || 0} prod.)
                           </span>
                         </td>
@@ -863,7 +863,7 @@ export default function DesktopReportsPage() {
                                   <tbody className="divide-y divide-slate-100 font-mono text-[11px]">
                                     {s.items?.map((it, idx) => (
                                       <tr key={idx} className="hover:bg-slate-50">
-                                        <td className="py-1.5 px-3 text-slate-400">{it.barcode || 'S/C'}</td>
+                                        <td className="py-1.5 px-3 text-slate-500">{it.barcode || 'S/C'}</td>
                                         <td className="py-1.5 px-3 font-sans font-medium text-slate-800">{it.name}</td>
                                         <td className="py-1.5 px-3 text-center font-bold text-slate-900">{it.qty}</td>
                                         <td className="py-1.5 px-3 text-right text-slate-600">${it.priceUSD.toFixed(2)}</td>
@@ -902,7 +902,7 @@ export default function DesktopReportsPage() {
 
                 {filteredSales.length === 0 && (
                   <tr>
-                    <td colSpan={10} className="py-12 text-center text-slate-400">
+                    <td colSpan={10} className="py-12 text-center text-slate-500">
                       No se encontraron ventas para los criterios seleccionados.
                     </td>
                   </tr>
@@ -918,7 +918,7 @@ export default function DesktopReportsPage() {
         <div className="flex-1 bg-white rounded-2xl border border-slate-300 shadow-xs flex flex-col overflow-hidden">
           <div className="p-3 border-b border-slate-200 bg-slate-50 flex items-center justify-between gap-4">
             <div className="relative flex-1 max-w-md">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+              <Search className="w-4 h-4 text-slate-500 absolute left-3 top-2.5" />
               <input
                 type="text"
                 placeholder="Buscar artículo por nombre, código o categoría..."
@@ -935,7 +935,7 @@ export default function DesktopReportsPage() {
 
           <div className="flex-1 overflow-y-auto">
             <table className="w-full text-left border-collapse text-xs">
-              <thead className="bg-slate-100 border-b border-slate-200 font-bold text-slate-700 uppercase tracking-wider text-[10px] sticky top-0 z-10">
+              <thead className="bg-slate-100 border-b border-slate-200 font-bold text-slate-700 uppercase tracking-wider text-xs sticky top-0 z-10">
                 <tr>
                   <th className="py-2.5 px-4">Código</th>
                   <th className="py-2.5 px-4">Producto</th>
@@ -1007,7 +1007,7 @@ export default function DesktopReportsPage() {
 
                 {filteredInventoryAudit.length === 0 && (
                   <tr>
-                    <td colSpan={8} className="py-12 text-center text-slate-400">
+                    <td colSpan={8} className="py-12 text-center text-slate-500">
                       No hay artículos vendidos en este turno para auditar.
                     </td>
                   </tr>
@@ -1030,7 +1030,7 @@ export default function DesktopReportsPage() {
 
           <div className="flex-1 overflow-y-auto">
             <table className="w-full text-left border-collapse text-xs">
-              <thead className="bg-slate-100 border-b border-slate-200 font-bold text-slate-700 uppercase tracking-wider text-[10px] sticky top-0 z-10">
+              <thead className="bg-slate-100 border-b border-slate-200 font-bold text-slate-700 uppercase tracking-wider text-xs sticky top-0 z-10">
                 <tr>
                   <th className="py-2.5 px-4">Turno #</th>
                   <th className="py-2.5 px-4">Cajero</th>
@@ -1086,7 +1086,7 @@ export default function DesktopReportsPage() {
 
                 {closedShifts.length === 0 && (
                   <tr>
-                    <td colSpan={9} className="py-12 text-center text-slate-400">
+                    <td colSpan={9} className="py-12 text-center text-slate-500">
                       Aún no se han ejecutado cierres de caja (Corte Z).
                     </td>
                   </tr>
@@ -1303,7 +1303,7 @@ export default function DesktopReportsPage() {
 
                   {seniatBookData.records.length === 0 && (
                     <tr>
-                      <td colSpan={15} className="py-12 text-center text-slate-400 font-sans text-xs">
+                      <td colSpan={15} className="py-12 text-center text-slate-500 font-sans text-xs">
                         No existen operaciones registradas para el período fiscal seleccionado.
                       </td>
                     </tr>
@@ -1364,7 +1364,7 @@ export default function DesktopReportsPage() {
             <div className="p-4 bg-slate-900 text-white flex items-center justify-between">
               <div>
                 <h3 className="font-black text-sm">Comprobante de Venta</h3>
-                <p className="text-[11px] text-slate-400 font-mono">{selectedSaleForView.receiptNumber}</p>
+                <p className="text-[11px] text-slate-500 font-mono">{selectedSaleForView.receiptNumber}</p>
               </div>
               <button
                 onClick={() => setSelectedSaleForView(null)}
@@ -1404,7 +1404,7 @@ export default function DesktopReportsPage() {
                     <div key={idx} className="p-2.5 flex justify-between items-center text-xs">
                       <div>
                         <p className="font-bold text-slate-900">{item.name}</p>
-                        <p className="text-[10px] text-slate-400 font-mono">
+                        <p className="text-[10px] text-slate-500 font-mono">
                           {item.qty} × ${item.priceUSD.toFixed(2)}
                         </p>
                       </div>

@@ -56,6 +56,10 @@ class SoundEffects {
     } catch {}
   }
 
+  playSuccess() {
+    this.playBeep();
+  }
+
   success() {
     this.playBeep();
   }

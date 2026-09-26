@@ -1,0 +1,63 @@
+================================================================================
+  VENEMATIC POS MOBILE - GUIA DE INSTALACION EN DISPOSITIVOS ANDROID (APK)
+================================================================================
+
+Versión: 1.0.0 (Build Release / Debug)
+Plataforma: Android 8.0 (Oreo) o superior (API 26+)
+Archivo APK: VenematicPOS-Mobile.apk
+
+--------------------------------------------------------------------------------
+1. DESCRIPCIÓN DE LA APLICACIÓN
+--------------------------------------------------------------------------------
+Venematic POS Mobile es la aplicación móvil complementaria y autónoma para 
+terminales punto de venta (POS) y teléfonos inteligentes o tablets Android.
+
+Funcionalidades principales integradas:
+  ✓ Lector de código de barras y cámara integrado (cámara trasera o escáner láser).
+  ✓ Teclado digital numérico rápido (calculadora táctil) para cajeros.
+  ✓ Consulta de inventario, precios y stock en tiempo real.
+  ✓ Conversión bimonetaria instantánea (USD $ / VES Bs.) con tasa BCV oficial.
+  ✓ Registro y liquidación de pagos: Efectivo (USD/Bs), Pago Móvil, Punto de Venta, Zelle.
+  ✓ Conexión en red local (LAN / Wi-Fi) con el servidor o terminal maestro Venematic.
+  ✓ Modo offline-first con sincronización automática de ventas y catálogo.
+
+--------------------------------------------------------------------------------
+2. PASOS PARA INSTALAR EL APK EN SU DISPOSITIVO ANDROID
+--------------------------------------------------------------------------------
+
+PASO 1: Transferir el archivo APK al teléfono o tablet
+  Puede transferir el archivo "VenematicPOS-Mobile.apk" por cualquiera de estos medios:
+  a) Cable USB: Conecte el teléfono a la PC y copie el archivo a la carpeta "Descargas" (Download).
+  b) WhatsApp / Telegram: Envíese el archivo APK como documento.
+  c) Google Drive / Servidor Local / Compartir en red: Suba el archivo y descárguelo desde el móvil.
+
+PASO 2: Habilitar la instalación de aplicaciones desconocidas (si es primera vez)
+  Por seguridad, Android solicita permiso para instalar archivos APK que no provengan
+  de Google Play Store:
+  - Vaya a: Ajustes > Seguridad (o Privacidad) > Instalar aplicaciones desconocidas.
+  - Seleccione la aplicación con la que abrirá el archivo (por ejemplo, "Archivos", "Chrome" o "WhatsApp")
+    y active el interruptor "Permitir desde esta fuente".
+
+PASO 3: Ejecutar el instalador
+  - Abra la aplicación "Archivos" o "Descargas" en su teléfono.
+  - Toque sobre el archivo "VenematicPOS-Mobile.apk".
+  - Presione "Instalar".
+  - Si aparece una advertencia de "Play Protect" indicando que la app no está registrada en Play Store,
+    toque en "Más detalles" y luego en "Instalar de todas formas".
+
+PASO 4: Otorgar Permisos
+  Al abrir la aplicación por primera vez, otorgue los siguientes permisos cuando se le soliciten:
+  - Cámara: Necesario para el lector de códigos de barras de productos.
+  - Acceso a Red / Wi-Fi: Necesario para sincronizar con la caja principal o servidor en la nube.
+
+--------------------------------------------------------------------------------
+3. CONFIGURACIÓN INICIAL DE CONEXIÓN
+--------------------------------------------------------------------------------
+- Al iniciar la app, puede usar el modo Local (demostración / caja autónoma) o ingresar
+  la dirección IP del servidor / caja principal de Venematic en la misma red Wi-Fi
+  (por ejemplo: http://192.168.1.100:3000).
+- Todos los cálculos de IVA (16%), IGTF (3%), tasa de cambio BCV y reglas fiscales
+  están precargados y se sincronizan automáticamente.
+
+Soporte y Desarrollo: Equipo de Desarrollo Venematic POS
+================================================================================

@@ -49,6 +49,8 @@ export default function DesktopPosPage() {
   const [showScannerModal, setShowScannerModal] = useState<boolean>(false);
   const [scannerUrl, setScannerUrl] = useState<string>('');
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string>('');
+  const [qrReceiptMode, setQrReceiptMode] = useState<'medium' | 'large' | 'none'>('medium');
+  const [ticketQrDataUrl, setTicketQrDataUrl] = useState<string>('');
   const [phoneConnected, setPhoneConnected] = useState<boolean>(false);
   const [phoneDeviceName, setPhoneDeviceName] = useState<string>('');
   const [toastMessage, setToastMessage] = useState<{ text: string; type: 'success' | 'error' | 'info' } | null>(null);
@@ -315,6 +317,30 @@ export default function DesktopPosPage() {
     }
   };
 
+  // Generar código QR dinámico para el pie del ticket de venta (Mediano o Grande)
+  useEffect(() => {
+    if (!lastCompletedSale || qrReceiptMode === 'none') {
+      setTicketQrDataUrl('');
+      return;
+    }
+    const qrData = JSON.stringify({
+      ticket: lastCompletedSale.receiptNumber,
+      rif: storeInfo.rif || 'J-50123456-7',
+      fecha: lastCompletedSale.timestamp,
+      totalUSD: Number(lastCompletedSale.totalUSD.toFixed(2)),
+      totalVES: Number(lastCompletedSale.totalVES.toFixed(2)),
+      bcv: lastCompletedSale.bcvRate,
+    });
+    const qrSize = qrReceiptMode === 'large' ? 180 : 100;
+    QRCode.toDataURL(qrData, {
+      width: qrSize,
+      margin: 1,
+      color: { dark: '#000000', light: '#ffffff' },
+    })
+      .then(setTicketQrDataUrl)
+      .catch(() => setTicketQrDataUrl(''));
+  }, [lastCompletedSale, qrReceiptMode, storeInfo.rif]);
+
   const handleTriggerMobileScanner = async () => {
     soundEffects.playBeep();
     try {
@@ -569,6 +595,36 @@ export default function DesktopPosPage() {
           }
         } catch (err) {
           console.error('Error procesando venta móvil via SSE:', err);
+        }
+      });
+
+      // Confirmación de Pago Móvil Remoto (Webhook entrante)
+      eventSource.addEventListener('payment_confirmed', (event: any) => {
+        try {
+          const payment = JSON.parse(event.data);
+          if (!payment || !payment.referencia) return;
+
+          soundEffects.playSuccess();
+          showToast(`🔔 ¡Pago Móvil Confirmado! Bs. ${Number(payment.monto).toFixed(2)} · Ref: ${payment.referencia} (${payment.banco || 'Banco'})`, 'success');
+
+          // Asignar automáticamente referencia si no hay una digitada
+          setPagoMovilRef((prev) => prev || payment.referencia);
+          setPagoMovilAutoStatus('confirmed');
+          setPagoMovilAutoConfirmation({
+            referencia: payment.referencia,
+            monto: payment.monto,
+            bancoOrigen: payment.banco || 'Pago Móvil',
+            bancoDestino: 'Cuenta Local',
+            telefonoPagador: payment.telefono || '',
+            nombrePagador: payment.pagador || '',
+            cedulaPagador: payment.cedula || '',
+            emailSubject: 'Notificación Webhook Remota',
+            emailDate: new Date(payment.timestamp || Date.now()).toISOString(),
+            emailId: payment.id || `wh_${Date.now()}`,
+            rawText: payment.rawText || '',
+          });
+        } catch (err) {
+          console.error('Error procesando payment_confirmed via SSE:', err);
         }
       });
 
@@ -2748,6 +2804,52 @@ export default function DesktopPosPage() {
               </button>
             </div>
 
+            {/* Selector de Opciones de Código QR al Pie del Ticket */}
+            <div className="px-3 py-1.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between text-xs shrink-0">
+              <span className="font-bold text-slate-700 text-[11px] flex items-center gap-1">
+                <QrIcon className="w-3.5 h-3.5 text-sky-600" />
+                Código QR al pie:
+              </span>
+              <div className="flex gap-1">
+                <button
+                  type="button"
+                  onClick={() => setQrReceiptMode('medium')}
+                  className={`px-2 py-1 rounded-lg text-[10px] font-bold transition-all ${
+                    qrReceiptMode === 'medium'
+                      ? 'bg-sky-600 text-white shadow-xs'
+                      : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+                  }`}
+                  title="Código QR tamaño mediano con texto descriptivo debajo"
+                >
+                  Mediano (+ texto)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setQrReceiptMode('large')}
+                  className={`px-2 py-1 rounded-lg text-[10px] font-bold transition-all ${
+                    qrReceiptMode === 'large'
+                      ? 'bg-sky-600 text-white shadow-xs'
+                      : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+                  }`}
+                  title="Código QR tamaño grande centrado sin texto"
+                >
+                  Grande (sin texto)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setQrReceiptMode('none')}
+                  className={`px-2 py-1 rounded-lg text-[10px] font-bold transition-all ${
+                    qrReceiptMode === 'none'
+                      ? 'bg-slate-600 text-white shadow-xs'
+                      : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+                  }`}
+                  title="Ocultar código QR en la impresión"
+                >
+                  Sin QR
+                </button>
+              </div>
+            </div>
+
             {/* Cuerpo del Ticket con Scroll */}
             <div className="p-4 bg-white font-mono text-xs text-slate-900 space-y-2 overflow-y-auto flex-1 border-b border-slate-200">
               {receiptType === 'mixed' ? (
@@ -2867,6 +2969,22 @@ export default function DesktopPosPage() {
                   <div className="text-center pt-2 text-[10px] text-slate-500 font-medium">
                     {storeInfo.footerMessage || '¡Gracias por su compra! • Comprobante Multimoneda'}
                   </div>
+
+                  {/* Código QR al final debajo en el ticket */}
+                  {qrReceiptMode !== 'none' && ticketQrDataUrl && (
+                    <div className="pt-2 border-t border-dashed border-slate-300 flex flex-col items-center justify-center text-center">
+                      <img
+                        src={ticketQrDataUrl}
+                        alt="QR Ticket"
+                        className={qrReceiptMode === 'large' ? 'w-40 h-40 object-contain mx-auto' : 'w-24 h-24 object-contain mx-auto'}
+                      />
+                      {qrReceiptMode === 'medium' && (
+                        <p className="text-[8px] text-slate-500 font-mono mt-0.5 leading-tight">
+                          Ticket: {lastCompletedSale.receiptNumber} • Total: Bs. {lastCompletedSale.totalVES.toFixed(2)}
+                        </p>
+                      )}
+                    </div>
+                  )}
                 </div>
               ) : (
                 /* ------------------------------------------------------------- */
@@ -2966,7 +3084,7 @@ export default function DesktopPosPage() {
                           <span className="font-mono font-bold">Bs. {iva16.toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between text-slate-500">
-                          <span>VENTAS EXENTAS / EXONERADAS (E):</span>
+                          <span>Exento:</span>
                           <span className="font-mono">Bs. 0.00</span>
                         </div>
                         {hasForeignPay && (

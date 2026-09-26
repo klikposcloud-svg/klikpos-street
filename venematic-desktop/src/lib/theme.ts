@@ -15,9 +15,23 @@ export interface ThemePalette {
 
 export const THEME_PALETTES: ThemePalette[] = [
   {
+    id: 'petrol',
+    name: 'Verde Petróleo Comercial',
+    tagline: 'Diseño Oficial • Supermercados, Minimarkets y Comercio Retail',
+    primary: '#0e4f5a',
+    primaryHover: '#0a3d46',
+    primaryLight: '#e6f4f6',
+    primaryBorder: '#7fc1cc',
+    accent: '#0a3d46',
+    glow: 'rgba(14, 79, 90, 0.35)',
+    glassBorder: 'rgba(127, 193, 204, 0.30)',
+    colorName: 'teal',
+    swatchGradient: 'from-teal-800 to-cyan-900',
+  },
+  {
     id: 'sky',
     name: 'Azul Industrial',
-    tagline: 'Por defecto • Minimarkets y Comercio General',
+    tagline: 'Minimarkets y Comercio General',
     primary: '#0369a1',
     primaryHover: '#075985',
     primaryLight: '#f0f9ff',
@@ -228,10 +242,10 @@ export interface BrandingConfig {
 }
 
 export const DEFAULT_BRANDING: BrandingConfig = {
-  paletteId: 'sky',
+  paletteId: 'petrol',
   uiStyle: 'industrial',
   industrialBg: 'white',
-  customBgColor: '#f8fafc',
+  customBgColor: '#eef2f5',
 };
 
 /**
@@ -420,31 +434,31 @@ export function computeIndustrialThemeVariables(
       return {
         bgColor: customHex,
         cardColor: '#ffffff',
-        textColor: '#090d16',
-        textMuted: '#334155',
+        textColor: '#0f172a',
+        textMuted: '#475569',
         borderColor: '#cbd5e1',
         primaryBg: brandPrimary,
         primaryHover: brandHover,
         primaryText,
         secondaryBg: secBg,
         secondaryBorder: '#cbd5e1',
-        secondaryText: getHighContrastTextColor(secBg),
+        secondaryText: '#0f172a',
       };
     } else {
       // Fondo Oscuro Personalizado
-      const secBg = '#243447';
+      const secBg = '#1e2d40';
       return {
         bgColor: customHex,
-        cardColor: '#1a2636',
-        textColor: '#f8fafc',
+        cardColor: '#132030',
+        textColor: '#ffffff',
         textMuted: '#cbd5e1',
-        borderColor: '#334a66',
+        borderColor: '#2b3e55',
         primaryBg: brandPrimary,
         primaryHover: brandHover,
         primaryText,
         secondaryBg: secBg,
-        secondaryBorder: '#475569',
-        secondaryText: getHighContrastTextColor(secBg),
+        secondaryBorder: '#334a66',
+        secondaryText: '#ffffff',
       };
     }
   }
@@ -466,14 +480,35 @@ export function computeIndustrialThemeVariables(
   };
 }
 
-export function applyBrandingToDOM(config: BrandingConfig) {
+export function applyBrandingToDOM(config: BrandingConfig, forceTheme?: 'light' | 'dark') {
   if (typeof window === 'undefined') return;
 
   const palette = THEME_PALETTES.find((p) => p.id === config.paletteId) || THEME_PALETTES[0];
   const root = document.documentElement;
 
+  // Determinar tema con máxima prioridad a forceTheme y config.uiStyle
+  let isDark: boolean;
+  if (forceTheme) {
+    isDark = forceTheme === 'dark';
+  } else if (config.uiStyle === 'industrial') {
+    isDark = false;
+  } else if (config.uiStyle === 'glassmorphism') {
+    isDark = true;
+  } else {
+    const attrTheme = root.getAttribute('data-theme');
+    if (attrTheme === 'light') {
+      isDark = false;
+    } else if (attrTheme === 'dark' || attrTheme === 'glass') {
+      isDark = true;
+    } else {
+      const currentSavedTheme = getCurrentTheme();
+      isDark = currentSavedTheme === 'dark' || currentSavedTheme === 'glass' || root.classList.contains('dark');
+    }
+  }
+  const isLight = !isDark;
+
   root.setAttribute('data-theme-palette', palette.id);
-  root.setAttribute('data-ui-style', config.uiStyle);
+  root.setAttribute('data-ui-style', isDark ? 'glassmorphism' : (config.uiStyle || 'industrial'));
 
   // Background y Adaptabilidad Dinámica para Modo Industrial Profesional
   const industrialBgPreset = config.industrialBg || 'white';
@@ -507,17 +542,124 @@ export function applyBrandingToDOM(config: BrandingConfig) {
   root.style.setProperty('--brand-accent', palette.accent);
   root.style.setProperty('--brand-glow', palette.glow);
   root.style.setProperty('--brand-glass-border', palette.glassBorder);
+  root.style.setProperty('--color-brand-600', palette.primary);
+  root.style.setProperty('--color-brand-700', palette.primaryHover);
+
+  if (isLight) {
+    root.setAttribute('data-theme', 'light');
+    root.setAttribute('data-ui-style', 'industrial');
+    root.classList.remove('dark');
+    root.style.backgroundColor = themeVars.bgColor;
+    root.style.color = themeVars.textColor;
+    (root.style as any).colorScheme = 'light';
+  } else {
+    root.setAttribute('data-theme', 'dark');
+    root.setAttribute('data-ui-style', 'glassmorphism');
+    root.classList.add('dark');
+    root.style.backgroundColor = '#121c29';
+    root.style.color = '#f8fafc';
+    (root.style as any).colorScheme = 'dark';
+  }
 
   if (document.body) {
-    if (config.uiStyle === 'industrial') {
+    if (isLight) {
+      document.body.classList.remove('dark');
       document.body.style.backgroundColor = themeVars.bgColor;
       document.body.style.color = themeVars.textColor;
+      (document.body.style as any).colorScheme = 'light';
     } else {
-      document.body.style.backgroundColor = '';
-      document.body.style.color = '';
+      document.body.classList.add('dark');
+      document.body.style.backgroundColor = '#121c29';
+      document.body.style.color = '#f8fafc';
+      (document.body.style as any).colorScheme = 'dark';
     }
   }
 
+  try {
+    localStorage.setItem('venematic_theme', isLight ? 'light' : 'dark');
+    localStorage.setItem('venematic_ui_style', isLight ? 'industrial' : 'glassmorphism');
+    localStorage.setItem('venematic_branding_palette', config.paletteId);
+    localStorage.setItem('venematic_industrial_bg', industrialBgPreset);
+    if (config.customBgColor) {
+      localStorage.setItem('venematic_custom_bg_color', config.customBgColor);
+    }
+  } catch {}
+
   // Trigger event for listeners
   window.dispatchEvent(new CustomEvent('venematic:branding_updated', { detail: config }));
+  window.dispatchEvent(new CustomEvent('venematic:theme_changed', { detail: isLight ? 'light' : 'dark' }));
 }
+
+/**
+ * §17 Temas Oficiales: light (Modo Blanco), dark (Modo Oscuro), glass (Glassmorphism regulado)
+ */
+export type ThemeMode = 'light' | 'dark' | 'glass';
+
+export function applyTheme(mode: ThemeMode) {
+  if (typeof window === 'undefined') return;
+  const root = document.documentElement;
+
+  try {
+    localStorage.setItem('venematic_theme', mode === 'light' ? 'light' : 'dark');
+    localStorage.setItem('venematic_ui_style', mode === 'light' ? 'industrial' : 'glassmorphism');
+  } catch {}
+
+  const savedPalette = localStorage.getItem('venematic_branding_palette') || 'petrol';
+  const savedBg = (localStorage.getItem('venematic_industrial_bg') as IndustrialBgPreset) || 'white';
+  const savedCustomBg = localStorage.getItem('venematic_custom_bg_color') || '#f8fafc';
+
+  if (mode === 'light') {
+    root.classList.remove('dark');
+    root.setAttribute('data-theme', 'light');
+    root.setAttribute('data-ui-style', 'industrial');
+    root.setAttribute('data-industrial-bg', savedBg);
+    (root.style as any).colorScheme = 'light';
+    if (document.body) {
+      document.body.classList.remove('dark');
+      (document.body.style as any).colorScheme = 'light';
+    }
+
+    applyBrandingToDOM({
+      paletteId: savedPalette,
+      uiStyle: 'industrial',
+      industrialBg: savedBg,
+      customBgColor: savedCustomBg,
+    }, 'light');
+  } else {
+    root.classList.add('dark');
+    root.setAttribute('data-theme', 'dark');
+    root.setAttribute('data-ui-style', 'glassmorphism');
+    root.style.backgroundColor = '#121c29';
+    root.style.color = '#f8fafc';
+    (root.style as any).colorScheme = 'dark';
+    if (document.body) {
+      document.body.classList.add('dark');
+      document.body.style.backgroundColor = '#121c29';
+      document.body.style.color = '#f8fafc';
+      (document.body.style as any).colorScheme = 'dark';
+    }
+
+    applyBrandingToDOM({
+      paletteId: savedPalette,
+      uiStyle: 'glassmorphism',
+      industrialBg: savedBg,
+      customBgColor: savedCustomBg,
+    }, 'dark');
+  }
+
+  window.dispatchEvent(new CustomEvent('venematic:theme_changed', { detail: mode === 'light' ? 'light' : 'dark' }));
+}
+
+export function getCurrentTheme(): ThemeMode {
+  if (typeof window === 'undefined') return 'light';
+  const saved = localStorage.getItem('venematic_theme');
+  if (saved === 'dark' || saved === 'glass') return 'dark';
+  if (saved === 'light') return 'light';
+  if (document.documentElement.classList.contains('dark') || document.documentElement.getAttribute('data-theme') === 'dark') {
+    return 'dark';
+  }
+  return 'light';
+}
+
+
+

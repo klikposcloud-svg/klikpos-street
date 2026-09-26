@@ -9,6 +9,23 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        pos: {
+          surface: '#ffffff',
+          subtle: '#f8fafc',
+          muted: '#f1f5f9',
+          border: '#e2e8f0',
+          'border-strong': '#cbd5e1',
+          text: '#0f172a',
+          'text-muted': '#64748b',
+          'text-subtle': '#94a3b8',
+          brand: '#0369a1',
+          'brand-hover': '#075985',
+          success: '#15803d',
+          'success-hover': '#166534',
+          danger: '#dc2626',
+          'danger-hover': '#b91c1c',
+          warning: '#b45309',
+        },
         slate: {
           50: '#f8fafc',
           100: '#f1f5f9',

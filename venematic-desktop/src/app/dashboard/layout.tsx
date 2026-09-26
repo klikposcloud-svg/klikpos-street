@@ -9,10 +9,11 @@ import { useAuth } from '@/context/AuthContext';
 import LoginModal from '@/components/LoginModal';
 import AdminPinModal from '@/components/AdminPinModal';
 import LockScreenModal from '@/components/LockScreenModal';
-import { LogOut, ShieldCheck, User, Lock, RefreshCw, CheckCircle2, Sun, Sparkles } from 'lucide-react';
+import { LogOut, ShieldCheck, User, Lock, RefreshCw, CheckCircle2, Sun, Moon, Sparkles, Clock, Cloud, Smartphone, Users, X, QrCode } from 'lucide-react';
 import { STANDARD_RUBROS, StandardRubroId } from '@/lib/utils/business-rubros';
-import { applyBrandingToDOM } from '@/lib/theme';
+import { applyBrandingToDOM, applyTheme, getCurrentTheme, ThemeMode } from '@/lib/theme';
 import CloudSyncWidget from '@/components/CloudSyncWidget';
+import QRCode from 'qrcode';
 
 interface NavItem {
   key: string;
@@ -37,7 +38,7 @@ const NAV_ITEMS: NavItem[] = [
   },
   {
     key: 'inventory',
-    label: 'Inventario y Precios',
+    label: 'Inventario',
     href: '/dashboard/inventory',
     shortcut: 'F2',
     icon: (
@@ -48,7 +49,7 @@ const NAV_ITEMS: NavItem[] = [
   },
   {
     key: 'sales',
-    label: 'Ventas del Turno',
+    label: 'Ventas',
     href: '/dashboard/sales',
     shortcut: 'F3',
     icon: (
@@ -70,7 +71,7 @@ const NAV_ITEMS: NavItem[] = [
   },
   {
     key: 'reports',
-    label: 'Cierres de Caja (X/Z)',
+    label: 'Cierres',
     href: '/dashboard/reports',
     shortcut: 'F5',
     icon: (
@@ -103,8 +104,8 @@ export default function DesktopDashboardLayout({
   const router = useRouter();
   const { user, isAdmin, isCajero, logout, requireAdminAuth, switchToRole } = useAuth();
 
-  const [storeName, setStoreName] = useState('Comercial Mi Tienda C.A.');
-  const [bcvRate, setBcvRate] = useState<number>(848.55);
+  const [storeName, setStoreName] = useState('Venemarket Express C.A.');
+  const [bcvRate, setBcvRate] = useState<number>(852.42);
   const [showBcvModal, setShowBcvModal] = useState(false);
   const [tempBcvRate, setTempBcvRate] = useState('');
   const [isSyncingBcv, setIsSyncingBcv] = useState(false);
@@ -113,64 +114,105 @@ export default function DesktopDashboardLayout({
   const [phoneConnected, setPhoneConnected] = useState<boolean>(false);
   const [phoneDeviceName, setPhoneDeviceName] = useState<string>('');
   const [currentTime, setCurrentTime] = useState('');
+  const [clockDate, setClockDate] = useState('');
+  const [clockTime, setClockTime] = useState('');
   const [isScreenLocked, setIsScreenLocked] = useState(false);
   const [isLoginDismissed, setIsLoginDismissed] = useState(false);
   const [activeRubroInfo, setActiveRubroInfo] = useState<{ id: string; name: string; icon: string }>({
-    id: 'bodega',
-    name: 'Bodega',
-    icon: '🏪',
+    id: 'supermercado',
+    name: 'Supermercado & Minimarket',
+    icon: '🛒',
   });
 
+  const [currentTheme, setCurrentTheme] = useState<ThemeMode>('light');
   const [currentUIStyle, setCurrentUIStyle] = useState<'industrial' | 'glassmorphism'>('industrial');
+
+  // Modal Global de Vinculación de Celular / Escáner Móvil
+  const [showMobileModal, setShowMobileModal] = useState(false);
+  const [mobileQrUrl, setMobileQrUrl] = useState('');
+  const [mobileScannerUrl, setMobileScannerUrl] = useState('');
+  const [mobileLocalIp, setMobileLocalIp] = useState('');
+  const [isGeneratingQr, setIsGeneratingQr] = useState(false);
+
+  const handleOpenMobileModal = async () => {
+    setShowMobileModal(true);
+    setIsGeneratingQr(true);
+    try {
+      const res = await fetch('/api/scanner/status?session=caja-1');
+      if (res.ok) {
+        const d = await res.json();
+        const fullUrl = d.scannerUrl || (typeof window !== 'undefined' ? `${window.location.origin}/scanner?session=caja-1` : '');
+        setMobileScannerUrl(fullUrl);
+        setMobileLocalIp(d.localIp || '');
+        if (d.phoneConnected) {
+          setPhoneConnected(true);
+          setPhoneDeviceName(d.deviceName || 'Caja Móvil');
+        }
+        if (fullUrl) {
+          const qr = await QRCode.toDataURL(fullUrl, {
+            width: 260,
+            margin: 1,
+            color: { dark: '#0e4f5a', light: '#ffffff' },
+          });
+          setMobileQrUrl(qr);
+        }
+      }
+    } catch {
+      const fallbackUrl = typeof window !== 'undefined' ? `${window.location.origin}/scanner?session=caja-1` : '';
+      setMobileScannerUrl(fallbackUrl);
+      if (fallbackUrl) {
+        QRCode.toDataURL(fallbackUrl, { width: 260, margin: 1 }).then(setMobileQrUrl).catch(() => { });
+      }
+    } finally {
+      setIsGeneratingQr(false);
+    }
+  };
 
   useEffect(() => {
     try {
-      const s = (localStorage.getItem('venematic_ui_style') as 'industrial' | 'glassmorphism') || 'industrial';
+      const t = getCurrentTheme();
+      setCurrentTheme(t);
+      const s = t === 'light' ? 'industrial' : ((localStorage.getItem('venematic_ui_style') as 'industrial' | 'glassmorphism') || 'industrial');
       setCurrentUIStyle(s);
-      const palette = localStorage.getItem('venematic_branding_palette') || 'sky';
+      applyTheme(t);
+      const palette = localStorage.getItem('venematic_branding_palette') || 'petrol';
       const industrialBg = (localStorage.getItem('venematic_industrial_bg') as any) || 'white';
-      const customBg = localStorage.getItem('venematic_custom_bg_color') || '#ffffff';
+      const customBg = localStorage.getItem('venematic_custom_bg_color') || '#f8fafc';
       applyBrandingToDOM({
         paletteId: palette,
         uiStyle: s,
         industrialBg: industrialBg,
         customBgColor: customBg,
-      });
-    } catch {}
+      }, t === 'light' ? 'light' : 'dark');
+    } catch { }
 
-    const handleBrandingUpdated = (e: any) => {
-      if (e.detail?.uiStyle) {
-        setCurrentUIStyle(e.detail.uiStyle);
+    const handleThemeChanged = (e: any) => {
+      if (e.detail) {
+        setCurrentTheme(e.detail);
+        if (e.detail === 'light') {
+          setCurrentUIStyle('industrial');
+        } else {
+          setCurrentUIStyle('glassmorphism');
+        }
       }
     };
-    window.addEventListener('venematic:branding_updated', handleBrandingUpdated);
-    return () => window.removeEventListener('venematic:branding_updated', handleBrandingUpdated);
+    const handleOpenScannerModalEvent = () => {
+      handleOpenMobileModal();
+    };
+    window.addEventListener('venematic:theme_changed', handleThemeChanged);
+    window.addEventListener('venematic:open_scanner_modal', handleOpenScannerModalEvent);
+    return () => {
+      window.removeEventListener('venematic:theme_changed', handleThemeChanged);
+      window.removeEventListener('venematic:open_scanner_modal', handleOpenScannerModalEvent);
+    };
   }, []);
 
-  const handleToggleUIStyle = () => {
-    const nextStyle = currentUIStyle === 'glassmorphism' ? 'industrial' : 'glassmorphism';
-    setCurrentUIStyle(nextStyle);
-    const palette = localStorage.getItem('venematic_branding_palette') || 'sky';
-    const industrialBg = (localStorage.getItem('venematic_industrial_bg') as any) || 'white';
-    const customBg = localStorage.getItem('venematic_custom_bg_color') || '#ffffff';
-    applyBrandingToDOM({
-      paletteId: palette,
-      uiStyle: nextStyle,
-      industrialBg: industrialBg,
-      customBgColor: customBg,
-    });
-    try {
-      localStorage.setItem('venematic_ui_style', nextStyle);
-      db.settings.put({
-        key: 'branding_config',
-        value: {
-          paletteId: palette,
-          uiStyle: nextStyle,
-          industrialBg: industrialBg,
-          customBgColor: customBg,
-        },
-      }).catch(() => {});
-    } catch {}
+  const handleToggleTheme = () => {
+    // Alternar directamente entre Modo Blanco y Modo Oscuro
+    const nextTheme: ThemeMode = currentTheme === 'light' ? 'dark' : 'light';
+    setCurrentTheme(nextTheme);
+    applyTheme(nextTheme);
+    db.settings.put({ key: 'app_theme', value: nextTheme }).catch(() => { });
   };
 
   // Escuchar atajo global de bloqueo rápido de pantalla (Ctrl+L) y eventos
@@ -202,9 +244,9 @@ export default function DesktopDashboardLayout({
           const data = JSON.parse(event.data);
           setPhoneConnected(Boolean(data.connected));
           if (data.deviceName) setPhoneDeviceName(data.deviceName);
-        } catch {}
+        } catch { }
       });
-    } catch {}
+    } catch { }
 
     // Polling ligero de respaldo cada 5s
     const checkStatus = () => {
@@ -214,7 +256,7 @@ export default function DesktopDashboardLayout({
           setPhoneConnected(Boolean(data.connected));
           if (data.deviceName) setPhoneDeviceName(data.deviceName);
         })
-        .catch(() => {});
+        .catch(() => { });
     };
 
     checkStatus();
@@ -230,7 +272,7 @@ export default function DesktopDashboardLayout({
             method: 'DELETE',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ receiptNumber: sale.receiptNumber }),
-          }).catch(() => {});
+          }).catch(() => { });
           return;
         }
 
@@ -277,7 +319,7 @@ export default function DesktopDashboardLayout({
           method: 'DELETE',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ receiptNumber: sale.receiptNumber }),
-        }).catch(() => {});
+        }).catch(() => { });
 
         window.dispatchEvent(new CustomEvent('venematic:mobile_sale_saved', { detail: saleToSave }));
       } catch (err) {
@@ -290,7 +332,7 @@ export default function DesktopDashboardLayout({
         try {
           const d = JSON.parse(e.data);
           if (d.sale) processIncomingSale(d.sale);
-        } catch {}
+        } catch { }
       });
     }
 
@@ -305,7 +347,7 @@ export default function DesktopDashboardLayout({
             }
           }
         })
-        .catch(() => {});
+        .catch(() => { });
     };
     checkPending();
     const pendingTimer = setInterval(checkPending, 4000);
@@ -334,7 +376,7 @@ export default function DesktopDashboardLayout({
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ bcvRate: data.rate }),
-            }).catch(() => {});
+            }).catch(() => { });
           }
         }
       } catch (err) {
@@ -368,20 +410,25 @@ export default function DesktopDashboardLayout({
 
     const updateClock = () => {
       const now = new Date();
-      setCurrentTime(
-        now.toLocaleDateString('es-VE', {
-          weekday: 'short',
-          day: 'numeric',
-          month: 'short',
-        }) +
-          ' ' +
-          now.toLocaleTimeString('es-VE', {
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit',
-            hour12: true,
-          })
-      );
+      // Fecha completa: ej. "Mar, 22 Sep 2026"
+      const dateFormatted = now.toLocaleDateString('es-VE', {
+        weekday: 'short',
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+      });
+      const capitalizedDate = dateFormatted.charAt(0).toUpperCase() + dateFormatted.slice(1);
+      setClockDate(capitalizedDate);
+
+      // Hora precisa con segundos y formato AM/PM
+      const timeFormatted = now.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true,
+      });
+      setClockTime(timeFormatted);
+      setCurrentTime(`${capitalizedDate} ${timeFormatted}`);
     };
     updateClock();
     const timer = setInterval(updateClock, 1000);
@@ -447,7 +494,7 @@ export default function DesktopDashboardLayout({
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ bcvRate: data.rate }),
-          }).catch(() => {});
+          }).catch(() => { });
           setBcvSyncMessage(`✓ Tasa BCV Oficial obtenida en vivo: Bs. ${data.rate.toFixed(2)} (${data.source || 'Scraping'})`);
         } else {
           setBcvSyncMessage('No se pudo obtener la tasa en vivo. Verifica conexión.');
@@ -472,83 +519,107 @@ export default function DesktopDashboardLayout({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ rate: parsed }),
-      }).catch(() => {});
+      }).catch(() => { });
       fetch('/api/scanner/inventory', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ bcvRate: parsed }),
-      }).catch(() => {});
+      }).catch(() => { });
     }
   };
 
   return (
-    <div className="h-screen w-screen flex flex-col bg-white text-slate-900 font-sans overflow-hidden select-none">
+    <div className="h-screen w-screen flex flex-col bg-[#f8fafc] text-slate-900 font-sans overflow-hidden select-none">
       {/* Barra de Estado Superior Profesional */}
-      <header className="h-12 bg-white border-b border-slate-200 px-4 flex items-center justify-between shrink-0 z-20 shadow-xs">
+      <header className="h-14 bg-white dark:bg-[#121c29] border-b border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white px-4 flex items-center justify-between shrink-0 z-20 shadow-2xs layer-shell">
         {/* Identidad del Terminal */}
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 font-black text-sm tracking-tight text-slate-900">
-            <span className="w-6 h-6 rounded brand-badge flex items-center justify-center font-mono text-xs font-bold shadow-xs">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="flex items-center gap-2.5 font-black text-sm tracking-tight text-slate-900 dark:text-white shrink-0">
+            <span className="w-7 h-7 rounded-lg bg-[var(--brand-primary)] text-white flex items-center justify-center font-mono text-sm font-black shadow-xs">
               V
             </span>
-            <span>VENEMATIC POS</span>
+            <span className="font-black text-sm tracking-tight text-slate-900 dark:text-white">VENEMATIC POS</span>
           </div>
-          <span className="h-4 w-px bg-slate-200" />
-          <div className="flex items-center gap-2 text-xs text-slate-600">
-            <span className="font-semibold text-slate-800">{storeName}</span>
-            <Link
-              href="/dashboard/settings"
-              title="Cambiar giro comercial o plantilla estándar (F8)"
-              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-100 hover:bg-sky-50 hover:border-sky-300 text-slate-700 hover:text-sky-900 border border-slate-200 font-bold text-[10px] transition-colors"
-            >
-              <span>{activeRubroInfo.icon}</span>
-              <span>{activeRubroInfo.name}</span>
-            </Link>
-            <span className="text-slate-400">|</span>
-            <span className="inline-flex items-center gap-1 text-emerald-700 font-medium">
-              <span className="w-2 h-2 rounded-full bg-emerald-500" />
-              Terminal Offline 100% Local
+          <span className="h-5 w-px bg-slate-200 dark:bg-slate-700 shrink-0" />
+          <div className="flex flex-col leading-tight min-w-0">
+            <span className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm truncate" title={storeName}>
+              {storeName}
             </span>
-            <span className="text-slate-400">|</span>
-            <CloudSyncWidget />
-            <span className="text-slate-400">|</span>
-            {phoneConnected ? (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-300 font-bold text-[11px] shadow-2xs animate-in fade-in">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span>📱 {phoneDeviceName || 'Celular'} Conectado</span>
-              </span>
-            ) : (
-              <span className="inline-flex items-center gap-1 text-slate-400 text-[11px]">
-                <span className="w-1.5 h-1.5 rounded-full bg-slate-300" />
-                <span>📱 Celular no enlazado</span>
-              </span>
-            )}
+            <span className="text-[10.5px] text-slate-500 dark:text-slate-300 font-medium">
+              Supermercado &amp; Minimarket
+            </span>
           </div>
         </div>
 
-        {/* Tasa BCV & Reloj de Sistema */}
-        <div className="flex items-center gap-2.5">
-          {/* Botón de Alternar Modo: Soft UI Blanco vs Glassmorphism */}
+        {/* Tasa BCV, Estado del Sistema & Atajos */}
+        <div className="flex items-center gap-2 shrink-0">
+          {/* Indicador Offline Local */}
+          <span
+            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-white border border-slate-200 dark:border-slate-700 text-xs font-bold select-none shadow-2xs"
+            title="Terminal operando 100% en modo local offline seguro"
+          >
+            <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block animate-pulse shrink-0" />
+            <span>Offline</span>
+          </span>
+
+          {/* Sincronización en la Nube */}
+          <span
+            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-white border border-slate-200 dark:border-slate-700 text-xs font-bold select-none cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors shadow-2xs"
+            title="Sincronización en tiempo real"
+          >
+            <Cloud className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" />
+            <span>Nube</span>
+          </span>
+
+          {/* Estado Celular Escáner / Vincular Móvil */}
           <button
             type="button"
-            onClick={handleToggleUIStyle}
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold transition-all shadow-xs border select-none pos-theme-toggle"
-            title={`Alternar tema: Actualmente en ${currentUIStyle === 'glassmorphism' ? 'Glassmorphism' : 'Modo Blanco'}`}
+            onClick={handleOpenMobileModal}
+            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full border text-xs font-bold select-none cursor-pointer transition-colors shadow-2xs ${phoneConnected
+                ? 'bg-emerald-50 text-emerald-800 border-emerald-300 hover:bg-emerald-100 font-black dark:bg-emerald-950 dark:text-emerald-300 dark:border-emerald-800'
+                : 'bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-white border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700'
+              }`}
+            title="Clic para vincular celular como escáner inalámbrico con código QR"
           >
-            {currentUIStyle === 'glassmorphism' ? (
-              <>
-                <Sun className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                <span className="text-[11px] font-bold">Modo Blanco</span>
-              </>
-            ) : (
-              <>
-                <Sparkles className="w-3.5 h-3.5 text-purple-600 shrink-0" />
-                <span className="text-[11px] font-bold text-purple-700">Glassmorphism</span>
-              </>
-            )}
+            <Smartphone className={`w-3.5 h-3.5 ${phoneConnected ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-600 dark:text-slate-200'}`} />
+            <span>{phoneConnected ? 'Móvil Conectado' : 'Móvil'}</span>
           </button>
 
-          <span className="h-4 w-px bg-slate-200" />
+          {/* Selector de Tema Inteligente (Claro / Oscuro) con Indicación Visual Inconfundible */}
+          <div className="inline-flex items-center p-0.5 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-2xs select-none">
+            <button
+              type="button"
+              onClick={() => {
+                setCurrentTheme('light');
+                applyTheme('light');
+                db.settings.put({ key: 'app_theme', value: 'light' }).catch(() => { });
+              }}
+              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer ${currentTheme === 'light'
+                  ? 'bg-white text-slate-900 shadow-xs border border-slate-200/90'
+                  : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
+                }`}
+              title="Activar Modo Blanco Profesional"
+            >
+              <Sun className={`w-3.5 h-3.5 ${currentTheme === 'light' ? 'text-amber-500' : 'text-slate-400'}`} />
+              <span>Modo Blanco</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setCurrentTheme('dark');
+                applyTheme('dark');
+                db.settings.put({ key: 'app_theme', value: 'dark' }).catch(() => { });
+              }}
+              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer ${currentTheme === 'dark'
+                  ? 'bg-[#121c29] text-amber-300 shadow-xs border border-slate-700'
+                  : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
+                }`}
+              title="Activar Modo Oscuro"
+            >
+              <Moon className={`w-3.5 h-3.5 ${currentTheme === 'dark' ? 'text-amber-400' : 'text-slate-400'}`} />
+              <span>Oscuro</span>
+            </button>
+          </div>
 
           {/* Tasa BCV con Botón de Ajuste Rápido */}
           <button
@@ -556,112 +627,109 @@ export default function DesktopDashboardLayout({
               setTempBcvRate(bcvRate.toFixed(2));
               setShowBcvModal(true);
             }}
-            className="flex items-center gap-2 px-3 py-1 rounded border border-slate-300 bg-slate-50 hover:bg-slate-100 hover:border-slate-400 text-xs transition-colors"
-            title="Clic para cambiar tasa BCV"
+            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-xs transition-colors shadow-2xs cursor-pointer"
+            title="Clic para cambiar tasa oficial BCV"
           >
-            <span className="text-slate-500 font-medium">Tasa BCV:</span>
-            <span className="font-mono font-black text-slate-900 tabular-numbers">
+            <span className="text-slate-600 dark:text-slate-300 font-bold text-xs">BCV:</span>
+            <span className="font-mono font-black text-slate-900 dark:text-white tabular-numbers text-xs">
               Bs. {bcvRate.toFixed(2)}
             </span>
-            <span className="text-[10px] text-sky-700 font-bold underline">Cambiar</span>
           </button>
 
-          <span className="h-4 w-px bg-slate-200" />
-
-          {/* Reloj */}
-          <span className="text-xs text-slate-500 font-mono tabular-numbers">
-            {currentTime}
-          </span>
+          {/* Reloj Digital del Sistema */}
+          <div
+            className="hidden md:inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-white border border-slate-200 dark:border-slate-700 text-xs font-bold font-mono select-none shadow-2xs shrink-0"
+            title="Fecha y hora oficial del sistema"
+          >
+            <span>{clockDate}</span>
+            <span className="text-slate-400 dark:text-slate-500 font-normal">|</span>
+            <span className="font-black text-slate-900 dark:text-white tabular-numbers">{clockTime}</span>
+          </div>
         </div>
       </header>
 
       {/* Cuerpo Principal: Sidebar + Contenido */}
       <div className="flex-1 flex overflow-hidden">
-        {/* Barra Lateral Blanca Profesional */}
-        <aside className="w-56 bg-white border-r border-slate-200 text-slate-700 flex flex-col justify-between shrink-0 p-3 z-10">
+        {/* Barra Lateral Profesional */}
+        <aside className="w-56 bg-white dark:bg-[#0e1826] border-r border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 flex flex-col justify-between shrink-0 p-3 z-10 layer-shell">
           <div className="space-y-1">
-            <div className="px-3 py-2 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+            <div className="px-3 py-2 text-[10.5px] font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 select-none">
               Operaciones de Caja
             </div>
 
-            {NAV_ITEMS.filter((item) => !item.adminOnly || isAdmin).map((item) => {
+            {NAV_ITEMS.map((item) => {
               const isActive = pathname === item.href || pathname?.startsWith(item.href + '/');
+              const isLocked = item.adminOnly && !isAdmin;
               return (
-                <Link
+                <button
                   key={item.key}
-                  href={item.href}
-                  prefetch={true}
-                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-xs transition-colors duration-75 border select-none ${
-                    isActive
-                      ? 'nav-item-active shadow-xs font-bold'
-                      : 'border-transparent text-slate-600 hover:bg-slate-50 hover:text-slate-900 active:bg-slate-100'
-                  }`}
+                  type="button"
+                  onClick={async (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (isLocked) {
+                      const ok = await requireAdminAuth();
+                      if (!ok) return;
+                    }
+                    router.push(item.href);
+                  }}
+                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs transition-colors select-none cursor-pointer text-left ${isActive
+                      ? 'nav-item-active font-black border shadow-xs'
+                      : 'text-slate-800 hover:text-slate-950 dark:text-slate-100 hover:dark:text-white hover:bg-slate-100 dark:hover:bg-slate-800 font-bold'
+                    }`}
                 >
-                  <div className="flex items-center gap-2.5">
-                    <span className={isActive ? 'text-sky-700' : 'text-slate-400'}>
+                  <div className="flex items-center gap-3">
+                    <span className={isActive ? '' : 'text-slate-600 dark:text-slate-300'}>
                       {item.icon}
                     </span>
                     <span>{item.label}</span>
                   </div>
-                  <kbd
-                    className={`text-[10px] font-mono px-1.5 py-0.5 rounded border ${
-                      isActive
-                        ? 'bg-sky-100 text-sky-800 border-sky-300 font-bold'
-                        : 'bg-slate-100 text-slate-500 border-slate-200'
-                    }`}
-                  >
-                    {item.shortcut}
-                  </kbd>
-                </Link>
+                  {isLocked && (
+                    <Lock className="w-3.5 h-3.5 text-slate-400 dark:text-slate-400 shrink-0" />
+                  )}
+                </button>
               );
             })}
           </div>
 
-          {/* Pie del Sidebar: Usuario / Rol Activo + Cerrar Sesión */}
-          <div className="pt-3 border-t border-slate-200 flex items-center justify-between text-xs text-slate-600">
-            <div className="flex items-center gap-2">
-              <div className={`w-8 h-8 rounded-lg font-black flex items-center justify-center text-xs border ${
-                isAdmin
-                  ? 'bg-indigo-700 text-white border-indigo-600 shadow-xs'
-                  : 'bg-sky-700 text-white border-sky-600 shadow-xs'
-              }`}>
+          {/* Pie del Sidebar: Avatar Circular + Administrador General + Pasar a */}
+          <div className="pt-3 border-t border-[#d9e2ec] dark:border-slate-800 flex flex-col items-center text-center">
+            {/* Avatar circular con borde blanco */}
+            <div className="w-16 h-16 rounded-full border-2 border-white dark:border-slate-700 shadow-md overflow-hidden bg-slate-300 dark:bg-slate-700 relative flex items-center justify-center">
+              <img
+                src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80"
+                alt="Usuario"
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                }}
+              />
+              <div className="absolute inset-0 flex items-center justify-center bg-[var(--brand-primary)] text-white font-black text-sm">
                 {isAdmin ? 'AD' : 'C1'}
-              </div>
-              <div className="flex flex-col">
-                <span className="font-bold text-slate-900 leading-tight">
-                  {user ? user.name : 'Iniciando...'}
-                </span>
-                <div className="flex items-center gap-1 mt-0.5">
-                  <span className={`text-[10px] font-semibold flex items-center gap-1 ${
-                    isAdmin ? 'text-indigo-600' : 'text-emerald-600'
-                  }`}>
-                    <span className={`w-1.5 h-1.5 rounded-full ${isAdmin ? 'bg-indigo-600' : 'bg-emerald-500'}`} />
-                    {isAdmin ? 'Administrador' : 'Cajero'}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => switchToRole(isAdmin ? 'cajero' : 'admin')}
-                    className={`text-[10px] font-bold px-1.5 py-0.5 rounded border transition-all ${
-                      isAdmin
-                        ? 'text-slate-600 bg-slate-100 hover:bg-slate-200 border-slate-300'
-                        : 'text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border-indigo-200'
-                    }`}
-                    title={isAdmin ? 'Cambiar a modo Cajero' : 'Cambiar a modo Administrador'}
-                  >
-                    {isAdmin ? 'Pasar a Cajero' : 'Cambiar a Admin'}
-                  </button>
-                </div>
               </div>
             </div>
 
-            <div className="flex items-center gap-1">
+            <span className="font-black text-slate-900 dark:text-white text-xs mt-2">
+              {isAdmin ? 'Administrador General' : user ? user.name : 'Cajero Activo'}
+            </span>
+
+            <div className="flex items-center gap-1.5 mt-1 text-[11px] text-slate-600 dark:text-slate-300 font-bold">
+              <span>Pasar a</span>
+              <button
+                type="button"
+                onClick={() => switchToRole(isAdmin ? 'cajero' : 'admin')}
+                className="p-1 hover:text-slate-950 dark:hover:text-white text-slate-600 dark:text-slate-300 transition-colors"
+                title={isAdmin ? 'Pasar a Cajero' : 'Cambiar a Admin'}
+              >
+                <Users className="w-3.5 h-3.5" />
+              </button>
               <button
                 type="button"
                 onClick={() => setIsScreenLocked(true)}
-                className="p-1.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
+                className="p-1 hover:text-amber-600 dark:hover:text-amber-400 text-slate-600 dark:text-slate-300 transition-colors"
                 title="Bloquear Pantalla de Seguridad (Ctrl+L)"
               >
-                <Lock className="w-4 h-4" />
+                <Lock className="w-3.5 h-3.5" />
               </button>
               <button
                 type="button"
@@ -669,17 +737,17 @@ export default function DesktopDashboardLayout({
                   setIsLoginDismissed(false);
                   logout();
                 }}
-                className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
-                title="Cerrar Sesión / Cambiar Usuario"
+                className="p-1 hover:text-rose-600 dark:hover:text-rose-400 text-slate-600 dark:text-slate-300 transition-colors"
+                title="Cerrar Sesión"
               >
-                <LogOut className="w-4 h-4" />
+                <LogOut className="w-3.5 h-3.5" />
               </button>
             </div>
           </div>
         </aside>
 
         {/* Área de Trabajo */}
-        <main className="flex-1 bg-slate-50 overflow-hidden flex flex-col">
+        <main className="flex-1 bg-[#eef2f5] overflow-hidden flex flex-col">
           {children}
         </main>
       </div>
@@ -782,6 +850,139 @@ export default function DesktopDashboardLayout({
                 className="px-4 py-2 rounded-lg bg-sky-700 hover:bg-sky-800 text-white text-xs font-bold shadow-sm"
               >
                 Guardar Tasa Manual
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Global: Vincular Celular como Escáner Móvil */}
+      {showMobileModal && (
+        <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-xs z-50 flex items-center justify-center p-4 select-none animate-in fade-in duration-150">
+          <div className="bg-white rounded-2xl shadow-2xl border border-slate-300 w-full max-w-md overflow-hidden flex flex-col">
+            {/* Header */}
+            <div className="p-4 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-[#0e4f5a] text-white flex items-center justify-center font-bold">
+                  <Smartphone className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="font-black text-sm text-slate-900 tracking-tight">
+                    Vincular Celular como Escáner
+                  </h3>
+                  <p className="text-[11px] text-slate-500">
+                    Cámara móvil lectora de códigos de barras y fotos de productos
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowMobileModal(false)}
+                className="w-7 h-7 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200 flex items-center justify-center cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Contenido */}
+            <div className="p-6 flex flex-col items-center text-center space-y-4">
+              {/* Código QR Generado Dinámicamente */}
+              <div className="p-3 bg-white border-2 border-slate-200 rounded-2xl shadow-sm relative group">
+                {mobileQrUrl ? (
+                  <img
+                    src={mobileQrUrl}
+                    alt="Escáner QR Celular"
+                    className="w-56 h-56 object-contain"
+                  />
+                ) : (
+                  <div className="w-56 h-56 flex flex-col items-center justify-center text-slate-400 gap-2">
+                    <RefreshCw className="w-6 h-6 animate-spin text-[#0e4f5a]" />
+                    <span className="text-xs font-semibold">Generando código QR...</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Estado de Conexión del Teléfono */}
+              <div
+                className={`px-3.5 py-1.5 rounded-full text-xs font-bold border flex items-center gap-2 ${phoneConnected
+                    ? 'bg-emerald-50 text-emerald-800 border-emerald-300 shadow-2xs'
+                    : 'bg-amber-50 text-amber-800 border-amber-300'
+                  }`}
+              >
+                <span
+                  className={`w-2 h-2 rounded-full ${phoneConnected ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'
+                    }`}
+                />
+                <span>
+                  {phoneConnected
+                    ? `¡Celular Conectado! (${phoneDeviceName || 'Móvil'})`
+                    : 'Esperando escaneo del código QR con el móvil...'}
+                </span>
+              </div>
+
+              {/* Instrucciones Paso a Paso */}
+              <div className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-left space-y-2 text-xs">
+                <div className="flex items-start gap-2">
+                  <span className="w-5 h-5 rounded-full bg-teal-100 text-[#0e4f5a] font-bold flex items-center justify-center shrink-0 text-[11px]">
+                    1
+                  </span>
+                  <span className="text-slate-600">
+                    Conecta tu celular al <b>mismo Wi-Fi</b> o red local que esta computadora.
+                  </span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="w-5 h-5 rounded-full bg-teal-100 text-[#0e4f5a] font-bold flex items-center justify-center shrink-0 text-[11px]">
+                    2
+                  </span>
+                  <span className="text-slate-600">
+                    Abre la cámara de tu teléfono, apunta a este código QR y toca el enlace.
+                  </span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="w-5 h-5 rounded-full bg-teal-100 text-[#0e4f5a] font-bold flex items-center justify-center shrink-0 text-[11px]">
+                    3
+                  </span>
+                  <span className="text-slate-600">
+                    ¡Listo! Podrás usar la cámara de tu móvil para escanear productos y se agregarán a la venta en vivo.
+                  </span>
+                </div>
+              </div>
+
+              {/* URL directa */}
+              {mobileScannerUrl && (
+                <div className="w-full text-left">
+                  <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">
+                    O escribe esta dirección en el navegador de tu celular:
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      readOnly
+                      value={mobileScannerUrl}
+                      className="flex-1 px-3 py-1.5 bg-slate-100 border border-slate-300 rounded-lg text-xs font-mono text-slate-700 select-all"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        navigator.clipboard.writeText(mobileScannerUrl);
+                      }}
+                      className="px-3 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs rounded-lg cursor-pointer"
+                    >
+                      Copiar
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="p-3 bg-slate-50 border-t border-slate-200 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setShowMobileModal(false)}
+                className="px-4 py-2 bg-[#0e4f5a] hover:bg-[#0a3d46] text-white font-bold text-xs rounded-lg shadow-sm cursor-pointer"
+              >
+                Cerrar
               </button>
             </div>
           </div>

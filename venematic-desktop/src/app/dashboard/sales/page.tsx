@@ -157,9 +157,9 @@ export default function CashierShiftSalesPage() {
         <div className="flex items-center gap-2">
           <button
             onClick={loadSales}
-            className="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-100 border border-slate-700/80 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all active:scale-95 shadow-xs"
+            className="px-3.5 py-2 bg-white hover:bg-slate-50 text-slate-800 border border-slate-300 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all active:scale-95 shadow-xs"
           >
-            <RefreshCw className={`w-3.5 h-3.5 text-emerald-400 ${isLoading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-3.5 h-3.5 text-emerald-600 ${isLoading ? 'animate-spin' : ''}`} />
             <span>Actualizar</span>
           </button>
 
@@ -178,76 +178,76 @@ export default function CashierShiftSalesPage() {
       {/* ========================================================================= */}
       <div className="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 shrink-0">
         {/* Total General Recaudado */}
-        <div className="bg-white/90 p-3.5 rounded-2xl border border-slate-200/80 shadow-2xs flex items-center justify-between">
+        <div className="bg-white p-4 rounded-2xl border border-slate-200/90 shadow-xs flex items-center justify-between">
           <div className="space-y-0.5">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+            <span className="text-[10px] font-black text-slate-500 uppercase tracking-wider block">
               Total Recaudado (Turno)
             </span>
-            <p className="font-mono font-black text-xl text-slate-100 leading-tight tabular-numbers">
+            <p className="font-mono font-black text-2xl text-slate-950 leading-tight tabular-numbers">
               {formatUSD(totalSalesUSD)}
             </p>
-            <p className="font-mono font-bold text-xs text-emerald-400 tabular-numbers">
+            <p className="font-mono font-black text-xs text-emerald-700 tabular-numbers">
               ≈ {formatVES(totalSalesVES)}
             </p>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-500/30 font-black text-lg">
+          <div className="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center justify-center shrink-0 font-black text-xl shadow-2xs">
             $
           </div>
         </div>
 
         {/* Cantidad de Ventas */}
-        <div className="bg-white/90 p-3.5 rounded-2xl border border-slate-200/80 shadow-2xs flex items-center justify-between">
+        <div className="bg-white p-4 rounded-2xl border border-slate-200/90 shadow-xs flex items-center justify-between">
           <div className="space-y-0.5">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+            <span className="text-[10px] font-black text-slate-500 uppercase tracking-wider block">
               Tickets Emitidos
             </span>
-            <p className="font-mono font-black text-xl text-slate-100 leading-tight tabular-numbers">
+            <p className="font-mono font-black text-2xl text-slate-950 leading-tight tabular-numbers">
               {sales.length}
             </p>
-            <p className="text-[11px] text-slate-400 font-medium">
+            <p className="text-[11px] text-slate-600 font-bold">
               Hoy · Sesión activa
             </p>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-sky-500/20 text-sky-400 flex items-center justify-center shrink-0 border border-sky-500/30">
+          <div className="w-11 h-11 rounded-xl bg-sky-50 text-sky-700 border border-sky-200 flex items-center justify-center shrink-0 shadow-2xs">
             <Receipt className="w-5 h-5" />
           </div>
         </div>
 
         {/* Ventas Celular Móvil */}
-        <div className="bg-sky-950/40 p-3.5 rounded-2xl border border-sky-600/40 shadow-2xs flex items-center justify-between">
+        <div className="bg-white p-4 rounded-2xl border border-slate-200/90 shadow-xs flex items-center justify-between">
           <div className="space-y-0.5">
             <div className="flex items-center gap-1.5">
-              <span className="text-[10px] font-black text-sky-300 uppercase tracking-wider block">
+              <span className="text-[10px] font-black text-slate-500 uppercase tracking-wider block">
                 Caja Celular Móvil
               </span>
-              <span className="w-2 h-2 rounded-full bg-sky-400 animate-pulse" />
+              <span className="w-2 h-2 rounded-full bg-sky-500 animate-pulse" />
             </div>
-            <p className="font-mono font-black text-xl text-white leading-tight tabular-numbers drop-shadow-xs">
+            <p className="font-mono font-black text-2xl text-slate-950 leading-tight tabular-numbers">
               {formatUSD(totalMobileUSD)}
             </p>
-            <p className="text-[11px] font-bold text-sky-200">
+            <p className="text-[11px] font-bold text-sky-700">
               {mobileSales.length} venta{mobileSales.length !== 1 ? 's' : ''} desde celular
             </p>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-sky-500 text-white flex items-center justify-center shrink-0 shadow-md">
+          <div className="w-11 h-11 rounded-xl bg-sky-100 text-sky-700 border border-sky-300 flex items-center justify-center shrink-0 shadow-2xs">
             <Smartphone className="w-5 h-5" />
           </div>
         </div>
 
         {/* Ventas Terminal PC */}
-        <div className="bg-white/90 p-3.5 rounded-2xl border border-slate-200/80 shadow-2xs flex items-center justify-between">
+        <div className="bg-white p-4 rounded-2xl border border-slate-200/90 shadow-xs flex items-center justify-between">
           <div className="space-y-0.5">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+            <span className="text-[10px] font-black text-slate-500 uppercase tracking-wider block">
               Terminal PC Caja
             </span>
-            <p className="font-mono font-black text-xl text-slate-100 leading-tight tabular-numbers">
+            <p className="font-mono font-black text-2xl text-slate-950 leading-tight tabular-numbers">
               {formatUSD(totalDesktopUSD)}
             </p>
-            <p className="text-[11px] font-bold text-slate-400">
+            <p className="text-[11px] font-bold text-indigo-700">
               {desktopSales.length} venta{desktopSales.length !== 1 ? 's' : ''} en mostrador
             </p>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-slate-800 text-slate-300 flex items-center justify-center shrink-0 border border-slate-700">
+          <div className="w-11 h-11 rounded-xl bg-indigo-50 text-indigo-700 border border-indigo-200 flex items-center justify-center shrink-0 shadow-2xs">
             <Monitor className="w-5 h-5" />
           </div>
         </div>
@@ -265,12 +265,12 @@ export default function CashierShiftSalesPage() {
             placeholder="Buscar por nro. ticket, cajero o producto..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-8 py-2 bg-slate-800/90 border border-slate-700/80 rounded-xl text-xs font-medium text-slate-100 shadow-2xs focus:outline-none focus:ring-2 focus:ring-emerald-500 placeholder:text-slate-400"
+            className="w-full pl-9 pr-8 py-2 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-900 shadow-2xs focus:outline-none focus:ring-2 focus:ring-emerald-500 placeholder:text-slate-400"
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 font-bold text-xs"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 font-bold text-xs"
             >
               ✕
             </button>
@@ -279,13 +279,13 @@ export default function CashierShiftSalesPage() {
 
         {/* Filtros por Origen y Pago */}
         <div className="flex flex-wrap items-center gap-1.5 text-xs">
-          <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mr-1">Origen:</span>
+          <span className="text-[11px] font-black text-slate-600 uppercase tracking-wider mr-1">Origen:</span>
           <button
             onClick={() => setFilterOrigin('all')}
             className={`px-3 py-1.5 rounded-xl font-bold transition-all border ${
               filterOrigin === 'all'
-                ? 'bg-emerald-600 border-emerald-500 text-white shadow-xs'
-                : 'bg-slate-800/80 text-slate-200 border-slate-700 hover:bg-slate-700 hover:text-white'
+                ? 'bg-slate-900 border-slate-900 text-white shadow-xs'
+                : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-100'
             }`}
           >
             Todas ({sales.length})
@@ -295,7 +295,7 @@ export default function CashierShiftSalesPage() {
             className={`px-3 py-1.5 rounded-xl font-bold flex items-center gap-1 transition-all border ${
               filterOrigin === 'mobile'
                 ? 'bg-sky-600 border-sky-500 text-white shadow-xs'
-                : 'bg-slate-800/80 text-slate-200 border-slate-700 hover:bg-slate-700 hover:text-white'
+                : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-100'
             }`}
           >
             <Smartphone className="w-3.5 h-3.5" />
@@ -305,169 +305,169 @@ export default function CashierShiftSalesPage() {
             onClick={() => setFilterOrigin('desktop')}
             className={`px-3 py-1.5 rounded-xl font-bold flex items-center gap-1 transition-all border ${
               filterOrigin === 'desktop'
-                ? 'bg-emerald-600 border-emerald-500 text-white shadow-xs'
-                : 'bg-slate-800/80 text-slate-200 border-slate-700 hover:bg-slate-700 hover:text-white'
+                ? 'bg-indigo-600 border-indigo-500 text-white shadow-xs'
+                : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-100'
             }`}
           >
             <Monitor className="w-3.5 h-3.5" />
             <span>PC Caja ({desktopSales.length})</span>
           </button>
 
-          <span className="text-slate-600 mx-1">|</span>
+          <span className="text-slate-400 mx-1">|</span>
 
           {/* Selector de Pago */}
           <select
             value={filterPayment}
             onChange={(e) => setFilterPayment(e.target.value)}
-            className="px-2.5 py-1.5 bg-slate-800 border border-slate-700 rounded-xl font-bold text-slate-100 text-xs outline-none focus:ring-2 focus:ring-emerald-500 shadow-2xs"
+            className="px-2.5 py-1.5 bg-white border border-slate-300 rounded-xl font-bold text-slate-800 text-xs outline-none focus:ring-2 focus:ring-emerald-500 shadow-2xs"
           >
-              <option value="all">Cualquier Método de Pago</option>
-              <option value="cash_usd">Efectivo $ USD</option>
-              <option value="cash_ves">Efectivo Bs. VES</option>
-              <option value="pago_movil">Pago Móvil</option>
-              <option value="card_debit">Tarjeta Débito</option>
-            </select>
-          </div>
+            <option value="all">Cualquier Método de Pago</option>
+            <option value="cash_usd">Efectivo $ USD</option>
+            <option value="cash_ves">Efectivo Bs. VES</option>
+            <option value="pago_movil">Pago Móvil</option>
+            <option value="card_debit">Tarjeta Débito</option>
+          </select>
         </div>
+      </div>
 
-        {/* ========================================================================= */}
-        {/* TABLA PRINCIPAL DE VENTAS DEL TURNO                                       */}
-        {/* ========================================================================= */}
-        <div className="flex-1 px-4 pb-4 overflow-hidden">
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xs h-full flex flex-col overflow-hidden">
-            {/* Cabecera de la tabla */}
-            <div className="overflow-x-auto flex-1">
-              <table className="w-full text-left text-xs border-collapse">
-                <thead className="bg-slate-100/90 text-slate-600 font-bold uppercase text-[10px] tracking-wider sticky top-0 border-b border-slate-200 z-10">
-                  <tr>
-                    <th className="py-3 px-4">Ticket</th>
-                    <th className="py-3 px-4">Origen</th>
-                    <th className="py-3 px-4">Hora</th>
-                    <th className="py-3 px-4">Artículos</th>
-                    <th className="py-3 px-4">Método de Pago</th>
-                    <th className="py-3 px-4 text-right">Total $ USD</th>
-                    <th className="py-3 px-4 text-right">Total Bs. VES</th>
-                    <th className="py-3 px-4 text-center">Acciones</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {filteredSales.map((sale, idx) => {
-                    const isMobile = saleOrigin(sale) === 'mobile';
-                    const saleDate = new Date(sale.timestamp);
-                    const timeFormatted = !isNaN(saleDate.getTime())
-                      ? saleDate.toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
-                      : '--:--';
+      {/* ========================================================================= */}
+      {/* TABLA PRINCIPAL DE VENTAS DEL TURNO                                       */}
+      {/* ========================================================================= */}
+      <div className="flex-1 px-4 pb-4 overflow-hidden">
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-2xs h-full flex flex-col overflow-hidden">
+          {/* Cabecera de la tabla */}
+          <div className="overflow-x-auto flex-1">
+            <table className="w-full text-left text-xs border-collapse">
+              <thead className="bg-slate-100 text-slate-700 font-black uppercase text-[10px] tracking-wider sticky top-0 border-b border-slate-200 z-10">
+                <tr>
+                  <th className="py-3 px-4">Ticket</th>
+                  <th className="py-3 px-4">Origen</th>
+                  <th className="py-3 px-4">Hora</th>
+                  <th className="py-3 px-4">Artículos</th>
+                  <th className="py-3 px-4">Método de Pago</th>
+                  <th className="py-3 px-4 text-right">Total $ USD</th>
+                  <th className="py-3 px-4 text-right">Total Bs. VES</th>
+                  <th className="py-3 px-4 text-center">Acciones</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {filteredSales.map((sale, idx) => {
+                  const isMobile = saleOrigin(sale) === 'mobile';
+                  const saleDate = new Date(sale.timestamp);
+                  const timeFormatted = !isNaN(saleDate.getTime())
+                    ? saleDate.toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+                    : '--:--';
 
-                    const primaryPayment = sale.payments?.[0];
-                    const hasChange = (sale.changeUSD || 0) > 0 || (sale.changeVES || 0) > 0;
+                  const primaryPayment = sale.payments?.[0];
+                  const hasChange = (sale.changeUSD || 0) > 0 || (sale.changeVES || 0) > 0;
 
-                    return (
-                      <tr
-                        key={sale.receiptNumber || idx}
-                        className="hover:bg-slate-800/40 transition-colors group cursor-pointer"
-                        onClick={() => setSelectedSaleForView(sale)}
-                      >
-                        {/* Nro Ticket */}
-                        <td className="py-3 px-4 font-mono font-black text-slate-100 text-xs whitespace-nowrap">
-                          <div className="flex items-center gap-1.5">
-                            <span className={sale.status === 'voided' ? 'line-through text-slate-400' : ''}>
-                              {sale.receiptNumber}
-                            </span>
-                            {sale.status === 'voided' && (
-                              <span className="px-1.5 py-0.5 rounded text-[9px] font-black bg-rose-600 text-white uppercase shadow-2xs">
-                                ANULADO
-                              </span>
-                            )}
-                          </div>
-                        </td>
-
-                        {/* Origen (Badge Móvil vs PC) */}
-                        <td className="py-3 px-4 whitespace-nowrap">
-                          {isMobile ? (
-                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-black bg-sky-500/20 text-sky-300 border border-sky-500/40 shadow-xs">
-                              <Smartphone className="w-3 h-3 text-sky-400" />
-                              <span>Celular Móvil</span>
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-black bg-slate-800 text-slate-200 border border-slate-700 shadow-xs">
-                              <Monitor className="w-3 h-3 text-emerald-400" />
-                              <span>Caja PC</span>
+                  return (
+                    <tr
+                      key={sale.receiptNumber || idx}
+                      className="hover:bg-slate-50 transition-colors group cursor-pointer"
+                      onClick={() => setSelectedSaleForView(sale)}
+                    >
+                      {/* Nro Ticket */}
+                      <td className="py-3.5 px-4 font-mono font-black text-slate-900 text-xs whitespace-nowrap">
+                        <div className="flex items-center gap-1.5">
+                          <span className={sale.status === 'voided' ? 'line-through text-slate-400' : ''}>
+                            {sale.receiptNumber}
+                          </span>
+                          {sale.status === 'voided' && (
+                            <span className="px-1.5 py-0.5 rounded text-[9px] font-black bg-rose-600 text-white uppercase shadow-2xs">
+                              ANULADO
                             </span>
                           )}
-                        </td>
+                        </div>
+                      </td>
 
-                        {/* Hora */}
-                        <td className="py-3 px-4 text-slate-300 font-mono text-[11px] whitespace-nowrap">
-                          {timeFormatted}
-                        </td>
-
-                        {/* Resumen de Artículos */}
-                        <td className="py-3 px-4 max-w-xs truncate">
-                          <span className="font-bold text-slate-100">
-                            {sale.items?.reduce((sum, i) => sum + i.qty, 0) || 0} ítems
+                      {/* Origen (Badge Móvil vs PC) */}
+                      <td className="py-3.5 px-4 whitespace-nowrap">
+                        {isMobile ? (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-black bg-sky-50 text-sky-700 border border-sky-200 shadow-2xs">
+                            <Smartphone className="w-3 h-3 text-sky-600" />
+                            <span>Celular Móvil</span>
                           </span>
-                          <span className="text-slate-500 mx-1">·</span>
-                          <span className="text-slate-300 text-[11px] truncate">
-                            {sale.items?.map((i) => `${i.name} (x${i.qty})`).join(', ')}
+                        ) : (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-black bg-slate-100 text-slate-800 border border-slate-300 shadow-2xs">
+                            <Monitor className="w-3 h-3 text-emerald-600" />
+                            <span>Caja PC</span>
                           </span>
-                        </td>
+                        )}
+                      </td>
 
-                        {/* Método de Pago y Vuelto */}
-                        <td className="py-3 px-4 whitespace-nowrap">
-                          <div className="flex flex-col gap-0.5">
-                            <span className="font-bold text-slate-100 text-[11px]">
-                              {(sale.payments?.length || 0) > 1
-                                ? '🔄 Mixto'
-                                : primaryPayment?.method === 'cash_usd'
-                                ? '💵 Efectivo $ USD'
-                                : primaryPayment?.method === 'cash_ves'
-                                ? '💴 Efectivo Bs. VES'
-                                : primaryPayment?.method === 'pago_movil'
-                                ? '📲 Pago Móvil'
-                                : primaryPayment?.method === 'card_debit'
-                                ? '💳 Débito'
-                                : primaryPayment?.method === 'card_credit'
-                                ? '💳 Crédito'
-                                : primaryPayment?.method === 'zelle'
-                                ? '⚡ Zelle'
-                                : 'Efectivo'}
+                      {/* Hora */}
+                      <td className="py-3.5 px-4 text-slate-700 font-mono font-bold text-xs whitespace-nowrap">
+                        {timeFormatted}
+                      </td>
+
+                      {/* Resumen de Artículos */}
+                      <td className="py-3.5 px-4 max-w-xs truncate">
+                        <span className="font-black text-slate-900 text-xs">
+                          {sale.items?.reduce((sum, i) => sum + i.qty, 0) || 0} ítems
+                        </span>
+                        <span className="text-slate-400 mx-1.5">·</span>
+                        <span className="text-slate-700 text-xs font-medium truncate">
+                          {sale.items?.map((i) => `${i.name} (x${i.qty})`).join(', ')}
+                        </span>
+                      </td>
+
+                      {/* Método de Pago y Vuelto */}
+                      <td className="py-3.5 px-4 whitespace-nowrap">
+                        <div className="flex flex-col gap-0.5">
+                          <span className="font-bold text-slate-900 text-xs">
+                            {(sale.payments?.length || 0) > 1
+                              ? '🔄 Mixto'
+                              : primaryPayment?.method === 'cash_usd'
+                              ? '💵 Efectivo $ USD'
+                              : primaryPayment?.method === 'cash_ves'
+                              ? '💴 Efectivo Bs. VES'
+                              : primaryPayment?.method === 'pago_movil'
+                              ? '📲 Pago Móvil'
+                              : primaryPayment?.method === 'card_debit'
+                              ? '💳 Débito'
+                              : primaryPayment?.method === 'card_credit'
+                              ? '💳 Crédito'
+                              : primaryPayment?.method === 'zelle'
+                              ? '⚡ Zelle'
+                              : 'Efectivo'}
+                          </span>
+                          {primaryPayment?.reference && (
+                            <span className="text-[10px] font-mono font-bold text-slate-500">
+                              Ref: {primaryPayment.reference}
                             </span>
-                            {primaryPayment?.reference && (
-                              <span className="text-[10px] font-mono text-slate-400">
-                                Ref: {primaryPayment.reference}
-                              </span>
-                            )}
-                            {hasChange && (
-                              <span className="text-[10px] text-emerald-400 font-bold">
-                                Vuelto: ${sale.changeUSD?.toFixed(2)} (Bs. {sale.changeVES?.toFixed(2)})
-                              </span>
-                            )}
-                          </div>
-                        </td>
+                          )}
+                          {hasChange && (
+                            <span className="text-[10px] text-emerald-700 font-bold">
+                              Vuelto: ${sale.changeUSD?.toFixed(2)} (Bs. {sale.changeVES?.toFixed(2)})
+                            </span>
+                          )}
+                        </div>
+                      </td>
 
-                        {/* Total USD */}
-                        <td className="py-3 px-4 text-right font-mono font-black text-slate-100 text-xs tabular-numbers whitespace-nowrap">
-                          {formatUSD(sale.totalUSD)}
-                        </td>
+                      {/* Total USD */}
+                      <td className="py-3.5 px-4 text-right font-mono font-black text-slate-950 text-sm tabular-numbers whitespace-nowrap">
+                        {formatUSD(sale.totalUSD)}
+                      </td>
 
-                        {/* Total VES */}
-                        <td className="py-3 px-4 text-right font-mono font-bold text-emerald-400 text-[11px] tabular-numbers whitespace-nowrap">
-                          {formatVES(sale.totalVES)}
-                        </td>
+                      {/* Total VES */}
+                      <td className="py-3.5 px-4 text-right font-mono font-black text-emerald-700 text-xs tabular-numbers whitespace-nowrap">
+                        {formatVES(sale.totalVES)}
+                      </td>
 
-                        {/* Botón Ver Ticket */}
-                        <td className="py-3 px-4 text-center whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
-                          <button
-                            onClick={() => setSelectedSaleForView(sale)}
-                            className="px-3 py-1.5 bg-slate-800 hover:bg-emerald-600 text-slate-100 hover:text-white border border-slate-700 hover:border-emerald-500 rounded-xl text-[11px] font-black transition-all active:scale-95 flex items-center gap-1.5 mx-auto shadow-xs"
-                          >
-                            <Eye className="w-3.5 h-3.5 text-emerald-400 group-hover:text-white" />
-                            <span>Ver Ticket</span>
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })}
+                      {/* Botón Ver Ticket */}
+                      <td className="py-3.5 px-4 text-center whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                        <button
+                          onClick={() => setSelectedSaleForView(sale)}
+                          className="px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition-all active:scale-95 flex items-center gap-1.5 mx-auto shadow-xs"
+                        >
+                          <Eye className="w-3.5 h-3.5 text-emerald-400" />
+                          <span>Ver Ticket</span>
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
 
                 {filteredSales.length === 0 && !isLoading && (
                   <tr>

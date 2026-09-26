@@ -69,6 +69,14 @@ export async function GET(req: NextRequest) {
     sendEvent('request_inventory', data);
   };
 
+  const onRemoteTrigger = (data: any) => {
+    sendEvent('remote_trigger', data);
+  };
+
+  const onPaymentConfirmed = (data: any) => {
+    sendEvent('payment_confirmed', data);
+  };
+
   scannerEmitter.on('scan', onScan);
   scannerEmitter.on('new_product', onNewProduct);
   scannerEmitter.on('phone_status', onPhoneStatus);
@@ -76,6 +84,8 @@ export async function GET(req: NextRequest) {
   scannerEmitter.on('mobile_sale_completed', onMobileSale);
   scannerEmitter.on('inventory_updated', onInventoryUpdated);
   scannerEmitter.on('request_inventory', onRequestInventory);
+  scannerEmitter.on('remote_trigger', onRemoteTrigger);
+  scannerEmitter.on('payment_confirmed', onPaymentConfirmed);
 
   // Keep alive ping every 15s
   const interval = setInterval(() => {
@@ -91,6 +101,8 @@ export async function GET(req: NextRequest) {
     scannerEmitter.off('mobile_sale_completed', onMobileSale);
     scannerEmitter.off('inventory_updated', onInventoryUpdated);
     scannerEmitter.off('request_inventory', onRequestInventory);
+    scannerEmitter.off('remote_trigger', onRemoteTrigger);
+    scannerEmitter.off('payment_confirmed', onPaymentConfirmed);
     writer.close().catch(() => {});
   });
 

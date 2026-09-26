@@ -747,9 +747,14 @@
           <div class="form-group">
             <label for="sim-plan">Tipo de Licencia</label>
             <select id="sim-plan">
-              <option value="vitalicia">Vitalicia (Perpetua - Sin Vencimiento)</option>
-              <option value="anual">Anual (1 Año de Actualizaciones y Soporte)</option>
-              <option value="demo">Demo / Prueba (15 Días)</option>
+              <option value="starter_trial">Starter - 1ra Cuota $25 (30 Días)</option>
+              <option value="starter_full">Starter - Completo $50 (PERMANENTE)</option>
+              <option value="pro_trial" selected>Pro - 1ra Cuota $37.50 (30 Días)</option>
+              <option value="pro_full">Pro - Completo $75 (PERMANENTE)</option>
+              <option value="demo">Demo Gratuita (15 Días)</option>
+              <option value="trial_15m">Prueba Flash (15 Minutos)</option>
+              <option value="anual">Anual (365 Días)</option>
+              <option value="vitalicia">Vitalicia Legacy</option>
             </select>
           </div>
         </div>
@@ -828,17 +833,28 @@
 
   <!-- SCRIPT DEL SIMULADOR -->
   <script>
-    function simpleHash(str) {
-      let hash = 0;
-      for (let i = 0; i < str.length; i++) {
-        const char = str.charCodeAt(i);
-        hash = ((hash << 5) - hash) + char;
-        hash = hash & hash;
-      }
-      return Math.abs(hash).toString(16).toUpperCase().padStart(8, '0');
+    const MASTER_SIGNING_SALT = 'VENEMATIC_SEC_SALT_2026_AIVYNTRAX_PRO_POS_V2';
+
+    const PLAN_CONFIG = {
+      starter_trial: { prefix: 'STT', days: 30 },
+      starter_full:  { prefix: 'STR', days: null },
+      pro_trial:     { prefix: 'PTT', days: 30 },
+      pro_full:      { prefix: 'PRO', days: null },
+      demo:          { prefix: 'DMO', days: 15 },
+      trial_15m:     { prefix: 'T15', days: '15m' },
+      anual:         { prefix: 'ANL', days: 365 },
+      vitalicia:     { prefix: 'VIT', days: null }
+    };
+
+    async function sha256Hex(str) {
+      const encoder = new TextEncoder();
+      const data = encoder.encode(str);
+      const hashBuffer = await window.crypto.subtle.digest('SHA-256', data);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
     }
 
-    function generateSimulatedKey() {
+    async function generateSimulatedKey() {
       const hwid = document.getElementById('sim-hwid').value.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
       const rif = document.getElementById('sim-rif').value.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
       const plan = document.getElementById('sim-plan').value;
@@ -848,15 +864,27 @@
         return;
       }
 
-      const planCode = plan === 'vitalicia' ? 'VIT' : plan === 'anual' ? 'ANL' : 'DMO';
-      const expCode = plan === 'vitalicia' ? 'PERP' : plan === 'anual' ? '2712' : '15DS';
+      const cfg = PLAN_CONFIG[plan] || PLAN_CONFIG['demo'];
+      let expires;
+      let expCode;
 
-      const sig1 = simpleHash(hwid + rif + planCode + 'SALT1').slice(0, 4);
-      const sig2 = simpleHash(hwid + rif + expCode + 'SALT2').slice(0, 4);
-      const sig3 = simpleHash(sig1 + sig2 + 'SALT3').slice(0, 4);
-      const sig4 = simpleHash(hwid + 'SALT4').slice(0, 4);
+      if (cfg.days === null) {
+        expires = 'NEVER';
+        expCode = 'PERP';
+      } else if (cfg.days === '15m') {
+        expires = '15MIN';
+        expCode = '15MN';
+      } else {
+        const d = new Date(Date.now() + cfg.days * 86400000);
+        expires = d.toISOString().split('T')[0];
+        expCode = expires.replace(/-/g, '').slice(2, 6);
+      }
 
-      const generatedKey = `VNK-${planCode}-${expCode}-${sig1}-${sig2}-${sig3}-${sig4}`;
+      const payloadStr = `${hwid}#${rif}#${plan}#${expires}#${MASTER_SIGNING_SALT}`;
+      const fullHash = await sha256Hex(payloadStr);
+      const sig = `${fullHash.slice(0,4)}-${fullHash.slice(4,8)}-${fullHash.slice(8,12)}-${fullHash.slice(12,16)}`;
+
+      const generatedKey = `VNK-${cfg.prefix}-${expCode}-${sig}`;
 
       document.getElementById('key-text').innerText = generatedKey;
       document.getElementById('sim-result').classList.add('active');

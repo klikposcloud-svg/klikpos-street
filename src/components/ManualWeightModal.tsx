@@ -191,7 +191,7 @@ export default function ManualWeightModal({
                   Sin Cable / Standalone
                 </span>
               </h3>
-              <p className="text-[10px] text-slate-400">
+              <p className="text-xs text-slate-500">
                 Digite el peso indicado en su balanza física de mostrador
               </p>
             </div>
@@ -215,13 +215,13 @@ export default function ManualWeightModal({
           {activeProduct ? (
             <div className="p-3 bg-sky-50 border border-sky-200 rounded-xl flex items-center justify-between gap-2">
               <div className="min-w-0">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-sky-700 block">
+                <span className="text-xs font-bold uppercase tracking-wider text-sky-700 block">
                   Producto a Pesar:
                 </span>
                 <p className="text-xs font-black text-slate-900 truncate">
                   {activeProduct.name}
                 </p>
-                <span className="text-[10px] text-slate-500 font-mono">
+                <span className="text-xs text-slate-500 font-mono">
                   Precio Base: {formatUSD(activeProduct.priceUSD)} por {priceBasis}
                 </span>
               </div>
@@ -232,7 +232,7 @@ export default function ManualWeightModal({
                     setChosenProduct(null);
                     setShowProductDropdown(true);
                   }}
-                  className="px-2 py-1 bg-white border border-sky-300 text-sky-800 rounded-lg text-[10px] font-bold shrink-0 hover:bg-sky-100"
+                  className="px-2 py-1 bg-white border border-sky-300 text-sky-800 rounded-lg text-xs font-bold shrink-0 hover:bg-sky-100"
                 >
                   Cambiar
                 </button>
@@ -241,11 +241,11 @@ export default function ManualWeightModal({
           ) : (
             <div className="p-2.5 bg-slate-50 border border-slate-300 rounded-xl space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-[11px] font-bold text-slate-700 flex items-center gap-1">
+                <span className="text-xs font-bold text-slate-700 flex items-center gap-1">
                   <Tag className="w-3.5 h-3.5 text-sky-600" />
                   <span>¿A qué producto se refiere este peso?</span>
                 </span>
-                <span className="text-[10px] text-slate-400">Opcional</span>
+                <span className="text-xs text-slate-500">Opcional</span>
               </div>
 
               <div className="relative">
@@ -285,9 +285,9 @@ export default function ManualWeightModal({
               </div>
 
               <div className="flex items-center gap-2 pt-1 border-t border-slate-200">
-                <span className="text-[10px] text-slate-500 shrink-0">O fija precio manual por Kg:</span>
+                <span className="text-xs text-slate-500 shrink-0">O fija precio manual por Kg:</span>
                 <div className="relative flex-1">
-                  <span className="absolute left-2 top-1/2 -translate-y-1/2 text-slate-400 font-mono text-[10px]">$</span>
+                  <span className="absolute left-2 top-1/2 -translate-y-1/2 text-slate-500 font-mono text-xs">$</span>
                   <input
                     type="number"
                     step="0.01"
@@ -305,7 +305,7 @@ export default function ManualWeightModal({
           {/* SELECTOR DE UNIDAD: GRAMOS VS KILOS                                      */}
           {/* ========================================================================= */}
           <div className="flex items-center justify-between gap-2">
-            <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wide">
+            <span className="text-xs font-bold text-slate-700 uppercase tracking-wide">
               Unidad de Entrada:
             </span>
             <div className="flex bg-slate-100 p-0.5 rounded-xl border border-slate-200 text-xs font-bold">
@@ -354,7 +354,7 @@ export default function ManualWeightModal({
               </span>
             </div>
 
-            <div className="pt-1.5 border-t border-slate-800/80 flex items-center justify-between text-[11px] font-mono text-slate-400">
+            <div className="pt-1.5 border-t border-slate-800/80 flex items-center justify-between text-xs font-mono text-slate-400">
               <span>Equivalente:</span>
               <span className="text-slate-200 font-bold">
                 {unit === 'g'
@@ -369,11 +369,11 @@ export default function ManualWeightModal({
           {/* ========================================================================= */}
           <div className="p-3 bg-gradient-to-br from-emerald-50 to-teal-50 border-2 border-emerald-400 rounded-xl space-y-1.5 shadow-2xs">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-black uppercase tracking-wider text-emerald-800 flex items-center gap-1">
+              <span className="text-xs font-black uppercase tracking-wider text-emerald-800 flex items-center gap-1">
                 <Calculator className="w-3.5 h-3.5 text-emerald-700" />
                 <span>¿Cómo se calcula el costo?</span>
               </span>
-              <span className="text-[10px] font-mono font-bold text-slate-500">
+              <span className="text-xs font-mono font-bold text-slate-500">
                 Tasa BCV: Bs. {bcvRate.toFixed(2)}
               </span>
             </div>
@@ -394,7 +394,7 @@ export default function ManualWeightModal({
                     <span>Multiplicador aplicado:</span>
                     <b className="text-emerald-700">× {calculation.multiplier.toFixed(3)}</b>
                   </div>
-                  <div className="text-[10px] text-slate-500 font-sans italic pt-0.5">
+                  <div className="text-xs text-slate-500 font-sans italic pt-0.5">
                     Fórmula: Peso ({calculation.multiplier.toFixed(3)}) × Precio (${activePriceUSD.toFixed(2)})
                   </div>
                 </div>
@@ -415,11 +415,11 @@ export default function ManualWeightModal({
                 </div>
               </div>
             ) : (
-              <div className="bg-white/70 p-2 rounded-lg border border-slate-200 text-[11px] text-slate-600 space-y-1">
+              <div className="bg-white/70 p-2 rounded-lg border border-slate-200 text-xs text-slate-600 space-y-1">
                 <p className="font-bold text-slate-800">
                   ⚡ Modo Pre-fijar Peso ({calculation.weightInKg.toFixed(3)} kg)
                 </p>
-                <p className="text-[10px] leading-tight text-slate-500">
+                <p className="text-xs leading-tight text-slate-500">
                   Al confirmar, este peso se aplicará automáticamente al próximo producto que toques en el catálogo, multiplicando su precio por <b className="text-slate-700">{calculation.weightInKg.toFixed(3)} kg</b>.
                 </p>
               </div>
@@ -431,11 +431,11 @@ export default function ManualWeightModal({
           {/* ========================================================================= */}
           <div className="p-2.5 bg-slate-50 border border-slate-200 rounded-xl space-y-1.5">
             <div className="flex items-center justify-between">
-              <label className="text-[11px] font-bold text-slate-800 flex items-center gap-1">
+              <label className="text-xs font-bold text-slate-800 flex items-center gap-1">
                 <Settings2 className="w-3 h-3 text-slate-500" />
                 <span>Base del Precio en Inventario:</span>
               </label>
-              <span className="text-[10px] text-slate-500 font-medium">
+              <span className="text-xs text-slate-500 font-medium">
                 {priceBasis === '100g' ? 'Charcutería (100g)' : priceBasis === '1g' ? 'Especias (1g)' : 'Estándar (1kg)'}
               </span>
             </div>
@@ -444,40 +444,40 @@ export default function ManualWeightModal({
               <button
                 type="button"
                 onClick={() => setPriceBasis('1kg')}
-                className={`p-1.5 rounded-lg border text-left transition-all ${
+                className={`p-2 min-h-[44px] rounded-lg border text-left transition-all ${
                   priceBasis === '1kg'
-                    ? 'bg-white border-amber-500 ring-2 ring-amber-500/20 shadow-xs text-slate-900'
-                    : 'bg-white/60 border-slate-200 text-slate-600 hover:bg-white'
+                    ? 'bg-amber-100 border-amber-500 ring-2 ring-amber-500/30 shadow-xs'
+                    : 'bg-slate-100 hover:bg-slate-200 border-slate-300'
                 }`}
               >
-                <div className="font-black text-[11px] text-amber-700">Por 1 Kilo</div>
-                <div className="text-[9px] text-slate-500">1000g (Común)</div>
+                <div className="font-black text-xs text-amber-950" style={{ color: '#78350f' }}>Por 1 Kilo</div>
+                <div className="text-xs font-bold text-slate-900" style={{ color: '#0f172a' }}>1000g (Común)</div>
               </button>
 
               <button
                 type="button"
                 onClick={() => setPriceBasis('100g')}
-                className={`p-1.5 rounded-lg border text-left transition-all ${
+                className={`p-2 min-h-[44px] rounded-lg border text-left transition-all ${
                   priceBasis === '100g'
-                    ? 'bg-white border-amber-500 ring-2 ring-amber-500/20 shadow-xs text-slate-900'
-                    : 'bg-white/60 border-slate-200 text-slate-600 hover:bg-white'
+                    ? 'bg-amber-100 border-amber-500 ring-2 ring-amber-500/30 shadow-xs'
+                    : 'bg-slate-100 hover:bg-slate-200 border-slate-300'
                 }`}
               >
-                <div className="font-black text-[11px] text-amber-700">Por 100g</div>
-                <div className="text-[9px] text-slate-500">Charcutería</div>
+                <div className="font-black text-xs text-amber-950" style={{ color: '#78350f' }}>Por 100g</div>
+                <div className="text-xs font-bold text-slate-900" style={{ color: '#0f172a' }}>Charcutería</div>
               </button>
 
               <button
                 type="button"
                 onClick={() => setPriceBasis('1g')}
-                className={`p-1.5 rounded-lg border text-left transition-all ${
+                className={`p-2 min-h-[44px] rounded-lg border text-left transition-all ${
                   priceBasis === '1g'
-                    ? 'bg-white border-amber-500 ring-2 ring-amber-500/20 shadow-xs text-slate-900'
-                    : 'bg-white/60 border-slate-200 text-slate-600 hover:bg-white'
+                    ? 'bg-amber-100 border-amber-500 ring-2 ring-amber-500/30 shadow-xs'
+                    : 'bg-slate-100 hover:bg-slate-200 border-slate-300'
                 }`}
               >
-                <div className="font-black text-[11px] text-amber-700">Por 1g</div>
-                <div className="text-[9px] text-slate-500">Granos / Oro</div>
+                <div className="font-black text-xs text-amber-950" style={{ color: '#78350f' }}>Por 1g</div>
+                <div className="text-xs font-bold text-slate-900" style={{ color: '#0f172a' }}>Granos / Oro</div>
               </button>
             </div>
           </div>
@@ -487,10 +487,10 @@ export default function ManualWeightModal({
           {/* ========================================================================= */}
           <div>
             <div className="flex items-center justify-between mb-1">
-              <span className="text-[10px] font-bold text-slate-600 uppercase tracking-wide">
+              <span className="text-xs font-bold text-slate-700 uppercase tracking-wide">
                 Pesos Rápidos Más Comunes:
               </span>
-              <span className="text-[9px] text-slate-400">Clic para rellenar</span>
+              <span className="text-[9px] text-slate-500">Clic para rellenar</span>
             </div>
 
             <div className="grid grid-cols-4 sm:grid-cols-6 gap-1">
@@ -512,7 +512,8 @@ export default function ManualWeightModal({
                   key={p.label}
                   type="button"
                   onClick={() => handlePreset(p.g)}
-                  className="py-1 px-0.5 bg-white hover:bg-amber-50 hover:border-amber-400 border border-slate-300 rounded-lg text-[10px] font-bold text-slate-700 transition-colors shadow-2xs text-center"
+                  className="py-1.5 px-0.5 bg-slate-100 hover:bg-amber-100 hover:border-amber-400 border border-slate-300 rounded-lg text-xs font-black text-slate-950 transition-colors shadow-2xs text-center"
+                  style={{ color: '#0f172a' }}
                 >
                   {p.label}
                 </button>
@@ -523,13 +524,14 @@ export default function ManualWeightModal({
           {/* ========================================================================= */}
           {/* TECLADO NUMÉRICO TÁCTIL                                                   */}
           {/* ========================================================================= */}
-          <div className="grid grid-cols-4 gap-1 pt-0.5">
+          <div className="grid grid-cols-4 gap-1.5 pt-0.5">
             {['7', '8', '9'].map((k) => (
               <button
                 key={k}
                 type="button"
                 onClick={() => handleKey(k)}
-                className="py-2 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-900 font-bold text-sm rounded-lg transition-colors"
+                className="py-2.5 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-950 font-black text-base rounded-lg border border-slate-300 transition-colors shadow-2xs"
+                style={{ color: '#0f172a' }}
               >
                 {k}
               </button>
@@ -537,7 +539,8 @@ export default function ManualWeightModal({
             <button
               type="button"
               onClick={() => handleKey('BACK')}
-              className="py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs rounded-lg border border-rose-200 transition-colors"
+              className="py-2.5 bg-rose-100 hover:bg-rose-200 text-rose-950 font-black text-xs rounded-lg border border-rose-300 transition-colors shadow-2xs flex items-center justify-center"
+              style={{ color: '#881337' }}
               title="Borrar dígito"
             >
               ⌫
@@ -548,7 +551,8 @@ export default function ManualWeightModal({
                 key={k}
                 type="button"
                 onClick={() => handleKey(k)}
-                className="py-2 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-900 font-bold text-sm rounded-lg transition-colors"
+                className="py-2.5 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-950 font-black text-base rounded-lg border border-slate-300 transition-colors shadow-2xs"
+                style={{ color: '#0f172a' }}
               >
                 {k}
               </button>
@@ -556,7 +560,8 @@ export default function ManualWeightModal({
             <button
               type="button"
               onClick={() => handleKey('C')}
-              className="py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs rounded-lg transition-colors"
+              className="py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-950 font-black text-sm rounded-lg border border-slate-300 transition-colors shadow-2xs"
+              style={{ color: '#0f172a' }}
               title="Limpiar"
             >
               C
@@ -567,7 +572,8 @@ export default function ManualWeightModal({
                 key={k}
                 type="button"
                 onClick={() => handleKey(k)}
-                className="py-2 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-900 font-bold text-sm rounded-lg transition-colors"
+                className="py-2.5 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-950 font-black text-base rounded-lg border border-slate-300 transition-colors shadow-2xs"
+                style={{ color: '#0f172a' }}
               >
                 {k}
               </button>
@@ -575,7 +581,8 @@ export default function ManualWeightModal({
             <button
               type="button"
               onClick={() => handleKey('.')}
-              className="py-2 bg-slate-100 hover:bg-slate-200 text-slate-900 font-black text-base rounded-lg transition-colors"
+              className="py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-950 font-black text-lg rounded-lg border border-slate-300 transition-colors shadow-2xs"
+              style={{ color: '#0f172a' }}
             >
               .
             </button>
@@ -583,7 +590,8 @@ export default function ManualWeightModal({
             <button
               type="button"
               onClick={() => handleKey('0')}
-              className="col-span-2 py-2 bg-slate-100 hover:bg-slate-200 text-slate-900 font-bold text-sm rounded-lg transition-colors"
+              className="col-span-2 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-950 font-black text-base rounded-lg border border-slate-300 transition-colors shadow-2xs"
+              style={{ color: '#0f172a' }}
             >
               0
             </button>
@@ -594,14 +602,16 @@ export default function ManualWeightModal({
                   setInputValue((prev) => prev + '00');
                 }
               }}
-              className="py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-lg transition-colors"
+              className="py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-950 font-black text-sm rounded-lg border border-slate-300 transition-colors shadow-2xs"
+              style={{ color: '#0f172a' }}
             >
               00
             </button>
             <button
               type="button"
               onClick={() => setInputValue('')}
-              className="py-2 bg-slate-100 hover:bg-slate-200 text-slate-500 font-bold text-[10px] rounded-lg transition-colors"
+              className="py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-950 font-black text-xs rounded-lg border border-slate-300 transition-colors shadow-2xs"
+              style={{ color: '#0f172a' }}
             >
               Limpiar
             </button>
@@ -609,7 +619,7 @@ export default function ManualWeightModal({
 
           {/* Opción para recordar configuración */}
           <div className="pt-0.5 flex items-center justify-between">
-            <label className="flex items-center gap-1.5 cursor-pointer text-[11px] text-slate-600 select-none">
+            <label className="flex items-center gap-1.5 cursor-pointer text-xs text-slate-700 select-none font-medium">
               <input
                 type="checkbox"
                 checked={saveAsDefault}
@@ -624,11 +634,12 @@ export default function ManualWeightModal({
         {/* ========================================================================= */}
         {/* PIE DE ACCIONES FIJO (NUNCA SE SALE DEL CANVAS)                           */}
         {/* ========================================================================= */}
-        <div className="p-3 sm:p-3.5 bg-slate-50 border-t border-slate-200 flex gap-2 shrink-0">
+        <div className="p-3 sm:p-3.5 bg-slate-100 border-t border-slate-300 flex gap-2 shrink-0">
           <button
             type="button"
             onClick={onClose}
-            className="px-3.5 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs rounded-xl transition-colors shrink-0"
+            className="px-4 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-950 font-black text-xs rounded-xl border border-slate-300 transition-colors shrink-0 shadow-2xs"
+            style={{ color: '#0f172a' }}
           >
             Cancelar (Esc)
           </button>

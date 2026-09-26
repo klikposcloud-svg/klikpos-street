@@ -29,11 +29,14 @@ import {
   AlertTriangle,
   Scale,
   Save,
+  Tag,
 } from 'lucide-react';
 import QRCode from 'qrcode';
 import { useAuth } from '@/context/AuthContext';
 import { removeBackgroundToWhiteCanvas } from '@/lib/background-remover';
 import ProductCostCalculator from '@/components/ProductCostCalculator';
+import ProductLabelModal from '@/components/ProductLabelModal';
+import ProductImageSearchModal from '@/components/ProductImageSearchModal';
 
 export default function DesktopInventoryPage() {
   const { user, isAdmin, isCajero, requireAdminAuth } = useAuth();
@@ -43,6 +46,38 @@ export default function DesktopInventoryPage() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState<LocalProduct | null>(null);
   const [bcvRate, setBcvRate] = useState(848.55);
+
+  // Estados de Búsqueda y Descarga de Fotos Web / Google
+  const [showImageSearchModal, setShowImageSearchModal] = useState(false);
+  const [imageSearchQuery, setImageSearchQuery] = useState('');
+
+  // Estados de Impresión de Etiquetas (Individual y Masivo)
+  const [showLabelModal, setShowLabelModal] = useState(false);
+  const [labelProducts, setLabelProducts] = useState<LocalProduct[]>([]);
+  const [selectedProductIds, setSelectedProductIds] = useState<Set<number>>(new Set());
+
+  const toggleSelectProduct = (id: number) => {
+    setSelectedProductIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedProductIds.size === filtered.length && filtered.length > 0) {
+      setSelectedProductIds(new Set());
+    } else {
+      const allIds = new Set(filtered.map(p => p.id!).filter(Boolean));
+      setSelectedProductIds(allIds);
+    }
+  };
+
+  const handleOpenLabelModal = (prods: LocalProduct[]) => {
+    setLabelProducts(prods);
+    setShowLabelModal(true);
+  };
 
   // Form State para Nuevo / Editar Producto
   const [name, setName] = useState('');
@@ -624,8 +659,20 @@ export default function DesktopInventoryPage() {
   };
 
   const handleOpenMovementsModal = async () => {
-    const list = await db.inventoryMovements.orderBy('createdAt').reverse().limit(100).toArray();
-    setMovementsList(list);
+    try {
+      const list = await db.inventoryMovements.orderBy('timestamp').reverse().limit(100).toArray();
+      setMovementsList(list);
+    } catch (err) {
+      console.warn('Error cargando movimientos ordenados por timestamp, aplicando fallback:', err);
+      try {
+        const all = await db.inventoryMovements.toArray();
+        all.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+        setMovementsList(all.slice(0, 100));
+      } catch (e) {
+        console.error('Error total en Kardex:', e);
+        setMovementsList([]);
+      }
+    }
     setShowMovementsModal(true);
   };
 
@@ -780,22 +827,47 @@ export default function DesktopInventoryPage() {
             />
           </div>
 
+          {/* Botón Imprimir Etiquetas (Individual o Masivo) */}
+          <button
+            onClick={() => {
+              const toPrint = selectedProductIds.size > 0 
+                ? products.filter(p => selectedProductIds.has(p.id!)) 
+                : (filtered.length > 0 ? [filtered[0]] : products.slice(0, 1));
+              if (toPrint.length > 0) {
+                handleOpenLabelModal(toPrint);
+              }
+            }}
+            className={`px-3.5 py-2 font-bold text-xs rounded-lg shadow-2xs flex items-center gap-1.5 transition-all ${
+              selectedProductIds.size > 0
+                ? 'bg-gradient-to-r from-indigo-600 to-sky-600 text-white shadow-md shadow-indigo-500/25 ring-2 ring-indigo-400'
+                : 'bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600 text-slate-700 dark:text-white border border-slate-300 dark:border-slate-600'
+            }`}
+            title="Diseñar e Imprimir Etiquetas de Productos con Código de Barras y Precios ($/Bs)"
+          >
+            <Tag className="w-4 h-4 text-indigo-500 dark:text-indigo-300" />
+            <span>
+              {selectedProductIds.size > 0
+                ? `Imprimir Etiquetas (${selectedProductIds.size})`
+                : 'Imprimir Etiquetas'}
+            </span>
+          </button>
+
           {/* Botón Auditoría / Kardex */}
           <button
             onClick={handleOpenMovementsModal}
-            className="px-3.5 py-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-bold text-xs rounded-lg shadow-2xs flex items-center gap-1.5 transition-colors"
+            className="px-3.5 py-2 bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600 text-slate-700 dark:text-white border border-slate-300 dark:border-slate-600 font-bold text-xs rounded-lg shadow-2xs flex items-center gap-1.5 transition-colors"
             title="Ver historial de mermas, caducidades y ajustes de stock"
           >
-            <History className="w-4 h-4 text-amber-700" />
+            <History className="w-4 h-4 text-amber-600 dark:text-amber-400" />
             <span>Auditoría / Kardex</span>
           </button>
 
           {/* Botón Importar desde Saint / CSV / JSON */}
           <button
             onClick={() => setShowImportModal(true)}
-            className="px-3.5 py-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-bold text-xs rounded-lg shadow-2xs flex items-center gap-1.5 transition-colors"
+            className="px-3.5 py-2 bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600 text-slate-700 dark:text-white border border-slate-300 dark:border-slate-600 font-bold text-xs rounded-lg shadow-2xs flex items-center gap-1.5 transition-colors"
           >
-            <UploadCloud className="w-4 h-4 text-sky-700" />
+            <UploadCloud className="w-4 h-4 text-sky-600 dark:text-sky-400" />
             <span>Importar Catálogo</span>
           </button>
 
@@ -816,6 +888,15 @@ export default function DesktopInventoryPage() {
           <table className="w-full text-left border-collapse text-xs">
             <thead className="bg-slate-100 border-b border-slate-300 sticky top-0 font-black text-slate-800 uppercase tracking-wider text-[11px] z-10 shadow-xs">
               <tr>
+                <th className="py-3.5 px-3 text-center w-10">
+                  <input
+                    type="checkbox"
+                    checked={filtered.length > 0 && selectedProductIds.size === filtered.length}
+                    onChange={toggleSelectAll}
+                    className="w-4 h-4 rounded text-sky-600 focus:ring-0 cursor-pointer"
+                    title="Seleccionar todos para imprimir etiquetas"
+                  />
+                </th>
                 <th className="py-3.5 px-3 text-center w-14">Foto</th>
                 <th className="py-3.5 px-4 w-36">Código / Barras</th>
                 <th className="py-3.5 px-4 min-w-[200px]">Producto</th>
@@ -824,7 +905,7 @@ export default function DesktopInventoryPage() {
                 <th className="py-3.5 px-4 text-right w-32">Precio Bs</th>
                 <th className="py-3.5 px-4 text-center w-28">Stock Actual</th>
                 <th className="py-3.5 px-4 text-center w-28">Ajuste Rápido</th>
-                <th className="py-3.5 px-4 text-center w-28">Acciones</th>
+                <th className="py-3.5 px-4 text-center w-40">Acciones</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200/70">
@@ -848,6 +929,17 @@ export default function DesktopInventoryPage() {
                         : 'bg-slate-100/50'
                     } hover:bg-sky-500/20`}
                   >
+                    {/* Checkbox Selección para Etiquetas */}
+                    <td className="py-3.5 px-3 text-center" onClick={(e) => e.stopPropagation()}>
+                      <input
+                        type="checkbox"
+                        checked={selectedProductIds.has(p.id!)}
+                        onChange={() => toggleSelectProduct(p.id!)}
+                        className="w-4 h-4 rounded text-sky-600 focus:ring-0 cursor-pointer"
+                        title="Seleccionar para imprimir etiqueta"
+                      />
+                    </td>
+
                     {/* Miniatura Foto */}
                     <td className="py-3.5 px-3 text-center">
                       <div className="w-12 h-12 rounded-lg bg-slate-100 border border-slate-300 overflow-hidden mx-auto flex items-center justify-center shadow-2xs">
@@ -884,7 +976,7 @@ export default function DesktopInventoryPage() {
 
                     {/* Categoría con Color Específico Distintivo */}
                     <td className="py-3.5 px-4">
-                      <span className={`inline-block px-2.5 py-1 rounded-md text-[11px] font-bold uppercase tracking-wider ${getCategoryBadge(p.category)}`}>
+                      <span className={`inline-flex items-center h-6 px-2.5 rounded-md text-[10px] font-bold uppercase tracking-wider whitespace-nowrap ${getCategoryBadge(p.category)}`}>
                         {p.category}
                       </span>
                     </td>
@@ -950,13 +1042,25 @@ export default function DesktopInventoryPage() {
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
+                            handleOpenLabelModal([p]);
+                          }}
+                          className="px-2.5 py-1.5 rounded-lg bg-indigo-100/90 hover:bg-indigo-200 border border-indigo-300 flex items-center gap-1.5 text-[11px] font-black shadow-2xs transition-all active:scale-95 cursor-pointer"
+                          title="Diseñar e Imprimir Etiqueta con Código de Barras y Precios ($/Bs)"
+                        >
+                          <Tag className="w-3.5 h-3.5 shrink-0 text-indigo-700" style={{ color: '#4338ca', stroke: '#4338ca' }} />
+                          <span className="text-slate-900 font-bold" style={{ color: '#0f172a' }}>Etiqueta</span>
+                        </button>
+
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
                             handleOpenAdjustmentModal(p);
                           }}
-                          className="px-2 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 flex items-center gap-1 text-[11px] font-bold shadow-2xs transition-all active:scale-95"
+                          className="px-2.5 py-1.5 rounded-lg bg-amber-100/90 hover:bg-amber-200 border border-amber-300 flex items-center gap-1 text-[11px] font-black shadow-2xs transition-all active:scale-95 cursor-pointer"
                           title="Ajuste con Motivo (Mermas, Caducidad, Autoconsumo, Conteo)"
                         >
-                          <SlidersHorizontal className="w-3.5 h-3.5 text-amber-700" />
-                          <span>Motivo</span>
+                          <SlidersHorizontal className="w-3.5 h-3.5 text-amber-800 shrink-0" />
+                          <span className="text-slate-900 font-bold" style={{ color: '#0f172a' }}>Motivo</span>
                         </button>
 
                         <button
@@ -964,11 +1068,11 @@ export default function DesktopInventoryPage() {
                             e.stopPropagation();
                             handleOpenEditModal(p);
                           }}
-                          className="px-2 py-1.5 rounded-lg bg-sky-50 hover:bg-sky-100 text-sky-800 border border-sky-300 flex items-center gap-1 text-[11px] font-bold shadow-2xs transition-all active:scale-95"
+                          className="px-2.5 py-1.5 rounded-lg bg-sky-100/90 hover:bg-sky-200 border border-sky-300 flex items-center gap-1 text-[11px] font-black shadow-2xs transition-all active:scale-95 cursor-pointer"
                           title={isAdmin ? 'Editar producto completo (Administrador)' : 'Editar producto (Requiere clave de Admin)'}
                         >
-                          <Edit2 className="w-3.5 h-3.5 text-sky-700" />
-                          <span>Editar</span>
+                          <Edit2 className="w-3.5 h-3.5 text-sky-800 shrink-0" />
+                          <span className="text-slate-900 font-bold" style={{ color: '#0f172a' }}>Editar</span>
                         </button>
 
                         {isAdmin && (
@@ -1228,13 +1332,13 @@ export default function DesktopInventoryPage() {
                     </div>
 
                     <div className="flex-1 space-y-2">
-                      {/* Las 2 opciones pedidas por el usuario */}
-                      <div className="grid grid-cols-2 gap-2">
+                      {/* Opciones de Foto: Subir de PC, Celular y Buscar en Google */}
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5">
                         {/* Opción 1: Subir desde PC */}
                         <button
                           type="button"
                           onClick={() => fileInputRef.current?.click()}
-                          className="px-2.5 py-2 bg-white hover:bg-slate-50 border border-slate-300 rounded-lg text-xs font-bold text-slate-700 flex items-center justify-center gap-1.5 shadow-sm transition-all active:scale-[0.98]"
+                          className="px-2 py-2 bg-white hover:bg-slate-50 border border-slate-300 rounded-lg text-xs font-bold text-slate-700 flex items-center justify-center gap-1 shadow-sm transition-all active:scale-[0.98]"
                           title="Selecciona una imagen almacenada en tu computadora"
                         >
                           <Camera className="w-3.5 h-3.5 text-sky-600" />
@@ -1248,7 +1352,7 @@ export default function DesktopInventoryPage() {
                             loadScannerInfo();
                             setShowMobileModal(true);
                           }}
-                          className={`px-2.5 py-2 border rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm transition-all active:scale-[0.98] ${
+                          className={`px-2 py-2 border rounded-lg text-xs font-bold flex items-center justify-center gap-1 shadow-sm transition-all active:scale-[0.98] ${
                             phoneConnected
                               ? 'bg-emerald-50 hover:bg-emerald-100 border-emerald-300 text-emerald-800'
                               : 'bg-slate-50 hover:bg-slate-100 border-slate-300 text-slate-700'
@@ -1260,7 +1364,21 @@ export default function DesktopInventoryPage() {
                           }
                         >
                           <Smartphone className={`w-3.5 h-3.5 ${phoneConnected ? 'text-emerald-600 animate-pulse' : 'text-slate-500'}`} />
-                          <span>{phoneConnected ? 'Móvil Listo ✓' : 'Vincular Móvil'}</span>
+                          <span>{phoneConnected ? 'Móvil Listo' : 'Con Celular'}</span>
+                        </button>
+
+                        {/* Opción 3: Buscar en Google / Web */}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setImageSearchQuery(name || barcode || '');
+                            setShowImageSearchModal(true);
+                          }}
+                          className="px-2 py-2 bg-sky-700 hover:bg-sky-800 text-white border border-sky-800 rounded-lg text-xs font-bold flex items-center justify-center gap-1 shadow-sm transition-all active:scale-[0.98]"
+                          title="Buscar y descargar foto real del producto desde Google / Catálogos comerciales"
+                        >
+                          <Search className="w-3.5 h-3.5 text-white" />
+                          <span>Google / Web</span>
                         </button>
                       </div>
 
@@ -1611,14 +1729,29 @@ export default function DesktopInventoryPage() {
                     </div>
 
                     <div className="flex-1 space-y-2">
-                      <button
-                        type="button"
-                        onClick={() => editFileInputRef.current?.click()}
-                        className="px-3 py-2 bg-white hover:bg-slate-50 border border-slate-300 rounded-lg text-xs font-bold text-slate-700 flex items-center gap-1.5 shadow-sm transition-all"
-                      >
-                        <Camera className="w-3.5 h-3.5 text-indigo-600" />
-                        <span>Cambiar Foto desde PC</span>
-                      </button>
+                      <div className="grid grid-cols-2 gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => editFileInputRef.current?.click()}
+                          className="px-2.5 py-2 bg-white hover:bg-slate-50 border border-slate-300 rounded-lg text-xs font-bold text-slate-700 flex items-center justify-center gap-1 shadow-sm transition-all"
+                        >
+                          <Camera className="w-3.5 h-3.5 text-indigo-600" />
+                          <span>Cambiar de PC</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setImageSearchQuery(name || barcode || '');
+                            setShowImageSearchModal(true);
+                          }}
+                          className="px-2.5 py-2 bg-sky-700 hover:bg-sky-800 text-white border border-sky-800 rounded-lg text-xs font-bold flex items-center justify-center gap-1 shadow-sm transition-all"
+                          title="Buscar foto del producto en Google / Catálogos comerciales"
+                        >
+                          <Search className="w-3.5 h-3.5 text-white" />
+                          <span>Buscar en Google</span>
+                        </button>
+                      </div>
                       <input
                         type="text"
                         placeholder="O pega URL de imagen..."
@@ -2082,6 +2215,32 @@ export default function DesktopInventoryPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL DE DISEÑO E IMPRESIÓN DE ETIQUETAS DE PRODUCTOS                     */}
+      {/* ========================================================================= */}
+      <ProductLabelModal
+        isOpen={showLabelModal}
+        onClose={() => setShowLabelModal(false)}
+        products={labelProducts}
+        allProducts={products}
+        bcvRate={bcvRate}
+      />
+
+      {/* ========================================================================= */}
+      {/* MODAL DE BÚSQUEDA Y DESCARGA DE IMÁGENES GOOGLE / WEB                     */}
+      {/* ========================================================================= */}
+      {showImageSearchModal && (
+        <ProductImageSearchModal
+          isOpen={showImageSearchModal}
+          initialQuery={imageSearchQuery}
+          onClose={() => setShowImageSearchModal(false)}
+          onSelectImage={(base64DataUrl) => {
+            setImage(base64DataUrl);
+            setShowImageSearchModal(false);
+          }}
+        />
       )}
     </div>
   );

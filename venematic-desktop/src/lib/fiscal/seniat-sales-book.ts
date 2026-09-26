@@ -97,8 +97,10 @@ export function buildSeniatSalesBook(
 
     if (sale.items && sale.items.length > 0) {
       sale.items.forEach((item) => {
-        // En Venezuela, productos alimenticios esenciales están exentos de IVA
-        const isExempt = !options?.forceAllTaxable && EXEMPT_CATEGORIES.some((cat) => (item.name || '').toLowerCase().includes(cat.toLowerCase()));
+        // En Venezuela, productos marcados como exentos o alimentos esenciales están exentos de IVA
+        const isExempt = item.isTaxExempt !== undefined
+          ? Boolean(item.isTaxExempt)
+          : (!options?.forceAllTaxable && EXEMPT_CATEGORIES.some((cat) => (item.name || '').toLowerCase().includes(cat.toLowerCase())));
         if (isExempt) {
           exentoUSD += item.totalUSD;
         } else {

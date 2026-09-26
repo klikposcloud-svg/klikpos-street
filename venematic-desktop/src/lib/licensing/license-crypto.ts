@@ -3,7 +3,7 @@
  * Genera y valida llaves criptográficas ligadas al HWID de la máquina.
  */
 
-export type LicensePlan = 'vitalicia' | 'anual' | 'demo';
+export type LicensePlan = 'vitalicia' | 'anual' | 'demo' | 'starter_trial' | 'starter_full' | 'pro_trial' | 'pro_full' | 'trial_15m';
 
 export interface LicensePayload {
   hwid: string;
@@ -55,7 +55,10 @@ function sha256Hex(str: string): string {
   const bitLength = bytes.length * 8;
   bytes.push(0x80);
   while ((bytes.length % 64) !== 56) bytes.push(0);
-  for (let i = 7; i >= 0; i--) bytes.push((bitLength >>> (i * 8)) & 0xff);
+  const highBits = Math.floor(bitLength / 0x100000000);
+  const lowBits = bitLength >>> 0;
+  for (let i = 3; i >= 0; i--) bytes.push((highBits >>> (i * 8)) & 0xff);
+  for (let i = 3; i >= 0; i--) bytes.push((lowBits >>> (i * 8)) & 0xff);
 
   const words = new Uint32Array(bytes.length / 4);
   for (let i = 0; i < bytes.length; i += 4) {
@@ -115,13 +118,38 @@ export function generateLicenseKey(
   plan: LicensePlan,
   expiresAtDateStr?: string
 ): string {
-  const planPrefix = plan === 'vitalicia' ? 'VIT' : plan === 'anual' ? 'ANL' : 'DMO';
-  const expires = plan === 'vitalicia' ? 'NEVER' : (expiresAtDateStr || new Date(Date.now() + 365 * 86400000).toISOString().split('T')[0]);
-  const sig = computeSignature(hwid, rif, plan, expires);
+  // Plan prefix codes
+  const planPrefixMap: Record<LicensePlan, string> = {
+    vitalicia:     'VIT',
+    anual:         'ANL',
+    demo:          'DMO',
+    starter_trial: 'STT',
+    starter_full:  'STR',
+    pro_trial:     'PTT',
+    pro_full:      'PRO',
+    trial_15m:     'T15',
+  };
+  const planPrefix = planPrefixMap[plan] ?? 'DMO';
 
-  // Formato final de clave de 29 caracteres:
-  // VNK-[PLAN]-[AÑO/EXP]-[FIRMA1]-[FIRMA2]
-  const expCode = expires === 'NEVER' ? 'PERP' : expires.replace(/-/g, '').slice(2, 6);
+  // Expiry logic
+  let expires: string;
+  if (plan === 'vitalicia' || plan === 'starter_full' || plan === 'pro_full') {
+    expires = 'NEVER';
+  } else if (plan === 'trial_15m') {
+    expires = '15MIN';
+  } else if (plan === 'starter_trial' || plan === 'pro_trial') {
+    // 30 days trial
+    expires = expiresAtDateStr || new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0];
+  } else if (plan === 'demo') {
+    // 15 days demo
+    expires = expiresAtDateStr || new Date(Date.now() + 15 * 86400000).toISOString().split('T')[0];
+  } else {
+    // anual: 365 days
+    expires = expiresAtDateStr || new Date(Date.now() + 365 * 86400000).toISOString().split('T')[0];
+  }
+
+  const sig = computeSignature(hwid, rif, plan, expires);
+  const expCode = expires === 'NEVER' ? 'PERP' : expires === '15MIN' ? '15MN' : expires.replace(/-/g, '').slice(2, 6);
   return `VNK-${planPrefix}-${expCode}-${sig}`;
 }
 
@@ -141,32 +169,77 @@ export function verifyLicenseKey(
   }
 
   const planCode = parts[1];
-  const plan: LicensePlan = planCode === 'VIT' ? 'vitalicia' : planCode === 'ANL' ? 'anual' : 'demo';
+  const planCodeMap: Record<string, LicensePlan> = {
+    VIT: 'vitalicia',
+    ANL: 'anual',
+    DMO: 'demo',
+    STT: 'starter_trial',
+    STR: 'starter_full',
+    PTT: 'pro_trial',
+    PRO: 'pro_full',
+    T15: 'trial_15m',
+  };
+  const plan: LicensePlan = planCodeMap[planCode] ?? 'demo';
+  if (!planCodeMap[planCode]) {
+    return { valid: false, error: `Código de plan desconocido: ${planCode}` };
+  }
+
   const expCode = parts[2];
   const sigProvided = `${parts[3]}-${parts[4]}-${parts[5] || ''}-${parts[6] || ''}`.replace(/-+$/, '');
 
+  // Caso especial: Prueba Flash de 15 Minutos
+  if (expCode === '15MN' || plan === 'trial_15m') {
+    const expectedSig = computeSignature(hwid, rif, 'trial_15m', '15MIN');
+    if (sigProvided !== expectedSig) {
+      return {
+        valid: false,
+        error: 'La firma de la llave de prueba no corresponde a este computador o RIF.',
+      };
+    }
+    if (typeof window !== 'undefined') {
+      const startRaw = localStorage.getItem('venematic_trial15m_start');
+      let startTime = startRaw ? parseInt(startRaw) : 0;
+      if (!startTime) {
+        startTime = Date.now();
+        localStorage.setItem('venematic_trial15m_start', String(startTime));
+      }
+      const elapsed = Date.now() - startTime;
+      if (elapsed > 15 * 60 * 1000) {
+        return {
+          valid: false,
+          plan: 'trial_15m',
+          expiresAt: '15MIN',
+          error: '⏳ El período de prueba de 15 minutos ha expirado. Por favor adquiere la licencia definitiva para continuar.',
+        };
+      }
+    }
+    return { valid: true, plan: 'trial_15m', expiresAt: '15MIN' };
+  }
+
   let expiresAt = 'NEVER';
   if (expCode !== 'PERP') {
-    // Reconstruir año aproximado (ej: 2612 -> 2026-12-31)
     const yy = expCode.slice(0, 2);
     const mm = expCode.slice(2, 4);
     expiresAt = `20${yy}-${mm}-28`;
   }
 
   const expectedSig = computeSignature(hwid, rif, plan, expiresAt);
-  
+
   if (sigProvided !== expectedSig) {
-    return { 
-      valid: false, 
-      error: 'La firma de la llave no corresponde a este computador o RIF. Licencia no transferible.' 
+    return {
+      valid: false,
+      error: 'La firma de la llave no corresponde a este computador o RIF. Licencia no transferible.',
     };
   }
 
-  // Verificar fecha de caducidad si no es perpetua
   if (expiresAt !== 'NEVER') {
     const expTime = new Date(expiresAt).getTime();
     if (Date.now() > expTime) {
-      return { valid: false, plan, expiresAt, error: `La licencia anual expiró el ${expiresAt}.` };
+      const isPlanTrial = plan === 'starter_trial' || plan === 'pro_trial' || plan === 'demo';
+      const msg = isPlanTrial
+        ? `El período de prueba (primera cuota) expiró el ${expiresAt}. Realiza tu segundo pago para activar la licencia completa.`
+        : `La licencia venció el ${expiresAt}.`;
+      return { valid: false, plan, expiresAt, error: msg };
     }
   }
 
@@ -179,6 +252,9 @@ export function verifyLicenseKey(
 export function saveActivatedLicense(payload: LicensePayload, key: string) {
   if (typeof window === 'undefined') return;
   try {
+    if (payload.plan !== 'trial_15m') {
+      localStorage.removeItem('venematic_trial15m_start');
+    }
     localStorage.setItem(LICENSE_STORAGE_KEY, JSON.stringify({ payload, key }));
     window.dispatchEvent(new CustomEvent('venematic:license-activated', { detail: payload }));
   } catch {}
@@ -220,6 +296,33 @@ export function getStoredLicenseStatus(currentHwid: string, latestDbSaleDate?: s
           message: 'Reloj del sistema alterado para intentar evadir la caducidad. Sistema bloqueado.',
         };
       }
+    }
+
+    // Caso especial: Licencia de prueba de 15 minutos
+    if (payload.plan === 'trial_15m') {
+      const startRaw = localStorage.getItem('venematic_trial15m_start');
+      const startTime = startRaw ? parseInt(startRaw) : Date.now();
+      const elapsed = Date.now() - startTime;
+      const remainingMs = Math.max(0, 15 * 60 * 1000 - elapsed);
+      const remainingMinutes = Math.ceil(remainingMs / 60000);
+
+      if (remainingMs <= 0) {
+        return {
+          status: 'expired',
+          payload,
+          licenseKey: key,
+          daysRemaining: 0,
+          message: '⏳ Período de prueba de 15 minutos finalizado. La aplicación requiere activación definitiva.',
+        };
+      }
+
+      return {
+        status: 'trial',
+        payload,
+        licenseKey: key,
+        daysRemaining: remainingMinutes,
+        message: `Prueba Flash Activa (${remainingMinutes} min restantes)`,
+      };
     }
 
     if (payload.expiresAt !== 'NEVER') {

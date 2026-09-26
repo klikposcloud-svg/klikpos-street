@@ -4,9 +4,371 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap');
 
-:root {
+:root,
+[data-theme="light"] {
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
+
+  /* §17.1 / §17.2 Tokens Semánticos Oficiales - Light (Modo Blanco) */
+  --color-bg-app: #eef2f5;
+  --color-bg-surface: #ffffff;
+  --color-bg-sunken: #f1f5f9;
+  --color-bg-hover: #e2e8f0;
+  --color-border-default: #d9e2ec;
+  --color-border-strong: #cbd5e1;
+  --color-text-primary: #0f172a;
+  --color-text-secondary: #475569;
+  --color-text-tertiary: #94a3b8;
+  --color-brand-600: #0e4f5a;
+  --color-brand-700: #0a3d46;
+  --color-brand-100: rgb(14 79 90 / 0.12);
+  --color-brand-050: rgb(14 79 90 / 0.06);
+  --color-price-bs: #0e4f5a;
+  --color-success: #15803d;
+  --color-success-tint: rgb(21 128 61 / 0.12);
+  --color-warning: #b45309;
+  --color-warning-tint: rgb(180 83 9 / 0.12);
+  --color-danger: #dc2626;
+  --color-danger-tint: rgb(220 38 38 / 0.12);
+  --color-hardware: #b45309;
+  --color-hardware-tint: rgb(180 83 9 / 0.12);
+  --focus-ring: 0 0 0 3px rgb(14 79 90 / 0.25);
+  --shadow-pop: 0 4px 12px rgb(0 0 0 / 0.08);
+  --shadow-modal: 0 20px 40px rgb(0 0 0 / 0.18);
+}
+
+/* §17.2 Tokens Semánticos Oficiales - Dark (Modo Oscuro) */
+[data-theme="dark"] {
+  --color-bg-app: #0B141F;
+  --color-bg-surface: #121C29;
+  --color-bg-sunken: #0E1826;
+  --color-bg-hover: #1A2634;
+  --color-border-default: #22303F;
+  --color-border-strong: #35465A;
+  --color-text-primary: #E8EEF4;
+  --color-text-secondary: #9DAEBE;
+  --color-text-tertiary: #6C7E90;
+  --color-brand-600: #4DA3E0;
+  --color-brand-700: #7FBCEA;
+  --color-brand-100: rgb(77 163 224 / .16);
+  --color-brand-050: rgb(77 163 224 / .10);
+  --color-price-bs: #6FB6E4;
+  --color-success: #3BBE8C;
+  --color-success-tint: rgb(59 190 140 / 0.14);
+  --color-warning: #E0A458;
+  --color-warning-tint: rgb(224 164 88 / 0.14);
+  --color-danger: #E5705E;
+  --color-danger-tint: rgb(229 112 94 / 0.14);
+  --color-hardware: #D9A441;
+  --color-hardware-tint: rgb(217 164 65 / 0.14);
+  --focus-ring: 0 0 0 3px rgb(77 163 224 / .35);
+  --shadow-pop: 0 4px 12px rgb(0 0 0 / .40);
+  --shadow-modal: 0 24px 64px rgb(0 0 0 / .60);
+}
+
+/* §17.3 Tema Glass (Glassmorphism Regulado) */
+[data-theme="glass"] {
+  --color-bg-app: #0B141F;
+  --color-bg-surface: #121C29;
+  --color-bg-sunken: #0E1826;
+  --color-bg-hover: #1A2634;
+  --color-border-default: #22303F;
+  --color-border-strong: #35465A;
+  --color-text-primary: #E8EEF4;
+  --color-text-secondary: #9DAEBE;
+  --color-text-tertiary: #6C7E90;
+  --color-brand-600: #4DA3E0;
+  --color-brand-700: #7FBCEA;
+  --color-brand-100: rgb(77 163 224 / .16);
+  --color-brand-050: rgb(77 163 224 / .10);
+  --color-price-bs: #6FB6E4;
+  --color-success: #3BBE8C;
+  --color-success-tint: rgb(59 190 140 / 0.14);
+  --color-warning: #E0A458;
+  --color-warning-tint: rgb(224 164 88 / 0.14);
+  --color-danger: #E5705E;
+  --color-danger-tint: rgb(229 112 94 / 0.14);
+  --color-hardware: #D9A441;
+  --color-hardware-tint: rgb(217 164 65 / 0.14);
+  --focus-ring: 0 0 0 3px rgb(77 163 224 / .35);
+  --shadow-pop: 0 4px 12px rgb(0 0 0 / .40);
+  --shadow-modal: 0 24px 64px rgb(0 0 0 / .60);
+
+  --glass-bg: rgb(255 255 255 / .06);
+  --glass-bg-strong: rgb(255 255 255 / .09);
+  --glass-border: rgb(255 255 255 / .12);
+  --glass-blur: 16px;
+  --glass-veil: rgb(11 20 31 / .55);
+}
+
+/* Capas Glass Reguladas (§17.3) */
+[data-theme="glass"] .layer-shell,
+[data-theme="glass"] .layer-overlay {
+  background-color: var(--glass-bg) !important;
+  background-image: linear-gradient(var(--glass-veil), var(--glass-veil)) !important;
+  backdrop-filter: blur(var(--glass-blur)) !important;
+  -webkit-backdrop-filter: blur(var(--glass-blur)) !important;
+  border-color: var(--glass-border) !important;
+}
+
+@supports not (backdrop-filter: blur(1px)) {
+  [data-theme="glass"] .layer-shell,
+  [data-theme="glass"] .layer-overlay {
+    background-color: var(--color-bg-surface) !important;
+    background-image: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border-color: var(--color-border-default) !important;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  [data-theme="glass"] .layer-shell,
+  [data-theme="glass"] .layer-overlay {
+    background-color: var(--color-bg-surface) !important;
+    background-image: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border-color: var(--color-border-default) !important;
+  }
+}
+
+/* ========================================================================= */
+/* MODO BLANCO / INDUSTRIAL PROFESIONAL SUPREMO (§17.1)                       */
+/* Interfaz 100% BLANCA, limpia, nítida y con máximo contraste legible        */
+/* ========================================================================= */
+html[data-theme="light"]:not(.dark),
+html[data-theme="light"]:not(.dark) body,
+html[data-ui-style="industrial"]:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]),
+html[data-ui-style="industrial"]:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]) body,
+html[data-ui-style="professional"]:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]),
+html[data-ui-style="professional"]:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]) body,
+html:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]),
+html:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]) body {
+  color-scheme: light !important;
+  background-color: #f8fafc !important;
+  background-image: none !important;
+  color: #0f172a !important;
+}
+
+/* Header blanco inmaculado */
+html[data-theme="light"]:not(.dark) header,
+html[data-ui-style="industrial"]:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]) header,
+html:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]) header,
+html[data-theme="light"]:not(.dark) header.layer-shell,
+html[data-ui-style="industrial"]:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]) header.layer-shell,
+html:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]) header.layer-shell {
+  background-color: #ffffff !important;
+  background-image: none !important;
+  border-color: #e2e8f0 !important;
+  color: #0f172a !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+}
+
+/* Sidebar blanco puro */
+html[data-theme="light"]:not(.dark) aside,
+html[data-ui-style="industrial"]:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]) aside,
+html:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]) aside,
+html[data-theme="light"]:not(.dark) aside.layer-shell,
+html[data-ui-style="industrial"]:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]) aside.layer-shell,
+html:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]) aside.layer-shell {
+  background-color: #ffffff !important;
+  background-image: none !important;
+  border-color: #e2e8f0 !important;
+  color: #1e293b !important;
+}
+
+/* Contenido Principal y Paneles */
+html[data-theme="light"]:not(.dark) main,
+html[data-ui-style="industrial"]:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]) main,
+html:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]) main {
+  background-color: #f8fafc !important;
+  background-image: none !important;
+  color: #0f172a !important;
+}
+
+/* Todas las tarjetas, paneles y contenedores bg-white en Modo Blanco */
+html[data-theme="light"] .bg-white,
+html[data-ui-style="industrial"] .bg-white,
+html:not(.dark) .bg-white {
+  background-color: #ffffff !important;
+  background-image: none !important;
+  border-color: #e2e8f0 !important;
+  color: #0f172a !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+}
+
+/* Fondos secundarios y terciarios claros */
+html[data-theme="light"] .bg-slate-50,
+html[data-ui-style="industrial"] .bg-slate-50,
+html:not(.dark) .bg-slate-50 {
+  background-color: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+  color: #0f172a !important;
+}
+
+html[data-theme="light"] .bg-slate-100,
+html[data-ui-style="industrial"] .bg-slate-100,
+html:not(.dark) .bg-slate-100 {
+  background-color: #f1f5f9 !important;
+  border-color: #e2e8f0 !important;
+  color: #0f172a !important;
+}
+
+html[data-theme="light"] .bg-\[\#eef2f5\],
+html[data-ui-style="industrial"] .bg-\[\#eef2f5\],
+html:not(.dark) .bg-\[\#eef2f5\],
+html[data-theme="light"] [class*="bg-[#eef2f5]"],
+html[data-ui-style="industrial"] [class*="bg-[#eef2f5]"],
+html:not(.dark) [class*="bg-[#eef2f5]"] {
+  background-color: #f8fafc !important;
+}
+
+/* Tipografía de Máximo Contraste (WCAG AAA >= 7:1) en Modo Blanco */
+html[data-theme="light"] .text-slate-900,
+html[data-ui-style="industrial"] .text-slate-900,
+html:not(.dark) .text-slate-900,
+html[data-theme="light"] .text-slate-950,
+html[data-ui-style="industrial"] .text-slate-950,
+html:not(.dark) .text-slate-950,
+html[data-theme="light"] .text-slate-800,
+html[data-ui-style="industrial"] .text-slate-800,
+html:not(.dark) .text-slate-800 {
+  color: #0f172a !important;
+}
+
+html[data-theme="light"] .text-slate-700,
+html[data-ui-style="industrial"] .text-slate-700,
+html:not(.dark) .text-slate-700,
+html[data-theme="light"] .text-slate-600,
+html[data-ui-style="industrial"] .text-slate-600,
+html:not(.dark) .text-slate-600 {
+  color: #334155 !important;
+}
+
+html[data-theme="light"] .text-slate-500,
+html[data-ui-style="industrial"] .text-slate-500,
+html:not(.dark) .text-slate-500 {
+  color: #475569 !important;
+}
+
+html[data-theme="light"] .border-slate-100,
+html[data-ui-style="industrial"] .border-slate-100,
+html:not(.dark) .border-slate-100,
+html[data-theme="light"] .border-slate-200,
+html[data-ui-style="industrial"] .border-slate-200,
+html:not(.dark) .border-slate-200,
+html[data-theme="light"] .border-slate-300,
+html[data-ui-style="industrial"] .border-slate-300,
+html:not(.dark) .border-slate-300 {
+  border-color: #e2e8f0 !important;
+}
+
+/* ========================================================================= */
+/* MODO OSCURO OFICIAL (§17.2)                                                */
+/* Activo ÚNICAMENTE cuando no está en Modo Blanco ni en estilo industrial   */
+/* ========================================================================= */
+html.dark,
+html[data-theme="dark"],
+html[data-theme="glass"],
+html.dark body,
+html[data-theme="dark"] body,
+html[data-theme="glass"] body {
+  color-scheme: dark !important;
+  background-color: #0b141f !important;
+  color: #f8fafc !important;
+}
+html.dark header,
+html[data-theme="dark"] header,
+html[data-theme="glass"] header,
+html.dark header.layer-shell,
+html[data-theme="dark"] header.layer-shell,
+html[data-theme="glass"] header.layer-shell {
+  background-color: #121c29 !important;
+  background-image: none !important;
+  border-color: #22303f !important;
+  color: #f8fafc !important;
+}
+html.dark aside,
+html[data-theme="dark"] aside,
+html[data-theme="glass"] aside,
+html.dark aside.layer-shell,
+html[data-theme="dark"] aside.layer-shell,
+html[data-theme="glass"] aside.layer-shell {
+  background-color: #0e1826 !important;
+  background-image: none !important;
+  border-color: #22303f !important;
+  color: #f8fafc !important;
+}
+html.dark main,
+html[data-theme="dark"] main,
+html[data-theme="glass"] main {
+  background-color: #0b141f !important;
+  color: #f8fafc !important;
+}
+html.dark .bg-white,
+html[data-theme="dark"] .bg-white,
+html[data-theme="glass"] .bg-white {
+  background-color: #121c29 !important;
+  border-color: #22303f !important;
+  color: #f8fafc !important;
+}
+/* Salvaguarda de Alto Contraste en Modo Oscuro para clases Tailwind */
+html.dark .bg-\[\#eef2f5\],
+html.dark [class*="bg-[#eef2f5]"],
+html[data-theme="dark"] .bg-\[\#eef2f5\],
+html[data-theme="glass"] .bg-\[\#eef2f5\] {
+  background-color: #0b141f !important;
+}
+html.dark .text-slate-900,
+html.dark .text-slate-950,
+html.dark .text-slate-800,
+html[data-theme="dark"] .text-slate-900,
+html[data-theme="dark"] .text-slate-950,
+html[data-theme="dark"] .text-slate-800,
+html[data-theme="glass"] .text-slate-900,
+html[data-theme="glass"] .text-slate-950,
+html[data-theme="glass"] .text-slate-800 {
+  color: #ffffff !important;
+}
+html.dark .text-slate-700,
+html.dark .text-slate-600,
+html[data-theme="dark"] .text-slate-700,
+html[data-theme="dark"] .text-slate-600,
+html[data-theme="glass"] .text-slate-700,
+html[data-theme="glass"] .text-slate-600 {
+  color: #f1f5f9 !important;
+}
+html.dark .text-slate-500,
+html.dark .text-slate-400,
+html[data-theme="dark"] .text-slate-500,
+html[data-theme="dark"] .text-slate-400,
+html[data-theme="glass"] .text-slate-500,
+html[data-theme="glass"] .text-slate-400 {
+  color: #cbd5e1 !important;
+}
+html.dark .border-slate-200,
+html.dark [class*="border-slate-200"],
+html.dark .border-slate-100,
+html.dark .border-slate-300,
+html[data-theme="dark"] [class*="border-slate-"],
+html[data-theme="glass"] [class*="border-slate-"] {
+  border-color: #22303f !important;
+}
+html.dark .bg-slate-100,
+html.dark .bg-slate-50,
+html.dark [class*="bg-slate-50"],
+html.dark [class*="bg-slate-100"],
+html[data-theme="dark"] .bg-slate-100,
+html[data-theme="dark"] .bg-slate-50,
+html[data-theme="dark"] [class*="bg-slate-50"],
+html[data-theme="dark"] [class*="bg-slate-100"],
+html[data-theme="glass"] .bg-slate-100,
+html[data-theme="glass"] .bg-slate-50,
+html[data-theme="glass"] [class*="bg-slate-50"],
+html[data-theme="glass"] [class*="bg-slate-100"] {
+  background-color: #1a2634 !important;
+  color: #f8fafc !important;
 }
 
 * {
@@ -23,13 +385,13 @@ input, textarea {
 }
 
 html {
-  background-color: #ffffff;
-  color: #0f172a;
+  background-color: var(--color-bg-app);
+  color: var(--color-text-primary);
 }
 
 body {
-  background-color: #f8fafc;
-  color: #0f172a;
+  background-color: var(--color-bg-app);
+  color: var(--color-text-primary);
   font-family: var(--font-sans);
   height: 100%;
   width: 100%;
@@ -54,7 +416,7 @@ body {
   }
   
   .pos-btn-success {
-    @apply pos-btn bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-700 shadow-sm active:bg-emerald-800;
+    @apply pos-btn bg-emerald-700 hover:bg-emerald-800 text-white border-emerald-800 shadow-sm active:bg-emerald-900;
   }
   
   .pos-btn-secondary {
@@ -76,24 +438,118 @@ body {
 }
 
 /* Estilos de Impresión Térmica (Ticket 80mm / 58mm) */
+@page {
+  margin: 0mm !important;
+  size: auto;
+}
+
 @media print {
+  @page {
+    margin: 0 !important;
+    size: auto;
+  }
+
+  html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    height: auto !important;
+    min-height: auto !important;
+    background: #ffffff !important;
+    overflow: visible !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
   body * {
     visibility: hidden;
   }
-  #thermal-receipt, #thermal-receipt * {
+
+  #thermal-receipt, #thermal-receipt *,
+  #seniat-receipt, #seniat-receipt *,
+  .print-area, .print-area * {
     visibility: visible;
+    color: #000000 !important;
+    text-shadow: none !important;
+    -webkit-font-smoothing: none !important;
+    -moz-osx-font-smoothing: unset !important;
+    text-rendering: geometricPrecision !important;
   }
-  #thermal-receipt {
+
+  #thermal-receipt, #seniat-receipt, .print-area {
     position: absolute;
     left: 0;
     top: 0;
-    width: 80mm;
-    margin: 0;
-    padding: 2mm;
-    font-family: var(--font-mono);
+    width: var(--receipt-width, 48mm) !important;
+    max-width: var(--receipt-width, 48mm) !important;
+    height: auto !important;
+    max-height: max-content !important;
+    margin: 0 !important;
+    padding: 1mm 1.5mm var(--receipt-feed-padding, 3mm) 1.5mm !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden !important;
+    word-break: break-word !important;
+    overflow-wrap: break-word !important;
+    font-family: 'Courier New', Courier, 'Lucida Console', Monaco, monospace !important;
     font-size: 11px;
-    line-height: 1.2;
-    color: #000000;
+    font-weight: 700 !important;
+    line-height: 1.22;
+    color: #000000 !important;
+    background: #ffffff !important;
+    page-break-after: avoid;
+    break-after: avoid;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* Soporte específico para rollo angosto 58mm (Cabezal térmico real: 48mm / 384 dots) */
+  html[data-paper-width="58mm"] #thermal-receipt,
+  html[data-paper-width="58mm"] #seniat-receipt,
+  html[data-paper-width="58mm"] .print-area {
+    width: 48mm !important;
+    max-width: 48mm !important;
+    font-size: 9.5px !important;
+    line-height: 1.18 !important;
+    padding: 0.5mm 0.5mm var(--receipt-feed-padding, 2mm) 0.5mm !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Para rollos de 80mm (Cabezal térmico real: 72mm / 576 dots) */
+  html[data-paper-width="80mm"] #thermal-receipt,
+  html[data-paper-width="80mm"] #seniat-receipt,
+  html[data-paper-width="80mm"] .print-area {
+    width: 72mm !important;
+    max-width: 72mm !important;
+    font-size: 11px !important;
+    padding: 1mm 1.5mm var(--receipt-feed-padding, 3mm) 1.5mm !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Forzar negro puro (#000000) en todos los bordes para eliminar tramas grises borrosas */
+  #thermal-receipt hr, #seniat-receipt hr,
+  #thermal-receipt .border-dashed, #seniat-receipt .border-dashed,
+  #thermal-receipt .border-b, #seniat-receipt .border-b,
+  #thermal-receipt .border-t, #seniat-receipt .border-t,
+  #thermal-receipt .border, #seniat-receipt .border,
+  #thermal-receipt div, #seniat-receipt div {
+    border-color: #000000 !important;
+  }
+
+  /* Eliminar fondos coloreados que la impresora térmica traduce en puntos grises tramados */
+  #thermal-receipt .bg-slate-50, #seniat-receipt .bg-slate-50,
+  #thermal-receipt .bg-sky-100, #seniat-receipt .bg-sky-100,
+  #thermal-receipt .bg-emerald-50, #seniat-receipt .bg-emerald-50,
+  #thermal-receipt .bg-indigo-50, #seniat-receipt .bg-indigo-50,
+  #thermal-receipt .bg-slate-100, #seniat-receipt .bg-slate-100,
+  #thermal-receipt .bg-slate-900, #seniat-receipt .bg-slate-900 {
+    background-color: transparent !important;
+    color: #000000 !important;
+  }
+
+  /* Logotipo nítido de alto contraste monocromático */
+  #thermal-receipt img, #seniat-receipt img {
+    image-rendering: pixelated !important;
+    filter: grayscale(100%) contrast(250%) !important;
+    max-width: 100% !important;
   }
 }
 
@@ -127,20 +583,24 @@ body {
 }
 
 /* ========================================================================= */
-/* CONEXIÓN UNIVERSAL DE MARCA Y PALETA ACTIVA (Aplica en todos los modos)   */
+/* CONEXIÓN UNIVERSAL DE MARCA Y PALETA ACTIVA (Aplica a cualquier Rubro)     */
 /* ========================================================================= */
+.bg-\[\#0e4f5a\],
+[class*="bg-[#0e4f5a]"],
 button.bg-sky-700,
 button.bg-sky-600,
 button.bg-sky-800,
 .btn-brand,
+.brand-badge,
 .pos-btn-primary {
   background-color: var(--brand-primary) !important;
-  color: var(--btn-primary-text, var(--brand-contrast-text, #ffffff)) !important;
+  color: var(--brand-contrast-text, #ffffff) !important;
   border-color: var(--brand-hover) !important;
-  box-shadow: 0 2px 8px var(--brand-glow) !important;
   transition: all 0.15s ease-in-out;
 }
 
+.hover\:bg-\[\#0a3d46\]:hover,
+[class*="hover:bg-[#0a3d46]"]:hover,
 button.bg-sky-700:hover,
 button.bg-sky-600:hover,
 button.bg-sky-800:hover,
@@ -151,6 +611,8 @@ button.bg-sky-800:hover,
   filter: brightness(1.08);
 }
 
+.text-\[\#0e4f5a\],
+[class*="text-[#0e4f5a]"],
 .text-brand,
 .text-sky-700,
 .text-sky-600,
@@ -164,34 +626,61 @@ button.bg-sky-800:hover,
 }
 
 .border-brand,
+.border-\[\#146c7b\]\/40,
+.border-\[\#146c7b\],
+[class*="border-[#146c7b]"],
 .border-sky-500,
 .border-sky-600,
 .border-sky-400 {
   border-color: var(--brand-border) !important;
 }
 
-.brand-badge {
-  background-color: var(--brand-primary) !important;
-  color: var(--btn-primary-text, var(--brand-contrast-text, #ffffff)) !important;
-  border-color: var(--brand-hover) !important;
+[class*="from-[#0e4f5a]"] {
+  --tw-gradient-from: var(--brand-primary) var(--tw-gradient-from-position) !important;
+  --tw-gradient-to: var(--brand-hover) var(--tw-gradient-to-position) !important;
+  --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-from), var(--tw-gradient-to)) !important;
 }
 
-/* Enlaces y Navegación Activa */
+[class*="ring-[#0e4f5a]"] {
+  --tw-ring-color: var(--brand-primary) !important;
+}
+
+/* Enlaces y Navegación Activa (Modo Claro) */
 .nav-item-active {
   background-color: var(--brand-light) !important;
   color: var(--brand-primary) !important;
   border-color: var(--brand-border) !important;
-  box-shadow: 0 0 10px var(--brand-glow) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
 }
 
 .nav-item-active span {
   color: var(--brand-primary) !important;
 }
 
-.nav-item-active kbd {
-  background-color: var(--brand-light) !important;
+.nav-item-active svg {
   color: var(--brand-primary) !important;
-  border-color: var(--brand-border) !important;
+}
+
+/* Enlaces y Navegación Activa (Modo Oscuro): Fondo sólido con máximo contraste blanco */
+html.dark .nav-item-active,
+html[data-theme="dark"] .nav-item-active,
+html[data-theme="glass"] .nav-item-active {
+  background-color: var(--brand-primary) !important;
+  color: #ffffff !important;
+  border-color: var(--brand-hover) !important;
+  box-shadow: 0 2px 8px var(--brand-glow) !important;
+}
+
+html.dark .nav-item-active span,
+html[data-theme="dark"] .nav-item-active span,
+html[data-theme="glass"] .nav-item-active span {
+  color: #ffffff !important;
+}
+
+html.dark .nav-item-active svg,
+html[data-theme="dark"] .nav-item-active svg,
+html[data-theme="glass"] .nav-item-active svg {
+  color: #ffffff !important;
 }
 
 /* Anillos de Foco Reactivos a la Paleta */
@@ -203,72 +692,118 @@ textarea:focus,
   --tw-ring-color: var(--brand-border) !important;
 }
 
+/* Foco visible accesible (WCAG 2.4.7) para navegación por teclado */
+button:focus-visible,
+a:focus-visible,
+[role="button"]:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--brand-primary, #0369a1) !important;
+  outline-offset: 2px !important;
+}
+
+html[data-ui-style="glassmorphism"] button:focus-visible,
+html[data-ui-style="glassmorphism"] a:focus-visible,
+html[data-ui-style="glassmorphism"] [role="button"]:focus-visible,
+html[data-ui-style="glassmorphism"] input:focus-visible,
+html[data-ui-style="glassmorphism"] select:focus-visible,
+html[data-ui-style="glassmorphism"] textarea:focus-visible,
+html[data-ui-style="glassmorphism"] [tabindex]:focus-visible {
+  outline-color: var(--brand-border, #7dd3fc) !important;
+}
+
 /* ========================================================================= */
 /* ========================================================================= */
 /* MODO INDUSTRIAL PROFESIONAL (SOFT UI DINÁMICO SEGÚN PALETA Y RUBRO)       */
 /* ========================================================================= */
-html[data-ui-style="industrial"],
-html[data-ui-style="professional"],
-html:not([data-ui-style="glassmorphism"]) {
+html:not(.dark):not([data-theme="dark"]):not([data-ui-style="glassmorphism"]) {
   color-scheme: light;
   background-color: var(--industrial-bg, #ffffff) !important;
   color: var(--industrial-text, #0f172a) !important;
 }
 
-html[data-ui-style="industrial"] body,
-html[data-ui-style="professional"] body,
-html:not([data-ui-style="glassmorphism"]) body,
-html[data-ui-style="industrial"] main,
-html[data-ui-style="professional"] main,
-html:not([data-ui-style="glassmorphism"]) main {
+html:not(.dark):not([data-theme="dark"]):not([data-ui-style="glassmorphism"]) body,
+html:not(.dark):not([data-theme="dark"]):not([data-ui-style="glassmorphism"]) main {
   background-color: var(--industrial-bg, #ffffff) !important;
   color: var(--industrial-text, #0f172a) !important;
 }
 
 /* Cabecera y Barra Lateral */
-html[data-ui-style="industrial"] header,
-html[data-ui-style="professional"] header,
-html:not([data-ui-style="glassmorphism"]) header,
-html[data-ui-style="industrial"] aside,
-html[data-ui-style="professional"] aside,
-html:not([data-ui-style="glassmorphism"]) aside {
+html:not(.dark):not([data-theme="dark"]):not([data-ui-style="glassmorphism"]) header,
+html:not(.dark):not([data-theme="dark"]):not([data-ui-style="glassmorphism"]) aside {
   background-color: var(--industrial-bg, #ffffff) !important;
   border-color: var(--industrial-border, #cbd5e1) !important;
   color: var(--industrial-text, #0f172a) !important;
 }
 
-/* Enlaces del Menú Lateral */
+/* Enlaces y Botones del Menú Lateral */
 html[data-ui-style="industrial"] aside a:not(.nav-item-active),
-html:not([data-ui-style="glassmorphism"]) aside a:not(.nav-item-active) {
-  color: var(--industrial-text-muted, #334155) !important;
+html[data-ui-style="industrial"] aside button:not(.nav-item-active),
+html:not([data-ui-style="glassmorphism"]) aside a:not(.nav-item-active),
+html:not([data-ui-style="glassmorphism"]) aside button:not(.nav-item-active) {
+  color: #1e293b !important;
 }
 html[data-ui-style="industrial"] aside a:not(.nav-item-active):hover,
-html:not([data-ui-style="glassmorphism"]) aside a:not(.nav-item-active):hover {
+html[data-ui-style="industrial"] aside button:not(.nav-item-active):hover,
+html:not([data-ui-style="glassmorphism"]) aside a:not(.nav-item-active):hover,
+html:not([data-ui-style="glassmorphism"]) aside button:not(.nav-item-active):hover {
   background-color: var(--btn-secondary-bg, #f1f5f9) !important;
-  color: var(--industrial-text, #0f172a) !important;
+  color: #0f172a !important;
 }
 html[data-ui-style="industrial"] aside a:not(.nav-item-active) span,
-html:not([data-ui-style="glassmorphism"]) aside a:not(.nav-item-active) span {
-  color: var(--industrial-text-muted, #334155) !important;
+html[data-ui-style="industrial"] aside button:not(.nav-item-active) span,
+html:not([data-ui-style="glassmorphism"]) aside a:not(.nav-item-active) span,
+html:not([data-ui-style="glassmorphism"]) aside button:not(.nav-item-active) span {
+  color: #1e293b !important;
+}
+html[data-ui-style="industrial"] aside a:not(.nav-item-active) svg,
+html[data-ui-style="industrial"] aside button:not(.nav-item-active) svg,
+html:not([data-ui-style="glassmorphism"]) aside a:not(.nav-item-active) svg,
+html:not([data-ui-style="glassmorphism"]) aside button:not(.nav-item-active) svg {
+  color: #475569 !important;
 }
 
-/* Ítem Activo en Sidebar: Pill con Color Primario de la Paleta */
-html[data-ui-style="industrial"] aside .nav-item-active,
-html[data-ui-style="professional"] aside .nav-item-active,
-html:not([data-ui-style="glassmorphism"]) aside .nav-item-active {
-  background-color: var(--industrial-card, #ffffff) !important;
+/* Ítem Activo en Sidebar (Modo Claro): Pill suave con Color Primario de la Paleta */
+html[data-ui-style="industrial"]:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]) aside .nav-item-active,
+html[data-ui-style="professional"]:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]) aside .nav-item-active,
+html:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]):not([data-ui-style="glassmorphism"]) aside .nav-item-active {
+  background-color: var(--brand-light, #f0f9ff) !important;
   color: var(--brand-primary, #0369a1) !important;
-  border-color: var(--industrial-border, #cbd5e1) !important;
+  border-color: var(--brand-border, #cbd5e1) !important;
   border-radius: 9999px !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
+  box-shadow: 0 2px 8px var(--brand-glow, rgba(0, 0, 0, 0.05)) !important;
 }
-html[data-ui-style="industrial"] aside .nav-item-active span,
-html[data-ui-style="professional"] aside .nav-item-active span,
-html:not([data-ui-style="glassmorphism"]) aside .nav-item-active span,
-html[data-ui-style="industrial"] aside .nav-item-active svg,
-html[data-ui-style="professional"] aside .nav-item-active svg,
-html:not([data-ui-style="glassmorphism"]) aside .nav-item-active svg {
+html[data-ui-style="industrial"]:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]) aside .nav-item-active span,
+html[data-ui-style="professional"]:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]) aside .nav-item-active span,
+html:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]):not([data-ui-style="glassmorphism"]) aside .nav-item-active span,
+html[data-ui-style="industrial"]:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]) aside .nav-item-active svg,
+html[data-ui-style="professional"]:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]) aside .nav-item-active svg,
+html:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]):not([data-ui-style="glassmorphism"]) aside .nav-item-active svg {
   color: var(--brand-primary, #0369a1) !important;
+}
+
+/* Ítem Activo en Sidebar (Modo Oscuro): Fondo sólido de la Paleta con texto blanco */
+html.dark aside .nav-item-active,
+html[data-theme="dark"] aside .nav-item-active,
+html[data-theme="glass"] aside .nav-item-active,
+html[data-ui-style="glassmorphism"] aside .nav-item-active {
+  background-color: var(--brand-primary, #b91c1c) !important;
+  color: #ffffff !important;
+  border-color: var(--brand-hover, #991b1b) !important;
+  border-radius: 9999px !important;
+  box-shadow: 0 2px 10px var(--brand-glow, rgba(185, 28, 28, 0.4)) !important;
+}
+html.dark aside .nav-item-active span,
+html[data-theme="dark"] aside .nav-item-active span,
+html[data-theme="glass"] aside .nav-item-active span,
+html[data-ui-style="glassmorphism"] aside .nav-item-active span,
+html.dark aside .nav-item-active svg,
+html[data-theme="dark"] aside .nav-item-active svg,
+html[data-theme="glass"] aside .nav-item-active svg,
+html[data-ui-style="glassmorphism"] aside .nav-item-active svg {
+  color: #ffffff !important;
 }
 html[data-ui-style="industrial"] aside .nav-item-active kbd,
 html[data-ui-style="professional"] aside .nav-item-active kbd,
@@ -373,8 +908,9 @@ html:not([data-ui-style="glassmorphism"]) .pos-category-active {
 html[data-ui-style="industrial"] .pos-category-inactive,
 html:not([data-ui-style="glassmorphism"]) .pos-category-inactive {
   background-color: var(--btn-secondary-bg, #f1f5f9) !important;
-  border-color: var(--btn-secondary-border, #cbd5e1) !important;
-  color: var(--btn-secondary-text, #334155) !important;
+  border-color: #94a3b8 !important;
+  color: #1e293b !important;
+  font-weight: 700 !important;
 }
 html[data-ui-style="industrial"] .pos-category-inactive:hover,
 html:not([data-ui-style="glassmorphism"]) .pos-category-inactive:hover {
@@ -403,14 +939,15 @@ html:not([data-ui-style="glassmorphism"]) .pos-card-barcode {
   color: var(--industrial-text-muted, #475569) !important;
 }
 
-/* Pastilla de Rubro / Categoría */
+/* Pastilla de Rubro / Categoría — altura uniforme en todos los modos, sin truncar */
 html[data-ui-style="industrial"] .pos-card-category-pill,
 html:not([data-ui-style="glassmorphism"]) .pos-card-category-pill {
-  background-color: var(--brand-light, #f0f9ff) !important;
-  border-color: var(--brand-border, #7dd3fc) !important;
-  color: var(--brand-primary, #0369a1) !important;
-  font-weight: 800 !important;
-  border-radius: 6px !important;
+  font-weight: 800;
+  border-radius: 6px;
+  height: 1.5rem !important;       /* h-6 fijo = misma altura siempre */
+  white-space: nowrap !important;  /* sin saltos de línea */
+  display: inline-flex !important;
+  align-items: center !important;
 }
 
 /* Nombre de Producto */
@@ -436,9 +973,9 @@ html:not([data-ui-style="glassmorphism"]) .pos-price-ves {
 html[data-ui-style="industrial"] .pos-card-stock-pill,
 html:not([data-ui-style="glassmorphism"]) .pos-card-stock-pill {
   background-color: var(--btn-secondary-bg, #f1f5f9) !important;
-  border-color: var(--industrial-border, #cbd5e1) !important;
-  color: var(--industrial-text-muted, #334155) !important;
-  font-weight: 700 !important;
+  border-color: #94a3b8 !important;
+  color: #1e293b !important;
+  font-weight: 800 !important;
   border-radius: 6px !important;
 }
 
@@ -525,15 +1062,16 @@ html:not([data-ui-style="glassmorphism"]) .pos-numpad-key:hover {
 }
 html[data-ui-style="industrial"] .pos-numpad-action,
 html:not([data-ui-style="glassmorphism"]) .pos-numpad-action {
-  background-color: var(--industrial-card, #ffffff) !important;
-  color: var(--btn-secondary-text, #334155) !important;
-  border: 1px solid var(--industrial-border, #cbd5e1) !important;
+  background-color: var(--btn-secondary-bg, #f1f5f9) !important;
+  color: #1e293b !important;
+  border: 1px solid #94a3b8 !important;
   border-radius: 8px !important;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.07) !important;
   height: 2.15rem !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
+  font-weight: 700 !important;
 }
 html[data-ui-style="industrial"] .pos-numpad-enter,
 html:not([data-ui-style="glassmorphism"]) .pos-numpad-enter {
@@ -554,13 +1092,13 @@ html:not([data-ui-style="glassmorphism"]) .pos-numpad-enter:hover {
 /* ========================================================================= */
 /* MODO GLASSMORPHISM PRO (Diseño Táctico Blueprint / Slate-Navy de Base)     */
 /* ========================================================================= */
-html[data-ui-style="glassmorphism"] {
+html.dark:not([data-theme="light"]), html[data-theme="dark"], html[data-ui-style="glassmorphism"]:not([data-theme="light"]) {
   color-scheme: dark !important;
   background-color: #1a2636 !important;
   color: #f8fafc !important;
 }
 
-html[data-ui-style="glassmorphism"] body {
+html.dark:not([data-theme="light"]), html[data-theme="dark"], html[data-ui-style="glassmorphism"]:not([data-theme="light"]) body {
   background-color: #1a2636 !important;
   background-image: 
     linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
@@ -571,14 +1109,14 @@ html[data-ui-style="glassmorphism"] body {
 }
 
 /* Cabecera Superior */
-html[data-ui-style="glassmorphism"] header {
+html.dark:not([data-theme="light"]), html[data-theme="dark"], html[data-ui-style="glassmorphism"]:not([data-theme="light"]) header {
   background: #15202e !important;
   border-color: #24354b !important;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
   color: #f8fafc !important;
 }
 
-html[data-ui-style="glassmorphism"] .brand-badge {
+html.dark:not([data-theme="light"]), html[data-theme="dark"], html[data-ui-style="glassmorphism"]:not([data-theme="light"]) .brand-badge {
   background-color: #8b5cf6 !important;
   border-color: #a78bfa !important;
   color: #ffffff !important;
@@ -586,53 +1124,53 @@ html[data-ui-style="glassmorphism"] .brand-badge {
 }
 
 /* Toggle de Tema en Glassmorphism */
-html[data-ui-style="glassmorphism"] .pos-theme-toggle {
+html.dark:not([data-theme="light"]), html[data-theme="dark"], html[data-ui-style="glassmorphism"]:not([data-theme="light"]) .pos-theme-toggle {
   background-color: #1c2b3d !important;
   border-color: #2d425c !important;
   color: #fbbf24 !important;
 }
 
 /* Barra Lateral (Sidebar) */
-html[data-ui-style="glassmorphism"] aside {
+html.dark:not([data-theme="light"]), html[data-theme="dark"], html[data-ui-style="glassmorphism"]:not([data-theme="light"]) aside {
   background: #131c28 !important;
   border-color: #223246 !important;
   color: #94a3b8 !important;
 }
 
-html[data-ui-style="glassmorphism"] aside div.text-\[11px\].font-bold.uppercase {
+html.dark:not([data-theme="light"]), html[data-theme="dark"], html[data-ui-style="glassmorphism"]:not([data-theme="light"]) aside div.text-\[11px\].font-bold.uppercase {
   color: #22d3ee !important;
   letter-spacing: 0.06em !important;
 }
 
 /* Navegación Activa en Sidebar */
-html[data-ui-style="glassmorphism"] .nav-item-active {
+html.dark:not([data-theme="light"]), html[data-theme="dark"], html[data-ui-style="glassmorphism"]:not([data-theme="light"]) .nav-item-active {
   background: #1f2f45 !important;
   border-color: #7c3aed !important;
   color: #ffffff !important;
   box-shadow: 0 0 14px rgba(124, 58, 237, 0.35) !important;
   border-radius: 9999px !important;
 }
-html[data-ui-style="glassmorphism"] .nav-item-active span {
+html.dark:not([data-theme="light"]), html[data-theme="dark"], html[data-ui-style="glassmorphism"]:not([data-theme="light"]) .nav-item-active span {
   color: #ffffff !important;
 }
-html[data-ui-style="glassmorphism"] .nav-item-active svg {
+html.dark:not([data-theme="light"]), html[data-theme="dark"], html[data-ui-style="glassmorphism"]:not([data-theme="light"]) .nav-item-active svg {
   color: #c084fc !important;
 }
-html[data-ui-style="glassmorphism"] .nav-item-active kbd {
+html.dark:not([data-theme="light"]), html[data-theme="dark"], html[data-ui-style="glassmorphism"]:not([data-theme="light"]) .nav-item-active kbd {
   background-color: #162232 !important;
   border-color: #27394f !important;
   color: #7890ad !important;
 }
 
 /* Paneles y Contenedores Principales */
-html[data-ui-style="glassmorphism"] .bg-white {
+html.dark:not([data-theme="light"]), html[data-theme="dark"], html[data-ui-style="glassmorphism"]:not([data-theme="light"]) .bg-white {
   background: #182333 !important;
   border-color: #283a50 !important;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35) !important;
   color: #f8fafc !important;
 }
-html[data-ui-style="glassmorphism"] .bg-slate-50,
-html[data-ui-style="glassmorphism"] .bg-slate-100 {
+html.dark:not([data-theme="light"]), html[data-theme="dark"], html[data-ui-style="glassmorphism"]:not([data-theme="light"]) .bg-slate-50,
+html.dark:not([data-theme="light"]), html[data-theme="dark"], html[data-ui-style="glassmorphism"]:not([data-theme="light"]) .bg-slate-100 {
   background-color: #141e2b !important;
   border-color: #202e40 !important;
   color: #e2e8f0 !important;
@@ -698,15 +1236,32 @@ html[data-ui-style="glassmorphism"] .overflow-x-auto button.brand-badge {
 html[data-ui-style="glassmorphism"] .pos-product-card,
 html[data-ui-style="glassmorphism"] button.h-48,
 html[data-ui-style="glassmorphism"] button.min-h-\[135px\] {
-  background: linear-gradient(180deg, #223348 0%, #1a2738 100%) !important;
   border: 1px solid #334a66 !important;
   border-radius: 14px !important;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35) !important;
 }
+/* Alternancia de contraste una sí y otra no */
+html[data-ui-style="glassmorphism"] .pos-card-even {
+  background: linear-gradient(180deg, #182434 0%, #131d2b 100%) !important;
+  border-color: #283e57 !important;
+}
+html[data-ui-style="glassmorphism"] .pos-card-odd {
+  background: linear-gradient(180deg, #2a3e57 0%, #1f2e42 100%) !important;
+  border-color: #3e587b !important;
+}
+html:not([data-ui-style="glassmorphism"]) .pos-card-even {
+  background-color: #ffffff !important;
+  border-color: #cbd5e1 !important;
+}
+html:not([data-ui-style="glassmorphism"]) .pos-card-odd {
+  background-color: #eef2f7 !important;
+  border-color: #94a3b8 !important;
+}
+
 html[data-ui-style="glassmorphism"] .pos-product-card:hover,
 html[data-ui-style="glassmorphism"] button.h-48:hover,
 html[data-ui-style="glassmorphism"] button.min-h-\[135px\]:hover {
-  background: linear-gradient(180deg, #283d57 0%, #1e2e42 100%) !important;
+  background: linear-gradient(180deg, #2d4563 0%, #22344a 100%) !important;
   border-color: #38bdf8 !important;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5) !important;
   transform: translateY(-2px);
@@ -720,12 +1275,17 @@ html[data-ui-style="glassmorphism"] .pos-card-barcode,
 html[data-ui-style="glassmorphism"] button.min-h-\[135px\] .font-mono.text-slate-400 {
   color: #7890ad !important;
 }
-html[data-ui-style="glassmorphism"] .pos-card-category-pill,
-html[data-ui-style="glassmorphism"] button.min-h-\[135px\] span.border,
-html[data-ui-style="glassmorphism"] button.h-48 span.border {
+/* Pastillas de categoría en glassmorphism: altura uniforme + sin wrap */
+html[data-ui-style="glassmorphism"] .pos-card-category-pill:not([style]) {
   background-color: #1b2a3a !important;
   border-color: #334a66 !important;
-  color: #94a3b8 !important;
+  color: #cbd5e1 !important;
+}
+html[data-ui-style="glassmorphism"] .pos-card-category-pill {
+  height: 1.5rem !important;
+  white-space: nowrap !important;
+  display: inline-flex !important;
+  align-items: center !important;
 }
 html[data-ui-style="glassmorphism"] .pos-price-usd,
 html[data-ui-style="glassmorphism"] button.h-48 .text-slate-900,
@@ -802,7 +1362,8 @@ html[data-ui-style="glassmorphism"] .pos-numpad-key:hover {
 html[data-ui-style="glassmorphism"] .pos-numpad-action {
   background-color: #1c2a3b !important;
   border-color: #2d425c !important;
-  color: #94a3b8 !important;
+  color: #e2e8f0 !important;
+  font-weight: 700 !important;
 }
 html[data-ui-style="glassmorphism"] .pos-numpad-action.text-rose-600 {
   background-color: #b24747 !important;
@@ -963,6 +1524,15 @@ html[data-ui-style="industrial"] .inventory-table-row .btn-stock-plus svg {
   color: #ffffff !important;
 }
 
+/* Botones de acción en tabla de inventario (Etiqueta, Motivo, Editar) - Texto negro/gris oscuro legible */
+.inventory-table-row button span,
+.inventory-table-row td button span,
+html[data-ui-style="industrial"] .inventory-table-row button span,
+html:not([data-ui-style="glassmorphism"]) .inventory-table-row button span {
+  color: #0f172a !important;
+  font-weight: 700 !important;
+}
+
 /* ========================================================================= */
 /* ALTO CONTRASTE Y LEGIBILIDAD TÁCTICA EN MODO GLASSMORPHISM (GLOBAL)       */
 /* ========================================================================= */
@@ -1068,6 +1638,18 @@ html[data-ui-style="glassmorphism"] tbody td button:hover {
   border-color: #38bdf8 !important;
   color: #ffffff !important;
 }
+/* Excepción: botones de acción con color propio (Etiqueta=indigo, Ajuste=amber) */
+html[data-ui-style="glassmorphism"] tbody td button.bg-indigo-50,
+html[data-ui-style="glassmorphism"] tbody td button.bg-indigo-100 {
+  background-color: #1e1b4b !important;
+  border-color: #4338ca !important;
+  color: #a5b4fc !important;
+}
+html[data-ui-style="glassmorphism"] tbody td button.bg-indigo-50 svg,
+html[data-ui-style="glassmorphism"] tbody td button.bg-indigo-100 svg {
+  color: #818cf8 !important;
+  stroke: #818cf8 !important;
+}
 
 /* Botones secundarios generales (Auditoría, Importar, Exportar, etc.) */
 html[data-ui-style="glassmorphism"] button.bg-white,
@@ -1142,4 +1724,294 @@ html[data-ui-style="glassmorphism"] aside .text-slate-400 {
 html[data-ui-style="glassmorphism"] aside .text-slate-700 {
   color: #cbd5e1 !important;
 }
+
+/* ========================================================================= */
+/* ALTO CONTRASTE INTEGRAL: BOTONES OSCUROS/AZULES CON TEXTO BLANCO          */
+/* Y BOTONES CLAROS CON TEXTO NEGRO (TODAS LAS INTERFACES)                   */
+/* ========================================================================= */
+
+/* 1. BOTONES OSCUROS, AZULES O COLOREADOS EN CUALQUIER MODO: TEXTO BLANCO PURO */
+button.bg-slate-700, button.bg-slate-700 *,
+button.bg-slate-800, button.bg-slate-800 *,
+button.bg-slate-900, button.bg-slate-900 *,
+button.bg-slate-950, button.bg-slate-950 *,
+button.bg-sky-600, button.bg-sky-600 *,
+button.bg-sky-700, button.bg-sky-700 *,
+button.bg-sky-800, button.bg-sky-800 *,
+button.bg-blue-600, button.bg-blue-600 *,
+button.bg-blue-700, button.bg-blue-700 *,
+button.bg-indigo-600, button.bg-indigo-600 *,
+button.bg-indigo-700, button.bg-indigo-700 *,
+button.bg-emerald-600, button.bg-emerald-600 *,
+button.bg-emerald-700, button.bg-emerald-700 *,
+button.bg-purple-600, button.bg-purple-600 *,
+button.bg-purple-700, button.bg-purple-700 *,
+.pay-method-btn.bg-slate-800, .pay-method-btn.bg-slate-800 *,
+.category-btn.bg-slate-800, .category-btn.bg-slate-800 * {
+  color: #ffffff !important;
+}
+
+/* 2. REGLA UNIVERSAL: BOTONES OSCUROS REALES TIENEN TEXTO BLANCO */
+button.bg-slate-700, button.bg-slate-700 *,
+button.bg-slate-800, button.bg-slate-800 *,
+button.bg-slate-900, button.bg-slate-900 *,
+button.bg-slate-950, button.bg-slate-950 *,
+button.bg-blue-600, button.bg-blue-600 *,
+button.bg-blue-700, button.bg-blue-700 *,
+button.bg-blue-800, button.bg-blue-800 *,
+button.bg-sky-600, button.bg-sky-600 *,
+button.bg-sky-700, button.bg-sky-700 *,
+button.bg-sky-800, button.bg-sky-800 *,
+button.bg-indigo-600, button.bg-indigo-600 *,
+button.bg-indigo-700, button.bg-indigo-700 *,
+button.bg-indigo-800, button.bg-indigo-800 *,
+button.bg-emerald-600, button.bg-emerald-600 *,
+button.bg-emerald-700, button.bg-emerald-700 *,
+button.bg-purple-600, button.bg-purple-600 *,
+button.bg-purple-700, button.bg-purple-700 *,
+button.bg-violet-600, button.bg-violet-600 *,
+button.bg-violet-700, button.bg-violet-700 *,
+button.bg-rose-600, button.bg-rose-600 *,
+button.bg-rose-700, button.bg-rose-700 *,
+button.bg-gray-800, button.bg-gray-800 *,
+button.bg-gray-900, button.bg-gray-900 *,
+button.bg-zinc-800, button.bg-zinc-800 *,
+button.bg-zinc-900, button.bg-zinc-900 *,
+html.dark button.dark\:bg-slate-700, html.dark button.dark\:bg-slate-700 *,
+html.dark button.dark\:bg-slate-800, html.dark button.dark\:bg-slate-800 *,
+html.dark button.dark\:bg-slate-900, html.dark button.dark\:bg-slate-900 *,
+html.dark button.dark\:bg-slate-950, html.dark button.dark\:bg-slate-950 *,
+html[data-theme="dark"] button.dark\:bg-slate-800, html[data-theme="dark"] button.dark\:bg-slate-800 *,
+html[data-theme="dark"] button.dark\:bg-slate-900, html[data-theme="dark"] button.dark\:bg-slate-900 *,
+html[data-theme="glass"] button.dark\:bg-slate-800, html[data-theme="glass"] button.dark\:bg-slate-800 *,
+.btn-dark, .btn-dark *,
+.btn-primary, .btn-primary *,
+.brand-badge, .brand-badge * {
+  color: #ffffff !important;
+}
+
+/* REGLA SUPREMA PARA EL SIDEBAR: ÍTEMS INACTIVOS NUNCA SON BLANCOS EN MODO CLARO */
+aside button:not(.nav-item-active),
+aside button:not(.nav-item-active) span,
+aside button:not(.nav-item-active) div,
+aside a:not(.nav-item-active),
+aside a:not(.nav-item-active) span {
+  color: #1e293b !important;
+}
+aside button:not(.nav-item-active) svg,
+aside a:not(.nav-item-active) svg {
+  color: #475569 !important;
+}
+aside button:not(.nav-item-active):hover,
+aside button:not(.nav-item-active):hover span,
+aside a:not(.nav-item-active):hover,
+aside a:not(.nav-item-active):hover span {
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
+}
+aside button:not(.nav-item-active):hover svg,
+aside a:not(.nav-item-active):hover svg {
+  color: #0f172a !important;
+}
+
+/* SIDEBAR EN MODO OSCURO: TEXTO BLANCO/SLATE-100 NÍTIDO */
+html.dark aside button:not(.nav-item-active),
+html.dark aside button:not(.nav-item-active) span,
+html.dark aside button:not(.nav-item-active) div,
+html.dark aside a:not(.nav-item-active),
+html.dark aside a:not(.nav-item-active) span,
+html[data-theme="dark"] aside button:not(.nav-item-active),
+html[data-theme="dark"] aside button:not(.nav-item-active) span,
+html[data-theme="glass"] aside button:not(.nav-item-active),
+html[data-theme="glass"] aside button:not(.nav-item-active) span {
+  color: #f1f5f9 !important;
+}
+html.dark aside button:not(.nav-item-active) svg,
+html.dark aside a:not(.nav-item-active) svg,
+html[data-theme="dark"] aside button:not(.nav-item-active) svg,
+html[data-theme="glass"] aside button:not(.nav-item-active) svg {
+  color: #cbd5e1 !important;
+}
+html.dark aside button:not(.nav-item-active):hover,
+html.dark aside button:not(.nav-item-active):hover span,
+html[data-theme="dark"] aside button:not(.nav-item-active):hover,
+html[data-theme="glass"] aside button:not(.nav-item-active):hover {
+  background-color: #1e293b !important;
+  color: #ffffff !important;
+}
+html.dark aside button:not(.nav-item-active):hover svg,
+html[data-theme="dark"] aside button:not(.nav-item-active):hover svg,
+html[data-theme="glass"] aside button:not(.nav-item-active):hover svg {
+  color: #ffffff !important;
+}
+
+/* 3. REGLAS ESPECÍFICAS PARA MODO GLASSMORPHISM (TEMA OSCURO / TÁCTICO) */
+/* Todos los botones de la barra superior, gaveta y categorías DEBEN tener texto blanco */
+html[data-ui-style="glassmorphism"] .pos-btn-gaveta,
+html[data-ui-style="glassmorphism"] .pos-btn-gaveta *,
+html[data-ui-style="glassmorphism"] button.pos-btn-gaveta,
+html[data-ui-style="glassmorphism"] button.pos-btn-gaveta span {
+  background-color: #172a3e !important;
+  border-color: #2b4566 !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+}
+
+html[data-ui-style="glassmorphism"] .pos-btn-gaveta svg {
+  color: #38bdf8 !important;
+}
+
+html[data-ui-style="glassmorphism"] .pos-btn-gaveta kbd {
+  background-color: #0b1523 !important;
+  border-color: #223c58 !important;
+  color: #7dd3fc !important;
+}
+
+/* Categorías Inactivas en Glassmorphism: Fondo oscuro táctico + TEXTO BLANCO PURO */
+html[data-ui-style="glassmorphism"] .pos-category-inactive,
+html[data-ui-style="glassmorphism"] .pos-category-inactive *,
+html[data-ui-style="glassmorphism"] .pos-categories-bar button:not(.pos-category-active),
+html[data-ui-style="glassmorphism"] .pos-categories-bar button:not(.pos-category-active) *,
+html[data-ui-style="glassmorphism"] .overflow-x-auto button:not(.brand-badge):not(.active),
+html[data-ui-style="glassmorphism"] .overflow-x-auto button:not(.brand-badge):not(.active) * {
+  background-color: #18283c !important;
+  border-color: #2c4463 !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+}
+
+html[data-ui-style="glassmorphism"] .pos-category-inactive:hover,
+html[data-ui-style="glassmorphism"] .pos-category-inactive:hover *,
+html[data-ui-style="glassmorphism"] .pos-categories-bar button:not(.pos-category-active):hover,
+html[data-ui-style="glassmorphism"] .pos-categories-bar button:not(.pos-category-active):hover * {
+  background-color: #243c58 !important;
+  border-color: #38bdf8 !important;
+  color: #ffffff !important;
+}
+
+/* Categoría Activa en Glassmorphism */
+html[data-ui-style="glassmorphism"] .pos-category-active,
+html[data-ui-style="glassmorphism"] .pos-category-active *,
+html[data-ui-style="glassmorphism"] .category-btn.active,
+html[data-ui-style="glassmorphism"] .category-btn.active * {
+  background-color: #8b5cf6 !important;
+  border-color: #a78bfa !important;
+  color: #ffffff !important;
+}
+
+/* Botones de acción en Glassmorphism (Header) */
+html[data-ui-style="glassmorphism"] .pos-header-btn-cream,
+html[data-ui-style="glassmorphism"] .pos-header-btn-cream * {
+  color: #ffffff !important;
+}
+
+/* 4. REGLA ESTRICTA DE MODO CLARO: CUALQUIER BOTÓN CON FONDO CLARO TIENE TEXTO NEGRO O GRIS OSCURO */
+/* ¡CERO TEXTOS CLAROS EN FONDOS CLAROS! */
+button.bg-white, button.bg-white *,
+button.bg-slate-50, button.bg-slate-50 *,
+button.bg-slate-100, button.bg-slate-100 *,
+button.bg-slate-200, button.bg-slate-200 *,
+button.bg-slate-300, button.bg-slate-300 *,
+button[class*="bg-indigo-50"], button[class*="bg-indigo-50"] *,
+button[class*="bg-indigo-100"], button[class*="bg-indigo-100"] *,
+button[class*="bg-indigo-200"], button[class*="bg-indigo-200"] *,
+button[class*="bg-blue-50"], button[class*="bg-blue-50"] *,
+button[class*="bg-blue-100"], button[class*="bg-blue-100"] *,
+button[class*="bg-blue-200"], button[class*="bg-blue-200"] *,
+button[class*="bg-sky-50"], button[class*="bg-sky-50"] *,
+button[class*="bg-sky-100"], button[class*="bg-sky-100"] *,
+button[class*="bg-sky-200"], button[class*="bg-sky-200"] *,
+button[class*="bg-amber-50"], button[class*="bg-amber-50"] *,
+button[class*="bg-amber-100"], button[class*="bg-amber-100"] *,
+button[class*="bg-amber-200"], button[class*="bg-amber-200"] *,
+button[class*="bg-yellow-50"], button[class*="bg-yellow-50"] *,
+button[class*="bg-yellow-100"], button[class*="bg-yellow-100"] *,
+button[class*="bg-yellow-200"], button[class*="bg-yellow-200"] *,
+button[class*="bg-emerald-50"], button[class*="bg-emerald-50"] *,
+button[class*="bg-emerald-100"], button[class*="bg-emerald-100"] *,
+button[class*="bg-emerald-200"], button[class*="bg-emerald-200"] *,
+button[class*="bg-rose-50"], button[class*="bg-rose-50"] *,
+button[class*="bg-rose-100"], button[class*="bg-rose-100"] *,
+button[class*="bg-rose-200"], button[class*="bg-rose-200"] *,
+button[class*="bg-purple-50"], button[class*="bg-purple-50"] *,
+button[class*="bg-purple-100"], button[class*="bg-purple-100"] *,
+button[class*="bg-purple-200"], button[class*="bg-purple-200"] *,
+button[class*="bg-violet-50"], button[class*="bg-violet-50"] *,
+button[class*="bg-violet-100"], button[class*="bg-violet-100"] *,
+button[class*="bg-violet-200"], button[class*="bg-violet-200"] *,
+button[class*="bg-gray-50"], button[class*="bg-gray-50"] *,
+button[class*="bg-gray-100"], button[class*="bg-gray-100"] *,
+button[class*="bg-gray-200"], button[class*="bg-gray-200"] *,
+button[class*="bg-zinc-50"], button[class*="bg-zinc-50"] *,
+button[class*="bg-zinc-100"], button[class*="bg-zinc-100"] *,
+button[class*="bg-zinc-200"], button[class*="bg-zinc-200"] {
+  color: #0f172a !important;
+}
+
+/* Iconos dentro de botones claros: color visible y nunca blanco */
+button[class*="bg-indigo-50"] svg, button[class*="bg-indigo-100"] svg {
+  color: #4338ca !important;
+  stroke: #4338ca !important;
+}
+button[class*="bg-amber-50"] svg, button[class*="bg-amber-100"] svg {
+  color: #b45309 !important;
+  stroke: #b45309 !important;
+}
+button[class*="bg-sky-50"] svg, button[class*="bg-sky-100"] svg {
+  color: #0369a1 !important;
+  stroke: #0369a1 !important;
+}
+
+/* 5. MODAL DE BALANZA (MANUAL WEIGHT MODAL): CONTRASTE PERFECTO EN CUALQUIER TEMA */
+#manual-weight-modal button.bg-slate-100,
+#manual-weight-modal button.bg-slate-100 *,
+#manual-weight-modal button.bg-slate-200,
+#manual-weight-modal button.bg-slate-200 *,
+.manual-scale-modal button.bg-slate-100,
+.manual-scale-modal button.bg-slate-100 *,
+.manual-scale-modal button.bg-slate-200,
+.manual-scale-modal button.bg-slate-200 * {
+  color: #0f172a !important;
+}
+
+/* 6. RELOJ DIGITAL DEL HEADER CON FECHA COMPLETA Y EFECTO SUTIL GLOW */
+.pos-header-clock {
+  background: rgba(15, 23, 42, 0.9);
+  border-color: rgba(56, 189, 248, 0.45);
+  box-shadow: 0 0 14px rgba(56, 189, 248, 0.22), inset 0 0 10px rgba(56, 189, 248, 0.08);
+}
+.pos-header-clock .pos-clock-date {
+  color: #cbd5e1;
+}
+.pos-header-clock .pos-clock-time {
+  color: #38bdf8;
+  text-shadow: 0 0 10px rgba(56, 189, 248, 0.65);
+}
+
+html[data-ui-style="glassmorphism"] .pos-header-clock {
+  background: rgba(7, 19, 44, 0.95);
+  border-color: rgba(56, 189, 248, 0.55);
+  box-shadow: 0 0 18px rgba(56, 189, 248, 0.28), inset 0 0 12px rgba(56, 189, 248, 0.12);
+}
+html[data-ui-style="glassmorphism"] .pos-header-clock .pos-clock-date {
+  color: #e2e8f0;
+}
+html[data-ui-style="glassmorphism"] .pos-header-clock .pos-clock-time {
+  color: #ffffff;
+  text-shadow: 0 0 12px rgba(56, 189, 248, 0.8);
+}
+
+html:not([data-ui-style="glassmorphism"]) .pos-header-clock {
+  background: #0f172a;
+  border-color: #334155;
+  box-shadow: 0 0 12px rgba(14, 165, 233, 0.2);
+}
+html:not([data-ui-style="glassmorphism"]) .pos-header-clock .pos-clock-date {
+  color: #94a3b8;
+}
+html:not([data-ui-style="glassmorphism"]) .pos-header-clock .pos-clock-time {
+  color: #38bdf8;
+  text-shadow: 0 0 8px rgba(56, 189, 248, 0.5);
+}
+
 

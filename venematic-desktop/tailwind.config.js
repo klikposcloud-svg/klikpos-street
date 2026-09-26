@@ -17,13 +17,13 @@ module.exports = {
           text: '#0f172a',
           'text-muted': '#64748b',
           'text-subtle': '#94a3b8',
-          brand: '#0284c7', // Slate Blue / Cyan técnico profesional
-          'brand-hover': '#0369a1',
-          success: '#16a34a', // Verde transaccional nítido
-          'success-hover': '#15803d',
+          brand: '#0369a1', // Sky 700 — AA 5.93:1 con texto blanco
+          'brand-hover': '#075985',
+          success: '#15803d', // Verde 700 — AA 5.02:1 con texto blanco
+          'success-hover': '#166534',
           danger: '#dc2626',
           'danger-hover': '#b91c1c',
-          warning: '#d97706',
+          warning: '#b45309', // Ámbar 700 — AA 5.02:1 con texto blanco
         },
       },
       fontFamily: {

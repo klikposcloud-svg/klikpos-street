@@ -1,0 +1,57 @@
+================================================================================
+           VENEMATIC POS ENTERPRISE v2.0 - GUIA DE INSTALACION
+================================================================================
+
+Este paquete de distribucion permite instalar Venematic POS en CUALQUIER
+computadora con Windows (Windows 10 o Windows 11) de forma 100% autonoma.
+
+NO REQUIERE INSTALAR:
+  * Node.js ni npm.
+  * Git, Rust, Python ni compiladores.
+  * Ningun tipo de configuracion de terminal o comandos.
+
+--------------------------------------------------------------------------------
+1. PASOS PARA INSTALAR EN CUALQUIER PC
+--------------------------------------------------------------------------------
+1. Copie el archivo 'Venematic-POS-Setup-v2.0.0.exe' en la computadora deseada
+   (puede transferirlo mediante pendrive USB, red local, WhatsApp Web o Drive).
+
+2. Haga doble clic sobre 'Venematic-POS-Setup-v2.0.0.exe'.
+   (Si Windows SmartScreen muestra un aviso de editor no conocido, haga clic en 
+   "Mas informacion" -> "Ejecutar de todas formas").
+
+3. Siga los pasos del asistente de instalacion en español:
+   - Seleccione la carpeta de instalacion (por defecto se instala en su carpeta de
+     usuario o en Archivos de Programa).
+   - Asegurese de dejar marcada la casilla "Crear acceso directo en el Escritorio".
+   - Haga clic en "Instalar".
+
+4. Al finalizar, deje marcada la opcion "Ejecutar Venematic POS ahora" y haga clic
+   en "Finalizar".
+
+--------------------------------------------------------------------------------
+2. USO Y OPERACION DIARIA
+--------------------------------------------------------------------------------
+- Para abrir el punto de venta en el dia a dia, simplemente haga doble clic en el
+  icono "Venematic POS" ubicado en su Escritorio o busquelo en el Menu Inicio.
+- El sistema iniciara el motor local de forma transparente y abrira la interfaz
+  en una ventana limpia y dedicada tipo aplicacion nativa.
+- Puede conectar lectores de codigos de barra USB, pistolas laser o usar el
+  escaner movil vinculado.
+
+--------------------------------------------------------------------------------
+3. DESINSTALACION
+--------------------------------------------------------------------------------
+Si en algun momento desea desinstalar el sistema:
+- Vaya a "Configuracion de Windows" -> "Aplicaciones" -> "Venematic POS" y pulse
+  "Desinstalar", o bien use el acceso directo "Desinstalar Venematic POS" en el
+  Menu Inicio.
+
+--------------------------------------------------------------------------------
+4. INFORMACION TECNICA DEL PAQUETE
+--------------------------------------------------------------------------------
+- Archivo: Venematic-POS-Setup-v2.0.0.exe
+- Peso: ~26.4 MB
+- Arquitectura: Windows x64 (compatible con x86_64)
+- Motor interno: Node.js Portable + Next.js Enterprise Engine + SQLite Local DB
+================================================================================

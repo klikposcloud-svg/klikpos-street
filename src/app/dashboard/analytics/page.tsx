@@ -185,7 +185,7 @@ export default function AnalyticsPage() {
           data: currencySummary.map((c) => c.totalUSD),
           backgroundColor: [
             '#059669', '#10b981', '#34d399', '#6ee7b7',
-            '#475569', '#64748b', '#94a3b8',
+            '#475569', '#64748b', '#0369a1',
           ],
           borderRadius: 6,
           borderSkipped: false,
@@ -230,16 +230,16 @@ export default function AnalyticsPage() {
     },
     scales: {
       x: {
-        ticks: { font: { family: 'Montserrat', size: 10 }, color: '#94a3b8' },
+        ticks: { font: { family: 'Montserrat', size: 11 }, color: '#64748b' },
         grid: { color: 'rgba(148, 163, 184, 0.1)' },
       },
       y: {
-        ticks: { font: { family: 'Montserrat', size: 10 }, color: '#94a3b8' },
+        ticks: { font: { family: 'Montserrat', size: 11 }, color: '#64748b' },
         grid: { color: 'rgba(148, 163, 184, 0.1)' },
       },
       y1: {
         position: 'right' as const,
-        ticks: { font: { family: 'Montserrat', size: 10 }, color: '#94a3b8' },
+        ticks: { font: { family: 'Montserrat', size: 11 }, color: '#64748b' },
         grid: { display: false },
       },
     },

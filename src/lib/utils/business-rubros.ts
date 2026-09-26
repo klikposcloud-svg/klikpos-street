@@ -235,7 +235,7 @@ export const BUSINESS_RUBROS: Record<BusinessType, BusinessRubroInfo> = {
 
 
 import { db, LocalProduct } from '@/lib/db';
-import { BrandingConfig, applyBrandingToDOM, IndustrialBgPreset } from '@/lib/theme';
+import { BrandingConfig, applyBrandingToDOM, IndustrialBgPreset, applyTheme } from '@/lib/theme';
 
 export type StandardRubroId = 'bodega' | 'market' | 'pharmacy' | 'bakery' | 'liquor' | 'bookstore';
 
@@ -1061,13 +1061,16 @@ export async function applyRubroToSystem(
     uiStyle: 'industrial',
     industrialBg: rubro.recommendedBgPreset,
   };
+  applyTheme('light');
   applyBrandingToDOM(brandingConfig);
 
   try {
+    localStorage.setItem('venematic_theme', 'light');
     localStorage.setItem('venematic_branding_palette', brandingConfig.paletteId);
     localStorage.setItem('venematic_ui_style', brandingConfig.uiStyle);
     localStorage.setItem('venematic_industrial_bg', brandingConfig.industrialBg || 'white');
     localStorage.setItem('venematic_active_rubro', rubroId);
+    await db.settings.put({ key: 'app_theme', value: 'light' });
     await db.settings.put({ key: 'branding_config', value: brandingConfig });
     await db.settings.put({ key: 'active_rubro', value: rubroId });
   } catch {}

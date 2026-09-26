@@ -1,6 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { scannerEmitter, mobileSalesQueue } from '@/lib/scanner-events';
 
+const CORS_HEADERS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+};
+
+export async function OPTIONS() {
+  return new Response(null, { status: 204, headers: CORS_HEADERS });
+}
 
 export async function GET(req: NextRequest) {
   try {
@@ -8,9 +17,9 @@ export async function GET(req: NextRequest) {
       success: true,
       pendingSales: mobileSalesQueue,
       count: mobileSalesQueue.length,
-    });
+    }, { headers: CORS_HEADERS });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: err.message }, { status: 500, headers: CORS_HEADERS });
   }
 }
 
@@ -20,7 +29,7 @@ export async function POST(req: NextRequest) {
     const { sale } = body;
 
     if (!sale || !sale.items || sale.items.length === 0) {
-      return NextResponse.json({ error: 'Datos de venta incompletos' }, { status: 400 });
+      return NextResponse.json({ error: 'Datos de venta incompletos' }, { status: 400, headers: CORS_HEADERS });
     }
 
     mobileSalesQueue.push({
@@ -38,9 +47,9 @@ export async function POST(req: NextRequest) {
       success: true,
       receiptNumber: sale.receiptNumber,
       message: 'Venta móvil registrada y sincronizada',
-    });
+    }, { headers: CORS_HEADERS });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: err.message }, { status: 500, headers: CORS_HEADERS });
   }
 }
 
@@ -56,8 +65,8 @@ export async function DELETE(req: NextRequest) {
     } else {
       mobileSalesQueue.length = 0;
     }
-    return NextResponse.json({ success: true, remaining: mobileSalesQueue.length });
+    return NextResponse.json({ success: true, remaining: mobileSalesQueue.length }, { headers: CORS_HEADERS });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: err.message }, { status: 500, headers: CORS_HEADERS });
   }
 }

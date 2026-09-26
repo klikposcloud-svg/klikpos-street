@@ -1238,14 +1238,14 @@ export default function MobileScannerPage() {
       {/* Top Mobile Bar */}
       <header className="bg-white border-b border-slate-300 px-4 py-2.5 sticky top-0 z-40 flex items-center justify-between shadow-xs shrink-0">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-sky-700 text-white flex items-center justify-center font-black text-sm">
+          <div className="w-8 h-8 rounded-lg bg-[var(--brand-primary,#0369a1)] text-white flex items-center justify-center font-black text-sm">
             V
           </div>
           <div>
             <h1 className="text-sm font-black text-slate-900 leading-tight tracking-tight">
               Venematic Mobile
             </h1>
-            <div className="flex items-center gap-1.5 text-[11px] text-slate-500 font-medium">
+            <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
               <span>Conectado a <b className="text-slate-800">{session}</b></span>
             </div>
@@ -1254,11 +1254,11 @@ export default function MobileScannerPage() {
 
         <div className="flex items-center gap-2">
           {/* Tasa BCV Visible en la esquina superior derecha */}
-          <div className="flex items-center gap-1.5 px-2.5 py-1 bg-sky-50 border border-sky-300 rounded-xl shadow-2xs">
+          <div className="flex items-center gap-1.5 px-2.5 py-1 bg-[var(--brand-light,#f0f9ff)] border border-[var(--brand-border,#7dd3fc)] rounded-xl shadow-2xs">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
             <div className="text-right leading-none">
-              <span className="text-[9px] uppercase font-bold text-sky-700 block tracking-tight">Tasa BCV</span>
-              <span className="font-mono font-black text-xs text-sky-950 tabular-numbers">
+              <span className="text-[10px] uppercase font-bold text-[var(--brand-primary,#0369a1)] block tracking-tight">Tasa BCV</span>
+              <span className="font-mono font-black text-xs text-[var(--brand-hover,#075985)] tabular-numbers">
                 Bs. {inventoryBcvRate.toFixed(2)}
               </span>
             </div>
@@ -1267,14 +1267,14 @@ export default function MobileScannerPage() {
           {isInstallable && !isInstalled && (
             <button
               onClick={handleInstallApp}
-              className="px-2.5 py-1 bg-sky-600 hover:bg-sky-700 text-white rounded-full text-[11px] font-black flex items-center gap-1 shadow-xs animate-bounce"
+              className="px-2.5 py-1 bg-[var(--brand-primary,#0369a1)] hover:opacity-90 text-white rounded-full text-xs font-black flex items-center gap-1 shadow-xs animate-bounce"
             >
               <Download className="w-3 h-3" />
               <span>Instalar</span>
             </button>
           )}
 
-          <div className="px-2.5 py-1 bg-emerald-50 border border-emerald-300 text-emerald-800 rounded-full text-[11px] font-bold flex items-center gap-1">
+          <div className="px-2.5 py-1 bg-emerald-50 border border-emerald-300 text-emerald-800 rounded-full text-xs font-bold flex items-center gap-1">
             <Wifi className="w-3 h-3" />
             <span>Wi-Fi OK</span>
           </div>
@@ -1283,12 +1283,12 @@ export default function MobileScannerPage() {
 
       {/* Banner de Instalación PWA si el usuario abre en navegador */}
       {!isInstalled && (
-        <div className="bg-gradient-to-r from-sky-800 to-indigo-900 text-white px-4 py-2.5 flex items-center justify-between shadow-xs">
+        <div className="bg-gradient-to-r from-[var(--brand-primary,#0369a1)] to-[var(--brand-hover,#075985)] text-white px-4 py-2.5 flex items-center justify-between shadow-xs">
           <div className="flex items-center gap-2.5">
             <span className="text-xl">📲</span>
             <div>
               <p className="text-xs font-black leading-tight">Instala Venematic en tu Celular</p>
-              <p className="text-[10px] text-sky-200">Acceso directo como app nativa a pantalla completa</p>
+              <p className="text-xs text-white/80">Acceso directo como app nativa a pantalla completa</p>
             </div>
           </div>
           <button
@@ -1309,7 +1309,7 @@ export default function MobileScannerPage() {
           </div>
           <button
             onClick={syncOfflineSalesToPC}
-            className="px-2.5 py-1 bg-white text-slate-900 rounded-lg text-[11px] font-black shadow-xs active:scale-95"
+            className="px-2.5 py-1 bg-white text-slate-900 rounded-lg text-xs font-black shadow-xs active:scale-95"
           >
             Sincronizar a PC
           </button>
@@ -1320,7 +1320,7 @@ export default function MobileScannerPage() {
       <div className="px-4 py-1.5 bg-slate-900 text-white flex items-center justify-between shadow-xs text-xs sticky top-12 z-30 shrink-0">
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-          <span className="font-extrabold text-[11px] uppercase tracking-wider text-slate-200">
+          <span className="font-extrabold text-xs uppercase tracking-wider text-slate-200">
             {activeTab === 'pos' && '🛒 Punto de Venta Móvil'}
             {activeTab === 'scale' && '⚖️ Balanza Digital Pesaje'}
             {activeTab === 'gun' && '⚡ Pistola Escáner 60 FPS'}
@@ -1329,7 +1329,7 @@ export default function MobileScannerPage() {
           </span>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-[10px] font-mono text-slate-400">BCV:</span>
+          <span className="text-xs font-mono text-slate-400">BCV:</span>
           <span className="font-mono font-black text-xs text-emerald-400">
             Bs. {inventoryBcvRate.toFixed(2)}
           </span>
@@ -1481,7 +1481,7 @@ export default function MobileScannerPage() {
                         <button
                           type="button"
                           onClick={() => updateMobileCartQty(item.barcode, -1)}
-                          className="w-7 h-7 rounded-md bg-white text-slate-800 font-bold text-xs flex items-center justify-center shadow-2xs active:scale-90"
+                          className="w-11 h-11 rounded-md bg-white text-slate-800 font-bold text-xs flex items-center justify-center shadow-2xs active:scale-90"
                           title="Restar 1"
                         >
                           <Minus className="w-3 h-3" />
@@ -1505,7 +1505,7 @@ export default function MobileScannerPage() {
                               }
                             )
                           }
-                          className="min-w-[28px] px-1 h-7 rounded-md bg-emerald-50 border border-emerald-300 text-emerald-900 font-mono font-bold text-xs flex items-center justify-center active:scale-95"
+                          className="min-w-[44px] h-11 px-1 rounded-md bg-emerald-50 border border-emerald-300 text-emerald-900 font-mono font-bold text-xs flex items-center justify-center active:scale-95"
                           title="Tocar para editar con teclado"
                         >
                           {item.qty}
@@ -1513,7 +1513,7 @@ export default function MobileScannerPage() {
                         <button
                           type="button"
                           onClick={() => updateMobileCartQty(item.barcode, 1)}
-                          className="w-7 h-7 rounded-md bg-emerald-600 text-white font-bold text-xs flex items-center justify-center shadow-xs active:scale-90"
+                          className="w-11 h-11 rounded-md bg-emerald-700 text-white font-bold text-xs flex items-center justify-center shadow-xs active:scale-90"
                           title="Sumar 1"
                         >
                           <Plus className="w-3 h-3" />
@@ -1552,18 +1552,18 @@ export default function MobileScannerPage() {
               {/* Fila del Monto Total */}
               <div className="flex items-center justify-between">
                 <div>
-                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wide block">
+                  <span className="text-xs font-bold text-slate-400 uppercase tracking-wide block">
                     Total a Cobrar ({mobileCart.reduce((sum, i) => sum + i.qty, 0)} arts)
                   </span>
-                  <span className="text-[10px] text-slate-400 block font-mono">
+                  <span className="text-xs text-slate-400 block font-mono">
                     Tasa BCV: Bs. {inventoryBcvRate.toFixed(2)}
                   </span>
                 </div>
                 <div className="text-right">
-                  <span className="font-mono font-black text-2xl text-emerald-400 block tabular-numbers leading-tight">
+                  <span className="font-mono font-black text-2xl text-white block tabular-numbers leading-tight" style={{ textShadow: '0 0 10px var(--brand-glow, rgba(2,132,199,0.35))' }}>
                     ${mobileTotalUSD.toFixed(2)}
                   </span>
-                  <span className="font-mono font-bold text-[11px] text-emerald-200 block tabular-numbers">
+                  <span className="font-mono font-bold text-xs text-slate-300 block tabular-numbers">
                     ≈ Bs. {mobileTotalVES.toFixed(2)}
                   </span>
                 </div>
@@ -1573,7 +1573,7 @@ export default function MobileScannerPage() {
               <button
                 type="button"
                 onClick={() => setShowMobilePaymentModal(true)}
-                className="w-full py-3 bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-600 hover:to-teal-700 active:scale-[0.98] text-white font-black text-sm rounded-xl shadow-lg flex items-center justify-center gap-2 transition-all ring-2 ring-emerald-400/30"
+                className="w-full py-3 bg-gradient-to-r from-[var(--brand-primary,#0369a1)] to-[var(--brand-hover,#075985)] hover:opacity-90 active:scale-[0.98] text-white font-black text-sm rounded-xl shadow-lg flex items-center justify-center gap-2 transition-all ring-2 ring-white/20"
               >
                 <Banknote className="w-5 h-5" />
                 <span>Cobrar Venta (${mobileTotalUSD.toFixed(2)} / Bs. {mobileTotalVES.toFixed(2)})</span>
@@ -1586,7 +1586,7 @@ export default function MobileScannerPage() {
                   onClick={() => setActiveTab('inventory')}
                   className="py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs rounded-lg flex items-center justify-center gap-1.5 transition-all active:scale-95"
                 >
-                  <Plus className="w-3.5 h-3.5 text-emerald-400" />
+                  <Plus className="w-3.5 h-3.5 text-[var(--brand-border,#7dd3fc)]" />
                   <span>+ Agregar Stock</span>
                 </button>
                 <button
@@ -1632,7 +1632,7 @@ export default function MobileScannerPage() {
               <div className="flex items-center gap-2">
                 <button
                   onClick={clearMobileCart}
-                  className="px-2.5 py-1 text-[11px] text-rose-600 font-bold bg-rose-50 rounded-lg hover:bg-rose-100 flex items-center gap-1"
+                  className="px-2.5 py-1 text-xs text-rose-700 font-bold bg-rose-50 rounded-lg hover:bg-rose-100 flex items-center gap-1"
                 >
                   <Trash2 className="w-3 h-3" />
                   <span>Vaciar</span>
@@ -1652,7 +1652,7 @@ export default function MobileScannerPage() {
                 <div key={item.barcode} className="p-2 flex items-center justify-between gap-2">
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-bold text-slate-900 truncate leading-tight">{item.name}</p>
-                    <p className="text-[11px] font-mono text-slate-500">
+                    <p className="text-xs font-mono text-slate-500">
                       ${item.priceUSD.toFixed(2)} c/u ≈ Bs. {(item.priceUSD * inventoryBcvRate).toFixed(2)}
                     </p>
                   </div>
@@ -1661,7 +1661,7 @@ export default function MobileScannerPage() {
                   <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg border border-slate-200 shrink-0">
                     <button
                       onClick={() => updateMobileCartQty(item.barcode, -1)}
-                      className="w-6 h-6 rounded bg-white text-slate-700 font-black text-xs flex items-center justify-center shadow-2xs active:scale-95"
+                      className="w-11 h-11 rounded-md bg-white text-slate-700 font-black text-xs flex items-center justify-center shadow-2xs active:scale-95"
                     >
                       <Minus className="w-3 h-3" />
                     </button>
@@ -1683,13 +1683,13 @@ export default function MobileScannerPage() {
                           }
                         )
                       }
-                      className="min-w-[28px] px-1.5 h-7 rounded-md bg-emerald-600/10 border border-emerald-400 text-emerald-800 font-black text-xs flex items-center justify-center active:scale-95"
+                      className="min-w-[44px] h-11 px-1.5 rounded-md bg-emerald-700/10 border border-emerald-600 text-emerald-900 font-black text-xs flex items-center justify-center active:scale-95"
                     >
                       {item.qty}
                     </button>
                     <button
                       onClick={() => updateMobileCartQty(item.barcode, 1)}
-                      className="w-6 h-6 rounded bg-emerald-600 text-white font-black text-xs flex items-center justify-center shadow-2xs active:scale-95"
+                      className="w-11 h-11 rounded-md bg-emerald-700 text-white font-black text-xs flex items-center justify-center shadow-2xs active:scale-95"
                     >
                       <Plus className="w-3 h-3" />
                     </button>
@@ -1724,10 +1724,10 @@ export default function MobileScannerPage() {
                   <span className="text-[10px] text-slate-400 block font-mono">Tasa: Bs. {inventoryBcvRate.toFixed(2)}</span>
                 </div>
                 <div className="text-right">
-                  <span className="font-mono font-black text-2xl text-emerald-400 block tabular-numbers">
+                  <span className="font-mono font-black text-2xl text-white block tabular-numbers" style={{ textShadow: '0 0 10px var(--brand-glow, rgba(2,132,199,0.35))' }}>
                     ${mobileTotalUSD.toFixed(2)}
                   </span>
-                  <span className="font-mono font-bold text-xs text-emerald-200 block tabular-numbers">
+                  <span className="font-mono font-bold text-xs text-slate-300 block tabular-numbers">
                     ≈ Bs. {mobileTotalVES.toFixed(2)}
                   </span>
                 </div>
@@ -1745,7 +1745,7 @@ export default function MobileScannerPage() {
                     setShowCartDrawer(false);
                     setShowMobilePaymentModal(true);
                   }}
-                  className="py-3 bg-emerald-500 hover:bg-emerald-600 active:scale-[0.98] text-white font-black text-sm rounded-xl shadow-lg flex items-center justify-center gap-1.5"
+                  className="py-3 bg-pos-success hover:bg-pos-success-hover active:scale-[0.98] text-white font-black text-sm rounded-xl shadow-lg flex items-center justify-center gap-1.5"
                 >
                   <Banknote className="w-4 h-4" />
                   <span>Cobrar Venta</span>
@@ -1785,45 +1785,43 @@ export default function MobileScannerPage() {
               </button>
             </div>
 
-            {/* Total a Pagar Destacado - Estilo Pantalla Calculadora Digital Verde Neón */}
+            {/* Total a Pagar Destacado - Readout digital con acentos de marca */}
             <div
               style={{
-                backgroundColor: '#050b07',
-                borderColor: '#00ff66',
-                boxShadow: 'inset 0 2px 12px rgba(0,0,0,0.95), 0 0 25px rgba(0, 255, 102, 0.3)',
+                backgroundColor: '#0f172a',
+                borderColor: 'var(--brand-border, #7dd3fc)',
+                boxShadow: 'inset 0 2px 12px rgba(0,0,0,0.6), 0 0 25px var(--brand-glow, rgba(2,132,199,0.35))',
               }}
               className="p-4 rounded-2xl text-center space-y-1 border-2 relative overflow-hidden"
             >
               <span
-                style={{ color: '#22c55e', WebkitTextFillColor: '#22c55e', letterSpacing: '0.15em' }}
-                className="text-[11px] uppercase font-mono font-black block text-emerald-400"
+                style={{ color: 'var(--brand-border, #7dd3fc)', letterSpacing: '0.15em' }}
+                className="text-xs uppercase font-mono font-black block"
               >
                 TOTAL DE LA VENTA
               </span>
               <p
                 style={{
-                  color: '#00ff66',
-                  WebkitTextFillColor: '#00ff66',
-                  textShadow: '0 0 1px #00ff66, 0 0 12px rgba(0, 255, 102, 0.85)',
+                  color: '#ffffff',
+                  textShadow: '0 0 12px var(--brand-glow, rgba(2,132,199,0.35))',
                 }}
-                className="font-mono font-black text-4xl tabular-numbers tracking-tight leading-none my-1 text-emerald-400"
+                className="font-mono font-black text-4xl tabular-numbers tracking-tight leading-none my-1"
               >
-                <span style={{ color: '#00ff66', WebkitTextFillColor: '#00ff66' }}>
+                <span>
                   ${mobileTotalUSD.toFixed(2)}
                 </span>
               </p>
               <div
                 style={{
-                  color: '#86efac',
-                  WebkitTextFillColor: '#86efac',
-                  borderColor: 'rgba(0, 255, 102, 0.2)',
+                  color: '#cbd5e1',
+                  borderColor: 'rgba(148, 163, 184, 0.25)',
                 }}
-                className="flex items-center justify-center gap-1.5 font-mono text-sm font-bold pt-1.5 border-t text-emerald-300"
+                className="flex items-center justify-center gap-1.5 font-mono text-sm font-bold pt-1.5 border-t"
               >
-                <span style={{ color: '#86efac', WebkitTextFillColor: '#86efac' }}>
+                <span>
                   ≈ Bs. {mobileTotalVES.toFixed(2)}
                 </span>
-                <span style={{ color: '#4ade80', WebkitTextFillColor: '#4ade80' }} className="text-xs font-semibold text-emerald-400">
+                <span className="text-xs font-semibold text-slate-400">
                   (Tasa: {inventoryBcvRate.toFixed(2)})
                 </span>
               </div>
@@ -2240,7 +2238,7 @@ export default function MobileScannerPage() {
 
             <button
               onClick={() => setMobileSaleSuccess(null)}
-              className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs rounded-xl shadow-xs active:scale-98"
+              className="w-full py-2.5 bg-pos-success hover:bg-pos-success-hover text-white font-black text-xs rounded-xl shadow-xs active:scale-98"
             >
               Aceptar y Nueva Venta
             </button>
@@ -2255,7 +2253,7 @@ export default function MobileScannerPage() {
         <main className="flex-1 min-h-0 flex flex-col overflow-y-auto p-3 space-y-3 pb-20 touch-pan-y animate-in fade-in duration-200">
           {/* Toast de agregado a venta */}
           {scaleAddedToast && (
-            <div className="p-3 bg-emerald-600 text-white rounded-2xl text-xs font-black shadow-lg flex items-center gap-2 animate-bounce">
+            <div className="p-3 bg-pos-success text-white rounded-2xl text-xs font-black shadow-lg flex items-center gap-2 animate-bounce">
               <CheckCircle2 className="w-5 h-5 shrink-0" />
               <span>{scaleAddedToast}</span>
             </div>
@@ -2264,20 +2262,20 @@ export default function MobileScannerPage() {
           {/* DISPLAY DIGITAL TIPO BALANZA ELECTRÓNICA SLIM & ERGONÓMICA */}
           <div className="bg-slate-950 border-2 border-slate-800 rounded-2xl p-3 shadow-xl relative overflow-hidden ring-1 ring-cyan-500/20 text-white space-y-2">
             {/* Luces Indicadoras y Unidades en una sola fila compacta */}
-            <div className="flex items-center justify-between border-b border-slate-800/80 pb-1.5">
-              <div className="flex items-center gap-2">
-                <span className="flex items-center gap-1 text-[9px] font-bold uppercase text-emerald-400">
+            <div className="flex items-center justify-between flex-wrap gap-y-1.5 border-b border-slate-800/80 pb-1.5">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="flex items-center gap-1 text-[10px] font-bold uppercase text-emerald-400">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                   Estable
                 </span>
-                <span className={`flex items-center gap-1 text-[9px] font-bold uppercase ${
+                <span className={`flex items-center gap-1 text-[10px] font-bold uppercase ${
                   scaleWeight === 0 ? 'text-cyan-400' : 'text-slate-600'
                 }`}>
                   <span className={`w-1.5 h-1.5 rounded-full ${scaleWeight === 0 ? 'bg-cyan-400' : 'bg-slate-700'}`} />
                   Cero
                 </span>
                 {scaleTare > 0 && (
-                  <span className="text-[9px] font-bold text-amber-400">
+                  <span className="text-[10px] font-bold text-amber-400">
                     Tara: {scaleTare.toFixed(3)}kg
                   </span>
                 )}
@@ -2290,8 +2288,8 @@ export default function MobileScannerPage() {
                     key={u}
                     type="button"
                     onClick={() => setScaleUnit(u)}
-                    className={`px-1.5 py-0.5 rounded text-[9px] font-black uppercase transition-all ${
-                      scaleUnit === u ? 'bg-cyan-500 text-slate-950' : 'text-slate-400 hover:text-white'
+                    className={`min-h-[44px] px-3 rounded-md text-xs font-black uppercase transition-all ${
+                      scaleUnit === u ? 'bg-[var(--brand-border,#7dd3fc)] text-slate-950' : 'text-slate-400 hover:text-white'
                     }`}
                   >
                     {u}
@@ -2306,9 +2304,8 @@ export default function MobileScannerPage() {
               <div className="flex items-baseline gap-1.5">
                 <span
                   style={{
-                    color: '#00ff66',
-                    WebkitTextFillColor: '#00ff66',
-                    textShadow: '0 0 12px rgba(0, 255, 102, 0.7)',
+                    color: '#ffffff',
+                    textShadow: '0 0 12px var(--brand-glow, rgba(2,132,199,0.35))',
                   }}
                   className="font-mono font-black text-4xl sm:text-5xl tracking-tight tabular-numbers"
                 >
@@ -2333,12 +2330,15 @@ export default function MobileScannerPage() {
                   return (
                     <div className="text-right">
                       <p
-                        style={{ color: '#00ff66', WebkitTextFillColor: '#00ff66' }}
+                        style={{
+                          color: '#ffffff',
+                          textShadow: '0 0 10px var(--brand-glow, rgba(2,132,199,0.35))',
+                        }}
                         className="font-mono font-black text-2xl tabular-numbers leading-tight"
                       >
                         ${totalLineUSD.toFixed(2)}
                       </p>
-                      <p className="font-mono font-bold text-[10px] text-emerald-300 tabular-numbers">
+                      <p className="font-mono font-bold text-xs text-slate-300 tabular-numbers">
                         ≈ Bs. {totalLineVES.toFixed(2)}
                       </p>
                     </div>
@@ -3498,7 +3498,7 @@ export default function MobileScannerPage() {
             <div className="px-4 pb-8">
               <button
                 onClick={confirmNumpad}
-                className="w-full h-14 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-black text-lg rounded-2xl shadow-lg transition-all"
+                className="w-full h-14 bg-pos-success hover:bg-pos-success-hover active:scale-[0.98] text-white font-black text-lg rounded-2xl shadow-lg transition-all"
               >
                 ✓ Confirmar
               </button>
@@ -3522,16 +3522,16 @@ export default function MobileScannerPage() {
             }}
             className={`flex flex-col items-center justify-center py-1 px-2.5 rounded-xl transition-all duration-150 relative ${
               activeTab === 'pos'
-                ? 'text-emerald-400 font-extrabold'
+                ? 'text-[var(--brand-border,#7dd3fc)] font-extrabold'
                 : 'text-slate-400 hover:text-white active:scale-95'
             }`}
           >
             <div className={`p-1 rounded-lg transition-all ${
-              activeTab === 'pos' ? 'bg-emerald-500/20 text-emerald-400' : ''
+              activeTab === 'pos' ? 'bg-white/10' : ''
             }`}>
               <ShoppingCart className="w-5 h-5" />
             </div>
-            <span className="text-[10px] font-bold tracking-tight">Venta</span>
+            <span className="text-xs font-bold tracking-tight">Venta</span>
             {mobileCart.length > 0 && (
               <span className="absolute top-0 right-1 bg-rose-500 text-white text-[9px] font-black rounded-full w-4 h-4 flex items-center justify-center border border-slate-950 animate-pulse">
                 {mobileCart.reduce((sum, i) => sum + i.qty, 0)}
@@ -3548,16 +3548,16 @@ export default function MobileScannerPage() {
             }}
             className={`flex flex-col items-center justify-center py-1 px-2.5 rounded-xl transition-all duration-150 relative ${
               activeTab === 'scale'
-                ? 'text-cyan-400 font-extrabold'
+                ? 'text-[var(--brand-border,#7dd3fc)] font-extrabold'
                 : 'text-slate-400 hover:text-white active:scale-95'
             }`}
           >
             <div className={`p-1 rounded-lg transition-all ${
-              activeTab === 'scale' ? 'bg-cyan-500/20 text-cyan-400' : ''
+              activeTab === 'scale' ? 'bg-white/10' : ''
             }`}>
               <Scale className="w-5 h-5" />
             </div>
-            <span className="text-[10px] font-bold tracking-tight">Balanza</span>
+            <span className="text-xs font-bold tracking-tight">Balanza</span>
           </button>
 
           {/* 3. CENTRO: ESCÁNER DE CÓDIGOS DE BARRAS */}
@@ -3575,13 +3575,13 @@ export default function MobileScannerPage() {
           >
             <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200 shadow-xl ring-2 ring-slate-950 ${
               activeTab === 'gun'
-                ? 'bg-gradient-to-tr from-sky-500 to-emerald-400 text-white ring-2 ring-cyan-300 shadow-[0_0_20px_rgba(56,189,248,0.6)] scale-105'
-                : 'bg-gradient-to-tr from-slate-900 via-slate-800 to-sky-950 text-cyan-400 border border-cyan-500/50 hover:scale-105 active:scale-95'
+                ? 'bg-gradient-to-tr from-[var(--brand-primary,#0369a1)] to-[var(--brand-accent,#0284c7)] text-white ring-2 ring-white/40 shadow-[0_0_20px_var(--brand-glow,rgba(2,132,199,0.35))] scale-105'
+                : 'bg-gradient-to-tr from-slate-900 via-slate-800 to-slate-950 text-slate-300 border border-slate-700 hover:scale-105 active:scale-95'
             }`}>
               <ScanLine className="w-6 h-6 stroke-[2.5]" />
             </div>
-            <span className={`text-[9px] font-black tracking-wider uppercase mt-0.5 ${
-              activeTab === 'gun' ? 'text-cyan-300 font-extrabold' : 'text-slate-400'
+            <span className={`text-[11px] font-black tracking-wider uppercase mt-0.5 ${
+              activeTab === 'gun' ? 'text-[var(--brand-border,#7dd3fc)] font-extrabold' : 'text-slate-400'
             }`}>
               Escanear
             </span>
@@ -3596,16 +3596,16 @@ export default function MobileScannerPage() {
             }}
             className={`flex flex-col items-center justify-center py-1 px-2.5 rounded-xl transition-all duration-150 relative ${
               activeTab === 'inventory'
-                ? 'text-amber-400 font-extrabold'
+                ? 'text-[var(--brand-border,#7dd3fc)] font-extrabold'
                 : 'text-slate-400 hover:text-white active:scale-95'
             }`}
           >
             <div className={`p-1 rounded-lg transition-all ${
-              activeTab === 'inventory' ? 'bg-amber-500/20 text-amber-400' : ''
+              activeTab === 'inventory' ? 'bg-white/10' : ''
             }`}>
               <ShoppingBag className="w-5 h-5" />
             </div>
-            <span className="text-[10px] font-bold tracking-tight">Stock</span>
+            <span className="text-xs font-bold tracking-tight">Stock</span>
           </button>
 
           {/* 5. DERECHA: +ARTÍCULO */}
@@ -3617,16 +3617,16 @@ export default function MobileScannerPage() {
             }}
             className={`flex flex-col items-center justify-center py-1 px-2.5 rounded-xl transition-all duration-150 relative ${
               activeTab === 'create'
-                ? 'text-indigo-400 font-extrabold'
+                ? 'text-[var(--brand-border,#7dd3fc)] font-extrabold'
                 : 'text-slate-400 hover:text-white active:scale-95'
             }`}
           >
             <div className={`p-1 rounded-lg transition-all ${
-              activeTab === 'create' ? 'bg-indigo-500/20 text-indigo-400' : ''
+              activeTab === 'create' ? 'bg-white/10' : ''
             }`}>
               <Camera className="w-5 h-5" />
             </div>
-            <span className="text-[10px] font-bold tracking-tight">+Artículo</span>
+            <span className="text-xs font-bold tracking-tight">+Artículo</span>
           </button>
 
         </div>

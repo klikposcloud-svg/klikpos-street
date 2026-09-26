@@ -66,8 +66,9 @@ export default function DesktopReportsPage() {
   // Pestaña activa
   const [activeTab, setActiveTab] = useState<'summary' | 'sales_detail' | 'inventory_audit' | 'shift_history' | 'seniat_sales_book'>('summary');
 
-  // Estado para Libro de Ventas SENIAT (Providencia 00071)
-  const [seniatPeriod, setSeniatPeriod] = useState<'current_month' | 'all' | 'custom'>('current_month');
+  // Estado para Libro de Ventas y Actas SENIAT (Providencia 00071): Diario, Semanal, Mensual
+  const [seniatPeriod, setSeniatPeriod] = useState<'daily' | 'weekly' | 'current_month' | 'custom_month' | 'all'>('daily');
+  const [seniatDailyDate, setSeniatDailyDate] = useState<string>(() => new Date().toISOString().split('T')[0]);
   const [seniatCustomMonth, setSeniatCustomMonth] = useState<string>(() => {
     const d = new Date();
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
@@ -81,8 +82,8 @@ export default function DesktopReportsPage() {
   // Modal para ver comprobante individual
   const [selectedSaleForView, setSelectedSaleForView] = useState<LocalSale | null>(null);
 
-  // Tipo de corte para imprimir ('X' o 'Z')
-  const [printReportType, setPrintReportType] = useState<'X' | 'Z' | null>(null);
+  // Tipo de reporte para imprimir ('X', 'Z' o 'SENIAT')
+  const [printReportType, setPrintReportType] = useState<'X' | 'Z' | 'SENIAT' | null>(null);
   const [isMounted, setIsMounted] = useState(false);
   const [printDateTime, setPrintDateTime] = useState('');
 
@@ -336,33 +337,71 @@ export default function DesktopReportsPage() {
     let startDate: string | undefined;
     let endDate: string | undefined;
 
-    if (seniatPeriod === 'current_month') {
+    if (seniatPeriod === 'daily') {
+      startDate = seniatDailyDate;
+      endDate = seniatDailyDate;
+    } else if (seniatPeriod === 'weekly') {
+      const targetDate = new Date(seniatDailyDate + 'T12:00:00');
+      const day = targetDate.getDay();
+      const diffToMonday = (day === 0 ? -6 : 1) - day;
+      const monday = new Date(targetDate);
+      monday.setDate(targetDate.getDate() + diffToMonday);
+      const sunday = new Date(monday);
+      sunday.setDate(monday.getDate() + 6);
+      startDate = monday.toISOString().split('T')[0];
+      endDate = sunday.toISOString().split('T')[0];
+    } else if (seniatPeriod === 'current_month') {
       const now = new Date();
       const y = now.getFullYear();
       const m = String(now.getMonth() + 1).padStart(2, '0');
       startDate = `${y}-${m}-01`;
       endDate = `${y}-${m}-31`;
-    } else if (seniatPeriod === 'custom' && seniatCustomMonth) {
+    } else if (seniatPeriod === 'custom_month' && seniatCustomMonth) {
       startDate = `${seniatCustomMonth}-01`;
       endDate = `${seniatCustomMonth}-31`;
     }
 
     return buildSeniatSalesBook(sales, { startDate, endDate });
-  }, [sales, seniatPeriod, seniatCustomMonth]);
+  }, [sales, seniatPeriod, seniatDailyDate, seniatCustomMonth]);
+
+  const getSeniatPeriodTitle = () => {
+    if (seniatPeriod === 'daily') {
+      return `DIARIO (${seniatDailyDate})`;
+    }
+    if (seniatPeriod === 'weekly') {
+      const targetDate = new Date(seniatDailyDate + 'T12:00:00');
+      const day = targetDate.getDay();
+      const diffToMonday = (day === 0 ? -6 : 1) - day;
+      const monday = new Date(targetDate);
+      monday.setDate(targetDate.getDate() + diffToMonday);
+      const sunday = new Date(monday);
+      sunday.setDate(monday.getDate() + 6);
+      return `SEMANAL (${monday.toISOString().split('T')[0]} al ${sunday.toISOString().split('T')[0]})`;
+    }
+    if (seniatPeriod === 'current_month') {
+      return `MENSUAL (${new Date().toLocaleString('es-VE', { month: 'long', year: 'numeric' }).toUpperCase()})`;
+    }
+    if (seniatPeriod === 'custom_month') {
+      return `MENSUAL (${seniatCustomMonth})`;
+    }
+    return 'HISTÓRICO COMPLETO';
+  };
 
   const handleExportSeniatCSV = () => {
-    const periodLabel =
-      seniatPeriod === 'all'
-        ? 'HISTÓRICO COMPLETO'
-        : seniatPeriod === 'current_month'
-        ? 'MES EN CURSO'
-        : `PERÍODO ${seniatCustomMonth}`;
     exportSeniatSalesBookToCSV(
       seniatBookData.records,
       seniatBookData.summary,
       { name: storeInfo.name, rif: storeInfo.rif },
-      periodLabel
+      getSeniatPeriodTitle()
     );
+  };
+
+  const handlePrintSeniatBook = () => {
+    setPrintReportType('SENIAT');
+    setPrintDateTime(new Date().toLocaleString('es-VE'));
+    setTimeout(() => {
+      window.print();
+    }, 150);
   };
 
   return (
@@ -524,7 +563,7 @@ export default function DesktopReportsPage() {
           {/* Tarjetas KPI Superiores */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
             <div className="bg-white p-4 rounded-2xl border border-slate-300 shadow-xs space-y-1">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block">
                 Total Ventas del Turno
               </span>
               <span className="text-2xl font-black font-mono text-slate-900 block tabular-numbers">
@@ -543,7 +582,7 @@ export default function DesktopReportsPage() {
             </div>
 
             <div className="bg-white p-4 rounded-2xl border border-slate-300 shadow-xs space-y-1">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block">
                 Efectivo en Dólares ($)
               </span>
               <span className="text-2xl font-black font-mono text-emerald-700 block tabular-numbers">
@@ -568,7 +607,7 @@ export default function DesktopReportsPage() {
             </div>
 
             <div className="bg-white p-4 rounded-2xl border border-slate-300 shadow-xs space-y-1">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block">
                 Efectivo en Bolívares (Bs.)
               </span>
               <span className="text-2xl font-black font-mono text-emerald-700 block tabular-numbers">
@@ -593,7 +632,7 @@ export default function DesktopReportsPage() {
             </div>
 
             <div className="bg-white p-4 rounded-2xl border border-slate-300 shadow-xs space-y-1">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block">
                 Electrónico y Bancario
               </span>
               <div className="space-y-1.5 pt-1 text-xs">
@@ -685,7 +724,7 @@ export default function DesktopReportsPage() {
           {/* Barra de Búsqueda y Filtro */}
           <div className="p-3 border-b border-slate-200 bg-slate-50 flex items-center justify-between gap-4">
             <div className="relative flex-1 max-w-md">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+              <Search className="w-4 h-4 text-slate-500 absolute left-3 top-2.5" />
               <input
                 type="text"
                 placeholder="Buscar por ticket, cliente o artículo..."
@@ -702,7 +741,7 @@ export default function DesktopReportsPage() {
           {/* Tabla de Ventas */}
           <div className="flex-1 overflow-y-auto">
             <table className="w-full text-left border-collapse text-xs">
-              <thead className="bg-slate-100 border-b border-slate-200 font-bold text-slate-700 uppercase tracking-wider text-[10px] sticky top-0 z-10">
+              <thead className="bg-slate-100 border-b border-slate-200 font-bold text-slate-700 uppercase tracking-wider text-xs sticky top-0 z-10">
                 <tr>
                   <th className="py-2.5 px-4 w-8"></th>
                   <th className="py-2.5 px-4">Ticket</th>
@@ -733,11 +772,11 @@ export default function DesktopReportsPage() {
                         onClick={() => setExpandedSaleId(isExpanded ? null : s.receiptNumber)}
                       >
                         {/* Botón Expansor */}
-                        <td className="py-2.5 px-2 text-center text-slate-400">
+                        <td className="py-2.5 px-2 text-center text-slate-500">
                           {isExpanded ? (
                             <ChevronUp className="w-4 h-4 text-slate-700 inline" />
                           ) : (
-                            <ChevronDown className="w-4 h-4 text-slate-400 inline" />
+                            <ChevronDown className="w-4 h-4 text-slate-500 inline" />
                           )}
                         </td>
 
@@ -773,7 +812,7 @@ export default function DesktopReportsPage() {
                           <span className="font-bold">
                             {s.items?.reduce((sum, i) => sum + i.qty, 0) || 0} ítems
                           </span>
-                          <span className="text-slate-400 text-[10px] ml-1.5">
+                          <span className="text-slate-500 text-[10px] ml-1.5">
                             ({s.items?.length || 0} prod.)
                           </span>
                         </td>
@@ -863,7 +902,7 @@ export default function DesktopReportsPage() {
                                   <tbody className="divide-y divide-slate-100 font-mono text-[11px]">
                                     {s.items?.map((it, idx) => (
                                       <tr key={idx} className="hover:bg-slate-50">
-                                        <td className="py-1.5 px-3 text-slate-400">{it.barcode || 'S/C'}</td>
+                                        <td className="py-1.5 px-3 text-slate-500">{it.barcode || 'S/C'}</td>
                                         <td className="py-1.5 px-3 font-sans font-medium text-slate-800">{it.name}</td>
                                         <td className="py-1.5 px-3 text-center font-bold text-slate-900">{it.qty}</td>
                                         <td className="py-1.5 px-3 text-right text-slate-600">${it.priceUSD.toFixed(2)}</td>
@@ -902,7 +941,7 @@ export default function DesktopReportsPage() {
 
                 {filteredSales.length === 0 && (
                   <tr>
-                    <td colSpan={10} className="py-12 text-center text-slate-400">
+                    <td colSpan={10} className="py-12 text-center text-slate-500">
                       No se encontraron ventas para los criterios seleccionados.
                     </td>
                   </tr>
@@ -918,7 +957,7 @@ export default function DesktopReportsPage() {
         <div className="flex-1 bg-white rounded-2xl border border-slate-300 shadow-xs flex flex-col overflow-hidden">
           <div className="p-3 border-b border-slate-200 bg-slate-50 flex items-center justify-between gap-4">
             <div className="relative flex-1 max-w-md">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+              <Search className="w-4 h-4 text-slate-500 absolute left-3 top-2.5" />
               <input
                 type="text"
                 placeholder="Buscar artículo por nombre, código o categoría..."
@@ -935,7 +974,7 @@ export default function DesktopReportsPage() {
 
           <div className="flex-1 overflow-y-auto">
             <table className="w-full text-left border-collapse text-xs">
-              <thead className="bg-slate-100 border-b border-slate-200 font-bold text-slate-700 uppercase tracking-wider text-[10px] sticky top-0 z-10">
+              <thead className="bg-slate-100 border-b border-slate-200 font-bold text-slate-700 uppercase tracking-wider text-xs sticky top-0 z-10">
                 <tr>
                   <th className="py-2.5 px-4">Código</th>
                   <th className="py-2.5 px-4">Producto</th>
@@ -1007,7 +1046,7 @@ export default function DesktopReportsPage() {
 
                 {filteredInventoryAudit.length === 0 && (
                   <tr>
-                    <td colSpan={8} className="py-12 text-center text-slate-400">
+                    <td colSpan={8} className="py-12 text-center text-slate-500">
                       No hay artículos vendidos en este turno para auditar.
                     </td>
                   </tr>
@@ -1030,7 +1069,7 @@ export default function DesktopReportsPage() {
 
           <div className="flex-1 overflow-y-auto">
             <table className="w-full text-left border-collapse text-xs">
-              <thead className="bg-slate-100 border-b border-slate-200 font-bold text-slate-700 uppercase tracking-wider text-[10px] sticky top-0 z-10">
+              <thead className="bg-slate-100 border-b border-slate-200 font-bold text-slate-700 uppercase tracking-wider text-xs sticky top-0 z-10">
                 <tr>
                   <th className="py-2.5 px-4">Turno #</th>
                   <th className="py-2.5 px-4">Cajero</th>
@@ -1086,7 +1125,7 @@ export default function DesktopReportsPage() {
 
                 {closedShifts.length === 0 && (
                   <tr>
-                    <td colSpan={9} className="py-12 text-center text-slate-400">
+                    <td colSpan={9} className="py-12 text-center text-slate-500">
                       Aún no se han ejecutado cierres de caja (Corte Z).
                     </td>
                   </tr>
@@ -1119,22 +1158,71 @@ export default function DesktopReportsPage() {
               </p>
             </div>
 
-            {/* Controles de Período y Exportación */}
+            {/* Controles de Período y Exportación: Diario, Semanal, Mensual */}
             <div className="flex items-center gap-2 flex-wrap">
+              {/* Botones de Selección Rápida */}
+              <div className="flex items-center p-0.5 bg-slate-200/80 rounded-xl border border-slate-300">
+                <button
+                  type="button"
+                  onClick={() => setSeniatPeriod('daily')}
+                  className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-all ${
+                    seniatPeriod === 'daily'
+                      ? 'bg-indigo-600 text-white shadow-xs'
+                      : 'text-slate-700 hover:text-slate-900'
+                  }`}
+                >
+                  📅 Diario
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSeniatPeriod('weekly')}
+                  className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-all ${
+                    seniatPeriod === 'weekly'
+                      ? 'bg-indigo-600 text-white shadow-xs'
+                      : 'text-slate-700 hover:text-slate-900'
+                  }`}
+                >
+                  📆 Semanal
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSeniatPeriod('current_month')}
+                  className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-all ${
+                    seniatPeriod === 'current_month' || seniatPeriod === 'custom_month'
+                      ? 'bg-indigo-600 text-white shadow-xs'
+                      : 'text-slate-700 hover:text-slate-900'
+                  }`}
+                >
+                  🗓️ Mensual
+                </button>
+              </div>
+
               <div className="flex items-center gap-1.5 bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-300 text-xs">
                 <Calendar className="w-3.5 h-3.5 text-slate-500" />
-                <span className="text-[11px] font-bold text-slate-600">Período Fiscal:</span>
+                <span className="text-[11px] font-bold text-slate-600">Período:</span>
                 <select
                   value={seniatPeriod}
-                  onChange={(e) => setSeniatPeriod(e.target.value as 'current_month' | 'all' | 'custom')}
+                  onChange={(e) => setSeniatPeriod(e.target.value as any)}
                   className="bg-white border border-slate-300 rounded-lg px-2 py-1 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-400"
                 >
-                  <option value="current_month">Mes en Curso</option>
-                  <option value="all">Histórico Completo</option>
-                  <option value="custom">Mes Específico</option>
+                  <option value="daily">📅 Diario (Día Seleccionado)</option>
+                  <option value="weekly">📆 Semanal (Semana / 7 Días)</option>
+                  <option value="current_month">🗓️ Mensual (Mes en Curso)</option>
+                  <option value="custom_month">🗓️ Mensual (Mes Específico)</option>
+                  <option value="all">📚 Histórico Completo</option>
                 </select>
 
-                {seniatPeriod === 'custom' && (
+                {(seniatPeriod === 'daily' || seniatPeriod === 'weekly') && (
+                  <input
+                    type="date"
+                    value={seniatDailyDate}
+                    onChange={(e) => setSeniatDailyDate(e.target.value)}
+                    className="bg-white border border-slate-300 rounded-lg px-2 py-0.5 text-xs font-bold text-slate-800 focus:outline-none"
+                    title={seniatPeriod === 'daily' ? 'Seleccionar día de ventas' : 'Seleccionar fecha de referencia para la semana'}
+                  />
+                )}
+
+                {seniatPeriod === 'custom_month' && (
                   <input
                     type="month"
                     value={seniatCustomMonth}
@@ -1150,13 +1238,13 @@ export default function DesktopReportsPage() {
                 title="Descargar archivo .CSV con formato oficial SENIAT delimitado por punto y coma para Excel y Saint"
               >
                 <Download className="w-3.5 h-3.5" />
-                <span>Exportar Excel (.CSV Oficial)</span>
+                <span>Exportar Excel (.CSV)</span>
               </button>
 
               <button
-                onClick={() => window.print()}
+                onClick={handlePrintSeniatBook}
                 className="px-3.5 py-2 bg-slate-800 hover:bg-slate-900 text-white font-black text-xs rounded-xl shadow-xs flex items-center gap-1.5 transition-all cursor-pointer"
-                title="Imprimir Libro de Ventas en formato tabular fiscal"
+                title="Imprimir Libro de Ventas en formato tabular fiscal oficial"
               >
                 <Printer className="w-3.5 h-3.5" />
                 <span>Imprimir Libro Fiscal</span>
@@ -1303,7 +1391,7 @@ export default function DesktopReportsPage() {
 
                   {seniatBookData.records.length === 0 && (
                     <tr>
-                      <td colSpan={15} className="py-12 text-center text-slate-400 font-sans text-xs">
+                      <td colSpan={15} className="py-12 text-center text-slate-500 font-sans text-xs">
                         No existen operaciones registradas para el período fiscal seleccionado.
                       </td>
                     </tr>
@@ -1364,7 +1452,7 @@ export default function DesktopReportsPage() {
             <div className="p-4 bg-slate-900 text-white flex items-center justify-between">
               <div>
                 <h3 className="font-black text-sm">Comprobante de Venta</h3>
-                <p className="text-[11px] text-slate-400 font-mono">{selectedSaleForView.receiptNumber}</p>
+                <p className="text-[11px] text-slate-500 font-mono">{selectedSaleForView.receiptNumber}</p>
               </div>
               <button
                 onClick={() => setSelectedSaleForView(null)}
@@ -1404,7 +1492,7 @@ export default function DesktopReportsPage() {
                     <div key={idx} className="p-2.5 flex justify-between items-center text-xs">
                       <div>
                         <p className="font-bold text-slate-900">{item.name}</p>
-                        <p className="text-[10px] text-slate-400 font-mono">
+                        <p className="text-[10px] text-slate-500 font-mono">
                           {item.qty} × ${item.priceUSD.toFixed(2)}
                         </p>
                       </div>
@@ -1456,104 +1544,200 @@ export default function DesktopReportsPage() {
         </div>
       )}
 
-      {/* PLANTILLA DE IMPRESIÓN EXCLUSIVA PARA CORTE X / CORTE Z (CSS @media print) */}
-      <div className="hidden print:block fixed inset-0 bg-white text-black p-4 text-[12px] font-mono leading-tight z-9999">
-        <div className="max-w-xs mx-auto text-center space-y-1 pb-2 border-b border-dashed border-black">
-          <p className="font-black text-sm">{storeInfo.name}</p>
-          <p>RIF: {storeInfo.rif}</p>
-          {storeInfo.address && <p>{storeInfo.address}</p>}
-          <p className="font-black text-sm pt-1">
-            {printReportType === 'Z' ? '*** CIERRE DE CAJA (CORTE Z) ***' : '*** ARQUEO DE CAJA (CORTE X) ***'}
-          </p>
-          <p suppressHydrationWarning>Fecha/Hora: {printDateTime || (isMounted ? new Date().toLocaleString('es-VE') : '')}</p>
-          <p>Cajero: {activeShiftData?.cashierName || 'Caja 1'}</p>
-          <p>Apertura: {activeShiftData?.openedAt ? formatDateShort(activeShiftData.openedAt) : '--'}</p>
-        </div>
-
-        {/* Resumen Financiero */}
-        <div className="py-2 border-b border-dashed border-black space-y-1">
-          <p className="font-bold text-center">--- RESUMEN FINANCIERO ---</p>
-          <div className="flex justify-between">
-            <span>Fondo Inicial $:</span>
-            <span>${(activeShiftData?.initialCashUSD || 0).toFixed(2)}</span>
-          </div>
-          <div className="flex justify-between">
-            <span>Fondo Inicial Bs:</span>
-            <span>Bs. {(activeShiftData?.initialCashVES || 0).toFixed(2)}</span>
-          </div>
-          <div className="flex justify-between font-black pt-1">
-            <span>TOTAL VENTAS ($):</span>
-            <span>${totalSalesUSD.toFixed(2)}</span>
-          </div>
-          <div className="flex justify-between font-black">
-            <span>TOTAL VENTAS (Bs):</span>
-            <span>Bs. {totalSalesVES.toFixed(2)}</span>
-          </div>
-          <div className="flex justify-between">
-            <span>Cant. Tickets:</span>
-            <span>{shiftSales.length}</span>
-          </div>
-        </div>
-
-        {/* Formas de Pago */}
-        <div className="py-2 border-b border-dashed border-black space-y-1">
-          <p className="font-bold text-center">--- FORMAS DE PAGO ---</p>
-          <div className="flex justify-between">
-            <span>Efectivo Dólares ($):</span>
-            <span>${paymentBreakdown.totalCashUSD.toFixed(2)}</span>
-          </div>
-          <div className="flex justify-between">
-            <span>Efectivo Bolívares (Bs):</span>
-            <span>Bs. {paymentBreakdown.totalCashVES.toFixed(2)}</span>
-          </div>
-          <div className="flex justify-between">
-            <span>Pago Móvil (Bs):</span>
-            <span>Bs. {paymentBreakdown.totalPagoMovilVES.toFixed(2)}</span>
-          </div>
-          <div className="flex justify-between">
-            <span>Tarjeta / Débito (Bs):</span>
-            <span>Bs. {paymentBreakdown.totalCardVES.toFixed(2)}</span>
-          </div>
-          {paymentBreakdown.totalZelleUSD > 0 && (
-            <div className="flex justify-between">
-              <span>Zelle ($):</span>
-              <span>${paymentBreakdown.totalZelleUSD.toFixed(2)}</span>
+      {/* PLANTILLA DE IMPRESIÓN EXCLUSIVA (CSS @media print) */}
+      <div className="hidden print:block fixed inset-0 bg-white text-black p-4 text-[12px] font-mono leading-tight z-[9999] overflow-visible">
+        {printReportType === 'SENIAT' ? (
+          /* ========================================================================= */
+          /* FORMATO DE IMPRESIÓN OFICIAL DEL LIBRO DE ACTAS / VENTAS SENIAT           */
+          /* ========================================================================= */
+          <div id="seniat-book-print" className="print-full-page w-full max-w-4xl mx-auto space-y-3 font-mono text-[11px]">
+            <div className="text-center border-b-2 border-black pb-2 space-y-1">
+              <h1 className="text-base font-black uppercase">REPÚBLICA BOLIVARIANA DE VENEZUELA</h1>
+              <h2 className="text-sm font-black uppercase">LIBRO DE VENTAS Y ACTAS FISCALES SENIAT</h2>
+              <p className="font-bold text-xs">
+                REPORTE {getSeniatPeriodTitle()} · PROVIDENCIA SNAT/2011/00071
+              </p>
+              <div className="flex justify-between items-center text-xs font-bold pt-1 border-t border-black/40">
+                <span>Razón Social: {storeInfo.name}</span>
+                <span>RIF: {storeInfo.rif}</span>
+                <span>Emisión: {printDateTime || new Date().toLocaleString('es-VE')}</span>
+              </div>
             </div>
-          )}
-          <div className="flex justify-between text-xs pt-1 border-t border-dashed border-black font-black">
-            <span>Vuelto entregado ($):</span>
-            <span>-${paymentBreakdown.totalChangeUSD.toFixed(2)}</span>
-          </div>
-          <div className="flex justify-between text-xs font-black">
-            <span>Vuelto entregado (Bs):</span>
-            <span>-Bs. {paymentBreakdown.totalChangeVES.toFixed(2)}</span>
-          </div>
-          <div className="flex justify-between text-xs pt-1 font-black">
-            <span>TOTAL GAVETA ($):</span>
-            <span>${paymentBreakdown.netCashUSDInDrawer.toFixed(2)}</span>
-          </div>
-          <div className="flex justify-between text-xs font-black">
-            <span>TOTAL GAVETA (Bs):</span>
-            <span>Bs. {paymentBreakdown.netCashVESInDrawer.toFixed(2)}</span>
-          </div>
-        </div>
 
-        {/* Resumen de Artículos Vendidos para Auditoría */}
-        <div className="py-2 border-b border-dashed border-black space-y-1">
-          <p className="font-bold text-center">--- MERCANCÍA VENDIDA ---</p>
-          {inventoryAudit.map((item, idx) => (
-            <div key={idx} className="flex justify-between text-[10px]">
-              <span className="truncate max-w-[170px]">{item.name} (x{item.qtySold})</span>
-              <span>${item.totalUSD.toFixed(2)}</span>
+            {/* Resumen Fiscal de Totales */}
+            <div className="grid grid-cols-3 gap-2 border border-black p-2.5 text-[11px] bg-slate-50">
+              <div>Total Facturado: <strong>Bs. {seniatBookData.summary.totalVentasVES.toLocaleString('es-VE', { minimumFractionDigits: 2 })}</strong></div>
+              <div>Ventas Exentas: <strong>Bs. {seniatBookData.summary.totalExentasVES.toLocaleString('es-VE', { minimumFractionDigits: 2 })}</strong></div>
+              <div>Base Imp. 16%: <strong>Bs. {seniatBookData.summary.totalBaseImponibleVES.toLocaleString('es-VE', { minimumFractionDigits: 2 })}</strong></div>
+              <div>Débito IVA 16%: <strong>Bs. {seniatBookData.summary.totalDebitoFiscalIVA.toLocaleString('es-VE', { minimumFractionDigits: 2 })}</strong></div>
+              <div>Base IGTF Divisas: <strong>${seniatBookData.summary.totalBaseIgtfUSD.toFixed(2)}</strong></div>
+              <div>IGTF 3% Percibido: <strong>Bs. {seniatBookData.summary.totalIgtfPercibidoVES.toLocaleString('es-VE', { minimumFractionDigits: 2 })}</strong></div>
             </div>
-          ))}
-        </div>
 
-        <div className="text-center pt-3 space-y-1 text-[10px]">
-          <p>Firma Cajero: ___________________</p>
-          <p>Firma Supervisor: ___________________</p>
-          <p className="pt-2">VENEMATIC POS · Sistema de Ventas</p>
-        </div>
+            {/* Tabla Detallada de Comprobantes del Período */}
+            <table className="w-full border-collapse border border-black text-[10px]">
+              <thead>
+                <tr className="bg-slate-200 border-b border-black font-black text-center">
+                  <th className="border border-black p-1 w-10">N°</th>
+                  <th className="border border-black p-1 w-20">Fecha</th>
+                  <th className="border border-black p-1 w-24">N° Factura</th>
+                  <th className="border border-black p-1">Cliente / RIF</th>
+                  <th className="border border-black p-1 text-right w-24">Total Bs</th>
+                  <th className="border border-black p-1 text-right w-20">Exento Bs</th>
+                  <th className="border border-black p-1 text-right w-20">Base 16%</th>
+                  <th className="border border-black p-1 text-right w-20">IVA 16%</th>
+                  <th className="border border-black p-1 text-right w-16">IGTF 3%</th>
+                </tr>
+              </thead>
+              <tbody>
+                {seniatBookData.records.map((r, i) => (
+                  <tr key={i} className="border-b border-black">
+                    <td className="border border-black p-1 text-center">{r.operacionNo}</td>
+                    <td className="border border-black p-1 text-center">{r.fecha}</td>
+                    <td className="border border-black p-1 font-bold text-center">{r.nroFactura}</td>
+                    <td className="border border-black p-1 truncate max-w-[200px]">{r.rif} - {r.nombreCliente}</td>
+                    <td className="border border-black p-1 text-right font-bold">{r.totalVentasVES.toFixed(2)}</td>
+                    <td className="border border-black p-1 text-right">{r.ventasExentasVES.toFixed(2)}</td>
+                    <td className="border border-black p-1 text-right">{r.baseImponibleVES.toFixed(2)}</td>
+                    <td className="border border-black p-1 text-right">{r.debitoFiscalIVA.toFixed(2)}</td>
+                    <td className="border border-black p-1 text-right">{r.igtfPercibidoVES.toFixed(2)}</td>
+                  </tr>
+                ))}
+                {seniatBookData.records.length === 0 && (
+                  <tr>
+                    <td colSpan={9} className="border border-black p-3 text-center text-slate-500 font-bold">
+                      No hay transacciones registradas en este período.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+              <tfoot>
+                <tr className="bg-slate-200 border-t-2 border-black font-black text-right">
+                  <td colSpan={4} className="border border-black p-1 text-center">TOTALES CONSOLIDADOS DEL PERÍODO:</td>
+                  <td className="border border-black p-1 font-black">Bs. {seniatBookData.summary.totalVentasVES.toFixed(2)}</td>
+                  <td className="border border-black p-1">Bs. {seniatBookData.summary.totalExentasVES.toFixed(2)}</td>
+                  <td className="border border-black p-1">Bs. {seniatBookData.summary.totalBaseImponibleVES.toFixed(2)}</td>
+                  <td className="border border-black p-1">Bs. {seniatBookData.summary.totalDebitoFiscalIVA.toFixed(2)}</td>
+                  <td className="border border-black p-1">Bs. {seniatBookData.summary.totalIgtfPercibidoVES.toFixed(2)}</td>
+                </tr>
+              </tfoot>
+            </table>
+
+            <div className="pt-6 flex justify-between text-center text-[10px]">
+              <div>
+                <p>_____________________________________</p>
+                <p className="font-bold pt-1">Firma Responsable / Contador</p>
+              </div>
+              <div>
+                <p>_____________________________________</p>
+                <p className="font-bold pt-1">Firma y Sello del Contribuyente</p>
+              </div>
+            </div>
+            <p className="text-center text-[9px] text-slate-600 pt-2">
+              Emitido a través de Venematic POS · Sistema de Facturación y Control Fiscal SENIAT
+            </p>
+          </div>
+        ) : (
+          /* ========================================================================= */
+          /* FORMATO DE CORTE X / CORTE Z (TÉRMICO)                                    */
+          /* ========================================================================= */
+          <div id="corte-receipt" className="print-area max-w-xs mx-auto text-center space-y-1 pb-2 border-b border-dashed border-black">
+            <p className="font-black text-sm">{storeInfo.name}</p>
+            <p>RIF: {storeInfo.rif}</p>
+            {storeInfo.address && <p>{storeInfo.address}</p>}
+            <p className="font-black text-sm pt-1">
+              {printReportType === 'Z' ? '*** CIERRE DE CAJA (CORTE Z) ***' : '*** ARQUEO DE CAJA (CORTE X) ***'}
+            </p>
+            <p suppressHydrationWarning>Fecha/Hora: {printDateTime || (isMounted ? new Date().toLocaleString('es-VE') : '')}</p>
+            <p>Cajero: {activeShiftData?.cashierName || 'Caja 1'}</p>
+            <p>Apertura: {activeShiftData?.openedAt ? formatDateShort(activeShiftData.openedAt) : '--'}</p>
+
+            {/* Resumen Financiero */}
+            <div className="py-2 border-b border-dashed border-black space-y-1 text-left">
+              <p className="font-bold text-center">--- RESUMEN FINANCIERO ---</p>
+              <div className="flex justify-between">
+                <span>Fondo Inicial $:</span>
+                <span>${(activeShiftData?.initialCashUSD || 0).toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Fondo Inicial Bs:</span>
+                <span>Bs. {(activeShiftData?.initialCashVES || 0).toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between font-black pt-1">
+                <span>TOTAL VENTAS ($):</span>
+                <span>${totalSalesUSD.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between font-black">
+                <span>TOTAL VENTAS (Bs):</span>
+                <span>Bs. {totalSalesVES.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Cant. Tickets:</span>
+                <span>{shiftSales.length}</span>
+              </div>
+            </div>
+
+            {/* Formas de Pago */}
+            <div className="py-2 border-b border-dashed border-black space-y-1 text-left">
+              <p className="font-bold text-center">--- FORMAS DE PAGO ---</p>
+              <div className="flex justify-between">
+                <span>Efectivo Dólares ($):</span>
+                <span>${paymentBreakdown.totalCashUSD.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Efectivo Bolívares (Bs):</span>
+                <span>Bs. {paymentBreakdown.totalCashVES.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Pago Móvil (Bs):</span>
+                <span>Bs. {paymentBreakdown.totalPagoMovilVES.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Tarjeta / Débito (Bs):</span>
+                <span>Bs. {paymentBreakdown.totalCardVES.toFixed(2)}</span>
+              </div>
+              {paymentBreakdown.totalZelleUSD > 0 && (
+                <div className="flex justify-between">
+                  <span>Zelle ($):</span>
+                  <span>${paymentBreakdown.totalZelleUSD.toFixed(2)}</span>
+                </div>
+              )}
+              <div className="flex justify-between text-xs pt-1 border-t border-dashed border-black font-black">
+                <span>Vuelto entregado ($):</span>
+                <span>-${paymentBreakdown.totalChangeUSD.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between text-xs font-black">
+                <span>Vuelto entregado (Bs):</span>
+                <span>-Bs. {paymentBreakdown.totalChangeVES.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between text-xs pt-1 font-black">
+                <span>TOTAL GAVETA ($):</span>
+                <span>${paymentBreakdown.netCashUSDInDrawer.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between text-xs font-black">
+                <span>TOTAL GAVETA (Bs):</span>
+                <span>Bs. {paymentBreakdown.netCashVESInDrawer.toFixed(2)}</span>
+              </div>
+            </div>
+
+            {/* Resumen de Artículos Vendidos para Auditoría */}
+            <div className="py-2 border-b border-dashed border-black space-y-1 text-left">
+              <p className="font-bold text-center">--- MERCANCÍA VENDIDA ---</p>
+              {inventoryAudit.map((item, idx) => (
+                <div key={idx} className="flex justify-between text-[10px]">
+                  <span className="truncate max-w-[170px]">{item.name} (x{item.qtySold})</span>
+                  <span>${item.totalUSD.toFixed(2)}</span>
+                </div>
+              ))}
+            </div>
+
+            <div className="text-center pt-3 space-y-1 text-[10px]">
+              <p>Firma Cajero: ___________________</p>
+              <p>Firma Supervisor: ___________________</p>
+              <p className="pt-2">VENEMATIC POS · Sistema de Ventas</p>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

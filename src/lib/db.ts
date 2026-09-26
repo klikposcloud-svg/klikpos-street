@@ -28,7 +28,7 @@ export interface SaleItem {
 }
 
 export interface SalePayment {
-  method: 'cash_usd' | 'cash_ves' | 'pago_movil' | 'card_debit' | 'card_credit' | 'zelle' | 'credit';
+  method: 'cash_usd' | 'cash_ves' | 'pago_movil' | 'card_debit' | 'card_credit' | 'zelle' | 'binance' | 'credit';
   amountUSD: number;
   amountVES: number;
   reference?: string;

@@ -15,6 +15,7 @@ export interface LocalProduct {
   costPerBox?: number;
   packageUnits?: number;
   profitMarginPercent?: number;
+  isTaxExempt?: boolean; // Verdadero si el artículo está exento de IVA (Tasa 0% SENIAT)
 }
 
 export interface SaleItem {
@@ -25,10 +26,11 @@ export interface SaleItem {
   priceUSD: number;
   totalUSD: number;
   taxRate?: number;
+  isTaxExempt?: boolean; // Verdadero si el artículo vendido está exento de IVA
 }
 
 export interface SalePayment {
-  method: 'cash_usd' | 'cash_ves' | 'pago_movil' | 'card_debit' | 'card_credit' | 'zelle' | 'credit';
+  method: 'cash_usd' | 'cash_ves' | 'pago_movil' | 'card_debit' | 'card_credit' | 'zelle' | 'binance' | 'credit';
   amountUSD: number;
   amountVES: number;
   reference?: string;

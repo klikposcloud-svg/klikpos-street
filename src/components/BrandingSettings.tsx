@@ -8,6 +8,8 @@ import {
   BrandingConfig,
   DEFAULT_BRANDING,
   applyBrandingToDOM,
+  applyTheme,
+  getCurrentTheme,
   IndustrialBgPreset,
   INDUSTRIAL_BG_PRESETS,
   computeIndustrialThemeVariables,
@@ -49,18 +51,30 @@ export default function BrandingSettings() {
   const [rubroFeedback, setRubroFeedback] = useState<string | null>(null);
 
   useEffect(() => {
+    const activeTheme = getCurrentTheme();
+    const isLight = activeTheme !== 'dark';
+
     // Load saved branding from Dexie or localStorage
     db.settings.get('branding_config').then((setting) => {
       if (setting && setting.value) {
-        setSelectedPaletteId(setting.value.paletteId || 'sky');
-        setSelectedUIStyle(setting.value.uiStyle || 'industrial');
-        setSelectedIndustrialBg(setting.value.industrialBg || 'white');
-        setCustomBgColor(setting.value.customBgColor || '#f8fafc');
-        applyBrandingToDOM(setting.value);
+        setSelectedPaletteId(setting.value.paletteId || 'petrol');
+        const style = isLight ? 'industrial' : (setting.value.uiStyle || 'industrial');
+        const bg = setting.value.industrialBg || (localStorage.getItem('venematic_industrial_bg') as IndustrialBgPreset) || 'white';
+        const cBg = setting.value.customBgColor || localStorage.getItem('venematic_custom_bg_color') || '#f8fafc';
+        setSelectedUIStyle(style);
+        setSelectedIndustrialBg(bg);
+        setCustomBgColor(cBg);
+        applyBrandingToDOM({
+          ...setting.value,
+          paletteId: setting.value.paletteId || 'petrol',
+          uiStyle: style,
+          industrialBg: bg,
+          customBgColor: cBg,
+        });
       } else {
         try {
           const p = localStorage.getItem('venematic_branding_palette') || 'sky';
-          const s = (localStorage.getItem('venematic_ui_style') as UIStyleMode) || 'industrial';
+          const s = isLight ? 'industrial' : ((localStorage.getItem('venematic_ui_style') as UIStyleMode) || 'industrial');
           const bg = (localStorage.getItem('venematic_industrial_bg') as IndustrialBgPreset) || 'white';
           const cBg = localStorage.getItem('venematic_custom_bg_color') || '#f8fafc';
           setSelectedPaletteId(p);
@@ -72,9 +86,30 @@ export default function BrandingSettings() {
       }
     });
 
+    // Sincronizar dinámicamente con cambios de tema desde la barra superior
+    const onThemeChange = (e: any) => {
+      const theme = e.detail;
+      if (theme === 'light') {
+        setSelectedUIStyle('industrial');
+        const savedBg = (localStorage.getItem('venematic_industrial_bg') as IndustrialBgPreset) || 'white';
+        const savedCustom = localStorage.getItem('venematic_custom_bg_color') || '#f8fafc';
+        setSelectedIndustrialBg(savedBg);
+        setCustomBgColor(savedCustom);
+        applyBrandingToDOM({
+          paletteId: localStorage.getItem('venematic_branding_palette') || selectedPaletteId,
+          uiStyle: 'industrial',
+          industrialBg: savedBg,
+          customBgColor: savedCustom,
+        });
+      } else if (theme === 'glass' || theme === 'dark') {
+        setSelectedUIStyle('glassmorphism');
+      }
+    };
+    window.addEventListener('venematic:theme_changed' as any, onThemeChange);
+
     // Cargar rubro activo guardado
     db.settings.get('active_rubro').then((s) => {
-      if (s && s.value) {
+      if (s && s.value && STANDARD_RUBROS[s.value as StandardRubroId]) {
         setActiveRubroId(s.value);
         setSelectedRubroForConfig(s.value);
       } else {
@@ -82,10 +117,31 @@ export default function BrandingSettings() {
         if (saved && STANDARD_RUBROS[saved]) {
           setActiveRubroId(saved);
           setSelectedRubroForConfig(saved);
+        } else {
+          setActiveRubroId('bodega');
+          setSelectedRubroForConfig('bodega');
         }
       }
     });
+
+    return () => {
+      window.removeEventListener('venematic:theme_changed' as any, onThemeChange);
+    };
   }, []);
+
+  const handleSelectIndustrialWhite = () => {
+    setSelectedIndustrialBg('white');
+    setSelectedUIStyle('industrial');
+    const config: BrandingConfig = {
+      paletteId: selectedPaletteId,
+      uiStyle: 'industrial',
+      industrialBg: 'white',
+      customBgColor,
+    };
+    applyTheme('light');
+    applyBrandingToDOM(config, 'light');
+    saveConfig(config);
+  };
 
   const handlePaletteSelect = (paletteId: string) => {
     setSelectedPaletteId(paletteId);
@@ -95,7 +151,8 @@ export default function BrandingSettings() {
       industrialBg: selectedIndustrialBg,
       customBgColor,
     };
-    applyBrandingToDOM(config);
+    const currentThemeMode = getCurrentTheme();
+    applyBrandingToDOM(config, currentThemeMode === 'light' ? 'light' : 'dark');
     saveConfig(config);
   };
 
@@ -107,7 +164,13 @@ export default function BrandingSettings() {
       industrialBg: selectedIndustrialBg,
       customBgColor,
     };
-    applyBrandingToDOM(config);
+    if (uiStyle === 'industrial') {
+      applyTheme('light');
+      applyBrandingToDOM(config, 'light');
+    } else {
+      applyTheme('dark');
+      applyBrandingToDOM(config, 'dark');
+    }
     saveConfig(config);
   };
 
@@ -120,7 +183,8 @@ export default function BrandingSettings() {
       industrialBg,
       customBgColor,
     };
-    applyBrandingToDOM(config);
+    applyTheme('light');
+    applyBrandingToDOM(config, 'light');
     saveConfig(config);
   };
 
@@ -134,7 +198,8 @@ export default function BrandingSettings() {
       industrialBg: 'custom',
       customBgColor: color,
     };
-    applyBrandingToDOM(config);
+    applyTheme('light');
+    applyBrandingToDOM(config, 'light');
     saveConfig(config);
   };
 
@@ -152,6 +217,7 @@ export default function BrandingSettings() {
       setSelectedPaletteId(def.recommendedPaletteId);
       setSelectedIndustrialBg(def.recommendedBgPreset);
       setSelectedUIStyle('industrial');
+      applyTheme('light');
 
       setRubroFeedback(res.message);
       setTimeout(() => setRubroFeedback(null), 4000);
@@ -176,6 +242,10 @@ export default function BrandingSettings() {
         key: 'branding_config',
         value: config,
       }).catch((err) => console.warn('Dexie save error:', err));
+      db.settings.put({
+        key: 'active_palette',
+        value: config.paletteId,
+      }).catch(() => {});
     } catch (e) {
       console.warn('Error saving branding config:', e);
     }
@@ -302,106 +372,110 @@ export default function BrandingSettings() {
         </div>
 
         {/* Panel de Configuración y Aplicación del Rubro Seleccionado */}
-        {selectedRubroForConfig && (
-          <div className="bg-white p-4 rounded-xl border border-sky-200 shadow-xs space-y-3.5 animate-in fade-in duration-150">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <span className="text-xl">{STANDARD_RUBROS[selectedRubroForConfig].icon}</span>
-                <div>
-                  <h5 className="text-xs font-black text-slate-900">
-                    Configuración de Plantilla: {STANDARD_RUBROS[selectedRubroForConfig].name}
-                  </h5>
-                  <span className="text-[11px] text-slate-500">
-                    Tienda sugerida: <b>{STANDARD_RUBROS[selectedRubroForConfig].defaultStoreName}</b>
-                  </span>
+        {(() => {
+          const currentRubroConfig = (selectedRubroForConfig && STANDARD_RUBROS[selectedRubroForConfig]) || STANDARD_RUBROS['bodega'];
+          if (!selectedRubroForConfig || !currentRubroConfig) return null;
+          return (
+            <div className="bg-white p-4 rounded-xl border border-sky-200 shadow-xs space-y-3.5 animate-in fade-in duration-150">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-xl">{currentRubroConfig.icon}</span>
+                  <div>
+                    <h5 className="text-xs font-black text-slate-900">
+                      Configuración de Plantilla: {currentRubroConfig.name}
+                    </h5>
+                    <span className="text-[11px] text-slate-500">
+                      Tienda sugerida: <b>{currentRubroConfig.defaultStoreName}</b>
+                    </span>
+                  </div>
+                </div>
+
+                {/* Categorías sugeridas */}
+                <div className="flex flex-wrap gap-1">
+                  {(currentRubroConfig.categories || []).slice(0, 4).map((c) => (
+                    <span key={c} className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-slate-100 border border-slate-200 text-slate-700">
+                      {c}
+                    </span>
+                  ))}
                 </div>
               </div>
 
-              {/* Categorías sugeridas */}
-              <div className="flex flex-wrap gap-1">
-                {STANDARD_RUBROS[selectedRubroForConfig].categories.slice(0, 4).map((c) => (
-                  <span key={c} className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-slate-100 border border-slate-200 text-slate-700">
-                    {c}
-                  </span>
-                ))}
+              {/* Opciones de Carga de Productos */}
+              <div className="pt-2 border-t border-slate-100">
+                <label className="block text-[11px] font-bold text-slate-700 mb-1.5 uppercase tracking-wider">
+                  ¿Cómo deseas aplicar este rubro en tu inventario?
+                </label>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <label className={`p-2.5 rounded-lg border text-xs cursor-pointer flex items-center gap-2 font-medium transition-colors ${
+                    loadProductsMode === 'replace' ? 'bg-sky-50 border-sky-500 text-sky-950 font-bold' : 'bg-slate-50 border-slate-200 text-slate-700'
+                  }`}>
+                    <input
+                      type="radio"
+                      name="rubro_product_mode"
+                      checked={loadProductsMode === 'replace'}
+                      onChange={() => setLoadProductsMode('replace')}
+                      className="accent-sky-600"
+                    />
+                    <span>Reemplazar catálogo ({currentRubroConfig.name})</span>
+                  </label>
+
+                  <label className={`p-2.5 rounded-lg border text-xs cursor-pointer flex items-center gap-2 font-medium transition-colors ${
+                    loadProductsMode === 'merge' ? 'bg-sky-50 border-sky-500 text-sky-950 font-bold' : 'bg-slate-50 border-slate-200 text-slate-700'
+                  }`}>
+                    <input
+                      type="radio"
+                      name="rubro_product_mode"
+                      checked={loadProductsMode === 'merge'}
+                      onChange={() => setLoadProductsMode('merge')}
+                      className="accent-sky-600"
+                    />
+                    <span>Combinar con catálogo actual</span>
+                  </label>
+
+                  <label className={`p-2.5 rounded-lg border text-xs cursor-pointer flex items-center gap-2 font-medium transition-colors ${
+                    loadProductsMode === 'theme_only' ? 'bg-sky-50 border-sky-500 text-sky-950 font-bold' : 'bg-slate-50 border-slate-200 text-slate-700'
+                  }`}>
+                    <input
+                      type="radio"
+                      name="rubro_product_mode"
+                      checked={loadProductsMode === 'theme_only'}
+                      onChange={() => setLoadProductsMode('theme_only')}
+                      className="accent-sky-600"
+                    />
+                    <span>Solo aplicar tema y colores</span>
+                  </label>
+                </div>
+              </div>
+
+              {/* Botón de Ejecución */}
+              <div className="flex items-center justify-between pt-2 border-t border-slate-100">
+                <span className="text-[11px] text-slate-500">
+                  Se configurará el color <b>{currentRubroConfig.recommendedPaletteId}</b> y fondo <b>{currentRubroConfig.recommendedBgPreset}</b> automáticamente.
+                </span>
+
+                <button
+                  type="button"
+                  onClick={() => handleApplyRubro(selectedRubroForConfig)}
+                  disabled={isApplyingRubro}
+                  className="px-5 py-2.5 bg-sky-700 hover:bg-sky-800 active:bg-sky-900 text-white font-bold text-xs rounded-xl shadow-md flex items-center gap-2 transition-all active:scale-95 disabled:opacity-50"
+                >
+                  {isApplyingRubro ? (
+                    <>
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                      <span>Aplicando Rubro y Catálogo...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>⚡ Aplicar Plantilla de {currentRubroConfig.name}</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </>
+                  )}
+                </button>
               </div>
             </div>
-
-            {/* Opciones de Carga de Productos */}
-            <div className="pt-2 border-t border-slate-100">
-              <label className="block text-[11px] font-bold text-slate-700 mb-1.5 uppercase tracking-wider">
-                ¿Cómo deseas aplicar este rubro en tu inventario?
-              </label>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                <label className={`p-2.5 rounded-lg border text-xs cursor-pointer flex items-center gap-2 font-medium transition-colors ${
-                  loadProductsMode === 'replace' ? 'bg-sky-50 border-sky-500 text-sky-950 font-bold' : 'bg-slate-50 border-slate-200 text-slate-700'
-                }`}>
-                  <input
-                    type="radio"
-                    name="rubro_product_mode"
-                    checked={loadProductsMode === 'replace'}
-                    onChange={() => setLoadProductsMode('replace')}
-                    className="accent-sky-600"
-                  />
-                  <span>Reemplazar catálogo ({STANDARD_RUBROS[selectedRubroForConfig].name})</span>
-                </label>
-
-                <label className={`p-2.5 rounded-lg border text-xs cursor-pointer flex items-center gap-2 font-medium transition-colors ${
-                  loadProductsMode === 'merge' ? 'bg-sky-50 border-sky-500 text-sky-950 font-bold' : 'bg-slate-50 border-slate-200 text-slate-700'
-                }`}>
-                  <input
-                    type="radio"
-                    name="rubro_product_mode"
-                    checked={loadProductsMode === 'merge'}
-                    onChange={() => setLoadProductsMode('merge')}
-                    className="accent-sky-600"
-                  />
-                  <span>Combinar con catálogo actual</span>
-                </label>
-
-                <label className={`p-2.5 rounded-lg border text-xs cursor-pointer flex items-center gap-2 font-medium transition-colors ${
-                  loadProductsMode === 'theme_only' ? 'bg-sky-50 border-sky-500 text-sky-950 font-bold' : 'bg-slate-50 border-slate-200 text-slate-700'
-                }`}>
-                  <input
-                    type="radio"
-                    name="rubro_product_mode"
-                    checked={loadProductsMode === 'theme_only'}
-                    onChange={() => setLoadProductsMode('theme_only')}
-                    className="accent-sky-600"
-                  />
-                  <span>Solo aplicar tema y colores</span>
-                </label>
-              </div>
-            </div>
-
-            {/* Botón de Ejecución */}
-            <div className="flex items-center justify-between pt-2 border-t border-slate-100">
-              <span className="text-[11px] text-slate-500">
-                Se configurará el color <b>{STANDARD_RUBROS[selectedRubroForConfig].recommendedPaletteId}</b> y fondo <b>{STANDARD_RUBROS[selectedRubroForConfig].recommendedBgPreset}</b> automáticamente.
-              </span>
-
-              <button
-                type="button"
-                onClick={() => handleApplyRubro(selectedRubroForConfig)}
-                disabled={isApplyingRubro}
-                className="px-5 py-2.5 bg-sky-700 hover:bg-sky-800 active:bg-sky-900 text-white font-bold text-xs rounded-xl shadow-md flex items-center gap-2 transition-all active:scale-95 disabled:opacity-50"
-              >
-                {isApplyingRubro ? (
-                  <>
-                    <RefreshCw className="w-4 h-4 animate-spin" />
-                    <span>Aplicando Rubro y Catálogo...</span>
-                  </>
-                ) : (
-                  <>
-                    <span>⚡ Aplicar Plantilla de {STANDARD_RUBROS[selectedRubroForConfig].name}</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-        )}
+          );
+        })()}
       </div>
 
       {/* ========================================================================= */}
@@ -415,10 +489,7 @@ export default function BrandingSettings() {
           <div className="flex items-center gap-2">
             <button
               type="button"
-              onClick={() => {
-                handleIndustrialBgSelect('white');
-                handleUIStyleSelect('industrial');
-              }}
+              onClick={handleSelectIndustrialWhite}
               className={`px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all ${
                 selectedUIStyle === 'industrial' && selectedIndustrialBg === 'white'
                   ? 'bg-slate-900 text-white shadow-xs'
@@ -448,10 +519,7 @@ export default function BrandingSettings() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {/* MODO PROFESIONAL BLANCO (INDUSTRIAL) */}
           <div
-            onClick={() => {
-              handleIndustrialBgSelect('white');
-              handleUIStyleSelect('industrial');
-            }}
+            onClick={handleSelectIndustrialWhite}
             className={`p-4 rounded-xl border-2 cursor-pointer transition-all flex flex-col justify-between select-none ${
               selectedUIStyle === 'industrial'
                 ? 'border-sky-600 bg-white shadow-md ring-1 ring-sky-500'
@@ -628,7 +696,7 @@ export default function BrandingSettings() {
             Paleta de Color de la Marca (10 Opciones por Rubro)
           </label>
           <span className="text-[11px] font-bold text-slate-500">
-            Activa: <b className="text-sky-700">{activePalette.name}</b>
+            Activa: <b style={{ color: activePalette.primary }}>{activePalette.name}</b>
           </span>
         </div>
 
@@ -640,11 +708,20 @@ export default function BrandingSettings() {
                 key={pal.id}
                 type="button"
                 onClick={() => handlePaletteSelect(pal.id)}
-                className={`p-3 rounded-xl border-2 text-left transition-all flex flex-col justify-between h-28 relative group select-none ${
+                className={`p-3 rounded-xl border-2 text-left transition-all flex flex-col justify-between h-28 relative group select-none cursor-pointer ${
                   isSelected
-                    ? 'border-sky-600 bg-sky-50 shadow-md ring-1 ring-sky-500'
+                    ? 'shadow-md ring-2'
                     : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50'
                 }`}
+                style={
+                  isSelected
+                    ? {
+                        borderColor: pal.primary,
+                        backgroundColor: pal.primaryLight,
+                        outlineColor: pal.primary,
+                      }
+                    : undefined
+                }
               >
                 {/* Header con Swatch y Check */}
                 <div className="flex items-center justify-between w-full">
@@ -660,7 +737,10 @@ export default function BrandingSettings() {
                   </div>
 
                   {isSelected && (
-                    <div className="w-4 h-4 rounded-full bg-sky-600 text-white flex items-center justify-center shadow-xs">
+                    <div
+                      className="w-4 h-4 rounded-full text-white flex items-center justify-center shadow-xs"
+                      style={{ backgroundColor: pal.primary }}
+                    >
                       <Check className="w-2.5 h-2.5 stroke-[3]" />
                     </div>
                   )}
