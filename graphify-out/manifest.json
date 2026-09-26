@@ -288,9 +288,9 @@
     "semantic_hash": "1671769c32220d2d3d02028a4abeb754"
   },
   "src/app/dashboard/pos/page.tsx": {
-    "mtime": 1790385229.8416536,
-    "seen": 1790385669.9172473,
-    "ast_hash": "66089189c10bb83f293c6910c1585a44",
+    "mtime": 1790386975.5772748,
+    "seen": 1790387170.8575802,
+    "ast_hash": "3f8c218652cbc8d4365b004bc4382ae9",
     "semantic_hash": ""
   },
   "src/app/dashboard/reports/page.tsx": {
@@ -1104,9 +1104,9 @@
     "semantic_hash": ""
   },
   "venematic-desktop/src/app/dashboard/pos/page.tsx": {
-    "mtime": 1790385229.8416536,
-    "seen": 1790385669.9175053,
-    "ast_hash": "66089189c10bb83f293c6910c1585a44",
+    "mtime": 1790386992.1380548,
+    "seen": 1790387170.8579752,
+    "ast_hash": "3f8c218652cbc8d4365b004bc4382ae9",
     "semantic_hash": ""
   },
   "venematic-desktop/src/app/dashboard/reports/page.tsx": {
@@ -1602,9 +1602,9 @@
     "semantic_hash": ""
   },
   "dist-installer/VERIFICACION_HASHES.txt": {
-    "mtime": 1790385648.0274775,
-    "seen": 1790385669.917653,
-    "ast_hash": "7886c0fedf56d4e821aa96964db7c8cb",
+    "mtime": 1790387148.7548912,
+    "seen": 1790387170.858201,
+    "ast_hash": "2892357dcbc079373dfb3beea7fc8ab8",
     "semantic_hash": ""
   },
   "docs/INFORME_CLIENTES_VENEMATIC_POS.md": {
@@ -1662,9 +1662,9 @@
     "semantic_hash": ""
   },
   "venematic-desktop/dist-installer/VERIFICACION_HASHES.txt": {
-    "mtime": 1790385648.0297577,
-    "seen": 1790385669.9176717,
-    "ast_hash": "7886c0fedf56d4e821aa96964db7c8cb",
+    "mtime": 1790387148.7584484,
+    "seen": 1790387170.8582306,
+    "ast_hash": "2892357dcbc079373dfb3beea7fc8ab8",
     "semantic_hash": ""
   },
   "venematic-desktop/refinancion.md": {

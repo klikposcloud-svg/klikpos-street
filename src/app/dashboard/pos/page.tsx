@@ -1835,7 +1835,7 @@ export default function DesktopPosPage() {
             </div>
 
             {/* Lista de Ítems */}
-            <div className="flex-1 min-h-0 overflow-y-auto divide-y divide-slate-100">
+            <div className="flex-1 min-h-0 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800/80">
               {cart.map((item) => {
                 const isSelected = selectedCartItemId === item.productId;
                 return (
@@ -1844,15 +1844,15 @@ export default function DesktopPosPage() {
                     onClick={() => setSelectedCartItemId(item.productId)}
                     className={`py-2 px-2 flex items-center justify-between gap-2 rounded-lg cursor-pointer transition-all ${
                       isSelected
-                        ? 'bg-sky-50 border border-sky-300'
-                        : 'hover:bg-slate-50'
+                        ? 'bg-sky-50 dark:bg-sky-950/60 border border-sky-300 dark:border-sky-500/70 shadow-xs'
+                        : 'hover:bg-slate-50 dark:hover:bg-slate-800/60'
                     }`}
                   >
                     <div className="min-w-0 flex-1">
-                      <p className="font-bold text-xs text-slate-900 truncate">
+                      <p className="font-bold text-xs text-slate-900 dark:text-slate-100 truncate">
                         {item.name}
                       </p>
-                      <p className="text-[11px] text-slate-500 font-mono">
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400 font-mono">
                         ${item.priceUSD.toFixed(2)} c/u × {item.qty}
                       </p>
                     </div>
@@ -1864,11 +1864,11 @@ export default function DesktopPosPage() {
                           e.stopPropagation();
                           updateItemQty(item.productId, item.qty - 1);
                         }}
-                        className="w-6 h-6 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded flex items-center justify-center text-xs cursor-pointer"
+                        className="w-6 h-6 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold rounded flex items-center justify-center text-xs cursor-pointer border border-transparent dark:border-slate-700"
                       >
                         -
                       </button>
-                      <span className="w-7 text-center font-mono font-bold text-xs tabular-numbers">
+                      <span className="w-7 text-center font-mono font-bold text-xs tabular-numbers text-slate-900 dark:text-white">
                         {item.qty}
                       </span>
                       <button
@@ -1876,7 +1876,7 @@ export default function DesktopPosPage() {
                           e.stopPropagation();
                           updateItemQty(item.productId, item.qty + 1);
                         }}
-                        className="w-6 h-6 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded flex items-center justify-center text-xs cursor-pointer"
+                        className="w-6 h-6 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold rounded flex items-center justify-center text-xs cursor-pointer border border-transparent dark:border-slate-700"
                       >
                         +
                       </button>
@@ -1884,10 +1884,10 @@ export default function DesktopPosPage() {
 
                     {/* Total por línea */}
                     <div className="text-right min-w-[75px]">
-                      <span className="text-xs font-mono font-black text-slate-900 block tabular-numbers">
+                      <span className="text-xs font-mono font-black text-slate-900 dark:text-slate-100 block tabular-numbers">
                         {formatVES(item.totalUSD * bcvRate)}
                       </span>
-                      <span className="text-[10px] font-mono text-slate-500 block tabular-numbers">
+                      <span className="text-[10px] font-mono text-slate-500 dark:text-slate-400 block tabular-numbers">
                         ${item.totalUSD.toFixed(2)}
                       </span>
                     </div>
@@ -1898,7 +1898,7 @@ export default function DesktopPosPage() {
                         e.stopPropagation();
                         removeItem(item.productId);
                       }}
-                      className="text-slate-300 hover:text-rose-600 px-1 text-sm font-bold cursor-pointer"
+                      className="text-slate-400 hover:text-rose-600 dark:text-slate-400 dark:hover:text-rose-400 px-1 text-sm font-bold cursor-pointer"
                       title="Eliminar ítem"
                     >
                       &times;
@@ -1909,12 +1909,12 @@ export default function DesktopPosPage() {
 
               {cart.length === 0 && (
                 <div className="h-full flex flex-col items-center justify-center text-slate-400 py-10 gap-3 select-none">
-                  <svg className="w-16 h-16 text-slate-300 stroke-[1.25]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-16 h-16 text-slate-300 dark:text-slate-600 stroke-[1.25]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                   </svg>
                   <div className="text-center space-y-1">
-                    <p className="text-sm font-semibold text-slate-600">El ticket está vacío.</p>
-                    <p className="text-xs text-slate-400">Escanee o seleccione productos.</p>
+                    <p className="text-sm font-semibold text-slate-600 dark:text-slate-300">El ticket está vacío.</p>
+                    <p className="text-xs text-slate-400 dark:text-slate-500">Escanee o seleccione productos.</p>
                   </div>
                 </div>
               )}
@@ -1922,21 +1922,14 @@ export default function DesktopPosPage() {
 
             {/* Gran Total del Ticket con Separación Nítida Anti-Colisión */}
             <div
-              className="pt-3 border-t-2 border-b border-x space-y-2 mt-auto shrink-0 -mx-3 -mb-3 p-3.5 rounded-b-2xl dark:bg-[#0e1826] dark:border-slate-700"
-              style={{
-                backgroundColor: 'color-mix(in srgb, var(--brand-primary) 6%, white)',
-                borderTopColor: 'color-mix(in srgb, var(--brand-primary) 45%, transparent)',
-                borderBottomColor: 'color-mix(in srgb, var(--brand-primary) 28%, transparent)',
-                borderLeftColor: 'color-mix(in srgb, var(--brand-primary) 28%, transparent)',
-                borderRightColor: 'color-mix(in srgb, var(--brand-primary) 28%, transparent)',
-              }}>
-
+              className="pt-3 border-t-2 space-y-2 mt-auto shrink-0 -mx-3 -mb-3 p-3.5 rounded-b-2xl bg-slate-50 dark:bg-[#0e1826] border-slate-200 dark:border-slate-700/80 shadow-xs"
+            >
               <div className="flex flex-col gap-1">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] sm:text-xs font-black uppercase tracking-wider text-slate-900 dark:text-slate-100">
+                  <span className="text-[11px] sm:text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-200">
                     TOTAL A COBRAR (BS)
                   </span>
-                  <span className="text-xs font-mono font-black text-sky-900 dark:text-sky-300 bg-sky-100 dark:bg-sky-950 px-2 py-0.5 rounded border border-sky-300 dark:border-sky-800">
+                  <span className="text-xs font-mono font-black text-sky-900 dark:text-sky-300 bg-sky-100 dark:bg-sky-950/80 px-2 py-0.5 rounded border border-sky-300 dark:border-sky-800">
                     Tasa: Bs. {bcvRate.toFixed(2)}
                   </span>
                 </div>
@@ -1965,15 +1958,15 @@ export default function DesktopPosPage() {
 
         {/* ---- TAB: VENTAS DEL TURNO ---- */}
         {rightPanelTab === 'shift' && (
-          <div className="flex-1 bg-white rounded-2xl border border-slate-200/90 shadow-2xs flex flex-col overflow-hidden">
-            <div className="p-3 border-b border-slate-100 bg-[var(--brand-primary)] text-white flex items-center justify-between">
+          <div className="flex-1 bg-white dark:bg-slate-800/70 rounded-2xl border border-slate-200/90 dark:border-slate-700 shadow-2xs flex flex-col overflow-hidden">
+            <div className="p-3 border-b border-slate-100 dark:border-slate-700 bg-[var(--brand-primary)] text-white flex items-center justify-between">
               <div>
                 <span className="text-xs font-black uppercase tracking-wide">Ventas del Turno</span>
                 <p className="text-[10px] text-emerald-100">{shiftSales.length} ventas · Esta sesión</p>
               </div>
             </div>
             {/* Lista de ventas de turno */}
-            <div className="flex-1 overflow-y-auto divide-y divide-slate-100 text-xs">
+            <div className="flex-1 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800 text-xs">
               {shiftSales.map((sale, idx) => (
                 <div key={sale.receiptNumber || idx} className="p-2.5 flex items-center justify-between">
                   <div>
