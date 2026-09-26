@@ -15,9 +15,18 @@ El presente acuerdo regula el uso del software **Venematic POS** (en sus version
 
 ---
 
-### 2. POLÍTICA DE ACTUALIZACIONES AUTOMÁTICAS Y MEJORAS DEL SISTEMA
-2.1. **Actualizaciones de Mantenimiento:** Para garantizar la compatibilidad con cambios en las tasas cambiarias del Banco Central de Venezuela (BCV), normativas fiscales del SENIAT y mejoras en el protocolo de lectura de SMS bancarios de Pago Móvil, el sistema podrá recibir actualizaciones periódicas en segundo plano.  
-2.2. **Continuidad Operativa:** Ninguna actualización automática interrumpirá las ventas en curso ni requerirá configuraciones técnicas complejas por parte del personal del comercio.
+### 2. POLÍTICA DE ACTUALIZACIONES AUTOMÁTICAS, INTEGRIDAD Y PRIVACIDAD DEL SISTEMA
+2.1. **Actualizaciones de Mantenimiento y Compatibilidad:** Para garantizar la compatibilidad operativa continua con cambios en las tasas cambiarias del Banco Central de Venezuela (BCV), normativas tributarias del SENIAT, formatos de impresión térmica y mejoras en la sincronización, el sistema cuenta con un motor de actualización automática y distribución de parches.
+2.2. **Continuidad Operativa Ininterrumpida:** Ninguna verificación o descarga de actualización interrumpirá las ventas en curso. Las actualizaciones se notifican de manera visual al administrador y solo se aplican con su confirmación o en momentos de reinicio seguro del sistema.
+2.3. **Privacidad Absoluta y Cero Fuga de Datos (Zero Data Leakage):** Durante las consultas de comprobación de nuevas versiones (consultas HTTP/HTTPS al manifiesto `version.json`), el sistema transmite **única y exclusivamente** el identificador semver de la versión actual instalada y el canal de plataforma (`desktop` o `mobile`). 
+   * **Garantía Estricta:** Bajo ninguna circunstancia se envían, transmiten, almacenan en registros remotos ni procesan datos del negocio, montos de venta, libros contables, inventario de productos, márgenes de ganancia, listas de clientes, documentos de identidad (cédulas/RIF) ni claves de acceso.
+2.4. **Preservación e Inmunidad de la Base de Datos Local:** El proceso de actualización actualiza exclusivamente el motor ejecutable y los archivos estáticos de la interfaz. La base de datos operativa local (alojada en `%APPDATA%` en Windows y en el almacenamiento de contenedor en Android mediante SQLite / IndexedDB Dexie) permanece completamente intacta e inmune a sobreescrituras o reseteos accidentales durante cualquier actualización.
+2.5. **Verificación Criptográfica de Integridad:** Todo paquete de actualización distribuido incluye verificación de integridad criptográfica (SHA-256) y firma digital, garantizando que el software instalado proviene auténticamente del equipo de ingeniería de Venematic y no ha sido alterado por intermediarios.
+2.6. **Soberanía y Control del Usuario (Configuración y Opt-Out):** El Administrador del establecimiento goza de soberanía total:
+   * Puede activar o desactivar la comprobación automática al iniciar el sistema desde el panel de **Configuración > Actualizaciones**.
+   * Puede realizar comprobaciones manuales en el momento que desee.
+   * Tiene acceso a la lectura completa de notas de la versión (*changelog*) antes de autorizar la aplicación de un paquete de actualización.
+2.7. **Operatividad 100% Fuera de Línea (Offline Resilient):** En ausencia de conectividad a Internet, el módulo de auto-actualización entra en modo de reposo transparente, sin arrojar alertas intrusivas ni degradar en lo más mínimo la velocidad o disponibilidad del punto de venta en caja.
 
 ---
 

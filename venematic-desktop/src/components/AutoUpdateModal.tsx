@@ -1,0 +1,188 @@
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import { updateService, VersionManifest, CURRENT_VERSION } from '@/lib/services/update-service';
+import { Sparkles, Download, CheckCircle2, X, AlertCircle, RefreshCw } from 'lucide-react';
+
+export default function AutoUpdateModal() {
+  const [manifest, setManifest] = useState<VersionManifest | null>(null);
+  const [isOpen, setIsOpen] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [updateMessage, setUpdateMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Escuchar evento manual para verificar actualizaciones desde Ajustes
+    const handleManualCheck = async () => {
+      const res = await updateService.checkForUpdates();
+      if (res.hasUpdate && res.latestManifest) {
+        setManifest(res.latestManifest);
+        setIsOpen(true);
+      } else {
+        alert(
+          res.error
+            ? `Estado de Actualizaciones: ${res.error}`
+            : `¡El sistema está al día! Estás usando la versión más reciente (v${CURRENT_VERSION}).`
+        );
+      }
+    };
+
+    window.addEventListener('venematic:check_updates', handleManualCheck);
+
+    // Verificación automática al iniciar (con retardo de 4 segundos para no entorpecer el arranque del POS)
+    const timer = setTimeout(async () => {
+      const cfg = updateService.getConfig();
+      if (cfg.autoCheckOnStartup && navigator.onLine) {
+        const res = await updateService.checkForUpdates();
+        if (res.hasUpdate && res.latestManifest) {
+          // Verificar si el usuario no ha pospuesto esta versión específica en esta sesión
+          const dismissedVersion = sessionStorage.getItem('venematic_dismissed_update');
+          if (dismissedVersion !== res.latestManifest.version || res.latestManifest.mandatory) {
+            setManifest(res.latestManifest);
+            setIsOpen(true);
+          }
+        }
+      }
+    }, 4000);
+
+    return () => {
+      window.removeEventListener('venematic:check_updates', handleManualCheck);
+      clearTimeout(timer);
+    };
+  }, []);
+
+  if (!isOpen || !manifest) return null;
+
+  const handleApplyUpdate = () => {
+    setIsUpdating(true);
+    setUpdateMessage('Iniciando descarga del paquete de actualización...');
+
+    setTimeout(() => {
+      const res = updateService.applyUpdate(manifest);
+      setUpdateMessage(res.message);
+      setIsUpdating(false);
+
+      if (res.downloadUrl) {
+        setTimeout(() => {
+          setIsOpen(false);
+        }, 3000);
+      }
+    }, 1200);
+  };
+
+  const handleDismiss = () => {
+    if (manifest.mandatory) {
+      alert('Esta actualización es obligatoria para garantizar la integridad fiscal y del inventario.');
+      return;
+    }
+    sessionStorage.setItem('venematic_dismissed_update', manifest.version);
+    setIsOpen(false);
+  };
+
+  return (
+    <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 select-none">
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-200"
+      >
+        {/* Cabecera con degradado tecnológico */}
+        <div className="bg-gradient-to-r from-emerald-600 via-teal-700 to-slate-900 p-6 text-white relative">
+          {!manifest.mandatory && (
+            <button
+              type="button"
+              onClick={handleDismiss}
+              className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors cursor-pointer"
+              title="Recordar más tarde"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
+
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30 shadow-inner">
+              <Sparkles className="w-6 h-6 text-white animate-pulse" />
+            </div>
+            <div>
+              <span className="text-[11px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-400 text-slate-950">
+                ¡Nueva Versión Disponible!
+              </span>
+              <h2 className="text-xl font-black tracking-tight text-white mt-0.5">
+                Venematic POS v{manifest.version}
+              </h2>
+            </div>
+          </div>
+          <p className="text-xs text-emerald-100 font-medium">
+            Fecha de Publicación: {manifest.releaseDate || 'Reciente'} · Versión Actual: v{CURRENT_VERSION}
+          </p>
+        </div>
+
+        {/* Contenido con Notas de la Versión */}
+        <div className="p-6 space-y-4">
+          <div>
+            <h4 className="text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2">
+              Novedades y Mejoras Incluidas:
+            </h4>
+            <div className="bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 max-h-48 overflow-y-auto space-y-2">
+              {manifest.notes && manifest.notes.length > 0 ? (
+                manifest.notes.map((note, idx) => (
+                  <div key={idx} className="flex items-start gap-2.5 text-xs text-slate-700 dark:text-slate-200">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+                    <span className="leading-snug">{note}</span>
+                  </div>
+                ))
+              ) : (
+                <p className="text-xs text-slate-500">Optimizaciones generales de estabilidad y rendimiento.</p>
+              )}
+            </div>
+          </div>
+
+          <div className="bg-sky-50 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-800 rounded-xl p-3 text-xs text-sky-800 dark:text-sky-200 flex items-start gap-2">
+            <AlertCircle className="w-4 h-4 text-sky-600 shrink-0 mt-0.5" />
+            <span>
+              <b>Garantía de Datos:</b> La actualización conserva íntegramente todos tus productos, clientes, precios, ventas y turnos de caja sin interrupción.
+            </span>
+          </div>
+
+          {updateMessage && (
+            <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-700 rounded-xl text-xs font-bold text-emerald-800 dark:text-emerald-200 flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+              <span>{updateMessage}</span>
+            </div>
+          )}
+
+          {/* Botones de Acción */}
+          <div className="pt-2 flex items-center justify-end gap-2.5">
+            {!manifest.mandatory && (
+              <button
+                type="button"
+                onClick={handleDismiss}
+                disabled={isUpdating}
+                className="px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold transition-all cursor-pointer"
+              >
+                Recordar Más Tarde
+              </button>
+            )}
+
+            <button
+              type="button"
+              onClick={handleApplyUpdate}
+              disabled={isUpdating}
+              className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-black flex items-center gap-2 shadow-md active:scale-95 transition-all cursor-pointer disabled:opacity-50"
+            >
+              {isUpdating ? (
+                <>
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  <span>Actualizando...</span>
+                </>
+              ) : (
+                <>
+                  <Download className="w-4 h-4" />
+                  <span>Actualizar Ahora (v{manifest.version})</span>
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

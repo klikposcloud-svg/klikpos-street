@@ -7,13 +7,14 @@ import BrandingSettings from '@/components/BrandingSettings';
 import LicenseActivationModal from '@/components/LicenseActivationModal';
 import CloudSyncSettingsCard from '@/components/CloudSyncSettingsCard';
 import { useAuth } from '@/context/AuthContext';
-import { ShieldAlert, ShieldCheck, ArrowLeft, Scale, CheckCircle2, AlertCircle, RefreshCw, Zap, Banknote, Upload, Image as ImageIcon, Trash2, Printer, Palette, Store, Users } from 'lucide-react';
+import { ShieldAlert, ShieldCheck, ArrowLeft, Scale, CheckCircle2, AlertCircle, RefreshCw, Zap, Banknote, Upload, Image as ImageIcon, Trash2, Printer, Palette, Store, Users, Download, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import { scaleService, ScaleProtocol, WeightReading, PriceMultiplierBasis } from '@/lib/hardware/scale';
 import { getScaleBarcodeConfig, saveScaleBarcodeConfig, ScaleBarcodeConfig } from '@/lib/hardware/scale-barcode';
 import { pagoMovilMonitor, initiateGmailOAuth, extractOAuthTokenFromUrl, verifyGmailToken } from '@/lib/payments/pago-movil-gmail-monitor';
+import { updateService, CURRENT_VERSION } from '@/lib/services/update-service';
 
-export type SettingsTabId = 'branding' | 'business' | 'printer' | 'scale' | 'cashiers' | 'cloud_backup' | 'payments' | 'privacy_compliance';
+export type SettingsTabId = 'branding' | 'business' | 'printer' | 'scale' | 'cashiers' | 'cloud_backup' | 'payments' | 'updates';
 
 export default function DesktopSettingsPage() {
   const { isAdmin, switchToRole } = useAuth();
@@ -336,7 +337,7 @@ export default function DesktopSettingsPage() {
     { id: 'cashiers', label: 'Cajeros y Seguridad', icon: Users },
     { id: 'cloud_backup', label: 'Nube y Respaldos', icon: RefreshCw },
     { id: 'payments', label: 'Pagos y Gmail', icon: Zap },
-    { id: 'privacy_compliance', label: 'Privacidad y Normativa', icon: ShieldCheck },
+    { id: 'updates', label: 'Actualizaciones', icon: Download },
   ];
 
   return (
@@ -1013,191 +1014,8 @@ export default function DesktopSettingsPage() {
         </div>
       )}
 
-      {/* TAB 8: PRIVACIDAD, REGULACIONES Y CUMPLIMIENTO SENIAT */}
-      {activeTab === 'privacy_compliance' && (
-        <div className="space-y-6">
-          {/* Header Card */}
-          <div className="bg-gradient-to-r from-blue-900 to-indigo-950 rounded-2xl p-6 text-white shadow-lg border border-blue-800/50">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div>
-                <div className="flex items-center gap-2 mb-1.5">
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                    Auditado & Certificado
-                  </span>
-                  <span className="text-xs text-blue-200 font-medium">Marco Legal Venezuela</span>
-                </div>
-                <h2 className="text-xl font-black tracking-tight text-white flex items-center gap-2">
-                  <span>Privacidad, Normativas Legales y SENIAT</span>
-                </h2>
-                <p className="text-xs text-blue-200/90 mt-1 max-w-2xl leading-relaxed">
-                  Venematic POS está arquitecturado bajo soberanía de datos local (Offline-First), cumplimiento estricto de la Providencia 00071 del SENIAT y protección de identidad y métodos de pago.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => window.print()}
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/20 text-xs font-bold transition-all shadow-sm shrink-0 self-start sm:self-center"
-              >
-                <Printer className="w-4 h-4 text-emerald-400" />
-                Imprimir Declaración Legal
-              </button>
-            </div>
-          </div>
-
-          {/* 6 Pilares de Cumplimiento */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Pilar 1 */}
-            <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-5 shadow-xs hover:border-blue-400 transition-colors">
-              <div className="flex items-start gap-3">
-                <div className="w-9 h-9 rounded-lg bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 flex items-center justify-center font-black text-sm shrink-0">
-                  1
-                </div>
-                <div>
-                  <h3 className="text-sm font-black text-slate-800 dark:text-slate-100 flex items-center gap-1.5">
-                    Soberanía de Datos (Zero Cloud Liability)
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500 inline" />
-                  </h3>
-                  <p className="text-xs text-slate-600 dark:text-slate-300 mt-1.5 leading-relaxed">
-                    Venematic es <strong>100% Offline-First</strong>. La base de datos de productos, inventario, precios, ventas y clientes se almacena exclusivamente en el almacenamiento local de este dispositivo. No transmitimos datos comerciales a servidores externos ni nubes de terceros.
-                  </p>
-                  <div className="mt-2.5 flex items-center gap-2 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    Base de datos local encriptada y protegida
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Pilar 2 */}
-            <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-5 shadow-xs hover:border-blue-400 transition-colors">
-              <div className="flex items-start gap-3">
-                <div className="w-9 h-9 rounded-lg bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-black text-sm shrink-0">
-                  2
-                </div>
-                <div>
-                  <h3 className="text-sm font-black text-slate-800 dark:text-slate-100 flex items-center gap-1.5">
-                    Cumplimiento Fiscal SENIAT (Providencia 00071)
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500 inline" />
-                  </h3>
-                  <p className="text-xs text-slate-600 dark:text-slate-300 mt-1.5 leading-relaxed">
-                    Estructurado bajo los lineamientos de facturación venezolana: numeración fiscal consecutiva y no reseteable, Libro de Ventas oficial (Diario, Semanal y Mensual) con desglose de <strong>Exento, Base 16%, Débito Fiscal IVA e IGTF 3%</strong>.
-                  </p>
-                  <div className="mt-2.5 flex items-center gap-2 text-[11px] font-semibold text-indigo-600 dark:text-indigo-400">
-                    <span className="w-2 h-2 rounded-full bg-indigo-500"></span>
-                    Tasa Oficial BCV requerida en comprobantes bi-monetarios
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Pilar 3 */}
-            <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-5 shadow-xs hover:border-blue-400 transition-colors">
-              <div className="flex items-start gap-3">
-                <div className="w-9 h-9 rounded-lg bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-black text-sm shrink-0">
-                  3
-                </div>
-                <div>
-                  <h3 className="text-sm font-black text-slate-800 dark:text-slate-100 flex items-center gap-1.5">
-                    Seguridad en Pagos y PCI DSS
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500 inline" />
-                  </h3>
-                  <p className="text-xs text-slate-600 dark:text-slate-300 mt-1.5 leading-relaxed">
-                    <strong>Cero almacenamiento de tarjetas:</strong> El software nunca solicita, captura ni guarda números completos de tarjetas de débito/crédito, CVV ni claves bancarias. Las verificaciones de Pago Móvil y Zelle residen en memoria volátil efímera (RAM) con purga automática.
-                  </p>
-                  <div className="mt-2.5 flex items-center gap-2 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                    Tolerante a inspecciones bancarias y auditorías PCI
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Pilar 4 */}
-            <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-5 shadow-xs hover:border-blue-400 transition-colors">
-              <div className="flex items-start gap-3">
-                <div className="w-9 h-9 rounded-lg bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-400 flex items-center justify-center font-black text-sm shrink-0">
-                  4
-                </div>
-                <div>
-                  <h3 className="text-sm font-black text-slate-800 dark:text-slate-100 flex items-center gap-1.5">
-                    Privacidad de Hardware y Sensores
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500 inline" />
-                  </h3>
-                  <p className="text-xs text-slate-600 dark:text-slate-300 mt-1.5 leading-relaxed">
-                    El permiso de cámara se usa estrictamente para la lectura de códigos de barras de productos y códigos QR de Pago Móvil. No se toman fotos ambientales, no hay vigilancia ni reconocimiento facial en ningún momento.
-                  </p>
-                  <div className="mt-2.5 flex items-center gap-2 text-[11px] font-semibold text-amber-600 dark:text-amber-400">
-                    <span className="w-2 h-2 rounded-full bg-amber-500"></span>
-                    Cámara activa sólo mientras el escáner esté abierto
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Pilar 5 */}
-            <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-5 shadow-xs hover:border-blue-400 transition-colors">
-              <div className="flex items-start gap-3">
-                <div className="w-9 h-9 rounded-lg bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-400 flex items-center justify-center font-black text-sm shrink-0">
-                  5
-                </div>
-                <div>
-                  <h3 className="text-sm font-black text-slate-800 dark:text-slate-100 flex items-center gap-1.5">
-                    Licenciamiento HWID Criptográfico
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500 inline" />
-                  </h3>
-                  <p className="text-xs text-slate-600 dark:text-slate-300 mt-1.5 leading-relaxed">
-                    La activación del software se valida mediante un identificador de hardware único (HWID) con firma <strong>HMAC-SHA256</strong>. La validación se ejecuta offline en el equipo, garantizando autenticidad sin requerir conexión permanente a internet.
-                  </p>
-                  <div className="mt-2.5 flex items-center gap-2 text-[11px] font-semibold text-purple-600 dark:text-purple-400">
-                    <span className="w-2 h-2 rounded-full bg-purple-500"></span>
-                    Clave criptográfica vinculada a este equipo
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Pilar 6 */}
-            <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-5 shadow-xs hover:border-blue-400 transition-colors">
-              <div className="flex items-start gap-3">
-                <div className="w-9 h-9 rounded-lg bg-teal-100 dark:bg-teal-900/50 text-teal-600 dark:text-teal-400 flex items-center justify-center font-black text-sm shrink-0">
-                  6
-                </div>
-                <div>
-                  <h3 className="text-sm font-black text-slate-800 dark:text-slate-100 flex items-center gap-1.5">
-                    Custodia y Responsabilidad de Respaldos
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500 inline" />
-                  </h3>
-                  <p className="text-xs text-slate-600 dark:text-slate-300 mt-1.5 leading-relaxed">
-                    En cumplimiento con el Código Orgánico Tributario, la responsabilidad de conservar la información contable y fiscal corresponde al sujeto pasivo (comercio). Venematic provee la herramienta de <strong>Copia de Seguridad</strong> para exportar respaldos periódicos a medios externos.
-                  </p>
-                  <div className="mt-2.5 flex items-center gap-2 text-[11px] font-semibold text-teal-600 dark:text-teal-400">
-                    <span className="w-2 h-2 rounded-full bg-teal-500"></span>
-                    Respaldos exportables en 1 clic desde la pestaña Sistema
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Marco Legal Referencial */}
-          <div className="bg-slate-50 dark:bg-slate-900/40 rounded-xl border border-slate-200 dark:border-slate-800 p-4">
-            <h4 className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
-              Referencias Legales y Normativas
-            </h4>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-[11px] text-slate-600 dark:text-slate-300">
-              <div className="p-2.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
-                <strong>SENIAT Providencia 00071:</strong> Normas generales de emisión de facturas y otros documentos.
-              </div>
-              <div className="p-2.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
-                <strong>Convenio Cambiario N° 1 (BCV):</strong> Obligatoriedad de tasa oficial para transacciones en divisas.
-              </div>
-              <div className="p-2.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
-                <strong>Gaceta Oficial N° 42.339:</strong> Aplicación de la alícuota del IGTF sobre pagos en divisas.
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* 8. PESTAÑA: ACTUALIZACIONES DE SOFTWARE */}
+      {activeTab === 'updates' && <SoftwareUpdatesSection />}
 
       {/* Modal de Licenciamiento y HWID */}
       <LicenseActivationModal
@@ -2104,5 +1922,169 @@ function DigitalScaleSettingsSection() {
     </div>
   );
 }
+
+function SoftwareUpdatesSection() {
+  const [currentVer] = useState(CURRENT_VERSION);
+  const [config, setConfig] = useState(updateService.getConfig());
+  const [isChecking, setIsChecking] = useState(false);
+  const [statusResult, setStatusResult] = useState<{
+    hasUpdate?: boolean;
+    manifest?: any;
+    msg?: string;
+    isError?: boolean;
+  } | null>(null);
+
+  const handleCheckNow = async () => {
+    setIsChecking(true);
+    setStatusResult(null);
+    const res = await updateService.checkForUpdates();
+    setIsChecking(false);
+
+    if (res.hasUpdate && res.latestManifest) {
+      setStatusResult({
+        hasUpdate: true,
+        manifest: res.latestManifest,
+        msg: `¡Nueva versión v${res.latestManifest.version} disponible! Publicada el ${res.latestManifest.releaseDate}.`,
+      });
+      window.dispatchEvent(new CustomEvent('venematic:check_updates'));
+    } else {
+      setStatusResult({
+        hasUpdate: false,
+        msg: res.error || `El sistema se encuentra actualizado a la última versión disponible (v${CURRENT_VERSION}).`,
+        isError: !!res.error,
+      });
+    }
+  };
+
+  const handleToggleAutoCheck = (enabled: boolean) => {
+    const updated = { ...config, autoCheckOnStartup: enabled };
+    setConfig(updated);
+    updateService.saveConfig({ autoCheckOnStartup: enabled });
+  };
+
+  const handleSaveManifestUrl = (url: string) => {
+    const updated = { ...config, updateManifestUrl: url };
+    setConfig(updated);
+    updateService.saveConfig({ updateManifestUrl: url });
+  };
+
+  return (
+    <div className="space-y-4 animate-in fade-in duration-150">
+      <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-300 dark:border-slate-700 shadow-xs p-5 space-y-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-700 pb-4">
+          <div className="flex items-start gap-3">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-600 via-teal-600 to-indigo-700 flex items-center justify-center text-white shadow-md">
+              <Download className="w-6 h-6" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="font-black text-sm text-slate-900 dark:text-white">
+                  Centro de Actualizaciones de Software
+                </h3>
+                <span className="bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 text-[11px] font-black px-2.5 py-0.5 rounded-full border border-emerald-300 dark:border-emerald-700">
+                  v{currentVer}
+                </span>
+              </div>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                Gestiona la recepción de actualizaciones automáticas en línea o la instalación manual acumulativa.
+              </p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleCheckNow}
+            disabled={isChecking}
+            className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs flex items-center justify-center gap-2 shadow-sm transition-all active:scale-95 cursor-pointer disabled:opacity-50 shrink-0"
+          >
+            <RefreshCw className={`w-4 h-4 ${isChecking ? 'animate-spin' : ''}`} />
+            <span>{isChecking ? 'Verificando...' : 'Buscar Actualizaciones Ahora'}</span>
+          </button>
+        </div>
+
+        {statusResult && (
+          <div
+            className={`p-3 rounded-xl border text-xs font-bold flex items-center gap-2 ${
+              statusResult.isError
+                ? 'bg-rose-50 dark:bg-rose-950/40 text-rose-800 dark:text-rose-300 border-rose-200 dark:border-rose-800'
+                : statusResult.hasUpdate
+                ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border-emerald-300 dark:border-emerald-700'
+                : 'bg-sky-50 dark:bg-sky-950/40 text-sky-800 dark:text-sky-300 border-sky-200 dark:border-sky-800'
+            }`}
+          >
+            {statusResult.hasUpdate ? (
+              <Sparkles className="w-4 h-4 text-emerald-600 shrink-0" />
+            ) : statusResult.isError ? (
+              <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+            ) : (
+              <CheckCircle2 className="w-4 h-4 text-sky-600 shrink-0" />
+            )}
+            <span>{statusResult.msg}</span>
+          </div>
+        )}
+
+        <div className="space-y-4">
+          <h4 className="text-xs font-black uppercase tracking-wider text-slate-600 dark:text-slate-400">
+            Preferencias de Actualización
+          </h4>
+
+          <div className="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-700">
+            <div>
+              <span className="font-bold text-xs text-slate-800 dark:text-slate-200 block">
+                Comprobación Automática en Línea al Iniciar
+              </span>
+              <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                Al abrir el sistema, verifica discretamente en segundo plano si existe una versión superior y te notifica.
+              </span>
+            </div>
+            <input
+              type="checkbox"
+              checked={config.autoCheckOnStartup}
+              onChange={(e) => handleToggleAutoCheck(e.target.checked)}
+              className="w-5 h-5 rounded text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+              URL del Servidor de Manifiesto de Versiones (version.json):
+            </label>
+            <input
+              type="text"
+              value={config.updateManifestUrl}
+              onChange={(e) => handleSaveManifestUrl(e.target.value)}
+              placeholder="https://tudominio.com/releases/version.json"
+              className="w-full h-10 px-3 border border-slate-300 dark:border-slate-600 rounded-lg text-xs font-mono text-slate-900 dark:text-white bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            />
+            <p className="text-[11px] text-slate-400">
+              Punto de enlace remoto donde el desarrollador publica los lanzamientos y notas de versión.
+            </p>
+          </div>
+        </div>
+
+        <div className="p-4 bg-emerald-50 dark:bg-emerald-950/30 rounded-xl border border-emerald-200 dark:border-emerald-800 space-y-2 text-xs text-emerald-900 dark:text-emerald-200">
+          <h5 className="font-black uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+            <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+            <span>Garantía de Privacidad y Blindaje de Datos Locales</span>
+          </h5>
+          <p className="text-[11.5px] leading-relaxed">
+            Conforme a nuestras Políticas de Privacidad, la comprobación de actualizaciones jamás transmite datos de inventario, ventas, clientes ni cifras contables. La base de datos local residente en su equipo está blindada y nunca se sobrescribe ni se resetea al aplicar parches o versiones nuevas.
+          </p>
+        </div>
+
+        <div className="p-4 bg-amber-50 dark:bg-amber-950/30 rounded-xl border border-amber-200 dark:border-amber-800 space-y-2 text-xs text-amber-900 dark:text-amber-200">
+          <h5 className="font-black uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+            <span>📦</span>
+            <span>Instalación Manual Acumulativa (Clientes Fuera de Línea)</span>
+          </h5>
+          <p className="text-[11.5px] leading-relaxed">
+            Para negocios sin acceso a internet, puedes entregarles el nuevo instalador (<b>.exe</b> para PC o <b>.apk</b> para móviles Android). Al ejecutarlo sobre la versión existente, el sistema se actualiza automáticamente preservando intactos todos los productos, ventas históricas y turnos de caja almacenados localmente.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 
 

@@ -15,7 +15,7 @@ export interface LocalProduct {
   costPerBox?: number;
   packageUnits?: number;
   profitMarginPercent?: number;
-  isTaxExempt?: boolean; // Verdadero si el artículo está exento de IVA (Tasa 0% SENIAT)
+  isTaxExempt?: boolean;
 }
 
 export interface SaleItem {
@@ -26,7 +26,7 @@ export interface SaleItem {
   priceUSD: number;
   totalUSD: number;
   taxRate?: number;
-  isTaxExempt?: boolean; // Verdadero si el artículo vendido está exento de IVA
+  isTaxExempt?: boolean;
 }
 
 export interface SalePayment {
@@ -197,6 +197,16 @@ export class VenematicDesktopDB extends Dexie {
     this.version(3).stores({
       products: '++id, &barcode, name, category, stock, updatedAt',
       sales: '++id, &receiptNumber, timestamp, status, cashierName',
+      customers: '++id, &docId, name, phone',
+      cashShifts: '++id, openedAt, status, cashierName',
+      settings: '&key',
+      inventoryMovements: '++id, productId, barcode, type, reason, timestamp',
+      customerCreditPayments: '++id, customerDoc, timestamp, method',
+      cashMovements: '++id, shiftId, type, timestamp',
+    });
+    this.version(4).stores({
+      products: '++id, &barcode, name, category, stock, updatedAt',
+      sales: '++id, &receiptNumber, timestamp, status, cashierName, customerDoc, [status+timestamp]',
       customers: '++id, &docId, name, phone',
       cashShifts: '++id, openedAt, status, cashierName',
       settings: '&key',

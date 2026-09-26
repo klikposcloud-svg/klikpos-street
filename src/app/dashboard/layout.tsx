@@ -9,6 +9,7 @@ import { useAuth } from '@/context/AuthContext';
 import LoginModal from '@/components/LoginModal';
 import AdminPinModal from '@/components/AdminPinModal';
 import LockScreenModal from '@/components/LockScreenModal';
+import AutoUpdateModal from '@/components/AutoUpdateModal';
 import { LogOut, ShieldCheck, User, Lock, RefreshCw, CheckCircle2, Sun, Moon, Sparkles, Clock, Cloud, Smartphone, Users, X, QrCode } from 'lucide-react';
 import { STANDARD_RUBROS, StandardRubroId } from '@/lib/utils/business-rubros';
 import { applyBrandingToDOM, applyTheme, getCurrentTheme, ThemeMode } from '@/lib/theme';
@@ -758,12 +759,8 @@ export default function DesktopDashboardLayout({
 
       {/* Modal de Inicio de Sesión Obligatorio */}
       <LoginModal
-        isOpen={!user && !isLoginDismissed}
+        isOpen={!user}
         onSuccess={() => setIsLoginDismissed(true)}
-        onClose={() => {
-          setIsLoginDismissed(true);
-          if (!user) switchToRole('admin');
-        }}
       />
 
       {/* Modal de Bloqueo Rápido de Pantalla */}
@@ -774,6 +771,9 @@ export default function DesktopDashboardLayout({
 
       {/* Modal de Confirmación de PIN de Administrador */}
       <AdminPinModal />
+
+      {/* Modal de Auto-Actualizaciones en Línea y Notificación */}
+      <AutoUpdateModal />
 
       {/* Modal Rápido de Cambio de Tasa BCV */}
       {showBcvModal && (

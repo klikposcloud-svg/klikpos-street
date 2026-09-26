@@ -7,7 +7,7 @@ export async function removeBackgroundToWhiteCanvas(
   imageSource: string,
   tolerance: number = 38
 ): Promise<string> {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     const img = new Image();
     img.crossOrigin = 'anonymous';
 

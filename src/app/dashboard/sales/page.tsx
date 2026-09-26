@@ -53,10 +53,14 @@ export default function CashierShiftSalesPage() {
   const loadSales = async () => {
     setIsLoading(true);
     try {
-      const all = await db.sales.orderBy('id').reverse().toArray();
       const todayStr = new Date().toISOString().slice(0, 10);
-      const todaySales = all.filter((s) => s.timestamp && s.timestamp.startsWith(todayStr));
-      setSales(todaySales.length > 0 ? todaySales : all);
+      const todaySales = await db.sales.where('timestamp').startsWith(todayStr).reverse().sortBy('id');
+      if (todaySales.length > 0) {
+        setSales(todaySales);
+      } else {
+        const recent = await db.sales.orderBy('id').reverse().limit(100).toArray();
+        setSales(recent);
+      }
 
       const rateSetting = await db.settings.get('bcv_rate');
       if (rateSetting) setBcvRate(rateSetting.value);

@@ -103,61 +103,95 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const isPassValidForAdmin = (p: string) => {
     const clean = (p || '').trim();
-    return (
-      clean === adminPassword ||
-      clean === '*2026' ||
-      clean === '2026' ||
-      clean === 'admin' ||
-      clean === 'admin123' ||
-      clean === '1234'
-    );
+    if (!clean) return false;
+    return clean === adminPassword;
   };
 
   const login = (username: string, pass: string) => {
     const cleanUser = (username || '').trim().toLowerCase();
     const cleanPass = (pass || '').trim();
 
-    // 1. Administrador General
-    if (cleanUser === 'admin' && (isPassValidForAdmin(cleanPass) || cleanPass === '')) {
-      const authData: AuthUser = {
-        username: 'admin',
-        name: 'Administrador General',
-        role: 'admin',
+    if (!cleanPass) {
+      return {
+        success: false,
+        error: 'Por favor ingrese la contraseña o PIN de acceso.',
       };
-      setUser(authData);
-      try {
-        localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(authData));
-      } catch {}
-      return { success: true };
+    }
+
+    // 1. Administrador General
+    if (cleanUser === 'admin' || cleanUser === 'administrador') {
+      if (isPassValidForAdmin(cleanPass)) {
+        const authData: AuthUser = {
+          username: 'admin',
+          name: 'Administrador General',
+          role: 'admin',
+        };
+        setUser(authData);
+        try {
+          localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(authData));
+        } catch {}
+        return { success: true };
+      }
+      return {
+        success: false,
+        error: 'Contraseña de Administrador incorrecta.',
+      };
     }
 
     // 2. Cajero dinámico desde la lista de cajeros registrados
     const matched = cashiers.find(
-      (c) => c.username.toLowerCase() === cleanUser && (c.pin === cleanPass || cleanPass === '1234' || cleanPass === '')
+      (c) => c.username.toLowerCase() === cleanUser
     );
 
-    if (matched || cleanUser === 'caja' || cleanUser === 'cajero') {
-      const authData: AuthUser = {
-        username: matched ? matched.username : 'caja',
-        name: matched ? matched.name : 'Cajero Principal',
-        role: 'cajero',
+    if (matched) {
+      if (matched.pin === cleanPass) {
+        const authData: AuthUser = {
+          username: matched.username,
+          name: matched.name,
+          role: 'cajero',
+        };
+        setUser(authData);
+        try {
+          localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(authData));
+        } catch {}
+        return { success: true };
+      }
+      return {
+        success: false,
+        error: `PIN incorrecto para el cajero "${matched.name}".`,
       };
-      setUser(authData);
-      try {
-        localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(authData));
-      } catch {}
-      return { success: true };
+    }
+
+    // Si ingresó como 'caja' genérico, validar contra cualquiera de los cajeros registrados
+    if (cleanUser === 'caja' || cleanUser === 'cajero') {
+      const pinMatch = cashiers.find((c) => c.pin === cleanPass);
+      if (pinMatch) {
+        const authData: AuthUser = {
+          username: pinMatch.username,
+          name: pinMatch.name,
+          role: 'cajero',
+        };
+        setUser(authData);
+        try {
+          localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(authData));
+        } catch {}
+        return { success: true };
+      }
+      return {
+        success: false,
+        error: 'PIN de cajero incorrecto.',
+      };
     }
 
     return {
       success: false,
-      error: 'Usuario o contraseña incorrectos. Intente nuevamente.',
+      error: 'Usuario o credenciales no encontradas.',
     };
   };
 
   const switchToRole = (role: UserRole, pass?: string): boolean => {
     if (role === 'admin') {
-      if (pass !== undefined && pass !== '' && !isPassValidForAdmin(pass)) {
+      if (!pass || !isPassValidForAdmin(pass)) {
         return false;
       }
       const authData: AuthUser = {
@@ -171,9 +205,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } catch {}
       return true;
     } else {
+      const activeCashier = cashiers[0] || DEFAULT_CASHIERS[0];
       const authData: AuthUser = {
-        username: 'caja',
-        name: 'Cajero Principal',
+        username: activeCashier.username,
+        name: activeCashier.name,
         role: 'cajero',
       };
       setUser(authData);

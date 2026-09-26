@@ -9,6 +9,7 @@ import { useAuth } from '@/context/AuthContext';
 import LoginModal from '@/components/LoginModal';
 import AdminPinModal from '@/components/AdminPinModal';
 import LockScreenModal from '@/components/LockScreenModal';
+import AutoUpdateModal from '@/components/AutoUpdateModal';
 import { LogOut, ShieldCheck, User, Lock, RefreshCw, CheckCircle2, Sun, Moon, Sparkles, Clock, Cloud, Smartphone, Users, X, QrCode } from 'lucide-react';
 import { STANDARD_RUBROS, StandardRubroId } from '@/lib/utils/business-rubros';
 import { applyBrandingToDOM, applyTheme, getCurrentTheme, ThemeMode } from '@/lib/theme';
@@ -161,7 +162,7 @@ export default function DesktopDashboardLayout({
       const fallbackUrl = typeof window !== 'undefined' ? `${window.location.origin}/scanner?session=caja-1` : '';
       setMobileScannerUrl(fallbackUrl);
       if (fallbackUrl) {
-        QRCode.toDataURL(fallbackUrl, { width: 260, margin: 1 }).then(setMobileQrUrl).catch(() => { });
+        QRCode.toDataURL(fallbackUrl, { width: 260, margin: 1 }).then(setMobileQrUrl).catch(() => {});
       }
     } finally {
       setIsGeneratingQr(false);
@@ -184,7 +185,7 @@ export default function DesktopDashboardLayout({
         industrialBg: industrialBg,
         customBgColor: customBg,
       }, t === 'light' ? 'light' : 'dark');
-    } catch { }
+    } catch {}
 
     const handleThemeChanged = (e: any) => {
       if (e.detail) {
@@ -212,7 +213,7 @@ export default function DesktopDashboardLayout({
     const nextTheme: ThemeMode = currentTheme === 'light' ? 'dark' : 'light';
     setCurrentTheme(nextTheme);
     applyTheme(nextTheme);
-    db.settings.put({ key: 'app_theme', value: nextTheme }).catch(() => { });
+    db.settings.put({ key: 'app_theme', value: nextTheme }).catch(() => {});
   };
 
   // Escuchar atajo global de bloqueo rápido de pantalla (Ctrl+L) y eventos
@@ -244,9 +245,9 @@ export default function DesktopDashboardLayout({
           const data = JSON.parse(event.data);
           setPhoneConnected(Boolean(data.connected));
           if (data.deviceName) setPhoneDeviceName(data.deviceName);
-        } catch { }
+        } catch {}
       });
-    } catch { }
+    } catch {}
 
     // Polling ligero de respaldo cada 5s
     const checkStatus = () => {
@@ -256,7 +257,7 @@ export default function DesktopDashboardLayout({
           setPhoneConnected(Boolean(data.connected));
           if (data.deviceName) setPhoneDeviceName(data.deviceName);
         })
-        .catch(() => { });
+        .catch(() => {});
     };
 
     checkStatus();
@@ -272,7 +273,7 @@ export default function DesktopDashboardLayout({
             method: 'DELETE',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ receiptNumber: sale.receiptNumber }),
-          }).catch(() => { });
+          }).catch(() => {});
           return;
         }
 
@@ -319,7 +320,7 @@ export default function DesktopDashboardLayout({
           method: 'DELETE',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ receiptNumber: sale.receiptNumber }),
-        }).catch(() => { });
+        }).catch(() => {});
 
         window.dispatchEvent(new CustomEvent('venematic:mobile_sale_saved', { detail: saleToSave }));
       } catch (err) {
@@ -332,7 +333,7 @@ export default function DesktopDashboardLayout({
         try {
           const d = JSON.parse(e.data);
           if (d.sale) processIncomingSale(d.sale);
-        } catch { }
+        } catch {}
       });
     }
 
@@ -347,7 +348,7 @@ export default function DesktopDashboardLayout({
             }
           }
         })
-        .catch(() => { });
+        .catch(() => {});
     };
     checkPending();
     const pendingTimer = setInterval(checkPending, 4000);
@@ -376,7 +377,7 @@ export default function DesktopDashboardLayout({
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ bcvRate: data.rate }),
-            }).catch(() => { });
+            }).catch(() => {});
           }
         }
       } catch (err) {
@@ -494,7 +495,7 @@ export default function DesktopDashboardLayout({
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ bcvRate: data.rate }),
-          }).catch(() => { });
+          }).catch(() => {});
           setBcvSyncMessage(`✓ Tasa BCV Oficial obtenida en vivo: Bs. ${data.rate.toFixed(2)} (${data.source || 'Scraping'})`);
         } else {
           setBcvSyncMessage('No se pudo obtener la tasa en vivo. Verifica conexión.');
@@ -519,12 +520,12 @@ export default function DesktopDashboardLayout({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ rate: parsed }),
-      }).catch(() => { });
+      }).catch(() => {});
       fetch('/api/scanner/inventory', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ bcvRate: parsed }),
-      }).catch(() => { });
+      }).catch(() => {});
     }
   };
 
@@ -575,10 +576,11 @@ export default function DesktopDashboardLayout({
           <button
             type="button"
             onClick={handleOpenMobileModal}
-            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full border text-xs font-bold select-none cursor-pointer transition-colors shadow-2xs ${phoneConnected
+            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full border text-xs font-bold select-none cursor-pointer transition-colors shadow-2xs ${
+              phoneConnected
                 ? 'bg-emerald-50 text-emerald-800 border-emerald-300 hover:bg-emerald-100 font-black dark:bg-emerald-950 dark:text-emerald-300 dark:border-emerald-800'
                 : 'bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-white border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700'
-              }`}
+            }`}
             title="Clic para vincular celular como escáner inalámbrico con código QR"
           >
             <Smartphone className={`w-3.5 h-3.5 ${phoneConnected ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-600 dark:text-slate-200'}`} />
@@ -592,12 +594,13 @@ export default function DesktopDashboardLayout({
               onClick={() => {
                 setCurrentTheme('light');
                 applyTheme('light');
-                db.settings.put({ key: 'app_theme', value: 'light' }).catch(() => { });
+                db.settings.put({ key: 'app_theme', value: 'light' }).catch(() => {});
               }}
-              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer ${currentTheme === 'light'
+              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer ${
+                currentTheme === 'light'
                   ? 'bg-white text-slate-900 shadow-xs border border-slate-200/90'
                   : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
-                }`}
+              }`}
               title="Activar Modo Blanco Profesional"
             >
               <Sun className={`w-3.5 h-3.5 ${currentTheme === 'light' ? 'text-amber-500' : 'text-slate-400'}`} />
@@ -608,12 +611,13 @@ export default function DesktopDashboardLayout({
               onClick={() => {
                 setCurrentTheme('dark');
                 applyTheme('dark');
-                db.settings.put({ key: 'app_theme', value: 'dark' }).catch(() => { });
+                db.settings.put({ key: 'app_theme', value: 'dark' }).catch(() => {});
               }}
-              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer ${currentTheme === 'dark'
+              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer ${
+                currentTheme === 'dark'
                   ? 'bg-[#121c29] text-amber-300 shadow-xs border border-slate-700'
                   : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
-                }`}
+              }`}
               title="Activar Modo Oscuro"
             >
               <Moon className={`w-3.5 h-3.5 ${currentTheme === 'dark' ? 'text-amber-400' : 'text-slate-400'}`} />
@@ -673,10 +677,11 @@ export default function DesktopDashboardLayout({
                     }
                     router.push(item.href);
                   }}
-                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs transition-colors select-none cursor-pointer text-left ${isActive
+                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs transition-colors select-none cursor-pointer text-left ${
+                    isActive
                       ? 'nav-item-active font-black border shadow-xs'
                       : 'text-slate-800 hover:text-slate-950 dark:text-slate-100 hover:dark:text-white hover:bg-slate-100 dark:hover:bg-slate-800 font-bold'
-                    }`}
+                  }`}
                 >
                   <div className="flex items-center gap-3">
                     <span className={isActive ? '' : 'text-slate-600 dark:text-slate-300'}>
@@ -754,12 +759,8 @@ export default function DesktopDashboardLayout({
 
       {/* Modal de Inicio de Sesión Obligatorio */}
       <LoginModal
-        isOpen={!user && !isLoginDismissed}
+        isOpen={!user}
         onSuccess={() => setIsLoginDismissed(true)}
-        onClose={() => {
-          setIsLoginDismissed(true);
-          if (!user) switchToRole('admin');
-        }}
       />
 
       {/* Modal de Bloqueo Rápido de Pantalla */}
@@ -770,6 +771,9 @@ export default function DesktopDashboardLayout({
 
       {/* Modal de Confirmación de PIN de Administrador */}
       <AdminPinModal />
+
+      {/* Modal de Auto-Actualizaciones en Línea y Notificación */}
+      <AutoUpdateModal />
 
       {/* Modal Rápido de Cambio de Tasa BCV */}
       {showBcvModal && (
@@ -904,14 +908,16 @@ export default function DesktopDashboardLayout({
 
               {/* Estado de Conexión del Teléfono */}
               <div
-                className={`px-3.5 py-1.5 rounded-full text-xs font-bold border flex items-center gap-2 ${phoneConnected
+                className={`px-3.5 py-1.5 rounded-full text-xs font-bold border flex items-center gap-2 ${
+                  phoneConnected
                     ? 'bg-emerald-50 text-emerald-800 border-emerald-300 shadow-2xs'
                     : 'bg-amber-50 text-amber-800 border-amber-300'
-                  }`}
+                }`}
               >
                 <span
-                  className={`w-2 h-2 rounded-full ${phoneConnected ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'
-                    }`}
+                  className={`w-2 h-2 rounded-full ${
+                    phoneConnected ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'
+                  }`}
                 />
                 <span>
                   {phoneConnected

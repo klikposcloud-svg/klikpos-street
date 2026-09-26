@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { Lock, User, KeyRound, ShieldCheck, ArrowRight, AlertCircle, ShoppingBag, Sparkles } from 'lucide-react';
+import { Lock, User, KeyRound, ShieldCheck, ArrowRight, AlertCircle, ShoppingBag, Eye, EyeOff } from 'lucide-react';
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -11,217 +11,202 @@ interface LoginModalProps {
 }
 
 export default function LoginModal({ isOpen, onSuccess, onClose }: LoginModalProps) {
-  const { user, login, switchToRole } = useAuth();
-  const [username, setUsername] = useState<'caja' | 'admin'>('admin');
-  const [password, setPassword] = useState('*2026');
+  const { user, login, cashiers } = useAuth();
+  const [selectedRole, setSelectedRole] = useState<'admin' | 'cajero'>('cajero');
+  const [selectedCashierUser, setSelectedCashierUser] = useState<string>('caja');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [forceClosed, setForceClosed] = useState(false);
 
-  // Atajo de teclado Escape para cerrar/omitir inmediatamente
-  React.useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setForceClosed(true);
-        if (onClose) onClose();
-        if (!user) switchToRole('admin');
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [onClose, user, switchToRole]);
+  // Sincronizar cajero por defecto si hay cajeros registrados
+  useEffect(() => {
+    if (cashiers && cashiers.length > 0) {
+      setSelectedCashierUser(cashiers[0].username);
+    }
+  }, [cashiers]);
 
-  if (!isOpen || forceClosed) return null;
+  // Si ya hay un usuario autenticado y el modal no está explícitamente forzado, no renderizar
+  if (!isOpen) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setError(null);
+
+    const passToVerify = password.trim();
+    if (!passToVerify) {
+      setError(selectedRole === 'admin' ? 'Ingrese la contraseña de Administrador.' : 'Ingrese el PIN de acceso del Cajero.');
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      const res = login(username, password);
+      const usernameToAuth = selectedRole === 'admin' ? 'admin' : selectedCashierUser;
+      const res = login(usernameToAuth, passToVerify);
       setIsLoading(false);
+
       if (res.success) {
         setPassword('');
-        setForceClosed(true);
+        setError(null);
         if (onSuccess) onSuccess();
         if (typeof window !== 'undefined') {
           window.dispatchEvent(new CustomEvent('venematic:auth_success'));
         }
       } else {
-        setError(res.error || 'Credenciales inválidas');
-      }
-    } catch (err: any) {
-      setIsLoading(false);
-      setError('Error interno al autenticar.');
-    }
-  };
-
-  const handleSelectRole = (role: 'caja' | 'admin') => {
-    setUsername(role);
-    setPassword(role === 'admin' ? '*2026' : '1234');
-    setError(null);
-  };
-
-  const handleDirectLogin = (role: 'caja' | 'admin') => {
-    setError(null);
-    setIsLoading(true);
-    try {
-      const ok = switchToRole(role === 'admin' ? 'admin' : 'cajero');
-      setIsLoading(false);
-      if (ok) {
-        setForceClosed(true);
-        if (onSuccess) onSuccess();
-        if (typeof window !== 'undefined') {
-          window.dispatchEvent(new CustomEvent('venematic:auth_success'));
-        }
+        setError(res.error || 'Credenciales incorrectas. Verifique e intente nuevamente.');
       }
     } catch {
       setIsLoading(false);
+      setError('Ocurrió un error al verificar las credenciales.');
     }
   };
 
+  const handleRoleChange = (role: 'admin' | 'cajero') => {
+    setSelectedRole(role);
+    setPassword('');
+    setError(null);
+  };
+
   return (
-    <div
-      onClick={(e) => {
-        if (e.target === e.currentTarget) {
-          setForceClosed(true);
-          if (onClose) onClose();
-          if (!user) switchToRole('admin');
-        }
-      }}
-      className="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center p-4 select-none cursor-pointer"
-    >
+    <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 select-none">
       <div
         onClick={(e) => e.stopPropagation()}
-        className="bg-white rounded-3xl shadow-2xl border border-slate-200 w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200 cursor-default"
+        className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200"
       >
         {/* Cabecera con Marca */}
         <div className="bg-gradient-to-r from-sky-900 via-indigo-950 to-slate-950 p-6 text-center relative border-b border-indigo-900/50">
-          <button
-            type="button"
-            onClick={() => {
-              setForceClosed(true);
-              if (onClose) onClose();
-              if (!user) switchToRole('admin');
-            }}
-            className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/10 hover:bg-white/25 text-white flex items-center justify-center text-sm font-black transition-all cursor-pointer shadow-sm"
-            title="Cerrar ventana de acceso"
-          >
-            ✕
-          </button>
-          <div className="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center mx-auto mb-3 shadow-inner">
-            <Lock className="w-7 h-7 text-white" />
+          <div className="w-13 h-13 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center mx-auto mb-3 shadow-inner">
+            <Lock className="w-6 h-6 text-white" />
           </div>
-          <h2 className="text-xl font-black tracking-tight !text-white" style={{ color: '#ffffff' }}>
-            Acceso al Sistema Venematic
+          <h2 className="text-xl font-black tracking-tight text-white">
+            Acceso a Venematic POS
           </h2>
-          <p className="text-xs font-semibold !text-sky-200 mt-1" style={{ color: '#bae6fd' }}>
-            Selecciona tu perfil de usuario para iniciar operaciones
+          <p className="text-xs font-medium text-sky-200/90 mt-1">
+            Identifíquese con sus credenciales de seguridad para operar
           </p>
         </div>
 
-        {/* Selector de Rol Rápido */}
-        <div className="p-6 space-y-4">
-          <div className="grid grid-cols-2 gap-3">
-            {/* Tarjeta Administrador */}
-            <button
-              type="button"
-              onClick={() => handleSelectRole('admin')}
-              className={`p-3.5 rounded-2xl border-2 flex flex-col items-center gap-1.5 transition-all text-center relative ${
-                username === 'admin'
-                  ? 'border-indigo-600 bg-indigo-50/90 text-indigo-950 shadow-md ring-2 ring-indigo-500/20'
-                  : 'border-slate-200 hover:border-slate-300 text-slate-600 bg-white'
-              }`}
-            >
-              {username === 'admin' && (
-                <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-indigo-600" />
-              )}
-              <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${
-                username === 'admin' ? 'bg-indigo-600 text-white shadow-sm' : 'bg-slate-100 text-slate-500'
-              }`}>
-                <ShieldCheck className="w-5 h-5" />
-              </div>
-              <span className="font-extrabold text-xs text-slate-900">Administrador</span>
-              <span className="text-[10px] font-mono text-indigo-600 font-bold bg-indigo-100/60 px-1.5 py-0.5 rounded">
-                Clave: admin o *2026
-              </span>
-            </button>
+        <div className="p-6 space-y-5">
+          {/* Selector de Perfil Claro y Profesional */}
+          <div>
+            <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
+              Seleccione Tipo de Acceso:
+            </label>
+            <div className="grid grid-cols-2 gap-3">
+              {/* Tarjeta Cajero */}
+              <button
+                type="button"
+                onClick={() => handleRoleChange('cajero')}
+                className={`p-3.5 rounded-2xl border-2 flex flex-col items-center gap-1.5 transition-all text-center relative cursor-pointer ${
+                  selectedRole === 'cajero'
+                    ? 'border-sky-600 bg-sky-50 dark:bg-sky-950/40 text-sky-950 dark:text-sky-200 shadow-sm ring-2 ring-sky-500/20'
+                    : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 text-slate-600 dark:text-slate-400 bg-white dark:bg-slate-800/50'
+                }`}
+              >
+                {selectedRole === 'cajero' && (
+                  <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-sky-600" />
+                )}
+                <div
+                  className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${
+                    selectedRole === 'cajero'
+                      ? 'bg-sky-600 text-white shadow-sm'
+                      : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400'
+                  }`}
+                >
+                  <ShoppingBag className="w-5 h-5" />
+                </div>
+                <span className="font-extrabold text-xs text-slate-900 dark:text-white">Caja / Ventas</span>
+                <span className="text-[10.5px] text-slate-500 dark:text-slate-400 font-medium">Facturación rápida</span>
+              </button>
 
-            {/* Tarjeta Cajero */}
-            <button
-              type="button"
-              onClick={() => handleSelectRole('caja')}
-              className={`p-3.5 rounded-2xl border-2 flex flex-col items-center gap-1.5 transition-all text-center relative ${
-                username === 'caja'
-                  ? 'border-sky-600 bg-sky-50/90 text-sky-950 shadow-md ring-2 ring-sky-500/20'
-                  : 'border-slate-200 hover:border-slate-300 text-slate-600 bg-white'
-              }`}
-            >
-              {username === 'caja' && (
-                <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-sky-600" />
-              )}
-              <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${
-                username === 'caja' ? 'bg-sky-600 text-white shadow-sm' : 'bg-slate-100 text-slate-500'
-              }`}>
-                <ShoppingBag className="w-5 h-5" />
-              </div>
-              <span className="font-extrabold text-xs text-slate-900">Cajero / Ventas</span>
-              <span className="text-[10px] font-mono text-sky-600 font-bold bg-sky-100/60 px-1.5 py-0.5 rounded">
-                PIN: 1234
-              </span>
-            </button>
+              {/* Tarjeta Administrador */}
+              <button
+                type="button"
+                onClick={() => handleRoleChange('admin')}
+                className={`p-3.5 rounded-2xl border-2 flex flex-col items-center gap-1.5 transition-all text-center relative cursor-pointer ${
+                  selectedRole === 'admin'
+                    ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-950 dark:text-indigo-200 shadow-sm ring-2 ring-indigo-500/20'
+                    : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 text-slate-600 dark:text-slate-400 bg-white dark:bg-slate-800/50'
+                }`}
+              >
+                {selectedRole === 'admin' && (
+                  <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-indigo-600" />
+                )}
+                <div
+                  className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${
+                    selectedRole === 'admin'
+                      ? 'bg-indigo-600 text-white shadow-sm'
+                      : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400'
+                  }`}
+                >
+                  <ShieldCheck className="w-5 h-5" />
+                </div>
+                <span className="font-extrabold text-xs text-slate-900 dark:text-white">Administrador</span>
+                <span className="text-[10.5px] text-slate-500 dark:text-slate-400 font-medium">Ajustes y reportes</span>
+              </button>
+            </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4 pt-1">
-            {/* Input Usuario */}
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Si es Cajero y hay múltiples cajeros registrados, selector de usuario */}
+            {selectedRole === 'cajero' && (
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Cajero Asignado:
+                </label>
+                <div className="relative">
+                  <User className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <select
+                    value={selectedCashierUser}
+                    onChange={(e) => setSelectedCashierUser(e.target.value)}
+                    className="w-full pl-9 pr-3 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-800 dark:text-slate-100 outline-none focus:ring-2 focus:ring-sky-500 appearance-none cursor-pointer"
+                  >
+                    {cashiers && cashiers.length > 0 ? (
+                      cashiers.map((c) => (
+                        <option key={c.id} value={c.username}>
+                          {c.name} (@{c.username})
+                        </option>
+                      ))
+                    ) : (
+                      <option value="caja">Cajero Principal (@caja)</option>
+                    )}
+                  </select>
+                </div>
+              </div>
+            )}
+
+            {/* Input de Contraseña o PIN de Acceso */}
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">
-                Usuario Seleccionado:
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                {selectedRole === 'admin' ? 'Contraseña Maestra de Administrador:' : 'PIN de Seguridad del Cajero:'}
               </label>
               <div className="relative">
-                <User className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <KeyRound className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                 <input
-                  type="text"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value as any)}
-                  className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-800 outline-none focus:ring-2 focus:ring-indigo-500 font-mono"
-                  required
-                />
-              </div>
-            </div>
-
-            {/* Input Contraseña */}
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <label className="block text-xs font-bold text-slate-700">
-                  Contraseña / PIN de Acceso:
-                </label>
-                <button
-                  type="button"
-                  onClick={() => setPassword(username === 'admin' ? '*2026' : '1234')}
-                  className="text-[10px] font-bold text-indigo-600 hover:text-indigo-800 underline"
-                >
-                  Auto-llenar clave ({username === 'admin' ? '*2026' : '1234'})
-                </button>
-              </div>
-              <div className="relative">
-                <KeyRound className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                <input
-                  type="text"
+                  type={showPassword ? 'text' : 'password'}
                   autoFocus
-                  placeholder={username === 'admin' ? 'Clave: admin o *2026' : 'PIN: 1234'}
+                  placeholder={selectedRole === 'admin' ? 'Ingrese contraseña de administrador' : 'Ingrese PIN numérico (Ej: 1234)'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2.5 bg-white border border-slate-300 rounded-xl text-sm font-mono font-bold text-slate-900 outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full pl-9 pr-10 py-2.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-sm font-mono font-bold text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors cursor-pointer"
+                  title={showPassword ? 'Ocultar contraseña' : 'Ver contraseña'}
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
               </div>
             </div>
 
+            {/* Mensaje de Error */}
             {error && (
-              <div className="p-2.5 bg-rose-50 border border-rose-200 rounded-xl flex items-center gap-2 text-rose-700 text-xs font-medium animate-shake">
-                <AlertCircle className="w-4 h-4 shrink-0" />
+              <div className="p-2.5 bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-800 rounded-xl flex items-center gap-2 text-rose-700 dark:text-rose-300 text-xs font-medium animate-in fade-in duration-150">
+                <AlertCircle className="w-4 h-4 shrink-0 text-rose-500" />
                 <span>{error}</span>
               </div>
             )}
@@ -230,60 +215,24 @@ export default function LoginModal({ isOpen, onSuccess, onClose }: LoginModalPro
             <button
               type="submit"
               disabled={isLoading}
-              className={`w-full py-3 rounded-xl font-black text-xs text-white flex items-center justify-center gap-2 shadow-md transition-all active:scale-98 disabled:opacity-50 ${
-                username === 'admin'
+              className={`w-full py-3 rounded-xl font-black text-xs text-white flex items-center justify-center gap-2 shadow-md transition-all active:scale-[0.98] disabled:opacity-50 cursor-pointer ${
+                selectedRole === 'admin'
                   ? 'bg-indigo-700 hover:bg-indigo-800 shadow-indigo-600/20'
                   : 'bg-sky-700 hover:bg-sky-800 shadow-sky-600/20'
               }`}
             >
-              <span>{isLoading ? 'Verificando...' : `Entrar como ${username === 'admin' ? 'Administrador' : 'Cajero'}`}</span>
+              <span>{isLoading ? 'Verificando...' : `Iniciar Sesión como ${selectedRole === 'admin' ? 'Administrador' : 'Cajero'}`}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
-
-            {/* Botón de Acceso Directo 1-Clic */}
-            <div className="pt-2 border-t border-slate-100 flex items-center justify-center gap-2">
-              <button
-                type="button"
-                onClick={() => handleDirectLogin('admin')}
-                className="flex-1 py-2 px-3 rounded-lg bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-800 text-[11px] font-bold flex items-center justify-center gap-1 transition-all"
-              >
-                <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
-                <span>Entrar Directo como Admin</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => handleDirectLogin('caja')}
-                className="flex-1 py-2 px-3 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-bold flex items-center justify-center gap-1 transition-all"
-              >
-                <span>Entrar como Cajero</span>
-              </button>
-            </div>
           </form>
 
-          <div className="pt-1 text-center text-[11px] text-slate-500">
-            {username === 'admin' ? (
-              <span className="text-indigo-700 font-semibold">
-                🛡️ Modo Administrador: Acceso completo a Configuración, Edición, Balanzas y Reportes.
-              </span>
+          {/* Nota al pie informativa */}
+          <div className="pt-2 border-t border-slate-100 dark:border-slate-800 text-center text-[11px] text-slate-500 dark:text-slate-400">
+            {selectedRole === 'admin' ? (
+              <span>🔒 Puede actualizar su contraseña de administrador en <b>Ajustes &gt; Gestión de Cajeros</b>.</span>
             ) : (
-              <span className="text-slate-600">
-                🛒 Modo Cajero: Punto de Venta rápido, emisión de tickets y cobro.
-              </span>
+              <span>🔑 Puede registrar o editar los PINs de los cajeros en el panel de Administración.</span>
             )}
-          </div>
-
-          <div className="pt-2 border-t border-slate-100 text-center">
-            <button
-              type="button"
-              onClick={() => {
-                setForceClosed(true);
-                if (onClose) onClose();
-                if (!user) switchToRole('admin');
-              }}
-              className="text-xs font-bold text-slate-500 hover:text-indigo-600 underline cursor-pointer py-1"
-            >
-              Continuar al Punto de Venta (Omitir este paso) →
-            </button>
           </div>
         </div>
       </div>

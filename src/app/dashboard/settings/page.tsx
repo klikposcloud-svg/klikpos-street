@@ -7,13 +7,14 @@ import BrandingSettings from '@/components/BrandingSettings';
 import LicenseActivationModal from '@/components/LicenseActivationModal';
 import CloudSyncSettingsCard from '@/components/CloudSyncSettingsCard';
 import { useAuth } from '@/context/AuthContext';
-import { ShieldAlert, ShieldCheck, ArrowLeft, Scale, CheckCircle2, AlertCircle, RefreshCw, Zap, Banknote, Upload, Image as ImageIcon, Trash2, Printer, Palette, Store, Users } from 'lucide-react';
+import { ShieldAlert, ShieldCheck, ArrowLeft, Scale, CheckCircle2, AlertCircle, RefreshCw, Zap, Banknote, Upload, Image as ImageIcon, Trash2, Printer, Palette, Store, Users, Download, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import { scaleService, ScaleProtocol, WeightReading, PriceMultiplierBasis } from '@/lib/hardware/scale';
 import { getScaleBarcodeConfig, saveScaleBarcodeConfig, ScaleBarcodeConfig } from '@/lib/hardware/scale-barcode';
 import { pagoMovilMonitor, initiateGmailOAuth, extractOAuthTokenFromUrl, verifyGmailToken } from '@/lib/payments/pago-movil-gmail-monitor';
+import { updateService, CURRENT_VERSION } from '@/lib/services/update-service';
 
-export type SettingsTabId = 'branding' | 'business' | 'printer' | 'scale' | 'cashiers' | 'cloud_backup' | 'payments';
+export type SettingsTabId = 'branding' | 'business' | 'printer' | 'scale' | 'cashiers' | 'cloud_backup' | 'payments' | 'updates';
 
 export default function DesktopSettingsPage() {
   const { isAdmin, switchToRole } = useAuth();
@@ -336,6 +337,7 @@ export default function DesktopSettingsPage() {
     { id: 'cashiers', label: 'Cajeros y Seguridad', icon: Users },
     { id: 'cloud_backup', label: 'Nube y Respaldos', icon: RefreshCw },
     { id: 'payments', label: 'Pagos y Gmail', icon: Zap },
+    { id: 'updates', label: 'Actualizaciones', icon: Download },
   ];
 
   return (
@@ -1011,6 +1013,9 @@ export default function DesktopSettingsPage() {
           </div>
         </div>
       )}
+
+      {/* 8. PESTAÑA: ACTUALIZACIONES DE SOFTWARE */}
+      {activeTab === 'updates' && <SoftwareUpdatesSection />}
 
       {/* Modal de Licenciamiento y HWID */}
       <LicenseActivationModal
@@ -1917,5 +1922,169 @@ function DigitalScaleSettingsSection() {
     </div>
   );
 }
+
+function SoftwareUpdatesSection() {
+  const [currentVer] = useState(CURRENT_VERSION);
+  const [config, setConfig] = useState(updateService.getConfig());
+  const [isChecking, setIsChecking] = useState(false);
+  const [statusResult, setStatusResult] = useState<{
+    hasUpdate?: boolean;
+    manifest?: any;
+    msg?: string;
+    isError?: boolean;
+  } | null>(null);
+
+  const handleCheckNow = async () => {
+    setIsChecking(true);
+    setStatusResult(null);
+    const res = await updateService.checkForUpdates();
+    setIsChecking(false);
+
+    if (res.hasUpdate && res.latestManifest) {
+      setStatusResult({
+        hasUpdate: true,
+        manifest: res.latestManifest,
+        msg: `¡Nueva versión v${res.latestManifest.version} disponible! Publicada el ${res.latestManifest.releaseDate}.`,
+      });
+      window.dispatchEvent(new CustomEvent('venematic:check_updates'));
+    } else {
+      setStatusResult({
+        hasUpdate: false,
+        msg: res.error || `El sistema se encuentra actualizado a la última versión disponible (v${CURRENT_VERSION}).`,
+        isError: !!res.error,
+      });
+    }
+  };
+
+  const handleToggleAutoCheck = (enabled: boolean) => {
+    const updated = { ...config, autoCheckOnStartup: enabled };
+    setConfig(updated);
+    updateService.saveConfig({ autoCheckOnStartup: enabled });
+  };
+
+  const handleSaveManifestUrl = (url: string) => {
+    const updated = { ...config, updateManifestUrl: url };
+    setConfig(updated);
+    updateService.saveConfig({ updateManifestUrl: url });
+  };
+
+  return (
+    <div className="space-y-4 animate-in fade-in duration-150">
+      <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-300 dark:border-slate-700 shadow-xs p-5 space-y-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-700 pb-4">
+          <div className="flex items-start gap-3">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-600 via-teal-600 to-indigo-700 flex items-center justify-center text-white shadow-md">
+              <Download className="w-6 h-6" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="font-black text-sm text-slate-900 dark:text-white">
+                  Centro de Actualizaciones de Software
+                </h3>
+                <span className="bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 text-[11px] font-black px-2.5 py-0.5 rounded-full border border-emerald-300 dark:border-emerald-700">
+                  v{currentVer}
+                </span>
+              </div>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                Gestiona la recepción de actualizaciones automáticas en línea o la instalación manual acumulativa.
+              </p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleCheckNow}
+            disabled={isChecking}
+            className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs flex items-center justify-center gap-2 shadow-sm transition-all active:scale-95 cursor-pointer disabled:opacity-50 shrink-0"
+          >
+            <RefreshCw className={`w-4 h-4 ${isChecking ? 'animate-spin' : ''}`} />
+            <span>{isChecking ? 'Verificando...' : 'Buscar Actualizaciones Ahora'}</span>
+          </button>
+        </div>
+
+        {statusResult && (
+          <div
+            className={`p-3 rounded-xl border text-xs font-bold flex items-center gap-2 ${
+              statusResult.isError
+                ? 'bg-rose-50 dark:bg-rose-950/40 text-rose-800 dark:text-rose-300 border-rose-200 dark:border-rose-800'
+                : statusResult.hasUpdate
+                ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border-emerald-300 dark:border-emerald-700'
+                : 'bg-sky-50 dark:bg-sky-950/40 text-sky-800 dark:text-sky-300 border-sky-200 dark:border-sky-800'
+            }`}
+          >
+            {statusResult.hasUpdate ? (
+              <Sparkles className="w-4 h-4 text-emerald-600 shrink-0" />
+            ) : statusResult.isError ? (
+              <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+            ) : (
+              <CheckCircle2 className="w-4 h-4 text-sky-600 shrink-0" />
+            )}
+            <span>{statusResult.msg}</span>
+          </div>
+        )}
+
+        <div className="space-y-4">
+          <h4 className="text-xs font-black uppercase tracking-wider text-slate-600 dark:text-slate-400">
+            Preferencias de Actualización
+          </h4>
+
+          <div className="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-700">
+            <div>
+              <span className="font-bold text-xs text-slate-800 dark:text-slate-200 block">
+                Comprobación Automática en Línea al Iniciar
+              </span>
+              <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                Al abrir el sistema, verifica discretamente en segundo plano si existe una versión superior y te notifica.
+              </span>
+            </div>
+            <input
+              type="checkbox"
+              checked={config.autoCheckOnStartup}
+              onChange={(e) => handleToggleAutoCheck(e.target.checked)}
+              className="w-5 h-5 rounded text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+              URL del Servidor de Manifiesto de Versiones (version.json):
+            </label>
+            <input
+              type="text"
+              value={config.updateManifestUrl}
+              onChange={(e) => handleSaveManifestUrl(e.target.value)}
+              placeholder="https://tudominio.com/releases/version.json"
+              className="w-full h-10 px-3 border border-slate-300 dark:border-slate-600 rounded-lg text-xs font-mono text-slate-900 dark:text-white bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            />
+            <p className="text-[11px] text-slate-400">
+              Punto de enlace remoto donde el desarrollador publica los lanzamientos y notas de versión.
+            </p>
+          </div>
+        </div>
+
+        <div className="p-4 bg-emerald-50 dark:bg-emerald-950/30 rounded-xl border border-emerald-200 dark:border-emerald-800 space-y-2 text-xs text-emerald-900 dark:text-emerald-200">
+          <h5 className="font-black uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+            <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+            <span>Garantía de Privacidad y Blindaje de Datos Locales</span>
+          </h5>
+          <p className="text-[11.5px] leading-relaxed">
+            Conforme a nuestras Políticas de Privacidad, la comprobación de actualizaciones jamás transmite datos de inventario, ventas, clientes ni cifras contables. La base de datos local residente en su equipo está blindada y nunca se sobrescribe ni se resetea al aplicar parches o versiones nuevas.
+          </p>
+        </div>
+
+        <div className="p-4 bg-amber-50 dark:bg-amber-950/30 rounded-xl border border-amber-200 dark:border-amber-800 space-y-2 text-xs text-amber-900 dark:text-amber-200">
+          <h5 className="font-black uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+            <span>📦</span>
+            <span>Instalación Manual Acumulativa (Clientes Fuera de Línea)</span>
+          </h5>
+          <p className="text-[11.5px] leading-relaxed">
+            Para negocios sin acceso a internet, puedes entregarles el nuevo instalador (<b>.exe</b> para PC o <b>.apk</b> para móviles Android). Al ejecutarlo sobre la versión existente, el sistema se actualiza automáticamente preservando intactos todos los productos, ventas históricas y turnos de caja almacenados localmente.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 
 

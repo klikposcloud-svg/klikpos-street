@@ -53,10 +53,14 @@ export default function CashierShiftSalesPage() {
   const loadSales = async () => {
     setIsLoading(true);
     try {
-      const all = await db.sales.orderBy('id').reverse().toArray();
       const todayStr = new Date().toISOString().slice(0, 10);
-      const todaySales = all.filter((s) => s.timestamp && s.timestamp.startsWith(todayStr));
-      setSales(todaySales.length > 0 ? todaySales : all);
+      const todaySales = await db.sales.where('timestamp').startsWith(todayStr).reverse().sortBy('id');
+      if (todaySales.length > 0) {
+        setSales(todaySales);
+      } else {
+        const recent = await db.sales.orderBy('id').reverse().limit(100).toArray();
+        setSales(recent);
+      }
 
       const rateSetting = await db.settings.get('bcv_rate');
       if (rateSetting) setBcvRate(rateSetting.value);
@@ -183,7 +187,7 @@ export default function CashierShiftSalesPage() {
             <span className="text-[10px] font-black text-slate-500 uppercase tracking-wider block">
               Total Recaudado (Turno)
             </span>
-            <p className="font-mono font-black text-2xl text-slate-950 leading-tight tabular-numbers">
+            <p className="font-mono font-black text-2xl text-emerald-400 leading-tight tabular-numbers drop-shadow-[0_0_8px_rgba(52,211,153,0.7)]">
               {formatUSD(totalSalesUSD)}
             </p>
             <p className="font-mono font-black text-xs text-emerald-700 tabular-numbers">
@@ -201,7 +205,7 @@ export default function CashierShiftSalesPage() {
             <span className="text-[10px] font-black text-slate-500 uppercase tracking-wider block">
               Tickets Emitidos
             </span>
-            <p className="font-mono font-black text-2xl text-slate-950 leading-tight tabular-numbers">
+            <p className="font-mono font-black text-2xl text-emerald-400 leading-tight tabular-numbers drop-shadow-[0_0_8px_rgba(52,211,153,0.7)]">
               {sales.length}
             </p>
             <p className="text-[11px] text-slate-600 font-bold">
@@ -222,7 +226,7 @@ export default function CashierShiftSalesPage() {
               </span>
               <span className="w-2 h-2 rounded-full bg-sky-500 animate-pulse" />
             </div>
-            <p className="font-mono font-black text-2xl text-slate-950 leading-tight tabular-numbers">
+            <p className="font-mono font-black text-2xl text-emerald-400 leading-tight tabular-numbers drop-shadow-[0_0_8px_rgba(52,211,153,0.7)]">
               {formatUSD(totalMobileUSD)}
             </p>
             <p className="text-[11px] font-bold text-sky-700">
@@ -240,7 +244,7 @@ export default function CashierShiftSalesPage() {
             <span className="text-[10px] font-black text-slate-500 uppercase tracking-wider block">
               Terminal PC Caja
             </span>
-            <p className="font-mono font-black text-2xl text-slate-950 leading-tight tabular-numbers">
+            <p className="font-mono font-black text-2xl text-emerald-400 leading-tight tabular-numbers drop-shadow-[0_0_8px_rgba(52,211,153,0.7)]">
               {formatUSD(totalDesktopUSD)}
             </p>
             <p className="text-[11px] font-bold text-indigo-700">

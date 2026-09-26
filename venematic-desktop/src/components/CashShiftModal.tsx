@@ -122,8 +122,8 @@ export default function CashShiftModal({
     if (!activeShift?.openedAt) return;
     try {
       const openTime = new Date(activeShift.openedAt).getTime();
-      const allSales = await db.sales.toArray();
-      const filtered = allSales.filter((s) => {
+      const salesSinceOpen = await db.sales.where('timestamp').aboveOrEqual(activeShift.openedAt).toArray();
+      const filtered = salesSinceOpen.filter((s) => {
         if (s.status !== 'completed') return false;
         const sTime = new Date(s.timestamp).getTime();
         return sTime >= openTime;

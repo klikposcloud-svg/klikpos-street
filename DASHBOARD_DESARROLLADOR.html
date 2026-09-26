@@ -81,6 +81,10 @@
         </button>
         <input type="file" id="import-file-input" class="hidden" accept=".json" onchange="importDatabaseJSON(event)">
 
+        <button onclick="openReleaseModal()" class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white font-black text-xs flex items-center gap-1.5 shadow-md active:scale-95 transition-all" title="Lanzar actualización de software en línea">
+          <span>🚀</span> <span>Lanzar Actualización</span>
+        </button>
+
         <button onclick="openClientModal()" class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 text-slate-950 font-black text-xs flex items-center gap-1.5 shadow-md active:scale-95 transition-all">
           <span>➕</span> <span>Nuevo Cliente</span>
         </button>
@@ -382,6 +386,78 @@
         <button onclick="sendWhatsAppNow()" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs py-2.5 rounded-xl shadow-md active:scale-95 transition-all flex items-center justify-center gap-2">
           <span>🚀</span> <span>Abrir WhatsApp</span>
         </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: LANZADOR Y GESTOR DE ACTUALIZACIONES EN LÍNEA (RELEASE MANAGER)   -->
+  <!-- ========================================================================= -->
+  <div id="release-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="card-bg bg-slate-900 border border-slate-800 rounded-3xl p-5 w-full max-w-lg space-y-4 shadow-2xl max-h-[92vh] overflow-y-auto custom-scrollbar">
+      <div class="flex justify-between items-center pb-2 border-b border-slate-800">
+        <div class="flex items-center gap-2">
+          <span class="text-xl">🚀</span>
+          <div>
+            <h3 class="text-sm font-black text-white uppercase tracking-wider">Lanzar Actualización en Línea</h3>
+            <p class="text-[11px] text-slate-400">Genera el manifiesto de versión (version.json) para actualizar los POS en línea</p>
+          </div>
+        </div>
+        <button onclick="closeReleaseModal()" class="text-slate-400 hover:text-white font-bold text-xl leading-none">&times;</button>
+      </div>
+
+      <div class="space-y-3">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Nueva Versión:</label>
+            <input type="text" id="rel-version" value="2.1.0" class="w-full bg-slate-950 border border-slate-700 text-white rounded-xl px-3 py-2 text-xs font-mono font-bold focus:outline-none focus:border-indigo-500">
+          </div>
+          <div>
+            <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Fecha de Publicación:</label>
+            <input type="date" id="rel-date" class="w-full bg-slate-950 border border-slate-700 text-white rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-indigo-500">
+          </div>
+        </div>
+
+        <div>
+          <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Título del Lanzamiento:</label>
+          <input type="text" id="rel-title" value="Venematic POS v2.1.0 · Actualización Mayor" class="w-full bg-slate-950 border border-slate-700 text-white rounded-xl px-3 py-2 text-xs font-semibold focus:outline-none focus:border-indigo-500">
+        </div>
+
+        <div>
+          <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Notas de la Versión / Novedades (Una por línea):</label>
+          <textarea id="rel-notes" rows="4" class="w-full bg-slate-950 border border-slate-700 text-slate-100 rounded-xl p-2.5 text-xs font-sans leading-relaxed focus:outline-none focus:border-indigo-500 custom-scrollbar">Balanza digital con apertura obligatoria en productos pesables
+Inicio de sesión seguro con roles estrictos de Cajero y Administrador
+Nuevo módulo de Auto-Actualizaciones en Línea con detección automática
+Optimizaciones de rendimiento y velocidad en punto de venta</textarea>
+        </div>
+
+        <div>
+          <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">URL de Descarga Instalador Windows (.exe):</label>
+          <input type="text" id="rel-win-url" value="https://github.com/aivyntrax-cpu/venematic-releases/releases/download/v2.1.0/Venematic-POS-Setup-v2.1.0.exe" class="w-full bg-slate-950 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-xs font-mono focus:outline-none focus:border-indigo-500">
+        </div>
+
+        <div>
+          <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">URL de Descarga APK Android (.apk):</label>
+          <input type="text" id="rel-apk-url" value="https://github.com/aivyntrax-cpu/venematic-releases/releases/download/v2.1.0/venematic-pos.apk" class="w-full bg-slate-950 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-xs font-mono focus:outline-none focus:border-indigo-500">
+        </div>
+
+        <div class="flex items-center gap-2 pt-1">
+          <input type="checkbox" id="rel-mandatory" class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500">
+          <label for="rel-mandatory" class="text-xs font-bold text-amber-300">Marcar como actualización crítica / obligatoria</label>
+        </div>
+
+        <div class="p-3 bg-slate-950/60 rounded-xl border border-slate-800 text-[11px] text-slate-400 leading-relaxed">
+          💡 <b>¿Cómo funciona?</b> Al pulsar <i>"Descargar version.json"</i>, obtienes el archivo de manifiesto. Solo debes subirlo a tu repositorio o servidor web. En cuanto los clientes abran su POS con internet, el sistema detectará la nueva versión y se actualizará automáticamente.
+        </div>
+
+        <div class="flex gap-2 pt-2">
+          <button type="button" onclick="copyVersionJSON()" class="flex-1 py-2.5 rounded-xl border border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors">
+            <span>📋</span> <span>Copiar JSON</span>
+          </button>
+          <button type="button" onclick="downloadVersionJSON()" class="flex-1 bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white font-black text-xs py-2.5 rounded-xl shadow-md active:scale-95 transition-all flex items-center justify-center gap-1.5">
+            <span>💾</span> <span>Descargar version.json</span>
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -908,6 +984,60 @@ Instálelo con confianza y empiece a cobrar con tasa BCV automática. Estamos at
       setTimeout(() => {
         toast.classList.add('opacity-0', '-translate-y-2');
       }, 3500);
+    }
+
+    // Gestor de Actualizaciones en Línea (Release Manager)
+    function openReleaseModal() {
+      document.getElementById('rel-date').value = new Date().toISOString().split('T')[0];
+      document.getElementById('release-modal').classList.remove('hidden');
+    }
+
+    function closeReleaseModal() {
+      document.getElementById('release-modal').classList.add('hidden');
+    }
+
+    function buildManifestObject() {
+      const version = document.getElementById('rel-version').value.trim() || '2.1.0';
+      const releaseDate = document.getElementById('rel-date').value || new Date().toISOString().split('T')[0];
+      const title = document.getElementById('rel-title').value.trim() || `Venematic POS v${version}`;
+      const notesRaw = document.getElementById('rel-notes').value.trim();
+      const notes = notesRaw.split('\n').map(n => n.trim()).filter(Boolean);
+      const windowsUrl = document.getElementById('rel-win-url').value.trim();
+      const androidUrl = document.getElementById('rel-apk-url').value.trim();
+      const mandatory = document.getElementById('rel-mandatory').checked;
+
+      return {
+        version,
+        releaseDate,
+        title,
+        notes,
+        windowsUrl,
+        androidUrl,
+        mandatory
+      };
+    }
+
+    function copyVersionJSON() {
+      const manifest = buildManifestObject();
+      const jsonStr = JSON.stringify(manifest, null, 2);
+      navigator.clipboard.writeText(jsonStr).then(() => {
+        showToast('✓ Manifiesto version.json copiado al portapapeles');
+      }).catch(() => {
+        alert('No se pudo copiar automáticamente. Puedes descargar el archivo.');
+      });
+    }
+
+    function downloadVersionJSON() {
+      const manifest = buildManifestObject();
+      const jsonStr = JSON.stringify(manifest, null, 2);
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(jsonStr);
+      const dlAnchor = document.createElement('a');
+      dlAnchor.setAttribute("href", dataStr);
+      dlAnchor.setAttribute("download", "version.json");
+      document.body.appendChild(dlAnchor);
+      dlAnchor.click();
+      dlAnchor.remove();
+      showToast('✓ version.json generado y descargado');
     }
 
     // Modo Claro / Oscuro

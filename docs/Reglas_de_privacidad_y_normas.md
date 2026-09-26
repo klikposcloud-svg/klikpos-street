@@ -139,3 +139,19 @@ Para las versiones de software Venematic POS (Desktop Tauri y Aplicaciones Móvi
   - Venematic queda exenta de toda responsabilidad derivada de fallas de hardware local, cortes de suministro eléctrico, borrado accidental o formateo de equipos sin copia de seguridad previa.
 - **Garantía y Limitación de Responsabilidad:**
   - El software se entrega "tal cual" (as-is) con soporte para incidencias atribuibles a errores propios de código. Venematic no asume responsabilidad por multas fiscales, diferencias de cambio por negligencia del usuario en actualizar la tasa oficial del BCV o errores de inventario por mal pesaje o digitación errónea del operador.
+
+---
+
+## 12. PROTOCOLO DE AUTO-ACTUALIZACIONES, PRIVACIDAD POR DISEÑO Y SEGURIDAD EN DISTRIBUCIÓN
+- **Cero Telemetría Comercial / Zero Business Leakage:**
+  - Las peticiones de comprobación de actualizaciones dirigidas al manifiesto de versión (`version.json`) no incluyen identificadores comerciales, volúmenes de venta, listas de productos ni bases de clientes.
+  - El payload de consulta se limita a parámetros técnicos no identificables: número de versión actual y plataforma (`desktop` / `mobile`).
+  - No se almacenan direcciones IP ni registros de comportamiento en los servidores de actualización para fines de perfilamiento publicitario o comercial.
+- **Inmunidad y Preservación de Datos Locales durante Actualizaciones:**
+  - Los instaladores de parches y versiones mayores (.exe en Windows y .apk en Android) tienen estrictamente restringido sobreescribir las rutas de datos locales del usuario (`%APPDATA%`, IndexedDB de Chromium / WebView y archivos SQLite locales).
+  - Toda actualización preserva al 100% el historial de ventas, clientes, saldos deudores, existencias de inventario y configuración de periféricos (balanza, impresora térmica).
+- **Control y Soberanía del Administrador:**
+  - El sistema incorpora una opción de control manual en **Configuración > Actualizaciones** donde el usuario puede activar o suspender la verificación automática al arranque.
+  - Cada actualización muestra de forma transparente sus notas de cambios (*release notes*) y solicita la confirmación expresa del usuario antes de proceder a la descarga o reinicio.
+- **Protección Criptográfica del Binario:**
+  - Los binarios ejecutables distribuidos (.exe / .apk) están firmados digitalmente y cuentan con hashes SHA-256 publicados en el manifiesto oficial para evitar la ejecución de paquetes no verificados o vulnerados en tránsito.

@@ -421,10 +421,14 @@ export default function DesktopPosPage() {
 
     // Cargar ventas del turno (hoy) desde la base de datos local
     try {
-      const allSales = await db.sales.orderBy('id').reverse().toArray();
       const todayStr = new Date().toISOString().slice(0, 10);
-      const todaySales = allSales.filter((s) => s.timestamp && s.timestamp.startsWith(todayStr));
-      setShiftSales(todaySales.length > 0 ? todaySales : allSales.slice(0, 50));
+      const todaySales = await db.sales.where('timestamp').startsWith(todayStr).reverse().sortBy('id');
+      if (todaySales.length > 0) {
+        setShiftSales(todaySales);
+      } else {
+        const recent = await db.sales.orderBy('id').reverse().limit(50).toArray();
+        setShiftSales(recent);
+      }
     } catch (e) {
       console.warn('Error cargando ventas de turno en POS:', e);
     }
@@ -939,17 +943,27 @@ export default function DesktopPosPage() {
       ? pendingQuantityRef.current
       : customQty;
 
-    // Si es un producto que se vende por peso (kg / gr)
-    const isWeighed = (product.unit || '').toLowerCase().includes('kg') ||
-                      (product.unit || '').toLowerCase().includes('kilo') ||
-                      (product.unit || '').toLowerCase().includes('gr');
+    // Si es un producto que se vende por peso (kg / gr / lb)
+    const unitLower = (product.unit || '').toLowerCase().trim();
+    const isWeighed = unitLower.includes('kg') ||
+                      unitLower.includes('kilo') ||
+                      unitLower.includes('gr') ||
+                      unitLower.includes('gram') ||
+                      unitLower === 'g' ||
+                      unitLower.includes('lb') ||
+                      unitLower.includes('libra') ||
+                      unitLower.includes('pesable') ||
+                      unitLower.includes('peso');
 
     const scaleCfg = scaleService.getConfig();
-    if (isWeighed && scaleCfg.autoWeight && scaleReading.weight > 0 && pendingQuantityRef.current === null && customQty === 1) {
+    const isPhysicalScaleConnected = scaleConnected || scaleService.isConnected();
+
+    // Si hay balanza física conectada con autoWeight y peso positivo sobre el plato
+    if (isWeighed && isPhysicalScaleConnected && scaleCfg.autoWeight && scaleReading.weight > 0 && pendingQuantityRef.current === null && customQty === 1) {
       qtyToAdd = scaleReading.weight;
       showToast(`⚖️ Balanza: ${scaleReading.weight.toFixed(3)} kg para ${product.name}`, 'info');
-    } else if (isWeighed && scaleCfg.manualWeightPrompt && scaleReading.weight <= 0 && pendingQuantityRef.current === null && customQty === 1) {
-      // Para comercios con balanzas normales de mostrador sin cable USB: abrir ingreso manual
+    } else if (isWeighed && pendingQuantityRef.current === null && customQty === 1) {
+      // Para todo producto pesable sin peso previo en balanza: abrir de inmediato ventana de balanza
       setManualWeightTargetProduct(product);
       setShowManualWeightModal(true);
       return;
