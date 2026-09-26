@@ -1,19 +1,29 @@
+﻿================================================================================
+VENEMATIC POS MÃ“VIL & ADMIN - VERIFICACIÃ“N OFICIAL DE INTEGRIDAD SHA-256
 ================================================================================
-          INTEGRIDAD Y SUMAS DE VERIFICACION CRIPTOGRAFICA (HASHES) - APK
-================================================================================
+Fecha de CompilaciÃ³n: 22 de Septiembre de 2026
+Arquitectura: Android 8.0+ (ARM64 / x86_64)
 
-1. VenematicPOS-Caja-Mobile.apk / VenematicPOS-Mobile.apk
-   Version: 1.0.0 (Actualizada con Navbar mejorado, Contraste de Secciones, Balanza y Menú SENIAT)
-   Fecha de compilacion: 25 de Septiembre de 2026
-   Hash SHA-256:
-   9276A33851FE671F3564E74E81025AFD18F7A204EA0A0C88B07CA66821EBCA79
+1. APK DE CAJA / MOSTRADOR / TABLET (Cajeros y Venta TÃ¡ctil):
+  Archivo: VenematicPOS-Caja-Mobile.apk
+  ID de Paquete: com.venematic.pos
+  Nombre de App: Venematic POS MÃ³vil
+  TamaÃ±o: 4246373 bytes
+  SHA-256: EDA751DEF0EE24EAA12F465B63E92600FFF58F5938B67D31D8752A35E00F6CAE
 
-2. VenematicPOS-Admin-Mobile.apk
-   Version: 1.0.0 (Panel Ejecutivo Móvil para Dueños y Gerentes)
-   Fecha de compilacion: 22 de Septiembre de 2026
-   Hash SHA-256:
-   4F6EBE57DA1F5774E9CF57DF8F2CFEBAED6E0EFDC0241A0B1A757B3F9EFB6199
+2. APK DE ADMINISTRADOR & MODO DUEÃ‘O (Uso Exclusivo del Gerente):
+  Archivo: VenematicPOS-Admin-Mobile.apk
+  ID de Paquete: com.venematic.admin
+  Nombre de App: Venematic Admin
+  TamaÃ±o: 4166955 bytes
+  SHA-256: 5EB8671CD968C4978F64E49D95C32675A75FE4466BAFDB15EEEA72C5F42F2E4E
+  CaracterÃ­sticas Exclusivas:
+   - Panel de Control del DueÃ±o en vivo con KPIs ($ y Bs)
+   - Arqueo de Caja y desglose multimoneda (USD, VES, Pago MÃ³vil, Punto, Binance, Zelle)
+   - Feed en tiempo real de tickets cobrados
+   - Alertas de inventario y stock crÃ­tico
+   - Modificador instantÃ¡neo de Tasa Oficial BCV con propagaciÃ³n a cajas
 
-Para verificar la integridad del APK en PowerShell:
-  Get-FileHash VenematicPOS-Caja-Mobile.apk -Algorithm SHA256
+Comando PowerShell para verificar:
+  Get-FileHash -Path "VenematicPOS-Admin-Mobile.apk" -Algorithm SHA256
 ================================================================================

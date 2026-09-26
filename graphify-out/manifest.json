@@ -306,9 +306,9 @@
     "semantic_hash": ""
   },
   "src/app/dashboard/settings/page.tsx": {
-    "mtime": 1790390819.4417706,
-    "seen": 1790391192.5713713,
-    "ast_hash": "2ef3243f63895cf74458c34feefa5a68",
+    "mtime": 1790393108.7305212,
+    "seen": 1790393606.6521268,
+    "ast_hash": "412b4937dd1be4521183dd7ea5f513fd",
     "semantic_hash": ""
   },
   "src/app/delivery-app/page.tsx": {
@@ -372,9 +372,9 @@
     "semantic_hash": "67b205cd4098ee8934ad43c2fe339e0e"
   },
   "src/components/BrandingSettings.tsx": {
-    "mtime": 1790390785.1195056,
-    "seen": 1790391192.5713913,
-    "ast_hash": "0b37b68bc6773f2784bf2ce2d4a56333",
+    "mtime": 1790393376.2768815,
+    "seen": 1790393606.652166,
+    "ast_hash": "7ba5141ab0d208c8d601184a18fcf373",
     "semantic_hash": ""
   },
   "src/components/CloudSyncSettingsCard.tsx": {
@@ -648,10 +648,10 @@
     "semantic_hash": "1fcde3bfb5ed03ebe6c558b1d04de01b"
   },
   "src/lib/theme.ts": {
-    "mtime": 1790212905.5449073,
-    "seen": 1790363920.7985125,
-    "ast_hash": "aeafa114ef0232fec34c1f603d7a5327",
-    "semantic_hash": "aeafa114ef0232fec34c1f603d7a5327"
+    "mtime": 1790393270.211754,
+    "seen": 1790393606.6523607,
+    "ast_hash": "228cd065ebdf0655ff4d0e5241b9897c",
+    "semantic_hash": ""
   },
   "src/lib/utils/analytics-service.ts": {
     "mtime": 1787615215.0,
@@ -858,10 +858,10 @@
     "semantic_hash": "fbaf7cc870c663eb52dcf218531c439d"
   },
   "venematic-desktop/android/app/src/main/java/com/venematic/pos/MainActivity.java": {
-    "mtime": 1790042260.6337001,
-    "seen": 1790363920.798557,
-    "ast_hash": "5120053ca7c615a361dd586b17ed8b84",
-    "semantic_hash": "5120053ca7c615a361dd586b17ed8b84"
+    "mtime": 1790394345.9809127,
+    "seen": 1790394661.897614,
+    "ast_hash": "c3991e8d111d6fbf05265c28ed45e9c2",
+    "semantic_hash": ""
   },
   "venematic-desktop/android/app/src/test/java/com/getcapacitor/myapp/ExampleUnitTest.java": {
     "mtime": 1789138888.0,
@@ -1122,9 +1122,9 @@
     "semantic_hash": ""
   },
   "venematic-desktop/src/app/dashboard/settings/page.tsx": {
-    "mtime": 1790390838.479785,
-    "seen": 1790391192.5716212,
-    "ast_hash": "23780ff29440b49db70b51cd93fcb855",
+    "mtime": 1790393130.9019022,
+    "seen": 1790393606.652588,
+    "ast_hash": "d7557d4d85296be42d634dc93527731a",
     "semantic_hash": ""
   },
   "venematic-desktop/src/app/layout.tsx": {
@@ -1158,9 +1158,9 @@
     "semantic_hash": "67b205cd4098ee8934ad43c2fe339e0e"
   },
   "venematic-desktop/src/components/BrandingSettings.tsx": {
-    "mtime": 1790390797.968135,
-    "seen": 1790391192.5716314,
-    "ast_hash": "0b37b68bc6773f2784bf2ce2d4a56333",
+    "mtime": 1790393376.2768815,
+    "seen": 1790393606.6526113,
+    "ast_hash": "7ba5141ab0d208c8d601184a18fcf373",
     "semantic_hash": ""
   },
   "venematic-desktop/src/components/CloudSyncSettingsCard.tsx": {
@@ -1362,10 +1362,10 @@
     "semantic_hash": "1fcde3bfb5ed03ebe6c558b1d04de01b"
   },
   "venematic-desktop/src/lib/theme.ts": {
-    "mtime": 1790212905.5449073,
-    "seen": 1790363920.7986822,
-    "ast_hash": "aeafa114ef0232fec34c1f603d7a5327",
-    "semantic_hash": "aeafa114ef0232fec34c1f603d7a5327"
+    "mtime": 1790393270.211754,
+    "seen": 1790393606.6527674,
+    "ast_hash": "228cd065ebdf0655ff4d0e5241b9897c",
+    "semantic_hash": ""
   },
   "venematic-desktop/src/lib/utils/business-rubros.ts": {
     "mtime": 1790201635.8425632,
@@ -1584,9 +1584,9 @@
     "semantic_hash": ""
   },
   "dist-apk/VERIFICACION_HASHES_APK.txt": {
-    "mtime": 1790369927.2924883,
-    "seen": 1790372297.182082,
-    "ast_hash": "b81b5d992e29b5baa7f4bb651286e442",
+    "mtime": 1790394611.3473241,
+    "seen": 1790394661.8978763,
+    "ast_hash": "1f6384655dd41de8e7eb6a706cf52f02",
     "semantic_hash": ""
   },
   "dist-installer/INSTRUCCIONES_ACTIVACION_LICENCIAS.txt": {
@@ -1932,9 +1932,9 @@
     "semantic_hash": ""
   },
   "docs/INFORME_AGENTES_Y_MCP_DISPONIBLES.md": {
-    "mtime": 1790366774.459033,
-    "seen": 1790367606.2090678,
-    "ast_hash": "b3b4f5ee381e8e2dd325dfb0d463574a",
+    "mtime": 1790392785.6144838,
+    "seen": 1790393606.6529515,
+    "ast_hash": "4237c02e855c4c1312f77f74e495925a",
     "semantic_hash": ""
   },
   "scripts/build-admin-apk.ps1": {
@@ -1971,6 +1971,48 @@
     "mtime": 1790385331.252239,
     "seen": 1790385669.917523,
     "ast_hash": "798307d7d71155632e58ba5d6ed361fe",
+    "semantic_hash": ""
+  },
+  "scripts/VenematicKeygen.cs": {
+    "mtime": 1790393420.4865506,
+    "seen": 1790393606.6519587,
+    "ast_hash": "b557244607b015ecf120e7c3134e631a",
+    "semantic_hash": ""
+  },
+  "docs/CATALOGO_VERSIONES_Y_PLANES_CLIENTES.md": {
+    "mtime": 1790393536.9904118,
+    "seen": 1790393606.6529438,
+    "ast_hash": "a4f8808c63f08196c064aa1db0be3129",
+    "semantic_hash": ""
+  },
+  "docs/MANUAL_GENERACION_LICENCIAS.md": {
+    "mtime": 1790393516.814113,
+    "seen": 1790393606.6529605,
+    "ast_hash": "b5435af359fa0c583d881771b8247517",
+    "semantic_hash": ""
+  },
+  "venematic-desktop/android/app/src/main/java/com/venematic/pos/SmsReceiver.java": {
+    "mtime": 1790394335.5383787,
+    "seen": 1790394661.8976192,
+    "ast_hash": "84b49bf5ad20b5285344ecbfd95f4dbc",
+    "semantic_hash": ""
+  },
+  "docs/GUIA_CONFIGURACION_FIRESTORE_SUPABASE_SMS.md": {
+    "mtime": 1790394565.4667351,
+    "seen": 1790394661.8978891,
+    "ast_hash": "ee7b66360ded24c324244e424fae184e",
+    "semantic_hash": ""
+  },
+  "public/admin-mobile.html": {
+    "mtime": 1790394506.188941,
+    "seen": 1790394661.8979049,
+    "ast_hash": "2476ac7011a0305eaf43d2ce23617c2e",
+    "semantic_hash": ""
+  },
+  "docs/INFORME_GENERAL_SISTEMA_Y_VERSIONES.md": {
+    "mtime": 1790395704.7660072,
+    "seen": 1790395771.4467897,
+    "ast_hash": "d9aea0823c5aadb52a1888427c78283c",
     "semantic_hash": ""
   }
 }

@@ -95,12 +95,6 @@ export default function BrandingSettings() {
         const savedCustom = localStorage.getItem('venematic_custom_bg_color') || '#f8fafc';
         setSelectedIndustrialBg(savedBg);
         setCustomBgColor(savedCustom);
-        applyBrandingToDOM({
-          paletteId: localStorage.getItem('venematic_branding_palette') || selectedPaletteId,
-          uiStyle: 'industrial',
-          industrialBg: savedBg,
-          customBgColor: savedCustom,
-        });
       } else if (theme === 'glass' || theme === 'dark') {
         setSelectedUIStyle('glassmorphism');
       }
@@ -138,9 +132,8 @@ export default function BrandingSettings() {
       industrialBg: 'white',
       customBgColor,
     };
-    applyTheme('light');
-    applyBrandingToDOM(config, 'light');
     saveConfig(config);
+    applyBrandingToDOM(config, 'light');
   };
 
   const handlePaletteSelect = (paletteId: string) => {
@@ -151,9 +144,9 @@ export default function BrandingSettings() {
       industrialBg: selectedIndustrialBg,
       customBgColor,
     };
+    saveConfig(config);
     const currentThemeMode = getCurrentTheme();
     applyBrandingToDOM(config, currentThemeMode === 'light' ? 'light' : 'dark');
-    saveConfig(config);
   };
 
   const handleUIStyleSelect = (uiStyle: UIStyleMode) => {
@@ -164,6 +157,7 @@ export default function BrandingSettings() {
       industrialBg: selectedIndustrialBg,
       customBgColor,
     };
+    saveConfig(config);
     if (uiStyle === 'industrial') {
       applyTheme('light');
       applyBrandingToDOM(config, 'light');
@@ -171,7 +165,6 @@ export default function BrandingSettings() {
       applyTheme('dark');
       applyBrandingToDOM(config, 'dark');
     }
-    saveConfig(config);
   };
 
   const handleIndustrialBgSelect = (industrialBg: IndustrialBgPreset) => {
@@ -183,9 +176,8 @@ export default function BrandingSettings() {
       industrialBg,
       customBgColor,
     };
-    applyTheme('light');
-    applyBrandingToDOM(config, 'light');
     saveConfig(config);
+    applyBrandingToDOM(config, 'light');
   };
 
   const handleCustomColorChange = (color: string) => {
@@ -198,9 +190,8 @@ export default function BrandingSettings() {
       industrialBg: 'custom',
       customBgColor: color,
     };
-    applyTheme('light');
-    applyBrandingToDOM(config, 'light');
     saveConfig(config);
+    applyBrandingToDOM(config, 'light');
   };
 
   const handleApplyRubro = async (rubroId: StandardRubroId) => {
@@ -599,7 +590,10 @@ export default function BrandingSettings() {
         {/* SUB-PANEL: TONOS DE FONDO Y CONTRASTE DINÁMICO (MODO PROFESIONAL)        */}
         {/* ========================================================================= */}
         {selectedUIStyle === 'industrial' && (
-          <div className="mt-3 p-4 rounded-xl bg-slate-50/90 border border-slate-300 space-y-3 animate-in fade-in duration-200">
+          <div
+            style={{ backgroundColor: 'var(--industrial-bg, #ffffff)', borderColor: 'var(--industrial-border, #cbd5e1)' }}
+            className="mt-3 p-4 rounded-xl border space-y-3 transition-colors duration-200 animate-in fade-in"
+          >
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
                 <h5 className="text-xs font-black text-slate-900 uppercase tracking-wide flex items-center gap-1.5">

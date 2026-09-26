@@ -195,32 +195,32 @@ export const INDUSTRIAL_BG_PRESETS: IndustrialBgOption[] = [
   {
     id: 'cream',
     name: 'Crema Suave / Soft Warm',
-    tagline: 'Tono marfil cálido elegante que reduce el cansancio visual (#f3eee7)',
-    bgColor: '#f3eee7',
-    previewColor: '#f3eee7',
+    tagline: 'Tono marfil cálido elegante que reduce el cansancio visual (#f4ede4)',
+    bgColor: '#f4ede4',
+    previewColor: '#f4ede4',
     borderPreview: '#ded8cd',
   },
   {
     id: 'teal',
     name: 'Turquesa Suave (Menta)',
-    tagline: 'Frescura visual que relaja la vista en jornadas de caja largas (#f0fdfa)',
-    bgColor: '#f0fdfa',
+    tagline: 'Frescura visual que relaja la vista en jornadas de caja largas (#e6f7f5)',
+    bgColor: '#e6f7f5',
     previewColor: '#14b8a6',
     borderPreview: '#99f6e4',
   },
   {
     id: 'blue',
     name: 'Azul Hielo Ejecutivo',
-    tagline: 'Tono azul corporativo suave para retail y farmacias (#f0f9ff)',
-    bgColor: '#f0f9ff',
+    tagline: 'Tono azul corporativo suave para retail y farmacias (#e8f3fc)',
+    bgColor: '#e8f3fc',
     previewColor: '#38bdf8',
     borderPreview: '#bae6fd',
   },
   {
     id: 'gray',
     name: 'Gris Titán Neutro',
-    tagline: 'Gris moderno para ferreterías, repuestos y depósitos (#f1f5f9)',
-    bgColor: '#f1f5f9',
+    tagline: 'Gris moderno para ferreterías, repuestos y depósitos (#edf2f7)',
+    bgColor: '#edf2f7',
     previewColor: '#94a3b8',
     borderPreview: '#cbd5e1',
   },
@@ -353,11 +353,11 @@ export function computeIndustrialThemeVariables(
     };
   }
 
-  // 2. Crema Cálido Soft UI (#f3eee7)
+  // 2. Crema Cálido Soft UI (#f4ede4)
   if (preset === 'cream') {
     const secBg = '#ede8df';
     return {
-      bgColor: '#f3eee7',
+      bgColor: '#f4ede4',
       cardColor: '#ffffff',
       textColor: '#0f172a',
       textMuted: '#475569',
@@ -371,11 +371,11 @@ export function computeIndustrialThemeVariables(
     };
   }
 
-  // 3. Turquesa Suave (Menta) (#f0fdfa)
+  // 3. Turquesa Suave (Menta) (#e6f7f5)
   if (preset === 'teal') {
-    const secBg = '#e6fffa';
+    const secBg = '#d1fae5';
     return {
-      bgColor: '#f0fdfa',
+      bgColor: '#e6f7f5',
       cardColor: '#ffffff',
       textColor: '#042f2e',
       textMuted: '#115e59',
@@ -389,11 +389,11 @@ export function computeIndustrialThemeVariables(
     };
   }
 
-  // 4. Azul Hielo Ejecutivo (#f0f9ff)
+  // 4. Azul Hielo Ejecutivo (#e8f3fc)
   if (preset === 'blue') {
     const secBg = '#e0f2fe';
     return {
-      bgColor: '#f0f9ff',
+      bgColor: '#e8f3fc',
       cardColor: '#ffffff',
       textColor: '#082f49',
       textMuted: '#0369a1',
@@ -407,11 +407,11 @@ export function computeIndustrialThemeVariables(
     };
   }
 
-  // 5. Gris Titán Neutro (#f1f5f9)
+  // 5. Gris Titán Neutro (#edf2f7)
   if (preset === 'gray') {
     const secBg = '#e2e8f0';
     return {
-      bgColor: '#f1f5f9',
+      bgColor: '#edf2f7',
       cardColor: '#ffffff',
       textColor: '#0f172a',
       textMuted: '#334155',

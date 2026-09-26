@@ -417,7 +417,7 @@ export default function DesktopSettingsPage() {
                 </div>
               </div>
 
-              <span className="text-xs bg-emerald-100 text-emerald-800 font-bold px-3 py-1 rounded-full border border-emerald-300">
+              <span className="text-xs bg-emerald-50 dark:bg-emerald-950/80 text-emerald-900 dark:text-emerald-300 font-extrabold px-3 py-1 rounded-full border border-emerald-300 dark:border-emerald-700 shadow-xs">
                 {primaryCurrency === 'VES' ? '🇻🇪 Bolívares (Bs.) Prioritario' : '💵 Dólares ($ USD) Prioritario'}
               </span>
             </div>
@@ -433,12 +433,12 @@ export default function DesktopSettingsPage() {
                 }}
                 className={`cursor-pointer p-3.5 rounded-xl border-2 transition-all ${
                   primaryCurrency === 'VES'
-                    ? 'border-emerald-600 bg-emerald-50/50 ring-2 ring-emerald-500/20 shadow-xs'
-                    : 'border-slate-200 hover:border-slate-300 bg-slate-50'
+                    ? 'border-emerald-600 dark:border-emerald-500 bg-emerald-50 dark:bg-emerald-950/70 ring-2 ring-emerald-500/25 shadow-xs'
+                    : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 bg-white dark:bg-slate-900/60'
                 }`}
               >
                 <div className="flex items-center justify-between mb-1.5">
-                  <span className="font-black text-slate-900 text-sm flex items-center gap-1.5">
+                  <span className="font-black text-slate-900 dark:text-white text-sm flex items-center gap-1.5">
                     <span className="text-base">🇻🇪</span> Bolívares (Bs.) Prioritario
                   </span>
                   <input
@@ -449,10 +449,10 @@ export default function DesktopSettingsPage() {
                     className="w-4 h-4 text-emerald-600 accent-emerald-600 cursor-pointer"
                   />
                 </div>
-                <p className="text-[11px] text-slate-600 leading-snug">
-                  El total a cobrar del ticket, los botones rápidos y el modal de cobro se muestran en <strong>fuente gigante en Bolívares (Bs.)</strong>, con el equivalente en $ en vivo como referencia secundaria.
+                <p className="text-[11px] text-slate-700 dark:text-slate-300 leading-snug font-medium">
+                  El total a cobrar del ticket, los botones rápidos y el modal de cobro se muestran en <strong className="font-black text-slate-900 dark:text-white">fuente gigante en Bolívares (Bs.)</strong>, con el equivalente en $ en vivo como referencia secundaria.
                 </p>
-                <div className="mt-2 text-[10px] font-black text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-md inline-block">
+                <div className="mt-2.5 text-[10px] font-black text-emerald-900 dark:text-emerald-100 bg-emerald-100 dark:bg-emerald-900/80 px-2.5 py-1 rounded-md inline-block border border-emerald-300 dark:border-emerald-700 shadow-2xs">
                   ★ RECOMENDADO PARA VENEZUELA (Pago Móvil / Punto)
                 </div>
               </div>
@@ -467,12 +467,12 @@ export default function DesktopSettingsPage() {
                 }}
                 className={`cursor-pointer p-3.5 rounded-xl border-2 transition-all ${
                   primaryCurrency === 'USD'
-                    ? 'border-emerald-600 bg-emerald-50/50 ring-2 ring-emerald-500/20 shadow-xs'
-                    : 'border-slate-200 hover:border-slate-300 bg-slate-50'
+                    ? 'border-emerald-600 dark:border-emerald-500 bg-emerald-50 dark:bg-emerald-950/70 ring-2 ring-emerald-500/25 shadow-xs'
+                    : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 bg-white dark:bg-slate-900/60'
                 }`}
               >
                 <div className="flex items-center justify-between mb-1.5">
-                  <span className="font-black text-slate-900 text-sm flex items-center gap-1.5">
+                  <span className="font-black text-slate-900 dark:text-white text-sm flex items-center gap-1.5">
                     <span className="text-base">💵</span> Dólares ($ USD) Prioritario
                   </span>
                   <input
@@ -483,10 +483,10 @@ export default function DesktopSettingsPage() {
                     className="w-4 h-4 text-emerald-600 accent-emerald-600 cursor-pointer"
                   />
                 </div>
-                <p className="text-[11px] text-slate-600 leading-snug">
-                  El total del ticket y los cobros se exhiben en <strong>fuente gigante en Dólares ($)</strong>, manteniendo la conversión en Bolívares en vivo calculada según la tasa del BCV.
+                <p className="text-[11px] text-slate-700 dark:text-slate-300 leading-snug font-medium">
+                  El total del ticket y los cobros se exhiben en <strong className="font-black text-slate-900 dark:text-white">fuente gigante en Dólares ($)</strong>, manteniendo la conversión en Bolívares en vivo calculada según la tasa del BCV.
                 </p>
-                <div className="mt-2 text-[10px] font-semibold text-slate-600 bg-slate-200 px-2 py-0.5 rounded-md inline-block">
+                <div className="mt-2.5 text-[10px] font-bold text-emerald-900 dark:text-emerald-100 bg-emerald-100 dark:bg-emerald-900/80 px-2.5 py-1 rounded-md inline-block border border-emerald-300 dark:border-emerald-700 shadow-2xs">
                   Ideal para cobro en divisas efectivo
                 </div>
               </div>
