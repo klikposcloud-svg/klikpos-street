@@ -67,6 +67,9 @@ export function buildSeniatSalesBook(
 
   const filtered = sortedSales.filter((s) => {
     if (!s.timestamp) return false;
+    // Excluir ventas a crédito / fiado de la liquidación fiscal inmediata (no constituyen factura fiscal hasta su cobro definitivo)
+    const isCredit = Array.isArray(s.payments) && s.payments.some((p) => p.method === 'credit');
+    if (isCredit) return false;
     const saleDate = s.timestamp.split('T')[0];
     if (options?.startDate && saleDate < options.startDate) return false;
     if (options?.endDate && saleDate > options.endDate) return false;

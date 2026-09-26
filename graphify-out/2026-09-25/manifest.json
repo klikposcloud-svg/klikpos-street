@@ -48,14 +48,14 @@
     "semantic_hash": "f72ef6c411866f3233741847d97c8d80"
   },
   "public/sw.js": {
-    "mtime": 1790385533.943005,
-    "seen": 1790385669.9171655,
-    "ast_hash": "c6cca3a61582b384ee7771e128456de7",
+    "mtime": 1790388317.0338576,
+    "seen": 1790388525.4174814,
+    "ast_hash": "a02fec1405d246a3f2c65945a0117130",
     "semantic_hash": ""
   },
   "public/workbox-00a24876.js": {
-    "mtime": 1790385533.9468086,
-    "seen": 1790385669.9171689,
+    "mtime": 1790388317.0353534,
+    "seen": 1790388525.4174864,
     "ast_hash": "2f569fb030b2a09996588b309a8d636e",
     "semantic_hash": "2f569fb030b2a09996588b309a8d636e"
   },
@@ -288,9 +288,9 @@
     "semantic_hash": "1671769c32220d2d3d02028a4abeb754"
   },
   "src/app/dashboard/pos/page.tsx": {
-    "mtime": 1790385229.8416536,
-    "seen": 1790385669.9172473,
-    "ast_hash": "66089189c10bb83f293c6910c1585a44",
+    "mtime": 1790386975.5772748,
+    "seen": 1790387170.8575802,
+    "ast_hash": "3f8c218652cbc8d4365b004bc4382ae9",
     "semantic_hash": ""
   },
   "src/app/dashboard/reports/page.tsx": {
@@ -408,10 +408,10 @@
     "semantic_hash": "0babcc8e577e2da69b9970b851420c1f"
   },
   "src/components/ManualWeightModal.tsx": {
-    "mtime": 1790116067.9196763,
-    "seen": 1790363920.7984564,
-    "ast_hash": "3404fa175569ae2a0607cad9b308a07c",
-    "semantic_hash": "3404fa175569ae2a0607cad9b308a07c"
+    "mtime": 1790388050.9186385,
+    "seen": 1790388525.4176683,
+    "ast_hash": "d39919084a9417467af1d8c87673579e",
+    "semantic_hash": ""
   },
   "src/components/ProductCostCalculator.tsx": {
     "mtime": 1790041088.497661,
@@ -1104,9 +1104,9 @@
     "semantic_hash": ""
   },
   "venematic-desktop/src/app/dashboard/pos/page.tsx": {
-    "mtime": 1790385229.8416536,
-    "seen": 1790385669.9175053,
-    "ast_hash": "66089189c10bb83f293c6910c1585a44",
+    "mtime": 1790386992.1380548,
+    "seen": 1790387170.8579752,
+    "ast_hash": "3f8c218652cbc8d4365b004bc4382ae9",
     "semantic_hash": ""
   },
   "venematic-desktop/src/app/dashboard/reports/page.tsx": {
@@ -1194,10 +1194,10 @@
     "semantic_hash": "0babcc8e577e2da69b9970b851420c1f"
   },
   "venematic-desktop/src/components/ManualWeightModal.tsx": {
-    "mtime": 1790116068.4689374,
-    "seen": 1790363920.7986443,
-    "ast_hash": "3404fa175569ae2a0607cad9b308a07c",
-    "semantic_hash": "3404fa175569ae2a0607cad9b308a07c"
+    "mtime": 1790388076.437516,
+    "seen": 1790388525.4180293,
+    "ast_hash": "d39919084a9417467af1d8c87673579e",
+    "semantic_hash": ""
   },
   "venematic-desktop/src/components/ProductCostCalculator.tsx": {
     "mtime": 1790041088.497661,
@@ -1602,9 +1602,9 @@
     "semantic_hash": ""
   },
   "dist-installer/VERIFICACION_HASHES.txt": {
-    "mtime": 1790385648.0274775,
-    "seen": 1790385669.917653,
-    "ast_hash": "7886c0fedf56d4e821aa96964db7c8cb",
+    "mtime": 1790388500.5005612,
+    "seen": 1790388525.4182208,
+    "ast_hash": "664c9dbfa7d05f7a9ec0be0f63c9bd44",
     "semantic_hash": ""
   },
   "docs/INFORME_CLIENTES_VENEMATIC_POS.md": {
@@ -1662,9 +1662,9 @@
     "semantic_hash": ""
   },
   "venematic-desktop/dist-installer/VERIFICACION_HASHES.txt": {
-    "mtime": 1790385648.0297577,
-    "seen": 1790385669.9176717,
-    "ast_hash": "7886c0fedf56d4e821aa96964db7c8cb",
+    "mtime": 1790388500.5043223,
+    "seen": 1790388525.4182582,
+    "ast_hash": "664c9dbfa7d05f7a9ec0be0f63c9bd44",
     "semantic_hash": ""
   },
   "venematic-desktop/refinancion.md": {

@@ -651,7 +651,7 @@
       "file_type": "code",
       "norm_label": "mobilecartitem",
       "source_file": "venematic-desktop/src/app/scanner/page.tsx",
-      "source_location": "L55"
+      "source_location": "L56"
     },
     {
       "id": "venematic_desktop_src_app_scanner_page_mobilecatalogitem",
@@ -664,7 +664,7 @@
       "file_type": "code",
       "norm_label": "mobilecatalogitem",
       "source_file": "venematic-desktop/src/app/scanner/page.tsx",
-      "source_location": "L45"
+      "source_location": "L46"
     },
     {
       "id": "venematic_desktop_src_app_scanner_page_scannedhistoryitem",
@@ -677,7 +677,7 @@
       "file_type": "code",
       "norm_label": "scannedhistoryitem",
       "source_file": "venematic-desktop/src/app/scanner/page.tsx",
-      "source_location": "L39"
+      "source_location": "L40"
     },
     {
       "id": "venematic_desktop_src_lib_firebase_firestore_schema_userrole",
@@ -3699,7 +3699,7 @@
       "file_type": "code",
       "norm_label": "mobilecartitem",
       "source_file": "src/app/scanner/page.tsx",
-      "source_location": "L55"
+      "source_location": "L56"
     },
     {
       "id": "src_app_scanner_page_mobilecatalogitem",
@@ -3712,7 +3712,7 @@
       "file_type": "code",
       "norm_label": "mobilecatalogitem",
       "source_file": "src/app/scanner/page.tsx",
-      "source_location": "L45"
+      "source_location": "L46"
     },
     {
       "id": "src_app_scanner_page_scannedhistoryitem",
@@ -3725,7 +3725,7 @@
       "file_type": "code",
       "norm_label": "scannedhistoryitem",
       "source_file": "src/app/scanner/page.tsx",
-      "source_location": "L39"
+      "source_location": "L40"
     },
     {
       "id": "src_lib_utils_barcode_scanner_barcodescanner",
@@ -6500,7 +6500,7 @@
       "file_type": "code",
       "norm_label": "mobilescannerpage()",
       "source_file": "venematic-desktop/src/app/scanner/page.tsx",
-      "source_location": "L65"
+      "source_location": "L66"
     },
     {
       "id": "venematic_desktop_src_lib_background_remover_removebackgroundtowhitecanvas",
@@ -10704,7 +10704,7 @@
       "file_type": "code",
       "norm_label": "exportseniatsalesbooktocsv()",
       "source_file": "src/lib/fiscal/seniat-sales-book.ts",
-      "source_location": "L218"
+      "source_location": "L221"
     },
     {
       "id": "src_lib_formatters_formatdateshort",
@@ -11076,7 +11076,7 @@
       "file_type": "code",
       "norm_label": "exportseniatsalesbooktocsv()",
       "source_file": "venematic-desktop/src/lib/fiscal/seniat-sales-book.ts",
-      "source_location": "L220"
+      "source_location": "L223"
     },
     {
       "id": "venematic_desktop_src_lib_formatters_formatdateshort",
@@ -11620,7 +11620,7 @@
       "file_type": "code",
       "norm_label": "mobilescannerpage()",
       "source_file": "src/app/scanner/page.tsx",
-      "source_location": "L65"
+      "source_location": "L66"
     },
     {
       "id": "src_lib_background_remover_removebackgroundtowhitecanvas",
@@ -30972,7 +30972,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/app/scanner/page.tsx",
-      "source_location": "L1059",
+      "source_location": "L1081",
       "weight": 1.0
     },
     {
@@ -31332,7 +31332,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/ManualWeightModal.tsx",
-      "source_location": "L225",
+      "source_location": "L261",
       "weight": 1.0
     },
     {
@@ -31344,7 +31344,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/ManualWeightModal.tsx",
-      "source_location": "L412",
+      "source_location": "L433",
       "weight": 1.0
     },
     {
@@ -34704,7 +34704,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "venematic-desktop/src/app/scanner/page.tsx",
-      "source_location": "L1059",
+      "source_location": "L1081",
       "weight": 1.0
     },
     {
@@ -34992,7 +34992,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "venematic-desktop/src/components/ManualWeightModal.tsx",
-      "source_location": "L225",
+      "source_location": "L261",
       "weight": 1.0
     },
     {
@@ -35004,7 +35004,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "venematic-desktop/src/components/ManualWeightModal.tsx",
-      "source_location": "L412",
+      "source_location": "L433",
       "weight": 1.0
     },
     {
@@ -39504,7 +39504,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/app/scanner/page.tsx",
-      "source_location": "L37",
+      "source_location": "L38",
       "weight": 1.0
     },
     {
@@ -42960,7 +42960,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "venematic-desktop/src/app/scanner/page.tsx",
-      "source_location": "L37",
+      "source_location": "L38",
       "weight": 1.0
     },
     {
@@ -46145,7 +46145,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/app/scanner/page.tsx",
-      "source_location": "L37",
+      "source_location": "L38",
       "weight": 1.0
     },
     {
@@ -49021,7 +49021,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "venematic-desktop/src/app/scanner/page.tsx",
-      "source_location": "L37",
+      "source_location": "L38",
       "weight": 1.0
     },
     {
@@ -58933,7 +58933,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/app/scanner/page.tsx",
-      "source_location": "L39",
+      "source_location": "L40",
       "weight": 1.0
     },
     {
@@ -58944,7 +58944,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/app/scanner/page.tsx",
-      "source_location": "L45",
+      "source_location": "L46",
       "weight": 1.0
     },
     {
@@ -58955,7 +58955,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/app/scanner/page.tsx",
-      "source_location": "L55",
+      "source_location": "L56",
       "weight": 1.0
     },
     {
@@ -58966,7 +58966,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/app/scanner/page.tsx",
-      "source_location": "L65",
+      "source_location": "L66",
       "weight": 1.0
     },
     {
@@ -60209,7 +60209,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/lib/fiscal/seniat-sales-book.ts",
-      "source_location": "L218",
+      "source_location": "L221",
       "weight": 1.0
     },
     {
@@ -65269,7 +65269,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "venematic-desktop/src/app/scanner/page.tsx",
-      "source_location": "L39",
+      "source_location": "L40",
       "weight": 1.0
     },
     {
@@ -65280,7 +65280,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "venematic-desktop/src/app/scanner/page.tsx",
-      "source_location": "L45",
+      "source_location": "L46",
       "weight": 1.0
     },
     {
@@ -65291,7 +65291,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "venematic-desktop/src/app/scanner/page.tsx",
-      "source_location": "L55",
+      "source_location": "L56",
       "weight": 1.0
     },
     {
@@ -65302,7 +65302,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "venematic-desktop/src/app/scanner/page.tsx",
-      "source_location": "L65",
+      "source_location": "L66",
       "weight": 1.0
     },
     {
@@ -66270,7 +66270,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "venematic-desktop/src/lib/fiscal/seniat-sales-book.ts",
-      "source_location": "L220",
+      "source_location": "L223",
       "weight": 1.0
     },
     {
@@ -72673,5 +72673,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "ca580f50983d191088edcc2ccd7136d0650e2dcf"
+  "built_at_commit": "6c5f3ac09653ca15840670a59e00de97ebe88c13"
 }

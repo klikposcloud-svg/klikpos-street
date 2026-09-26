@@ -7,7 +7,7 @@ Version: 2.0.0 (Actualizada con Cloud Sync, Calculadora de Ganancia, Balanza y M
 Fecha de emision: 25 de September de 2026
 
 Algoritmo SHA256:
-F8D19BC563208159B080D6010572654351734A1F26F93A411DFB82CEF26CA6F6
+741D807A638664458017D6062ABEBDC16EC49EBD5B5AF736082ADB67A4E8218C
 
 Para verificar la integridad del instalador en cualquier computadora:
 PowerShell:

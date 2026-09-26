@@ -2854,15 +2854,21 @@ export default function DesktopPosPage() {
       {/* ========================================================================= */}
       {/* MODAL DUAL DE TICKETS: TICKET MIXTO (CLIENTE) Y FACTURA FISCAL SENIAT (BS) */}
       {/* ========================================================================= */}
-      {showReceiptModal && lastCompletedSale && (
+      {showReceiptModal && lastCompletedSale && (() => {
+        const isCreditSale = Boolean(
+          Array.isArray(lastCompletedSale.payments) &&
+          lastCompletedSale.payments.some((p) => p.method === 'credit')
+        );
+
+        return (
         <div className="fixed inset-0 bg-slate-900/70 backdrop-blur-2xs z-50 flex items-center justify-center p-3 sm:p-4">
           <div className="bg-white rounded-2xl shadow-2xl border border-slate-300 w-full max-w-md overflow-hidden flex flex-col max-h-[92vh]">
             {/* Encabezado y Selector de Tipo de Ticket */}
             <div className="p-3 bg-slate-900 border-b border-slate-800 text-white flex items-center justify-between shrink-0">
               <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span className={`w-2 h-2 rounded-full ${isCreditSale ? 'bg-amber-400' : 'bg-emerald-400'} animate-pulse`} />
                 <span className="font-black text-xs uppercase tracking-wider text-slate-100">
-                  Comprobantes de Venta
+                  {isCreditSale ? 'Nota de Entrega No Fiscal (Crédito)' : 'Comprobantes de Venta'}
                 </span>
               </div>
               <button
@@ -2875,30 +2881,39 @@ export default function DesktopPosPage() {
 
             {/* Pestañas de Selección de Ticket */}
             <div className="flex border-b border-slate-200 bg-slate-100 p-1.5 gap-1.5 shrink-0">
-              <button
-                type="button"
-                onClick={() => setReceiptType('mixed')}
-                className={`flex-1 py-1.5 px-2 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 ${
-                  receiptType === 'mixed'
-                    ? 'bg-sky-700 text-white shadow-sm'
-                    : 'bg-white text-slate-700 hover:bg-slate-200 border border-slate-300'
-                }`}
-              >
-                <span>🔄</span>
-                <span>Ticket Mixto (Cliente)</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setReceiptType('fiscal_seniat')}
-                className={`flex-1 py-1.5 px-2 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 ${
-                  receiptType === 'fiscal_seniat'
-                    ? 'bg-indigo-700 text-white shadow-sm'
-                    : 'bg-white text-slate-700 hover:bg-slate-200 border border-slate-300'
-                }`}
-              >
-                <span>🏛️</span>
-                <span>Factura SENIAT (Bs)</span>
-              </button>
+              {isCreditSale ? (
+                <div className="flex-1 py-1.5 px-3 rounded-xl text-xs font-black bg-amber-600 text-white flex items-center justify-center gap-2 shadow-xs">
+                  <span>📋</span>
+                  <span>Nota de Entrega / Vale de Fiado (Documento No Fiscal)</span>
+                </div>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => setReceiptType('mixed')}
+                    className={`flex-1 py-1.5 px-2 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 ${
+                      receiptType === 'mixed'
+                        ? 'bg-sky-700 text-white shadow-sm'
+                        : 'bg-white text-slate-700 hover:bg-slate-200 border border-slate-300'
+                    }`}
+                  >
+                    <span>🔄</span>
+                    <span>Ticket Mixto (Cliente)</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setReceiptType('fiscal_seniat')}
+                    className={`flex-1 py-1.5 px-2 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 ${
+                      receiptType === 'fiscal_seniat'
+                        ? 'bg-indigo-700 text-white shadow-sm'
+                        : 'bg-white text-slate-700 hover:bg-slate-200 border border-slate-300'
+                    }`}
+                  >
+                    <span>🏛️</span>
+                    <span>Factura SENIAT (Bs)</span>
+                  </button>
+                </>
+              )}
             </div>
 
             {/* Selector de Opciones de Código QR al Pie del Ticket */}
@@ -2949,9 +2964,9 @@ export default function DesktopPosPage() {
 
             {/* Cuerpo del Ticket con Scroll */}
             <div className="p-4 bg-white font-mono text-xs text-slate-900 space-y-2 overflow-y-auto flex-1 border-b border-slate-200">
-              {receiptType === 'mixed' ? (
+              {receiptType === 'mixed' || isCreditSale ? (
                 /* ------------------------------------------------------------- */
-                /* 1. TICKET MIXTO / OPERATIVO MULTIMONEDA                      */
+                /* 1. TICKET MIXTO / NOTA DE ENTREGA NO FISCAL                   */
                 /* ------------------------------------------------------------- */
                 <div id="thermal-receipt" className="space-y-2">
                   <div className="text-center space-y-0.5">
@@ -2970,15 +2985,26 @@ export default function DesktopPosPage() {
                     <p className="text-[10px] text-slate-600 font-bold">RIF: {storeInfo.rif}</p>
                     <p className="text-[10px] text-slate-600">{storeInfo.address}</p>
                     {storeInfo.phone && <p className="text-[10px] text-slate-600">Telf: {storeInfo.phone}</p>}
-                    <span className="inline-block mt-1 px-2 py-0.5 rounded-full bg-sky-100 text-sky-900 text-[10px] font-black border border-sky-300">
-                      TICKET DE CONTROL MULTIMONEDA
-                    </span>
+                    {isCreditSale ? (
+                      <div className="mt-1 space-y-0.5">
+                        <span className="inline-block px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-950 text-[10px] font-black border border-amber-400">
+                          *** NOTA DE ENTREGA / VALE DE FIADO ***
+                        </span>
+                        <div className="text-[9px] text-amber-900 font-bold uppercase tracking-wider">
+                          DOCUMENTO NO FISCAL • VENTA A CRÉDITO
+                        </div>
+                      </div>
+                    ) : (
+                      <span className="inline-block mt-1 px-2 py-0.5 rounded-full bg-sky-100 text-sky-900 text-[10px] font-black border border-sky-300">
+                        TICKET DE CONTROL MULTIMONEDA
+                      </span>
+                    )}
                   </div>
 
                   <div className="border-t border-b border-dashed border-slate-400 py-1.5 space-y-0.5 text-[11px]">
                     <div className="flex justify-between">
-                      <span className="text-slate-600">Ticket N°:</span>
-                      <span className="font-black">{lastCompletedSale.receiptNumber}</span>
+                      <span className="text-slate-600">{isCreditSale ? 'Nota de Entrega N°:' : 'Ticket N°:'}</span>
+                      <span className="font-black">{isCreditSale ? `NE-${lastCompletedSale.receiptNumber}` : lastCompletedSale.receiptNumber}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-slate-600">Fecha / Hora:</span>
@@ -2988,6 +3014,24 @@ export default function DesktopPosPage() {
                       <span className="text-slate-600">Tasa Oficial BCV:</span>
                       <span className="font-black">Bs. {lastCompletedSale.bcvRate.toFixed(2)}</span>
                     </div>
+                    {isCreditSale && (
+                      <>
+                        <div className="flex justify-between pt-1 border-t border-slate-200">
+                          <span className="text-slate-600">Cliente Deudor:</span>
+                          <span className="font-black text-slate-900">{lastCompletedSale.customerName || 'CLIENTE A CRÉDITO'}</span>
+                        </div>
+                        {lastCompletedSale.customerDoc && (
+                          <div className="flex justify-between">
+                            <span className="text-slate-600">C.I. / RIF:</span>
+                            <span className="font-mono font-bold text-slate-900">{lastCompletedSale.customerDoc}</span>
+                          </div>
+                        )}
+                        <div className="flex justify-between text-amber-900 font-bold bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 text-[10px]">
+                          <span>Condición de Pago:</span>
+                          <span>PENDIENTE POR COBRAR (CRÉDITO)</span>
+                        </div>
+                      </>
+                    )}
                   </div>
 
                   {/* Listado de Productos */}
@@ -3029,7 +3073,7 @@ export default function DesktopPosPage() {
                             {p.method === 'card_debit' && '💳 Tarjeta / Punto (Bs.)'}
                             {p.method === 'card_credit' && '💳 Tarjeta Crédito (Bs.)'}
                             {p.method === 'zelle' && '🏦 Zelle ($)'}
-                            {p.method === 'credit' && '📝 Crédito de Confianza'}
+                            {p.method === 'credit' && '📝 Crédito de Confianza (Fiado)'}
                             {p.reference && <span className="text-[9px] text-slate-500 ml-1 font-mono">[{p.reference}]</span>}
                           </span>
                           <span className="font-mono font-bold">
@@ -3063,9 +3107,28 @@ export default function DesktopPosPage() {
                     </div>
                   </div>
 
-                  <div className="text-center pt-2 text-[10px] text-slate-500 font-medium">
-                    {storeInfo.footerMessage || '¡Gracias por su compra! • Comprobante Multimoneda'}
-                  </div>
+                  {/* Pie del ticket / Firma para venta a crédito */}
+                  {isCreditSale ? (
+                    <div className="pt-3 pb-1 border-t border-dashed border-slate-400 text-center space-y-3">
+                      <p className="text-[9px] text-slate-700 uppercase font-bold leading-tight px-1">
+                        Acepto haber recibido a satisfacción la mercancía descrita y me comprometo formalmente al pago del saldo deudor estipulado.
+                      </p>
+                      <div className="pt-8 border-b-2 border-slate-800 w-3/4 mx-auto" />
+                      <div className="text-[10px] font-bold text-slate-900">
+                        Firma de Conformidad del Cliente
+                        <div className="text-[9px] text-slate-600 font-mono mt-0.5">
+                          C.I. / RIF: {lastCompletedSale.customerDoc || '____________________'}
+                        </div>
+                      </div>
+                      <p className="text-[8px] text-slate-500 uppercase font-mono tracking-tight">
+                        DOCUMENTO NO FISCAL • VÁLIDO PARA CONTROL INTERNO Y DESPACHO A CRÉDITO
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="text-center pt-2 text-[10px] text-slate-500 font-medium">
+                      {storeInfo.footerMessage || '¡Gracias por su compra! • Comprobante Multimoneda'}
+                    </div>
+                  )}
 
                   {/* Código QR al final debajo en el ticket */}
                   {qrReceiptMode !== 'none' && ticketQrDataUrl && (
@@ -3229,28 +3292,33 @@ export default function DesktopPosPage() {
               <button
                 type="button"
                 onClick={printReceipt}
-                className="flex-1 py-2 px-3 bg-sky-700 hover:bg-sky-800 text-white rounded-xl font-bold text-xs shadow-sm flex items-center justify-center gap-1.5 transition-colors"
+                className={`flex-1 py-2 px-3 rounded-xl font-bold text-xs shadow-sm flex items-center justify-center gap-1.5 transition-colors text-white ${
+                  isCreditSale ? 'bg-amber-600 hover:bg-amber-700' : 'bg-sky-700 hover:bg-sky-800'
+                }`}
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
                 </svg>
-                <span>Imprimir Este Ticket</span>
+                <span>{isCreditSale ? 'Imprimir Vale de Fiado (No Fiscal)' : 'Imprimir Este Ticket'}</span>
               </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setReceiptType(receiptType === 'mixed' ? 'fiscal_seniat' : 'mixed');
-                  setTimeout(() => printReceipt(), 200);
-                }}
-                className="py-2 px-3 bg-indigo-700 hover:bg-indigo-800 text-white rounded-xl font-bold text-xs shadow-sm flex items-center justify-center gap-1 transition-colors"
-                title="Cambiar al otro formato e imprimir"
-              >
-                <span>{receiptType === 'mixed' ? '📄 Imprimir Fiscal SENIAT' : '🔄 Imprimir Ticket Mixto'}</span>
-              </button>
+              {!isCreditSale && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setReceiptType(receiptType === 'mixed' ? 'fiscal_seniat' : 'mixed');
+                    setTimeout(() => printReceipt(), 200);
+                  }}
+                  className="py-2 px-3 bg-indigo-700 hover:bg-indigo-800 text-white rounded-xl font-bold text-xs shadow-sm flex items-center justify-center gap-1 transition-colors"
+                  title="Cambiar al otro formato e imprimir"
+                >
+                  <span>{receiptType === 'mixed' ? '📄 Imprimir Fiscal SENIAT' : '🔄 Imprimir Ticket Mixto'}</span>
+                </button>
+              )}
             </div>
           </div>
         </div>
-      )}
+        );
+      })()}
 
       {/* ========================================================================= */}
       {/* MODAL: VINCULAR CELULAR COMO ESCÁNER INALÁMBRICO & AGREGAR PRODUCTOS      */}

@@ -30684,7 +30684,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/app/dashboard/pos/page.tsx",
-      "source_location": "L1948",
+      "source_location": "L1941",
       "weight": 1.0
     },
     {
@@ -31332,7 +31332,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/ManualWeightModal.tsx",
-      "source_location": "L225",
+      "source_location": "L261",
       "weight": 1.0
     },
     {
@@ -31344,7 +31344,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/ManualWeightModal.tsx",
-      "source_location": "L412",
+      "source_location": "L433",
       "weight": 1.0
     },
     {
@@ -34440,7 +34440,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "venematic-desktop/src/app/dashboard/pos/page.tsx",
-      "source_location": "L1948",
+      "source_location": "L1941",
       "weight": 1.0
     },
     {
@@ -34992,7 +34992,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "venematic-desktop/src/components/ManualWeightModal.tsx",
-      "source_location": "L225",
+      "source_location": "L261",
       "weight": 1.0
     },
     {
@@ -35004,7 +35004,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "venematic-desktop/src/components/ManualWeightModal.tsx",
-      "source_location": "L412",
+      "source_location": "L433",
       "weight": 1.0
     },
     {
@@ -72673,5 +72673,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "6e81254b12efadaaf9d793fe3537370e705e5936"
+  "built_at_commit": "6c5f3ac09653ca15840670a59e00de97ebe88c13"
 }

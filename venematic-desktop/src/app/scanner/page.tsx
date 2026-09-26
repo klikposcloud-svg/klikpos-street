@@ -33,6 +33,7 @@ import {
   Receipt,
   Scale,
   Copy,
+  FileText,
 } from 'lucide-react';
 import { removeBackgroundToWhiteCanvas } from '@/lib/background-remover';
 
@@ -78,11 +79,13 @@ export default function MobileScannerPage() {
   const [selectedMobileCategory, setSelectedMobileCategory] = useState('Todos');
   const [showCartDrawer, setShowCartDrawer] = useState(false);
   const [showMobilePaymentModal, setShowMobilePaymentModal] = useState(false);
-  const [mobilePaymentMethod, setMobilePaymentMethod] = useState<'cash_usd' | 'cash_ves' | 'pago_movil' | 'punto_venta' | 'zelle'>('cash_usd');
+  const [mobilePaymentMethod, setMobilePaymentMethod] = useState<'cash_usd' | 'cash_ves' | 'pago_movil' | 'punto_venta' | 'zelle' | 'credit'>('cash_usd');
   const [mobileAmountGiven, setMobileAmountGiven] = useState('');
   const [mobilePagoMovilRef, setMobilePagoMovilRef] = useState('');
   const [mobileCardRef, setMobileCardRef] = useState('');
   const [mobileZelleRef, setMobileZelleRef] = useState('');
+  const [mobileCustomerName, setMobileCustomerName] = useState('');
+  const [mobileCustomerDoc, setMobileCustomerDoc] = useState('');
   const [isProcessingMobileSale, setIsProcessingMobileSale] = useState(false);
   const [mobileSaleSuccess, setMobileSaleSuccess] = useState<any | null>(null);
   const [offlinePendingSalesCount, setOfflinePendingSalesCount] = useState(0);
@@ -609,6 +612,14 @@ export default function MobileScannerPage() {
       }
     }
 
+    if (mobilePaymentMethod === 'credit') {
+      if (!mobileCustomerName.trim()) {
+        alert('Por favor ingrese el nombre del cliente para registrar la venta a crédito / fiado.');
+        setIsProcessingMobileSale(false);
+        return;
+      }
+    }
+
     const receiptNum = `CEL-${String(Date.now()).slice(-6)}`;
     const newSale = {
       receiptNumber: receiptNum,
@@ -626,6 +637,8 @@ export default function MobileScannerPage() {
       totalUSD: mobileTotalUSD,
       totalVES: mobileTotalVES,
       bcvRate: inventoryBcvRate,
+      customerName: mobilePaymentMethod === 'credit' ? mobileCustomerName.trim() : undefined,
+      customerDoc: mobilePaymentMethod === 'credit' && mobileCustomerDoc.trim() ? mobileCustomerDoc.trim() : undefined,
       payments: [
         {
           method: mobilePaymentMethod,
@@ -638,6 +651,8 @@ export default function MobileScannerPage() {
               ? mobileCardRef
               : mobilePaymentMethod === 'zelle'
               ? mobileZelleRef
+              : mobilePaymentMethod === 'credit'
+              ? 'Crédito de Confianza'
               : undefined,
         },
       ],
@@ -700,6 +715,11 @@ export default function MobileScannerPage() {
       changeUSD: finalChangeUSD,
       changeVES: finalChangeVES,
       paymentMethod: mobilePaymentMethod,
+      customerName: mobileCustomerName.trim(),
+      customerDoc: mobileCustomerDoc.trim(),
+      items: [...mobileCart],
+      bcvRate: inventoryBcvRate,
+      timestamp: newSale.timestamp,
       sentToPC,
       itemsCount: mobileCart.reduce((sum, i) => sum + i.qty, 0),
     });
@@ -707,6 +727,8 @@ export default function MobileScannerPage() {
     setMobileCart([]);
     setMobileAmountGiven('');
     setMobilePagoMovilRef('');
+    setMobileCustomerName('');
+    setMobileCustomerDoc('');
     setShowCartDrawer(false);
     setShowMobilePaymentModal(false);
     setIsProcessingMobileSale(false);
@@ -1859,7 +1881,7 @@ export default function MobileScannerPage() {
             {/* Selector de Método de Pago */}
             <div className="space-y-1.5">
               <label className="block text-[11px] font-bold text-slate-700">Forma de Pago:</label>
-              <div className="grid grid-cols-3 sm:grid-cols-5 gap-1">
+              <div className="grid grid-cols-3 sm:grid-cols-6 gap-1">
                 <button
                   type="button"
                   onClick={() => {
@@ -1938,6 +1960,22 @@ export default function MobileScannerPage() {
                 >
                   <DollarSign className="w-3.5 h-3.5" />
                   <span>Zelle</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMobilePaymentMethod('credit');
+                    setMobileAmountGiven('');
+                  }}
+                  className={`p-2 rounded-xl text-[11px] font-bold border flex flex-col items-center gap-1 transition-all ${
+                    mobilePaymentMethod === 'credit'
+                      ? 'bg-amber-600 text-white border-amber-600 shadow-xs scale-102'
+                      : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                  }`}
+                >
+                  <FileText className="w-3.5 h-3.5" />
+                  <span>Crédito / Fiado</span>
                 </button>
               </div>
             </div>
@@ -2214,6 +2252,53 @@ export default function MobileScannerPage() {
               </div>
             )}
 
+            {/* ========================================================================= */}
+            {/* DATOS DE VENTA A CRÉDITO / FIADO (DOCUMENTO NO FISCAL)                    */}
+            {/* ========================================================================= */}
+            {mobilePaymentMethod === 'credit' && (
+              <div className="space-y-2 bg-amber-50 p-3 rounded-2xl border border-amber-200">
+                <div className="flex items-center justify-between">
+                  <label className="text-[11px] font-bold text-amber-950 flex items-center gap-1.5">
+                    <FileText className="w-3.5 h-3.5 text-amber-700" />
+                    <span>Datos del Cliente (Fiado / Crédito):</span>
+                  </label>
+                  <span className="text-[9px] font-bold uppercase tracking-wider bg-amber-200/80 text-amber-900 px-2 py-0.5 rounded-full">
+                    No Fiscal
+                  </span>
+                </div>
+
+                <div className="space-y-2">
+                  <div>
+                    <label className="text-[10px] font-bold text-slate-700 block mb-1">
+                      Nombre del Cliente *
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Ej: Carmen Rodríguez"
+                      value={mobileCustomerName}
+                      onChange={(e) => setMobileCustomerName(e.target.value)}
+                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-900 outline-none focus:ring-2 focus:ring-amber-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-bold text-slate-700 block mb-1">
+                      Cédula / RIF (Opcional)
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Ej: V-18.452.100"
+                      value={mobileCustomerDoc}
+                      onChange={(e) => setMobileCustomerDoc(e.target.value)}
+                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-mono font-bold text-slate-900 outline-none focus:ring-2 focus:ring-amber-500"
+                    />
+                  </div>
+                  <div className="bg-amber-100/60 p-2 rounded-xl text-[10px] text-amber-900 leading-tight">
+                    ⚠️ <strong>Venta a Crédito:</strong> No genera factura fiscal SENIAT. Se emitirá una Nota de Entrega / Vale de Fiado con firma de conformidad para el cobro posterior.
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Botón Confirmar Venta */}
             <button
               type="button"
@@ -2228,19 +2313,46 @@ export default function MobileScannerPage() {
         </div>
       )}
 
-      {/* TOAST DE ÉXITO DE VENTA MÓVIL */}
+      {/* TOAST / MODAL DE ÉXITO DE VENTA MÓVIL */}
       {mobileSaleSuccess && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-2xs z-[110] flex items-center justify-center p-4">
-          <div className="bg-white w-full max-w-xs rounded-3xl p-5 text-center space-y-3 shadow-2xl border border-slate-200 animate-in zoom-in-95 duration-150">
-            <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto">
-              <CheckCircle2 className="w-7 h-7" />
+          <div className={`bg-white w-full ${mobileSaleSuccess.paymentMethod === 'credit' ? 'max-w-sm' : 'max-w-xs'} rounded-3xl p-5 text-center space-y-3 shadow-2xl border border-slate-200 animate-in zoom-in-95 duration-150 max-h-[90vh] overflow-y-auto`}>
+            <div className={`w-12 h-12 ${mobileSaleSuccess.paymentMethod === 'credit' ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-600'} rounded-full flex items-center justify-center mx-auto`}>
+              {mobileSaleSuccess.paymentMethod === 'credit' ? <FileText className="w-7 h-7" /> : <CheckCircle2 className="w-7 h-7" />}
             </div>
             <div>
-              <h3 className="font-black text-base text-slate-900">¡Venta Registrada!</h3>
-              <p className="text-xs font-mono text-slate-500 font-bold">{mobileSaleSuccess.receiptNumber}</p>
+              <h3 className="font-black text-base text-slate-900">
+                {mobileSaleSuccess.paymentMethod === 'credit' ? '¡Vale de Fiado Registrado!' : '¡Venta Registrada!'}
+              </h3>
+              <p className="text-xs font-mono text-slate-500 font-bold">
+                {mobileSaleSuccess.paymentMethod === 'credit' ? `NE-${mobileSaleSuccess.receiptNumber}` : mobileSaleSuccess.receiptNumber}
+              </p>
+              {mobileSaleSuccess.paymentMethod === 'credit' && (
+                <span className="inline-block mt-1 px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 text-[10px] font-black border border-amber-300">
+                  DOCUMENTO NO FISCAL • VENTA A CRÉDITO
+                </span>
+              )}
             </div>
 
-            <div className="bg-slate-50 p-3 rounded-2xl border border-slate-200 text-left text-xs space-y-1.5">
+            <div className="bg-slate-50 p-3 rounded-2xl border border-slate-200 text-left text-xs space-y-1.5 font-mono">
+              {mobileSaleSuccess.paymentMethod === 'credit' && (
+                <div className="pb-1 mb-1 border-b border-slate-200 space-y-0.5 font-sans">
+                  <div className="flex justify-between">
+                    <span className="text-slate-500 text-[11px]">Cliente Deudor:</span>
+                    <span className="font-bold text-slate-900 text-[11px]">{mobileSaleSuccess.customerName || 'Cliente a Crédito'}</span>
+                  </div>
+                  {mobileSaleSuccess.customerDoc && (
+                    <div className="flex justify-between">
+                      <span className="text-slate-500 text-[11px]">C.I. / RIF:</span>
+                      <span className="font-mono font-bold text-slate-900 text-[11px]">{mobileSaleSuccess.customerDoc}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between text-amber-900 font-bold bg-amber-100/70 px-1.5 py-0.5 rounded text-[10px]">
+                    <span>Condición:</span>
+                    <span>PENDIENTE POR COBRAR</span>
+                  </div>
+                </div>
+              )}
               <div className="flex justify-between">
                 <span className="text-slate-500">Monto $:</span>
                 <span className="font-mono font-bold text-slate-900">${mobileSaleSuccess.totalUSD.toFixed(2)}</span>
@@ -2263,11 +2375,23 @@ export default function MobileScannerPage() {
                   {mobileSaleSuccess.sentToPC ? '✓ Sincronizado a PC' : '⚡ Guardado en Celular'}
                 </span>
               </div>
+
+              {mobileSaleSuccess.paymentMethod === 'credit' && (
+                <div className="pt-3 pb-1 border-t border-dashed border-slate-300 text-center space-y-2 font-sans">
+                  <p className="text-[9px] text-slate-600 leading-tight">
+                    Firma de conformidad de recepción a satisfacción y compromiso de pago:
+                  </p>
+                  <div className="pt-6 border-b border-slate-700 w-3/4 mx-auto" />
+                  <div className="text-[9px] font-bold text-slate-800">
+                    Firma del Cliente
+                  </div>
+                </div>
+              )}
             </div>
 
             <button
               onClick={() => setMobileSaleSuccess(null)}
-              className="w-full py-2.5 bg-pos-success hover:bg-pos-success-hover text-white font-black text-xs rounded-xl shadow-xs active:scale-98"
+              className={`w-full py-2.5 ${mobileSaleSuccess.paymentMethod === 'credit' ? 'bg-amber-600 hover:bg-amber-700' : 'bg-pos-success hover:bg-pos-success-hover'} text-white font-black text-xs rounded-xl shadow-xs active:scale-98 transition-colors`}
             >
               Aceptar y Nueva Venta
             </button>

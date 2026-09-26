@@ -48,14 +48,14 @@
     "semantic_hash": "f72ef6c411866f3233741847d97c8d80"
   },
   "public/sw.js": {
-    "mtime": 1790385533.943005,
-    "seen": 1790385669.9171655,
-    "ast_hash": "c6cca3a61582b384ee7771e128456de7",
+    "mtime": 1790388317.0338576,
+    "seen": 1790388525.4174814,
+    "ast_hash": "a02fec1405d246a3f2c65945a0117130",
     "semantic_hash": ""
   },
   "public/workbox-00a24876.js": {
-    "mtime": 1790385533.9468086,
-    "seen": 1790385669.9171689,
+    "mtime": 1790388317.0353534,
+    "seen": 1790388525.4174864,
     "ast_hash": "2f569fb030b2a09996588b309a8d636e",
     "semantic_hash": "2f569fb030b2a09996588b309a8d636e"
   },
@@ -288,9 +288,9 @@
     "semantic_hash": "1671769c32220d2d3d02028a4abeb754"
   },
   "src/app/dashboard/pos/page.tsx": {
-    "mtime": 1790386975.5772748,
-    "seen": 1790387170.8575802,
-    "ast_hash": "3f8c218652cbc8d4365b004bc4382ae9",
+    "mtime": 1790389233.2886293,
+    "seen": 1790389693.071694,
+    "ast_hash": "71c622a304fe72d4178780bd69fcd63f",
     "semantic_hash": ""
   },
   "src/app/dashboard/reports/page.tsx": {
@@ -348,10 +348,10 @@
     "semantic_hash": "dff31a89a0d04b3fe8a9f83520bac746"
   },
   "src/app/scanner/page.tsx": {
-    "mtime": 1790116563.4797356,
-    "seen": 1790363920.798443,
-    "ast_hash": "61dad1e63690b0a9c9abe4c8da6ba75a",
-    "semantic_hash": "61dad1e63690b0a9c9abe4c8da6ba75a"
+    "mtime": 1790389341.3956213,
+    "seen": 1790389693.0717144,
+    "ast_hash": "51f2afc21e7fe05c1422578bf11a8b56",
+    "semantic_hash": ""
   },
   "src/app/sw.ts": {
     "mtime": 1787615215.0,
@@ -408,10 +408,10 @@
     "semantic_hash": "0babcc8e577e2da69b9970b851420c1f"
   },
   "src/components/ManualWeightModal.tsx": {
-    "mtime": 1790116067.9196763,
-    "seen": 1790363920.7984564,
-    "ast_hash": "3404fa175569ae2a0607cad9b308a07c",
-    "semantic_hash": "3404fa175569ae2a0607cad9b308a07c"
+    "mtime": 1790388050.9186385,
+    "seen": 1790388525.4176683,
+    "ast_hash": "d39919084a9417467af1d8c87673579e",
+    "semantic_hash": ""
   },
   "src/components/ProductCostCalculator.tsx": {
     "mtime": 1790041088.497661,
@@ -510,10 +510,10 @@
     "semantic_hash": "6f6b34ade8ecede80764fb7db57ef8c7"
   },
   "src/lib/fiscal/seniat-sales-book.ts": {
-    "mtime": 1789950398.0895667,
-    "seen": 1790363920.7984786,
-    "ast_hash": "0e1aa1e82dd656bea46aa80f278f2287",
-    "semantic_hash": "0e1aa1e82dd656bea46aa80f278f2287"
+    "mtime": 1790389162.0227542,
+    "seen": 1790389693.071807,
+    "ast_hash": "ac132cbfc2e106dbfc3041e23da4cb5b",
+    "semantic_hash": ""
   },
   "src/lib/formatters.ts": {
     "mtime": 1789828253.072496,
@@ -1104,9 +1104,9 @@
     "semantic_hash": ""
   },
   "venematic-desktop/src/app/dashboard/pos/page.tsx": {
-    "mtime": 1790386992.1380548,
-    "seen": 1790387170.8579752,
-    "ast_hash": "3f8c218652cbc8d4365b004bc4382ae9",
+    "mtime": 1790389271.815108,
+    "seen": 1790389693.0720606,
+    "ast_hash": "71c622a304fe72d4178780bd69fcd63f",
     "semantic_hash": ""
   },
   "venematic-desktop/src/app/dashboard/reports/page.tsx": {
@@ -1146,10 +1146,10 @@
     "semantic_hash": "2c0fdb1c15f1e65afb7bd098b1c87f9e"
   },
   "venematic-desktop/src/app/scanner/page.tsx": {
-    "mtime": 1790269217.3972387,
-    "seen": 1790363920.798633,
-    "ast_hash": "a03eb3e06f6553db177581525aa466ae",
-    "semantic_hash": "a03eb3e06f6553db177581525aa466ae"
+    "mtime": 1790389391.754566,
+    "seen": 1790389693.0720758,
+    "ast_hash": "85eacb3f885427b491a633b70b8ba1a3",
+    "semantic_hash": ""
   },
   "venematic-desktop/src/components/AdminPinModal.tsx": {
     "mtime": 1789949541.121312,
@@ -1194,10 +1194,10 @@
     "semantic_hash": "0babcc8e577e2da69b9970b851420c1f"
   },
   "venematic-desktop/src/components/ManualWeightModal.tsx": {
-    "mtime": 1790116068.4689374,
-    "seen": 1790363920.7986443,
-    "ast_hash": "3404fa175569ae2a0607cad9b308a07c",
-    "semantic_hash": "3404fa175569ae2a0607cad9b308a07c"
+    "mtime": 1790388076.437516,
+    "seen": 1790388525.4180293,
+    "ast_hash": "d39919084a9417467af1d8c87673579e",
+    "semantic_hash": ""
   },
   "venematic-desktop/src/components/ProductCostCalculator.tsx": {
     "mtime": 1790041088.497661,
@@ -1266,9 +1266,9 @@
     "semantic_hash": "6f6b34ade8ecede80764fb7db57ef8c7"
   },
   "venematic-desktop/src/lib/fiscal/seniat-sales-book.ts": {
-    "mtime": 1790381190.5054622,
-    "seen": 1790381521.614991,
-    "ast_hash": "eb71744505bc8779ca9386d687fcbdaf",
+    "mtime": 1790389168.1005018,
+    "seen": 1790389693.072121,
+    "ast_hash": "2646020666938378cc075869d8c454e6",
     "semantic_hash": ""
   },
   "venematic-desktop/src/lib/formatters.ts": {
@@ -1602,9 +1602,9 @@
     "semantic_hash": ""
   },
   "dist-installer/VERIFICACION_HASHES.txt": {
-    "mtime": 1790387148.7548912,
-    "seen": 1790387170.858201,
-    "ast_hash": "2892357dcbc079373dfb3beea7fc8ab8",
+    "mtime": 1790389667.9662976,
+    "seen": 1790389693.0722494,
+    "ast_hash": "754acc8e6dfb904b264dd1c8532285d0",
     "semantic_hash": ""
   },
   "docs/INFORME_CLIENTES_VENEMATIC_POS.md": {
@@ -1662,9 +1662,9 @@
     "semantic_hash": ""
   },
   "venematic-desktop/dist-installer/VERIFICACION_HASHES.txt": {
-    "mtime": 1790387148.7584484,
-    "seen": 1790387170.8582306,
-    "ast_hash": "2892357dcbc079373dfb3beea7fc8ab8",
+    "mtime": 1790389667.96951,
+    "seen": 1790389693.0722716,
+    "ast_hash": "754acc8e6dfb904b264dd1c8532285d0",
     "semantic_hash": ""
   },
   "venematic-desktop/refinancion.md": {
