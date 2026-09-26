@@ -1584,9 +1584,9 @@
     "semantic_hash": ""
   },
   "dist-apk/VERIFICACION_HASHES_APK.txt": {
-    "mtime": 1790394611.3473241,
-    "seen": 1790394661.8978763,
-    "ast_hash": "1f6384655dd41de8e7eb6a706cf52f02",
+    "mtime": 1790398126.32169,
+    "seen": 1790398190.3649037,
+    "ast_hash": "efbfe719cd5a04ddfbedf539f8ec0864",
     "semantic_hash": ""
   },
   "dist-installer/INSTRUCCIONES_ACTIVACION_LICENCIAS.txt": {
@@ -2004,15 +2004,21 @@
     "semantic_hash": ""
   },
   "public/admin-mobile.html": {
-    "mtime": 1790394506.188941,
-    "seen": 1790394661.8979049,
-    "ast_hash": "2476ac7011a0305eaf43d2ce23617c2e",
+    "mtime": 1790397986.1343696,
+    "seen": 1790398190.3649526,
+    "ast_hash": "e7b268787bd16c6ca9833f29f12e120a",
     "semantic_hash": ""
   },
   "docs/INFORME_GENERAL_SISTEMA_Y_VERSIONES.md": {
     "mtime": 1790395704.7660072,
     "seen": 1790395771.4467897,
     "ast_hash": "d9aea0823c5aadb52a1888427c78283c",
+    "semantic_hash": ""
+  },
+  "docs/TERMINOS_CONDICIONES_Y_PRIVACIDAD.md": {
+    "mtime": 1790398016.2710843,
+    "seen": 1790398190.3649452,
+    "ast_hash": "7a68cabbc49c787969137efeb7b4f139",
     "semantic_hash": ""
   }
 }

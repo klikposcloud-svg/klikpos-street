@@ -146,6 +146,10 @@
       <span>📲</span> <span>SMS Gateway</span>
       <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
     </button>
+    <!-- BOTÓN DE DELIVERY RESERVADO: Se activará en la actualización posterior al lanzamiento oficial -->
+    <button id="tab-btn-delivery" class="hidden px-3.5 py-1.5 rounded-xl font-bold text-xs bg-slate-800 text-slate-300 hover:bg-slate-700 items-center gap-1.5 transition-all">
+      <span>🛵</span> <span>Delivery</span>
+    </button>
   </div>
 
   <!-- ========================================================================= -->
@@ -448,32 +452,64 @@
   <!-- ========================================================================= -->
   <!-- MODAL: CONFIGURACIÓN DE SERVIDOR / RED Y SEGURIDAD PIN                   -->
   <!-- ========================================================================= -->
+  <!-- MODAL: AJUSTES DE RED LOCAL, SEGURIDAD PIN Y GOOGLE CLOUD FIRESTORE       -->
+  <!-- ========================================================================= -->
   <div id="server-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 w-full max-w-sm space-y-3 shadow-2xl modal-enter">
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl p-4 w-full max-w-sm space-y-3.5 shadow-2xl modal-enter max-h-[92vh] overflow-y-auto custom-scrollbar">
       <div class="flex justify-between items-center pb-2 border-b border-slate-800">
-        <h3 class="text-xs font-black text-white flex items-center gap-1.5">
-          <span>⚙️</span> <span>Ajustes de Conexión y PIN</span>
+        <h3 class="text-xs font-black text-white flex items-center gap-1.5 uppercase tracking-wider">
+          <span>⚙️</span> <span>Conexión, PIN y Nube</span>
         </h3>
         <button onclick="closeServerConfigModal()" class="text-slate-400 hover:text-white font-bold text-lg leading-none">&times;</button>
       </div>
 
-      <!-- Configuración IP de Servidor -->
+      <!-- Configuración IP de Servidor Local -->
       <div>
-        <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Dirección IP de Caja Principal (Red Local):</label>
+        <label class="text-[10px] font-bold text-sky-400 uppercase block mb-1">1. IP de Caja Principal (Red Local LAN):</label>
         <input id="server-url-input" type="text" placeholder="http://192.168.1.100:3000" class="w-full bg-slate-950 border border-slate-700 text-white rounded-xl px-3 py-2 text-xs font-mono focus:outline-none focus:border-sky-500" />
+        <p class="text-[9px] text-slate-400 mt-1">Conecta con la PC del mostrador para sincronizar ventas y enviar pagos por SMS.</p>
       </div>
 
       <!-- Configuración de PIN de Seguridad -->
       <div class="pt-2 border-t border-slate-800">
-        <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">PIN Maestro de Acceso (4 Dígitos):</label>
+        <label class="text-[10px] font-bold text-amber-400 uppercase block mb-1">2. PIN Maestro de Acceso (4 Dígitos):</label>
         <input id="master-pin-input" type="password" maxlength="4" placeholder="1234" class="w-full bg-slate-950 border border-slate-700 text-amber-400 rounded-xl px-3 py-2 text-xs font-mono font-bold tracking-widest text-center focus:outline-none focus:border-amber-500" />
       </div>
 
-      <div class="flex gap-2 pt-2">
-        <button onclick="closeServerConfigModal()" class="flex-1 py-2 rounded-xl border border-slate-700 text-slate-300 text-xs font-bold hover:bg-slate-800 transition-colors">
+      <!-- Configuración de Google Cloud Firestore -->
+      <div class="pt-2 border-t border-slate-800 space-y-2">
+        <div class="flex items-center justify-between">
+          <label class="text-[10px] font-bold text-indigo-400 uppercase flex items-center gap-1">
+            <span>☁️</span> <span>3. Google Cloud Firestore:</span>
+          </label>
+          <span id="firestore-status-badge" class="text-[9px] font-bold px-1.5 py-0.2 rounded bg-slate-800 text-slate-400">Sin configurar</span>
+        </div>
+        
+        <div>
+          <label class="text-[9px] text-slate-400 block mb-0.5">Project ID:</label>
+          <input id="firestore-project-id" type="text" placeholder="venematic-pos" class="w-full bg-slate-950 border border-slate-700 text-indigo-300 rounded-xl px-3 py-1.5 text-xs font-mono focus:outline-none focus:border-indigo-500" />
+        </div>
+        
+        <div>
+          <label class="text-[9px] text-slate-400 block mb-0.5">API Key de Web:</label>
+          <input id="firestore-api-key" type="password" placeholder="AIzaSy..." class="w-full bg-slate-950 border border-slate-700 text-indigo-300 rounded-xl px-3 py-1.5 text-xs font-mono focus:outline-none focus:border-indigo-500" />
+        </div>
+
+        <div>
+          <label class="text-[9px] text-slate-400 block mb-0.5">ID de Tienda / Sucursal:</label>
+          <input id="firestore-store-id" type="text" placeholder="tienda_principal" class="w-full bg-slate-950 border border-slate-700 text-indigo-300 rounded-xl px-3 py-1.5 text-xs font-mono focus:outline-none focus:border-indigo-500" />
+        </div>
+
+        <button type="button" onclick="triggerFirestoreSyncNow()" class="w-full py-2 bg-indigo-600/30 hover:bg-indigo-600 border border-indigo-500/40 text-indigo-200 hover:text-white rounded-xl text-[11px] font-bold transition-all active:scale-95 flex items-center justify-center gap-1.5">
+          <span>🔄</span> <span>Sincronizar con Firestore Ahora</span>
+        </button>
+      </div>
+
+      <div class="flex gap-2 pt-2 border-t border-slate-800">
+        <button onclick="closeServerConfigModal()" class="flex-1 py-2.5 rounded-xl border border-slate-700 text-slate-300 text-xs font-bold hover:bg-slate-800 transition-colors">
           Cancelar
         </button>
-        <button onclick="saveServerConfig()" class="flex-1 bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs py-2 rounded-xl shadow-md active:scale-95 transition-all">
+        <button onclick="saveServerConfig()" class="flex-1 bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs py-2.5 rounded-xl shadow-md active:scale-95 transition-all">
           Guardar Cambios
         </button>
       </div>
@@ -598,6 +634,9 @@
     let bcvRate = 848.55;
     let serverUrl = localStorage.getItem('venematic_server_url') || '';
     let masterPin = localStorage.getItem('venematic_admin_pin') || '1234';
+    let firestoreProjectId = localStorage.getItem('venematic_firestore_project_id') || '';
+    let firestoreApiKey = localStorage.getItem('venematic_firestore_api_key') || '';
+    let firestoreStoreId = localStorage.getItem('venematic_firestore_store_id') || 'tienda_principal';
     let isConnected = false;
     let allSales = [];
     let catalog = [];
@@ -722,11 +761,27 @@
     }
 
     // =========================================================================
-    // CONFIGURACIÓN DE RED Y PIN
+    // CONFIGURACIÓN DE RED, PIN Y GOOGLE CLOUD FIRESTORE
     // =========================================================================
+    function updateFirestoreBadge() {
+      const badge = document.getElementById('firestore-status-badge');
+      if (!badge) return;
+      if (firestoreProjectId && firestoreApiKey) {
+        badge.className = "text-[9px] font-bold px-1.5 py-0.2 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/40";
+        badge.innerText = "Configurado";
+      } else {
+        badge.className = "text-[9px] font-bold px-1.5 py-0.2 rounded bg-slate-800 text-slate-400";
+        badge.innerText = "Sin configurar";
+      }
+    }
+
     function openServerConfigModal() {
       document.getElementById('server-url-input').value = serverUrl;
       document.getElementById('master-pin-input').value = masterPin;
+      document.getElementById('firestore-project-id').value = firestoreProjectId;
+      document.getElementById('firestore-api-key').value = firestoreApiKey;
+      document.getElementById('firestore-store-id').value = firestoreStoreId;
+      updateFirestoreBadge();
       document.getElementById('server-modal').classList.remove('hidden');
     }
     function closeServerConfigModal() {
@@ -735,9 +790,15 @@
     function saveServerConfig() {
       const val = document.getElementById('server-url-input').value.trim();
       const newPin = document.getElementById('master-pin-input').value.trim();
+      firestoreProjectId = document.getElementById('firestore-project-id').value.trim();
+      firestoreApiKey = document.getElementById('firestore-api-key').value.trim();
+      firestoreStoreId = document.getElementById('firestore-store-id').value.trim() || 'tienda_principal';
 
       serverUrl = val.replace(/\/+$/, '');
       localStorage.setItem('venematic_server_url', serverUrl);
+      localStorage.setItem('venematic_firestore_project_id', firestoreProjectId);
+      localStorage.setItem('venematic_firestore_api_key', firestoreApiKey);
+      localStorage.setItem('venematic_firestore_store_id', firestoreStoreId);
 
       if (newPin && newPin.length === 4) {
         masterPin = newPin;
@@ -745,8 +806,55 @@
       }
 
       closeServerConfigModal();
-      showToast('Ajustes guardados correctamente', true);
+      showToast('Ajustes de Servidor y Firestore guardados', true);
       checkServerConnection();
+      if (firestoreProjectId && firestoreApiKey) {
+        triggerFirestoreSyncNow();
+      }
+    }
+
+    // Sincronización REST con Google Cloud Firestore
+    async function triggerFirestoreSyncNow() {
+      if (!firestoreProjectId || !firestoreApiKey) {
+        alert('Ingresa el Project ID y API Key de Google Cloud Firestore para sincronizar.');
+        return;
+      }
+      showToast('☁️ Conectando con Google Firestore...', true);
+      try {
+        const url = `https://firestore.googleapis.com/v1/projects/${firestoreProjectId}/databases/(default)/documents/stores/${firestoreStoreId}/summary/latest?key=${firestoreApiKey}`;
+        const totals = calculateTotals();
+        const payload = {
+          fields: {
+            storeId: { stringValue: firestoreStoreId },
+            totalUSD: { doubleValue: totals.totalUSD },
+            totalVES: { doubleValue: totals.totalUSD * bcvRate },
+            bcvRate: { doubleValue: bcvRate },
+            salesCount: { integerValue: allSales.length },
+            updatedAt: { stringValue: new Date().toISOString() },
+            source: { stringValue: "admin_mobile_pos" }
+          }
+        };
+
+        const res = await fetch(url, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (res.ok) {
+          showToast('✓ Sincronizado exitosamente con Google Cloud Firestore', true);
+          const badge = document.getElementById('firestore-status-badge');
+          if (badge) {
+            badge.className = "text-[9px] font-bold px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40";
+            badge.innerText = "✓ Sincronizado";
+          }
+        } else {
+          showToast('Aviso: Verifique credenciales o reglas de Firestore', false);
+        }
+      } catch (err) {
+        console.error('Error sincronizando con Firestore:', err);
+        showToast('Error de conexión con Google Firestore', false);
+      }
     }
 
     // =========================================================================

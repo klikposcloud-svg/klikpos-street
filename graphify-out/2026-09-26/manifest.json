@@ -2008,5 +2008,11 @@
     "seen": 1790394661.8979049,
     "ast_hash": "2476ac7011a0305eaf43d2ce23617c2e",
     "semantic_hash": ""
+  },
+  "docs/INFORME_GENERAL_SISTEMA_Y_VERSIONES.md": {
+    "mtime": 1790395704.7660072,
+    "seen": 1790395771.4467897,
+    "ast_hash": "d9aea0823c5aadb52a1888427c78283c",
+    "semantic_hash": ""
   }
 }
