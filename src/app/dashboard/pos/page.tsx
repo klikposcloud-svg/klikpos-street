@@ -24,8 +24,9 @@ import {
 } from 'lucide-react';
 import { scaleService, WeightReading } from '@/lib/hardware/scale';
 import { kickCashDrawer } from '@/lib/hardware/cash-drawer';
-import { LocalCustomer } from '@/lib/db';
+import { LocalCustomer, LocalCashShift } from '@/lib/db';
 import ManualWeightModal from '@/components/ManualWeightModal';
+import CashShiftModal from '@/components/CashShiftModal';
 import { parseScaleBarcode, findProductByScalePLU } from '@/lib/hardware/scale-barcode';
 import { pagoMovilMonitor, PagoMovilConfirmation } from '@/lib/payments/pago-movil-gmail-monitor';
 
@@ -92,6 +93,11 @@ export default function DesktopPosPage() {
   const [pagoMovilAutoStatus, setPagoMovilAutoStatus] = useState<'idle' | 'monitoring' | 'confirmed' | 'error'>('idle');
   const [pagoMovilAutoConfirmation, setPagoMovilAutoConfirmation] = useState<PagoMovilConfirmation | null>(null);
   const [pagoMovilGmailConfigured] = useState<boolean>(() => pagoMovilMonitor.isConfigured());
+
+  // Gestión Profesional de Turno de Caja y Arqueo Físico
+  const [activeShift, setActiveShift] = useState<LocalCashShift | null>(null);
+  const [showCashShiftModal, setShowCashShiftModal] = useState<boolean>(false);
+  const [cashShiftModalMode, setCashShiftModalMode] = useState<'open' | 'close' | 'movement' | 'view_x'>('open');
 
   // Pagos Mixtos Multimoneda
   const [mixedPayments, setMixedPayments] = useState<{
@@ -421,6 +427,18 @@ export default function DesktopPosPage() {
       setShiftSales(todaySales.length > 0 ? todaySales : allSales.slice(0, 50));
     } catch (e) {
       console.warn('Error cargando ventas de turno en POS:', e);
+    }
+
+    // Cargar turno de caja activo (si existe)
+    try {
+      const openShift = await db.cashShifts.where('status').equals('open').first();
+      if (openShift) {
+        setActiveShift(openShift);
+      } else {
+        setActiveShift(null);
+      }
+    } catch (e) {
+      console.warn('Error cargando turno activo en POS:', e);
     }
 
     // Cargar directorio de clientes para ventas a crédito / fiado
@@ -1106,6 +1124,13 @@ export default function DesktopPosPage() {
 
   // Abrir Modal de Cobro
   const openPaymentModal = () => {
+    if (!activeShift) {
+      setCashShiftModalMode('open');
+      setShowCashShiftModal(true);
+      showToast('⚠️ Debes abrir la caja e ingresar el fondo inicial antes de cobrar.', 'error');
+      return;
+    }
+
     setCashGivenUSD(totalUSD.toFixed(2));
     setCashGivenVES(totalVES.toFixed(2));
     setMixedPayments([]);
@@ -1435,6 +1460,30 @@ export default function DesktopPosPage() {
           )}
           {/* Quick buttons */}
           <div className="flex items-center gap-1.5 ml-2 pl-2 border-l border-slate-200 shrink-0">
+            {/* Pill de Turno / Caja */}
+            <button
+              type="button"
+              onClick={() => {
+                if (!activeShift) {
+                  setCashShiftModalMode('open');
+                } else {
+                  setCashShiftModalMode('view_x');
+                }
+                setShowCashShiftModal(true);
+              }}
+              className={`px-2.5 py-1 rounded-lg text-xs font-black flex items-center gap-1.5 transition-colors cursor-pointer border ${
+                activeShift
+                  ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border-emerald-300 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-700'
+                  : 'bg-amber-100 hover:bg-amber-200 text-amber-900 border-amber-300 dark:bg-amber-950 dark:text-amber-300 dark:border-amber-700'
+              }`}
+              title={activeShift ? `Turno #${activeShift.id} abierto. Clic para ver arqueo` : 'Caja cerrada. Clic para registrar fondo inicial'}
+            >
+              <span className={`w-2 h-2 rounded-full shrink-0 ${activeShift ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
+              <span className="hidden sm:inline">
+                {activeShift ? `Turno #${activeShift.id} (${activeShift.cashierName})` : 'Abrir Turno'}
+              </span>
+            </button>
+
             {/* Botón Balanza Manual */}
             <button
               type="button"
@@ -1466,7 +1515,7 @@ export default function DesktopPosPage() {
         {/* BARRA DE BOTONES GRANDES (ACCIONES RÁPIDAS TÁCTILES POS)                  */}
         {/* ========================================================================= */}
         <div className="bg-slate-200/70 dark:bg-slate-900/80 border border-slate-300/80 dark:border-slate-800 rounded-2xl p-2.5 shadow-2xs shrink-0">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 items-center">
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5 items-center">
             {/* 1. Botón Grande: Escanear con Celular (Logo SVG de Código de Barras con Láser) */}
             <button
               type="button"
@@ -1583,6 +1632,47 @@ export default function DesktopPosPage() {
               <div className="flex flex-col justify-center text-left leading-tight min-w-0">
                 <span className="text-xs font-black tracking-tight truncate text-slate-900 dark:text-white">Gaveta (F10)</span>
                 <span className="text-[10.5px] text-slate-500 dark:text-slate-300 font-bold truncate">Abrir Caja</span>
+              </div>
+            </button>
+
+            {/* 5. Botón Grande: Turno / Caja (Apertura, Arqueo, Movimiento y Cierre) */}
+            <button
+              type="button"
+              onClick={() => {
+                if (!activeShift) {
+                  setCashShiftModalMode('open');
+                } else {
+                  setCashShiftModalMode('view_x');
+                }
+                setShowCashShiftModal(true);
+              }}
+              className={`h-14 px-3.5 rounded-xl font-bold flex items-center gap-2.5 shadow-2xs active:scale-[0.98] transition-all cursor-pointer border ${
+                activeShift
+                  ? 'bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-900 dark:text-white border-slate-200/90 dark:border-slate-700'
+                  : 'bg-amber-500 hover:bg-amber-400 text-white border-amber-400 shadow-sm'
+              }`}
+              title={activeShift ? 'Gestionar turno, consultar arqueo o cerrar caja' : 'Caja cerrada: Clic para registrar fondo inicial'}
+            >
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border ${
+                activeShift
+                  ? 'bg-indigo-50 dark:bg-slate-700 text-indigo-700 dark:text-indigo-400 border-indigo-200 dark:border-slate-600'
+                  : 'bg-white/20 text-white border-white/30'
+              }`}>
+                <Banknote className={`w-5 h-5 ${activeShift ? 'text-indigo-700 dark:text-indigo-400' : 'text-white'}`} />
+              </div>
+              <div className="flex flex-col justify-center text-left leading-tight min-w-0">
+                <span
+                  className={`text-xs font-black tracking-tight truncate ${activeShift ? 'text-slate-900 dark:text-white' : '!text-white'}`}
+                  style={!activeShift ? { color: '#ffffff' } : undefined}
+                >
+                  {activeShift ? `Turno #${activeShift.id}` : 'Abrir Turno'}
+                </span>
+                <span
+                  className={`text-[10.5px] font-bold truncate ${activeShift ? 'text-slate-500 dark:text-slate-300' : '!text-amber-100'}`}
+                  style={!activeShift ? { color: '#fef3c7' } : undefined}
+                >
+                  {activeShift ? 'Arqueo / Cierre' : 'Fondo de Caja'}
+                </span>
               </div>
             </button>
           </div>
@@ -3319,6 +3409,17 @@ export default function DesktopPosPage() {
         availableProducts={products}
         bcvRate={bcvRate}
         initialWeightKg={scaleReading.weight > 0 ? scaleReading.weight : pendingQuantity || 0}
+      />
+
+      {/* Modal Profesional de Gestión de Turno y Arqueo Físico de Caja */}
+      <CashShiftModal
+        isOpen={showCashShiftModal}
+        onClose={() => setShowCashShiftModal(false)}
+        initialMode={cashShiftModalMode}
+        activeShift={activeShift}
+        bcvRate={bcvRate}
+        onShiftUpdated={(updated) => setActiveShift(updated)}
+        storeInfo={storeInfo}
       />
 
       {/* ========================================================================= */}

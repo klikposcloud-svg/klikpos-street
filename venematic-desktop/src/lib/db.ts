@@ -72,6 +72,36 @@ export interface LocalCustomer {
   createdAt: string;
 }
 
+export interface CashDenominationBreakdown {
+  usd_100?: number;
+  usd_50?: number;
+  usd_20?: number;
+  usd_10?: number;
+  usd_5?: number;
+  usd_2?: number;
+  usd_1?: number;
+  usd_coins?: number;
+
+  ves_100?: number;
+  ves_50?: number;
+  ves_20?: number;
+  ves_10?: number;
+  ves_5?: number;
+  ves_coins?: number;
+}
+
+export interface CashMovement {
+  id?: number;
+  shiftId: number;
+  type: 'in' | 'out'; // in: Entrada/Aporte, out: Salida/Retiro/Gasto
+  amountUSD: number;
+  amountVES: number;
+  reason: string;
+  performedBy: string;
+  timestamp: string;
+  notes?: string;
+}
+
 export interface LocalCashShift {
   id?: number;
   openedAt: string;
@@ -79,12 +109,25 @@ export interface LocalCashShift {
   cashierName: string;
   initialCashUSD: number;
   initialCashVES: number;
+  initialDenominations?: CashDenominationBreakdown;
   totalSalesUSD: number;
   totalCashUSD: number;
   totalCashVES: number;
   totalPagoMovilVES: number;
   totalCardVES: number;
   totalZelleUSD: number;
+  cashInUSD?: number;
+  cashOutUSD?: number;
+  cashInVES?: number;
+  cashOutVES?: number;
+  expectedCashUSD?: number;
+  expectedCashVES?: number;
+  actualCashUSD?: number;
+  actualCashVES?: number;
+  differenceUSD?: number;
+  differenceVES?: number;
+  finalDenominations?: CashDenominationBreakdown;
+  notes?: string;
   status: 'open' | 'closed';
 }
 
@@ -131,6 +174,7 @@ export class VenematicDesktopDB extends Dexie {
   settings!: Table<LocalSetting, string>;
   inventoryMovements!: Table<InventoryMovement, number>;
   customerCreditPayments!: Table<CustomerCreditPayment, number>;
+  cashMovements!: Table<CashMovement, number>;
 
   constructor() {
     super('VenematicDesktopDB');
@@ -149,6 +193,16 @@ export class VenematicDesktopDB extends Dexie {
       settings: '&key',
       inventoryMovements: '++id, productId, barcode, type, reason, timestamp',
       customerCreditPayments: '++id, customerDoc, timestamp, method',
+    });
+    this.version(3).stores({
+      products: '++id, &barcode, name, category, stock, updatedAt',
+      sales: '++id, &receiptNumber, timestamp, status, cashierName',
+      customers: '++id, &docId, name, phone',
+      cashShifts: '++id, openedAt, status, cashierName',
+      settings: '&key',
+      inventoryMovements: '++id, productId, barcode, type, reason, timestamp',
+      customerCreditPayments: '++id, customerDoc, timestamp, method',
+      cashMovements: '++id, shiftId, type, timestamp',
     });
   }
 }

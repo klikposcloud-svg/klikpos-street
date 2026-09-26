@@ -21,13 +21,12 @@ import {
   Banknote,
   Users,
   Search,
-  Maximize,
-  Minimize,
 } from 'lucide-react';
 import { scaleService, WeightReading } from '@/lib/hardware/scale';
 import { kickCashDrawer } from '@/lib/hardware/cash-drawer';
-import { LocalCustomer } from '@/lib/db';
+import { LocalCustomer, LocalCashShift } from '@/lib/db';
 import ManualWeightModal from '@/components/ManualWeightModal';
+import CashShiftModal from '@/components/CashShiftModal';
 import { parseScaleBarcode, findProductByScalePLU } from '@/lib/hardware/scale-barcode';
 import { pagoMovilMonitor, PagoMovilConfirmation } from '@/lib/payments/pago-movil-gmail-monitor';
 
@@ -56,23 +55,6 @@ export default function DesktopPosPage() {
   const [phoneConnected, setPhoneConnected] = useState<boolean>(false);
   const [phoneDeviceName, setPhoneDeviceName] = useState<string>('');
   const [toastMessage, setToastMessage] = useState<{ text: string; type: 'success' | 'error' | 'info' } | null>(null);
-  const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
-
-  const toggleFullscreen = () => {
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen().then(() => setIsFullscreen(true)).catch(() => {});
-    } else {
-      if (document.exitFullscreen) {
-        document.exitFullscreen().then(() => setIsFullscreen(false)).catch(() => {});
-      }
-    }
-  };
-
-  useEffect(() => {
-    const handleFs = () => setIsFullscreen(!!document.fullscreenElement);
-    document.addEventListener('fullscreenchange', handleFs);
-    return () => document.removeEventListener('fullscreenchange', handleFs);
-  }, []);
 
   // Balanza Digital Comercial
   const [scaleReading, setScaleReading] = useState<WeightReading>({
@@ -111,6 +93,11 @@ export default function DesktopPosPage() {
   const [pagoMovilAutoStatus, setPagoMovilAutoStatus] = useState<'idle' | 'monitoring' | 'confirmed' | 'error'>('idle');
   const [pagoMovilAutoConfirmation, setPagoMovilAutoConfirmation] = useState<PagoMovilConfirmation | null>(null);
   const [pagoMovilGmailConfigured] = useState<boolean>(() => pagoMovilMonitor.isConfigured());
+
+  // Gestión Profesional de Turno de Caja y Arqueo Físico
+  const [activeShift, setActiveShift] = useState<LocalCashShift | null>(null);
+  const [showCashShiftModal, setShowCashShiftModal] = useState<boolean>(false);
+  const [cashShiftModalMode, setCashShiftModalMode] = useState<'open' | 'close' | 'movement' | 'view_x'>('open');
 
   // Pagos Mixtos Multimoneda
   const [mixedPayments, setMixedPayments] = useState<{
@@ -440,6 +427,18 @@ export default function DesktopPosPage() {
       setShiftSales(todaySales.length > 0 ? todaySales : allSales.slice(0, 50));
     } catch (e) {
       console.warn('Error cargando ventas de turno en POS:', e);
+    }
+
+    // Cargar turno de caja activo (si existe)
+    try {
+      const openShift = await db.cashShifts.where('status').equals('open').first();
+      if (openShift) {
+        setActiveShift(openShift);
+      } else {
+        setActiveShift(null);
+      }
+    } catch (e) {
+      console.warn('Error cargando turno activo en POS:', e);
     }
 
     // Cargar directorio de clientes para ventas a crédito / fiado
@@ -981,7 +980,6 @@ export default function DesktopPosPage() {
             priceUSD: product.priceUSD,
             totalUSD: qtyToAdd * product.priceUSD,
             stock: product.stock,
-            isTaxExempt: Boolean(product.isTaxExempt),
           },
         ];
       }
@@ -1126,6 +1124,13 @@ export default function DesktopPosPage() {
 
   // Abrir Modal de Cobro
   const openPaymentModal = () => {
+    if (!activeShift) {
+      setCashShiftModalMode('open');
+      setShowCashShiftModal(true);
+      showToast('⚠️ Debes abrir la caja e ingresar el fondo inicial antes de cobrar.', 'error');
+      return;
+    }
+
     setCashGivenUSD(totalUSD.toFixed(2));
     setCashGivenVES(totalVES.toFixed(2));
     setMixedPayments([]);
@@ -1454,7 +1459,31 @@ export default function DesktopPosPage() {
             </button>
           )}
           {/* Quick buttons */}
-          <div className="flex items-center gap-1.5 ml-2 pl-2 border-l border-slate-200 dark:border-slate-700 shrink-0">
+          <div className="flex items-center gap-1.5 ml-2 pl-2 border-l border-slate-200 shrink-0">
+            {/* Pill de Turno / Caja */}
+            <button
+              type="button"
+              onClick={() => {
+                if (!activeShift) {
+                  setCashShiftModalMode('open');
+                } else {
+                  setCashShiftModalMode('view_x');
+                }
+                setShowCashShiftModal(true);
+              }}
+              className={`px-2.5 py-1 rounded-lg text-xs font-black flex items-center gap-1.5 transition-colors cursor-pointer border ${
+                activeShift
+                  ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border-emerald-300 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-700'
+                  : 'bg-amber-100 hover:bg-amber-200 text-amber-900 border-amber-300 dark:bg-amber-950 dark:text-amber-300 dark:border-amber-700'
+              }`}
+              title={activeShift ? `Turno #${activeShift.id} abierto. Clic para ver arqueo` : 'Caja cerrada. Clic para registrar fondo inicial'}
+            >
+              <span className={`w-2 h-2 rounded-full shrink-0 ${activeShift ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
+              <span className="hidden sm:inline">
+                {activeShift ? `Turno #${activeShift.id} (${activeShift.cashierName})` : 'Abrir Turno'}
+              </span>
+            </button>
+
             {/* Botón Balanza Manual */}
             <button
               type="button"
@@ -1463,9 +1492,9 @@ export default function DesktopPosPage() {
                 setShowManualWeightModal(true);
               }}
               title="Balanza: Clic para peso manual"
-              className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg text-slate-600 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
+              className="p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded text-slate-600 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
             >
-              <Scale className="w-4 h-4" />
+              <Scale className="w-3.5 h-3.5" />
             </button>
             {/* Botón Gaveta */}
             <button
@@ -1475,18 +1504,9 @@ export default function DesktopPosPage() {
                 showToast(res.message, 'success');
               }}
               title="Abrir gaveta de dinero (F10)"
-              className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg text-slate-600 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
+              className="p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded text-slate-600 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
             >
-              <Banknote className="w-4 h-4" />
-            </button>
-            {/* Botón Pantalla Completa / Kiosco (F11) */}
-            <button
-              type="button"
-              onClick={toggleFullscreen}
-              title={isFullscreen ? 'Salir de Pantalla Completa (F11)' : 'Modo Kiosco / Pantalla Completa (F11)'}
-              className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg text-slate-600 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
-            >
-              {isFullscreen ? <Minimize className="w-4 h-4 text-emerald-600" /> : <Maximize className="w-4 h-4" />}
+              <Banknote className="w-3.5 h-3.5" />
             </button>
           </div>
         </div>
@@ -1495,7 +1515,7 @@ export default function DesktopPosPage() {
         {/* BARRA DE BOTONES GRANDES (ACCIONES RÁPIDAS TÁCTILES POS)                  */}
         {/* ========================================================================= */}
         <div className="bg-slate-200/70 dark:bg-slate-900/80 border border-slate-300/80 dark:border-slate-800 rounded-2xl p-2.5 shadow-2xs shrink-0">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 items-center">
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5 items-center">
             {/* 1. Botón Grande: Escanear con Celular (Logo SVG de Código de Barras con Láser) */}
             <button
               type="button"
@@ -1614,6 +1634,47 @@ export default function DesktopPosPage() {
                 <span className="text-[10.5px] text-slate-500 dark:text-slate-300 font-bold truncate">Abrir Caja</span>
               </div>
             </button>
+
+            {/* 5. Botón Grande: Turno / Caja (Apertura, Arqueo, Movimiento y Cierre) */}
+            <button
+              type="button"
+              onClick={() => {
+                if (!activeShift) {
+                  setCashShiftModalMode('open');
+                } else {
+                  setCashShiftModalMode('view_x');
+                }
+                setShowCashShiftModal(true);
+              }}
+              className={`h-14 px-3.5 rounded-xl font-bold flex items-center gap-2.5 shadow-2xs active:scale-[0.98] transition-all cursor-pointer border ${
+                activeShift
+                  ? 'bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-900 dark:text-white border-slate-200/90 dark:border-slate-700'
+                  : 'bg-amber-500 hover:bg-amber-400 text-white border-amber-400 shadow-sm'
+              }`}
+              title={activeShift ? 'Gestionar turno, consultar arqueo o cerrar caja' : 'Caja cerrada: Clic para registrar fondo inicial'}
+            >
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border ${
+                activeShift
+                  ? 'bg-indigo-50 dark:bg-slate-700 text-indigo-700 dark:text-indigo-400 border-indigo-200 dark:border-slate-600'
+                  : 'bg-white/20 text-white border-white/30'
+              }`}>
+                <Banknote className={`w-5 h-5 ${activeShift ? 'text-indigo-700 dark:text-indigo-400' : 'text-white'}`} />
+              </div>
+              <div className="flex flex-col justify-center text-left leading-tight min-w-0">
+                <span
+                  className={`text-xs font-black tracking-tight truncate ${activeShift ? 'text-slate-900 dark:text-white' : '!text-white'}`}
+                  style={!activeShift ? { color: '#ffffff' } : undefined}
+                >
+                  {activeShift ? `Turno #${activeShift.id}` : 'Abrir Turno'}
+                </span>
+                <span
+                  className={`text-[10.5px] font-bold truncate ${activeShift ? 'text-slate-500 dark:text-slate-300' : '!text-amber-100'}`}
+                  style={!activeShift ? { color: '#fef3c7' } : undefined}
+                >
+                  {activeShift ? 'Arqueo / Cierre' : 'Fondo de Caja'}
+                </span>
+              </div>
+            </button>
           </div>
         </div>
 
@@ -1643,30 +1704,29 @@ export default function DesktopPosPage() {
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5 content-start">
             {filteredProducts.map((p) => {
               const isLowStock = p.stock <= p.minStock;
-              const catTheme = getCategoryTheme(p.category);
               return (
                 <div
                   key={p.id}
                   onClick={() => addToCart(p, 1)}
-                  className={`bg-white dark:bg-slate-800 rounded-2xl border border-slate-300/80 dark:border-slate-700 p-3 shadow-2xs hover:shadow-md transition-all active:scale-[0.98] cursor-pointer flex flex-col justify-between group ${catTheme.cardBorder}`}
+                  className="bg-white rounded-2xl border border-slate-200/90 p-3 shadow-2xs hover:shadow-md transition-all active:scale-[0.98] cursor-pointer flex flex-col justify-between group"
                 >
                   {/* Encabezado: Barcode Pill + Rubro Coloreado */}
                   <div className="flex items-center justify-between gap-1.5 w-full mb-1">
-                    <span className="font-mono text-[9.5px] font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-700/60 px-2 py-0.5 rounded border border-slate-200/60 dark:border-slate-600 truncate max-w-[100px]">
+                    <span className="font-mono text-[9.5px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded border border-slate-200/60 truncate max-w-[100px]">
                       {p.barcode || 'S/C'}
                     </span>
-                    <span className={`text-[9.5px] font-extrabold px-2.5 py-0.5 rounded uppercase tracking-wider shrink-0 border ${catTheme.badge}`}>
+                    <span className="text-[9.5px] font-extrabold px-2.5 py-0.5 rounded bg-[#0e4f5a] text-white uppercase tracking-wider shrink-0">
                       {p.category}
                     </span>
                   </div>
 
                   {/* Nombre */}
-                  <h4 className="font-bold text-[13px] text-slate-900 dark:text-white truncate leading-snug my-1" title={p.name}>
+                  <h4 className="font-bold text-[13px] text-slate-900 truncate leading-snug my-1" title={p.name}>
                     {p.name}
                   </h4>
 
                   {/* Contenedor de Imagen */}
-                  <div className="w-full h-24 sm:h-28 rounded-xl bg-slate-100 dark:bg-slate-700/40 overflow-hidden relative border border-slate-200/60 dark:border-slate-700 my-1">
+                  <div className="w-full h-24 sm:h-28 rounded-xl bg-slate-100 overflow-hidden relative border border-slate-200/60 my-1">
                     {p.image ? (
                       <img
                         src={p.image}
@@ -1675,24 +1735,24 @@ export default function DesktopPosPage() {
                         loading="lazy"
                       />
                     ) : (
-                      <div className="w-full h-full flex flex-col items-center justify-center text-slate-300 dark:text-slate-500">
+                      <div className="w-full h-full flex flex-col items-center justify-center text-slate-300">
                         <Package className="w-8 h-8 stroke-1" />
                       </div>
                     )}
                   </div>
 
                   {/* Precios y Stock */}
-                  <div className="flex items-end justify-between gap-1.5 pt-1.5 mt-1 border-t border-slate-100 dark:border-slate-700/80">
+                  <div className="flex items-end justify-between gap-1.5 pt-1 mt-1">
                     <div className="leading-tight flex flex-col">
-                      <span className="text-[15px] font-black font-sans text-slate-950 dark:text-emerald-400 tabular-numbers leading-tight">
+                      <span className="text-[15px] font-black font-sans text-slate-950 tabular-numbers leading-tight">
                         {formatVES(p.priceUSD * bcvRate)}
                       </span>
-                      <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                      <span className="text-xs text-slate-500 font-medium">
                         ${p.priceUSD.toFixed(2)} USD
                       </span>
                     </div>
 
-                    <span className="text-[11px] font-medium px-2.5 py-0.5 rounded-full border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-700 dark:text-slate-300 shrink-0 flex items-center gap-1.5">
+                    <span className="text-[11px] font-medium px-2.5 py-0.5 rounded-full border border-slate-200 bg-slate-50 text-slate-700 shrink-0 flex items-center gap-1.5">
                       <span className={`w-1.5 h-1.5 rounded-full ${isLowStock ? 'bg-rose-500 animate-pulse' : 'bg-emerald-500'}`} />
                       <span>{p.stock} {p.unit}</span>
                     </span>
@@ -1862,7 +1922,7 @@ export default function DesktopPosPage() {
 
             {/* Gran Total del Ticket con Separación Nítida Anti-Colisión */}
             <div
-              className="pt-3 border-t-2 border-b border-x space-y-2 mt-auto shrink-0 -mx-3 -mb-3 p-3.5 rounded-b-2xl dark:bg-[#0e1826] dark:border-slate-700 shadow-xs"
+              className="pt-3 border-t-2 border-b border-x space-y-2 mt-auto shrink-0 -mx-3 -mb-3 p-3.5 rounded-b-2xl dark:bg-[#0e1826] dark:border-slate-700"
               style={{
                 backgroundColor: 'color-mix(in srgb, var(--brand-primary) 6%, white)',
                 borderTopColor: 'color-mix(in srgb, var(--brand-primary) 45%, transparent)',
@@ -1876,15 +1936,15 @@ export default function DesktopPosPage() {
                   <span className="text-[11px] sm:text-xs font-black uppercase tracking-wider text-slate-900 dark:text-slate-100">
                     TOTAL A COBRAR (BS)
                   </span>
-                  <span className="text-xs font-mono font-black text-sky-950 dark:text-sky-300 bg-sky-100 dark:bg-sky-950 px-2 py-0.5 rounded-lg border border-sky-300 dark:border-sky-800 shadow-2xs">
+                  <span className="text-xs font-mono font-black text-sky-900 dark:text-sky-300 bg-sky-100 dark:bg-sky-950 px-2 py-0.5 rounded border border-sky-300 dark:border-sky-800">
                     Tasa: Bs. {bcvRate.toFixed(2)}
                   </span>
                 </div>
                 <div className="flex items-baseline justify-between gap-2">
-                  <span className="text-2xl sm:text-3xl font-black font-sans text-emerald-700 dark:text-emerald-400 tracking-tight tabular-numbers break-all leading-tight">
+                  <span className="text-xl sm:text-2xl font-black font-sans text-emerald-700 dark:text-emerald-400 tracking-tight tabular-numbers break-all leading-tight">
                     {formatVES(totalVES)}
                   </span>
-                  <span className="text-sm sm:text-base font-black font-mono text-slate-900 dark:text-white shrink-0 bg-white/80 dark:bg-slate-800/80 px-2.5 py-1 rounded-lg border border-slate-200/80 dark:border-slate-700 shadow-2xs">
+                  <span className="text-sm sm:text-base font-black font-mono text-slate-900 dark:text-white shrink-0">
                     {formatUSD(totalUSD)}
                   </span>
                 </div>
@@ -1894,10 +1954,10 @@ export default function DesktopPosPage() {
               <button
                 onClick={openPaymentModal}
                 disabled={cart.length === 0}
-                className="w-full py-3.5 bg-[var(--brand-primary)] hover:bg-[var(--brand-hover)] active:scale-[0.99] text-white font-black text-sm rounded-xl uppercase tracking-wider shadow-md hover:shadow-lg transition-all disabled:bg-slate-300 disabled:text-slate-600 disabled:cursor-not-allowed dark:disabled:bg-slate-800 dark:disabled:text-slate-400 dark:disabled:border dark:disabled:border-slate-700 disabled:opacity-100 cursor-pointer flex items-center justify-center gap-2 mt-2"
+                className="w-full py-3.5 bg-[var(--brand-primary)] hover:bg-[var(--brand-hover)] active:scale-[0.99] text-white font-black text-sm rounded-xl uppercase tracking-wider shadow-md transition-all disabled:bg-slate-300 disabled:text-slate-600 disabled:cursor-not-allowed dark:disabled:bg-slate-800 dark:disabled:text-slate-400 dark:disabled:border dark:disabled:border-slate-700 disabled:opacity-100 cursor-pointer flex items-center justify-center gap-2 mt-2"
               >
                 <span>COBRAR VENTA</span>
-                <span className="text-xs bg-white/20 text-white px-2 py-0.5 rounded-md font-mono font-bold">F12</span>
+                <span className="text-xs text-emerald-200 font-mono font-bold">F12</span>
               </button>
             </div>
           </div>
@@ -3349,6 +3409,17 @@ export default function DesktopPosPage() {
         availableProducts={products}
         bcvRate={bcvRate}
         initialWeightKg={scaleReading.weight > 0 ? scaleReading.weight : pendingQuantity || 0}
+      />
+
+      {/* Modal Profesional de Gestión de Turno y Arqueo Físico de Caja */}
+      <CashShiftModal
+        isOpen={showCashShiftModal}
+        onClose={() => setShowCashShiftModal(false)}
+        initialMode={cashShiftModalMode}
+        activeShift={activeShift}
+        bcvRate={bcvRate}
+        onShiftUpdated={(updated) => setActiveShift(updated)}
+        storeInfo={storeInfo}
       />
 
       {/* ========================================================================= */}

@@ -4,10 +4,10 @@
 
 Paquete: Venematic-POS-Setup-v2.0.0.exe
 Version: 2.0.0 (Actualizada con Cloud Sync, Calculadora de Ganancia, Balanza y Moneda Bs)
-Fecha de emision: 25 25e September 25e 2026
+Fecha de emision: 25 de September de 2026
 
 Algoritmo SHA256:
-1014850A62FF240CBC2128A921453F699694AD32D466E33905FAF2696F4C1BEE
+1C1E127445269D8BA742492668A539498C788FD62A0031843CF7B84262124950
 
 Para verificar la integridad del instalador en cualquier computadora:
 PowerShell:

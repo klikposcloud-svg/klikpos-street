@@ -95,26 +95,7 @@ export default function DesktopReportsPage() {
     setProducts(allProds);
 
     const shift = await db.cashShifts.where('status').equals('open').first();
-    if (shift) {
-      setCurrentShift(shift);
-    } else {
-      // Si no existe un turno abierto, creamos uno inicial automáticamente
-      const newShiftId = await db.cashShifts.add({
-        openedAt: new Date().toISOString(),
-        cashierName: 'Cajero Principal',
-        initialCashUSD: 50.0,
-        initialCashVES: 0.0,
-        totalSalesUSD: 0,
-        totalCashUSD: 0,
-        totalCashVES: 0,
-        totalPagoMovilVES: 0,
-        totalCardVES: 0,
-        totalZelleUSD: 0,
-        status: 'open',
-      });
-      const created = await db.cashShifts.get(newShiftId);
-      if (created) setCurrentShift(created);
-    }
+    setCurrentShift(shift || null);
 
     const pastShifts = await db.cashShifts.where('status').equals('closed').reverse().toArray();
     setClosedShifts(pastShifts);
