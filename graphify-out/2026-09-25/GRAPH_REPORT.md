@@ -1,7 +1,7 @@
 # Graph Report - venematic-master  (2026-09-25)
 
 ## Corpus Check
-- 275 files · ~337,500 words
+- 275 files · ~339,164 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 44 file(s) not represented in the graph (top: .xml 10, .apk 7, .bat 6)
 

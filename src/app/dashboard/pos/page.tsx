@@ -1433,7 +1433,7 @@ export default function DesktopPosPage() {
   };
 
   return (
-    <div className="flex-1 min-h-0 flex overflow-hidden p-3 gap-3 bg-[#eef2f5] font-sans">
+    <div className="flex-1 min-h-0 flex overflow-hidden p-3 gap-3 bg-[var(--industrial-bg,#ffffff)] font-sans">
       {/* ========================================================================= */}
       {/* PANEL IZQUIERDO: Buscador, Categorías y Cuadrícula de Productos           */}
       {/* ========================================================================= */}

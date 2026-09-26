@@ -1,7 +1,7 @@
 # Graph Report - venematic-master  (2026-09-25)
 
 ## Corpus Check
-- 275 files · ~339,164 words
+- 275 files · ~339,150 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 44 file(s) not represented in the graph (top: .xml 10, .apk 7, .bat 6)
 
@@ -11,7 +11,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `6c5f3ac0`
+- Built from commit: `7404fc7a`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 

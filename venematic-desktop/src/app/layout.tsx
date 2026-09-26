@@ -27,19 +27,13 @@ export default function RootLayout({
             __html: `
               (function() {
                 try {
-                  var t = localStorage.getItem('venematic_theme');
-                  // Forzar Modo Blanco Oficial a menos que el usuario haya seleccionado explícitamente 'dark'
-                  if (t !== 'dark') {
+                  var t = localStorage.getItem('venematic_theme') || 'light';
+                  if (t !== 'dark' && t !== 'glass') {
                     t = 'light';
-                    try {
-                      localStorage.setItem('venematic_theme', 'light');
-                      localStorage.setItem('venematic_ui_style', 'industrial');
-                      localStorage.setItem('venematic_industrial_bg', 'white');
-                    } catch(e) {}
                   }
                   var p = localStorage.getItem('venematic_branding_palette') || 'petrol';
                   var s = t === 'light' ? 'industrial' : (localStorage.getItem('venematic_ui_style') || 'industrial');
-                  var bgPreset = t === 'light' ? 'white' : (localStorage.getItem('venematic_industrial_bg') || 'white');
+                  var bgPreset = localStorage.getItem('venematic_industrial_bg') || 'white';
                   var customBg = localStorage.getItem('venematic_custom_bg_color') || '#f8fafc';
 
                   var palettes = {

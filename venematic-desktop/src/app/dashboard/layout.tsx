@@ -529,7 +529,7 @@ export default function DesktopDashboardLayout({
   };
 
   return (
-    <div className="h-screen w-screen flex flex-col bg-[#f8fafc] text-slate-900 font-sans overflow-hidden select-none">
+    <div className="h-screen w-screen flex flex-col bg-[var(--industrial-bg,#ffffff)] text-slate-900 font-sans overflow-hidden select-none">
       {/* Barra de Estado Superior Profesional */}
       <header className="h-14 bg-white dark:bg-[#121c29] border-b border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white px-4 flex items-center justify-between shrink-0 z-20 shadow-2xs layer-shell">
         {/* Identidad del Terminal */}
@@ -747,7 +747,7 @@ export default function DesktopDashboardLayout({
         </aside>
 
         {/* Área de Trabajo */}
-        <main className="flex-1 bg-[#eef2f5] overflow-hidden flex flex-col">
+        <main className="flex-1 bg-[var(--industrial-bg,#ffffff)] overflow-hidden flex flex-col">
           {children}
         </main>
       </div>

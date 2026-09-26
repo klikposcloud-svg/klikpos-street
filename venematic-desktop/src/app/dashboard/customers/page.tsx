@@ -141,7 +141,7 @@ export default function DesktopCustomersPage() {
   const totalDebtUSD = customers.reduce((acc, c) => acc + (c.currentDebtUSD || 0), 0);
 
   return (
-    <div className="flex-1 flex flex-col p-4 gap-4 overflow-hidden bg-slate-100 font-sans">
+    <div className="flex-1 flex flex-col p-4 gap-4 overflow-hidden bg-[var(--industrial-bg,#ffffff)] font-sans">
       {/* Toast */}
       {toastMessage && (
         <div className="fixed top-5 right-5 z-50 bg-emerald-600 text-white px-4 py-3 rounded-xl shadow-xl flex items-center gap-2 text-xs font-bold animate-bounce">

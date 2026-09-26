@@ -386,7 +386,7 @@ export default function DesktopReportsPage() {
   };
 
   return (
-    <div className="flex-1 flex flex-col p-4 gap-4 overflow-hidden bg-slate-100 font-sans">
+    <div className="flex-1 flex flex-col p-4 gap-4 overflow-hidden bg-[var(--industrial-bg,#ffffff)] font-sans">
       {/* Cabecera Principal */}
       <div className="bg-white p-4 rounded-2xl border border-slate-300 shadow-xs flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">

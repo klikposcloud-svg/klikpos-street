@@ -127,7 +127,7 @@ export default function CashierShiftSalesPage() {
   });
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-slate-50 overflow-hidden select-none">
+    <div className="flex-1 flex flex-col h-full bg-[var(--industrial-bg,#ffffff)] overflow-hidden select-none">
       {/* ========================================================================= */}
       {/* HEADER DE LA VISTA: Título + Badge de Sincronización + Acciones           */}
       {/* ========================================================================= */}

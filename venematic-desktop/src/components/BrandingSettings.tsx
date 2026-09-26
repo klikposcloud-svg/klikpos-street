@@ -624,7 +624,13 @@ export default function BrandingSettings() {
                 return (
                   <div
                     key={opt.id}
-                    onClick={() => !isCustom && handleIndustrialBgSelect(opt.id)}
+                    onClick={() => {
+                      if (isCustom) {
+                        handleIndustrialBgSelect('custom');
+                      } else {
+                        handleIndustrialBgSelect(opt.id);
+                      }
+                    }}
                     className={`p-3 rounded-xl border-2 transition-all flex flex-col justify-between select-none cursor-pointer relative ${
                       isSelected
                         ? 'border-sky-600 bg-white shadow-sm ring-1 ring-sky-500'
@@ -635,12 +641,16 @@ export default function BrandingSettings() {
                     <div className="flex items-center justify-between w-full">
                       <div className="flex items-center gap-2">
                         {isCustom ? (
-                          <label className="cursor-pointer relative flex items-center" title="Haz clic para abrir el Color Picker">
+                          <label
+                            className="cursor-pointer relative flex items-center shrink-0"
+                            title="Haz clic para abrir el Color Picker"
+                            onClick={(e) => e.stopPropagation()}
+                          >
                             <input
                               type="color"
                               value={customBgColor}
                               onChange={(e) => handleCustomColorChange(e.target.value)}
-                              className="w-6 h-6 rounded-md cursor-pointer border border-slate-300 shadow-2xs p-0"
+                              className="w-6 h-6 rounded-md cursor-pointer border border-slate-300 shadow-2xs p-0 bg-transparent"
                             />
                           </label>
                         ) : (
@@ -669,7 +679,10 @@ export default function BrandingSettings() {
                     </p>
 
                     {isCustom && (
-                      <div className="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between">
+                      <div
+                        className="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between"
+                        onClick={(e) => e.stopPropagation()}
+                      >
                         <span className="text-[10px] text-slate-400 font-bold uppercase">Hex:</span>
                         <input
                           type="text"

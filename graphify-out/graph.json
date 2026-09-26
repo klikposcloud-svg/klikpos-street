@@ -31116,7 +31116,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/BrandingSettings.tsx",
-      "source_location": "L768",
+      "source_location": "L781",
       "weight": 1.0
     },
     {
@@ -34776,7 +34776,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "venematic-desktop/src/components/BrandingSettings.tsx",
-      "source_location": "L768",
+      "source_location": "L781",
       "weight": 1.0
     },
     {
@@ -72673,5 +72673,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "6c5f3ac09653ca15840670a59e00de97ebe88c13"
+  "built_at_commit": "7404fc7a0578905671cf4594d0c7ed61b5506ab3"
 }

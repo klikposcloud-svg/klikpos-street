@@ -272,7 +272,7 @@ export default function DesktopSettingsPage() {
 
   if (!isAdmin) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center p-6 bg-slate-100 font-sans select-none">
+      <div className="flex-1 flex flex-col items-center justify-center p-6 bg-[var(--industrial-bg,#ffffff)] font-sans select-none">
         <div className="bg-white rounded-3xl border border-slate-300 shadow-xl p-8 max-w-md w-full text-center space-y-4">
           <div className="w-16 h-16 rounded-2xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center mx-auto shadow-inner">
             <ShieldAlert className="w-8 h-8" />
@@ -339,7 +339,7 @@ export default function DesktopSettingsPage() {
   ];
 
   return (
-    <div className="flex-1 flex flex-col p-4 gap-4 overflow-y-auto bg-slate-100 font-sans">
+    <div className="flex-1 flex flex-col p-4 gap-4 overflow-y-auto bg-[var(--industrial-bg,#ffffff)] font-sans">
       {/* Cabecera y Barra de Pestañas Superior */}
       <div className="bg-white p-4 rounded-xl border border-slate-300 shadow-xs flex flex-col gap-3">
         <div className="flex flex-wrap items-center justify-between gap-3">

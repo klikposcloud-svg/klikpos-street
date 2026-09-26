@@ -851,7 +851,7 @@ export default function DesktopInventoryPage() {
   };
 
   return (
-    <div className="flex-1 flex flex-col p-4 gap-4 overflow-hidden bg-slate-100 font-sans">
+    <div className="flex-1 flex flex-col p-4 gap-4 overflow-hidden bg-[var(--industrial-bg,#ffffff)] font-sans">
       {/* Toast de Resultado de Importación */}
       {importResultToast && (
         <div className="p-3 bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-md flex items-center justify-between animate-in fade-in slide-in-from-top-2 duration-150">
