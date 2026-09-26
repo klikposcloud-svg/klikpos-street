@@ -1056,10 +1056,10 @@
     "semantic_hash": "2741b32dc0bebefe0e3f3d09fe63c12e"
   },
   "venematic-desktop/src/app/api/products/search-images/route.ts": {
-    "mtime": 1790109274.5269017,
-    "seen": 1790363920.7986033,
-    "ast_hash": "550ad83958e6d93096a2a0504b8e4b2c",
-    "semantic_hash": "550ad83958e6d93096a2a0504b8e4b2c"
+    "mtime": 1790381064.8499484,
+    "seen": 1790381521.6149054,
+    "ast_hash": "ba24bf49954271e3643bd7dc3f628786",
+    "semantic_hash": ""
   },
   "venematic-desktop/src/app/api/scanner/create-product/route.ts": {
     "mtime": 1790099407.1766932,
@@ -1128,9 +1128,9 @@
     "semantic_hash": "b6d56e5d62d48a17a2209c1bc908905a"
   },
   "venematic-desktop/src/app/dashboard/inventory/page.tsx": {
-    "mtime": 1790371245.512341,
-    "seen": 1790372297.181874,
-    "ast_hash": "bf2cf2400cb97c46d71385e8ac8b73f3",
+    "mtime": 1790381261.6818528,
+    "seen": 1790381521.6149333,
+    "ast_hash": "09744caa71fc18586932922c4fb877a5",
     "semantic_hash": ""
   },
   "venematic-desktop/src/app/dashboard/layout.tsx": {
@@ -1140,15 +1140,15 @@
     "semantic_hash": ""
   },
   "venematic-desktop/src/app/dashboard/pos/page.tsx": {
-    "mtime": 1790367491.0366712,
-    "seen": 1790367606.208786,
-    "ast_hash": "d0d1a224d18da6fd4eb880533cdf40cd",
+    "mtime": 1790381203.7608812,
+    "seen": 1790381521.614937,
+    "ast_hash": "b44d8d16a43309a0b11bcd9016d44461",
     "semantic_hash": ""
   },
   "venematic-desktop/src/app/dashboard/reports/page.tsx": {
-    "mtime": 1790371525.7949085,
-    "seen": 1790372297.181882,
-    "ast_hash": "84aaf4733490e238d9c9c4b53e758c6f",
+    "mtime": 1790381148.7060366,
+    "seen": 1790381521.614939,
+    "ast_hash": "d6e9af9cc59c338cca682e33a7dbf233",
     "semantic_hash": ""
   },
   "venematic-desktop/src/app/dashboard/sales/page.tsx": {
@@ -1266,10 +1266,10 @@
     "semantic_hash": "55e04fee7a5a4b29a543990e2db06ba5"
   },
   "venematic-desktop/src/lib/db.ts": {
-    "mtime": 1790103110.6658213,
-    "seen": 1790363920.7986522,
-    "ast_hash": "a2dee9e358d66a8fd3e2e1d3b1047a2f",
-    "semantic_hash": "a2dee9e358d66a8fd3e2e1d3b1047a2f"
+    "mtime": 1790381160.9386518,
+    "seen": 1790381521.6149783,
+    "ast_hash": "021f9965d3ad8ad7d56d26567a52be73",
+    "semantic_hash": ""
   },
   "venematic-desktop/src/lib/firebase/auth.ts": {
     "mtime": 1790033123.6643372,
@@ -1302,10 +1302,10 @@
     "semantic_hash": "6f6b34ade8ecede80764fb7db57ef8c7"
   },
   "venematic-desktop/src/lib/fiscal/seniat-sales-book.ts": {
-    "mtime": 1789950236.1306815,
-    "seen": 1790363920.7986603,
-    "ast_hash": "0e1aa1e82dd656bea46aa80f278f2287",
-    "semantic_hash": "0e1aa1e82dd656bea46aa80f278f2287"
+    "mtime": 1790381190.5054622,
+    "seen": 1790381521.614991,
+    "ast_hash": "eb71744505bc8779ca9386d687fcbdaf",
+    "semantic_hash": ""
   },
   "venematic-desktop/src/lib/formatters.ts": {
     "mtime": 1789828253.072496,
@@ -1704,9 +1704,9 @@
     "semantic_hash": ""
   },
   "venematic-desktop/out/index.html": {
-    "mtime": 1790376908.4118443,
-    "seen": 1790376996.7525997,
-    "ast_hash": "54498b34941495f01409b912d6446844",
+    "mtime": 1790381369.1504457,
+    "seen": 1790381521.615141,
+    "ast_hash": "bc001508ecbb2bcd93d17c71e3b33f02",
     "semantic_hash": ""
   },
   "venematic-desktop/refinancion.md": {
@@ -2025,6 +2025,24 @@
     "mtime": 1790370111.1148663,
     "seen": 1790372297.1817896,
     "ast_hash": "ebe0dfca8731a86ccc474d54fed21816",
+    "semantic_hash": ""
+  },
+  "venematic-desktop/scratch/test-ddg-results.js": {
+    "mtime": 1790380798.4800491,
+    "seen": 1790381521.6148653,
+    "ast_hash": "6414820471fc2fbdfc2351a9dbde78ac",
+    "semantic_hash": ""
+  },
+  "venematic-desktop/scratch/test-ddg.js": {
+    "mtime": 1790380730.4514406,
+    "seen": 1790381521.6148696,
+    "ast_hash": "00d124bc0df5e10687f875fbdcbeb8f5",
+    "semantic_hash": ""
+  },
+  "venematic-desktop/scratch/test-google.js": {
+    "mtime": 1790380772.2799442,
+    "seen": 1790381521.6148717,
+    "ast_hash": "3b537f5daf07961f2dd19ab7ae45cdc4",
     "semantic_hash": ""
   }
 }

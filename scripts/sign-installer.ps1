@@ -23,28 +23,11 @@ $certPath = "c:\Users\pcpro\OneDrive\Documents\venematic-master\venematic-master
 Export-Certificate -Cert $cert -FilePath $certPath -Force | Out-Null
 
 # 4. Firmar el instalador con Authenticode
-Write-Host "Firmando digitalmente el instalador..."
-Set-AuthenticodeSignature -FilePath $exePath -Certificate $cert -TimestampServer "http://timestamp.digicert.com" -ErrorAction SilentlyContinue
-if ((Get-AuthenticodeSignature $exePath).Status -eq "UnknownError") {
-    # Fallback sin timestamp si no hay internet hacia digicert
-    Set-AuthenticodeSignature -FilePath $exePath -Certificate $cert
-}
+Write-Host "Firmando digitalmente el instalador con certificado Authenticode local..."
+Set-AuthenticodeSignature -FilePath $exePath -Certificate $cert -ErrorAction SilentlyContinue
 
-# 5. Instalar certificado en Trusted Root del usuario actual para que Windows lo reconozca
-try {
-    $store = New-Object System.Security.Cryptography.X509Certificates.X509Store("Root", "CurrentUser")
-    $store.Open("ReadWrite")
-    $store.Add($cert)
-    $store.Close()
-} catch {}
 
-try {
-    $store2 = New-Object System.Security.Cryptography.X509Certificates.X509Store("TrustedPublisher", "CurrentUser")
-    $store2.Open("ReadWrite")
-    $store2.Add($cert)
-    $store2.Close()
-} catch {}
-
+# 5. Firma completada
 $sig = Get-AuthenticodeSignature $exePath
 Write-Host "Estado de Firma:" $sig.Status
 Write-Host "Firmante:" $sig.SignerCertificate.Subject

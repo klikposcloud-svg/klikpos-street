@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "test:contrast": "node scripts/check-contrast.mjs",
+    "build:installer": "powershell -ExecutionPolicy Bypass -File scripts/build-installer-full.ps1",
     "scraper": "node src/scripts/bcv-scraper.js"
   },
   "dependencies": {

@@ -1502,22 +1502,30 @@ export default function DesktopPosPage() {
               onClick={openScannerModal}
               className={`h-14 px-3.5 rounded-xl font-bold flex items-center gap-2.5 shadow-2xs active:scale-[0.98] transition-all cursor-pointer border ${
                 phoneConnected
-                  ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border-emerald-300 dark:bg-emerald-950 dark:text-emerald-300 dark:border-emerald-800'
+                  ? 'bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-500 shadow-sm'
                   : 'bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-900 dark:text-white border-slate-200/90 dark:border-slate-700'
               }`}
               title="Vincular teléfono como escáner inalámbrico con código QR"
             >
               <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border ${
-                phoneConnected ? 'bg-emerald-600 text-white border-emerald-500' : 'bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-white border-slate-200 dark:border-slate-600'
+                phoneConnected
+                  ? 'bg-white/20 text-white border-white/30'
+                  : 'bg-emerald-50 dark:bg-slate-700 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-slate-600'
               }`}>
-                <Smartphone className="w-4 h-4" />
+                <Smartphone className={`w-5 h-5 ${phoneConnected ? 'text-white' : 'text-emerald-700 dark:text-emerald-400'}`} />
               </div>
               <div className="flex flex-col justify-center text-left leading-tight min-w-0">
-                <span className="text-xs font-black tracking-tight truncate text-slate-900 dark:text-white">
+                <span
+                  className={`text-xs font-black tracking-tight truncate ${phoneConnected ? '!text-white' : 'text-slate-900 dark:text-white'}`}
+                  style={phoneConnected ? { color: '#ffffff' } : undefined}
+                >
                   {phoneConnected ? 'Móvil En Línea' : 'Vincular Móvil'}
                 </span>
-                <span className="text-[10.5px] text-slate-500 dark:text-slate-300 font-bold truncate">
-                  {phoneConnected ? phoneDeviceName || 'Conectado' : 'Escanear QR'}
+                <span
+                  className={`text-[10.5px] font-bold truncate ${phoneConnected ? '!text-emerald-100' : 'text-slate-500 dark:text-slate-300'}`}
+                  style={phoneConnected ? { color: '#d1fae5' } : undefined}
+                >
+                  {phoneConnected ? phoneDeviceName || 'Android POS Móvil' : 'Escanear QR'}
                 </span>
               </div>
             </button>
@@ -1531,23 +1539,29 @@ export default function DesktopPosPage() {
               }}
               className={`h-14 px-3.5 rounded-xl font-bold flex items-center gap-2.5 shadow-2xs active:scale-[0.98] transition-all cursor-pointer border ${
                 scaleConnected || scaleReading.weight > 0
-                  ? 'bg-sky-50 hover:bg-sky-100 text-sky-900 border-sky-300 dark:bg-sky-950 dark:text-sky-300 dark:border-sky-800'
+                  ? 'bg-sky-600 hover:bg-sky-500 text-white border-sky-500 shadow-sm'
                   : 'bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-900 dark:text-white border-slate-200/90 dark:border-slate-700'
               }`}
               title="Balanza: Clic para pesar producto o ingresar peso manual"
             >
               <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border ${
                 scaleConnected || scaleReading.weight > 0
-                  ? 'bg-sky-600 text-white border-sky-500'
-                  : 'bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-white border-slate-200 dark:border-slate-600'
+                  ? 'bg-white/20 text-white border-white/30'
+                  : 'bg-sky-50 dark:bg-slate-700 text-sky-700 dark:text-sky-300 border-sky-200 dark:border-slate-600'
               }`}>
-                <Scale className="w-4 h-4" />
+                <Scale className={`w-5 h-5 ${scaleConnected || scaleReading.weight > 0 ? 'text-white' : 'text-sky-700 dark:text-sky-300'}`} />
               </div>
               <div className="flex flex-col justify-center text-left leading-tight min-w-0">
-                <span className="text-xs font-black tracking-tight truncate text-slate-900 dark:text-white">
+                <span
+                  className={`text-xs font-black tracking-tight truncate ${scaleConnected || scaleReading.weight > 0 ? '!text-white' : 'text-slate-900 dark:text-white'}`}
+                  style={scaleConnected || scaleReading.weight > 0 ? { color: '#ffffff' } : undefined}
+                >
                   {scaleReading.weight > 0 ? `${scaleReading.weight.toFixed(3)} kg` : 'Balanza (kg)'}
                 </span>
-                <span className="text-[10.5px] text-slate-500 dark:text-slate-300 font-bold truncate">
+                <span
+                  className={`text-[10.5px] font-bold truncate ${scaleConnected || scaleReading.weight > 0 ? '!text-sky-100' : 'text-slate-500 dark:text-slate-300'}`}
+                  style={scaleConnected || scaleReading.weight > 0 ? { color: '#e0f2fe' } : undefined}
+                >
                   {scaleReading.weight > 0 ? 'Peso en vivo' : 'Pesar Producto'}
                 </span>
               </div>
@@ -1563,8 +1577,8 @@ export default function DesktopPosPage() {
               className="h-14 px-3.5 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-900 dark:text-white rounded-xl font-bold flex items-center gap-2.5 shadow-2xs active:scale-[0.98] transition-all cursor-pointer border border-slate-200/90 dark:border-slate-700 group"
               title="Abrir gaveta de dinero conectada a la impresora (F10)"
             >
-              <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-950 text-amber-900 dark:text-amber-300 flex items-center justify-center shrink-0 border border-amber-200 dark:border-amber-800 group-hover:bg-amber-200 transition-colors">
-                <Banknote className="w-4 h-4" />
+              <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/50 text-amber-800 dark:text-amber-300 flex items-center justify-center shrink-0 border border-amber-300 dark:border-amber-700 group-hover:bg-amber-200 transition-colors">
+                <Banknote className="w-5 h-5 text-amber-800 dark:text-amber-300" />
               </div>
               <div className="flex flex-col justify-center text-left leading-tight min-w-0">
                 <span className="text-xs font-black tracking-tight truncate text-slate-900 dark:text-white">Gaveta (F10)</span>

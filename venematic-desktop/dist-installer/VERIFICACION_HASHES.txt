@@ -1,13 +1,13 @@
-================================================================================
+﻿================================================================================
              INTEGRIDAD Y SUMAS DE VERIFICACION CRIPTOGRAFICA (HASHES)
 ================================================================================
 
 Paquete: Venematic-POS-Setup-v2.0.0.exe
 Version: 2.0.0 (Actualizada con Cloud Sync, Calculadora de Ganancia, Balanza y Moneda Bs)
-Fecha de emision: 24 de Septiembre de 2026
+Fecha de emision: 25 25e September 25e 2026
 
 Algoritmo SHA256:
-81D9A2F455C283DCA95C36FA9040777E7553152ACFD0818407E1A0CD569FAF53
+1014850A62FF240CBC2128A921453F699694AD32D466E33905FAF2696F4C1BEE
 
 Para verificar la integridad del instalador en cualquier computadora:
 PowerShell:
