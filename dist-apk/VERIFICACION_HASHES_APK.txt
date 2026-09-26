@@ -15,8 +15,8 @@ Arquitectura: Android 8.0+ (ARM64 / x86_64)
   Archivo: VenematicPOS-Admin-Mobile.apk
   ID de Paquete: com.venematic.admin
   Nombre de App: Venematic Admin
-  TamaÃ±o: 4168629 bytes
-  SHA-256: 72675CB67DCE0855822131485341D5CA552EE36078921214977F936338B90E14
+  TamaÃ±o: 4168505 bytes
+  SHA-256: 1691718F564F3091804E2ED1DB5171CB2901593AB98F4C0F4EFD31148D46402A
   CaracterÃ­sticas Exclusivas:
    - Panel de Control del DueÃ±o en vivo con KPIs ($ y Bs)
    - Arqueo de Caja y desglose multimoneda (USD, VES, Pago MÃ³vil, Punto, Binance, Zelle)
