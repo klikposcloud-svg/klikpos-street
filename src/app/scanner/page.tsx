@@ -51,6 +51,8 @@ interface MobileCatalogItem {
   priceUSD: number;
   stock: number;
   image?: string;
+  isFixedPriceVES?: boolean;
+  fixedPriceVES?: number;
 }
 
 interface MobileCartItem {
@@ -61,6 +63,8 @@ interface MobileCartItem {
   priceUSD: number;
   totalUSD: number;
   image?: string;
+  isFixedPriceVES?: boolean;
+  fixedPriceVES?: number;
 }
 
 export default function MobileScannerPage() {
@@ -518,6 +522,8 @@ export default function MobileScannerPage() {
             : item
         );
       } else {
+        const isFixed = product.isFixedPriceVES && product.fixedPriceVES;
+        const itemPriceUSD = isFixed ? (product.fixedPriceVES! / inventoryBcvRate) : product.priceUSD;
         return [
           ...prev,
           {
@@ -525,9 +531,11 @@ export default function MobileScannerPage() {
             barcode: product.barcode,
             name: product.name,
             qty: 1,
-            priceUSD: product.priceUSD,
-            totalUSD: product.priceUSD,
+            priceUSD: itemPriceUSD,
+            totalUSD: itemPriceUSD,
             image: product.image,
+            isFixedPriceVES: product.isFixedPriceVES,
+            fixedPriceVES: product.fixedPriceVES,
           },
         ];
       }
@@ -567,10 +575,15 @@ export default function MobileScannerPage() {
     setMobileCart([]);
   };
 
-  // Totales de la venta móvil
+  // Totales de la venta móvil (Considera productos con precio fijo en Bolívares exentos de BCV)
   const mobileSubtotalUSD = mobileCart.reduce((sum, i) => sum + i.totalUSD, 0);
   const mobileTotalUSD = mobileSubtotalUSD;
-  const mobileTotalVES = mobileTotalUSD * inventoryBcvRate;
+  const mobileTotalVES = mobileCart.reduce((sum, item) => {
+    if (item.isFixedPriceVES && item.fixedPriceVES) {
+      return sum + (item.fixedPriceVES * item.qty);
+    }
+    return sum + (item.totalUSD * inventoryBcvRate);
+  }, 0);
 
   // Agregar producto pesado desde la Balanza al Carrito Móvil
   const handleAddWeighedToCart = (goToCheckout: boolean = false) => {

@@ -123,6 +123,8 @@ export default function DesktopInventoryPage() {
   const [stock, setStock] = useState('10');
   const [minStock, setMinStock] = useState('3');
   const [image, setImage] = useState('');
+  const [isFixedPriceVES, setIsFixedPriceVES] = useState<boolean>(false);
+  const [fixedPriceVES, setFixedPriceVES] = useState<string>('');
   const [isRemovingBg, setIsRemovingBg] = useState(false);
   const [isAnalyzingAI, setIsAnalyzingAI] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -626,6 +628,8 @@ export default function DesktopInventoryPage() {
       minStock: parseFloat(minStock.replace(',', '.')) || 0,
       unit: unit || 'unidad',
       image: image.trim() || undefined,
+      isFixedPriceVES: Boolean(isFixedPriceVES),
+      fixedPriceVES: isFixedPriceVES && fixedPriceVES ? parseFloat(fixedPriceVES.replace(',', '.')) : undefined,
       updatedAt: new Date().toISOString(),
     };
 
@@ -645,6 +649,8 @@ export default function DesktopInventoryPage() {
     setPackageUnits('');
     setProfitMarginPercent('');
     setImage('');
+    setIsFixedPriceVES(false);
+    setFixedPriceVES('');
     setShowAddModal(false);
     await loadProducts();
     broadcastInventoryToMobile();
@@ -669,6 +675,8 @@ export default function DesktopInventoryPage() {
     setStock(product.stock.toString());
     setMinStock(product.minStock ? product.minStock.toString() : '3');
     setImage(product.image || '');
+    setIsFixedPriceVES(Boolean(product.isFixedPriceVES));
+    setFixedPriceVES(product.fixedPriceVES ? product.fixedPriceVES.toString() : '');
     setShowEditModal(true);
   };
 
@@ -695,6 +703,8 @@ export default function DesktopInventoryPage() {
       minStock: parseFloat(minStock.replace(',', '.')) || 0,
       unit: unit || 'unidad',
       image: image.trim() || undefined,
+      isFixedPriceVES: Boolean(isFixedPriceVES),
+      fixedPriceVES: isFixedPriceVES && fixedPriceVES ? parseFloat(fixedPriceVES.replace(',', '.')) : undefined,
       updatedAt: new Date().toISOString(),
     };
 
@@ -710,6 +720,8 @@ export default function DesktopInventoryPage() {
     setPackageUnits('');
     setProfitMarginPercent('');
     setImage('');
+    setIsFixedPriceVES(false);
+    setFixedPriceVES('');
     await loadProducts();
     broadcastInventoryToMobile();
   };
@@ -1193,10 +1205,21 @@ export default function DesktopInventoryPage() {
 
                     {/* Precio Bs */}
                     <td className="py-3 px-4 text-right font-mono font-semibold text-slate-600 dark:text-slate-300 text-xs tabular-numbers border-t border-b border-inherit">
-                      <div>{formatVES(p.priceUSD * bcvRate)}</div>
-                      <div className="text-[10px] text-slate-400 dark:text-slate-500">
-                        {p.unit === 'kg' ? '/ kg' : p.unit === 'gr' ? '/ gr' : '/ unid'}
-                      </div>
+                      {p.isFixedPriceVES && p.fixedPriceVES ? (
+                        <>
+                          <div className="text-sky-700 dark:text-sky-300 font-black">{formatVES(p.fixedPriceVES)}</div>
+                          <span className="inline-flex items-center gap-0.5 text-[9.5px] font-black px-1.5 py-0.2 rounded bg-sky-100 dark:bg-sky-950 text-sky-800 dark:text-sky-300 border border-sky-300 dark:border-sky-800">
+                            🔒 Fijo Bs.
+                          </span>
+                        </>
+                      ) : (
+                        <>
+                          <div>{formatVES(p.priceUSD * bcvRate)}</div>
+                          <div className="text-[10px] text-slate-400 dark:text-slate-500">
+                            {p.unit === 'kg' ? '/ kg' : p.unit === 'gr' ? '/ gr' : '/ unid'}
+                          </div>
+                        </>
+                      )}
                     </td>
 
                     {/* Stock Actual */}
@@ -1734,6 +1757,68 @@ export default function DesktopInventoryPage() {
                   }}
                 />
 
+                {/* SECCIÓN PRECIO FIJO EN BOLÍVARES (EXENTO DE TASA BCV) */}
+                <div className="p-3 bg-sky-50/70 dark:bg-slate-800/80 border-2 border-dashed border-sky-400/70 rounded-xl space-y-2.5">
+                  <label className="flex items-start gap-2.5 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={isFixedPriceVES}
+                      onChange={(e) => {
+                        const checked = e.target.checked;
+                        setIsFixedPriceVES(checked);
+                        if (checked && !fixedPriceVES && priceUSD) {
+                          const calculatedVES = (parseFloat(priceUSD.replace(',', '.')) * bcvRate).toFixed(2);
+                          setFixedPriceVES(calculatedVES);
+                        }
+                      }}
+                      className="w-4 h-4 rounded text-sky-600 focus:ring-sky-500 border-slate-300 cursor-pointer mt-0.5"
+                    />
+                    <div className="flex flex-col">
+                      <span className="text-xs font-black text-slate-900 dark:text-white flex items-center gap-1.5">
+                        <span>🔒 Precio Fijo en Bolívares (No fluctuar con la tasa BCV / Dólar)</span>
+                      </span>
+                      <span className="text-[10.5px] text-slate-500 dark:text-slate-400">
+                        Activar para productos como recargas, hielo, combos de comida o cigarros cuyo PVP en Bs. debe permanecer invariable.
+                      </span>
+                    </div>
+                  </label>
+
+                  {isFixedPriceVES && (
+                    <div className="pt-2 border-t border-sky-200 dark:border-slate-700 flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                      <div className="flex-1 w-full">
+                        <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                          Monto Fijo de Venta en Bolívares (Bs.) *:
+                        </label>
+                        <div className="relative">
+                          <span className="absolute left-3 top-2 text-xs font-bold text-slate-400">Bs.</span>
+                          <input
+                            type="number"
+                            step="any"
+                            required={isFixedPriceVES}
+                            placeholder="Ej: 150.00"
+                            value={fixedPriceVES}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              setFixedPriceVES(val);
+                              const num = parseFloat(val);
+                              if (!isNaN(num) && bcvRate > 0) {
+                                setPriceUSD((num / bcvRate).toFixed(4));
+                              }
+                            }}
+                            className="w-full pl-9 pr-3 py-2 border-2 border-sky-500 rounded-lg font-mono font-bold text-slate-900 dark:text-white bg-white dark:bg-slate-900 focus:ring-2 focus:ring-sky-500 outline-none text-sm"
+                          />
+                        </div>
+                      </div>
+                      <div className="text-[11px] text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-900 p-2.5 rounded-lg border border-sky-200 dark:border-slate-700 shrink-0">
+                        <span className="font-bold text-sky-800 dark:text-sky-300 block">⚡ Equivalente Divisas:</span>
+                        <span className="font-mono font-bold">
+                          ${fixedPriceVES && !isNaN(parseFloat(fixedPriceVES)) && bcvRate > 0 ? (parseFloat(fixedPriceVES) / bcvRate).toFixed(2) : '0.00'} USD
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
                 <div className="grid grid-cols-2 gap-2">
                   <div>
                     <label className="block font-semibold text-slate-700 mb-1">
@@ -2111,6 +2196,68 @@ export default function DesktopInventoryPage() {
                     setProfitMarginPercent(pMargin);
                   }}
                 />
+
+                {/* SECCIÓN PRECIO FIJO EN BOLÍVARES (EXENTO DE TASA BCV) */}
+                <div className="p-3 bg-indigo-50/70 dark:bg-slate-800/80 border-2 border-dashed border-indigo-400/70 rounded-xl space-y-2.5">
+                  <label className="flex items-start gap-2.5 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={isFixedPriceVES}
+                      onChange={(e) => {
+                        const checked = e.target.checked;
+                        setIsFixedPriceVES(checked);
+                        if (checked && !fixedPriceVES && priceUSD) {
+                          const calculatedVES = (parseFloat(priceUSD.replace(',', '.')) * bcvRate).toFixed(2);
+                          setFixedPriceVES(calculatedVES);
+                        }
+                      }}
+                      className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 cursor-pointer mt-0.5"
+                    />
+                    <div className="flex flex-col">
+                      <span className="text-xs font-black text-slate-900 dark:text-white flex items-center gap-1.5">
+                        <span>🔒 Precio Fijo en Bolívares (No fluctuar con la tasa BCV / Dólar)</span>
+                      </span>
+                      <span className="text-[10.5px] text-slate-500 dark:text-slate-400">
+                        Activar para productos como recargas, hielo, combos de comida o cigarros cuyo PVP en Bs. debe permanecer invariable.
+                      </span>
+                    </div>
+                  </label>
+
+                  {isFixedPriceVES && (
+                    <div className="pt-2 border-t border-indigo-200 dark:border-slate-700 flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                      <div className="flex-1 w-full">
+                        <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                          Monto Fijo de Venta en Bolívares (Bs.) *:
+                        </label>
+                        <div className="relative">
+                          <span className="absolute left-3 top-2 text-xs font-bold text-slate-400">Bs.</span>
+                          <input
+                            type="number"
+                            step="any"
+                            required={isFixedPriceVES}
+                            placeholder="Ej: 150.00"
+                            value={fixedPriceVES}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              setFixedPriceVES(val);
+                              const num = parseFloat(val);
+                              if (!isNaN(num) && bcvRate > 0) {
+                                setPriceUSD((num / bcvRate).toFixed(4));
+                              }
+                            }}
+                            className="w-full pl-9 pr-3 py-2 border-2 border-indigo-500 rounded-lg font-mono font-bold text-slate-900 dark:text-white bg-white dark:bg-slate-900 focus:ring-2 focus:ring-indigo-500 outline-none text-sm"
+                          />
+                        </div>
+                      </div>
+                      <div className="text-[11px] text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-900 p-2.5 rounded-lg border border-indigo-200 dark:border-slate-700 shrink-0">
+                        <span className="font-bold text-indigo-800 dark:text-indigo-300 block">⚡ Equivalente Divisas:</span>
+                        <span className="font-mono font-bold">
+                          ${fixedPriceVES && !isNaN(parseFloat(fixedPriceVES)) && bcvRate > 0 ? (parseFloat(fixedPriceVES) / bcvRate).toFixed(2) : '0.00'} USD
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </div>
 
                 <div className="grid grid-cols-2 gap-2">
                   <div>

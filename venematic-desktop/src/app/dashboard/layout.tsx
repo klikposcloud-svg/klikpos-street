@@ -555,9 +555,9 @@ export default function DesktopDashboardLayout({
   };
 
   return (
-    <div className="h-screen w-screen flex flex-col bg-white dark:bg-[#0B141F] text-slate-900 dark:text-slate-100 font-sans overflow-hidden select-none">
+    <div className="h-screen w-screen flex flex-col bg-white dark:bg-[#0a192f] text-slate-900 dark:text-slate-100 font-sans overflow-hidden select-none">
       {/* Barra de Estado Superior Profesional (30% más alta, imponente y sobria) */}
-      <header className="h-[72px] sm:h-[74px] bg-white dark:bg-[#121c29] border-b-2 border-slate-200/90 dark:border-slate-800 text-slate-900 dark:text-white px-5 sm:px-6 flex items-center justify-between shrink-0 z-20 shadow-sm layer-shell transition-all">
+      <header className="h-[72px] sm:h-[74px] bg-white dark:bg-[#0b1a30] border-b-2 border-slate-200/90 dark:border-[#1e3a5f] text-slate-900 dark:text-white px-5 sm:px-6 flex items-center justify-between shrink-0 z-20 shadow-sm layer-shell transition-all">
         {/* Identidad del Terminal */}
         <div className="flex items-center gap-3.5 min-w-0">
           <div className="flex items-center gap-2 shrink-0">
@@ -783,8 +783,8 @@ export default function DesktopDashboardLayout({
         <aside
           className="w-56 border-r flex flex-col justify-between shrink-0 p-3 z-10 layer-shell"
           style={{
-            backgroundColor: currentTheme === 'dark' ? '#0e1826' : '#ffffff',
-            borderColor: currentTheme === 'dark' ? '#1e293b' : '#e2e8f0',
+            backgroundColor: currentTheme === 'dark' ? '#0b1a30' : '#ffffff',
+            borderColor: currentTheme === 'dark' ? '#1e3a5f' : '#e2e8f0',
             color: currentTheme === 'dark' ? '#f8fafc' : '#0f172a',
           }}
         >
@@ -902,7 +902,7 @@ export default function DesktopDashboardLayout({
         </aside>
 
         {/* Área de Trabajo */}
-        <main className="flex-1 bg-white dark:bg-[#0B141F] overflow-hidden flex flex-col">
+        <main className="flex-1 bg-slate-100 dark:bg-[#0a192f] overflow-hidden flex flex-col">
           {children}
         </main>
       </div>

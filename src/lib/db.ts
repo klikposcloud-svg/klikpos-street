@@ -16,6 +16,8 @@ export interface LocalProduct {
   packageUnits?: number;
   profitMarginPercent?: number;
   isTaxExempt?: boolean;
+  isFixedPriceVES?: boolean;
+  fixedPriceVES?: number;
 }
 
 export interface SaleItem {
@@ -27,6 +29,8 @@ export interface SaleItem {
   totalUSD: number;
   taxRate?: number;
   isTaxExempt?: boolean;
+  isFixedPriceVES?: boolean;
+  fixedPriceVES?: number;
 }
 
 export interface SalePayment {

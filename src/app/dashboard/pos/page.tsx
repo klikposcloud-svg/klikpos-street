@@ -30,6 +30,22 @@ import {
   LayoutGrid,
   List,
   Zap,
+  UtensilsCrossed,
+  Coffee,
+  Croissant,
+  ShoppingBag,
+  Milk,
+  Beef,
+  Apple,
+  Gift,
+  Wine,
+  Cake,
+  Pizza,
+  Cookie,
+  CupSoda,
+  Sandwich,
+  ShieldAlert,
+  ShieldCheck,
 } from 'lucide-react';
 import { scaleService, WeightReading } from '@/lib/hardware/scale';
 import { kickCashDrawer } from '@/lib/hardware/cash-drawer';
@@ -73,6 +89,50 @@ const getCategoryBadgeColor = (category: string) => {
   if (cat.includes('limpieza') || cat.includes('higiene')) return 'bg-cyan-700 dark:bg-cyan-800';
   if (cat.includes('licor') || cat.includes('cerveza')) return 'bg-indigo-700 dark:bg-indigo-800';
   return 'bg-[#0e4f5a]';
+};
+
+const getProductVectorIcon = (p: LocalProduct) => {
+  const text = `${p.category || ''} ${p.name || ''}`.toLowerCase();
+  if (text.includes('café') || text.includes('cafe') || text.includes('espresso') || text.includes('latte') || text.includes('cappuccino')) {
+    return <Coffee className="w-9 h-9 sm:w-11 sm:h-11 stroke-[1.5]" />;
+  }
+  if (text.includes('pan') || text.includes('croissant') || text.includes('bakery') || text.includes('hojaldre') || text.includes('pastel')) {
+    return <Croissant className="w-9 h-9 sm:w-11 sm:h-11 stroke-[1.5]" />;
+  }
+  if (text.includes('torta') || text.includes('dulce') || text.includes('postre') || text.includes('cake') || text.includes('pie')) {
+    return <Cake className="w-9 h-9 sm:w-11 sm:h-11 stroke-[1.5]" />;
+  }
+  if (text.includes('galleta') || text.includes('cookie') || text.includes('snack') || text.includes('dorito') || text.includes('papita')) {
+    return <Cookie className="w-9 h-9 sm:w-11 sm:h-11 stroke-[1.5]" />;
+  }
+  if (text.includes('pizza') || text.includes('calzone')) {
+    return <Pizza className="w-9 h-9 sm:w-11 sm:h-11 stroke-[1.5]" />;
+  }
+  if (text.includes('sandwich') || text.includes('hamburguesa') || text.includes('burger') || text.includes('arepa') || text.includes('pepito')) {
+    return <Sandwich className="w-9 h-9 sm:w-11 sm:h-11 stroke-[1.5]" />;
+  }
+  if (text.includes('leche') || text.includes('lacteo') || text.includes('queso') || text.includes('yogurt') || text.includes('milk') || text.includes('mantequilla')) {
+    return <Milk className="w-9 h-9 sm:w-11 sm:h-11 stroke-[1.5]" />;
+  }
+  if (text.includes('carne') || text.includes('pollo') || text.includes('res') || text.includes('cerdo') || text.includes('beef') || text.includes('chuleta') || text.includes('bistec')) {
+    return <Beef className="w-9 h-9 sm:w-11 sm:h-11 stroke-[1.5]" />;
+  }
+  if (text.includes('fruta') || text.includes('manzana') || text.includes('verdura') || text.includes('vegetal') || text.includes('apple') || text.includes('tomate')) {
+    return <Apple className="w-9 h-9 sm:w-11 sm:h-11 stroke-[1.5]" />;
+  }
+  if (text.includes('bebida') || text.includes('refresco') || text.includes('jugo') || text.includes('soda') || text.includes('malta') || text.includes('agua') || text.includes('pepsi') || text.includes('coca')) {
+    return <CupSoda className="w-9 h-9 sm:w-11 sm:h-11 stroke-[1.5]" />;
+  }
+  if (text.includes('licor') || text.includes('vino') || text.includes('cerveza') || text.includes('ron') || text.includes('whisky') || text.includes('polar')) {
+    return <Wine className="w-9 h-9 sm:w-11 sm:h-11 stroke-[1.5]" />;
+  }
+  if (text.includes('regalo') || text.includes('promo') || text.includes('combo') || text.includes('pack')) {
+    return <Gift className="w-9 h-9 sm:w-11 sm:h-11 stroke-[1.5]" />;
+  }
+  if (text.includes('viveres') || text.includes('mercado') || text.includes('arroz') || text.includes('harina') || text.includes('pasta') || text.includes('aceite')) {
+    return <ShoppingBag className="w-9 h-9 sm:w-11 sm:h-11 stroke-[1.5]" />;
+  }
+  return <Package className="w-9 h-9 sm:w-11 sm:h-11 stroke-[1.5]" />;
 };
 
 export default function DesktopPosPage() {
@@ -136,6 +196,44 @@ export default function DesktopPosPage() {
     'cash_usd' | 'cash_ves' | 'pago_movil' | 'card_debit' | 'binance' | 'mixed' | 'credit'
   >('cash_usd');
   const [pagoMovilRef, setPagoMovilRef] = useState<string>('');
+  const [pagoMovilDuplicateAlert, setPagoMovilDuplicateAlert] = useState<{
+    isDuplicate: boolean;
+    receiptNumber?: string;
+    date?: string;
+    amountVES?: number;
+  } | null>(null);
+
+  const checkDuplicateReference = async (ref: string) => {
+    const cleanRef = ref.trim();
+    if (cleanRef.length < 4) {
+      setPagoMovilDuplicateAlert(null);
+      return;
+    }
+    try {
+      const allSales = await db.sales.toArray();
+      const match = allSales.find((s) =>
+        s.payments?.some(
+          (p) =>
+            p.method === 'pago_movil' &&
+            p.reference &&
+            p.reference.trim().toLowerCase() === cleanRef.toLowerCase()
+        )
+      );
+      if (match) {
+        setPagoMovilDuplicateAlert({
+          isDuplicate: true,
+          receiptNumber: match.receiptNumber,
+          date: match.timestamp,
+          amountVES: match.totalVES,
+        });
+        soundEffects.error();
+      } else {
+        setPagoMovilDuplicateAlert({ isDuplicate: false });
+      }
+    } catch {
+      setPagoMovilDuplicateAlert(null);
+    }
+  };
   const [cardDebitRef, setCardDebitRef] = useState<string>('');
   const [binanceRef, setBinanceRef] = useState<string>('');
   const [customersList, setCustomersList] = useState<LocalCustomer[]>([]);
@@ -146,12 +244,12 @@ export default function DesktopPosPage() {
   const [pagoMovilAutoConfirmation, setPagoMovilAutoConfirmation] = useState<PagoMovilConfirmation | null>(null);
   const [pagoMovilGmailConfigured] = useState<boolean>(() => pagoMovilMonitor.isConfigured());
 
-  // Modos de Vista del Catálogo POS (Cuadrícula, Lista Compacta, Botonera Táctil Express)
-  type PosViewMode = 'grid' | 'list' | 'touch';
+  // Modos de Vista del Catálogo POS (Cuadrícula, Lista Compacta, Botonera Táctil Express, Comida Rápida 3x3)
+  type PosViewMode = 'grid' | 'list' | 'touch' | 'fastfood';
   const [posViewMode, setPosViewMode] = useState<PosViewMode>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('klikpos_pos_view_mode');
-      if (saved === 'grid' || saved === 'list' || saved === 'touch') return saved;
+      if (saved === 'grid' || saved === 'list' || saved === 'touch' || saved === 'fastfood') return saved;
     }
     return 'grid';
   });
@@ -1215,6 +1313,8 @@ export default function DesktopPosPage() {
             : item
         );
       } else {
+        const isFixed = product.isFixedPriceVES && product.fixedPriceVES;
+        const itemPriceUSD = isFixed ? (product.fixedPriceVES! / bcvRate) : product.priceUSD;
         return [
           ...prev,
           {
@@ -1222,9 +1322,11 @@ export default function DesktopPosPage() {
             name: product.name,
             barcode: product.barcode,
             qty: Number(qtyToAdd.toFixed(3)),
-            priceUSD: product.priceUSD,
-            totalUSD: qtyToAdd * product.priceUSD,
+            priceUSD: itemPriceUSD,
+            totalUSD: qtyToAdd * itemPriceUSD,
             stock: product.stock,
+            isFixedPriceVES: product.isFixedPriceVES,
+            fixedPriceVES: product.fixedPriceVES,
           },
         ];
       }
@@ -1262,10 +1364,15 @@ export default function DesktopPosPage() {
     setSelectedCartItemId(null);
   };
 
-  // Cálculos totales
+  // Cálculos totales (Considera productos con precio fijo en Bolívares exentos de BCV)
   const subtotalUSD = cart.reduce((sum, item) => sum + item.totalUSD, 0);
   const totalUSD = subtotalUSD;
-  const totalVES = totalUSD * bcvRate;
+  const totalVES = cart.reduce((sum, item) => {
+    if (item.isFixedPriceVES && item.fixedPriceVES) {
+      return sum + (item.fixedPriceVES * item.qty);
+    }
+    return sum + (item.totalUSD * bcvRate);
+  }, 0);
 
   // Manejo del Teclado Numérico Táctil
   const handleNumpadKey = (key: string) => {
@@ -1534,6 +1641,11 @@ export default function DesktopPosPage() {
         amountVES: totalVES,
       });
     } else if (selectedPaymentMethod === 'pago_movil') {
+      if (pagoMovilDuplicateAlert?.isDuplicate) {
+        showToast('🚨 Bloqueo Antifraude: No puedes registrar una venta con una referencia bancaria ya registrada.', 'error');
+        soundEffects.error();
+        return;
+      }
       payments.push({
         method: 'pago_movil',
         amountUSD: totalUSD,
@@ -1678,13 +1790,13 @@ export default function DesktopPosPage() {
   };
 
   return (
-    <div className="flex-1 min-h-0 flex overflow-hidden p-3 gap-3 bg-[var(--industrial-bg,#ffffff)] font-sans">
+    <div className="flex-1 min-h-0 flex overflow-hidden p-3 gap-3 bg-slate-100 dark:bg-[#0a192f] font-sans">
       {/* ========================================================================= */}
       {/* PANEL IZQUIERDO: Buscador, Categorías y Cuadrícula de Productos           */}
       {/* ========================================================================= */}
       <div className="flex-1 min-h-0 flex flex-col gap-2.5 overflow-hidden">
         {/* Barra de Búsqueda de Alta Visibilidad */}
-        <div className="relative w-full bg-white rounded-2xl border border-slate-200/90 shadow-2xs flex items-center px-4 py-2.5">
+        <div className="pos-white-card relative w-full bg-white dark:bg-white rounded-2xl border-2 border-slate-200 dark:border-sky-500/20 shadow-xs flex items-center px-4 py-2.5">
           <Search className="w-4 h-4 text-slate-400 shrink-0 mr-3" />
           <input
             ref={searchInputRef}
@@ -1757,10 +1869,77 @@ export default function DesktopPosPage() {
         </div>
 
         {/* ========================================================================= */}
-        {/* BARRA DE BOTONES GRANDES (ACCIONES RÁPIDAS TÁCTILES POS)                  */}
+        {/* BARRA DE BOTONES DE ACCIÓN RÁPIDA (Normal o Micro-Barra en Comida Rápida) */}
         {/* ========================================================================= */}
-        <div className="bg-slate-200/70 dark:bg-slate-900/80 border border-slate-300/80 dark:border-slate-800 rounded-2xl p-2.5 shadow-2xs shrink-0">
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5 items-center">
+        {posViewMode === 'fastfood' ? (
+          <div className="bg-white dark:bg-[#0e223f] border border-slate-200 dark:border-sky-500/30 rounded-xl px-2.5 py-1.5 shadow-2xs shrink-0 flex items-center justify-between gap-1.5 overflow-x-auto no-scrollbar">
+            <button
+              type="button"
+              onClick={handleTriggerMobileScanner}
+              className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-[var(--brand-primary)] hover:bg-[var(--brand-hover)] text-white text-[11px] font-bold shadow-2xs cursor-pointer shrink-0"
+              title="Activar escáner de código de barras en el celular vinculado"
+            >
+              <Smartphone className="w-3.5 h-3.5" />
+              <span>Escanear Móvil</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => openScannerModal()}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 text-[11px] font-bold border border-slate-200 cursor-pointer shrink-0"
+              title="Vincular celular como escáner inalámbrico"
+            >
+              <QrIcon className="w-3.5 h-3.5 text-sky-600" />
+              <span>Vincular QR</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setShowManualWeightModal(true)}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 text-[11px] font-bold border border-slate-200 cursor-pointer shrink-0"
+              title="Balanza: Pesar producto"
+            >
+              <Scale className="w-3.5 h-3.5 text-sky-600" />
+              <span>Balanza</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={async () => {
+                const res = await kickCashDrawer();
+                showToast(res.message, 'success');
+              }}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 text-[11px] font-bold border border-slate-200 cursor-pointer shrink-0"
+              title="Abrir gaveta de dinero (F10)"
+            >
+              <Banknote className="w-3.5 h-3.5 text-amber-600" />
+              <span>Gaveta (F10)</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                if (!activeShift) {
+                  setCashShiftModalMode('open');
+                } else {
+                  setCashShiftModalMode('view_x');
+                }
+                setShowCashShiftModal(true);
+              }}
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold cursor-pointer shrink-0 border ${
+                activeShift
+                  ? 'bg-slate-100 hover:bg-slate-200 text-slate-800 border-slate-200'
+                  : 'bg-amber-500 hover:bg-amber-400 text-white border-amber-400'
+              }`}
+              title={activeShift ? 'Consultar arqueo o cerrar caja' : 'Fondo de caja'}
+            >
+              <Banknote className="w-3.5 h-3.5" />
+              <span>{activeShift ? `Turno #${activeShift.id}` : 'Abrir Turno'}</span>
+            </button>
+          </div>
+        ) : (
+          <div className="bg-slate-200/70 dark:bg-slate-900/80 border border-slate-300/80 dark:border-slate-800 rounded-2xl p-2.5 shadow-2xs shrink-0">
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5 items-center">
             {/* 1. Botón Grande: Escanear con Celular (Logo SVG de Código de Barras con Láser) */}
             <button
               type="button"
@@ -1922,11 +2101,12 @@ export default function DesktopPosPage() {
             </button>
           </div>
         </div>
+      )}
 
         {/* ========================================================================= */}
         {/* BANDEJA DOCK: ACCESOS RÁPIDOS Y FAVORITOS (Diferenciada y Colapsable)     */}
         {/* ========================================================================= */}
-        {!searchQuery.trim() && sliderProducts.length > 0 && (
+        {!searchQuery.trim() && sliderProducts.length > 0 && posViewMode !== 'fastfood' && (
           <div className="shrink-0 flex flex-col gap-1.5 bg-gradient-to-r from-slate-100/90 via-slate-50/80 to-slate-100/90 dark:from-slate-900/80 dark:via-slate-900/60 dark:to-slate-900/80 p-2.5 rounded-2xl border-2 border-sky-600/20 dark:border-sky-500/20 shadow-xs transition-all">
             {/* Header de la Bandeja con Controles de Desplazamiento & Colapso */}
             <div className="flex items-center justify-between px-1">
@@ -2083,7 +2263,7 @@ export default function DesktopPosPage() {
                   className={`px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all duration-150 select-none active:scale-[0.97] cursor-pointer shadow-2xs ${
                     isSelected
                       ? 'bg-[var(--brand-primary)] text-white shadow-xs ring-2 ring-[var(--brand-primary)]/30'
-                      : 'bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200/90 dark:border-slate-700'
+                      : 'bg-white dark:bg-white hover:bg-slate-100 text-slate-800 border-2 border-slate-200 dark:border-sky-500/20'
                   }`}
                 >
                   {cat}
@@ -2092,19 +2272,19 @@ export default function DesktopPosPage() {
             })}
           </div>
 
-          {/* Selector de los 3 Modos de Vista a la derecha */}
-          <div className="flex items-center p-1 bg-slate-100 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shrink-0 select-none shadow-2xs">
+          {/* Selector de los Modos de Vista a la derecha */}
+          <div className="flex items-center p-1 bg-white dark:bg-white rounded-xl border-2 border-slate-200 dark:border-sky-500/20 shrink-0 select-none shadow-2xs">
             <button
               type="button"
               onClick={() => handleSetPosViewMode('grid')}
               className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-black transition-all cursor-pointer ${
                 posViewMode === 'grid'
-                  ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-xs border border-slate-200 dark:border-slate-700'
-                  : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
+                  ? 'bg-sky-600 text-white shadow-xs border border-sky-700'
+                  : 'text-slate-600 hover:text-slate-900'
               }`}
               title="Vista de Cuadrícula Visual con Imágenes"
             >
-              <LayoutGrid className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" />
+              <LayoutGrid className="w-3.5 h-3.5" />
               <span className="hidden xl:inline">Cuadrícula</span>
             </button>
 
@@ -2113,12 +2293,12 @@ export default function DesktopPosPage() {
               onClick={() => handleSetPosViewMode('list')}
               className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-black transition-all cursor-pointer ${
                 posViewMode === 'list'
-                  ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-xs border border-slate-200 dark:border-slate-700'
-                  : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
+                  ? 'bg-emerald-600 text-white shadow-xs border border-emerald-700'
+                  : 'text-slate-600 hover:text-slate-900'
               }`}
               title="Vista en Lista Compacta de Alta Densidad (15+ productos por pantalla)"
             >
-              <List className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+              <List className="w-3.5 h-3.5" />
               <span className="hidden xl:inline">Lista</span>
             </button>
 
@@ -2127,13 +2307,27 @@ export default function DesktopPosPage() {
               onClick={() => handleSetPosViewMode('touch')}
               className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-black transition-all cursor-pointer ${
                 posViewMode === 'touch'
-                  ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-xs border border-slate-200 dark:border-slate-700'
-                  : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
+                  ? 'bg-amber-500 text-white shadow-xs border border-amber-600'
+                  : 'text-slate-600 hover:text-slate-900'
               }`}
               title="Vista Táctil Express / Cafetería y Panadería (Botones Grandes)"
             >
-              <Zap className="w-3.5 h-3.5 text-amber-500" />
+              <Zap className="w-3.5 h-3.5" />
               <span className="hidden xl:inline">Táctil Express</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleSetPosViewMode('fastfood')}
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-black transition-all cursor-pointer ${
+                posViewMode === 'fastfood'
+                  ? 'bg-amber-500 text-white shadow-xs border border-amber-600'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+              title="Modo Comida Rápida / Fast Food & Restaurante (Cuadrícula Táctil 3x3)"
+            >
+              <UtensilsCrossed className="w-3.5 h-3.5" />
+              <span className="hidden xl:inline">Comida Rápida</span>
             </button>
           </div>
         </div>
@@ -2147,26 +2341,36 @@ export default function DesktopPosPage() {
             <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4 gap-3 content-start">
               {filteredProducts.map((p) => {
                 const isLowStock = p.stock <= p.minStock;
+                const isFixed = p.isFixedPriceVES && p.fixedPriceVES;
+                const displayVES = isFixed ? p.fixedPriceVES! : (p.priceUSD * bcvRate);
+                const displayUSD = isFixed ? (p.fixedPriceVES! / bcvRate) : p.priceUSD;
                 return (
                   <div
                     key={p.id}
                     onClick={() => addToCart(p, 1)}
-                    className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/90 dark:border-slate-700/80 p-3 shadow-xs hover:shadow-lg hover:border-sky-500 transition-all active:scale-[0.98] cursor-pointer flex flex-col justify-between group select-none"
+                    className="pos-white-card bg-white rounded-2xl border-2 border-slate-200/90 dark:border-sky-500/20 p-3 shadow-sm hover:shadow-lg hover:border-sky-500 transition-all active:scale-[0.98] cursor-pointer flex flex-col justify-between group select-none"
                   >
                     <div className="flex items-center justify-between gap-1.5 w-full mb-1.5">
-                      <span className="font-mono text-[10px] font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-700/60 px-2 py-0.5 rounded-md border border-slate-200 dark:border-slate-600 truncate">
+                      <span className="font-mono text-[10px] font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200 truncate">
                         {p.barcode ? (p.barcode.length > 4 ? p.barcode.slice(-4) : p.barcode) : '759...'}
                       </span>
-                      <span className={`text-[9.5px] font-black px-2 py-0.5 rounded-md text-white uppercase tracking-wider shrink-0 truncate max-w-[120px] ${getCategoryBadgeColor(p.category)}`}>
-                        {p.category}
-                      </span>
+                      <div className="flex items-center gap-1">
+                        {isFixed && (
+                          <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-amber-500 text-white shrink-0 shadow-2xs">
+                            🔒 Fijo Bs.
+                          </span>
+                        )}
+                        <span className={`text-[9.5px] font-black px-2 py-0.5 rounded-md text-white uppercase tracking-wider shrink-0 truncate max-w-[120px] ${getCategoryBadgeColor(p.category)}`}>
+                          {p.category}
+                        </span>
+                      </div>
                     </div>
 
-                    <h4 className="font-black text-[13px] text-slate-900 dark:text-white leading-snug my-1 line-clamp-2 min-h-[36px] flex items-center" title={p.name}>
+                    <h4 className="font-black text-[13px] text-slate-900 leading-snug my-1 line-clamp-2 min-h-[36px] flex items-center" title={p.name}>
                       {p.name}
                     </h4>
 
-                    <div className="w-full h-24 sm:h-28 rounded-xl bg-slate-50 dark:bg-slate-900 overflow-hidden relative border border-slate-200/80 dark:border-slate-700/80 mb-2">
+                    <div className="w-full h-24 sm:h-28 rounded-xl bg-slate-50 overflow-hidden relative border border-slate-200/80 mb-2">
                       {p.image && showImages ? (
                         <img
                           src={p.image}
@@ -2175,23 +2379,23 @@ export default function DesktopPosPage() {
                           loading="lazy"
                         />
                       ) : (
-                        <div className="w-full h-full flex flex-col items-center justify-center text-slate-300 dark:text-slate-600">
+                        <div className="w-full h-full flex flex-col items-center justify-center text-slate-300">
                           <Package className="w-8 h-8 stroke-1" />
                         </div>
                       )}
                     </div>
 
-                    <div className="flex items-end justify-between gap-1.5 pt-1 mt-auto border-t border-slate-100 dark:border-slate-700/60">
+                    <div className="flex items-end justify-between gap-1.5 pt-1 mt-auto border-t border-slate-100">
                       <div className="leading-tight flex flex-col">
-                        <span className="text-[14.5px] sm:text-[15.5px] font-black font-sans text-slate-950 dark:text-white tabular-numbers leading-tight">
-                          {formatVES(p.priceUSD * bcvRate)}
+                        <span className="text-[14.5px] sm:text-[15.5px] font-black font-sans text-slate-950 tabular-numbers leading-tight">
+                          {formatVES(displayVES)}
                         </span>
-                        <span className="text-[11px] text-slate-600 dark:text-slate-300 font-bold mt-0.5">
-                          ${p.priceUSD.toFixed(2)}
+                        <span className="text-[11px] text-slate-600 font-bold mt-0.5">
+                          ${displayUSD.toFixed(2)}
                         </span>
                       </div>
 
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-200 shrink-0 flex items-center gap-1.5">
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border border-slate-200 bg-slate-100 text-slate-800 shrink-0 flex items-center gap-1.5">
                         <span className={`w-2 h-2 rounded-full ${isLowStock ? 'bg-rose-500 animate-pulse' : 'bg-emerald-500'} shrink-0`} />
                         <span>{p.stock}</span>
                       </span>
@@ -2207,15 +2411,18 @@ export default function DesktopPosPage() {
             <div className="flex flex-col gap-1.5 content-start">
               {filteredProducts.map((p) => {
                 const isLowStock = p.stock <= p.minStock;
+                const isFixed = p.isFixedPriceVES && p.fixedPriceVES;
+                const displayVES = isFixed ? p.fixedPriceVES! : (p.priceUSD * bcvRate);
+                const displayUSD = isFixed ? (p.fixedPriceVES! / bcvRate) : p.priceUSD;
                 return (
                   <div
                     key={p.id}
                     onClick={() => addToCart(p, 1)}
-                    className="bg-white dark:bg-slate-800 hover:bg-sky-50/50 dark:hover:bg-slate-700/70 border border-slate-200/90 dark:border-slate-700/80 rounded-xl px-3 py-2 flex items-center justify-between gap-3 shadow-2xs hover:shadow-xs transition-all cursor-pointer group select-none active:scale-[0.99]"
+                    className="pos-white-card bg-white hover:bg-sky-50/50 border-2 border-slate-200/90 dark:border-sky-500/20 rounded-xl px-3 py-2 flex items-center justify-between gap-3 shadow-xs hover:shadow-sm transition-all cursor-pointer group select-none active:scale-[0.99]"
                   >
                     {/* Miniatura / Ícono + Nombre + SKU */}
                     <div className="flex items-center gap-3 min-w-0 flex-1">
-                      <div className="w-10 h-10 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 overflow-hidden shrink-0 flex items-center justify-center">
+                      <div className="w-10 h-10 rounded-lg bg-slate-50 border border-slate-200 overflow-hidden shrink-0 flex items-center justify-center">
                         {p.image && showImages ? (
                           <img src={p.image} alt={p.name} className="w-full h-full object-cover" loading="lazy" />
                         ) : (
@@ -2225,9 +2432,14 @@ export default function DesktopPosPage() {
 
                       <div className="min-w-0 flex-1 leading-tight">
                         <div className="flex items-center gap-2">
-                          <span className="font-bold text-xs sm:text-[13px] text-slate-900 dark:text-white truncate" title={p.name}>
+                          <span className="font-bold text-xs sm:text-[13px] text-slate-900 truncate" title={p.name}>
                             {p.name}
                           </span>
+                          {isFixed && (
+                            <span className="text-[8.5px] font-black px-1.5 py-0.5 rounded bg-amber-500 text-white shrink-0 shadow-2xs">
+                              🔒 Fijo Bs.
+                            </span>
+                          )}
                           <span className={`text-[8.5px] font-black px-1.5 py-0.5 rounded text-white uppercase tracking-wider shrink-0 ${getCategoryBadgeColor(p.category)}`}>
                             {p.category}
                           </span>
@@ -2239,18 +2451,18 @@ export default function DesktopPosPage() {
                     </div>
 
                     {/* Stock */}
-                    <span className="text-[10.5px] font-bold px-2.5 py-1 rounded-full border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-300 shrink-0 flex items-center gap-1.5">
+                    <span className="text-[10.5px] font-bold px-2.5 py-1 rounded-full border border-slate-200 bg-slate-50 text-slate-700 shrink-0 flex items-center gap-1.5">
                       <span className={`w-2 h-2 rounded-full ${isLowStock ? 'bg-rose-500 animate-pulse' : 'bg-emerald-500'} shrink-0`} />
                       <span>{p.stock} {p.unit === 'kg' || (p as any).isWeighable ? 'kg' : 'uds'}</span>
                     </span>
 
                     {/* Precios duales */}
                     <div className="text-right leading-tight min-w-[110px] shrink-0">
-                      <span className="font-black text-sm text-slate-950 dark:text-white tabular-numbers block">
-                        {formatVES(p.priceUSD * bcvRate)}
+                      <span className="font-black text-sm text-slate-950 tabular-numbers block">
+                        {formatVES(displayVES)}
                       </span>
-                      <span className="text-[11px] text-slate-500 dark:text-slate-400 font-semibold block">
-                        ${p.priceUSD.toFixed(2)}
+                      <span className="text-[11px] text-slate-500 font-semibold block">
+                        ${displayUSD.toFixed(2)}
                       </span>
                     </div>
 
@@ -2267,44 +2479,140 @@ export default function DesktopPosPage() {
             </div>
           )}
 
-          {/* MODO 3: TÁCTIL EXPRESS (BOTONES GRANDES PARA PANTALLA TÁCTIL) */}
+          {/* MODO 3: TÁCTIL MINIMALISTA / KIOSK EXPRESS & CAFÉ (ESTILO IMAGEN 2) */}
           {posViewMode === 'touch' && (
-            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4 gap-2.5 content-start">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4 gap-3 content-start">
               {filteredProducts.map((p) => {
                 const isLowStock = p.stock <= p.minStock;
+                const isFixed = p.isFixedPriceVES && p.fixedPriceVES;
+                const displayVES = isFixed ? p.fixedPriceVES! : (p.priceUSD * bcvRate);
+                const displayUSD = isFixed ? (p.fixedPriceVES! / bcvRate) : p.priceUSD;
                 return (
                   <button
                     key={p.id}
                     type="button"
                     onClick={() => addToCart(p, 1)}
-                    className="h-28 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 border-2 border-slate-200/90 dark:border-slate-700 hover:border-sky-500 rounded-2xl p-2.5 flex flex-col justify-between text-left shadow-2xs hover:shadow-md transition-all active:scale-[0.97] cursor-pointer group select-none relative overflow-hidden"
+                    className="pos-white-card aspect-square rounded-3xl p-3.5 flex flex-col justify-between items-center text-center shadow-xs hover:shadow-lg transition-all duration-200 active:scale-[0.96] cursor-pointer group select-none relative overflow-hidden border border-slate-200/90 dark:border-white/10 hover:border-sky-500 bg-white dark:bg-white"
+                    style={{
+                      borderColor: 'var(--industrial-border, rgba(226, 232, 240, 0.9))',
+                    }}
                   >
-                    {/* Banda de color de categoría en el borde superior */}
-                    <div className="flex items-center justify-between w-full">
-                      <span className={`text-[9px] font-black px-1.5 py-0.5 rounded text-white uppercase tracking-wider shrink-0 ${getCategoryBadgeColor(p.category)}`}>
+                    {/* Indicador superior sutil (Categoría pequeña o Tag Fijo) */}
+                    <div className="flex items-center justify-between w-full px-0.5">
+                      <span className="text-[10px] font-black tracking-wider uppercase text-slate-400 group-hover:text-sky-600 transition-colors truncate max-w-[90px]">
                         {p.category}
                       </span>
-                      <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1">
-                        <span className={`w-1.5 h-1.5 rounded-full ${isLowStock ? 'bg-rose-500' : 'bg-emerald-500'}`} />
-                        <span>{p.stock}</span>
-                      </span>
+                      {isFixed ? (
+                        <span className="text-[8.5px] font-black px-1.5 py-0.5 rounded-full bg-amber-500 text-white shrink-0 shadow-2xs">
+                          🔒 Bs. Fijo
+                        </span>
+                      ) : (
+                        <span className="text-[10px] font-bold text-slate-400 flex items-center gap-1">
+                          <span className={`w-1.5 h-1.5 rounded-full ${isLowStock ? 'bg-rose-500 animate-pulse' : 'bg-emerald-500'}`} />
+                          <span>{p.stock}</span>
+                        </span>
+                      )}
                     </div>
 
-                    {/* Nombre grande */}
-                    <span className="font-black text-xs sm:text-[13px] text-slate-900 dark:text-white leading-tight line-clamp-2 my-1">
-                      {p.name}
-                    </span>
+                    {/* Icono Vectorial Minimalista Central con Tinte Dinámico de Branding */}
+                    <div
+                      className="my-auto flex flex-col items-center justify-center p-3 rounded-2xl bg-slate-50 group-hover:bg-sky-50 transition-all duration-200 group-hover:scale-110"
+                      style={{
+                        color: 'var(--btn-primary-bg, #0284c7)',
+                      }}
+                    >
+                      {getProductVectorIcon(p)}
+                    </div>
 
-                    {/* Precios gigantes táctiles */}
-                    <div className="flex items-baseline justify-between w-full pt-1 border-t border-slate-100 dark:border-slate-700/60">
-                      <span className="font-black text-sm sm:text-base font-sans text-slate-950 dark:text-white tabular-numbers">
-                        {formatVES(p.priceUSD * bcvRate)}
+                    {/* Nombre en Mayúsculas con Tracking Elegante (Estilo Imagen 2) */}
+                    <div className="w-full flex flex-col items-center">
+                      <span className="font-black text-xs sm:text-[13px] tracking-widest uppercase text-slate-900 leading-tight line-clamp-1 group-hover:text-sky-600 transition-colors">
+                        {p.name}
                       </span>
-                      <span className="text-xs text-sky-700 dark:text-sky-300 font-black">
-                        ${p.priceUSD.toFixed(2)}
-                      </span>
+
+                      {/* Precios Minimalistas de Alto Contraste */}
+                      <div className="flex items-baseline justify-center gap-2 mt-1 w-full pt-1.5 border-t border-slate-100">
+                        <span className="font-black text-sm sm:text-base font-sans text-slate-950 tabular-numbers">
+                          {formatVES(displayVES)}
+                        </span>
+                        <span className="text-[11px] font-bold text-slate-500">
+                          ${displayUSD.toFixed(2)}
+                        </span>
+                      </div>
                     </div>
                   </button>
+                );
+              })}
+            </div>
+          )}
+
+          {/* MODO 4: COMIDA RÁPIDA / RESTAURANTE & FAST FOOD (QUIOSCO TÁCTIL GASTRONÓMICO) */}
+          {posViewMode === 'fastfood' && (
+            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-3 gap-3.5 content-start">
+              {filteredProducts.map((p) => {
+                const isLowStock = p.stock <= p.minStock;
+                const isFixed = p.isFixedPriceVES && p.fixedPriceVES;
+                const displayVES = isFixed ? p.fixedPriceVES! : (p.priceUSD * bcvRate);
+                const displayUSD = isFixed ? (p.fixedPriceVES! / bcvRate) : p.priceUSD;
+                return (
+                  <div
+                    key={p.id}
+                    onClick={() => addToCart(p, 1)}
+                    className="relative h-[250px] sm:h-[275px] rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-200 active:scale-[0.98] cursor-pointer group select-none border border-slate-300/40 dark:border-white/10 bg-slate-900 flex flex-col justify-end"
+                  >
+                    {/* Foto de Fondo a Pantalla Completa */}
+                    {p.image && showImages ? (
+                      <img
+                        src={p.image}
+                        alt={p.name}
+                        className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-slate-800 to-slate-950 flex flex-col items-center justify-center text-slate-500">
+                        <UtensilsCrossed className="w-16 h-16 stroke-1 text-slate-600" />
+                      </div>
+                    )}
+
+                    {/* Degradado suave para garantizar contraste de textos */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent pointer-events-none" />
+
+                    {/* Badge superior si es Precio Fijo en Bs. o Stock bajo */}
+                    <div className="absolute top-2.5 right-2.5 flex items-center gap-1.5 z-10">
+                      {isFixed && (
+                        <span className="text-[10px] font-black px-2 py-0.5 rounded-lg bg-amber-500 text-white shadow-md">
+                          🔒 Fijo Bs.
+                        </span>
+                      )}
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-sm text-white border border-white/20">
+                        {p.stock} {p.unit === 'kg' ? 'kg' : 'uds'}
+                      </span>
+                    </div>
+
+                    {/* Caja Inferior Flotante (Overlay tipo Card Interna idéntica a la imagen de referencia) */}
+                    <div className="relative m-2.5 p-3 rounded-2xl bg-black/65 backdrop-blur-md border border-white/20 text-white flex flex-col gap-0.5 z-10 shadow-lg">
+                      {/* Título del Plato */}
+                      <h4 className="font-bold text-[15px] sm:text-[16px] text-white leading-tight truncate drop-shadow-xs" title={p.name}>
+                        {p.name}
+                      </h4>
+
+                      {/* Precio en Bolívares Gigante */}
+                      <div className="font-black text-[18px] sm:text-[20px] font-sans text-white tabular-numbers leading-tight drop-shadow-xs">
+                        {formatVES(displayVES)}
+                      </div>
+
+                      {/* Fila Inferior: Precio en Dólares + Pill de Categoría */}
+                      <div className="flex items-center justify-between gap-2 pt-1 border-t border-white/15 mt-0.5">
+                        <span className="text-xs text-slate-300 font-semibold tracking-wide">
+                          ${displayUSD.toFixed(2)} USD
+                        </span>
+
+                        <span className="text-[9.5px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-white/20 text-white truncate max-w-[120px]">
+                          {p.category}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
                 );
               })}
             </div>
@@ -2531,7 +2839,7 @@ export default function DesktopPosPage() {
 
         {/* ---- TAB: TICKET ACTIVO ---- */}
         {rightPanelTab === 'cart' && (
-          <div className="flex-1 min-h-0 bg-white dark:bg-slate-800/70 rounded-2xl border-2 border-[var(--brand-primary)]/30 dark:border-slate-700 shadow-sm dark:shadow-none flex flex-col p-3.5 overflow-hidden" style={{ borderColor: 'color-mix(in srgb, var(--brand-primary) 35%, transparent)' }}>
+          <div className="pos-white-card flex-1 min-h-0 bg-white dark:bg-white rounded-2xl border-2 border-[var(--brand-primary)]/30 dark:border-sky-500/20 shadow-md flex flex-col p-3.5 overflow-hidden">
             {/* Cabecera del Ticket */}
             <div className="flex items-center justify-between mb-2 shrink-0">
               <div className="flex items-center gap-2">
@@ -2703,7 +3011,7 @@ export default function DesktopPosPage() {
         )}
 
         {/* TECLADO NUMÉRICO TÁCTIL INDUSTRIAL */}
-        <div className="bg-white dark:bg-slate-800/70 rounded-2xl border-2 dark:border dark:border-slate-700 shadow-sm p-3 space-y-2 shrink-0" style={{ borderColor: 'color-mix(in srgb, var(--brand-primary) 30%, transparent)' }}>
+        <div className="pos-white-card bg-white dark:bg-white rounded-2xl border-2 border-slate-200/90 dark:border-sky-500/20 shadow-md p-3 space-y-2 shrink-0">
           {/* Top row: Cantidad | Código | Input */}
           <div className="flex items-center gap-2">
             <button
@@ -3442,17 +3750,53 @@ export default function DesktopPosPage() {
                             </div>
                           )}
                           <div>
-                            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-                              Comprobante / Referencia de Pago Móvil:
-                            </label>
+                            <div className="flex items-center justify-between mb-1.5">
+                              <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                                Comprobante / Referencia de Pago Móvil:
+                              </label>
+                              <span className="text-[10.5px] font-black text-sky-600 dark:text-sky-400 flex items-center gap-1">
+                                <ShieldCheck className="w-3.5 h-3.5 text-sky-600" /> KlikPOS Shield Antifraude
+                              </span>
+                            </div>
                             <input
                               type="text"
                               maxLength={20}
-                              placeholder="Ej: 00123456789"
+                              placeholder="Ej: 00123456789 (mínimo 4 dígitos)"
                               value={pagoMovilRef}
-                              onChange={(e) => setPagoMovilRef(e.target.value)}
-                              className="w-full h-11 px-4 border-2 border-slate-300 dark:border-slate-600 rounded-xl text-sm font-mono text-slate-900 dark:text-white bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                setPagoMovilRef(val);
+                                checkDuplicateReference(val);
+                              }}
+                              className={`w-full h-11 px-4 border-2 rounded-xl text-sm font-mono text-slate-900 dark:text-white bg-white dark:bg-slate-900 focus:outline-none transition-colors ${
+                                pagoMovilDuplicateAlert?.isDuplicate
+                                  ? 'border-rose-500 ring-2 ring-rose-500/20 bg-rose-50/50 dark:bg-rose-950/20'
+                                  : 'border-slate-300 dark:border-slate-600 focus:ring-2 focus:ring-sky-500'
+                              }`}
                             />
+
+                            {/* Alerta de Referencia Duplicada / Reciclada */}
+                            {pagoMovilDuplicateAlert?.isDuplicate && (
+                              <div className="mt-2.5 p-3 bg-rose-50 dark:bg-rose-950/40 border-2 border-rose-500 rounded-xl flex items-start gap-2.5 text-rose-900 dark:text-rose-200 shadow-sm animate-pulse">
+                                <ShieldAlert className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
+                                <div className="text-xs leading-snug">
+                                  <p className="font-black text-rose-700 dark:text-rose-300">🚨 ¡ALERTA ANTIFRAUDE! REFERENCIA DUPLICADA</p>
+                                  <p className="mt-0.5">
+                                    Esta referencia ya fue registrada en el <b>Ticket #{pagoMovilDuplicateAlert.receiptNumber}</b> el {new Date(pagoMovilDuplicateAlert.date || '').toLocaleString('es-VE')} por <b>Bs. {pagoMovilDuplicateAlert.amountVES?.toFixed(2)}</b>.
+                                  </p>
+                                  <p className="font-bold text-rose-800 dark:text-rose-200 mt-1">
+                                    ⛔ Posible captura reciclada o intento de pago duplicado. Verifique con el cliente antes de despachar.
+                                  </p>
+                                </div>
+                              </div>
+                            )}
+
+                            {!pagoMovilDuplicateAlert?.isDuplicate && pagoMovilRef.trim().length >= 4 && (
+                              <div className="mt-1.5 flex items-center gap-1.5 text-xs text-emerald-700 dark:text-emerald-400 font-bold px-1">
+                                <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                                <span>Referencia única comprobada en historial de ventas.</span>
+                              </div>
+                            )}
                           </div>
                         </>
                       )}

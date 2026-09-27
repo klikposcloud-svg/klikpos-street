@@ -94,6 +94,10 @@ class SoundEffects {
     this.playBeep();
   }
 
+  error() {
+    this.playError();
+  }
+
   action() {
     this.playBeep();
   }

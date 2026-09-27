@@ -40,24 +40,24 @@
   --industrial-border: #e2e8f0;
 }
 
-/* Â§17.2 Tokens SemÃ¡nticos Oficiales - Dark (Modo Oscuro) */
+/* §17.2 Tokens Semánticos Oficiales - Dark (Modo Oscuro: Fondo Azul Marino + Cards Blancas) */
 [data-theme="dark"] {
-  --industrial-bg: #0B141F;
-  --industrial-card: #121C29;
-  --industrial-border: #22303F;
-  --color-bg-app: #0B141F;
-  --color-bg-surface: #121C29;
-  --color-bg-sunken: #0E1826;
-  --color-bg-hover: #1A2634;
-  --color-border-default: #22303F;
-  --color-border-strong: #35465A;
-  --color-text-primary: #E8EEF4;
-  --color-text-secondary: #9DAEBE;
-  --color-text-tertiary: #6C7E90;
-  --color-brand-600: #4DA3E0;
-  --color-brand-700: #7FBCEA;
-  --color-brand-100: rgb(77 163 224 / .16);
-  --color-brand-050: rgb(77 163 224 / .10);
+  --industrial-bg: #0a192f;
+  --industrial-card: #ffffff;
+  --industrial-border: #1e3a5f;
+  --color-bg-app: #0a192f;
+  --color-bg-surface: #0e223f;
+  --color-bg-sunken: #071324;
+  --color-bg-hover: #162f52;
+  --color-border-default: #1e3a5f;
+  --color-border-strong: #2d5282;
+  --color-text-primary: #0f172a;
+  --color-text-secondary: #475569;
+  --color-text-tertiary: #64748b;
+  --color-brand-600: #0284c7;
+  --color-brand-700: #0369a1;
+  --color-brand-100: rgb(2 132 199 / .16);
+  --color-brand-050: rgb(2 132 199 / .10);
   --color-price-bs: #6FB6E4;
   --color-success: #3BBE8C;
   --color-success-tint: rgb(59 190 140 / 0.14);
@@ -70,6 +70,16 @@
   --focus-ring: 0 0 0 3px rgb(77 163 224 / .35);
   --shadow-pop: 0 4px 12px rgb(0 0 0 / .40);
   --shadow-modal: 0 24px 64px rgb(0 0 0 / .60);
+}
+
+/* §17.2.1 Contraste Inverso: Lienzo Azul Marino Profundo con Tarjetas Blancas */
+[data-theme="dark"] body {
+  background-color: #0a192f !important;
+}
+
+[data-theme="dark"] .pos-white-card {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
 }
 
 /* Â§17.3 Tema Glass (Glassmorphism Regulado) */
@@ -374,9 +384,9 @@ html[data-theme="glass"] main {
   background-color: #0b141f !important;
   color: #f8fafc !important;
 }
-html.dark .bg-white,
-html[data-theme="dark"] .bg-white,
-html[data-theme="glass"] .bg-white {
+html.dark .bg-white:not(.pos-white-card),
+html[data-theme="dark"] .bg-white:not(.pos-white-card),
+html[data-theme="glass"] .bg-white:not(.pos-white-card) {
   background-color: #121c29 !important;
   border-color: #22303f !important;
   color: #f8fafc !important;
@@ -1269,7 +1279,7 @@ html.dark:not([data-theme="light"]), html[data-theme="dark"], html[data-ui-style
 }
 
 /* Paneles y Contenedores Principales */
-html.dark:not([data-theme="light"]), html[data-theme="dark"], html[data-ui-style="glassmorphism"]:not([data-theme="light"]) .bg-white {
+html.dark:not([data-theme="light"]) .bg-white:not(.pos-white-card), html[data-theme="dark"] .bg-white:not(.pos-white-card), html[data-ui-style="glassmorphism"]:not([data-theme="light"]) .bg-white:not(.pos-white-card) {
   background: #182333 !important;
   border-color: #283a50 !important;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35) !important;
@@ -2267,6 +2277,30 @@ html.theme-glass .inventory-capsule-row:hover {
   border-color: rgba(56, 189, 248, 0.45) !important;
   box-shadow: 0 8px 30px -4px rgba(0, 0, 0, 0.6), 0 0 20px rgba(56, 189, 248, 0.25), inset 0 1px 0 0 rgba(255, 255, 255, 0.2) !important;
   transform: translateY(-1.5px);
+}
+
+/* ==========================================================================
+   SALVAGUARDA SUPREMA: CONTRASTE INVERSO EN MODO OSCURO
+   Lienzo Azul Marino Profundo (#0a192f) con Tarjetas Blancas (#ffffff)
+   ========================================================================== */
+html.dark .pos-white-card,
+html[data-theme="dark"] .pos-white-card,
+[data-theme="dark"] .pos-white-card {
+  background-color: #ffffff !important;
+  background: #ffffff !important;
+  color: #0f172a !important;
+  border-color: rgba(226, 232, 240, 0.9) !important;
+}
+
+html.dark .pos-white-card h3,
+html.dark .pos-white-card h4,
+html.dark .pos-white-card .text-slate-900,
+html.dark .pos-white-card .text-slate-950,
+html[data-theme="dark"] .pos-white-card h3,
+html[data-theme="dark"] .pos-white-card h4,
+html[data-theme="dark"] .pos-white-card .text-slate-900,
+html[data-theme="dark"] .pos-white-card .text-slate-950 {
+  color: #0f172a !important;
 }
 
 
