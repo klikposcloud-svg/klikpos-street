@@ -48,6 +48,7 @@ Write-Host "[OK] Certificado registrado en Windows (TrustedPublisher)" -Foregrou
 Write-Host "[4/5] Firmando digitalmente y desbloqueando ejecutables..." -ForegroundColor Yellow
 
 $targetFiles = @(
+    "c:\Users\pcpro\OneDrive\Documents\venematic-master\venematic-master\dist-installer\KlikPOS-Enterprise-Setup-v2.4.1.exe",
     "c:\Users\pcpro\OneDrive\Documents\venematic-master\venematic-master\dist-installer\KlikPOS-Enterprise-Setup-v2.4.0.exe",
     "c:\Users\pcpro\OneDrive\Documents\venematic-master\venematic-master\DISTRIBUCION_KLIKPOS\01_Combo_Basico_Desktop_Satelite\KlikPOS_Desktop_Setup.exe",
     "c:\Users\pcpro\OneDrive\Documents\venematic-master\venematic-master\DISTRIBUCION_KLIKPOS\02_Combo_Empresarial_Full\KlikPOS_Desktop_Full_Setup.exe",

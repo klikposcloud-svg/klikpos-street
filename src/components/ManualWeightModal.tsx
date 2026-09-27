@@ -257,8 +257,8 @@ export default function ManualWeightModal({
                   <p className="text-xs font-black text-slate-900 dark:text-slate-100 truncate">
                     {activeProduct.name}
                   </p>
-                  <span className="text-[11px] text-slate-600 dark:text-slate-400 font-mono">
-                    Precio: <b className="text-slate-900 dark:text-white">{formatUSD(activeProduct.priceUSD)}</b> por {priceBasis}
+                  <span className="text-[11px] text-slate-700 dark:text-slate-300 font-mono">
+                    Precio: <b style={{ color: '#0f172a' }} className="font-black">{formatUSD(activeProduct.priceUSD)}</b> por {priceBasis}
                   </span>
                 </div>
                 {!targetProduct && (

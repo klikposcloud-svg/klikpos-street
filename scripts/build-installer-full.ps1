@@ -3,8 +3,8 @@ $ErrorActionPreference = "Stop"
 $rootDir = Split-Path -Parent $PSScriptRoot
 $desktopDir = Join-Path $rootDir "venematic-desktop"
 $issPath = Join-Path $desktopDir "installer.iss"
-$outputExeDesktop = Join-Path $desktopDir "dist-installer\KlikPOS-Enterprise-Setup-v2.4.0.exe"
-$outputExeRoot = Join-Path $rootDir "dist-installer\KlikPOS-Enterprise-Setup-v2.4.0.exe"
+$outputExeDesktop = Join-Path $desktopDir "dist-installer\KlikPOS-Enterprise-Setup-v2.4.1.exe"
+$outputExeRoot = Join-Path $rootDir "dist-installer\KlikPOS-Enterprise-Setup-v2.4.1.exe"
 $hashDesktop = Join-Path $desktopDir "dist-installer\VERIFICACION_HASHES.txt"
 $hashRoot = Join-Path $rootDir "dist-installer\VERIFICACION_HASHES.txt"
 
@@ -53,6 +53,13 @@ Unblock-File -Path $outputExeRoot -ErrorAction SilentlyContinue
 $distRoot = Join-Path $rootDir "dist-installer"
 Copy-Item $outputExeRoot (Join-Path $distRoot "Klikpos-Setup-v2.0.0.exe") -Force
 Copy-Item $outputExeRoot (Join-Path $distRoot "KlikPOS_Setup_v2.4.0.exe") -Force
+Copy-Item $outputExeRoot (Join-Path $distRoot "KlikPOS-Enterprise-Setup-v2.4.0.exe") -Force
+
+# Sincronizar en combos oficiales de distribución
+$combo1 = Join-Path $rootDir "DISTRIBUCION_KLIKPOS\01_Combo_Basico_Desktop_Satelite\KlikPOS_Desktop_Setup.exe"
+$combo2 = Join-Path $rootDir "DISTRIBUCION_KLIKPOS\02_Combo_Empresarial_Full\KlikPOS_Desktop_Full_Setup.exe"
+if (Test-Path (Split-Path $combo1)) { Copy-Item $outputExeRoot $combo1 -Force }
+if (Test-Path (Split-Path $combo2)) { Copy-Item $outputExeRoot $combo2 -Force }
 
 # 5. Calcular Hash SHA256 y actualizar archivos de verificación
 Write-Host "[5/5] Calculando SHA-256 y actualizando hashes..." -ForegroundColor Yellow
@@ -64,8 +71,8 @@ $hashContent = @"
              INTEGRIDAD Y SUMAS DE VERIFICACION CRIPTOGRAFICA (HASHES)
 ================================================================================
 
-Paquete: KlikPOS-Enterprise-Setup-v2.4.0.exe
-Version: 2.4.0 (Enterprise Security Suite, Anti-BruteForce, BCV Realtime, Cloud Sync)
+Paquete: KlikPOS-Enterprise-Setup-v2.4.1.exe
+Version: 2.4.1 (Interfaz Espaciosa, 4 Cols POS, Alto Contraste, Cloud Sync)
 Fecha de emision: $dateStr
 
 Algoritmo SHA256:
@@ -73,7 +80,7 @@ $hashVal
 
 Para verificar la integridad del instalador en cualquier computadora:
 PowerShell:
-  Get-FileHash KlikPOS-Enterprise-Setup-v2.4.0.exe -Algorithm SHA256
+  Get-FileHash KlikPOS-Enterprise-Setup-v2.4.1.exe -Algorithm SHA256
 ================================================================================
 "@
 
@@ -81,6 +88,6 @@ Set-Content -Path $hashRoot -Value $hashContent -Encoding UTF8
 Set-Content -Path $hashDesktop -Value $hashContent -Encoding UTF8
 
 Write-Host "==========================================================" -ForegroundColor Green
-Write-Host "  ¡Instalador KlikPOS Enterprise v2.4.0 generado con éxito!" -ForegroundColor Green
+Write-Host "  ¡Instalador KlikPOS Enterprise v2.4.1 generado con éxito!" -ForegroundColor Green
 Write-Host "  SHA256: $hashVal" -ForegroundColor Cyan
 Write-Host "==========================================================" -ForegroundColor Green

@@ -19,7 +19,7 @@ export interface UpdateConfig {
 
 export const CURRENT_VERSION = '2.4.0';
 
-const DEFAULT_MANIFEST_URL = 'https://raw.githubusercontent.com/klikposcloud-svg/klikpos-releases/main/version.json';
+const DEFAULT_MANIFEST_URL = 'https://raw.githubusercontent.com/klikposcloud-svg/klikpos/main/klikpos-releases/version.json';
 const UPDATE_CONFIG_KEY = 'klikpos_update_config';
 
 export function compareVersions(v1: string, v2: string): number {

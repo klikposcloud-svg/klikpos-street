@@ -1946,7 +1946,7 @@ export default function DesktopPosPage() {
                   <div
                     key={`slider-${p.id}`}
                     onClick={() => addToCart(p, 1)}
-                    className="w-[230px] sm:w-[250px] h-[98px] bg-white rounded-xl border border-slate-200/90 p-2 shadow-xs hover:shadow-md hover:border-sky-400 transition-all active:scale-[0.98] cursor-pointer flex gap-2.5 items-stretch shrink-0 snap-start group select-none"
+                    className="w-[270px] sm:w-[300px] h-[104px] bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/90 dark:border-slate-700/80 p-2.5 shadow-xs hover:shadow-md hover:border-sky-500 transition-all active:scale-[0.98] cursor-pointer flex gap-3 items-stretch shrink-0 snap-start group select-none"
                   >
                     {/* Foto rectangular a la izquierda */}
                     <div className="w-18 sm:w-20 h-full rounded-lg bg-slate-50 overflow-hidden relative border border-slate-200/80 shrink-0">
@@ -2035,32 +2035,32 @@ export default function DesktopPosPage() {
         {/* Catálogo Completo / Filtrado Dinámico - Mayor densidad de productos       */}
         {/* ========================================================================= */}
         <div className="flex-1 overflow-y-auto pr-1">
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-2.5 content-start">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4 gap-3 content-start">
             {filteredProducts.map((p) => {
               const isLowStock = p.stock <= p.minStock;
               return (
                 <div
                   key={p.id}
                   onClick={() => addToCart(p, 1)}
-                  className="bg-white rounded-xl border border-slate-200/90 p-2 shadow-xs hover:shadow-md hover:border-sky-400 transition-all active:scale-[0.98] cursor-pointer flex flex-col justify-between group select-none"
+                  className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/90 dark:border-slate-700/80 p-3 shadow-xs hover:shadow-lg hover:border-sky-500 transition-all active:scale-[0.98] cursor-pointer flex flex-col justify-between group select-none"
                 >
                   {/* Encabezado: SKU con bordecito a la izquierda + Badge color sólido de Rubro a la derecha */}
-                  <div className="flex items-center justify-between gap-1 w-full mb-1">
-                    <span className="font-mono text-[9.5px] font-bold text-slate-600 bg-slate-50 px-1.5 py-0.5 rounded border border-slate-200/90 truncate max-w-[65px]">
+                  <div className="flex items-center justify-between gap-1.5 w-full mb-1.5">
+                    <span className="font-mono text-[10px] font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-700/60 px-2 py-0.5 rounded-md border border-slate-200 dark:border-slate-600 truncate">
                       {p.barcode ? (p.barcode.length > 4 ? p.barcode.slice(-4) : p.barcode) : '759...'}
                     </span>
-                    <span className={`text-[8.5px] font-black px-1.5 py-0.5 rounded text-white uppercase tracking-wider shrink-0 truncate max-w-[90px] ${getCategoryBadgeColor(p.category)}`}>
+                    <span className={`text-[9.5px] font-black px-2 py-0.5 rounded-md text-white uppercase tracking-wider shrink-0 truncate max-w-[120px] ${getCategoryBadgeColor(p.category)}`}>
                       {p.category}
                     </span>
                   </div>
 
-                  {/* Nombre */}
-                  <h4 className="font-bold text-[12px] text-slate-900 truncate leading-tight my-1" title={p.name}>
+                  {/* Nombre con 2 líneas completas para que no se corte */}
+                  <h4 className="font-black text-[13px] text-slate-900 dark:text-white leading-snug my-1 line-clamp-2 min-h-[36px] flex items-center" title={p.name}>
                     {p.name}
                   </h4>
 
-                  {/* Contenedor de Imagen Panorámica con esquinas redondeadas */}
-                  <div className="w-full h-18 sm:h-20 rounded-lg bg-slate-50 overflow-hidden relative border border-slate-200/80 mb-1.5">
+                  {/* Contenedor de Imagen Panorámica con mayor altura y presencia */}
+                  <div className="w-full h-24 sm:h-28 rounded-xl bg-slate-50 dark:bg-slate-900 overflow-hidden relative border border-slate-200/80 dark:border-slate-700/80 mb-2">
                     {p.image && showImages ? (
                       <img
                         src={p.image}
@@ -2069,25 +2069,25 @@ export default function DesktopPosPage() {
                         loading="lazy"
                       />
                     ) : (
-                      <div className="w-full h-full flex flex-col items-center justify-center text-slate-300">
-                        <Package className="w-6 h-6 stroke-1" />
+                      <div className="w-full h-full flex flex-col items-center justify-center text-slate-300 dark:text-slate-600">
+                        <Package className="w-8 h-8 stroke-1" />
                       </div>
                     )}
                   </div>
 
-                  {/* Precios y Stock */}
-                  <div className="flex items-end justify-between gap-1 pt-0.5 mt-auto">
+                  {/* Precios y Stock amplios y claros */}
+                  <div className="flex items-end justify-between gap-1.5 pt-1 mt-auto border-t border-slate-100 dark:border-slate-700/60">
                     <div className="leading-tight flex flex-col">
-                      <span className="text-[13px] sm:text-[14px] font-black font-sans text-slate-950 tabular-numbers leading-tight">
+                      <span className="text-[14.5px] sm:text-[15.5px] font-black font-sans text-slate-950 dark:text-white tabular-numbers leading-tight">
                         {formatVES(p.priceUSD * bcvRate)}
                       </span>
-                      <span className="text-[10px] text-slate-500 font-semibold">
+                      <span className="text-[11px] text-slate-600 dark:text-slate-300 font-bold mt-0.5">
                         ${p.priceUSD.toFixed(2)}
                       </span>
                     </div>
 
-                    <span className="text-[9.5px] font-medium px-1.5 py-0.5 rounded-full border border-slate-200/80 bg-slate-50 text-slate-700 shrink-0 flex items-center gap-1">
-                      <span className={`w-1.5 h-1.5 rounded-full ${isLowStock ? 'bg-rose-500 animate-pulse' : 'bg-emerald-500'} shrink-0`} />
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-200 shrink-0 flex items-center gap-1.5">
+                      <span className={`w-2 h-2 rounded-full ${isLowStock ? 'bg-rose-500 animate-pulse' : 'bg-emerald-500'} shrink-0`} />
                       <span>{p.stock}</span>
                     </span>
                   </div>

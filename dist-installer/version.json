@@ -1,14 +1,15 @@
 {
-  "version": "2.4.0",
-  "releaseDate": "2026-09-26",
-  "title": "KlikPOS v2.4.0 - Oficial",
+  "version": "2.4.1",
+  "releaseDate": "2026-09-27",
+  "title": "KlikPOS v2.4.1 - Interfaz Ultra-Espaciosa & Alto Contraste",
   "notes": [
-    "Sincronización oficial en la nube con KlikPOS Cloud (Firebase Firestore).",
-    "Auto-sincronización de tasa oficial BCV del día en tiempo real.",
-    "Gestión dinámica de categorías y rubros en inventario.",
-    "Compatibilidad con App Nativa APK SMS Bridge sin Google Play.",
-    "Interfaz con temas y soporte de atajos F-Keys optimizado para cajeros."
+    "Diseño de catálogo optimizado: reducción de 7 a 4 columnas por fila con mayor espacio.",
+    "Títulos de productos en 2 líneas completas para lectura limpia sin truncamientos.",
+    "Corrección de alto contraste en textos claros (teclado numérico, balanza y reloj 100% legibles).",
+    "Accesos directos del carrusel ensanchados para mayor confort táctil en cajas rápidas.",
+    "Actualizador automático conectado a la nube oficial de KlikPOS."
   ],
-  "windowsUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v2.4.0/KlikPOS_Setup_v2.4.0.exe",
+  "windowsUrl": "https://github.com/klikposcloud-svg/klikpos/releases/download/v2.4.1/KlikPOS-Enterprise-Setup-v2.4.1.exe",
+  "androidUrl": "https://github.com/klikposcloud-svg/klikpos/releases/download/v2.4.1/KlikPOS_Movil_Full.apk",
   "mandatory": false
 }
