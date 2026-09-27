@@ -2526,60 +2526,60 @@ export default function DesktopPosPage() {
           {/* Grid de teclas con contornos oscurecidos y alto contraste táctil */}
           <div className="grid grid-cols-4 gap-1.5">
             {/* Fila 1: 7, 8, 9, Backspace */}
-            <button type="button" onClick={() => handleNumpadKey('7')} className="h-10 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border-2 border-slate-300 hover:border-slate-500 dark:border-slate-600 dark:hover:border-slate-400 transition-all active:scale-95 shadow-2xs cursor-pointer flex items-center justify-center">
-              <span className="text-slate-900 dark:text-white font-black text-lg">7</span>
+            <button type="button" onClick={() => handleNumpadKey('7')} style={{ color: '#0f172a' }} className="h-10 rounded-xl bg-slate-100 hover:bg-slate-200 border-2 border-slate-300 hover:border-slate-500 transition-all active:scale-95 shadow-2xs cursor-pointer flex items-center justify-center">
+              <span style={{ color: '#0f172a' }} className="font-black text-lg">7</span>
             </button>
-            <button type="button" onClick={() => handleNumpadKey('8')} className="h-10 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border-2 border-slate-300 hover:border-slate-500 dark:border-slate-600 dark:hover:border-slate-400 transition-all active:scale-95 shadow-2xs cursor-pointer flex items-center justify-center">
-              <span className="text-slate-900 dark:text-white font-black text-lg">8</span>
+            <button type="button" onClick={() => handleNumpadKey('8')} style={{ color: '#0f172a' }} className="h-10 rounded-xl bg-slate-100 hover:bg-slate-200 border-2 border-slate-300 hover:border-slate-500 transition-all active:scale-95 shadow-2xs cursor-pointer flex items-center justify-center">
+              <span style={{ color: '#0f172a' }} className="font-black text-lg">8</span>
             </button>
-            <button type="button" onClick={() => handleNumpadKey('9')} className="h-10 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border-2 border-slate-300 hover:border-slate-500 dark:border-slate-600 dark:hover:border-slate-400 transition-all active:scale-95 shadow-2xs cursor-pointer flex items-center justify-center">
-              <span className="text-slate-900 dark:text-white font-black text-lg">9</span>
+            <button type="button" onClick={() => handleNumpadKey('9')} style={{ color: '#0f172a' }} className="h-10 rounded-xl bg-slate-100 hover:bg-slate-200 border-2 border-slate-300 hover:border-slate-500 transition-all active:scale-95 shadow-2xs cursor-pointer flex items-center justify-center">
+              <span style={{ color: '#0f172a' }} className="font-black text-lg">9</span>
             </button>
-            <button type="button" onClick={() => handleNumpadKey('BACK')} className="h-10 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border-2 border-slate-300 hover:border-slate-500 dark:border-slate-600 dark:hover:border-slate-400 text-slate-800 dark:text-slate-200 font-bold text-base transition-all active:scale-95 shadow-2xs flex items-center justify-center cursor-pointer" title="Borrar">
-              <svg className="w-5 h-5 text-slate-800 dark:text-slate-200" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+            <button type="button" onClick={() => handleNumpadKey('BACK')} style={{ color: '#0f172a' }} className="h-10 rounded-xl bg-slate-100 hover:bg-slate-200 border-2 border-slate-300 hover:border-slate-500 transition-all active:scale-95 shadow-2xs flex items-center justify-center cursor-pointer" title="Borrar">
+              <svg className="w-5 h-5 text-slate-900" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M3 12l6-7h12a2 2 0 012 2v10a2 2 0 01-2 2H9l-6-7z" />
               </svg>
             </button>
 
             {/* Fila 2: 4, 5, 6, C */}
-            <button type="button" onClick={() => handleNumpadKey('4')} className="h-10 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border-2 border-slate-300 hover:border-slate-500 dark:border-slate-600 dark:hover:border-slate-400 transition-all active:scale-95 shadow-2xs cursor-pointer flex items-center justify-center">
-              <span className="text-slate-900 dark:text-white font-black text-lg">4</span>
+            <button type="button" onClick={() => handleNumpadKey('4')} style={{ color: '#0f172a' }} className="h-10 rounded-xl bg-slate-100 hover:bg-slate-200 border-2 border-slate-300 hover:border-slate-500 transition-all active:scale-95 shadow-2xs cursor-pointer flex items-center justify-center">
+              <span style={{ color: '#0f172a' }} className="font-black text-lg">4</span>
             </button>
-            <button type="button" onClick={() => handleNumpadKey('5')} className="h-10 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border-2 border-slate-300 hover:border-slate-500 dark:border-slate-600 dark:hover:border-slate-400 transition-all active:scale-95 shadow-2xs cursor-pointer flex items-center justify-center">
-              <span className="text-slate-900 dark:text-white font-black text-lg">5</span>
+            <button type="button" onClick={() => handleNumpadKey('5')} style={{ color: '#0f172a' }} className="h-10 rounded-xl bg-slate-100 hover:bg-slate-200 border-2 border-slate-300 hover:border-slate-500 transition-all active:scale-95 shadow-2xs cursor-pointer flex items-center justify-center">
+              <span style={{ color: '#0f172a' }} className="font-black text-lg">5</span>
             </button>
-            <button type="button" onClick={() => handleNumpadKey('6')} className="h-10 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border-2 border-slate-300 hover:border-slate-500 dark:border-slate-600 dark:hover:border-slate-400 transition-all active:scale-95 shadow-2xs cursor-pointer flex items-center justify-center">
-              <span className="text-slate-900 dark:text-white font-black text-lg">6</span>
+            <button type="button" onClick={() => handleNumpadKey('6')} style={{ color: '#0f172a' }} className="h-10 rounded-xl bg-slate-100 hover:bg-slate-200 border-2 border-slate-300 hover:border-slate-500 transition-all active:scale-95 shadow-2xs cursor-pointer flex items-center justify-center">
+              <span style={{ color: '#0f172a' }} className="font-black text-lg">6</span>
             </button>
-            <button type="button" onClick={() => handleNumpadKey('C')} className="h-10 rounded-xl bg-rose-50 hover:bg-rose-100 dark:bg-slate-800 dark:hover:bg-rose-950/40 border-2 border-rose-300 hover:border-rose-500 dark:border-slate-600 transition-all active:scale-95 shadow-2xs cursor-pointer flex items-center justify-center" title="Limpiar">
-              <span className="text-rose-600 dark:text-rose-400 font-black text-base">C</span>
+            <button type="button" onClick={() => handleNumpadKey('C')} className="h-10 rounded-xl bg-rose-100 hover:bg-rose-200 border-2 border-rose-300 hover:border-rose-500 transition-all active:scale-95 shadow-2xs cursor-pointer flex items-center justify-center" title="Limpiar">
+              <span className="text-rose-700 font-black text-base">C</span>
             </button>
 
             {/* Fila 3: 1, 2, 3, Enter */}
-            <button type="button" onClick={() => handleNumpadKey('1')} className="h-10 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border-2 border-slate-300 hover:border-slate-500 dark:border-slate-600 dark:hover:border-slate-400 transition-all active:scale-95 shadow-2xs cursor-pointer flex items-center justify-center">
-              <span className="text-slate-900 dark:text-white font-black text-lg">1</span>
+            <button type="button" onClick={() => handleNumpadKey('1')} style={{ color: '#0f172a' }} className="h-10 rounded-xl bg-slate-100 hover:bg-slate-200 border-2 border-slate-300 hover:border-slate-500 transition-all active:scale-95 shadow-2xs cursor-pointer flex items-center justify-center">
+              <span style={{ color: '#0f172a' }} className="font-black text-lg">1</span>
             </button>
-            <button type="button" onClick={() => handleNumpadKey('2')} className="h-10 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border-2 border-slate-300 hover:border-slate-500 dark:border-slate-600 dark:hover:border-slate-400 transition-all active:scale-95 shadow-2xs cursor-pointer flex items-center justify-center">
-              <span className="text-slate-900 dark:text-white font-black text-lg">2</span>
+            <button type="button" onClick={() => handleNumpadKey('2')} style={{ color: '#0f172a' }} className="h-10 rounded-xl bg-slate-100 hover:bg-slate-200 border-2 border-slate-300 hover:border-slate-500 transition-all active:scale-95 shadow-2xs cursor-pointer flex items-center justify-center">
+              <span style={{ color: '#0f172a' }} className="font-black text-lg">2</span>
             </button>
-            <button type="button" onClick={() => handleNumpadKey('3')} className="h-10 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border-2 border-slate-300 hover:border-slate-500 dark:border-slate-600 dark:hover:border-slate-400 transition-all active:scale-95 shadow-2xs cursor-pointer flex items-center justify-center">
-              <span className="text-slate-900 dark:text-white font-black text-lg">3</span>
+            <button type="button" onClick={() => handleNumpadKey('3')} style={{ color: '#0f172a' }} className="h-10 rounded-xl bg-slate-100 hover:bg-slate-200 border-2 border-slate-300 hover:border-slate-500 transition-all active:scale-95 shadow-2xs cursor-pointer flex items-center justify-center">
+              <span style={{ color: '#0f172a' }} className="font-black text-lg">3</span>
             </button>
             <button
               type="button"
               onClick={handleNumpadApply}
               className="row-span-2 rounded-xl bg-[var(--brand-primary)] hover:bg-[var(--brand-hover)] border-2 border-[var(--brand-primary)] text-white font-bold text-xs flex flex-col items-center justify-center leading-tight transition-all active:scale-95 shadow-xs cursor-pointer p-1"
             >
-              <span className="font-black text-sm">Enter</span>
-              <span className="text-[10px] text-emerald-200 font-semibold">Aplicar</span>
+              <span className="font-black text-sm text-white">Enter</span>
+              <span className="text-[10px] text-white/90 font-semibold">Aplicar</span>
             </button>
 
             {/* Fila 4: 0 (span 2), . */}
-            <button type="button" onClick={() => handleNumpadKey('0')} className="col-span-2 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border-2 border-slate-300 hover:border-slate-500 dark:border-slate-600 dark:hover:border-slate-400 transition-all active:scale-95 shadow-2xs cursor-pointer flex items-center justify-center">
-              <span className="text-slate-900 dark:text-white font-black text-lg">0</span>
+            <button type="button" onClick={() => handleNumpadKey('0')} style={{ color: '#0f172a' }} className="col-span-2 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 border-2 border-slate-300 hover:border-slate-500 transition-all active:scale-95 shadow-2xs cursor-pointer flex items-center justify-center">
+              <span style={{ color: '#0f172a' }} className="font-black text-lg">0</span>
             </button>
-            <button type="button" onClick={() => handleNumpadKey('.')} className="h-10 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border-2 border-slate-300 hover:border-slate-500 dark:border-slate-600 dark:hover:border-slate-400 transition-all active:scale-95 shadow-2xs cursor-pointer flex items-center justify-center">
-              <span className="text-slate-900 dark:text-white font-black text-lg">.</span>
+            <button type="button" onClick={() => handleNumpadKey('.')} style={{ color: '#0f172a' }} className="h-10 rounded-xl bg-slate-100 hover:bg-slate-200 border-2 border-slate-300 hover:border-slate-500 transition-all active:scale-95 shadow-2xs cursor-pointer flex items-center justify-center">
+              <span style={{ color: '#0f172a' }} className="font-black text-lg">.</span>
             </button>
           </div>
         </div>

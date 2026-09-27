@@ -608,39 +608,62 @@ export default function DesktopDashboardLayout({
         <div className="flex items-center gap-2.5 shrink-0">
           {/* Indicador Offline Local */}
           <span
-            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-white border border-slate-200 dark:border-slate-700 text-xs font-bold select-none shadow-2xs"
+            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border text-xs font-bold select-none shadow-2xs"
+            style={{
+              backgroundColor: currentTheme === 'dark' ? '#1e293b' : '#f1f5f9',
+              borderColor: currentTheme === 'dark' ? '#334155' : '#cbd5e1',
+              color: currentTheme === 'dark' ? '#ffffff' : '#0f172a',
+            }}
             title="Terminal operando 100% en modo local offline seguro"
           >
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block animate-pulse shrink-0" />
-            <span>Offline</span>
+            <span style={{ color: currentTheme === 'dark' ? '#ffffff' : '#0f172a' }}>Offline</span>
           </span>
 
           {/* Sincronización en la Nube */}
           <span
-            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-white border border-slate-200 dark:border-slate-700 text-xs font-bold select-none cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors shadow-2xs"
+            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border text-xs font-bold select-none cursor-pointer transition-colors shadow-2xs"
+            style={{
+              backgroundColor: currentTheme === 'dark' ? '#1e293b' : '#f1f5f9',
+              borderColor: currentTheme === 'dark' ? '#334155' : '#cbd5e1',
+              color: currentTheme === 'dark' ? '#ffffff' : '#0f172a',
+            }}
             title="Sincronización en tiempo real"
           >
             <Cloud className="w-4 h-4 text-sky-600 dark:text-sky-400" />
-            <span>Nube</span>
+            <span style={{ color: currentTheme === 'dark' ? '#ffffff' : '#0f172a' }}>Nube</span>
           </span>
 
           {/* Estado Celular Escáner / Vincular Móvil */}
           <button
             type="button"
             onClick={handleOpenMobileModal}
-            className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border text-xs font-bold select-none cursor-pointer transition-colors shadow-2xs ${
-              phoneConnected
-                ? 'bg-emerald-50 text-emerald-800 border-emerald-300 hover:bg-emerald-100 font-black dark:bg-emerald-950 dark:text-emerald-300 dark:border-emerald-800'
-                : 'bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-white border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700'
-            }`}
+            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border text-xs font-bold select-none cursor-pointer transition-colors shadow-2xs"
+            style={{
+              backgroundColor: phoneConnected
+                ? (currentTheme === 'dark' ? '#064e3b' : '#ecfdf5')
+                : (currentTheme === 'dark' ? '#1e293b' : '#f1f5f9'),
+              borderColor: phoneConnected
+                ? (currentTheme === 'dark' ? '#047857' : '#6ee7b7')
+                : (currentTheme === 'dark' ? '#334155' : '#cbd5e1'),
+              color: phoneConnected
+                ? (currentTheme === 'dark' ? '#6ee7b7' : '#065f46')
+                : (currentTheme === 'dark' ? '#ffffff' : '#0f172a'),
+            }}
             title="Clic para vincular celular como escáner inalámbrico con código QR"
           >
-            <Smartphone className={`w-4 h-4 ${phoneConnected ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-600 dark:text-slate-200'}`} />
-            <span>{phoneConnected ? 'Móvil Conectado' : 'Móvil'}</span>
+            <Smartphone className="w-4 h-4 text-emerald-600" />
+            <span style={{ color: currentTheme === 'dark' ? '#ffffff' : '#0f172a' }}>{phoneConnected ? 'Móvil Conectado' : 'Móvil'}</span>
           </button>
 
           {/* Selector de Tema Inteligente: Modo Blanco, Oscuro, Esmerilado */}
-          <div className="inline-flex items-center p-1 rounded-full bg-slate-100 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700/80 shadow-2xs select-none">
+          <div
+            className="inline-flex items-center p-1 rounded-full border shadow-2xs select-none"
+            style={{
+              backgroundColor: currentTheme === 'dark' ? '#1e293b' : '#f1f5f9',
+              borderColor: currentTheme === 'dark' ? '#334155' : '#cbd5e1',
+            }}
+          >
             <button
               type="button"
               onClick={() => {
@@ -648,14 +671,15 @@ export default function DesktopDashboardLayout({
                 applyTheme('light');
                 db.settings.put({ key: 'app_theme', value: 'light' }).catch(() => {});
               }}
-              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer ${
+              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black transition-all cursor-pointer ${
                 currentTheme === 'light'
-                  ? 'bg-white text-slate-900 shadow-xs border border-slate-200/90'
-                  : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
+                  ? 'bg-white text-slate-950 shadow-xs border border-slate-300'
+                  : 'text-slate-800 hover:text-slate-950'
               }`}
+              style={{ color: currentTheme === 'light' ? '#0f172a' : (currentTheme === 'dark' ? '#94a3b8' : '#334155') }}
               title="Activar Modo Blanco Profesional"
             >
-              <Sun className={`w-3.5 h-3.5 ${currentTheme === 'light' ? 'text-amber-500' : 'text-slate-400'}`} />
+              <Sun className={`w-3.5 h-3.5 ${currentTheme === 'light' ? 'text-amber-500' : 'text-slate-600'}`} />
               <span>Modo Blanco</span>
             </button>
             <button
@@ -665,14 +689,15 @@ export default function DesktopDashboardLayout({
                 applyTheme('dark');
                 db.settings.put({ key: 'app_theme', value: 'dark' }).catch(() => {});
               }}
-              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer ${
+              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black transition-all cursor-pointer ${
                 currentTheme === 'dark'
                   ? 'bg-[#121c29] text-amber-300 shadow-xs border border-slate-700'
-                  : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
+                  : 'text-slate-800 hover:text-slate-950'
               }`}
+              style={{ color: currentTheme === 'dark' ? '#fcd34d' : '#334155' }}
               title="Activar Modo Oscuro"
             >
-              <Moon className={`w-3.5 h-3.5 ${currentTheme === 'dark' ? 'text-amber-400' : 'text-slate-400'}`} />
+              <Moon className={`w-3.5 h-3.5 ${currentTheme === 'dark' ? 'text-amber-400' : 'text-slate-600'}`} />
               <span>Oscuro</span>
             </button>
             <button
@@ -682,14 +707,15 @@ export default function DesktopDashboardLayout({
                 applyTheme('glass');
                 db.settings.put({ key: 'app_theme', value: 'glass' }).catch(() => {});
               }}
-              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer ${
+              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black transition-all cursor-pointer ${
                 currentTheme === 'glass'
                   ? 'bg-gradient-to-r from-sky-500/25 to-teal-500/25 text-sky-300 shadow-xs border border-sky-400/50 backdrop-blur-md'
-                  : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
+                  : 'text-slate-800 hover:text-slate-950'
               }`}
+              style={{ color: currentTheme === 'glass' ? '#7dd3fc' : (currentTheme === 'dark' ? '#94a3b8' : '#334155') }}
               title="Activar Modo Esmerilado Translúcido (Glassmorphism)"
             >
-              <Sparkles className={`w-3.5 h-3.5 ${currentTheme === 'glass' ? 'text-sky-300 animate-pulse' : 'text-slate-400'}`} />
+              <Sparkles className={`w-3.5 h-3.5 ${currentTheme === 'glass' ? 'text-sky-300 animate-pulse' : 'text-slate-600'}`} />
               <span>Esmerilado</span>
             </button>
           </div>
@@ -730,12 +756,17 @@ export default function DesktopDashboardLayout({
 
           {/* Reloj Digital del Sistema */}
           <div
-            className="hidden md:inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-white border border-slate-200 dark:border-slate-700 text-xs font-bold font-mono select-none shadow-2xs shrink-0"
+            className="hidden md:inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border text-xs font-bold font-mono select-none shadow-2xs shrink-0"
+            style={{
+              backgroundColor: currentTheme === 'dark' ? '#1e293b' : '#f1f5f9',
+              borderColor: currentTheme === 'dark' ? '#334155' : '#cbd5e1',
+              color: currentTheme === 'dark' ? '#ffffff' : '#0f172a',
+            }}
             title="Fecha y hora oficial del sistema"
           >
-            <span>{clockDate}</span>
-            <span className="text-slate-400 dark:text-slate-500 font-normal">|</span>
-            <span className="font-black text-slate-900 dark:text-white tabular-numbers">{clockTime}</span>
+            <span style={{ color: currentTheme === 'dark' ? '#cbd5e1' : '#0f172a' }}>{clockDate}</span>
+            <span style={{ color: currentTheme === 'dark' ? '#64748b' : '#94a3b8' }}>|</span>
+            <span className="font-black tabular-numbers" style={{ color: currentTheme === 'dark' ? '#ffffff' : '#000000' }}>{clockTime}</span>
           </div>
         </div>
       </header>
@@ -743,9 +774,19 @@ export default function DesktopDashboardLayout({
       {/* Cuerpo Principal: Sidebar + Contenido */}
       <div className="flex-1 flex overflow-hidden">
         {/* Barra Lateral Profesional */}
-        <aside className="w-56 bg-white dark:bg-[#0e1826] border-r border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 flex flex-col justify-between shrink-0 p-3 z-10 layer-shell">
+        <aside
+          className="w-56 border-r flex flex-col justify-between shrink-0 p-3 z-10 layer-shell"
+          style={{
+            backgroundColor: currentTheme === 'dark' ? '#0e1826' : '#ffffff',
+            borderColor: currentTheme === 'dark' ? '#1e293b' : '#e2e8f0',
+            color: currentTheme === 'dark' ? '#f8fafc' : '#0f172a',
+          }}
+        >
           <div className="space-y-1">
-            <div className="px-3 py-2 text-[10.5px] font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 select-none">
+            <div
+              className="px-3 py-2 text-[10.5px] font-black uppercase tracking-wider select-none"
+              style={{ color: currentTheme === 'dark' ? '#94a3b8' : '#0f172a' }}
+            >
               Operaciones de Caja
             </div>
 
@@ -768,11 +809,16 @@ export default function DesktopDashboardLayout({
                   className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs transition-colors select-none cursor-pointer text-left ${
                     isActive
                       ? 'nav-item-active font-black border shadow-xs'
-                      : 'text-slate-800 hover:text-slate-950 dark:text-slate-100 hover:dark:text-white hover:bg-slate-100 dark:hover:bg-slate-800 font-bold'
+                      : (currentTheme === 'dark'
+                          ? 'text-slate-100 hover:text-white hover:bg-slate-800 font-bold'
+                          : 'text-slate-900 hover:text-slate-950 hover:bg-slate-100 font-black')
                   }`}
+                  style={{
+                    color: isActive ? undefined : (currentTheme === 'dark' ? '#f1f5f9' : '#0f172a')
+                  }}
                 >
                   <div className="flex items-center gap-3">
-                    <span className={isActive ? '' : 'text-slate-600 dark:text-slate-300'}>
+                    <span style={{ color: isActive ? undefined : (currentTheme === 'dark' ? '#94a3b8' : '#0f172a') }}>
                       {item.icon}
                     </span>
                     <span>{item.label}</span>
@@ -786,7 +832,10 @@ export default function DesktopDashboardLayout({
           </div>
 
           {/* Pie del Sidebar: Avatar Circular + Administrador General + Pasar a */}
-          <div className="pt-3 border-t border-[#d9e2ec] dark:border-slate-800 flex flex-col items-center text-center">
+          <div
+            className="pt-3 border-t flex flex-col items-center text-center select-none"
+            style={{ borderColor: currentTheme === 'dark' ? '#1e293b' : '#e2e8f0' }}
+          >
             {/* Avatar circular con borde blanco */}
             <div className="w-16 h-16 rounded-full border-2 border-white dark:border-slate-700 shadow-md overflow-hidden bg-slate-300 dark:bg-slate-700 relative flex items-center justify-center">
               <img
@@ -802,16 +851,23 @@ export default function DesktopDashboardLayout({
               </div>
             </div>
 
-            <span className="font-black text-slate-900 dark:text-white text-xs mt-2">
+            <span
+              className="font-black text-xs mt-2"
+              style={{ color: currentTheme === 'dark' ? '#ffffff' : '#0f172a' }}
+            >
               {isAdmin ? 'Administrador General' : user ? user.name : 'Cajero Activo'}
             </span>
 
-            <div className="flex items-center gap-1.5 mt-1 text-[11px] text-slate-600 dark:text-slate-300 font-bold">
+            <div
+              className="flex items-center gap-1.5 mt-1 text-[11px] font-bold"
+              style={{ color: currentTheme === 'dark' ? '#cbd5e1' : '#334155' }}
+            >
               <span>Pasar a</span>
               <button
                 type="button"
                 onClick={() => switchToRole(isAdmin ? 'cajero' : 'admin')}
-                className="p-1 hover:text-slate-950 dark:hover:text-white text-slate-600 dark:text-slate-300 transition-colors"
+                className="p-1 hover:text-slate-950 dark:hover:text-white transition-colors"
+                style={{ color: currentTheme === 'dark' ? '#cbd5e1' : '#0f172a' }}
                 title={isAdmin ? 'Pasar a Cajero' : 'Cambiar a Admin'}
               >
                 <Users className="w-3.5 h-3.5" />
@@ -819,7 +875,8 @@ export default function DesktopDashboardLayout({
               <button
                 type="button"
                 onClick={() => setIsScreenLocked(true)}
-                className="p-1 hover:text-amber-600 dark:hover:text-amber-400 text-slate-600 dark:text-slate-300 transition-colors"
+                className="p-1 hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
+                style={{ color: currentTheme === 'dark' ? '#cbd5e1' : '#0f172a' }}
                 title="Bloquear Pantalla de Seguridad (Ctrl+L)"
               >
                 <Lock className="w-3.5 h-3.5" />
@@ -830,7 +887,8 @@ export default function DesktopDashboardLayout({
                   setIsLoginDismissed(false);
                   logout();
                 }}
-                className="p-1 hover:text-rose-600 dark:hover:text-rose-400 text-slate-600 dark:text-slate-300 transition-colors"
+                className="p-1 hover:text-rose-600 dark:hover:text-rose-400 transition-colors"
+                style={{ color: currentTheme === 'dark' ? '#cbd5e1' : '#0f172a' }}
                 title="Cerrar Sesión"
               >
                 <LogOut className="w-3.5 h-3.5" />
