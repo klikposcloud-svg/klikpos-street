@@ -1,0 +1,16 @@
+﻿================================================================================
+EDICION 3: KLIKPOS TABLET / MOVIL STANDALONE (MESAS Y RESTAURANTES)
+================================================================================
+* Proposito: Edicion 100% INDEPENDIENTE de la computadora de escritorio.
+  Disenada para restaurantes, cafeterias, pizzerias, comida rapida y autoservicio.
+* Boton Central en Dock: COBRAR (CircleDollarSign con pasarela multimoneda).
+* Modulos incluidos:
+  - Mapa interactivo de Mesas, Barra y Cuentas para Llevar.
+  - Comanda tactil con notas de cocina (ej. 'Sin cebolla', 'Termino medio').
+  - Menu digital QR dinamico para clientes.
+  - Cartera y registro rapido de clientes.
+  - Configuracion completa de datos de Empresa (RIF, Nombre, Telefono, Direccion).
+  - Configuracion de Pago Movil con selector de bancos venezolanos y copia 1-tap.
+  - Pasarela de cobro multimoneda (USD, Bs. BCV, Efectivo, Debito, Zelle).
+  - Tiradores laterales flotantes sutiles semi-traslucidos adaptados al branding.
+================================================================================

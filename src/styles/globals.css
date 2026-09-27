@@ -347,56 +347,60 @@ html:not(.dark) .border-slate-300 {
 /* Activo ÃšNICAMENTE cuando no estÃ¡ en Modo Blanco ni en estilo industrial   */
 /* ========================================================================= */
 html.dark,
-html[data-theme="dark"],
+html[data-theme="dark"]:not([data-theme="glass"]):not(.theme-glass),
+html.dark:not([data-theme="glass"]):not(.theme-glass) body,
+html[data-theme="dark"]:not([data-theme="glass"]):not(.theme-glass) body {
+  color-scheme: dark !important;
+  background-color: var(--industrial-bg, #0b141f) !important;
+  color: var(--industrial-text, #f8fafc) !important;
+}
+
 html[data-theme="glass"],
-html.dark body,
-html[data-theme="dark"] body,
+html.theme-glass body,
 html[data-theme="glass"] body {
   color-scheme: dark !important;
-  background-color: #0b141f !important;
+  background-color: #070e17 !important;
   color: #f8fafc !important;
 }
-html.dark header,
-html[data-theme="dark"] header,
-html[data-theme="glass"] header,
-html.dark header.layer-shell,
-html[data-theme="dark"] header.layer-shell,
-html[data-theme="glass"] header.layer-shell {
-  background-color: #121c29 !important;
+
+html.dark:not([data-theme="glass"]):not(.theme-glass) header,
+html[data-theme="dark"]:not([data-theme="glass"]):not(.theme-glass) header,
+html.dark:not([data-theme="glass"]):not(.theme-glass) header.layer-shell,
+html[data-theme="dark"]:not([data-theme="glass"]):not(.theme-glass) header.layer-shell {
+  background-color: var(--industrial-card, #121c29) !important;
   background-image: none !important;
-  border-color: #22303f !important;
-  color: #f8fafc !important;
+  border-color: var(--industrial-border, #22303f) !important;
+  color: var(--industrial-text, #f8fafc) !important;
 }
-html.dark aside,
-html[data-theme="dark"] aside,
-html[data-theme="glass"] aside,
-html.dark aside.layer-shell,
-html[data-theme="dark"] aside.layer-shell,
-html[data-theme="glass"] aside.layer-shell {
-  background-color: #0e1826 !important;
+
+html.dark:not([data-theme="glass"]):not(.theme-glass) aside,
+html[data-theme="dark"]:not([data-theme="glass"]):not(.theme-glass) aside,
+html.dark:not([data-theme="glass"]):not(.theme-glass) aside.layer-shell,
+html[data-theme="dark"]:not([data-theme="glass"]):not(.theme-glass) aside.layer-shell {
+  background-color: var(--industrial-card, #0e1826) !important;
   background-image: none !important;
-  border-color: #22303f !important;
-  color: #f8fafc !important;
+  border-color: var(--industrial-border, #22303f) !important;
+  color: var(--industrial-text, #f8fafc) !important;
 }
-html.dark main,
-html[data-theme="dark"] main,
-html[data-theme="glass"] main {
-  background-color: #0b141f !important;
-  color: #f8fafc !important;
+
+html.dark:not([data-theme="glass"]):not(.theme-glass) main,
+html[data-theme="dark"]:not([data-theme="glass"]):not(.theme-glass) main {
+  background-color: var(--industrial-bg, #0b141f) !important;
+  color: var(--industrial-text, #f8fafc) !important;
 }
-html.dark .bg-white:not(.pos-white-card),
-html[data-theme="dark"] .bg-white:not(.pos-white-card),
-html[data-theme="glass"] .bg-white:not(.pos-white-card) {
-  background-color: #121c29 !important;
-  border-color: #22303f !important;
-  color: #f8fafc !important;
+
+html.dark:not([data-theme="glass"]):not(.theme-glass) .bg-white:not(.pos-white-card),
+html[data-theme="dark"]:not([data-theme="glass"]):not(.theme-glass) .bg-white:not(.pos-white-card) {
+  background-color: var(--industrial-card, #121c29) !important;
+  border-color: var(--industrial-border, #22303f) !important;
+  color: var(--industrial-text, #f8fafc) !important;
 }
+
 /* Salvaguarda de Alto Contraste en Modo Oscuro para clases Tailwind */
-html.dark .bg-\[\#eef2f5\],
-html.dark [class*="bg-[#eef2f5]"],
-html[data-theme="dark"] .bg-\[\#eef2f5\],
-html[data-theme="glass"] .bg-\[\#eef2f5\] {
-  background-color: #0b141f !important;
+html.dark:not([data-theme="glass"]):not(.theme-glass) .bg-\[\#eef2f5\],
+html.dark:not([data-theme="glass"]):not(.theme-glass) [class*="bg-[#eef2f5]"],
+html[data-theme="dark"]:not([data-theme="glass"]):not(.theme-glass) .bg-\[\#eef2f5\] {
+  background-color: var(--industrial-bg, #0b141f) !important;
 }
 html.dark .text-slate-900,
 html.dark .text-slate-950,

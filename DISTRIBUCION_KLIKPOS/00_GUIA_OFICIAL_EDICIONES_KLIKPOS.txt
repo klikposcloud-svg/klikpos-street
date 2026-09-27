@@ -1,0 +1,32 @@
+﻿================================================================================
+GUIA OFICIAL DE DISTRIBUCION - KLIKPOS ENTERPRISE
+================================================================================
+
+Este directorio contiene las 5 ediciones oficiales de KlikPOS:
+
+[01] 01_KlikPOS_Satelite_PC_Contingencia
+     -> KlikPOS_Movil_Satelite.apk
+     -> Companion para PC: cobro con escaner, inventario anaquel y contingencia sin luz.
+     -> Boton central: ESCANER.
+
+[02] 02_Combo_Empresarial_Full
+     -> INSTALAR_KLIKPOS_FULL.bat + KlikPOS_Desktop_Full_Setup.exe
+     -> Version Windows completa con balanza, lector, impresora y servidor local.
+     -> Modo Oscuro personalizable (OLED, Carbon, Esmeralda, Purpura, Azul o Hex Libre).
+
+[03] 03_KlikPOS_Tablet_Standalone_Mesas
+     -> KlikPOS_Tablet_Standalone.apk
+     -> 100% independiente de PC. Restaurantes, comanda, mesas, clientes y Pago Movil.
+     -> Boton central: COBRAR.
+
+[04] 04_KlikPOS_Movil_Full_Autonomo_Nube
+     -> KlikPOS_Movil_Full_Autonomo.apk
+     -> 100% independiente de PC. Retail, escaner camara, balanza y nube Firestore.
+     -> Boton central: ESCANER.
+
+[05] 05_KlikPOS_Movil_Full_Para_PC
+     -> KlikPOS_Movil_Full_PC.apk
+     -> Control y cobro remoto enlazado al servidor local de la PC principal.
+     -> Boton central: ESCANER.
+
+================================================================================

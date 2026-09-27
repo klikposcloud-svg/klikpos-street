@@ -1,0 +1,11 @@
+﻿================================================================================
+EDICION 2: KLIKPOS DESKTOP EMPRESARIAL FULL PC (WINDOWS)
+================================================================================
+* Proposito: Version central para computadoras de caja en Windows 10/11.
+* Soporte integrado: Balanzas electronicas (Torrey, Systel, Dibal), lectoras USB,
+  impresoras termicas ESC/POS (USB/Red/Serial), cajon monedero y servidor local.
+* Temas visuales: Blanco Oficial Industrial WCAG AAA, Modo Oscuro Totalmente 
+  Personalizable (Negro OLED, Grafito Carbon, Esmeralda, Purpura, Azul o Hex Libre)
+  y Modo Esmerilado Glassmorphism.
+* Instalacion: Haz doble clic en INSTALAR_KLIKPOS_FULL.bat.
+================================================================================

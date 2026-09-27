@@ -16,14 +16,21 @@ if (!fs.existsSync(tabletHtmlSrc)) {
 // 1. Asegurar directorio assets/public
 fs.mkdirSync(androidPublic, { recursive: true });
 
-// 2. Copiar tablet-pos.html como index.html
+// 2. Copiar tablet-pos.html como index.html y tablet-pos.html
 let html = fs.readFileSync(tabletHtmlSrc, 'utf8');
-
-// Ajustar título y meta si fuera necesario
 html = html.replace(/<title>.*?<\/title>/, '<title>KlikPOS Móvil Enterprise</title>');
-
 fs.writeFileSync(path.join(androidPublic, 'index.html'), html, 'utf8');
-console.log('✓ Guardado tablet-pos como index.html oficial (' + html.length + ' bytes)');
+fs.writeFileSync(path.join(androidPublic, 'tablet-pos.html'), html, 'utf8');
+console.log('✓ Guardado tablet-pos como index.html y tablet-pos.html (' + html.length + ' bytes)');
+
+// 2b. Copiar scanner.html si existe
+const scannerHtmlSrc = path.join(root, '.next', 'server', 'app', 'scanner.html');
+if (fs.existsSync(scannerHtmlSrc)) {
+  let scannerHtml = fs.readFileSync(scannerHtmlSrc, 'utf8');
+  scannerHtml = scannerHtml.replace(/<title>.*?<\/title>/, '<title>KlikPOS Móvil Scanner & Retail</title>');
+  fs.writeFileSync(path.join(androidPublic, 'scanner.html'), scannerHtml, 'utf8');
+  console.log('✓ Guardado scanner.html en assets/public/ (' + scannerHtml.length + ' bytes)');
+}
 
 // 3. Copiar .next/static a assets/public/_next/static
 const nextStaticDest = path.join(androidPublic, '_next', 'static');

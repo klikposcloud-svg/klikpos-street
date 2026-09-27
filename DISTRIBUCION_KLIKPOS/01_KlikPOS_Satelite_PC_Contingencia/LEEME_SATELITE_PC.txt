@@ -1,0 +1,10 @@
+﻿================================================================================
+EDICION 1: KLIKPOS MOVIL SATELITE PC (CONTINGENCIA Y ESCANER)
+================================================================================
+* Proposito: Companion complementario de la PC para cobro con camara, auditoria 
+  de inventario en anaquel y venta de contingencia cuando se corta la luz.
+* Boton Central en Dock: ESCANER (Camara lectora de codigos de barra 60 FPS).
+* Sincronizacion: Conectado a la PC local (LAN/Wi-Fi) y respaldo en nube Firestore.
+* Instalacion: Copia o envia este archivo APK a cualquier telefono o tablet Android
+  y ejecutalo habilitando 'Instalar apps de fuentes desconocidas'.
+================================================================================

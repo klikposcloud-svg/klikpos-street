@@ -1,0 +1,10 @@
+﻿================================================================================
+EDICION 5: KLIKPOS MOVIL FULL PARA PC (COMPANION TOTAL ENLAZADO)
+================================================================================
+* Proposito: App movil conectada al servidor local de la PC principal.
+* Caracteristicas:
+  - Todo el inventario de la computadora central reflejado en el telefono.
+  - Permite cobrar desde cualquier rincon del local e imprimir en la caja de la PC.
+  - Escaner laser para usar el telefono como pistola lectora remota hacia la PC.
+  - Envio de fotos tomadas con el celular directo al formulario de producto en la PC.
+================================================================================

@@ -7,7 +7,7 @@ Version: 2.4.5 (Standalone Tablet/Mobile POS, 4 Card Views, Minimalist Sidebar, 
 Fecha de emision: 27 de September de 2026
 
 Algoritmo SHA256:
-0BDF42105A289F9F1161FAB95DC360C3620D3E53A945CCB22B611242E124419B
+CC305DDE1D97BBEBE562CA01E616965CF7DD00EA5326C3157FF8124421225FB0
 
 Para verificar la integridad del instalador en cualquier computadora:
 PowerShell:

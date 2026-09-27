@@ -1,0 +1,15 @@
+﻿================================================================================
+EDICION 4: KLIKPOS MOVIL FULL AUTONOMO (RETAIL NUBE 100% EN CELULAR)
+================================================================================
+* Proposito: Para clientes que manejan TODO su comercio exclusivamente desde su 
+  telefono o tablet Android, sin requerir nunca una computadora.
+* Boton Central en Dock: ESCANER (Camara lectora laser de codigos de barra).
+* Modulos incluidos:
+  - Venta directa retail con escaner de codigos de barra con camara del telefono.
+  - Balanza digital tactil para productos pesados (kg / gramos).
+  - Deteccion en vivo de SMS bancarios de Pago Movil con auto-llenado de referencia.
+  - Catalogo de productos completo con busqueda, categorias y fotos.
+  - Actualizacion automatica de Tasa BCV oficial (DolarAPI en vivo).
+  - Sincronizacion continua de productos y ventas en Firebase Firestore 
+    organizado por comercio y licencia comercial.
+================================================================================
