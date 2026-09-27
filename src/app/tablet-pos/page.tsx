@@ -842,26 +842,44 @@ export default function TabletMobilePosPage() {
       `}</style>
 
       {/* ========================================================================= */}
-      {/* 1. TIRADORES LATERALES SUTILES (EDGE HANDLES)                             */}
+      {/* 1. BOTONES FLOTANTES LATERALES PEGADOS AL BORDE (SEMI-TRASLÚCIDOS BRANDING)*/}
       {/* ========================================================================= */}
-      {/* Tirador Izquierdo: Abre Ajustes y Empresa */}
+      {/* Botón Flotante Lateral Izquierdo: Abre Ajustes y Empresa */}
       <button
+        type="button"
         onClick={() => setIsLeftDrawerOpen(true)}
-        className="fixed left-0 top-1/2 -translate-y-1/2 z-30 bg-slate-900/90 hover:bg-slate-900 text-white pl-1.5 pr-2 py-3.5 rounded-r-2xl shadow-xl flex items-center justify-center transition-all duration-200 active:scale-90 border border-l-0 border-slate-700/80 group"
+        className="fixed top-1/2 -translate-y-1/2 z-40 rounded-r-2xl shadow-xl flex items-center justify-center transition-all duration-200 active:scale-90 border-t border-b border-r border-l-0 border-white/20 backdrop-blur-md group cursor-pointer"
+        style={{
+          left: 0,
+          width: '36px',
+          height: '58px',
+          maxWidth: '36px',
+          backgroundColor: `${currentPal.primary}d9`,
+          boxShadow: `0 4px 14px ${currentPal.glow || 'rgba(0,0,0,0.25)'}`
+        }}
         title="Abrir Ajustes de Empresa y Branding"
       >
-        <ChevronRight className="w-4 h-4 text-slate-200 group-hover:translate-x-0.5 transition-transform" />
+        <ChevronRight className="w-5 h-5 text-white group-hover:translate-x-0.5 transition-transform drop-shadow-xs" />
       </button>
 
-      {/* Tirador Derecho: Abre Comanda Activa */}
+      {/* Botón Flotante Lateral Derecho: Abre Comanda Activa */}
       <button
+        type="button"
         onClick={() => setIsRightDrawerOpen(true)}
-        className="fixed right-0 top-1/2 -translate-y-1/2 z-30 bg-slate-900/90 hover:bg-slate-900 text-white pr-1.5 pl-2 py-3.5 rounded-l-2xl shadow-xl flex items-center justify-center transition-all duration-200 active:scale-90 border border-r-0 border-slate-700/80 group relative"
+        className="fixed top-1/2 -translate-y-1/2 z-40 rounded-l-2xl shadow-xl flex items-center justify-center transition-all duration-200 active:scale-90 border-t border-b border-l border-r-0 border-white/20 backdrop-blur-md group cursor-pointer"
+        style={{
+          right: 0,
+          width: '36px',
+          height: '58px',
+          maxWidth: '36px',
+          backgroundColor: `${currentPal.primary}d9`,
+          boxShadow: `0 4px 14px ${currentPal.glow || 'rgba(0,0,0,0.25)'}`
+        }}
         title="Ver Comanda Activa"
       >
-        <ChevronLeft className="w-4 h-4 text-slate-200 group-hover:-translate-x-0.5 transition-transform" />
+        <ChevronLeft className="w-5 h-5 text-white group-hover:-translate-x-0.5 transition-transform drop-shadow-xs" />
         {totalItems > 0 && (
-          <span className="absolute -top-1.5 -left-1.5 bg-amber-400 text-slate-950 text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center shadow-xs">
+          <span className="absolute -top-1.5 -left-1.5 bg-amber-400 text-slate-950 text-[10px] font-black w-4.5 h-4.5 rounded-full flex items-center justify-center shadow-md anim-badge-spring">
             {totalItems}
           </span>
         )}
