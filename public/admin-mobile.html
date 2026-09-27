@@ -514,7 +514,7 @@
         
         <div>
           <label class="text-[9px] text-slate-400 block mb-0.5">Project ID:</label>
-          <input id="firestore-project-id" type="text" placeholder="venematic-pos" class="w-full bg-slate-950 border border-slate-700 text-indigo-300 rounded-xl px-3 py-1.5 text-xs font-mono focus:outline-none focus:border-indigo-500" />
+          <input id="firestore-project-id" type="text" placeholder="klikpos-pos" class="w-full bg-slate-950 border border-slate-700 text-indigo-300 rounded-xl px-3 py-1.5 text-xs font-mono focus:outline-none focus:border-indigo-500" />
         </div>
         
         <div>
@@ -680,11 +680,11 @@
 
   <script>
     let bcvRate = 855.66;
-    let serverUrl = localStorage.getItem('venematic_server_url') || '';
-    let masterPin = localStorage.getItem('venematic_admin_pin') || '1234';
-    let firestoreProjectId = localStorage.getItem('venematic_firestore_project_id') || 'klikpos-cloud';
-    let firestoreApiKey = localStorage.getItem('venematic_firestore_api_key') || 'AIzaSyDT26ff7t-W5WZKZktPWLZ_D79QHGh6sEg';
-    let firestoreStoreId = localStorage.getItem('venematic_firestore_store_id') || 'tienda_principal';
+    let serverUrl = localStorage.getItem('klikpos_server_url') || '';
+    let masterPin = localStorage.getItem('klikpos_admin_pin') || '1234';
+    let firestoreProjectId = localStorage.getItem('klikpos_firestore_project_id') || 'klikpos-cloud';
+    let firestoreApiKey = localStorage.getItem('klikpos_firestore_api_key') || 'AIzaSyDT26ff7t-W5WZKZktPWLZ_D79QHGh6sEg';
+    let firestoreStoreId = localStorage.getItem('klikpos_firestore_store_id') || 'tienda_principal';
     let isConnected = false;
     let allSales = [];
     let catalog = [];
@@ -757,21 +757,21 @@
 
         if (detectedUrl) {
           serverUrl = detectedUrl.replace(/\/+$/, '');
-          localStorage.setItem('venematic_server_url', serverUrl);
+          localStorage.setItem('klikpos_server_url', serverUrl);
           const inp = document.getElementById('server-url-input');
           if (inp) inp.value = serverUrl;
         }
 
         if (detectedStore) {
           firestoreStoreId = detectedStore;
-          localStorage.setItem('venematic_firestore_store_id', firestoreStoreId);
+          localStorage.setItem('klikpos_firestore_store_id', firestoreStoreId);
           const inpS = document.getElementById('firestore-store-id');
           if (inpS) inpS.value = firestoreStoreId;
         }
 
         if (detectedProject) {
           firestoreProjectId = detectedProject;
-          localStorage.setItem('venematic_firestore_project_id', firestoreProjectId);
+          localStorage.setItem('klikpos_firestore_project_id', firestoreProjectId);
         }
 
         closeServerConfigModal();
@@ -1015,14 +1015,14 @@
       firestoreStoreId = document.getElementById('firestore-store-id').value.trim() || 'tienda_principal';
 
       serverUrl = val.replace(/\/+$/, '');
-      localStorage.setItem('venematic_server_url', serverUrl);
-      localStorage.setItem('venematic_firestore_project_id', firestoreProjectId);
-      localStorage.setItem('venematic_firestore_api_key', firestoreApiKey);
-      localStorage.setItem('venematic_firestore_store_id', firestoreStoreId);
+      localStorage.setItem('klikpos_server_url', serverUrl);
+      localStorage.setItem('klikpos_firestore_project_id', firestoreProjectId);
+      localStorage.setItem('klikpos_firestore_api_key', firestoreApiKey);
+      localStorage.setItem('klikpos_firestore_store_id', firestoreStoreId);
 
       if (newPin && newPin.length === 4) {
         masterPin = newPin;
-        localStorage.setItem('venematic_admin_pin', masterPin);
+        localStorage.setItem('klikpos_admin_pin', masterPin);
       }
 
       closeServerConfigModal();
@@ -1116,7 +1116,7 @@
           const d = await rSales.json();
           if (Array.isArray(d.pendingSales)) {
             allSales = d.pendingSales;
-            localStorage.setItem('venematic_admin_sales', JSON.stringify(allSales));
+            localStorage.setItem('klikpos_admin_sales', JSON.stringify(allSales));
           }
         }
         const rInv = await fetch(`${serverUrl}/api/scanner/inventory`);
@@ -1124,7 +1124,7 @@
           const d = await rInv.json();
           if (Array.isArray(d.items)) {
             catalog = d.items;
-            localStorage.setItem('venematic_admin_catalog', JSON.stringify(catalog));
+            localStorage.setItem('klikpos_admin_catalog', JSON.stringify(catalog));
           }
         }
         renderAdminDashboard();
@@ -1132,7 +1132,7 @@
     }
 
     function loadMockDataIfEmpty() {
-      const savedSales = localStorage.getItem('venematic_admin_sales');
+      const savedSales = localStorage.getItem('klikpos_admin_sales');
       if (savedSales) {
         try { allSales = JSON.parse(savedSales); } catch {}
       }
@@ -1171,7 +1171,7 @@
         ];
       }
 
-      const savedCatalog = localStorage.getItem('venematic_admin_catalog');
+      const savedCatalog = localStorage.getItem('klikpos_admin_catalog');
       if (savedCatalog) {
         try { catalog = JSON.parse(savedCatalog); } catch {}
       }
@@ -1401,7 +1401,7 @@
       if (idx !== -1) {
         catalog[idx] = { ...editingProductItem };
       }
-      localStorage.setItem('venematic_admin_catalog', JSON.stringify(catalog));
+      localStorage.setItem('klikpos_admin_catalog', JSON.stringify(catalog));
 
       // Sincronizar con servidor de caja si está conectado
       if (serverUrl && isConnected) {
@@ -1596,7 +1596,7 @@
 
       const msg = 
 `🏛️ *REPORTE Z OFICIAL - CIERRE FISCAL*
-🏢 *Comercial Mi Tienda C.A.* | Venematic POS
+🏢 *Comercial Mi Tienda C.A.* | KlikPOS POS
 📅 Fecha: ${new Date().toLocaleDateString('es-VE')} - ${new Date().toLocaleTimeString('es-VE')}
 🏛️ Tasa BCV: Bs. ${bcvRate.toFixed(2)}
 -----------------------------------------
@@ -1769,7 +1769,7 @@
 
     async function applyNewBcvRate(rate, source = 'Manual', propagate = true) {
       bcvRate = Math.round(rate * 100) / 100;
-      localStorage.setItem('venematic_bcv_rate', bcvRate.toString());
+      localStorage.setItem('klikpos_bcv_rate', bcvRate.toString());
 
       const headerEl = document.getElementById('header-bcv-rate');
       if (headerEl) headerEl.innerText = `Bs. ${bcvRate.toFixed(2)}`;
@@ -1835,7 +1835,7 @@
     }
 
     // Inicialización al cargar: Tasa guardada
-    const savedRate = localStorage.getItem('venematic_bcv_rate');
+    const savedRate = localStorage.getItem('klikpos_bcv_rate');
     if (savedRate) bcvRate = parseFloat(savedRate) || 855.66;
     const headerBcvEl = document.getElementById('header-bcv-rate');
     if (headerBcvEl) headerBcvEl.innerText = `Bs. ${bcvRate.toFixed(2)}`;
@@ -1886,7 +1886,7 @@
     // =========================================================================
     let receivedSmsList = [];
     try {
-      const savedSms = localStorage.getItem('venematic_admin_sms_list');
+      const savedSms = localStorage.getItem('klikpos_admin_sms_list');
       if (savedSms) receivedSmsList = JSON.parse(savedSms);
     } catch {}
 
@@ -1967,7 +1967,7 @@
 
       receivedSmsList.unshift(smsEntry);
       if (receivedSmsList.length > 50) receivedSmsList.pop();
-      localStorage.setItem('venematic_admin_sms_list', JSON.stringify(receivedSmsList));
+      localStorage.setItem('klikpos_admin_sms_list', JSON.stringify(receivedSmsList));
 
       showToast(`🔔 PAGO MÓVIL SMS: Bs. ${parsed.monto.toFixed(2)} (${parsed.banco} Ref: ${parsed.referencia})`, true);
       renderSmsFeed();
@@ -2038,7 +2038,7 @@
     }
 
     // Escuchador nativo para Android Bridge
-    window.addEventListener('venematic:sms_received', function(e) {
+    window.addEventListener('klikpos:sms_received', function(e) {
       if (e.detail && e.detail.body) {
         handleSmsPaymentDetected(e.detail.body, e.detail.sender || 'SMS');
       }

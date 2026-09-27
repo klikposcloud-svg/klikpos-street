@@ -1,5 +1,9 @@
 @echo off
-title Venematic POS - Launcher
+title KlikPOS Enterprise - Launcher
 cd /d "%~dp0"
-start "" "%~dp0VenematicPOS.exe"
+if exist "%~dp0KlikPOS.exe" (
+    start "" "%~dp0KlikPOS.exe"
+) else (
+    start "" "%~dp0VenematicPOS.exe"
+)
 exit

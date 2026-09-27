@@ -1,7 +1,7 @@
 {
-  "name": "Venematic - Sistema Administrativo para Comercios",
-  "short_name": "Venematic",
-  "description": "PWA Offline-First para gestión de bodegas y minimarkets en Venezuela",
+  "name": "KlikPOS Enterprise - Sistema Comercial y Facturación",
+  "short_name": "KlikPOS",
+  "description": "Sistema Inteligente Offline-First para Comercios y Facturación en Venezuela",
   "start_url": "/dashboard/pos",
   "display": "standalone",
   "background_color": "#0f172a",

@@ -3,8 +3,8 @@ import '@/styles/globals.css';
 import { AuthProvider } from '@/context/AuthContext';
 
 export const metadata: Metadata = {
-  title: 'Venematic POS Local - Terminal Comercial',
-  description: 'Sistema de Punto de Venta Local y Offline para Comercios',
+  title: 'KlikPOS Enterprise - Terminal Comercial y Facturación',
+  description: 'Sistema Inteligente de Punto de Venta y Facturación Local y Offline',
 };
 
 export default function RootLayout({

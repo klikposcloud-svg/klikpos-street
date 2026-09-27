@@ -1,12 +1,12 @@
 [Setup]
-AppName=Venematic POS
-AppVersion=2.0.0
-AppPublisher=Venematic
-AppPublisherURL=https://venematic.com
-DefaultDirName={autopf}\Venematic POS
-DefaultGroupName=Venematic POS
+AppName=KlikPOS Enterprise
+AppVersion=2.4.0
+AppPublisher=KlikPOS Cloud
+AppPublisherURL=https://klikposcloud.com
+DefaultDirName={autopf}\KlikPOS Enterprise
+DefaultGroupName=KlikPOS Enterprise
 OutputDir=c:\Users\pcpro\OneDrive\Documents\venematic-master\venematic-master\venematic-desktop\dist-installer
-OutputBaseFilename=Venematic-POS-Setup-v2.0.0
+OutputBaseFilename=KlikPOS-Enterprise-Setup-v2.4.0
 Compression=lzma2/ultra64
 SolidCompression=yes
 WizardStyle=modern
@@ -27,10 +27,10 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 Source: "c:\Users\pcpro\OneDrive\Documents\venematic-master\venematic-master\venematic-desktop\build-staging\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
-Name: "{group}\Venematic POS"; Filename: "{app}\VenematicPOS.exe"; IconFilename: "{app}\app.ico"
-Name: "{group}\Detener Venematic POS"; Filename: "{app}\detener-venematic.bat"; IconFilename: "{app}\app.ico"
-Name: "{group}\Desinstalar Venematic POS"; Filename: "{uninstallexe}"
-Name: "{autodesktop}\Venematic POS"; Filename: "{app}\VenematicPOS.exe"; IconFilename: "{app}\app.ico"; Tasks: desktopicon
+Name: "{group}\KlikPOS Enterprise"; Filename: "{app}\KlikPOS.exe"; IconFilename: "{app}\app.ico"
+Name: "{group}\Detener KlikPOS Enterprise"; Filename: "{app}\detener-klikpos.bat"; IconFilename: "{app}\app.ico"
+Name: "{group}\Desinstalar KlikPOS Enterprise"; Filename: "{uninstallexe}"
+Name: "{autodesktop}\KlikPOS Enterprise"; Filename: "{app}\KlikPOS.exe"; IconFilename: "{app}\app.ico"; Tasks: desktopicon
 
 [Run]
-Filename: "{app}\VenematicPOS.exe"; Description: "Ejecutar Venematic POS ahora"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\KlikPOS.exe"; Description: "Ejecutar KlikPOS Enterprise ahora"; Flags: nowait postinstall skipifsilent

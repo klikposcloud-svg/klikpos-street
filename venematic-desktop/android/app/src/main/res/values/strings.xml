@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Venematic Mobile POS</string>
-    <string name="title_activity_main">Venematic Mobile POS</string>
+    <string name="app_name">KlikPOS Móvil</string>
+    <string name="title_activity_main">KlikPOS Móvil</string>
     <string name="package_name">com.venematic.pos</string>
     <string name="custom_url_scheme">com.venematic.pos</string>
 </resources>

@@ -1,6 +1,7 @@
 {
-  "name": "venematic",
-  "version": "1.0.0",
+  "name": "klikpos",
+  "version": "2.4.0",
+  "description": "KlikPOS Enterprise - Sistema Inteligente de Punto de Venta y Facturación",
   "private": true,
   "scripts": {
     "dev": "next dev --hostname 0.0.0.0",

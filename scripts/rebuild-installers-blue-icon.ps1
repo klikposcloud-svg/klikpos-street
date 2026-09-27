@@ -56,7 +56,7 @@ Write-Host "=== 4. SYNCHRONIZING ALL INSTALLER VERSIONS ==="
 $distDesktop = Join-Path $desktop "dist-installer"
 $distRoot = Join-Path $root "dist-installer"
 
-$compiledExe = Join-Path $distDesktop "Venematic-POS-Setup-v2.0.0.exe"
+$compiledExe = Join-Path $distDesktop "KlikPOS-Enterprise-Setup-v2.4.0.exe"
 if (Test-Path $compiledExe) {
     $targets = @(
         (Join-Path $distDesktop "Klikpos-Setup-v2.0.0.exe"),

@@ -5,7 +5,7 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Windows.Forms;
 
-namespace VenematicPOS
+namespace KlikPOS
 {
     static class Program
     {
@@ -47,7 +47,7 @@ namespace VenematicPOS
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show("Error iniciando el motor local de Venematic:\n" + ex.Message, "Venematic POS", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show("Error iniciando el motor local de KlikPOS:\n" + ex.Message, "KlikPOS Enterprise", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         return;
                     }
 
@@ -60,7 +60,7 @@ namespace VenematicPOS
                 }
                 else
                 {
-                    MessageBox.Show("No se encontró el ejecutable del servidor o motor Node integrado.\nRuta buscada: " + nodePath, "Venematic POS - Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("No se encontró el ejecutable del servidor o motor Node integrado.\nRuta buscada: " + nodePath, "KlikPOS Enterprise - Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
             }

@@ -3,13 +3,13 @@ $ErrorActionPreference = "Stop"
 $rootDir = Split-Path -Parent $PSScriptRoot
 $desktopDir = Join-Path $rootDir "venematic-desktop"
 $issPath = Join-Path $desktopDir "installer.iss"
-$outputExeDesktop = Join-Path $desktopDir "dist-installer\Venematic-POS-Setup-v2.0.0.exe"
-$outputExeRoot = Join-Path $rootDir "dist-installer\Venematic-POS-Setup-v2.0.0.exe"
+$outputExeDesktop = Join-Path $desktopDir "dist-installer\KlikPOS-Enterprise-Setup-v2.4.0.exe"
+$outputExeRoot = Join-Path $rootDir "dist-installer\KlikPOS-Enterprise-Setup-v2.4.0.exe"
 $hashDesktop = Join-Path $desktopDir "dist-installer\VERIFICACION_HASHES.txt"
 $hashRoot = Join-Path $rootDir "dist-installer\VERIFICACION_HASHES.txt"
 
 Write-Host "==========================================================" -ForegroundColor Cyan
-Write-Host "  VENEMATIC POS - Pipeline de Generación de Instalador    " -ForegroundColor Cyan
+Write-Host "  KLIKPOS ENTERPRISE - Pipeline de Generación Instalador  " -ForegroundColor Cyan
 Write-Host "==========================================================" -ForegroundColor Cyan
 
 # 1. Localizar compilador Inno Setup (ISCC.exe)
@@ -44,11 +44,15 @@ if (-not (Test-Path $outputExeDesktop)) {
     throw "Error: No se generó el archivo de instalación en $outputExeDesktop"
 }
 
-# 4. Copiar instalador a dist-installer de raíz
-# Sincronizar copias y desbloquear restricciones web
+# 4. Copiar instalador a dist-installer de raíz y sincronizar nombres
 Copy-Item $outputExeDesktop $outputExeRoot -Force
 Unblock-File -Path $outputExeDesktop -ErrorAction SilentlyContinue
 Unblock-File -Path $outputExeRoot -ErrorAction SilentlyContinue
+
+# Copias de compatibilidad para carpetas de distribución
+$distRoot = Join-Path $rootDir "dist-installer"
+Copy-Item $outputExeRoot (Join-Path $distRoot "Klikpos-Setup-v2.0.0.exe") -Force
+Copy-Item $outputExeRoot (Join-Path $distRoot "KlikPOS_Setup_v2.4.0.exe") -Force
 
 # 5. Calcular Hash SHA256 y actualizar archivos de verificación
 Write-Host "[5/5] Calculando SHA-256 y actualizando hashes..." -ForegroundColor Yellow
@@ -60,8 +64,8 @@ $hashContent = @"
              INTEGRIDAD Y SUMAS DE VERIFICACION CRIPTOGRAFICA (HASHES)
 ================================================================================
 
-Paquete: Venematic-POS-Setup-v2.0.0.exe
-Version: 2.0.0 (Actualizada con Cloud Sync, Calculadora de Ganancia, Balanza y Moneda Bs)
+Paquete: KlikPOS-Enterprise-Setup-v2.4.0.exe
+Version: 2.4.0 (Enterprise Security Suite, Anti-BruteForce, BCV Realtime, Cloud Sync)
 Fecha de emision: $dateStr
 
 Algoritmo SHA256:
@@ -69,7 +73,7 @@ $hashVal
 
 Para verificar la integridad del instalador en cualquier computadora:
 PowerShell:
-  Get-FileHash Venematic-POS-Setup-v2.0.0.exe -Algorithm SHA256
+  Get-FileHash KlikPOS-Enterprise-Setup-v2.4.0.exe -Algorithm SHA256
 ================================================================================
 "@
 
@@ -77,6 +81,6 @@ Set-Content -Path $hashRoot -Value $hashContent -Encoding UTF8
 Set-Content -Path $hashDesktop -Value $hashContent -Encoding UTF8
 
 Write-Host "==========================================================" -ForegroundColor Green
-Write-Host "  ¡Instalador generado, firmado y verificado con éxito!    " -ForegroundColor Green
+Write-Host "  ¡Instalador KlikPOS Enterprise v2.4.0 generado con éxito!" -ForegroundColor Green
 Write-Host "  SHA256: $hashVal" -ForegroundColor Cyan
 Write-Host "==========================================================" -ForegroundColor Green
