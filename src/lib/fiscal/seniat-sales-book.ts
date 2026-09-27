@@ -4,6 +4,7 @@
  */
 
 import { LocalSale } from '@/lib/db';
+import { SYSTEM_DEFAULTS } from '@/lib/constants/defaults';
 
 export interface SeniatSaleRecord {
   operacionNo: number;
@@ -90,7 +91,7 @@ export function buildSeniatSalesBook(
 
   filtered.forEach((sale, index) => {
     const isVoided = sale.status === 'voided' || sale.status === 'cancelled';
-    const rate = sale.bcvRate || 848.55;
+    const rate = sale.bcvRate || SYSTEM_DEFAULTS.DEFAULT_BCV_RATE;
     const totalUSD = sale.totalUSD || 0;
     const totalVES = sale.totalVES || totalUSD * rate;
 

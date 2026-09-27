@@ -1,33 +1,44 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { scannerEmitter } from '@/lib/scanner-events';
+import { NextResponse } from 'next/server'
+import { scannerEmitter } from '@/lib/scanner-events'
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-};
-
-export async function OPTIONS() {
-  return new Response(null, { status: 204, headers: CORS_HEADERS });
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type',
 }
 
-export async function POST(req: NextRequest) {
+export async function OPTIONS() {
+  return new Response(null, { status: 204, headers: CORS_HEADERS })
+}
+
+export async function POST(request: Request) {
   try {
-    const body = await req.json();
-    const { session = 'caja-1', barcode } = body;
+    const body = await request.json()
+    const { session, barcode, format } = body
 
     if (!barcode) {
-      return NextResponse.json({ error: 'Código de barras requerido' }, { status: 400, headers: CORS_HEADERS });
+      return NextResponse.json(
+        { error: 'Código de barras requerido' },
+        { status: 400, headers: CORS_HEADERS }
+      )
     }
 
-    scannerEmitter.emit('scan', {
-      session,
+    const payload = {
+      session: session || 'default',
       barcode: String(barcode).trim(),
-      timestamp: Date.now(),
-    });
+      format: format || 'CODE',
+      timestamp: Date.now()
+    }
 
-    return NextResponse.json({ success: true, barcode }, { headers: CORS_HEADERS });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500, headers: CORS_HEADERS });
+    // Emitir inmediatamente al receptor SSE de la laptop
+    scannerEmitter.emit('scan', payload)
+
+    return NextResponse.json({ success: true, payload }, { headers: CORS_HEADERS })
+  } catch (error) {
+    console.error('Error al recibir escaneo:', error)
+    return NextResponse.json(
+      { error: 'Error procesando escaneo' },
+      { status: 500, headers: CORS_HEADERS }
+    )
   }
 }

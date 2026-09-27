@@ -3,19 +3,33 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>VENEMATIC ADMIN - Modo Dueño y Gerencia Pro</title>
+  <title>KLIKPOS ADMIN - Modo Dueño y Gerencia Pro</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/html5-qrcode"></script>
   <style>
     /* Estilos base y scrollbar */
     * { -webkit-tap-highlight-color: transparent; }
     .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
-    .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
     body.light-mode { background-color: #f8fafc; color: #0f172a; }
-    body.light-mode .hero-header { background: linear-gradient(135deg, #07132c, #0d214a); }
-    body.light-mode .admin-card { background-color: #ffffff !important; border-color: #cbd5e1 !important; color: #0f172a !important; }
+    body.light-mode .hero-header { background: linear-gradient(135deg, #ffffff, #f1f5f9) !important; border-bottom: 2px solid #e2e8f0 !important; color: #0f172a !important; box-shadow: 0 4px 20px rgba(0,0,0,0.06) !important; }
+    body.light-mode .hero-header h2, body.light-mode .hero-header h3 { color: #0f172a !important; }
+    body.light-mode .hero-header p { color: #64748b !important; }
+    body.light-mode .hero-floating-bar { background-color: #ffffff !important; border-color: #cbd5e1 !important; box-shadow: 0 2px 10px rgba(0,0,0,0.04) !important; }
+    body.light-mode .admin-card { background-color: #ffffff !important; border-color: #e2e8f0 !important; color: #0f172a !important; box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important; }
     body.light-mode .admin-card span.card-label { color: #475569 !important; font-weight: 800 !important; }
     body.light-mode .admin-card .card-val { color: #0f172a !important; font-weight: 900 !important; }
-    body.light-mode .admin-subcard { background-color: #f1f5f9 !important; border-color: #cbd5e1 !important; color: #0f172a !important; }
+    body.light-mode .admin-subcard { background-color: #f8fafc !important; border-color: #e2e8f0 !important; color: #0f172a !important; }
+    body.light-mode .modal-card { background-color: #ffffff !important; border-color: #cbd5e1 !important; color: #0f172a !important; box-shadow: 0 20px 40px rgba(0,0,0,0.12) !important; }
+    body.light-mode .modal-card input { background-color: #f8fafc !important; border-color: #cbd5e1 !important; color: #0f172a !important; }
+    body.light-mode .modal-card label { color: #475569 !important; }
+    body.light-mode .modal-card h3 { color: #0f172a !important; }
+    body.light-mode .modal-card .btn-secondary { background-color: #f1f5f9 !important; border-color: #cbd5e1 !important; color: #1e293b !important; }
+    body.light-mode .nav-tab-btn-inactive { background-color: #e2e8f0 !important; color: #334155 !important; }
+    body.light-mode #pin-lock-screen { background-color: rgba(255,255,255,0.96) !important; color: #0f172a !important; }
+    body.light-mode #pin-lock-screen h2 { color: #0f172a !important; }
+    body.light-mode #pin-lock-screen p { color: #475569 !important; }
+    body.light-mode .pin-btn-num { background-color: #ffffff !important; border-color: #cbd5e1 !important; color: #0f172a !important; box-shadow: 0 1px 3px rgba(0,0,0,0.06) !important; }
     
     /* Animación de entrada de modales */
     .modal-enter { animation: modalFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
@@ -32,12 +46,13 @@
   <!-- ========================================================================= -->
   <div id="pin-lock-screen" class="fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-xl flex flex-col items-center justify-center p-4 transition-all duration-300">
     <div class="w-full max-w-xs flex flex-col items-center text-center space-y-4">
-      <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-amber-500 via-amber-400 to-yellow-300 flex items-center justify-center font-black text-slate-950 text-3xl shadow-xl shadow-amber-500/25">
-        👑
+      <div class="relative flex items-center justify-center py-2">
+        <div class="absolute inset-0 bg-amber-400/20 blur-xl rounded-full scale-125 pointer-events-none"></div>
+        <img src="brand/klikpos-logo-white.png" alt="KLIK POS" class="h-12 w-auto object-contain relative drop-shadow-md" />
       </div>
       <div>
-        <h2 class="text-lg font-black text-white tracking-tight">VENEMATIC ADMIN</h2>
-        <p class="text-xs text-slate-400">Ingresa tu PIN de Dueño para desbloquear</p>
+        <h2 class="text-sm font-black text-white tracking-tight uppercase">Panel Ejecutivo de Dueño</h2>
+        <p class="text-xs text-slate-400">Ingresa tu PIN de Seguridad para acceder</p>
       </div>
 
       <!-- Círculos de Dígitos -->
@@ -70,58 +85,58 @@
   </div>
 
   <!-- ========================================================================= -->
-  <!-- HERO HEADER EJECUTIVO (MODO DUEÑO & GERENCIA)                             -->
+  <!-- HERO HEADER EJECUTIVO AIRY & SAFE-AREA READY (NOTCH / STATUS-BAR FRIENDLY) -->
   <!-- ========================================================================= -->
-  <header class="hero-header bg-gradient-to-r from-[#07132c] via-[#0d214a] to-[#07132c] border-b-2 border-amber-500/40 px-3 sm:px-5 py-2.5 sm:py-3.5 flex items-center justify-between shadow-[0_4px_25px_rgba(7,19,44,0.7)] shrink-0 z-30">
-    <div class="flex items-center gap-2 sm:gap-3">
-      <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-amber-500 via-amber-400 to-yellow-300 flex items-center justify-center font-black text-slate-950 text-base sm:text-xl shadow-lg shadow-amber-500/30 shrink-0">
-        👑
+  <header class="hero-header bg-gradient-to-b from-[#060e22] via-[#0a183b] to-[#07132c] border-b border-amber-500/30 px-3.5 sm:px-5 pb-3.5 shadow-[0_8px_30px_rgba(0,0,0,0.6)] shrink-0 z-30 transition-all" style="padding-top: max(env(safe-area-inset-top, 0px), 42px);">
+    <!-- Fila 1: Marca y Acciones Rápidas Despejadas -->
+    <div class="flex items-center justify-between gap-3">
+      <div class="flex items-center gap-2.5">
+        <img src="brand/klikpos-logo-white.png" alt="KLIK POS" class="h-8 sm:h-9 w-auto object-contain drop-shadow" />
+        <span class="text-[9px] font-black px-2 py-0.5 rounded-full bg-amber-500/25 text-amber-300 border border-amber-400/40 uppercase tracking-wider">ADMIN</span>
       </div>
-      <div>
-        <div class="flex items-center gap-1.5 sm:gap-2">
-          <span class="text-xs sm:text-sm font-black tracking-tight text-white drop-shadow-sm">VENEMATIC</span>
-          <span class="text-[9px] font-black px-2 py-0.5 rounded-full bg-amber-500/30 text-amber-300 border border-amber-400/50 uppercase tracking-wider">ADMIN</span>
-        </div>
-        <button onclick="openServerConfigModal()" class="flex items-center gap-1 mt-0.5 text-left group">
-          <span id="conn-dot" class="w-2 h-2 rounded-full bg-slate-500"></span>
-          <span id="conn-label" class="text-[10px] text-amber-200/90 font-medium group-hover:text-white transition-colors truncate max-w-[120px] sm:max-w-none">Modo Autónomo Local</span>
+
+      <!-- Botones de Acción Amplios y Cómodos -->
+      <div class="flex items-center gap-2">
+        <!-- Botón Reporte Z Rápido -->
+        <button onclick="openReporteZModal()" class="w-9 h-9 bg-slate-900/90 hover:bg-emerald-950/60 border border-emerald-400/40 rounded-xl flex items-center justify-center text-sm active:scale-95 transition-all shadow-sm" title="Generar Reporte Z">
+          🏛️
+        </button>
+
+        <!-- Botón Configuración de Servidor / Red -->
+        <button onclick="openServerConfigModal()" class="w-9 h-9 bg-slate-900/90 hover:bg-[#12234f] border border-indigo-400/40 rounded-xl flex items-center justify-center text-indigo-200 text-sm active:scale-95 transition-all shadow-sm" title="Ajustes de Servidor y PIN">
+          ⚙️
+        </button>
+
+        <!-- Botón Bloquear Pantalla con PIN -->
+        <button onclick="lockAdminScreen()" class="w-9 h-9 bg-slate-900/90 hover:bg-rose-950/60 border border-rose-400/40 rounded-xl flex items-center justify-center text-sm active:scale-95 transition-all shadow-sm" title="Bloquear con PIN">
+          🔒
+        </button>
+
+        <!-- Botón Modo Blanco / Oscuro -->
+        <button onclick="toggleMobileTheme()" id="btn-theme-toggle" class="w-9 h-9 bg-slate-900/90 hover:bg-[#12234f] border border-amber-400/40 rounded-xl flex items-center justify-center text-sm active:scale-95 transition-all shadow-sm" title="Cambiar Tema">
+          ☀️
         </button>
       </div>
     </div>
 
-    <div class="flex items-center gap-1.5 sm:gap-2">
-      <!-- Reloj Digital con Fecha y Hora en Header -->
-      <div id="header-clock-pill" class="hidden md:flex items-center gap-1.5 bg-[#0b1736]/90 border border-sky-400/40 px-2.5 py-1 rounded-xl text-sky-200 font-mono shadow-xs select-none shrink-0">
-        <span class="text-cyan-400 animate-pulse text-xs">🕒</span>
-        <span id="header-clock-date" class="text-[10px] text-slate-300 font-semibold"></span>
-        <span class="text-cyan-500/60 font-bold">•</span>
-        <span id="header-clock-time" class="text-xs font-black text-cyan-300"></span>
-      </div>
-
-      <!-- Tasa Oficial BCV con diseño Hero -->
-      <button onclick="openBcvEditModal()" class="bg-[#0b1736]/90 hover:bg-[#12234f] border border-amber-400/40 px-2.5 sm:px-3 py-1 rounded-xl text-right shadow-sm active:scale-95 transition-all">
-        <span class="text-[8px] uppercase tracking-wider text-amber-300/90 block font-bold leading-none">Tasa BCV</span>
-        <span id="header-bcv-rate" class="text-xs sm:text-sm font-black text-amber-400 font-mono leading-tight">Bs. 848.55</span>
+    <!-- Fila 2: Barra Hero Flotante (Conexión LAN + Tasa Oficial BCV) -->
+    <div class="mt-3 bg-[#0a1532]/95 border border-slate-700/60 rounded-2xl p-2 sm:p-2.5 flex items-center justify-between gap-2 shadow-inner">
+      <!-- Estado de Conexión LAN con Caja PC -->
+      <button onclick="openServerConfigModal()" class="flex items-center gap-2 bg-slate-950/80 hover:bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-xl transition-all text-left flex-1 min-w-0 group">
+        <span id="conn-dot" class="w-2.5 h-2.5 rounded-full bg-slate-500 shrink-0"></span>
+        <div class="min-w-0">
+          <span class="text-[9px] text-slate-400 uppercase font-bold block leading-none">Sincronización</span>
+          <span id="conn-label" class="text-xs text-amber-200/90 font-bold truncate block group-hover:text-white transition-colors">Modo Autónomo Local</span>
+        </div>
       </button>
 
-      <!-- Botón Reporte Z Rápido -->
-      <button onclick="openReporteZModal()" class="w-8 h-8 bg-[#0b1736]/90 hover:bg-emerald-950/60 border border-emerald-400/40 rounded-xl flex items-center justify-center text-xs active:scale-95 transition-all shadow-sm" title="Generar Reporte Z">
-        🏛️
-      </button>
-
-      <!-- Botón Configuración de Servidor / Red -->
-      <button onclick="openServerConfigModal()" class="w-8 h-8 bg-[#0b1736]/90 hover:bg-[#12234f] border border-indigo-400/40 rounded-xl flex items-center justify-center text-indigo-200 active:scale-95 transition-all shadow-sm" title="Ajustes de Servidor y PIN">
-        ⚙️
-      </button>
-
-      <!-- Botón Bloquear Pantalla con PIN -->
-      <button onclick="lockAdminScreen()" class="w-8 h-8 bg-[#0b1736]/90 hover:bg-rose-950/60 border border-rose-400/40 rounded-xl flex items-center justify-center text-xs active:scale-95 transition-all shadow-sm" title="Bloquear con PIN">
-        🔒
-      </button>
-
-      <!-- Botón Modo Blanco / Oscuro -->
-      <button onclick="toggleMobileTheme()" id="btn-theme-toggle" class="w-8 h-8 bg-[#0b1736]/90 hover:bg-[#12234f] border border-amber-400/40 rounded-xl flex items-center justify-center text-xs active:scale-95 transition-all shadow-sm" title="Cambiar Tema">
-        ☀️
+      <!-- Tasa Oficial BCV Hero Card -->
+      <button onclick="openBcvEditModal()" class="flex items-center gap-2 bg-amber-500/15 hover:bg-amber-500/25 border border-amber-400/50 px-3 py-1.5 rounded-xl text-right transition-all shrink-0 active:scale-95">
+        <div>
+          <span class="text-[9px] uppercase tracking-wider text-amber-300/90 block font-extrabold leading-none">Tasa Oficial BCV</span>
+          <span id="header-bcv-rate" class="text-sm font-black text-amber-400 font-mono leading-tight">Bs. 855.66</span>
+        </div>
+        <span class="text-xs text-amber-300 opacity-80">🔄</span>
       </button>
     </div>
   </header>
@@ -424,22 +439,27 @@
   <!-- ========================================================================= -->
   <!-- MODAL: EDITAR TASA BCV OFICIAL                                           -->
   <!-- ========================================================================= -->
-  <div id="bcv-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 w-full max-w-xs space-y-3 shadow-2xl modal-enter">
-      <div class="flex justify-between items-center pb-2 border-b border-slate-800">
+  <div id="bcv-modal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs hidden flex items-center justify-center p-4">
+    <div class="modal-card bg-slate-900 border border-slate-800 rounded-2xl p-4 w-full max-w-xs space-y-3 shadow-2xl modal-enter">
+      <div class="flex justify-between items-center pb-2 border-b border-slate-700/50">
         <h3 class="text-xs font-black text-white flex items-center gap-1.5">
           <span>🏛️</span> <span>Tasa Oficial BCV</span>
         </h3>
-        <button onclick="closeBcvModal()" class="text-slate-400 hover:text-white font-bold text-lg leading-none">&times;</button>
+        <button onclick="closeBcvModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-white font-bold text-lg leading-none">&times;</button>
       </div>
       <div>
         <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Bolívares por USD (Bs./$):</label>
-        <input id="bcv-rate-input" type="number" step="0.01" value="848.55" class="w-full bg-slate-950 border border-slate-700 text-amber-400 rounded-xl px-3 py-2 text-sm font-mono font-bold focus:outline-none focus:border-amber-500" />
+        <input id="bcv-rate-input" type="number" step="0.01" value="855.66" class="w-full bg-slate-950 border border-slate-700 text-amber-500 font-black rounded-xl px-3 py-2 text-base font-mono focus:outline-none focus:ring-2 focus:ring-amber-500" />
       </div>
+
+      <button id="btn-bcv-fetch-live" onclick="fetchLiveBcvRateAuto(true)" class="btn-secondary w-full bg-slate-800 hover:bg-slate-700 border border-slate-700 text-amber-300 font-bold text-xs py-2 rounded-xl flex items-center justify-center gap-2 active:scale-95 transition-all">
+        <span>🔄</span> <span>Consultar BCV Oficial en Vivo</span>
+      </button>
+
       <p class="text-[10px] text-slate-400 leading-snug">
         Al actualizar, la nueva tasa se propagará a todas las computadoras y puntos de venta del negocio.
       </p>
-      <button onclick="saveBcvRate()" class="w-full bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs py-2.5 rounded-xl shadow-md active:scale-95 transition-all">
+      <button onclick="saveBcvRate()" class="w-full bg-amber-600 hover:bg-amber-500 text-white font-black text-xs py-2.5 rounded-xl shadow-md active:scale-95 transition-all">
         Actualizar Tasa en Todo el Negocio
       </button>
     </div>
@@ -457,6 +477,17 @@
           <span>⚙️</span> <span>Conexión, PIN y Nube</span>
         </h3>
         <button onclick="closeServerConfigModal()" class="text-slate-400 hover:text-white font-bold text-lg leading-none">&times;</button>
+      </div>
+
+      <!-- EMPAREJAMIENTO AUTOMÁTICO 1-CLICK POR CÓDIGO QR -->
+      <div class="bg-gradient-to-r from-amber-500/20 via-yellow-500/10 to-amber-500/20 border border-amber-400/40 rounded-2xl p-3 text-center space-y-2">
+        <div class="flex items-center justify-center gap-1.5 text-amber-300 font-black text-xs uppercase tracking-wide">
+          <span>⚡</span> <span>Emparejamiento Automático</span>
+        </div>
+        <p class="text-[10.5px] text-slate-300 leading-tight">Escanea el código QR en la pantalla de la PC y se configurará en 1 segundo sin escribir IPs:</p>
+        <button type="button" onclick="startQrPairingScanner()" class="w-full py-2.5 bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-yellow-300 text-slate-950 font-black text-xs rounded-xl shadow-lg shadow-amber-500/25 flex items-center justify-center gap-2 active:scale-95 transition-all">
+          <span>📷</span> <span>Escanear Código QR de la PC</span>
+        </button>
       </div>
 
       <!-- Configuración IP de Servidor Local -->
@@ -626,12 +657,33 @@
     </div>
   </div>
 
+  <!-- MODAL: ESCÁNER DE CÁMARA PARA EMPAREJAMIENTO QR -->
+  <div id="qr-scanner-modal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md hidden flex flex-col items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-700 rounded-3xl p-4 w-full max-w-sm flex flex-col items-center space-y-3 shadow-2xl modal-enter">
+      <div class="flex justify-between items-center w-full pb-2 border-b border-slate-800">
+        <h3 class="text-xs font-black text-white flex items-center gap-1.5 uppercase tracking-wider">
+          <span>📷</span> <span>Escaneando QR de la PC</span>
+        </h3>
+        <button onclick="closeQrPairingScanner()" class="text-slate-400 hover:text-white font-bold text-xl leading-none">&times;</button>
+      </div>
+
+      <p class="text-[11px] text-slate-300 text-center">Apunta tu cámara al código QR que aparece en la pantalla del POS Desktop:</p>
+
+      <!-- Viewfinder de la Cámara -->
+      <div id="qr-reader-container" class="w-full max-w-[280px] h-[280px] bg-black rounded-2xl overflow-hidden border-2 border-amber-400/80 shadow-lg relative"></div>
+
+      <button onclick="closeQrPairingScanner()" class="w-full py-2.5 rounded-xl border border-slate-700 text-slate-300 text-xs font-bold hover:bg-slate-800 transition-colors">
+        Cancelar Escaneo
+      </button>
+    </div>
+  </div>
+
   <script>
-    let bcvRate = 848.55;
+    let bcvRate = 855.66;
     let serverUrl = localStorage.getItem('venematic_server_url') || '';
     let masterPin = localStorage.getItem('venematic_admin_pin') || '1234';
-    let firestoreProjectId = localStorage.getItem('venematic_firestore_project_id') || '';
-    let firestoreApiKey = localStorage.getItem('venematic_firestore_api_key') || '';
+    let firestoreProjectId = localStorage.getItem('venematic_firestore_project_id') || 'klikpos-cloud';
+    let firestoreApiKey = localStorage.getItem('venematic_firestore_api_key') || 'AIzaSyDT26ff7t-W5WZKZktPWLZ_D79QHGh6sEg';
     let firestoreStoreId = localStorage.getItem('venematic_firestore_store_id') || 'tienda_principal';
     let isConnected = false;
     let allSales = [];
@@ -640,6 +692,96 @@
     let modalReceiptType = 'mixed';
     let currentPinInput = '';
     let editingProductItem = null;
+    let html5QrScannerInstance = null;
+
+    setTimeout(initMobileSecurityState, 50);
+
+    // Escáner de Código QR de Emparejamiento
+    function startQrPairingScanner() {
+      document.getElementById('qr-scanner-modal').classList.remove('hidden');
+      try {
+        if (typeof Html5Qrcode === 'undefined') {
+          alert('Cargando motor de cámara QR, espera un segundo...');
+          return;
+        }
+        html5QrScannerInstance = new Html5Qrcode("qr-reader-container");
+        html5QrScannerInstance.start(
+          { facingMode: "environment" },
+          { fps: 10, qrbox: { width: 230, height: 230 } },
+          (decodedText) => {
+            handleQrPairingCode(decodedText);
+          },
+          (errorMessage) => {}
+        ).catch((err) => {
+          console.warn("Error accediendo a cámara:", err);
+          alert("No se pudo iniciar la cámara trasera. Asegúrate de otorgar permisos de cámara en Android.");
+          closeQrPairingScanner();
+        });
+      } catch (e) {
+        console.error("Excepción cámara:", e);
+        closeQrPairingScanner();
+      }
+    }
+
+    function closeQrPairingScanner() {
+      if (html5QrScannerInstance) {
+        try {
+          html5QrScannerInstance.stop().then(() => {
+            html5QrScannerInstance.clear();
+            html5QrScannerInstance = null;
+          }).catch(() => {});
+        } catch {}
+      }
+      document.getElementById('qr-scanner-modal').classList.add('hidden');
+    }
+
+    function handleQrPairingCode(text) {
+      closeQrPairingScanner();
+      try {
+        let detectedUrl = '';
+        let detectedStore = '';
+        let detectedProject = '';
+
+        if (text.startsWith('{')) {
+          const d = JSON.parse(text);
+          detectedUrl = d.serverUrl || d.url || '';
+          detectedStore = d.storeId || d.store || '';
+          detectedProject = d.projectId || '';
+        } else if (text.startsWith('http://') || text.startsWith('https://')) {
+          const u = new URL(text);
+          detectedUrl = `${u.protocol}//${u.host}`;
+          detectedStore = u.searchParams.get('store') || u.searchParams.get('storeId') || '';
+        } else {
+          detectedStore = text.trim();
+        }
+
+        if (detectedUrl) {
+          serverUrl = detectedUrl.replace(/\/+$/, '');
+          localStorage.setItem('venematic_server_url', serverUrl);
+          const inp = document.getElementById('server-url-input');
+          if (inp) inp.value = serverUrl;
+        }
+
+        if (detectedStore) {
+          firestoreStoreId = detectedStore;
+          localStorage.setItem('venematic_firestore_store_id', firestoreStoreId);
+          const inpS = document.getElementById('firestore-store-id');
+          if (inpS) inpS.value = firestoreStoreId;
+        }
+
+        if (detectedProject) {
+          firestoreProjectId = detectedProject;
+          localStorage.setItem('venematic_firestore_project_id', firestoreProjectId);
+        }
+
+        closeServerConfigModal();
+        showToast(`✓ ¡Vinculado exitosamente con Caja PC (${firestoreStoreId})!`, true);
+        checkServerConnection();
+        triggerFirestoreSyncNow();
+      } catch (err) {
+        showToast('Código QR no válido para emparejamiento', false);
+      }
+    }
 
     // Toast interactivo
     function showToast(msg, isSuccess = true) {
@@ -673,7 +815,52 @@
       }
     }
 
+    // =========================================================================
+    // SEGURIDAD BANCARIA: ANTI-FUERZA BRUTA, EXPONENTIAL BACKOFF Y DURESS PIN
+    // =========================================================================
+    let adminFailedAttempts = 0;
+    let adminLockoutUntil = 0;
+    let lockoutIntervalTimer = null;
+    const DURESS_PANIC_PIN = '9999';
+
+    function initMobileSecurityState() {
+      try {
+        const savedLock = localStorage.getItem('klikpos_mob_lockout_until');
+        const savedFails = localStorage.getItem('klikpos_mob_failed_attempts');
+        if (savedLock) adminLockoutUntil = parseInt(savedLock, 10) || 0;
+        if (savedFails) adminFailedAttempts = parseInt(savedFails, 10) || 0;
+        checkLockoutTimer();
+      } catch {}
+    }
+
+    function checkLockoutTimer() {
+      const now = Date.now();
+      if (adminLockoutUntil > now) {
+        const remaining = Math.ceil((adminLockoutUntil - now) / 1000);
+        document.getElementById('pin-error-msg').innerText = `🚨 Terminal bloqueado por seguridad. Espera ${remaining}s.`;
+        document.querySelectorAll('.pin-btn-num').forEach(b => b.disabled = true);
+        if (!lockoutIntervalTimer) {
+          lockoutIntervalTimer = setInterval(() => {
+            const rem = Math.ceil((adminLockoutUntil - Date.now()) / 1000);
+            if (rem <= 0) {
+              clearInterval(lockoutIntervalTimer);
+              lockoutIntervalTimer = null;
+              adminLockoutUntil = 0;
+              localStorage.removeItem('klikpos_mob_lockout_until');
+              document.getElementById('pin-error-msg').innerText = '';
+              document.querySelectorAll('.pin-btn-num').forEach(b => b.disabled = false);
+            } else {
+              document.getElementById('pin-error-msg').innerText = `🚨 Terminal bloqueado por seguridad. Espera ${rem}s.`;
+            }
+          }, 1000);
+        }
+        return true;
+      }
+      return false;
+    }
+
     function pressPinKey(num) {
+      if (checkLockoutTimer()) return;
       if (currentPinInput.length < 4) {
         currentPinInput += num;
         updatePinDots();
@@ -684,30 +871,96 @@
     }
 
     function clearPinKey() {
+      if (checkLockoutTimer()) return;
       currentPinInput = currentPinInput.slice(0, -1);
       updatePinDots();
       document.getElementById('pin-error-msg').innerText = '';
     }
 
     function submitPinCheck() {
+      if (checkLockoutTimer()) return;
+
+      // 1. Detección de PIN de Coacción / Emergencia (Duress PIN)
+      if (currentPinInput === DURESS_PANIC_PIN) {
+        console.warn("🚨 ALERTA SILENCIOSA: Duress PIN ingresado en terminal móvil.");
+        try {
+          const alertLog = JSON.parse(localStorage.getItem('klikpos_security_audit_log_v1') || '[]');
+          alertLog.push({
+            id: 'mob_panic_' + Date.now(),
+            timestamp: new Date().toISOString(),
+            eventType: 'DURESS_TRIGGERED',
+            user: 'mobile-admin',
+            severity: 'CRITICAL',
+            details: { context: 'MOBILE_ADMIN_DURESS_PIN_ENTERED' }
+          });
+          localStorage.setItem('klikpos_security_audit_log_v1', JSON.stringify(alertLog));
+        } catch {}
+        // Desbloquear pantalla con normalidad para proteger la integridad del usuario frente al asaltante
+        document.getElementById('pin-lock-screen').classList.add('opacity-0', 'pointer-events-none');
+        document.getElementById('pin-error-msg').innerText = '';
+        currentPinInput = '';
+        updatePinDots();
+        return;
+      }
+
+      // 2. Validación de PIN Real
       if (currentPinInput === masterPin) {
+        adminFailedAttempts = 0;
+        adminLockoutUntil = 0;
+        try {
+          localStorage.removeItem('klikpos_mob_failed_attempts');
+          localStorage.removeItem('klikpos_mob_lockout_until');
+        } catch {}
         document.getElementById('pin-lock-screen').classList.add('opacity-0', 'pointer-events-none');
         document.getElementById('pin-error-msg').innerText = '';
         currentPinInput = '';
         updatePinDots();
         showToast('Acceso autorizado como Administrador', true);
+        resetInactivityTimer();
       } else {
-        document.getElementById('pin-error-msg').innerText = 'PIN incorrecto. Intenta de nuevo.';
+        adminFailedAttempts++;
+        try {
+          localStorage.setItem('klikpos_mob_failed_attempts', adminFailedAttempts.toString());
+        } catch {}
+
+        let penaltySeconds = 0;
+        if (adminFailedAttempts === 3) penaltySeconds = 30;
+        else if (adminFailedAttempts === 4) penaltySeconds = 60;
+        else if (adminFailedAttempts >= 5) penaltySeconds = 300;
+
         currentPinInput = '';
         updatePinDots();
+
+        if (penaltySeconds > 0) {
+          adminLockoutUntil = Date.now() + penaltySeconds * 1000;
+          try {
+            localStorage.setItem('klikpos_mob_lockout_until', adminLockoutUntil.toString());
+          } catch {}
+          checkLockoutTimer();
+        } else {
+          document.getElementById('pin-error-msg').innerText = `PIN incorrecto (Intento ${adminFailedAttempts}/3).`;
+        }
       }
     }
+
+    // Auto-bloqueo por inactividad (90 segundos de desatención)
+    let inactivityTimer = null;
+    function resetInactivityTimer() {
+      if (inactivityTimer) clearTimeout(inactivityTimer);
+      inactivityTimer = setTimeout(() => {
+        lockAdminScreen();
+      }, 90000);
+    }
+    ['pointerdown', 'touchstart', 'click', 'keydown'].forEach(ev => {
+      window.addEventListener(ev, resetInactivityTimer, { passive: true });
+    });
 
     function lockAdminScreen() {
       currentPinInput = '';
       updatePinDots();
       document.getElementById('pin-error-msg').innerText = '';
       document.getElementById('pin-lock-screen').classList.remove('opacity-0', 'pointer-events-none');
+      checkLockoutTimer();
     }
 
     // =========================================================================
@@ -725,35 +978,6 @@
       if (activeSec) activeSec.classList.remove('hidden');
       if (activeBtn) activeBtn.className = "px-3.5 py-1.5 rounded-xl font-bold text-xs bg-amber-500 text-slate-950 shadow-sm flex items-center gap-1.5 transition-all";
       if (sec === 'sms') renderSmsFeed();
-    }
-
-    // =========================================================================
-    // GESTIÓN DE TASA BCV
-    // =========================================================================
-    function openBcvEditModal() {
-      document.getElementById('bcv-rate-input').value = bcvRate.toFixed(2);
-      document.getElementById('bcv-modal').classList.remove('hidden');
-    }
-    function closeBcvModal() {
-      document.getElementById('bcv-modal').classList.add('hidden');
-    }
-    async function saveBcvRate() {
-      const val = parseFloat(document.getElementById('bcv-rate-input').value);
-      if (val && val > 0) {
-        bcvRate = val;
-        localStorage.setItem('venematic_bcv_rate', bcvRate.toString());
-        document.getElementById('header-bcv-rate').innerText = `Bs. ${bcvRate.toFixed(2)}`;
-        closeBcvModal();
-        showToast(`Tasa BCV actualizada a Bs. ${bcvRate.toFixed(2)}`, true);
-        if (serverUrl && isConnected) {
-          fetch(`${serverUrl}/api/bcv/rate`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ rate: bcvRate })
-          }).catch(() => {});
-        }
-        renderAdminDashboard();
-      }
     }
 
     // =========================================================================
@@ -1419,10 +1643,225 @@
       }
     }
 
-    // Inicialización al cargar
+    // =========================================================================
+    // CONTROL Y SINCRONIZACIÓN DE TASA BCV OFICIAL
+    // =========================================================================
+    function getEffectiveServerUrl() {
+      if (serverUrl && serverUrl.trim().length > 0) return serverUrl.trim().replace(/\/+$/, '');
+      if (typeof window !== 'undefined' && window.location && window.location.origin && window.location.origin.startsWith('http')) {
+        return window.location.origin;
+      }
+      return '';
+    }
+
+    function openBcvEditModal() {
+      const modal = document.getElementById('bcv-modal');
+      const input = document.getElementById('bcv-rate-input');
+      if (input) input.value = bcvRate.toFixed(2);
+      if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeBcvModal() {
+      const modal = document.getElementById('bcv-modal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    async function fetchLiveBcvRateAuto(notify = false) {
+      const btn = document.getElementById('btn-bcv-fetch-live');
+      const originalHtml = btn ? btn.innerHTML : '';
+      if (btn) {
+        btn.innerHTML = '<span>⏳</span> <span>Consultando BCV en vivo...</span>';
+        btn.disabled = true;
+      }
+      if (notify) showToast('Consultando tasa oficial del BCV en vivo...', true);
+
+      let foundRate = null;
+      let foundSource = 'Oficial BCV';
+      const effectiveUrl = getEffectiveServerUrl();
+
+      // 1. Intento primario con Servidor de la Caja POS (hace scraping directo de www.bcv.org.ve sin CORS)
+      if (effectiveUrl) {
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 6000);
+          const res = await fetch(`${effectiveUrl}/api/bcv/rate?refresh=true`, { signal: controller.signal, cache: 'no-store' });
+          clearTimeout(timeoutId);
+          if (res.ok) {
+            const data = await res.json();
+            if (data && typeof data.rate === 'number' && data.rate > 0) {
+              foundRate = data.rate;
+              foundSource = data.source || 'Portal Oficial BCV';
+            }
+          }
+        } catch (e) {
+          console.warn('Fallo consulta a servidor local:', e);
+        }
+      }
+
+      // 2. Intento secundario con DolarApi oficial
+      if (!foundRate) {
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 6000);
+          const res = await fetch('https://ve.dolarapi.com/v1/dolares/oficial', { signal: controller.signal });
+          clearTimeout(timeoutId);
+          if (res.ok) {
+            const data = await res.json();
+            const val = parseFloat(data?.promedio || data?.price);
+            if (!isNaN(val) && val > 0) {
+              foundRate = val;
+              foundSource = 'DolarAPI Venezuela';
+            }
+          }
+        } catch (e) {
+          console.warn('Fallo intento DolarApi:', e);
+        }
+      }
+
+      // 3. Intento terciario con PyDolarVenezuela
+      if (!foundRate) {
+        try {
+          const res2 = await fetch('https://pydolarve.org/api/v1/dollar?page=bcv');
+          if (res2.ok) {
+            const data2 = await res2.json();
+            const val = parseFloat(data2?.monitors?.bcv?.price);
+            if (!isNaN(val) && val > 0) {
+              foundRate = val;
+              foundSource = 'PyDolar Venezuela';
+            }
+          }
+        } catch (e) {}
+      }
+
+      // 4. Intento con API internacional Open Exchange Rates
+      if (!foundRate) {
+        try {
+          const res = await fetch('https://open.er-api.com/v6/latest/USD');
+          if (res.ok) {
+            const data = await res.json();
+            const val = parseFloat(data?.rates?.VES);
+            if (!isNaN(val) && val > 0) {
+              foundRate = val;
+              foundSource = 'Exchange Rates VES';
+            }
+          }
+        } catch (e) {}
+      }
+
+      // Restaurar botón
+      if (btn) {
+        btn.innerHTML = originalHtml || '<span>🔄</span> <span>Consultar BCV Oficial en Vivo</span>';
+        btn.disabled = false;
+      }
+
+      if (foundRate && foundRate > 0) {
+        const rounded = Math.round(foundRate * 100) / 100;
+        const input = document.getElementById('bcv-rate-input');
+        if (input) input.value = rounded.toFixed(2);
+        applyNewBcvRate(rounded, foundSource, false);
+        if (notify) {
+          showToast(`✓ Tasa BCV Oficial obtenida: Bs. ${rounded.toFixed(2)} (${foundSource}). Pulsa 'Actualizar' para propagar.`, true);
+        }
+      } else if (notify) {
+        showToast('No se pudo sincronizar con el BCV. Verifica tu conexión a internet o red local.', false);
+      }
+    }
+
+    async function applyNewBcvRate(rate, source = 'Manual', propagate = true) {
+      bcvRate = Math.round(rate * 100) / 100;
+      localStorage.setItem('venematic_bcv_rate', bcvRate.toString());
+
+      const headerEl = document.getElementById('header-bcv-rate');
+      if (headerEl) headerEl.innerText = `Bs. ${bcvRate.toFixed(2)}`;
+      const inputEl = document.getElementById('bcv-rate-input');
+      if (inputEl) inputEl.value = bcvRate.toFixed(2);
+
+      renderAdminDashboard();
+
+      if (propagate) {
+        const effectiveUrl = getEffectiveServerUrl();
+        if (effectiveUrl) {
+          // Propagar a servidor principal /api/bcv/rate
+          fetch(`${effectiveUrl}/api/bcv/rate`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ rate: bcvRate, isManual: true, source: `Admin Móvil (${source})` })
+          }).catch(() => {});
+
+          // Propagar a /api/bcv-rate
+          fetch(`${effectiveUrl}/api/bcv-rate`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ rate: bcvRate, updatedBy: 'Admin Móvil' })
+          }).catch(() => {});
+
+          // Propagar a inventario y escáneres celulares
+          fetch(`${effectiveUrl}/api/scanner/inventory`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ bcvRate: bcvRate })
+          }).catch(() => {});
+        }
+
+        // Propagar a Firestore si está configurado
+        if (firestoreProjectId && firestoreApiKey) {
+          try {
+            const fsUrl = `https://firestore.googleapis.com/v1/projects/${firestoreProjectId}/databases/(default)/documents/stores/${firestoreStoreId}?key=${firestoreApiKey}&updateMask.fieldPaths=bcvRate`;
+            fetch(fsUrl, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                fields: {
+                  bcvRate: { doubleValue: bcvRate }
+                }
+              })
+            }).catch(() => {});
+          } catch {}
+        }
+      }
+    }
+
+    async function saveBcvRate() {
+      const input = document.getElementById('bcv-rate-input');
+      if (!input) return;
+      const val = parseFloat(input.value.replace(',', '.'));
+      if (isNaN(val) || val <= 0) {
+        showToast('Ingresa un valor válido para la tasa (mayor a 0)', false);
+        return;
+      }
+      await applyNewBcvRate(val, 'Ajuste Manual Admin', true);
+      closeBcvModal();
+      showToast(`✓ Tasa BCV: Bs. ${bcvRate.toFixed(2)} propagada a todo el negocio.`, true);
+    }
+
+    // Inicialización al cargar: Tasa guardada
     const savedRate = localStorage.getItem('venematic_bcv_rate');
-    if (savedRate) bcvRate = parseFloat(savedRate) || 848.55;
-    document.getElementById('header-bcv-rate').innerText = `Bs. ${bcvRate.toFixed(2)}`;
+    if (savedRate) bcvRate = parseFloat(savedRate) || 855.66;
+    const headerBcvEl = document.getElementById('header-bcv-rate');
+    if (headerBcvEl) headerBcvEl.innerText = `Bs. ${bcvRate.toFixed(2)}`;
+
+    // Modo Blanco Preestablecido por defecto
+    const savedMobileTheme = localStorage.getItem('klikpos_admin_theme') || 'light';
+    if (savedMobileTheme === 'light') {
+      document.body.classList.add('light-mode');
+      const toggleBtn = document.getElementById('btn-theme-toggle');
+      if (toggleBtn) toggleBtn.innerText = '🌙';
+    } else {
+      document.body.classList.remove('light-mode');
+      const toggleBtn = document.getElementById('btn-theme-toggle');
+      if (toggleBtn) toggleBtn.innerText = '☀️';
+    }
+
+    function toggleMobileTheme() {
+      const isLight = document.body.classList.toggle('light-mode');
+      localStorage.setItem('klikpos_admin_theme', isLight ? 'light' : 'dark');
+      const toggleBtn = document.getElementById('btn-theme-toggle');
+      if (toggleBtn) toggleBtn.innerText = isLight ? '🌙' : '☀️';
+    }
+
+    // Auto-consultar tasa BCV en vivo al iniciar y cada 15 minutos
+    setTimeout(() => fetchLiveBcvRateAuto(false), 800);
+    setInterval(() => fetchLiveBcvRateAuto(false), 1000 * 60 * 15);
 
     setInterval(updateHeaderClock, 1000);
     updateHeaderClock();

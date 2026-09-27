@@ -27,14 +27,16 @@ export default function RootLayout({
             __html: `
               (function() {
                 try {
-                  var t = localStorage.getItem('venematic_theme') || 'light';
-                  if (t !== 'dark' && t !== 'glass') {
+                  var t = localStorage.getItem('venematic_theme');
+                  // Preestablecido: SIEMPRE entrar en Modo Blanco Profesional por defecto
+                  if (!t || t !== 'dark' && t !== 'glass') {
                     t = 'light';
+                    try { localStorage.setItem('venematic_theme', 'light'); } catch(e) {}
                   }
                   var p = localStorage.getItem('venematic_branding_palette') || 'petrol';
                   var s = t === 'light' ? 'industrial' : (localStorage.getItem('venematic_ui_style') || 'industrial');
-                  var bgPreset = localStorage.getItem('venematic_industrial_bg') || 'white';
-                  var customBg = localStorage.getItem('venematic_custom_bg_color') || '#f8fafc';
+                  var bgPreset = t === 'light' ? (localStorage.getItem('venematic_industrial_bg') || 'white') : (localStorage.getItem('venematic_industrial_bg') || 'white');
+                  var customBg = localStorage.getItem('venematic_custom_bg_color') || '#ffffff';
 
                   var palettes = {
                     petrol: { primary: '#0e4f5a', hover: '#0a3d46', light: '#e6f4f6', border: '#7fc1cc', accent: '#0a3d46', glow: 'rgba(14, 79, 90, 0.35)', glassBorder: 'rgba(127, 193, 204, 0.30)' },

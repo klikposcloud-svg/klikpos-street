@@ -1,0 +1,14 @@
+{
+  "version": "2.4.0",
+  "releaseDate": "2026-09-26",
+  "title": "KlikPOS v2.4.0 - Oficial",
+  "notes": [
+    "Sincronización oficial en la nube con KlikPOS Cloud (Firebase Firestore).",
+    "Auto-sincronización de tasa oficial BCV del día en tiempo real.",
+    "Gestión dinámica de categorías y rubros en inventario.",
+    "Compatibilidad con App Nativa APK SMS Bridge sin Google Play.",
+    "Interfaz con temas y soporte de atajos F-Keys optimizado para cajeros."
+  ],
+  "windowsUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v2.4.0/KlikPOS_Setup_v2.4.0.exe",
+  "mandatory": false
+}

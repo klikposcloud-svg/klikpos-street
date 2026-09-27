@@ -15,6 +15,7 @@ import { STANDARD_RUBROS, StandardRubroId } from '@/lib/utils/business-rubros';
 import { applyBrandingToDOM, applyTheme, getCurrentTheme, ThemeMode } from '@/lib/theme';
 import CloudSyncWidget from '@/components/CloudSyncWidget';
 import QRCode from 'qrcode';
+import { SYSTEM_DEFAULTS } from '@/lib/constants/defaults';
 
 interface NavItem {
   key: string;
@@ -105,8 +106,8 @@ export default function DesktopDashboardLayout({
   const router = useRouter();
   const { user, isAdmin, isCajero, logout, requireAdminAuth, switchToRole } = useAuth();
 
-  const [storeName, setStoreName] = useState('Venemarket Express C.A.');
-  const [bcvRate, setBcvRate] = useState<number>(852.42);
+  const [storeName, setStoreName] = useState(SYSTEM_DEFAULTS.DEFAULT_STORE.name);
+  const [bcvRate, setBcvRate] = useState<number>(SYSTEM_DEFAULTS.DEFAULT_BCV_RATE);
   const [showBcvModal, setShowBcvModal] = useState(false);
   const [tempBcvRate, setTempBcvRate] = useState('');
   const [isSyncingBcv, setIsSyncingBcv] = useState(false);
@@ -127,6 +128,7 @@ export default function DesktopDashboardLayout({
 
   const [currentTheme, setCurrentTheme] = useState<ThemeMode>('light');
   const [currentUIStyle, setCurrentUIStyle] = useState<'industrial' | 'glassmorphism'>('industrial');
+  const [currentPalette, setCurrentPalette] = useState<string>('petrol');
 
   // Modal Global de Vinculación de Celular / Escáner Móvil
   const [showMobileModal, setShowMobileModal] = useState(false);
@@ -142,7 +144,8 @@ export default function DesktopDashboardLayout({
       const res = await fetch('/api/scanner/status?session=caja-1');
       if (res.ok) {
         const d = await res.json();
-        const fullUrl = d.scannerUrl || (typeof window !== 'undefined' ? `${window.location.origin}/scanner?session=caja-1` : '');
+        const base = d.scannerUrl || (typeof window !== 'undefined' ? `${window.location.origin}/scanner?session=caja-1` : '');
+        const fullUrl = base.includes('?') ? `${base}&store=tienda_principal` : `${base}?store=tienda_principal`;
         setMobileScannerUrl(fullUrl);
         setMobileLocalIp(d.localIp || '');
         if (d.phoneConnected) {
@@ -159,7 +162,7 @@ export default function DesktopDashboardLayout({
         }
       }
     } catch {
-      const fallbackUrl = typeof window !== 'undefined' ? `${window.location.origin}/scanner?session=caja-1` : '';
+      const fallbackUrl = typeof window !== 'undefined' ? `${window.location.origin}/scanner?session=caja-1&store=tienda_principal` : '';
       setMobileScannerUrl(fallbackUrl);
       if (fallbackUrl) {
         QRCode.toDataURL(fallbackUrl, { width: 260, margin: 1 }).then(setMobileQrUrl).catch(() => {});
@@ -177,6 +180,7 @@ export default function DesktopDashboardLayout({
       setCurrentUIStyle(s);
       applyTheme(t);
       const palette = localStorage.getItem('venematic_branding_palette') || 'petrol';
+      setCurrentPalette(palette);
       const industrialBg = (localStorage.getItem('venematic_industrial_bg') as any) || 'white';
       const customBg = localStorage.getItem('venematic_custom_bg_color') || '#f8fafc';
       applyBrandingToDOM({
@@ -197,13 +201,20 @@ export default function DesktopDashboardLayout({
         }
       }
     };
+    const handleBrandingChanged = (e: any) => {
+      if (e.detail?.paletteId) {
+        setCurrentPalette(e.detail.paletteId);
+      }
+    };
     const handleOpenScannerModalEvent = () => {
       handleOpenMobileModal();
     };
     window.addEventListener('venematic:theme_changed', handleThemeChanged);
+    window.addEventListener('venematic:branding_changed', handleBrandingChanged);
     window.addEventListener('venematic:open_scanner_modal', handleOpenScannerModalEvent);
     return () => {
       window.removeEventListener('venematic:theme_changed', handleThemeChanged);
+      window.removeEventListener('venematic:branding_changed', handleBrandingChanged);
       window.removeEventListener('venematic:open_scanner_modal', handleOpenScannerModalEvent);
     };
   }, []);
@@ -335,6 +346,19 @@ export default function DesktopDashboardLayout({
           if (d.sale) processIncomingSale(d.sale);
         } catch {}
       });
+
+      eventSource.addEventListener('inventory_updated', (e: any) => {
+        try {
+          const d = JSON.parse(e.data);
+          if (typeof d.bcvRate === 'number' && d.bcvRate > 0) {
+            setBcvRate(d.bcvRate);
+            setTempBcvRate(d.bcvRate.toFixed(2));
+            db.settings.put({ key: 'bcv_rate', value: d.bcvRate });
+            window.dispatchEvent(new CustomEvent('pos:bcv_updated', { detail: d.bcvRate }));
+            window.dispatchEvent(new CustomEvent('venematic:bcv_updated', { detail: d.bcvRate }));
+          }
+        } catch {}
+      });
     }
 
     // Polling de ventas pendientes cada 4s
@@ -364,7 +388,7 @@ export default function DesktopDashboardLayout({
   useEffect(() => {
     const autoSyncBcv = async () => {
       try {
-        const res = await fetch('/api/bcv/rate');
+        const res = await fetch('/api/bcv/rate?refresh=true');
         if (res.ok) {
           const data = await res.json();
           if (data.success && typeof data.rate === 'number' && data.rate > 0) {
@@ -372,6 +396,7 @@ export default function DesktopDashboardLayout({
             setBcvRate(data.rate);
             if (data.source) setBcvRateSource(data.source);
             window.dispatchEvent(new CustomEvent('pos:bcv_updated', { detail: data.rate }));
+            window.dispatchEvent(new CustomEvent('venematic:bcv_updated', { detail: data.rate }));
             // Sincronizar catálogo celular
             fetch('/api/scanner/inventory', {
               method: 'POST',
@@ -530,45 +555,72 @@ export default function DesktopDashboardLayout({
   };
 
   return (
-    <div className="h-screen w-screen flex flex-col bg-[var(--industrial-bg,#ffffff)] text-slate-900 font-sans overflow-hidden select-none">
-      {/* Barra de Estado Superior Profesional */}
-      <header className="h-14 bg-white dark:bg-[#121c29] border-b border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white px-4 flex items-center justify-between shrink-0 z-20 shadow-2xs layer-shell">
+    <div className="h-screen w-screen flex flex-col bg-white dark:bg-[#0B141F] text-slate-900 dark:text-slate-100 font-sans overflow-hidden select-none">
+      {/* Barra de Estado Superior Profesional (30% más alta, imponente y sobria) */}
+      <header className="h-[72px] sm:h-[74px] bg-white dark:bg-[#121c29] border-b-2 border-slate-200/90 dark:border-slate-800 text-slate-900 dark:text-white px-5 sm:px-6 flex items-center justify-between shrink-0 z-20 shadow-sm layer-shell transition-all">
         {/* Identidad del Terminal */}
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="flex items-center gap-2.5 font-black text-sm tracking-tight text-slate-900 dark:text-white shrink-0">
-            <span className="w-7 h-7 rounded-lg bg-[var(--brand-primary)] text-white flex items-center justify-center font-mono text-sm font-black shadow-xs">
-              V
-            </span>
-            <span className="font-black text-sm tracking-tight text-slate-900 dark:text-white">VENEMATIC POS</span>
+        <div className="flex items-center gap-3.5 min-w-0">
+          <div className="flex items-center gap-2 shrink-0">
+            <div
+              className="h-9 sm:h-10 w-28 sm:w-32 cursor-pointer transition-all duration-300 hover:scale-105"
+              style={{
+                maskImage: 'url(/brand/klikpos-logo-white.png)',
+                WebkitMaskImage: 'url(/brand/klikpos-logo-white.png)',
+                maskSize: 'contain',
+                WebkitMaskSize: 'contain',
+                maskRepeat: 'no-repeat',
+                WebkitMaskRepeat: 'no-repeat',
+                maskPosition: 'center left',
+                WebkitMaskPosition: 'center left',
+                backgroundColor: currentTheme === 'dark' ? '#ffffff' : 'var(--brand-primary, #0f172a)',
+              }}
+              onClick={() => router.push('/dashboard/pos')}
+              title="KlikPOS Cloud"
+            />
           </div>
-          <span className="h-5 w-px bg-slate-200 dark:bg-slate-700 shrink-0" />
+          <span className="h-7 w-px bg-slate-200 dark:bg-slate-700 shrink-0" />
           <div className="flex flex-col leading-tight min-w-0">
-            <span className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm truncate" title={storeName}>
+            <span
+              className="font-black text-sm sm:text-base truncate tracking-tight transition-colors duration-300 drop-shadow-xs"
+              style={{
+                color: currentTheme === 'light'
+                  ? 'var(--brand-primary, #0369a1)'
+                  : currentTheme === 'glass'
+                  ? 'var(--brand-border, #38bdf8)'
+                  : 'var(--brand-border, #7dd3fc)',
+                textShadow: currentTheme === 'glass' ? '0 0 10px var(--brand-glow, rgba(56,189,248,0.35))' : undefined,
+              }}
+              title={storeName}
+            >
               {storeName}
             </span>
-            <span className="text-[10.5px] text-slate-500 dark:text-slate-300 font-medium">
-              Supermercado &amp; Minimarket
+            <span className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 font-semibold flex items-center gap-1.5">
+              <span>Terminal de Cobro &amp; Facturación</span>
+              <span
+                className="inline-block w-1.5 h-1.5 rounded-full transition-colors duration-300"
+                style={{ backgroundColor: 'var(--brand-primary, #0284c7)' }}
+              />
             </span>
           </div>
         </div>
 
         {/* Tasa BCV, Estado del Sistema & Atajos */}
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-2.5 shrink-0">
           {/* Indicador Offline Local */}
           <span
-            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-white border border-slate-200 dark:border-slate-700 text-xs font-bold select-none shadow-2xs"
+            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-white border border-slate-200 dark:border-slate-700 text-xs font-bold select-none shadow-2xs"
             title="Terminal operando 100% en modo local offline seguro"
           >
-            <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block animate-pulse shrink-0" />
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block animate-pulse shrink-0" />
             <span>Offline</span>
           </span>
 
           {/* Sincronización en la Nube */}
           <span
-            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-white border border-slate-200 dark:border-slate-700 text-xs font-bold select-none cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors shadow-2xs"
+            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-white border border-slate-200 dark:border-slate-700 text-xs font-bold select-none cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors shadow-2xs"
             title="Sincronización en tiempo real"
           >
-            <Cloud className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" />
+            <Cloud className="w-4 h-4 text-sky-600 dark:text-sky-400" />
             <span>Nube</span>
           </span>
 
@@ -576,19 +628,19 @@ export default function DesktopDashboardLayout({
           <button
             type="button"
             onClick={handleOpenMobileModal}
-            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full border text-xs font-bold select-none cursor-pointer transition-colors shadow-2xs ${
+            className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border text-xs font-bold select-none cursor-pointer transition-colors shadow-2xs ${
               phoneConnected
                 ? 'bg-emerald-50 text-emerald-800 border-emerald-300 hover:bg-emerald-100 font-black dark:bg-emerald-950 dark:text-emerald-300 dark:border-emerald-800'
                 : 'bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-white border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700'
             }`}
             title="Clic para vincular celular como escáner inalámbrico con código QR"
           >
-            <Smartphone className={`w-3.5 h-3.5 ${phoneConnected ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-600 dark:text-slate-200'}`} />
+            <Smartphone className={`w-4 h-4 ${phoneConnected ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-600 dark:text-slate-200'}`} />
             <span>{phoneConnected ? 'Móvil Conectado' : 'Móvil'}</span>
           </button>
 
-          {/* Selector de Tema Inteligente (Claro / Oscuro) con Indicación Visual Inconfundible */}
-          <div className="inline-flex items-center p-0.5 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-2xs select-none">
+          {/* Selector de Tema Inteligente: Modo Blanco, Oscuro, Esmerilado */}
+          <div className="inline-flex items-center p-1 rounded-full bg-slate-100 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700/80 shadow-2xs select-none">
             <button
               type="button"
               onClick={() => {
@@ -623,26 +675,62 @@ export default function DesktopDashboardLayout({
               <Moon className={`w-3.5 h-3.5 ${currentTheme === 'dark' ? 'text-amber-400' : 'text-slate-400'}`} />
               <span>Oscuro</span>
             </button>
+            <button
+              type="button"
+              onClick={() => {
+                setCurrentTheme('glass');
+                applyTheme('glass');
+                db.settings.put({ key: 'app_theme', value: 'glass' }).catch(() => {});
+              }}
+              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer ${
+                currentTheme === 'glass'
+                  ? 'bg-gradient-to-r from-sky-500/25 to-teal-500/25 text-sky-300 shadow-xs border border-sky-400/50 backdrop-blur-md'
+                  : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
+              }`}
+              title="Activar Modo Esmerilado Translúcido (Glassmorphism)"
+            >
+              <Sparkles className={`w-3.5 h-3.5 ${currentTheme === 'glass' ? 'text-sky-300 animate-pulse' : 'text-slate-400'}`} />
+              <span>Esmerilado</span>
+            </button>
           </div>
 
-          {/* Tasa BCV con Botón de Ajuste Rápido */}
+          {/* Tasa BCV con Botón de Ajuste Rápido - Impecable en Modo Blanco, Oscuro y Esmerilado */}
           <button
+            type="button"
             onClick={() => {
               setTempBcvRate(bcvRate.toFixed(2));
               setShowBcvModal(true);
             }}
-            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-xs transition-colors shadow-2xs cursor-pointer"
+            className="inline-flex items-center gap-2 px-3 py-1 rounded-full border-2 text-xs transition-all shadow-xs active:scale-95 cursor-pointer group shrink-0"
+            style={{
+              backgroundColor: currentTheme === 'light' ? '#f8fafc' : '#0f172a',
+              borderColor: currentTheme === 'light' ? '#cbd5e1' : '#334155',
+              color: currentTheme === 'light' ? '#0f172a' : '#ffffff',
+            }}
             title="Clic para cambiar tasa oficial BCV"
           >
-            <span className="text-slate-600 dark:text-slate-300 font-bold text-xs">BCV:</span>
-            <span className="font-mono font-black text-slate-900 dark:text-white tabular-numbers text-xs">
+            <span
+              className="px-2.5 py-0.5 rounded-full text-[10.5px] font-black tracking-wider shadow-2xs transition-colors shrink-0"
+              style={{
+                backgroundColor: 'var(--brand-primary, #0369a1)',
+                color: '#ffffff',
+              }}
+            >
+              BCV
+            </span>
+            <span
+              className="font-mono font-black tabular-numbers text-xs sm:text-[13.5px] tracking-wide"
+              style={{
+                color: currentTheme === 'light' ? '#020617' : '#ffffff',
+              }}
+            >
               Bs. {bcvRate.toFixed(2)}
             </span>
           </button>
 
           {/* Reloj Digital del Sistema */}
           <div
-            className="hidden md:inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-white border border-slate-200 dark:border-slate-700 text-xs font-bold font-mono select-none shadow-2xs shrink-0"
+            className="hidden md:inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-white border border-slate-200 dark:border-slate-700 text-xs font-bold font-mono select-none shadow-2xs shrink-0"
             title="Fecha y hora oficial del sistema"
           >
             <span>{clockDate}</span>
@@ -752,7 +840,7 @@ export default function DesktopDashboardLayout({
         </aside>
 
         {/* Área de Trabajo */}
-        <main className="flex-1 bg-[var(--industrial-bg,#ffffff)] overflow-hidden flex flex-col">
+        <main className="flex-1 bg-white dark:bg-[#0B141F] overflow-hidden flex flex-col">
           {children}
         </main>
       </div>
@@ -904,6 +992,27 @@ export default function DesktopDashboardLayout({
                     <span className="text-xs font-semibold">Generando código QR...</span>
                   </div>
                 )}
+              </div>
+
+              {/* Código de Tienda y Estado */}
+              <div className="w-full flex items-center justify-between p-2.5 bg-amber-500/10 border border-amber-500/30 rounded-xl text-left">
+                <div>
+                  <span className="text-[10px] uppercase font-bold text-amber-800 dark:text-amber-300 block leading-tight">
+                    Código de Tienda (Store ID):
+                  </span>
+                  <span className="font-mono font-black text-sm text-slate-900 dark:text-white">
+                    tienda_principal
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigator.clipboard.writeText('tienda_principal');
+                  }}
+                  className="px-2.5 py-1 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs rounded-lg cursor-pointer transition-all"
+                >
+                  Copiar Código
+                </button>
               </div>
 
               {/* Estado de Conexión del Teléfono */}

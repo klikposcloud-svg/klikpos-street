@@ -2,14 +2,13 @@
              INTEGRIDAD Y SUMAS DE VERIFICACION CRIPTOGRAFICA (HASHES)
 ================================================================================
 
-Paquete: Venematic-POS-Setup-v2.0.0.exe
-Version: 2.0.0 (Actualizada con Cloud Sync, Calculadora de Ganancia, Balanza y Moneda Bs)
+Paquetes de Instalacion Oficiales v2.0.0 con Nuevo Icono Klik-POS:
 Fecha de emision: 26 de September de 2026
 
-Algoritmo SHA256:
-C78D943DAE7EF5FB9D853B16020345244488AC80CC261ADEAB5DBFE615DF2AD8
+Klikpos-Setup-v2.0.0.exe:
+SHA256: 80F2238756A844C8524801C8B3B614A7BCB8D660FDB4FD9AE8024A714F5B95AE
 
-Para verificar la integridad del instalador en cualquier computadora:
-PowerShell:
-  Get-FileHash Venematic-POS-Setup-v2.0.0.exe -Algorithm SHA256
+Venematic-POS-Setup-v2.0.0.exe:
+SHA256: C8F6F9959888DA99513F6D44A4A372927A332DB014049AF7B686183706CAEAE3
+
 ================================================================================

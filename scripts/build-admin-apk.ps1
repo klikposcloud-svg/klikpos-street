@@ -42,8 +42,13 @@ try {
 "@
     Set-Content -Path $stringsXml -Value $adminStrings -Encoding UTF8
 
-    # 3. Inyectar admin-index.html como index.html de la APK
-    Copy-Item $adminIndex $publicIndex -Force
+    # 3. Inyectar admin-mobile.html y assets de marca como index.html de la APK
+    Copy-Item "$root\public\admin-mobile.html" $adminIndex -Force
+    Copy-Item "$root\public\admin-mobile.html" $publicIndex -Force
+    if (Test-Path "$root\public\brand") {
+        New-Item -ItemType Directory -Force -Path "$androidDir\app\src\main\assets\public\brand" | Out-Null
+        Copy-Item -Recurse -Force "$root\public\brand\*" "$androidDir\app\src\main\assets\public\brand\"
+    }
 
     Write-Host ">>> [3/5] Ejecutando compilación Gradle (assembleDebug)..." -ForegroundColor Yellow
     Set-Location $androidDir
@@ -52,10 +57,12 @@ try {
         throw "Error en Gradle assembleDebug"
     }
 
-    Write-Host ">>> [4/5] Empaquetando VenematicPOS-Admin-Mobile.apk en dist-apk..." -ForegroundColor Green
+    Write-Host ">>> [4/5] Empaquetando VenematicPOS-Admin-Mobile.apk y Klikpos-Admin-Mobile.apk en dist-apk..." -ForegroundColor Green
     $outputApk = "$androidDir\app\build\outputs\apk\debug\app-debug.apk"
     $targetApk = "$distDir\VenematicPOS-Admin-Mobile.apk"
+    $targetKlikposApk = "$distDir\Klikpos-Admin-Mobile.apk"
     Copy-Item $outputApk $targetApk -Force
+    Copy-Item $outputApk $targetKlikposApk -Force
 
     $hashObj = Get-FileHash -Path $targetApk -Algorithm SHA256
     $posApk = "$distDir\VenematicPOS-Caja-Mobile.apk"

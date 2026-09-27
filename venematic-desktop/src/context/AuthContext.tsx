@@ -1,6 +1,16 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import {
+  checkLockout,
+  recordAuthFailure,
+  recordAuthSuccess,
+  verifyCredential,
+  hashCredential,
+  isDuressPin,
+  triggerDuressSilentAlarm,
+  logSecurityEvent,
+} from '@/lib/security/enterprise-security';
 
 export type UserRole = 'admin' | 'cajero';
 
@@ -104,7 +114,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const isPassValidForAdmin = (p: string) => {
     const clean = (p || '').trim();
     if (!clean) return false;
-    return clean === adminPassword;
+    const check = verifyCredential(clean, adminPassword, 'ADMIN_SALT');
+    if (check.isValid && check.needsRehash && check.newHash) {
+      setAdminPassword(check.newHash);
+      try {
+        localStorage.setItem(ADMIN_PASS_STORAGE_KEY, check.newHash);
+      } catch {}
+    }
+    return check.isValid;
   };
 
   const login = (username: string, pass: string) => {
@@ -118,9 +135,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       };
     }
 
+    // 0. Blindaje Anti-Fuerza Bruta & Lockout
+    const lockout = checkLockout(cleanUser || 'login_portal');
+    if (lockout.isLocked) {
+      return {
+        success: false,
+        error: lockout.message || `Terminal bloqueado temporalmente. Espera ${lockout.remainingSeconds}s.`,
+      };
+    }
+
+    // 0.1 Detección de PIN de Coacción / Emergencia
+    if (isDuressPin(cleanPass)) {
+      triggerDuressSilentAlarm(cleanUser, { context: 'PORTAL_LOGIN' });
+      const authData: AuthUser = {
+        username: cleanUser || 'cajero',
+        name: 'Cajero en Servicio',
+        role: 'cajero',
+      };
+      setUser(authData);
+      try {
+        localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(authData));
+      } catch {}
+      return { success: true };
+    }
+
     // 1. Administrador General
     if (cleanUser === 'admin' || cleanUser === 'administrador') {
       if (isPassValidForAdmin(cleanPass)) {
+        recordAuthSuccess(cleanUser);
         const authData: AuthUser = {
           username: 'admin',
           name: 'Administrador General',
@@ -132,9 +174,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         } catch {}
         return { success: true };
       }
+      const fail = recordAuthFailure(cleanUser);
       return {
         success: false,
-        error: 'Contraseña de Administrador incorrecta.',
+        error: fail.message || 'Contraseña de Administrador incorrecta.',
       };
     }
 
@@ -144,7 +187,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     );
 
     if (matched) {
-      if (matched.pin === cleanPass) {
+      const check = verifyCredential(cleanPass, matched.pin, `CASHIER_${matched.id}`);
+      if (check.isValid) {
+        if (check.needsRehash && check.newHash) {
+          updateCashier(matched.id, { pin: check.newHash });
+        }
+        recordAuthSuccess(cleanUser);
         const authData: AuthUser = {
           username: matched.username,
           name: matched.name,
@@ -156,16 +204,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         } catch {}
         return { success: true };
       }
+      const fail = recordAuthFailure(cleanUser);
       return {
         success: false,
-        error: `PIN incorrecto para el cajero "${matched.name}".`,
+        error: fail.message || `PIN incorrecto para el cajero "${matched.name}".`,
       };
     }
 
     // Si ingresó como 'caja' genérico, validar contra cualquiera de los cajeros registrados
     if (cleanUser === 'caja' || cleanUser === 'cajero') {
-      const pinMatch = cashiers.find((c) => c.pin === cleanPass);
+      const pinMatch = cashiers.find((c) => {
+        const check = verifyCredential(cleanPass, c.pin, `CASHIER_${c.id}`);
+        return check.isValid;
+      });
       if (pinMatch) {
+        recordAuthSuccess('caja');
         const authData: AuthUser = {
           username: pinMatch.username,
           name: pinMatch.name,
@@ -177,15 +230,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         } catch {}
         return { success: true };
       }
+      const fail = recordAuthFailure('caja');
       return {
         success: false,
-        error: 'PIN de cajero incorrecto.',
+        error: fail.message || 'PIN de cajero incorrecto.',
       };
     }
 
+    const fail = recordAuthFailure(cleanUser || 'unknown');
     return {
       success: false,
-      error: 'Usuario o credenciales no encontradas.',
+      error: fail.message || 'Usuario o credenciales no encontradas.',
     };
   };
 
@@ -237,13 +292,41 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const handleAdminAuthConfirm = (pass: string): boolean => {
-    if (isPassValidForAdmin(pass)) {
+    const cleanPass = (pass || '').trim();
+    const lockout = checkLockout('supervisor_auth');
+    if (lockout.isLocked) {
+      alert(lockout.message || 'Autorización bloqueada por seguridad.');
+      return false;
+    }
+
+    if (isDuressPin(cleanPass)) {
+      triggerDuressSilentAlarm('supervisor', { context: 'SUPERVISOR_AUTH_DURESS' });
       if (adminAuthResolver) {
         adminAuthResolver(true);
         setAdminAuthResolver(null);
       }
       setShowAdminAuthModal(false);
       return true;
+    }
+
+    if (isPassValidForAdmin(cleanPass)) {
+      recordAuthSuccess('supervisor_auth');
+      logSecurityEvent({
+        eventType: 'AUTH_SUCCESS',
+        user: 'supervisor',
+        details: { action: 'Autorización de supervisor aprobada' },
+      });
+      if (adminAuthResolver) {
+        adminAuthResolver(true);
+        setAdminAuthResolver(null);
+      }
+      setShowAdminAuthModal(false);
+      return true;
+    }
+
+    const fail = recordAuthFailure('supervisor_auth');
+    if (fail.isLocked) {
+      alert(fail.message);
     }
     return false;
   };

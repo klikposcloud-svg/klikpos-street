@@ -76,14 +76,11 @@ export default function LoginModal({ isOpen, onSuccess, onClose }: LoginModalPro
         className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200"
       >
         {/* Cabecera con Marca */}
-        <div className="bg-gradient-to-r from-sky-900 via-indigo-950 to-slate-950 p-6 text-center relative border-b border-indigo-900/50">
-          <div className="w-13 h-13 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center mx-auto mb-3 shadow-inner">
-            <Lock className="w-6 h-6 text-white" />
+        <div className="bg-gradient-to-r from-sky-950 via-slate-900 to-indigo-950 p-6 text-center relative border-b border-indigo-900/50">
+          <div className="flex items-center justify-center mb-2">
+            <img src="/brand/klikpos-logo-white.png" alt="KLIK POS" className="h-10 w-auto object-contain drop-shadow-md" />
           </div>
-          <h2 className="text-xl font-black tracking-tight text-white">
-            Acceso a Venematic POS
-          </h2>
-          <p className="text-xs font-medium text-sky-200/90 mt-1">
+          <p className="text-xs font-semibold text-slate-300 mt-1">
             Identifíquese con sus credenciales de seguridad para operar
           </p>
         </div>

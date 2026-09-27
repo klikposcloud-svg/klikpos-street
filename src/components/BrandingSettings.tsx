@@ -226,6 +226,7 @@ export default function BrandingSettings() {
       localStorage.setItem('venematic_ui_style', config.uiStyle);
       if (config.industrialBg) localStorage.setItem('venematic_industrial_bg', config.industrialBg);
       if (config.customBgColor) localStorage.setItem('venematic_custom_bg_color', config.customBgColor);
+      window.dispatchEvent(new CustomEvent('venematic:branding_changed', { detail: config }));
       setSavedFeedback(true);
       setTimeout(() => setSavedFeedback(false), 2000);
       // Guardar en Dexie de forma asíncrona desacoplada
@@ -470,118 +471,185 @@ export default function BrandingSettings() {
       </div>
 
       {/* ========================================================================= */}
-      {/* 1. SELECCIÓN DE MODO DE INTERFAZ: MODO PROFESIONAL BLANCO VS GLASSMORPHISM */}
+      {/* 1. SELECCIÓN DE ESTILO PRINCIPAL: MODO BLANCO, OSCURO O ESMERILADO        */}
       {/* ========================================================================= */}
-      <div className="space-y-2.5">
+      <div className="space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
-            Modo de Apariencia de la Interfaz
-          </label>
-          <div className="flex items-center gap-2">
+          <div>
+            <label className="block text-xs font-black text-slate-800 dark:text-slate-200 uppercase tracking-wider">
+              Estilo Base de la Interfaz (3 Modos Disponibles)
+            </label>
+            <p className="text-[11px] text-slate-500">
+              Elige el estilo estructural. Puedes combinar cualquiera de estos 3 estilos con la paleta de colores individual que prefieras.
+            </p>
+          </div>
+          <div className="inline-flex items-center p-0.5 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-2xs select-none">
             <button
               type="button"
-              onClick={handleSelectIndustrialWhite}
-              className={`px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all ${
-                selectedUIStyle === 'industrial' && selectedIndustrialBg === 'white'
-                  ? 'bg-slate-900 text-white shadow-xs'
-                  : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300'
+              onClick={() => {
+                applyTheme('light');
+                setSelectedUIStyle('industrial');
+              }}
+              className={`px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer ${
+                getCurrentTheme() === 'light'
+                  ? 'bg-white text-slate-900 shadow-xs border border-slate-200'
+                  : 'text-slate-500 hover:text-slate-800 dark:text-slate-400'
               }`}
             >
-              <span>☀️ Modo Profesional Blanco</span>
-              {selectedUIStyle === 'industrial' && selectedIndustrialBg === 'white' && <span>✓</span>}
+              ☀️ Blanco
             </button>
-
             <button
               type="button"
-              onClick={() => handleUIStyleSelect('glassmorphism')}
-              className={`px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all ${
-                selectedUIStyle === 'glassmorphism'
-                  ? 'bg-sky-600 text-white shadow-xs'
-                  : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300'
+              onClick={() => {
+                applyTheme('dark');
+                setSelectedUIStyle('dark' as any);
+              }}
+              className={`px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer ${
+                getCurrentTheme() === 'dark'
+                  ? 'bg-[#121c29] text-amber-300 shadow-xs border border-slate-700'
+                  : 'text-slate-500 hover:text-slate-800 dark:text-slate-400'
               }`}
             >
-              <Sparkles className="w-3 h-3" />
-              <span>Modo Glassmorphism</span>
-              {selectedUIStyle === 'glassmorphism' && <span>✓</span>}
+              🌙 Oscuro
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                applyTheme('glass');
+                setSelectedUIStyle('glassmorphism');
+              }}
+              className={`px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer ${
+                getCurrentTheme() === 'glass'
+                  ? 'bg-gradient-to-r from-sky-500/25 to-teal-500/25 text-sky-300 shadow-xs border border-sky-400/50 backdrop-blur-md'
+                  : 'text-slate-500 hover:text-slate-800 dark:text-slate-400'
+              }`}
+            >
+              ✨ Esmerilado
             </button>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {/* MODO PROFESIONAL BLANCO (INDUSTRIAL) */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          {/* 1. MODO PROFESIONAL BLANCO */}
           <div
-            onClick={handleSelectIndustrialWhite}
-            className={`p-4 rounded-xl border-2 cursor-pointer transition-all flex flex-col justify-between select-none ${
-              selectedUIStyle === 'industrial'
-                ? 'border-sky-600 bg-white shadow-md ring-1 ring-sky-500'
+            onClick={() => {
+              applyTheme('light');
+              setSelectedUIStyle('industrial');
+            }}
+            className={`p-4 rounded-2xl border-2 cursor-pointer transition-all flex flex-col justify-between select-none ${
+              getCurrentTheme() === 'light'
+                ? 'border-sky-600 bg-white shadow-md ring-2 ring-sky-500/20'
                 : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50'
             }`}
           >
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-slate-900 text-white flex items-center justify-center">
+                <div className="w-8 h-8 rounded-xl bg-slate-900 text-white flex items-center justify-center shadow-xs">
                   <ShieldCheck className="w-4 h-4" />
                 </div>
                 <div>
                   <h4 className="text-xs font-bold text-slate-900">
-                    Modo Profesional Blanco
+                    Modo Blanco Profesional
                   </h4>
-                  <span className="text-[10px] text-emerald-700 font-bold">Fondo Blanco Puro • Máximo Contraste (#ffffff)</span>
+                  <span className="text-[10px] text-emerald-700 font-bold">Fondo Blanco Puro • Industrial (#ffffff)</span>
                 </div>
               </div>
-              {selectedUIStyle === 'industrial' && (
+              {getCurrentTheme() === 'light' && (
                 <div className="w-5 h-5 rounded-full bg-slate-900 text-white flex items-center justify-center">
                   <Check className="w-3 h-3 stroke-[3]" />
                 </div>
               )}
             </div>
 
-            <p className="text-[11px] text-slate-600 mt-2 leading-relaxed">
+            <p className="text-[11px] text-slate-600 mt-2.5 leading-relaxed">
               Superficie 100% blanca y limpia, bordes nítidos de 1px, máximo contraste con tipografía oscura profunda y respuesta táctil instantánea. Diseñado para evitar fatiga visual en jornadas largas de caja.
             </p>
 
-            <div className="mt-3 pt-2 border-t border-slate-200 flex items-center gap-1.5 text-[10px] font-bold">
-              <span className="px-2 py-0.5 rounded bg-emerald-50 border border-emerald-300 text-emerald-800">Blanco Puro Sólido</span>
+            <div className="mt-3 pt-2.5 border-t border-slate-200 flex items-center gap-1.5 text-[10px] font-bold flex-wrap">
+              <span className="px-2 py-0.5 rounded bg-emerald-50 border border-emerald-300 text-emerald-800">Blanco Puro</span>
               <span className="px-2 py-0.5 rounded bg-slate-100 border border-slate-300 text-slate-700">0% Distracciones</span>
-              <span className="px-2 py-0.5 rounded bg-slate-100 border border-slate-300 text-slate-700">Alta Densidad POS</span>
             </div>
           </div>
 
-          {/* MODO GLASSMORPHISM MODERNO */}
+          {/* 2. MODO OSCURO CLÁSICO */}
           <div
-            onClick={() => handleUIStyleSelect('glassmorphism')}
-            className={`p-4 rounded-xl border-2 cursor-pointer transition-all flex flex-col justify-between select-none ${
-              selectedUIStyle === 'glassmorphism'
-                ? 'border-sky-600 bg-sky-50/70 shadow-sm'
+            onClick={() => {
+              applyTheme('dark');
+              setSelectedUIStyle('dark' as any);
+            }}
+            className={`p-4 rounded-2xl border-2 cursor-pointer transition-all flex flex-col justify-between select-none ${
+              getCurrentTheme() === 'dark'
+                ? 'border-indigo-500 bg-slate-900 text-white shadow-md ring-2 ring-indigo-500/20'
                 : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50'
             }`}
           >
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-sky-600 text-white flex items-center justify-center shadow-xs">
-                  <Sparkles className="w-4 h-4" />
+                <div className="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-xs">
+                  🌙
                 </div>
                 <div>
-                  <h4 className="text-xs font-bold text-slate-900">
-                    Modo Glassmorphism Moderno
+                  <h4 className={`text-xs font-bold ${getCurrentTheme() === 'dark' ? 'text-white' : 'text-slate-900'}`}>
+                    Modo Oscuro Clásico
                   </h4>
-                  <span className="text-[10px] text-sky-700 font-semibold">Vidrio Esmerilado • Dark Navy Futurista</span>
+                  <span className="text-[10px] text-indigo-400 font-bold">Fondo Dark Slate (#121c29)</span>
                 </div>
               </div>
-              {selectedUIStyle === 'glassmorphism' && (
-                <div className="w-5 h-5 rounded-full bg-sky-600 text-white flex items-center justify-center shadow-xs">
+              {getCurrentTheme() === 'dark' && (
+                <div className="w-5 h-5 rounded-full bg-indigo-500 text-white flex items-center justify-center">
                   <Check className="w-3 h-3 stroke-[3]" />
                 </div>
               )}
             </div>
 
-            <p className="text-[11px] text-slate-600 mt-2 leading-relaxed">
-              Superficie oscura negro-azulada con paneles translúcidos de cristal esmerilado (frosted glass), bordes luminosos y alto contraste para pantallas táctiles modernas.
+            <p className={`text-[11px] mt-2.5 leading-relaxed ${getCurrentTheme() === 'dark' ? 'text-slate-300' : 'text-slate-600'}`}>
+              Lienzo oscuro profundo para ambientes nocturnos o discotecas, con tarjetas de productos en blanco de alto contraste para máxima visibilidad de fotos y precios.
             </p>
 
-            <div className="mt-3 pt-2 border-t border-slate-200 flex items-center gap-1.5 text-[10px] font-bold">
-              <span className="px-2 py-0.5 rounded bg-sky-100 border border-sky-300 text-sky-800">Frosted Glass</span>
-              <span className="px-2 py-0.5 rounded bg-sky-100 border border-sky-300 text-sky-800">Elegante</span>
+            <div className="mt-3 pt-2.5 border-t border-slate-200/40 flex items-center gap-1.5 text-[10px] font-bold flex-wrap">
+              <span className="px-2 py-0.5 rounded bg-indigo-950 border border-indigo-700 text-indigo-300">Descanso Visual</span>
+              <span className="px-2 py-0.5 rounded bg-slate-800 border border-slate-700 text-slate-300">Alto Contraste</span>
+            </div>
+          </div>
+
+          {/* 3. MODO ESMERILADO (GLASSMORPHISM) */}
+          <div
+            onClick={() => {
+              applyTheme('glass');
+              setSelectedUIStyle('glassmorphism');
+            }}
+            className={`p-4 rounded-2xl border-2 cursor-pointer transition-all flex flex-col justify-between select-none ${
+              getCurrentTheme() === 'glass'
+                ? 'border-sky-400 bg-slate-900/90 text-white shadow-xl ring-2 ring-sky-400/30'
+                : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50'
+            }`}
+          >
+            <div className="flex items-start justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-sky-500 to-teal-400 text-white flex items-center justify-center shadow-xs">
+                  <Sparkles className="w-4 h-4 text-white" />
+                </div>
+                <div>
+                  <h4 className={`text-xs font-bold ${getCurrentTheme() === 'glass' ? 'text-white' : 'text-slate-900'}`}>
+                    Modo Esmerilado Translúcido
+                  </h4>
+                  <span className="text-[10px] text-sky-400 font-semibold">Frosted Glass • Mac & Linear Style</span>
+                </div>
+              </div>
+              {getCurrentTheme() === 'glass' && (
+                <div className="w-5 h-5 rounded-full bg-sky-500 text-white flex items-center justify-center">
+                  <Check className="w-3 h-3 stroke-[3]" />
+                </div>
+              )}
+            </div>
+
+            <p className={`text-[11px] mt-2.5 leading-relaxed ${getCurrentTheme() === 'glass' ? 'text-slate-300' : 'text-slate-600'}`}>
+              Efecto esmerilado translúcido con desenfoque de fondo (backdrop-blur), filas flotantes tipo cápsula, destellos de cristal reflectivo y ambient lighting dinámico.
+            </p>
+
+            <div className="mt-3 pt-2.5 border-t border-slate-200/40 flex items-center gap-1.5 text-[10px] font-bold flex-wrap">
+              <span className="px-2 py-0.5 rounded bg-sky-950 border border-sky-800 text-sky-300">Frosted Glass</span>
+              <span className="px-2 py-0.5 rounded bg-teal-950 border border-teal-800 text-teal-300">Filas Cápsula</span>
             </div>
           </div>
         </div>

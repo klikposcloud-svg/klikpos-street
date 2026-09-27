@@ -45,13 +45,10 @@ if (-not (Test-Path $outputExeDesktop)) {
 }
 
 # 4. Copiar instalador a dist-installer de raíz
-Write-Host "[4/5] Sincronizando instaladores y firmando digitalmente..." -ForegroundColor Yellow
+# Sincronizar copias y desbloquear restricciones web
 Copy-Item $outputExeDesktop $outputExeRoot -Force
-
-# Ejecutar script de firma digital Authenticode
-& "$PSScriptRoot\sign-installer.ps1"
-# También firmar la copia de venematic-desktop
-Set-AuthenticodeSignature -FilePath $outputExeDesktop -Certificate (Get-ChildItem Cert:\CurrentUser\My -CodeSigningCert | Where-Object { $_.Subject -match "Venematic" } | Select-Object -First 1) -ErrorAction SilentlyContinue
+Unblock-File -Path $outputExeDesktop -ErrorAction SilentlyContinue
+Unblock-File -Path $outputExeRoot -ErrorAction SilentlyContinue
 
 # 5. Calcular Hash SHA256 y actualizar archivos de verificación
 Write-Host "[5/5] Calculando SHA-256 y actualizando hashes..." -ForegroundColor Yellow

@@ -11,31 +11,25 @@ export async function OPTIONS() {
   return new Response(null, { status: 204, headers: CORS_HEADERS });
 }
 
-import { INITIAL_PRODUCTS } from '@/lib/seed-data';
-
 // Caché en memoria de productos compartidos por la caja para consulta rápida del celular
-let cachedProducts: any[] = INITIAL_PRODUCTS.map((p, idx) => ({
-  id: idx + 1,
-  barcode: p.barcode,
-  name: p.name,
-  category: p.category,
-  priceUSD: p.priceUSD,
-  stock: p.stock,
-  image: p.image,
-  isWeighable: p.unit === 'kg' || p.category === 'Charcutería' || p.category === 'Carnes y Pollo' || p.barcode.startsWith('20')
-}));
-let lastCacheUpdate = Date.now();
+let cachedProducts: any[] = [];
+let lastCacheUpdate = 0;
 let cachedBcvRate = 848.55;
 
 export async function GET(req: NextRequest) {
   try {
+    // Si la caché está vacía, notificar al desktop que envíe el inventario
+    if (cachedProducts.length === 0) {
+      scannerEmitter.emit('request_inventory', { timestamp: Date.now() });
+    }
+
     return NextResponse.json({
       success: true,
       products: cachedProducts,
       bcvRate: cachedBcvRate,
       count: cachedProducts.length,
       updatedAt: lastCacheUpdate,
-      needsSync: false,
+      needsSync: cachedProducts.length === 0,
     }, { headers: CORS_HEADERS });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500, headers: CORS_HEADERS });

@@ -23,6 +23,7 @@ import {
   Building,
   Calendar,
 } from 'lucide-react';
+import LegalViewerModal from '@/components/LegalViewerModal';
 
 interface LicenseModalProps {
   isOpen: boolean;
@@ -38,6 +39,11 @@ export default function LicenseActivationModal({ isOpen, onClose, onSuccess }: L
   const [statusInfo, setStatusInfo] = useState<ActivatedLicenseInfo | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+
+  // Estados de Cumplimiento Legal (EULA, T&C, Privacidad)
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [showLegalModal, setShowLegalModal] = useState(false);
+  const [legalDocToView, setLegalDocToView] = useState<'eula' | 'terms' | 'privacy'>('eula');
 
   // Estados del Keygen Oculto (Herramienta del Desarrollador)
   const [developerUnlocked, setDeveloperUnlocked] = useState(false);
@@ -71,6 +77,11 @@ export default function LicenseActivationModal({ isOpen, onClose, onSuccess }: L
       setStatusInfo(current);
       if (current.payload?.rif) setRif(current.payload.rif);
       if (current.licenseKey) setProductKey(current.licenseKey);
+
+      const accepted = localStorage.getItem('venematic_terms_accepted_at');
+      if (accepted || current.status === 'active') {
+        setTermsAccepted(true);
+      }
     }
   }, [isOpen]);
 
@@ -104,6 +115,11 @@ export default function LicenseActivationModal({ isOpen, onClose, onSuccess }: L
     setErrorMsg(null);
     setSuccessMsg(null);
 
+    if (!termsAccepted) {
+      setErrorMsg('Debe leer y aceptar el Contrato de Licencia (EULA) y los Términos de Servicio.');
+      return;
+    }
+
     if (!rif.trim()) {
       setErrorMsg('Debe indicar el RIF o Cédula del titular del negocio.');
       return;
@@ -120,6 +136,12 @@ export default function LicenseActivationModal({ isOpen, onClose, onSuccess }: L
       setErrorMsg(verification.error || 'La clave no es válida para este computador.');
       return;
     }
+
+    // Registrar aceptación legal vinculante
+    try {
+      localStorage.setItem('venematic_terms_accepted_at', new Date().toISOString());
+      localStorage.setItem('venematic_terms_version', '2026.1');
+    } catch {}
 
     // Guardar la activación
     saveActivatedLicense(
@@ -323,10 +345,69 @@ export default function LicenseActivationModal({ isOpen, onClose, onSuccess }: L
                   </div>
                 )}
 
+                {/* Aceptación Obligatoria del Marco Legal (EULA, T&C, Privacidad) */}
+                <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+                  <label className="flex items-start gap-2.5 cursor-pointer select-none text-xs text-slate-700">
+                    <input
+                      type="checkbox"
+                      checked={termsAccepted}
+                      onChange={(e) => setTermsAccepted(e.target.checked)}
+                      className="mt-0.5 w-4 h-4 rounded text-indigo-600 focus:ring-0 cursor-pointer shrink-0"
+                    />
+                    <span className="leading-relaxed">
+                      He leído y acepto el{' '}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setLegalDocToView('eula');
+                          setShowLegalModal(true);
+                        }}
+                        className="text-indigo-600 font-bold underline hover:text-indigo-800 cursor-pointer"
+                      >
+                        Contrato de Licencia (EULA)
+                      </button>
+                      , los{' '}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setLegalDocToView('terms');
+                          setShowLegalModal(true);
+                        }}
+                        className="text-indigo-600 font-bold underline hover:text-indigo-800 cursor-pointer"
+                      >
+                        Términos & Descargo SENIAT
+                      </button>{' '}
+                      y la{' '}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setLegalDocToView('privacy');
+                          setShowLegalModal(true);
+                        }}
+                        className="text-indigo-600 font-bold underline hover:text-indigo-800 cursor-pointer"
+                      >
+                        Privacidad On-Premise
+                      </button>
+                      .
+                    </span>
+                  </label>
+                  {!termsAccepted && (
+                    <p className="text-[10px] text-amber-700 font-medium pl-6">
+                      * Es indispensable aceptar las condiciones de uso y propiedad intelectual para registrar la licencia.
+                    </p>
+                  )}
+                </div>
+
                 <div className="pt-2 flex justify-end gap-2">
                   <button
                     type="submit"
-                    className="w-full sm:w-auto px-6 py-2.5 bg-indigo-700 hover:bg-indigo-800 text-white font-extrabold text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-2"
+                    disabled={!termsAccepted}
+                    className={`w-full sm:w-auto px-6 py-2.5 font-extrabold text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-2 ${
+                      termsAccepted
+                        ? 'bg-indigo-700 hover:bg-indigo-800 text-white cursor-pointer active:scale-95'
+                        : 'bg-slate-300 text-slate-500 cursor-not-allowed'
+                    }`}
+                    title={!termsAccepted ? 'Debe aceptar el marco legal para activar' : 'Activar licencia'}
                   >
                     <ShieldCheck className="w-4 h-4" />
                     <span>Activar Terminal Oficial</span>
@@ -448,6 +529,14 @@ export default function LicenseActivationModal({ isOpen, onClose, onSuccess }: L
           )}
         </div>
       </div>
+
+      {/* Modal Visor de Acuerdos Legales */}
+      <LegalViewerModal
+        isOpen={showLegalModal}
+        onClose={() => setShowLegalModal(false)}
+        defaultDoc={legalDocToView}
+        onAccept={() => setTermsAccepted(true)}
+      />
     </div>
   );
 }

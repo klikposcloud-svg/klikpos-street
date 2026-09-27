@@ -31,12 +31,12 @@ export function getActiveFirebaseConfig(): FirebaseClientConfig {
   }
 
   return {
-    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || 'mock-api-key',
-    authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || 'venematic.firebaseapp.com',
-    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'venematic',
-    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || 'venematic.appspot.com',
-    messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || '000000000000',
-    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || '1:000000000000:web:000000000000',
+    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || 'AIzaSyDT26ff7t-W5WZKZktPWLZ_D79QHGh6sEg',
+    authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || 'klikpos-cloud.firebaseapp.com',
+    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'klikpos-cloud',
+    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || 'klikpos-cloud.firebasestorage.app',
+    messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || '147933668842',
+    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || '1:147933668842:web:cf3bd154b7164b7ce07e93',
   };
 }
 

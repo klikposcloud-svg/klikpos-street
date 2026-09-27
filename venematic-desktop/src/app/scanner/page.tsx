@@ -100,6 +100,14 @@ export default function MobileScannerPage() {
   const [isSyncingSales, setIsSyncingSales] = useState(false);
   const [copiedAmountToast, setCopiedAmountToast] = useState(false);
 
+  // Funciones Especiales para Vendedores de Calle / Ambulantes
+  const [detectedBankSms, setDetectedBankSms] = useState<{ amount: number; ref: string; sender: string; time: string; fullText?: string } | null>(null);
+  const [showQuickSaleModal, setShowQuickSaleModal] = useState(false);
+  const [quickSaleAmount, setQuickSaleAmount] = useState('');
+  const [quickSaleCurrency, setQuickSaleCurrency] = useState<'USD' | 'VES'>('USD');
+  const [quickSaleConcept, setQuickSaleConcept] = useState('Venta Rápida');
+  const [customerWhatsAppPhone, setCustomerWhatsAppPhone] = useState('');
+
   // PWA Install prompt state
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [isInstallable, setIsInstallable] = useState(false);
@@ -269,12 +277,51 @@ export default function MobileScannerPage() {
 
       window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 
+      // Listener de SMS Pago Móvil en tiempo real desde Android / WebView
+      const handleIncomingBankSms = (e: any) => {
+        try {
+          const detail = e.detail || {};
+          const text = (detail.body || detail.message || '').toString();
+          const sender = (detail.sender || 'BANCO').toString();
+          if (!text) return;
+
+          // Extracción de referencia y monto con regex bancario
+          const refMatch = text.match(/(?:ref(?:erencia)?|operaci[oó]n|nro|id)[:\s#]*([0-9]{4,12})/i);
+          const amountMatch = text.match(/(?:bs\.?|ves|monto)[:\s]*([0-9]{1,3}(?:[.,][0-9]{3})*(?:[.,][0-9]{2}))/i) || text.match(/([0-9]+[.,][0-9]{2})/);
+
+          let parsedRef = refMatch ? refMatch[1] : '';
+          let parsedAmount = 0;
+          if (amountMatch) {
+            const cleanAmt = amountMatch[1].replace(/\./g, '').replace(',', '.');
+            parsedAmount = parseFloat(cleanAmt) || 0;
+          }
+
+          if (parsedRef || parsedAmount > 0) {
+            setDetectedBankSms({
+              amount: parsedAmount,
+              ref: parsedRef,
+              sender,
+              time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+              fullText: text,
+            });
+            if (parsedRef) {
+              setMobilePagoMovilRef(parsedRef.slice(-6));
+            }
+          }
+        } catch (err) {
+          console.warn('Error parsing incoming bank SMS:', err);
+        }
+      };
+
+      window.addEventListener('venematic:sms_received', handleIncomingBankSms);
+
       if (window.matchMedia('(display-mode: standalone)').matches) {
         setIsInstalled(true);
       }
 
       return () => {
         clearInterval(pingTimer);
+        window.removeEventListener('venematic:sms_received', handleIncomingBankSms);
         document.removeEventListener('visibilitychange', handleVisibility);
         window.removeEventListener('beforeunload', handleUnload);
         window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
@@ -348,7 +395,16 @@ export default function MobileScannerPage() {
     let retryInterval: NodeJS.Timeout | null = null;
     try {
       sseSource = new EventSource('/api/scanner/events?session=caja-1');
-      sseSource.addEventListener('inventory_updated', () => {
+      sseSource.addEventListener('inventory_updated', (e: any) => {
+        try {
+          if (e.data) {
+            const d = JSON.parse(e.data);
+            if (typeof d.bcvRate === 'number' && d.bcvRate > 0) {
+              setInventoryBcvRate(d.bcvRate);
+              try { localStorage.setItem('venematic_offline_bcv', String(d.bcvRate)); } catch {}
+            }
+          }
+        } catch {}
         fetchInventory();
         if (retryInterval) {
           clearInterval(retryInterval);
@@ -555,6 +611,24 @@ export default function MobileScannerPage() {
     if (goToCheckout) {
       setShowMobilePaymentModal(true);
     }
+  };
+
+  // Función de Cobro Rápido por Monto (Comida rápida, ropa, servicios ambulantes)
+  const handleAddQuickSale = (amountNum: number, concept: string, currency: 'USD' | 'VES') => {
+    if (amountNum <= 0) return;
+    const priceUSD = currency === 'USD' ? amountNum : (amountNum / inventoryBcvRate);
+    const uniqueId = 'quick_' + Date.now();
+    const newItem: MobileCartItem = {
+      productId: uniqueId,
+      barcode: 'RAPIDO',
+      name: (concept || 'Cobro Rápido').trim(),
+      qty: 1,
+      priceUSD: Number(priceUSD.toFixed(2)),
+      totalUSD: Number(priceUSD.toFixed(2)),
+    };
+    setMobileCart((prev) => [...prev, newItem]);
+    setShowQuickSaleModal(false);
+    setQuickSaleAmount('');
   };
 
   // Enviar peso/producto a la PC (Control Remoto en Vivo)
@@ -1257,135 +1331,106 @@ export default function MobileScannerPage() {
 
   return (
     <div className="h-[100dvh] max-h-[100dvh] w-full bg-[var(--industrial-bg,#ffffff)] flex flex-col font-sans text-slate-900 select-none overflow-hidden pb-[60px]">
-      {/* ── TOP BAR COMPACTA ── */}
-      <header className="bg-white border-b border-slate-200 px-3 py-2 sticky top-0 z-40 flex items-center justify-between shadow-sm shrink-0">
-        {/* Logo + Modo activo */}
+      {/* Top Mobile Bar */}
+      <header className="bg-white border-b border-slate-300 px-4 py-2.5 sticky top-0 z-40 flex items-center justify-between shadow-xs shrink-0">
         <div className="flex items-center gap-2.5">
-          <div
-            style={{
-              width: 32, height: 32, borderRadius: 10,
-              background: 'linear-gradient(135deg, #0e4f5a 0%, #0a9396 100%)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: '0 2px 8px rgba(14,79,90,0.25)',
-              flexShrink: 0,
-            }}
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z" />
-            </svg>
+          <div className="w-8 h-8 rounded-lg bg-[var(--brand-primary,#0369a1)] text-white flex items-center justify-center font-black text-sm">
+            V
           </div>
           <div>
-            <p className="text-xs font-black text-slate-900 leading-none tracking-tight">VENEMATIC</p>
-            <span
-              style={{
-                display: 'inline-flex', alignItems: 'center', gap: 4,
-                marginTop: 2, fontSize: 10, fontWeight: 700,
-                color: '#0e4f5a',
-                background: 'rgba(14,79,90,0.07)',
-                borderRadius: 99, padding: '1px 7px',
-              }}
-            >
-              <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#10b981', display: 'inline-block' }} />
-              {activeTab === 'pos' && 'Venta'}
-              {activeTab === 'scale' && 'Balanza'}
-              {activeTab === 'gun' && 'Escáner'}
-              {activeTab === 'create' && 'Crear Producto'}
-              {activeTab === 'inventory' && 'Inventario'}
-            </span>
+            <h1 className="text-sm font-black text-slate-900 leading-tight tracking-tight">
+              Venematic Mobile
+            </h1>
+            <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span>Conectado a <b className="text-slate-800">{session}</b></span>
+            </div>
           </div>
         </div>
 
-        {/* Derecha: BCV + Wi-Fi */}
-        <div className="flex items-center gap-1.5">
-          <div
-            style={{
-              display: 'flex', alignItems: 'center', gap: 5,
-              padding: '4px 10px', borderRadius: 99,
-              background: '#f0fdf4', border: '1px solid #6ee7b7',
-            }}
-          >
-            <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#10b981', display: 'inline-block' }} />
-            <span style={{ fontSize: 11, fontWeight: 800, color: '#065f46', fontFamily: 'monospace' }}>
-              Bs. {inventoryBcvRate.toFixed(2)}
-            </span>
+        <div className="flex items-center gap-2">
+          {/* Tasa BCV Visible en la esquina superior derecha */}
+          <div className="flex items-center gap-1.5 px-2.5 py-1 bg-[var(--brand-light,#f0f9ff)] border border-[var(--brand-border,#7dd3fc)] rounded-xl shadow-2xs">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <div className="text-right leading-none">
+              <span className="text-[10px] uppercase font-bold text-[var(--brand-primary,#0369a1)] block tracking-tight">Tasa BCV</span>
+              <span className="font-mono font-black text-xs text-[var(--brand-hover,#075985)] tabular-numbers">
+                Bs. {inventoryBcvRate.toFixed(2)}
+              </span>
+            </div>
           </div>
-          <div
-            style={{
-              display: 'flex', alignItems: 'center', gap: 4,
-              padding: '4px 8px', borderRadius: 99,
-              background: '#f0f9ff', border: '1px solid #bae6fd',
-              fontSize: 10, fontWeight: 700, color: '#0369a1',
-            }}
-          >
-            <Wifi style={{ width: 11, height: 11 }} />
-            OK
-          </div>
+
           {isInstallable && !isInstalled && (
             <button
               onClick={handleInstallApp}
-              style={{
-                display: 'flex', alignItems: 'center', gap: 4,
-                padding: '4px 10px', borderRadius: 99,
-                background: '#0e4f5a', color: '#fff',
-                fontSize: 10, fontWeight: 800, border: 'none', cursor: 'pointer',
-              }}
+              className="px-2.5 py-1 bg-[var(--brand-primary,#0369a1)] hover:opacity-90 text-white rounded-full text-xs font-black flex items-center gap-1 shadow-xs animate-bounce"
             >
-              <Download style={{ width: 11, height: 11 }} />
-              Instalar
+              <Download className="w-3 h-3" />
+              <span>Instalar</span>
             </button>
           )}
+
+          <div className="px-2.5 py-1 bg-emerald-50 border border-emerald-300 text-emerald-800 rounded-full text-xs font-bold flex items-center gap-1">
+            <Wifi className="w-3 h-3" />
+            <span>Wi-Fi OK</span>
+          </div>
         </div>
       </header>
 
-      {/* Banner PWA: solo en navegador, oculto en APK Capacitor nativo */}
-      {!isInstalled && isInstallable && !(typeof window !== 'undefined' && (window as any).Capacitor?.isNativePlatform()) && (
-        <div style={{
-          background: 'linear-gradient(90deg, #0e4f5a, #0a9396)',
-          color: '#fff', padding: '10px 16px',
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          fontSize: 12, flexShrink: 0,
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <span style={{ fontSize: 18 }}>📲</span>
+      {/* Banner de Instalación PWA si el usuario abre en navegador */}
+      {!isInstalled && (
+        <div className="bg-gradient-to-r from-[var(--brand-primary,#0369a1)] to-[var(--brand-hover,#075985)] text-white px-4 py-2.5 flex items-center justify-between shadow-xs">
+          <div className="flex items-center gap-2.5">
+            <span className="text-xl">📲</span>
             <div>
-              <p style={{ fontWeight: 800, lineHeight: 1.2, margin: 0 }}>Instala la app en tu celular</p>
-              <p style={{ opacity: 0.8, fontSize: 11, margin: 0 }}>Acceso rápido sin navegador</p>
+              <p className="text-xs font-black leading-tight">Instala Venematic en tu Celular</p>
+              <p className="text-xs text-white/80">Acceso directo como app nativa a pantalla completa</p>
             </div>
           </div>
           <button
             onClick={handleInstallApp}
-            style={{
-              padding: '6px 14px', background: '#fff', color: '#0e4f5a',
-              borderRadius: 8, fontSize: 11, fontWeight: 800,
-              border: 'none', cursor: 'pointer',
-            }}
+            className="px-3 py-1.5 bg-white text-sky-900 rounded-lg text-xs font-black shadow-sm shrink-0 active:scale-95"
           >
             Instalar
           </button>
         </div>
       )}
 
-      {/* Banner ventas offline pendientes */}
+      {/* Banner de Ventas Pendientes Offline (Contingencia sin Luz) */}
       {offlinePendingSalesCount > 0 && (
-        <div style={{
-          background: '#f59e0b', color: '#1c1917',
-          padding: '8px 16px', display: 'flex',
-          alignItems: 'center', justifyContent: 'space-between',
-          fontSize: 11, fontWeight: 700, flexShrink: 0,
-        }}>
-          <span>⚡ {offlinePendingSalesCount} venta(s) sin sincronizar</span>
+        <div className="bg-amber-500 text-slate-900 px-4 py-2 flex items-center justify-between shadow-xs">
+          <div className="flex items-center gap-2 text-xs font-bold">
+            <span>⚡</span>
+            <span>{offlinePendingSalesCount} venta(s) guardadas en celular (Modo Contingencia)</span>
+          </div>
           <button
             onClick={syncOfflineSalesToPC}
-            style={{
-              padding: '4px 12px', background: '#fff', color: '#1c1917',
-              borderRadius: 7, fontSize: 10, fontWeight: 800,
-              border: 'none', cursor: 'pointer',
-            }}
+            className="px-2.5 py-1 bg-white text-slate-900 rounded-lg text-xs font-black shadow-xs active:scale-95"
           >
-            Sync →
+            Sincronizar a PC
           </button>
         </div>
       )}
+
+      {/* Subheader: Estado del Sistema Dual y Modo Activo */}
+      <div className="px-4 py-1.5 bg-slate-900 text-white flex items-center justify-between shadow-xs text-xs sticky top-12 z-30 shrink-0">
+        <div className="flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+          <span className="font-extrabold text-xs uppercase tracking-wider text-slate-200">
+            {activeTab === 'pos' && '🛒 Punto de Venta Móvil'}
+            {activeTab === 'scale' && '⚖️ Balanza Digital Pesaje'}
+            {activeTab === 'gun' && '⚡ Pistola Escáner 60 FPS'}
+            {activeTab === 'create' && '📸 Captura Foto & IA'}
+            {activeTab === 'inventory' && '📦 Conteo de Stock & Pasillo'}
+          </span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-mono text-slate-400">BCV:</span>
+          <span className="font-mono font-black text-xs text-emerald-400">
+            Bs. {inventoryBcvRate.toFixed(2)}
+          </span>
+        </div>
+      </div>
 
       {/* ========================================================================= */}
       {/* PESTAÑA 1 (NAV DOCK 1): PANTALLA COMPLETA DE VENTA ACTUAL / COBRO         */}
@@ -1479,6 +1524,13 @@ export default function MobileScannerPage() {
                       <span>⚖️ Balanza</span>
                     </button>
                   </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowQuickSaleModal(true)}
+                    className="w-full py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black text-xs rounded-xl shadow-md flex items-center justify-center gap-2 border border-amber-400 active:scale-98 transition-all"
+                  >
+                    <span>⚡ Cobro Rápido por Monto (Comida / Ambulante)</span>
+                  </button>
                 </div>
               </div>
             ) : (
@@ -1631,14 +1683,21 @@ export default function MobileScannerPage() {
               </button>
 
               {/* Acciones Rápidas para seguir sumando */}
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-3 gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => setShowQuickSaleModal(true)}
+                  className="py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-black text-[11px] rounded-lg flex items-center justify-center gap-1 transition-all active:scale-95 shadow-xs"
+                >
+                  <span>⚡ Monto Libre</span>
+                </button>
                 <button
                   type="button"
                   onClick={() => setActiveTab('inventory')}
                   className="py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs rounded-lg flex items-center justify-center gap-1.5 transition-all active:scale-95"
                 >
                   <Plus className="w-3.5 h-3.5 text-[var(--brand-border,#7dd3fc)]" />
-                  <span>+ Agregar Stock</span>
+                  <span>+ Stock</span>
                 </button>
                 <button
                   type="button"
@@ -1646,7 +1705,7 @@ export default function MobileScannerPage() {
                   className="py-1.5 bg-slate-800 hover:bg-slate-700 text-cyan-300 font-bold text-xs rounded-lg flex items-center justify-center gap-1.5 transition-all active:scale-95"
                 >
                   <Scale className="w-3.5 h-3.5" />
-                  <span>Pesar en Balanza</span>
+                  <span>Balanza</span>
                 </button>
               </div>
             </div>
@@ -2182,6 +2241,39 @@ export default function MobileScannerPage() {
                   </button>
                 </div>
 
+                {/* Detector en vivo de SMS Pago Móvil */}
+                {detectedBankSms ? (
+                  <div className="bg-emerald-50 border border-emerald-300 p-2.5 rounded-xl space-y-1 animate-in fade-in duration-150">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-black uppercase text-emerald-800 flex items-center gap-1">
+                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                        SMS Detectado ({detectedBankSms.sender})
+                      </span>
+                      <span className="text-[9px] font-mono text-emerald-700">{detectedBankSms.time}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs font-mono font-bold text-emerald-950">
+                      <span>Monto: Bs. {detectedBankSms.amount > 0 ? detectedBankSms.amount.toFixed(2) : mobileTotalVES.toFixed(2)}</span>
+                      <span>Ref: {detectedBankSms.ref || 'En texto'}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (detectedBankSms.ref) {
+                          setMobilePagoMovilRef(detectedBankSms.ref.slice(-6));
+                        }
+                      }}
+                      className="w-full mt-1 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-black rounded-lg shadow-xs active:scale-98 transition-colors flex items-center justify-center gap-1"
+                    >
+                      <span>✓ Auto-completar Referencia</span>
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2 px-2.5 py-2 bg-sky-50/80 border border-sky-200 rounded-xl text-[10px] text-sky-900 font-bold">
+                    <span className="w-2 h-2 rounded-full bg-sky-500 animate-ping shrink-0" />
+                    <span>Detector en vivo activo: Al entrar el SMS de tu banco se vinculará automáticamente.</span>
+                  </div>
+                )}
+
                 <div>
                   <label className="block text-[11px] font-bold text-slate-700 mb-1">
                     Últimos 4 dígitos o número de referencia bancaria:
@@ -2389,9 +2481,35 @@ export default function MobileScannerPage() {
               )}
             </div>
 
+            {/* Botón 1-Tap Enviar Recibo por WhatsApp */}
+            <button
+              type="button"
+              onClick={() => {
+                try {
+                  const itemsList = (mobileSaleSuccess.items || []).map((it: any) => `• ${it.qty}x ${it.name} - $${(it.priceUSD * it.qty).toFixed(2)}`).join('%0A');
+                  const msg = `*COMPROBANTE DE PAGO - KLIKPOS*%0A` +
+                    `*Ticket:* %23${mobileSaleSuccess.receiptNumber}%0A` +
+                    `*Fecha:* ${encodeURIComponent(new Date().toLocaleString())}%0A` +
+                    `--------------------------------%0A` +
+                    (itemsList ? `${itemsList}%0A--------------------------------%0A` : '') +
+                    `*Total a Pagar:* $${mobileSaleSuccess.totalUSD.toFixed(2)} / Bs. ${mobileSaleSuccess.totalVES.toFixed(2)}%0A` +
+                    `*Método:* ${encodeURIComponent(mobileSaleSuccess.paymentMethod || 'Contado')}%0A` +
+                    (mobileSaleSuccess.referenceNumber ? `*Referencia:* ${encodeURIComponent(mobileSaleSuccess.referenceNumber)}%0A` : '') +
+                    `%0A¡Muchas gracias por su preferencia! ✨`;
+                  const waUrl = `https://wa.me/?text=${msg}`;
+                  window.open(waUrl, '_blank');
+                } catch (e) {
+                  console.error('Error abriendo WhatsApp:', e);
+                }
+              }}
+              className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white font-black text-xs rounded-xl shadow-xs flex items-center justify-center gap-1.5 transition-all"
+            >
+              <span>📲 Enviar Recibo por WhatsApp</span>
+            </button>
+
             <button
               onClick={() => setMobileSaleSuccess(null)}
-              className={`w-full py-2.5 ${mobileSaleSuccess.paymentMethod === 'credit' ? 'bg-amber-600 hover:bg-amber-700' : 'bg-pos-success hover:bg-pos-success-hover'} text-white font-black text-xs rounded-xl shadow-xs active:scale-98 transition-colors`}
+              className={`w-full py-2.5 ${mobileSaleSuccess.paymentMethod === 'credit' ? 'bg-amber-600 hover:bg-amber-700' : 'bg-slate-800 hover:bg-slate-900'} text-white font-black text-xs rounded-xl shadow-xs active:scale-98 transition-colors`}
             >
               Aceptar y Nueva Venta
             </button>
@@ -3372,11 +3490,34 @@ export default function MobileScannerPage() {
                 <ShoppingBag className="w-4 h-4 text-emerald-600" />
                 <span>Stock ({inventoryList.length} productos)</span>
               </span>
-              <div className="flex items-center gap-1.5 px-2 py-0.5 bg-sky-50 border border-sky-300 rounded-lg">
+              <button
+                type="button"
+                onClick={async () => {
+                  setStatusMessage('Sincronizando tasa BCV...');
+                  try {
+                    const res = await fetch('/api/bcv/rate?refresh=true');
+                    if (res.ok) {
+                      const data = await res.json();
+                      if (typeof data.rate === 'number' && data.rate > 0) {
+                        setInventoryBcvRate(data.rate);
+                        localStorage.setItem('venematic_offline_bcv', String(data.rate));
+                        setStatusMessage(`✓ Tasa BCV actualizada: Bs. ${data.rate.toFixed(2)}`);
+                        setTimeout(() => setStatusMessage('Listo para escanear'), 2500);
+                      }
+                    }
+                  } catch {
+                    setStatusMessage('Error al consultar BCV');
+                    setTimeout(() => setStatusMessage('Listo para escanear'), 2000);
+                  }
+                }}
+                className="flex items-center gap-1.5 px-2.5 py-1 bg-sky-50 hover:bg-sky-100 active:scale-95 border border-sky-300 rounded-lg transition-all cursor-pointer shadow-2xs"
+                title="Tocar para consultar tasa BCV oficial en vivo"
+              >
+                <RefreshCw className="w-3 h-3 text-sky-700" />
                 <span className="text-[10px] font-mono font-black text-sky-950">
                   Tasa: Bs. {inventoryBcvRate.toFixed(2)}
                 </span>
-              </div>
+              </button>
             </div>
 
             {/* Buscador */}
@@ -3784,6 +3925,112 @@ export default function MobileScannerPage() {
 
         </div>
       </nav>
+
+      {/* MODAL DE COBRO RÁPIDO POR MONTO (COMIDA, ROPA, AMBULANTE) */}
+      {showQuickSaleModal && (
+        <div className="fixed inset-0 bg-slate-900/70 backdrop-blur-2xs z-[120] flex items-center justify-center p-4 animate-in fade-in duration-150">
+          <div className="bg-white w-full max-w-xs rounded-3xl p-5 space-y-4 shadow-2xl border border-slate-200 animate-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+              <div className="flex items-center gap-2">
+                <span className="p-2 bg-amber-100 text-amber-800 rounded-xl text-lg">⚡</span>
+                <div>
+                  <h3 className="font-black text-sm text-slate-900">Cobro Rápido por Monto</h3>
+                  <p className="text-[10px] text-slate-500 font-bold">Venta directa sin inventario previo</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowQuickSaleModal(false)}
+                className="w-7 h-7 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 font-bold flex items-center justify-center text-xs"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                  Concepto / Descripción:
+                </label>
+                <input
+                  type="text"
+                  placeholder="Ej: 2 Empanadas y Malta / Ropa / Varios"
+                  value={quickSaleConcept}
+                  onChange={(e) => setQuickSaleConcept(e.target.value)}
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-900 outline-none focus:ring-2 focus:ring-amber-500"
+                />
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-[11px] font-bold text-slate-700">Monto a Cobrar:</label>
+                  <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg text-[10px] font-black">
+                    <button
+                      type="button"
+                      onClick={() => setQuickSaleCurrency('USD')}
+                      className={`px-2 py-0.5 rounded ${quickSaleCurrency === 'USD' ? 'bg-white shadow-2xs text-slate-900' : 'text-slate-500'}`}
+                    >
+                      USD ($)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setQuickSaleCurrency('VES')}
+                      className={`px-2 py-0.5 rounded ${quickSaleCurrency === 'VES' ? 'bg-white shadow-2xs text-slate-900' : 'text-slate-500'}`}
+                    >
+                      Bs. (VES)
+                    </button>
+                  </div>
+                </div>
+                <div className="relative">
+                  <span className="absolute left-3 top-2.5 font-bold text-sm text-slate-400">
+                    {quickSaleCurrency === 'USD' ? '$' : 'Bs.'}
+                  </span>
+                  <input
+                    type="number"
+                    step="0.01"
+                    placeholder="0.00"
+                    autoFocus
+                    value={quickSaleAmount}
+                    onChange={(e) => setQuickSaleAmount(e.target.value)}
+                    className="w-full pl-9 pr-3 py-2.5 bg-white border-2 border-amber-300 rounded-xl text-base font-mono font-black text-slate-900 outline-none focus:ring-2 focus:ring-amber-500"
+                  />
+                </div>
+                {quickSaleAmount && parseFloat(quickSaleAmount) > 0 && (
+                  <p className="text-[10px] font-mono text-slate-500 text-right mt-1">
+                    Equivalente: {quickSaleCurrency === 'USD'
+                      ? `Bs. ${(parseFloat(quickSaleAmount) * inventoryBcvRate).toFixed(2)}`
+                      : `$ ${(parseFloat(quickSaleAmount) / inventoryBcvRate).toFixed(2)} USD`
+                    }
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="flex gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowQuickSaleModal(false)}
+                className="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const amt = parseFloat(quickSaleAmount);
+                  if (amt > 0) {
+                    handleAddQuickSale(amt, quickSaleConcept, quickSaleCurrency);
+                  }
+                }}
+                disabled={!quickSaleAmount || parseFloat(quickSaleAmount) <= 0}
+                className="flex-1 py-2.5 bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-slate-950 font-black text-xs rounded-xl shadow-md active:scale-98 transition-all"
+              >
+                + Cobrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

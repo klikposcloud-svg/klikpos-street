@@ -1,39 +1,29 @@
+﻿================================================================================
+VENEMATIC POS MÃ“VIL & ADMIN - VERIFICACIÃ“N OFICIAL DE INTEGRIDAD SHA-256
 ================================================================================
-VENEMATIC POS MÓVIL & ADMIN - VERIFICACIÓN OFICIAL DE INTEGRIDAD SHA-256
-================================================================================
-Fecha de Compilación: 26 de Septiembre de 2026
+Fecha de CompilaciÃ³n: 22 de Septiembre de 2026
 Arquitectura: Android 8.0+ (ARM64 / x86_64)
 
-1. POS APK FULL (Punto de Venta Autónomo Completo):
-  Archivo: VenematicPOS-Full-Mobile.apk
-  Alias: VenematicPOS-Caja-Mobile.apk / VenematicPOS-Mobile.apk
+1. APK DE CAJA / MOSTRADOR / TABLET (Cajeros y Venta TÃ¡ctil):
+  Archivo: VenematicPOS-Caja-Mobile.apk
   ID de Paquete: com.venematic.pos
-  Nombre de App: Venematic POS Móvil
-  Tamaño: 4,216,846 bytes
+  Nombre de App: Venematic POS MÃ³vil
+  TamaÃ±o: 4216846 bytes
   SHA-256: FAC5FE73F99E50BBF637A53EDA53AE695B37E265477898C88DDE9F098AF7D3F1
-  Uso: Terminal de venta táctil autónoma para ventas en mostrador, pasillo o ferias.
 
-2. POS APK LITE COMPLEMENTARIA (Terminal Auxiliar de la Versión Desktop):
-  Archivo: VenematicPOS-Lite-Companion.apk
-  ID de Paquete: com.venematic.pos
-  Nombre de App: Venematic POS Lite
-  Tamaño: 4,216,846 bytes
-  SHA-256: FAC5FE73F99E50BBF637A53EDA53AE695B37E265477898C88DDE9F098AF7D3F1
-  Uso: Terminal complementaria conectada a la PC de escritorio como escáner inalámbrico de códigos de barra, consulta rápida de precios y cobro en cola.
-
-3. POS APK ADMINISTRADOR (Modo Dueño y Gerencia):
+2. APK DE ADMINISTRADOR & MODO DUEÃ‘O (Uso Exclusivo del Gerente):
   Archivo: VenematicPOS-Admin-Mobile.apk
   ID de Paquete: com.venematic.admin
   Nombre de App: Venematic Admin
-  Tamaño: 4,153,854 bytes
-  SHA-256: A3E8E7AFCF61B54AA7E917C1FD7D55DEB102B4D91E6644E23D871DC0EBA22E36
-  Características Exclusivas:
-   - Panel de Control del Dueño en vivo con KPIs ($ y Bs)
-   - Arqueo de Caja y desglose multimoneda (USD, VES, Pago Móvil, Punto, Binance, Zelle)
+  TamaÃ±o: 4557752 bytes
+  SHA-256: 5A5C6479378AD6C3A132ECBA542243B7C6737F42D52C16441E5F1947931B5438
+  CaracterÃ­sticas Exclusivas:
+   - Panel de Control del DueÃ±o en vivo con KPIs ($ y Bs)
+   - Arqueo de Caja y desglose multimoneda (USD, VES, Pago MÃ³vil, Punto, Binance, Zelle)
    - Feed en tiempo real de tickets cobrados
-   - Alertas de inventario y stock crítico
-   - Modificador instantáneo de Tasa Oficial BCV con propagación a cajas
+   - Alertas de inventario y stock crÃ­tico
+   - Modificador instantÃ¡neo de Tasa Oficial BCV con propagaciÃ³n a cajas
 
 Comando PowerShell para verificar:
-  Get-FileHash -Path "<NOMBRE_ARCHIVO>.apk" -Algorithm SHA256
+  Get-FileHash -Path "VenematicPOS-Admin-Mobile.apk" -Algorithm SHA256
 ================================================================================

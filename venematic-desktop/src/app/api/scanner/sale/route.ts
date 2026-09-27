@@ -26,16 +26,11 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const rawSale = body.sale || body;
+    const { sale } = body;
 
-    if (!rawSale || !rawSale.items || rawSale.items.length === 0) {
-      return NextResponse.json({ error: 'Datos de venta incompletos (items requeridos)' }, { status: 400, headers: CORS_HEADERS });
+    if (!sale || !sale.items || sale.items.length === 0) {
+      return NextResponse.json({ error: 'Datos de venta incompletos' }, { status: 400, headers: CORS_HEADERS });
     }
-
-    const sale = {
-      ...rawSale,
-      receiptNumber: rawSale.receiptNumber || `MOVIL-${Date.now().toString().slice(-6)}`,
-    };
 
     mobileSalesQueue.push({
       ...sale,

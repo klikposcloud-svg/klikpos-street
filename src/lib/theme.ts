@@ -480,35 +480,33 @@ export function computeIndustrialThemeVariables(
   };
 }
 
-export function applyBrandingToDOM(config: BrandingConfig, forceTheme?: 'light' | 'dark') {
+export function applyBrandingToDOM(config: BrandingConfig, forceTheme?: 'light' | 'dark' | 'glass') {
   if (typeof window === 'undefined') return;
 
   const palette = THEME_PALETTES.find((p) => p.id === config.paletteId) || THEME_PALETTES[0];
   const root = document.documentElement;
 
-  // Determinar tema con máxima prioridad a forceTheme y config.uiStyle
-  let isDark: boolean;
+  // Determinar tema con máxima prioridad a forceTheme
+  let activeTheme: ThemeMode = 'light';
   if (forceTheme) {
-    isDark = forceTheme === 'dark';
-  } else if (config.uiStyle === 'industrial') {
-    isDark = false;
-  } else if (config.uiStyle === 'glassmorphism') {
-    isDark = true;
+    activeTheme = forceTheme;
   } else {
-    const attrTheme = root.getAttribute('data-theme');
-    if (attrTheme === 'light') {
-      isDark = false;
-    } else if (attrTheme === 'dark' || attrTheme === 'glass') {
-      isDark = true;
+    const savedTheme = (typeof window !== 'undefined' ? localStorage.getItem('venematic_theme') : null) as ThemeMode | null;
+    if (savedTheme === 'glass' || savedTheme === 'dark' || savedTheme === 'light') {
+      activeTheme = savedTheme;
     } else {
-      const currentSavedTheme = getCurrentTheme();
-      isDark = currentSavedTheme === 'dark' || currentSavedTheme === 'glass' || root.classList.contains('dark');
+      const attr = root.getAttribute('data-theme');
+      if (attr === 'glass') activeTheme = 'glass';
+      else if (attr === 'dark' || root.classList.contains('dark')) activeTheme = 'dark';
+      else activeTheme = 'light';
     }
   }
-  const isLight = !isDark;
+
+  const isLight = activeTheme === 'light';
+  const isGlass = activeTheme === 'glass';
+  const isDark = activeTheme === 'dark' || isGlass;
 
   root.setAttribute('data-theme-palette', palette.id);
-  root.setAttribute('data-ui-style', isDark ? 'glassmorphism' : (config.uiStyle || 'industrial'));
 
   // Background y Adaptabilidad Dinámica para Modo Industrial Profesional
   const industrialBgPreset = config.industrialBg || 'white';
@@ -520,12 +518,29 @@ export function applyBrandingToDOM(config: BrandingConfig, forceTheme?: 'light' 
     palette.primaryHover
   );
 
-  root.setAttribute('data-industrial-bg', industrialBgPreset);
-  root.style.setProperty('--industrial-bg', themeVars.bgColor);
-  root.style.setProperty('--industrial-card', themeVars.cardColor);
-  root.style.setProperty('--industrial-text', themeVars.textColor);
-  root.style.setProperty('--industrial-text-muted', themeVars.textMuted);
-  root.style.setProperty('--industrial-border', themeVars.borderColor);
+  if (isLight) {
+    root.setAttribute('data-industrial-bg', industrialBgPreset);
+    root.style.setProperty('--industrial-bg', themeVars.bgColor);
+    root.style.setProperty('--industrial-card', themeVars.cardColor);
+    root.style.setProperty('--industrial-text', themeVars.textColor);
+    root.style.setProperty('--industrial-text-muted', themeVars.textMuted);
+    root.style.setProperty('--industrial-border', themeVars.borderColor);
+  } else if (isGlass) {
+    root.setAttribute('data-industrial-bg', 'glass');
+    root.style.setProperty('--industrial-bg', '#0B141F'); // Azul Pizarra Noche
+    root.style.setProperty('--industrial-card', 'rgba(18, 28, 41, 0.7)');
+    root.style.setProperty('--industrial-text', '#f8fafc');
+    root.style.setProperty('--industrial-text-muted', '#94a3b8');
+    root.style.setProperty('--industrial-border', 'rgba(255, 255, 255, 0.12)');
+  } else {
+    // Modo Oscuro Industrial Clásico (Azul Pizarra)
+    root.setAttribute('data-industrial-bg', 'dark');
+    root.style.setProperty('--industrial-bg', '#0B141F'); // Azul Pizarra Profundo
+    root.style.setProperty('--industrial-card', '#121C29'); // Azul Pizarra Tarjeta
+    root.style.setProperty('--industrial-text', '#f8fafc');
+    root.style.setProperty('--industrial-text-muted', '#94a3b8');
+    root.style.setProperty('--industrial-border', '#22303F');
+  }
   root.style.setProperty('--btn-primary-bg', themeVars.primaryBg);
   root.style.setProperty('--btn-primary-hover', themeVars.primaryHover);
   root.style.setProperty('--btn-primary-text', themeVars.primaryText);
@@ -549,35 +564,59 @@ export function applyBrandingToDOM(config: BrandingConfig, forceTheme?: 'light' 
     root.setAttribute('data-theme', 'light');
     root.setAttribute('data-ui-style', 'industrial');
     root.classList.remove('dark');
+    root.classList.remove('theme-glass');
     root.style.backgroundColor = themeVars.bgColor;
+    root.style.backgroundImage = 'none';
     root.style.color = themeVars.textColor;
     (root.style as any).colorScheme = 'light';
-  } else {
-    root.setAttribute('data-theme', 'dark');
-    root.setAttribute('data-ui-style', 'glassmorphism');
-    root.classList.add('dark');
-    root.style.backgroundColor = '#121c29';
-    root.style.color = '#f8fafc';
-    (root.style as any).colorScheme = 'dark';
-  }
-
-  if (document.body) {
-    if (isLight) {
+    if (document.body) {
       document.body.classList.remove('dark');
+      document.body.classList.remove('theme-glass');
       document.body.style.backgroundColor = themeVars.bgColor;
+      document.body.style.backgroundImage = 'none';
       document.body.style.color = themeVars.textColor;
       (document.body.style as any).colorScheme = 'light';
-    } else {
+    }
+  } else if (isGlass) {
+    root.setAttribute('data-theme', 'glass');
+    root.setAttribute('data-ui-style', 'glassmorphism');
+    root.classList.add('dark');
+    root.classList.add('theme-glass');
+    root.style.backgroundColor = '#0b1320';
+    root.style.backgroundImage = 'radial-gradient(circle at 50% 35%, rgba(2, 132, 199, 0.20) 0%, rgba(245, 158, 11, 0.12) 30%, rgba(11, 19, 32, 0.96) 80%)';
+    root.style.color = '#f8fafc';
+    (root.style as any).colorScheme = 'dark';
+    if (document.body) {
       document.body.classList.add('dark');
+      document.body.classList.add('theme-glass');
+      document.body.style.backgroundColor = '#0b1320';
+      document.body.style.backgroundImage = 'radial-gradient(circle at 50% 35%, rgba(2, 132, 199, 0.20) 0%, rgba(245, 158, 11, 0.12) 30%, rgba(11, 19, 32, 0.96) 80%)';
+      document.body.style.color = '#f8fafc';
+      (document.body.style as any).colorScheme = 'dark';
+    }
+  } else {
+    // Modo Oscuro Industrial Clásico
+    root.setAttribute('data-theme', 'dark');
+    root.setAttribute('data-ui-style', 'dark');
+    root.classList.add('dark');
+    root.classList.remove('theme-glass');
+    root.style.backgroundColor = '#121c29';
+    root.style.backgroundImage = 'none';
+    root.style.color = '#f8fafc';
+    (root.style as any).colorScheme = 'dark';
+    if (document.body) {
+      document.body.classList.add('dark');
+      document.body.classList.remove('theme-glass');
       document.body.style.backgroundColor = '#121c29';
+      document.body.style.backgroundImage = 'none';
       document.body.style.color = '#f8fafc';
       (document.body.style as any).colorScheme = 'dark';
     }
   }
 
   try {
-    localStorage.setItem('venematic_theme', isLight ? 'light' : 'dark');
-    localStorage.setItem('venematic_ui_style', isLight ? 'industrial' : 'glassmorphism');
+    localStorage.setItem('venematic_theme', activeTheme);
+    localStorage.setItem('venematic_ui_style', isLight ? 'industrial' : (isGlass ? 'glassmorphism' : 'dark'));
     localStorage.setItem('venematic_branding_palette', config.paletteId);
     localStorage.setItem('venematic_industrial_bg', industrialBgPreset);
     if (config.customBgColor) {
@@ -587,74 +626,46 @@ export function applyBrandingToDOM(config: BrandingConfig, forceTheme?: 'light' 
 
   // Trigger event for listeners
   window.dispatchEvent(new CustomEvent('venematic:branding_updated', { detail: config }));
-  window.dispatchEvent(new CustomEvent('venematic:theme_changed', { detail: isLight ? 'light' : 'dark' }));
+  window.dispatchEvent(new CustomEvent('venematic:theme_changed', { detail: activeTheme }));
 }
 
 /**
- * §17 Temas Oficiales: light (Modo Blanco), dark (Modo Oscuro), glass (Glassmorphism regulado)
+ * §17 Tres Estilos Oficiales:
+ * - light: Modo Blanco Profesional
+ * - dark: Modo Oscuro Slate
+ * - glass: Modo Esmerilado Translúcido (Glassmorphism con ambient lighting)
  */
 export type ThemeMode = 'light' | 'dark' | 'glass';
 
 export function applyTheme(mode: ThemeMode) {
   if (typeof window === 'undefined') return;
-  const root = document.documentElement;
 
   try {
-    localStorage.setItem('venematic_theme', mode === 'light' ? 'light' : 'dark');
-    localStorage.setItem('venematic_ui_style', mode === 'light' ? 'industrial' : 'glassmorphism');
+    localStorage.setItem('venematic_theme', mode);
+    localStorage.setItem('venematic_ui_style', mode === 'light' ? 'industrial' : (mode === 'glass' ? 'glassmorphism' : 'dark'));
   } catch {}
 
   const savedPalette = localStorage.getItem('venematic_branding_palette') || 'petrol';
   const savedBg = (localStorage.getItem('venematic_industrial_bg') as IndustrialBgPreset) || 'white';
   const savedCustomBg = localStorage.getItem('venematic_custom_bg_color') || '#f8fafc';
 
-  if (mode === 'light') {
-    root.classList.remove('dark');
-    root.setAttribute('data-theme', 'light');
-    root.setAttribute('data-ui-style', 'industrial');
-    root.setAttribute('data-industrial-bg', savedBg);
-    (root.style as any).colorScheme = 'light';
-    if (document.body) {
-      document.body.classList.remove('dark');
-      (document.body.style as any).colorScheme = 'light';
-    }
-
-    applyBrandingToDOM({
-      paletteId: savedPalette,
-      uiStyle: 'industrial',
-      industrialBg: savedBg,
-      customBgColor: savedCustomBg,
-    }, 'light');
-  } else {
-    root.classList.add('dark');
-    root.setAttribute('data-theme', 'dark');
-    root.setAttribute('data-ui-style', 'glassmorphism');
-    root.style.backgroundColor = '#121c29';
-    root.style.color = '#f8fafc';
-    (root.style as any).colorScheme = 'dark';
-    if (document.body) {
-      document.body.classList.add('dark');
-      document.body.style.backgroundColor = '#121c29';
-      document.body.style.color = '#f8fafc';
-      (document.body.style as any).colorScheme = 'dark';
-    }
-
-    applyBrandingToDOM({
-      paletteId: savedPalette,
-      uiStyle: 'glassmorphism',
-      industrialBg: savedBg,
-      customBgColor: savedCustomBg,
-    }, 'dark');
-  }
-
-  window.dispatchEvent(new CustomEvent('venematic:theme_changed', { detail: mode === 'light' ? 'light' : 'dark' }));
+  applyBrandingToDOM({
+    paletteId: savedPalette,
+    uiStyle: mode === 'light' ? 'industrial' : (mode === 'glass' ? 'glassmorphism' : 'dark' as any),
+    industrialBg: savedBg,
+    customBgColor: savedCustomBg,
+  }, mode);
 }
 
 export function getCurrentTheme(): ThemeMode {
   if (typeof window === 'undefined') return 'light';
   const saved = localStorage.getItem('venematic_theme');
-  if (saved === 'dark' || saved === 'glass') return 'dark';
+  if (saved === 'glass') return 'glass';
+  if (saved === 'dark') return 'dark';
   if (saved === 'light') return 'light';
+  if (document.documentElement.getAttribute('data-theme') === 'glass' || document.documentElement.classList.contains('theme-glass')) {
+    return 'glass';
+  }
   if (document.documentElement.classList.contains('dark') || document.documentElement.getAttribute('data-theme') === 'dark') {
     return 'dark';
   }

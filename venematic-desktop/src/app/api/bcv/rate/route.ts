@@ -9,10 +9,10 @@ let latestBcvData: {
   lastUpdated: string;
   isManual?: boolean;
 } = {
-  rate: 855.66,
-  date: new Date().toISOString().split('T')[0],
+  rate: 857.01,
+  date: '',
   source: 'Predeterminada',
-  lastUpdated: new Date().toISOString(),
+  lastUpdated: '',
   isManual: false,
 };
 
@@ -20,9 +20,9 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const forceLive = searchParams.get('refresh') === 'true';
 
-  // Si se solicita refresco forzado o no ha sido sincronizado hoy
+  // Si se solicita refresco forzado, no ha sido sincronizado hoy, o aún tiene valores por defecto
   const todayStr = new Date().toISOString().split('T')[0];
-  const needsSync = forceLive || latestBcvData.date !== todayStr;
+  const needsSync = forceLive || latestBcvData.date !== todayStr || latestBcvData.source === 'Predeterminada' || !latestBcvData.lastUpdated;
 
   if (needsSync && !latestBcvData.isManual) {
     try {

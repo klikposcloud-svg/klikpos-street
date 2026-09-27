@@ -11,10 +11,27 @@ export async function OPTIONS() {
   return new Response(null, { status: 204, headers: CORS_HEADERS });
 }
 
+import os from 'os';
+
+function getLocalNetworkIp(): string {
+  const nets = os.networkInterfaces();
+  for (const name of Object.keys(nets)) {
+    for (const net of nets[name] || []) {
+      if (net.family === 'IPv4' && !net.internal && !net.address.startsWith('169.254')) {
+        return net.address;
+      }
+    }
+  }
+  return 'localhost';
+}
+
 export async function GET(req: NextRequest) {
   const session = req.nextUrl.searchParams.get('session') || 'caja-1';
   const data = scannerSessions.get(session);
   const isOnline = Boolean(data && data.connected && Date.now() - data.lastSeen < 15000);
+  const localIp = getLocalNetworkIp();
+  const port = process.env.PORT || '3000';
+  const serverUrl = `http://${localIp}:${port}`;
 
   return NextResponse.json({
     success: true,
@@ -22,6 +39,11 @@ export async function GET(req: NextRequest) {
     status: 'ready',
     connected: isOnline,
     deviceName: isOnline ? data?.deviceName : '',
+    localIp,
+    port,
+    serverUrl,
+    adminConnectUrl: serverUrl,
+    scannerUrl: `${serverUrl}/scanner?session=${session}`,
   }, { headers: CORS_HEADERS });
 }
 

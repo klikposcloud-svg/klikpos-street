@@ -4,17 +4,19 @@ import React, { useState, useEffect } from 'react';
 import { db } from '@/lib/db';
 import { initializeDatabaseIfNeeded } from '@/lib/seed-data';
 import BrandingSettings from '@/components/BrandingSettings';
+import PosQuickAccessSettings from '@/components/PosQuickAccessSettings';
+import LegalSettingsTab from '@/components/LegalSettingsTab';
 import LicenseActivationModal from '@/components/LicenseActivationModal';
 import CloudSyncSettingsCard from '@/components/CloudSyncSettingsCard';
 import { useAuth } from '@/context/AuthContext';
-import { ShieldAlert, ShieldCheck, ArrowLeft, Scale, CheckCircle2, AlertCircle, RefreshCw, Zap, Banknote, Upload, Image as ImageIcon, Trash2, Printer, Palette, Store, Users, Download, Sparkles } from 'lucide-react';
+import { ShieldAlert, ShieldCheck, ArrowLeft, Scale, CheckCircle2, AlertCircle, RefreshCw, Zap, Banknote, Upload, Image as ImageIcon, Trash2, Printer, Palette, Store, Users, Download, Sparkles, FileText } from 'lucide-react';
 import Link from 'next/link';
 import { scaleService, ScaleProtocol, WeightReading, PriceMultiplierBasis } from '@/lib/hardware/scale';
 import { getScaleBarcodeConfig, saveScaleBarcodeConfig, ScaleBarcodeConfig } from '@/lib/hardware/scale-barcode';
 import { pagoMovilMonitor, initiateGmailOAuth, extractOAuthTokenFromUrl, verifyGmailToken } from '@/lib/payments/pago-movil-gmail-monitor';
 import { updateService, CURRENT_VERSION } from '@/lib/services/update-service';
 
-export type SettingsTabId = 'branding' | 'business' | 'printer' | 'scale' | 'cashiers' | 'cloud_backup' | 'payments' | 'updates';
+export type SettingsTabId = 'branding' | 'pos_quick' | 'legal' | 'business' | 'printer' | 'scale' | 'cashiers' | 'cloud_backup' | 'payments' | 'updates';
 
 export default function DesktopSettingsPage() {
   const { isAdmin, switchToRole } = useAuth();
@@ -330,7 +332,9 @@ export default function DesktopSettingsPage() {
   }
 
   const SETTINGS_TABS: { id: SettingsTabId; label: string; icon: any }[] = [
-    { id: 'branding', label: 'Marca y Fondo', icon: Palette },
+    { id: 'branding', label: 'Marca y Tema', icon: Palette },
+    { id: 'pos_quick', label: 'Carrusel POS (Accesos Rápidos)', icon: Sparkles },
+    { id: 'legal', label: 'Marco Legal & Licencia', icon: FileText },
     { id: 'business', label: 'Datos del Negocio', icon: Store },
     { id: 'printer', label: 'Impresora y Logo', icon: Printer },
     { id: 'scale', label: 'Balanza Digital', icon: Scale },
@@ -495,6 +499,12 @@ export default function DesktopSettingsPage() {
           </div>
         </div>
       )}
+
+      {/* PESTAÑA: ACCESOS RÁPIDOS DEL CARRUSEL POS */}
+      {activeTab === 'pos_quick' && <PosQuickAccessSettings />}
+
+      {/* PESTAÑA: MARCO LEGAL Y LICENCIAMIENTO */}
+      {activeTab === 'legal' && <LegalSettingsTab />}
 
       {/* 2. PESTAÑA: DATOS DEL NEGOCIO */}
       {activeTab === 'business' && (
@@ -987,16 +997,27 @@ export default function DesktopSettingsPage() {
               )}
             </div>
 
-            {/* Guía Rápida para el Celular del Dueño */}
-            <div className="p-4 bg-slate-50 dark:bg-slate-900/40 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2 text-xs text-slate-600 dark:text-slate-300">
-              <h5 className="font-black text-slate-800 dark:text-slate-200 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
-                <span>📱</span>
-                <span>¿C&oacute;mo configurarlo en el celular del due&ntilde;o en 3 pasos?</span>
-              </h5>
-              <ol className="list-decimal pl-4 space-y-1 text-[11px] leading-relaxed">
-                <li>Instala una app de automatizaci&oacute;n ligera en el tel&eacute;fono Android del due&ntilde;o (como <strong>MacroDroid</strong> o <strong>SMS Forwarder</strong> desde Google Play).</li>
-                <li>Crea un disparador: cuando llegue un SMS de los n&uacute;meros del banco (ej. <em>2661 / 2662 Banco de Venezuela, Banesco, Mercantil, Bancamiga, BBVA Provincial, BNC</em>).</li>
-                <li>Agrega la acci&oacute;n: enviar una petici&oacute;n <strong>HTTP POST</strong> a la URL del Webhook con el texto del SMS en el campo <code>message</code> o directamente en el cuerpo. El parser de Venematic extraer&aacute; autom&aacute;ticamente la referencia y el monto.</li>
+            {/* Guía Rápida para el Celular con APK Oficial Nativo Venematic (Sin Google Play) */}
+            <div className="p-4 bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-sky-500/10 rounded-xl border border-emerald-300 dark:border-emerald-700/60 space-y-3 text-xs text-slate-700 dark:text-slate-200">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-emerald-200 dark:border-emerald-800 pb-2">
+                <h5 className="font-black text-slate-900 dark:text-white uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+                  <span className="p-1 bg-emerald-500 text-white rounded text-[10px]">APK</span>
+                  <span>Configuración con App Nativa Venematic SMS Bridge (Sin Google Play)</span>
+                </h5>
+                <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-950/60 px-2 py-0.5 rounded-full self-start sm:self-auto">
+                  100% Autónomo y Seguro
+                </span>
+              </div>
+              <ol className="list-decimal pl-4 space-y-2 text-[11px] leading-relaxed">
+                <li>
+                  <strong>Instalación directa:</strong> Transfiere e instala el instalador <code>Venematic-SMS-Bridge.apk</code> en el teléfono Android (mediante cable USB, WhatsApp o Bluetooth). No necesitas cuenta de Google ni entrar a Google Play Store; solo activa <em>&quot;Permitir instalar aplicaciones de fuentes desconocidas&quot;</em>.
+                </li>
+                <li>
+                  <strong>Vinculación con el Servidor POS:</strong> Abre la aplicación e ingresa la <strong>URL del Webhook</strong> copiada arriba y el <strong>Token Secreto de Seguridad</strong>.
+                </li>
+                <li>
+                  <strong>Activación:</strong> Otorga el permiso de lectura de SMS. La aplicación se mantendrá activa en segundo plano, capturará automáticamente los SMS de los bancos (Banco de Venezuela 2661/2662, Banesco, Mercantil, Bancamiga, Provincial, BNC) y liberará los cobros en pantalla con sonido al instante.
+                </li>
               </ol>
             </div>
           </div>

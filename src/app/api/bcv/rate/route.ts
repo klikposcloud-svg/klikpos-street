@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { fetchLiveBcvRate } from '@/lib/services/bcv-service';
+import { scannerEmitter } from '@/lib/scanner-events';
 
 // In-memory cache for server lifecycle
 let latestBcvData: {
@@ -9,10 +10,10 @@ let latestBcvData: {
   lastUpdated: string;
   isManual?: boolean;
 } = {
-  rate: 854.46,
-  date: new Date().toISOString().split('T')[0],
+  rate: 857.01,
+  date: '',
   source: 'Predeterminada',
-  lastUpdated: new Date().toISOString(),
+  lastUpdated: '',
   isManual: false,
 };
 
@@ -20,9 +21,9 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const forceLive = searchParams.get('refresh') === 'true';
 
-  // Si se solicita refresco forzado o no ha sido sincronizado hoy
+  // Si se solicita refresco forzado, no ha sido sincronizado hoy, o aún tiene valores por defecto
   const todayStr = new Date().toISOString().split('T')[0];
-  const needsSync = forceLive || latestBcvData.date !== todayStr;
+  const needsSync = forceLive || latestBcvData.date !== todayStr || latestBcvData.source === 'Predeterminada' || !latestBcvData.lastUpdated;
 
   if (needsSync && !latestBcvData.isManual) {
     try {
@@ -74,6 +75,10 @@ export async function POST(request: Request) {
         lastUpdated: new Date().toISOString(),
         isManual: true,
       };
+      scannerEmitter.emit('inventory_updated', {
+        bcvRate: latestBcvData.rate,
+        timestamp: Date.now(),
+      });
       return NextResponse.json({ success: true, ...latestBcvData });
     }
 

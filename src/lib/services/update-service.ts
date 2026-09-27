@@ -17,10 +17,10 @@ export interface UpdateConfig {
   lastChecked?: string;
 }
 
-export const CURRENT_VERSION = '2.0.0';
+export const CURRENT_VERSION = '2.4.0';
 
-const DEFAULT_MANIFEST_URL = 'https://raw.githubusercontent.com/aivyntrax-cpu/venematic-releases/main/version.json';
-const UPDATE_CONFIG_KEY = 'venematic_update_config';
+const DEFAULT_MANIFEST_URL = 'https://raw.githubusercontent.com/klikposcloud-svg/klikpos-releases/main/version.json';
+const UPDATE_CONFIG_KEY = 'klikpos_update_config';
 
 export function compareVersions(v1: string, v2: string): number {
   const parts1 = v1.replace(/^v/, '').split('.').map((n) => parseInt(n, 10) || 0);

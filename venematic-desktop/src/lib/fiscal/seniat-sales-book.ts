@@ -4,6 +4,7 @@
  */
 
 import { LocalSale } from '@/lib/db';
+import { SYSTEM_DEFAULTS } from '@/lib/constants/defaults';
 
 export interface SeniatSaleRecord {
   operacionNo: number;
@@ -90,7 +91,7 @@ export function buildSeniatSalesBook(
 
   filtered.forEach((sale, index) => {
     const isVoided = sale.status === 'voided' || sale.status === 'cancelled';
-    const rate = sale.bcvRate || 848.55;
+    const rate = sale.bcvRate || SYSTEM_DEFAULTS.DEFAULT_BCV_RATE;
     const totalUSD = sale.totalUSD || 0;
     const totalVES = sale.totalVES || totalUSD * rate;
 
@@ -100,10 +101,8 @@ export function buildSeniatSalesBook(
 
     if (sale.items && sale.items.length > 0) {
       sale.items.forEach((item) => {
-        // En Venezuela, productos marcados como exentos o alimentos esenciales están exentos de IVA
-        const isExempt = item.isTaxExempt !== undefined
-          ? Boolean(item.isTaxExempt)
-          : (!options?.forceAllTaxable && EXEMPT_CATEGORIES.some((cat) => (item.name || '').toLowerCase().includes(cat.toLowerCase())));
+        // En Venezuela, productos alimenticios esenciales están exentos de IVA
+        const isExempt = !options?.forceAllTaxable && EXEMPT_CATEGORIES.some((cat) => (item.name || '').toLowerCase().includes(cat.toLowerCase()));
         if (isExempt) {
           exentoUSD += item.totalUSD;
         } else {

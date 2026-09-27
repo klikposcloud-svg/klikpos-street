@@ -66,3 +66,5 @@ master_public_key.txt
 **/android/*.iml
 **/android/app/*.iml
 dist-apk/dist-apk.lnk
+graphify-out/cache/
+

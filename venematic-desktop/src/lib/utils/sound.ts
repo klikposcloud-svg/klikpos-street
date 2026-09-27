@@ -97,6 +97,10 @@ class SoundEffects {
   action() {
     this.playBeep();
   }
+
+  playTrash() {
+    this.playError();
+  }
 }
 
 export const soundEffects = new SoundEffects();

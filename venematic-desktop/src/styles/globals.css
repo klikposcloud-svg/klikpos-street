@@ -35,10 +35,16 @@
   --focus-ring: 0 0 0 3px rgb(14 79 90 / 0.25);
   --shadow-pop: 0 4px 12px rgb(0 0 0 / 0.08);
   --shadow-modal: 0 20px 40px rgb(0 0 0 / 0.18);
+  --industrial-bg: #ffffff;
+  --industrial-card: #ffffff;
+  --industrial-border: #e2e8f0;
 }
 
 /* §17.2 Tokens Semánticos Oficiales - Dark (Modo Oscuro) */
 [data-theme="dark"] {
+  --industrial-bg: #0B141F;
+  --industrial-card: #121C29;
+  --industrial-border: #22303F;
   --color-bg-app: #0B141F;
   --color-bg-surface: #121C29;
   --color-bg-sunken: #0E1826;
@@ -200,7 +206,6 @@ html:not(.dark) .bg-white {
   background-color: #ffffff !important;
   background-image: none !important;
   border-color: #e2e8f0 !important;
-  color: #0f172a !important;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
 }
 
@@ -210,7 +215,6 @@ html[data-ui-style="industrial"] .bg-slate-50,
 html:not(.dark) .bg-slate-50 {
   background-color: #f8fafc !important;
   border-color: #e2e8f0 !important;
-  color: #0f172a !important;
 }
 
 html[data-theme="light"] .bg-slate-100,
@@ -218,7 +222,6 @@ html[data-ui-style="industrial"] .bg-slate-100,
 html:not(.dark) .bg-slate-100 {
   background-color: #f1f5f9 !important;
   border-color: #e2e8f0 !important;
-  color: #0f172a !important;
 }
 
 html[data-theme="light"] .bg-\[\#eef2f5\],
@@ -241,6 +244,65 @@ html[data-theme="light"] .text-slate-800,
 html[data-ui-style="industrial"] .text-slate-800,
 html:not(.dark) .text-slate-800 {
   color: #0f172a !important;
+}
+
+/* ========================================================================= */
+/* MÁXIMA PRIORIDAD PARA BADGES DE TECLAS F (F1 - F12) Y TEXTO BLANCO       */
+/* Supera cualquier selector de Modo Industrial, Profesional o Modo Blanco   */
+/* ========================================================================= */
+.text-white,
+[class*="text-white"] {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+html .fkey-badge,
+html .fkey-badge-danger,
+html .fkey-badge-success,
+html:not(.dark) .fkey-badge,
+html:not(.dark) .fkey-badge-danger,
+html:not(.dark) .fkey-badge-success,
+html[data-ui-style] .fkey-badge,
+html[data-ui-style] .fkey-badge-danger,
+html[data-ui-style] .fkey-badge-success,
+html[data-ui-style] * .fkey-badge,
+html[data-ui-style] * .fkey-badge-danger,
+html[data-ui-style] * .fkey-badge-success,
+html[data-theme] * .fkey-badge,
+html[data-theme] * .fkey-badge-danger,
+html[data-theme] * .fkey-badge-success,
+html body .fkey-badge,
+html body .fkey-badge-danger,
+html body .fkey-badge-success,
+span.fkey-badge,
+span.fkey-badge-danger,
+span.fkey-badge-success {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+html .fkey-badge,
+html:not(.dark) .fkey-badge,
+html[data-ui-style] * .fkey-badge,
+html[data-theme] * .fkey-badge,
+span.fkey-badge {
+  background-color: #0f172a !important;
+}
+
+html .fkey-badge-danger,
+html:not(.dark) .fkey-badge-danger,
+html[data-ui-style] * .fkey-badge-danger,
+html[data-theme] * .fkey-badge-danger,
+span.fkey-badge-danger {
+  background-color: #be123c !important;
+}
+
+html .fkey-badge-success,
+html:not(.dark) .fkey-badge-success,
+html[data-ui-style] * .fkey-badge-success,
+html[data-theme] * .fkey-badge-success,
+span.fkey-badge-success {
+  background-color: #047857 !important;
 }
 
 html[data-theme="light"] .text-slate-700,
@@ -471,12 +533,9 @@ body {
   }
 
   #thermal-receipt, #thermal-receipt *,
-  #corte-receipt, #corte-receipt *,
   #seniat-receipt, #seniat-receipt *,
-  #seniat-book-print, #seniat-book-print *,
-  .print-area, .print-area *,
-  .print-full-page, .print-full-page * {
-    visibility: visible !important;
+  .print-area, .print-area * {
+    visibility: visible;
     color: #000000 !important;
     text-shadow: none !important;
     -webkit-font-smoothing: none !important;
@@ -484,8 +543,7 @@ body {
     text-rendering: geometricPrecision !important;
   }
 
-  /* Contenedor Térmico (Tickets POS y Cortes de Caja X y Z) */
-  #thermal-receipt, #corte-receipt, .print-area {
+  #thermal-receipt, #seniat-receipt, .print-area {
     position: absolute;
     left: 0;
     top: 0;
@@ -513,7 +571,6 @@ body {
 
   /* Soporte específico para rollo angosto 58mm (Cabezal térmico real: 48mm / 384 dots) */
   html[data-paper-width="58mm"] #thermal-receipt,
-  html[data-paper-width="58mm"] #corte-receipt,
   html[data-paper-width="58mm"] #seniat-receipt,
   html[data-paper-width="58mm"] .print-area {
     width: 48mm !important;
@@ -526,23 +583,12 @@ body {
 
   /* Para rollos de 80mm (Cabezal térmico real: 72mm / 576 dots) */
   html[data-paper-width="80mm"] #thermal-receipt,
-  html[data-paper-width="80mm"] #corte-receipt,
   html[data-paper-width="80mm"] #seniat-receipt,
   html[data-paper-width="80mm"] .print-area {
     width: 72mm !important;
     max-width: 72mm !important;
     font-size: 11px !important;
     padding: 1mm 1.5mm var(--receipt-feed-padding, 3mm) 1.5mm !important;
-    box-sizing: border-box !important;
-  }
-
-  /* Documentos Fiscales en Hoja Completa (Carta / A4) */
-  .print-full-page, #seniat-book-print {
-    position: relative !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    background: #ffffff !important;
-    color: #000000 !important;
     box-sizing: border-box !important;
   }
 
@@ -2105,5 +2151,85 @@ html:not([data-ui-style="glassmorphism"]) .pos-header-clock .pos-clock-time {
   color: #38bdf8;
   text-shadow: 0 0 8px rgba(56, 189, 248, 0.5);
 }
+
+/* ========================================================================= */
+/* TEMA ESMERILADO (FROSTED GLASS / GLASSMORPHISM)                           */
+/* ========================================================================= */
+
+html[data-theme="glass"],
+html.theme-glass {
+  background-color: #0b1320 !important;
+  background-image: radial-gradient(circle at 50% 35%, rgba(2, 132, 199, 0.18) 0%, rgba(245, 158, 11, 0.10) 30%, rgba(11, 19, 32, 0.98) 78%) !important;
+  background-attachment: fixed !important;
+  color: #f8fafc !important;
+}
+
+html[data-theme="glass"] body,
+html.theme-glass body {
+  background-color: transparent !important;
+  background-image: none !important;
+  color: #f8fafc !important;
+}
+
+/* Paneles de cristal esmerilado translúcido */
+html[data-theme="glass"] .glass-panel,
+html[data-theme="glass"] header,
+html[data-theme="glass"] aside {
+  background: rgba(14, 23, 38, 0.72) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border-color: rgba(255, 255, 255, 0.10) !important;
+}
+
+/* Filas Cápsula de Inventario Flotantes */
+.inventory-capsule-row {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Estilo Blanco para Cápsulas */
+html[data-theme="light"] .inventory-capsule-row,
+html:not([data-theme="glass"]):not(.dark) .inventory-capsule-row {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04);
+}
+html[data-theme="light"] .inventory-capsule-row:hover,
+html:not([data-theme="glass"]):not(.dark) .inventory-capsule-row:hover {
+  background-color: #ffffff;
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1px);
+}
+
+/* Estilo Oscuro Clásico para Cápsulas */
+html[data-theme="dark"]:not([data-theme="glass"]) .inventory-capsule-row {
+  background-color: #141f2e;
+  border: 1px solid #233348;
+  box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.3);
+}
+html[data-theme="dark"]:not([data-theme="glass"]) .inventory-capsule-row:hover {
+  background-color: #1a293d;
+  border-color: #38bdf8;
+  box-shadow: 0 4px 18px -2px rgba(0, 0, 0, 0.5);
+  transform: translateY(-1px);
+}
+
+/* Estilo Esmerilado Translúcido para Cápsulas (Mac / Linear Style) */
+html[data-theme="glass"] .inventory-capsule-row,
+html.theme-glass .inventory-capsule-row {
+  background: rgba(18, 30, 48, 0.60) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.4), inset 0 1px 0 0 rgba(255, 255, 255, 0.1) !important;
+}
+html[data-theme="glass"] .inventory-capsule-row:hover,
+html.theme-glass .inventory-capsule-row:hover {
+  background: rgba(24, 40, 64, 0.80) !important;
+  border-color: rgba(56, 189, 248, 0.45) !important;
+  box-shadow: 0 8px 30px -4px rgba(0, 0, 0, 0.6), 0 0 20px rgba(56, 189, 248, 0.25), inset 0 1px 0 0 rgba(255, 255, 255, 0.2) !important;
+  transform: translateY(-1.5px);
+}
+
 
 

@@ -21,6 +21,10 @@ import {
   Banknote,
   Users,
   Search,
+  ChevronLeft,
+  ChevronRight,
+  Sparkles,
+  SlidersHorizontal,
 } from 'lucide-react';
 import { scaleService, WeightReading } from '@/lib/hardware/scale';
 import { kickCashDrawer } from '@/lib/hardware/cash-drawer';
@@ -29,10 +33,42 @@ import ManualWeightModal from '@/components/ManualWeightModal';
 import CashShiftModal from '@/components/CashShiftModal';
 import { parseScaleBarcode, findProductByScalePLU } from '@/lib/hardware/scale-barcode';
 import { pagoMovilMonitor, PagoMovilConfirmation } from '@/lib/payments/pago-movil-gmail-monitor';
+import PosQuickAccessSettings from '@/components/PosQuickAccessSettings';
+import { SYSTEM_DEFAULTS } from '@/lib/constants/defaults';
 
 interface CartItem extends SaleItem {
   stock: number;
 }
+
+// Helpers para íconos y colores por rubro (Imágenes 1 y 2)
+const getCategoryEmoji = (category: string) => {
+  const cat = (category || '').toLowerCase();
+  if (cat.includes('carne') || cat.includes('pollo') || cat.includes('res') || cat.includes('cerdo')) return '🍅';
+  if (cat.includes('bebida') || cat.includes('refresco') || cat.includes('jugo') || cat.includes('agua')) return '🥤';
+  if (cat.includes('lacteo') || cat.includes('queso') || cat.includes('leche')) return '🧀';
+  if (cat.includes('fruta') || cat.includes('verdura') || cat.includes('legumbre')) return '🥑';
+  if (cat.includes('pan') || cat.includes('panaderia') || cat.includes('dulce')) return '🥖';
+  if (cat.includes('snack') || cat.includes('golosina') || cat.includes('galleta')) return '🍿';
+  if (cat.includes('viveres') || cat.includes('grano') || cat.includes('arroz') || cat.includes('pasta')) return '🌾';
+  if (cat.includes('limpieza') || cat.includes('higiene') || cat.includes('aseo')) return '🧼';
+  if (cat.includes('licor') || cat.includes('cerveza') || cat.includes('vino')) return '🍺';
+  if (cat.includes('charcuteria') || cat.includes('embutido')) return '🥓';
+  return '📦';
+};
+
+const getCategoryBadgeColor = (category: string) => {
+  const cat = (category || '').toLowerCase();
+  if (cat.includes('carne') || cat.includes('pollo') || cat.includes('res') || cat.includes('cerdo')) return 'bg-rose-600 dark:bg-rose-700';
+  if (cat.includes('bebida') || cat.includes('refresco') || cat.includes('jugo')) return 'bg-blue-600 dark:bg-blue-700';
+  if (cat.includes('lacteo') || cat.includes('queso') || cat.includes('leche')) return 'bg-amber-600 dark:bg-amber-700';
+  if (cat.includes('fruta') || cat.includes('verdura') || cat.includes('legumbre')) return 'bg-emerald-600 dark:bg-emerald-700';
+  if (cat.includes('pan') || cat.includes('panaderia')) return 'bg-orange-600 dark:bg-orange-700';
+  if (cat.includes('snack') || cat.includes('golosina')) return 'bg-purple-600 dark:bg-purple-700';
+  if (cat.includes('viveres') || cat.includes('grano')) return 'bg-teal-700 dark:bg-teal-800';
+  if (cat.includes('limpieza') || cat.includes('higiene')) return 'bg-cyan-700 dark:bg-cyan-800';
+  if (cat.includes('licor') || cat.includes('cerveza')) return 'bg-indigo-700 dark:bg-indigo-800';
+  return 'bg-[#0e4f5a]';
+};
 
 export default function DesktopPosPage() {
   const [products, setProducts] = useState<LocalProduct[]>([]);
@@ -40,8 +76,19 @@ export default function DesktopPosPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>('Todos');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [cart, setCart] = useState<CartItem[]>([]);
-  const [bcvRate, setBcvRate] = useState<number>(848.55);
+  const [bcvRate, setBcvRate] = useState<number>(SYSTEM_DEFAULTS.DEFAULT_BCV_RATE);
   const [primaryCurrency, setPrimaryCurrency] = useState<'VES' | 'USD'>('VES');
+
+  // Slider manual superior (Imagen 1) - Accesos Rápidos Personalizables
+  const sliderRef = useRef<HTMLDivElement>(null);
+  const [customSliderIds, setCustomSliderIds] = useState<number[]>([]);
+  const [showQuickAccessModal, setShowQuickAccessModal] = useState<boolean>(false);
+  const scrollSlider = (direction: 'left' | 'right') => {
+    if (sliderRef.current) {
+      const scrollAmount = direction === 'left' ? -380 : 380;
+      sliderRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
+  };
 
   // Toggle de visualización de fotos (persistente en localStorage)
   const [showImages, setShowImages] = useState<boolean>(true);
@@ -377,7 +424,7 @@ export default function DesktopPosPage() {
     setCategories(['Todos', ...cats]);
 
     const rateSetting = await db.settings.get('bcv_rate');
-    const currentRate = rateSetting ? rateSetting.value : 848.55;
+    const currentRate = rateSetting ? rateSetting.value : SYSTEM_DEFAULTS.DEFAULT_BCV_RATE;
     if (rateSetting) setBcvRate(rateSetting.value);
 
     const currencySetting = await db.settings.get('primary_currency');
@@ -387,6 +434,22 @@ export default function DesktopPosPage() {
       const stored = typeof window !== 'undefined' ? localStorage.getItem('venematic_primary_currency') : null;
       if (stored === 'USD' || stored === 'VES') setPrimaryCurrency(stored);
     }
+
+    // Cargar configuración de productos favoritos para el carrusel de accesos rápidos
+    try {
+      const sliderSetting = await db.settings.get('pos_slider_quick_products');
+      if (sliderSetting && Array.isArray(sliderSetting.value) && sliderSetting.value.length > 0) {
+        setCustomSliderIds(sliderSetting.value);
+      } else {
+        const local = localStorage.getItem('venematic_pos_slider_quick_products');
+        if (local) {
+          const parsed = JSON.parse(local);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setCustomSliderIds(parsed);
+          }
+        }
+      }
+    } catch {}
 
     // Cargar datos de membrete de comercio y logo
     try {
@@ -558,9 +621,19 @@ export default function DesktopPosPage() {
     } catch {}
 
     const handleBcvUpdate = (e: any) => {
-      if (e.detail) setBcvRate(e.detail);
+      if (e.detail && typeof e.detail === 'number' && e.detail > 0) {
+        setBcvRate(e.detail);
+      }
     };
     window.addEventListener('pos:bcv_updated', handleBcvUpdate);
+    window.addEventListener('venematic:bcv_updated', handleBcvUpdate);
+
+    const handleSliderUpdate = (e: any) => {
+      if (e.detail && Array.isArray(e.detail)) {
+        setCustomSliderIds(e.detail);
+      }
+    };
+    window.addEventListener('pos:quick_slider_updated', handleSliderUpdate);
 
     // Conectar a eventos del escáner celular en tiempo real (SSE)
     let eventSource: EventSource | null = null;
@@ -681,21 +754,91 @@ export default function DesktopPosPage() {
     // Foco automático en el buscador para pistolas lectoras de códigos de barras
     searchInputRef.current?.focus();
 
-    // Atajos de teclado para POS y Teclado Numérico Físico (Numpad)
+    // Atajos de teclado para POS (F2 a F12) y Teclado Numérico Físico (Numpad)
     const handleKeyDown = (e: KeyboardEvent) => {
-      // F3: Enfocar buscador
+      // F2: Alternar Moneda Principal (VES / USD)
+      if (e.key === 'F2') {
+        e.preventDefault();
+        setPrimaryCurrency((prev) => {
+          const next = prev === 'VES' ? 'USD' : 'VES';
+          localStorage.setItem('venematic_primary_currency', next);
+          showToast(`Moneda cambiada a: ${next === 'VES' ? 'Bolívares (Bs.)' : 'Dólares ($)'} (F2)`, 'info');
+          soundEffects.playBeep();
+          return next;
+        });
+        return;
+      }
+
+      // F3: Enfocar buscador / lector de código de barras
       if (e.key === 'F3') {
         e.preventDefault();
         searchInputRef.current?.focus();
         searchInputRef.current?.select();
+        showToast('Buscador enfocado (F3)', 'info');
         return;
       }
-      // F12: Cobrar
-      if (e.key === 'F12') {
+
+      // F4: Venta a Crédito / Fiado
+      if (e.key === 'F4') {
         e.preventDefault();
-        if (cartRef.current.length > 0) openPaymentModal();
+        if (cartRef.current.length > 0) {
+          setSelectedPaymentMethod('credit');
+          openPaymentModal();
+          showToast('Cobro en Crédito / Fiado (F4)', 'info');
+        } else {
+          showToast('Agrega productos al carrito para venta a crédito (F4)', 'info');
+        }
         return;
       }
+
+      // F5: Balanza Digital / Ingreso Manual de Peso
+      if (e.key === 'F5') {
+        e.preventDefault();
+        setShowManualWeightModal(true);
+        soundEffects.playBeep();
+        return;
+      }
+
+      // F6: Alternar modo del teclado numérico (Cantidad / Código)
+      if (e.key === 'F6') {
+        e.preventDefault();
+        setNumpadMode((prev) => {
+          const next = prev === 'qty' ? 'barcode' : 'qty';
+          showToast(`Modo numpad: ${next === 'qty' ? 'Cantidad' : 'Código de Barras'} (F6)`, 'info');
+          soundEffects.playBeep();
+          return next;
+        });
+        return;
+      }
+
+      // F7: Limpiar / Vaciar Carrito Actual
+      if (e.key === 'F7') {
+        e.preventDefault();
+        if (cartRef.current.length > 0) {
+          setCart([]);
+          setSelectedCartItemId(null);
+          soundEffects.playTrash();
+          showToast('Carrito vaciado exitosamente (F7)', 'info');
+        } else {
+          showToast('El carrito ya está vacío', 'info');
+        }
+        return;
+      }
+
+      // F8: Escáner Celular Inalámbrico con QR
+      if (e.key === 'F8') {
+        e.preventDefault();
+        openScannerModal();
+        return;
+      }
+
+      // F9: Turno de Caja y Arqueo Físico
+      if (e.key === 'F9') {
+        e.preventDefault();
+        setShowCashShiftModal(true);
+        return;
+      }
+
       // F10: Abrir Gaveta de Dinero (ESC/POS RJ11 Kick)
       if (e.key === 'F10') {
         e.preventDefault();
@@ -704,11 +847,39 @@ export default function DesktopPosPage() {
         });
         return;
       }
+
+      // F11: Pantalla Completa
+      if (e.key === 'F11') {
+        e.preventDefault();
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(() => {});
+          showToast('Pantalla Completa Activada (F11)', 'info');
+        } else {
+          document.exitFullscreen().catch(() => {});
+          showToast('Pantalla Completa Desactivada (F11)', 'info');
+        }
+        return;
+      }
+
+      // F12: Cobrar y Liquidar Venta
+      if (e.key === 'F12') {
+        e.preventDefault();
+        if (cartRef.current.length > 0) {
+          openPaymentModal();
+        } else {
+          showToast('Agrega productos al carrito antes de cobrar (F12)', 'error');
+        }
+        return;
+      }
+
       // Escape: Cerrar modales
       if (e.key === 'Escape') {
         setShowPaymentModal(false);
         setShowReceiptModal(false);
         setShowScannerModal(false);
+        setShowManualWeightModal(false);
+        setShowCashShiftModal(false);
+        setShowQuickAccessModal(false);
         return;
       }
 
@@ -793,7 +964,7 @@ export default function DesktopPosPage() {
     };
   }, []);
 
-  // Filtrado de productos
+  // Filtrado de productos para el catálogo general
   const filteredProducts = products.filter((p) => {
     const matchesCategory =
       selectedCategory === 'Todos' || p.category === selectedCategory;
@@ -804,6 +975,28 @@ export default function DesktopPosPage() {
       p.barcode.toLowerCase().includes(query);
     return matchesCategory && matchesQuery;
   });
+
+  // Productos para el slider superior manual (Cards rectangulares horizontales - Imagen 1)
+  const sliderProducts = React.useMemo(() => {
+    if (customSliderIds.length > 0) {
+      const customList = customSliderIds
+        .map((id) => products.find((p) => p.id === id))
+        .filter((p): p is LocalProduct => Boolean(p));
+
+      if (selectedCategory !== 'Todos') {
+        const catList = customList.filter((p) => p.category === selectedCategory);
+        if (catList.length > 0) return catList;
+        return products.filter((p) => p.category === selectedCategory).slice(0, 20);
+      }
+      return customList;
+    }
+
+    let list = products;
+    if (selectedCategory !== 'Todos') {
+      list = products.filter((p) => p.category === selectedCategory);
+    }
+    return list.slice(0, 20);
+  }, [products, selectedCategory, customSliderIds]);
 
   // Aplicar peso ingresado manualmente (gramos o kilos) desde el modal
   const handleApplyManualWeight = (
@@ -1692,6 +1885,130 @@ export default function DesktopPosPage() {
           </div>
         </div>
 
+        {/* ========================================================================= */}
+        {/* SUBSECCIÓN 1: SLIDER MANUAL DE CARDS RECTANGULARES (IMAGEN 1)             */}
+        {/* Acceso Ultrarrápido / Favoritos / Más Vendidos                            */}
+        {/* ========================================================================= */}
+        {!searchQuery.trim() && sliderProducts.length > 0 && (
+          <div className="shrink-0 flex flex-col gap-1.5 bg-slate-50/70 dark:bg-slate-900/40 p-2 rounded-2xl border border-slate-200/80 dark:border-slate-800/80">
+            {/* Header del Slider con Controles Manuales & Configuración */}
+            <div className="flex items-center justify-between px-1">
+              <div className="flex items-center gap-2">
+                <span className="flex items-center justify-center w-6 h-6 rounded-lg bg-[var(--brand-primary)]/10 text-[var(--brand-primary)]">
+                  <Sparkles className="w-3.5 h-3.5" />
+                </span>
+                <span className="text-xs font-black uppercase tracking-wider text-slate-800 dark:text-slate-200">
+                  {customSliderIds.length > 0 ? 'Accesos Directos de Caja' : 'Más Vendidos & Acceso Rápido'}
+                </span>
+                <span className="text-[10px] font-bold text-slate-500 bg-white dark:bg-slate-800 px-2 py-0.5 rounded-full border border-slate-200/80 dark:border-slate-700">
+                  {sliderProducts.length} items
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setShowQuickAccessModal(true)}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200/90 dark:border-slate-700 shadow-2xs transition-all active:scale-95 cursor-pointer ml-1"
+                  title="Configurar los productos favoritos y accesos directos del carrusel"
+                >
+                  <SlidersHorizontal className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" />
+                  <span className="hidden sm:inline">Configurar Accesos</span>
+                </button>
+              </div>
+
+              {/* Botones de Desplazamiento Manual */}
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => scrollSlider('left')}
+                  className="w-7 h-7 rounded-full bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200/90 dark:border-slate-700 shadow-2xs flex items-center justify-center cursor-pointer transition-all active:scale-90"
+                  title="Desplazar hacia la izquierda"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => scrollSlider('right')}
+                  className="w-7 h-7 rounded-full bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200/90 dark:border-slate-700 shadow-2xs flex items-center justify-center cursor-pointer transition-all active:scale-90"
+                  title="Desplazar hacia la derecha"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            {/* Carrusel Desplazable de Cards Compactas (Más productos visibles simultáneamente) */}
+            <div
+              ref={sliderRef}
+              className="flex gap-2.5 overflow-x-auto snap-x scroll-smooth no-scrollbar py-1 px-0.5"
+            >
+              {sliderProducts.map((p) => {
+                const isLowStock = p.stock <= p.minStock;
+                return (
+                  <div
+                    key={`slider-${p.id}`}
+                    onClick={() => addToCart(p, 1)}
+                    className="w-[230px] sm:w-[250px] h-[98px] bg-white rounded-xl border border-slate-200/90 p-2 shadow-xs hover:shadow-md hover:border-sky-400 transition-all active:scale-[0.98] cursor-pointer flex gap-2.5 items-stretch shrink-0 snap-start group select-none"
+                  >
+                    {/* Foto rectangular a la izquierda */}
+                    <div className="w-18 sm:w-20 h-full rounded-lg bg-slate-50 overflow-hidden relative border border-slate-200/80 shrink-0">
+                      {p.image && showImages ? (
+                        <img
+                          src={p.image}
+                          alt={p.name}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex flex-col items-center justify-center text-slate-300">
+                          <Package className="w-5 h-5 stroke-1" />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Columna de Información a la derecha */}
+                    <div className="flex flex-col justify-between flex-1 min-w-0 py-0.5">
+                      {/* Fila Superior: Código SKU a la izquierda, Chip de Rubro con Emoji a la derecha */}
+                      <div className="flex items-center justify-between gap-1 w-full">
+                        <span className="font-mono text-[10px] font-bold text-slate-500 truncate max-w-[55px]">
+                          {p.barcode ? (p.barcode.length > 4 ? p.barcode.slice(-4) : p.barcode) : '7591'}
+                        </span>
+                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-700 flex items-center gap-1 shrink-0 truncate max-w-[100px]">
+                          <span>{getCategoryEmoji(p.category)}</span>
+                          <span className="uppercase tracking-wide truncate">{p.category}</span>
+                        </span>
+                      </div>
+
+                      {/* Título en Negrita Destacado */}
+                      <h3
+                        className="font-bold text-[12px] sm:text-[12.5px] text-slate-900 leading-tight line-clamp-1 my-0.5"
+                        title={p.name}
+                      >
+                        {p.name}
+                      </h3>
+
+                      {/* Fila Inferior: Precios duales a la izquierda, Badge de Stock con punto verde a la derecha */}
+                      <div className="flex items-end justify-between gap-1">
+                        <div className="leading-tight flex flex-col">
+                          <span className="text-[13px] sm:text-[14px] font-black font-sans text-slate-950 tabular-numbers leading-none">
+                            {formatVES(p.priceUSD * bcvRate)}
+                          </span>
+                          <span className="text-[10px] text-slate-500 font-semibold leading-tight mt-0.5">
+                            ${p.priceUSD.toFixed(2)}
+                          </span>
+                        </div>
+
+                        <span className="text-[9.5px] font-bold px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-700 flex items-center gap-1 shrink-0 border border-slate-200/70">
+                          <span className={`w-1.5 h-1.5 rounded-full ${isLowStock ? 'bg-rose-500 animate-pulse' : 'bg-emerald-500'} shrink-0`} />
+                          <span>{p.stock}</span>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         {/* Categorías Rápidas */}
         <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5 shrink-0">
           {categories.map((cat) => {
@@ -1713,35 +2030,38 @@ export default function DesktopPosPage() {
           })}
         </div>
 
-        {/* Cuadrícula de Productos */}
+        {/* ========================================================================= */}
+        {/* SUBSECCIÓN 2: CUADRÍCULA CLÁSICA DE PRODUCTOS (CARDS COMPACTAS MULTI-COLUMNA)*/}
+        {/* Catálogo Completo / Filtrado Dinámico - Mayor densidad de productos       */}
+        {/* ========================================================================= */}
         <div className="flex-1 overflow-y-auto pr-1">
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5 content-start">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-2.5 content-start">
             {filteredProducts.map((p) => {
               const isLowStock = p.stock <= p.minStock;
               return (
                 <div
                   key={p.id}
                   onClick={() => addToCart(p, 1)}
-                  className="bg-white rounded-2xl border border-slate-200/90 p-3 shadow-2xs hover:shadow-md transition-all active:scale-[0.98] cursor-pointer flex flex-col justify-between group"
+                  className="bg-white rounded-xl border border-slate-200/90 p-2 shadow-xs hover:shadow-md hover:border-sky-400 transition-all active:scale-[0.98] cursor-pointer flex flex-col justify-between group select-none"
                 >
-                  {/* Encabezado: Barcode Pill + Rubro Coloreado */}
-                  <div className="flex items-center justify-between gap-1.5 w-full mb-1">
-                    <span className="font-mono text-[9.5px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded border border-slate-200/60 truncate max-w-[100px]">
-                      {p.barcode || 'S/C'}
+                  {/* Encabezado: SKU con bordecito a la izquierda + Badge color sólido de Rubro a la derecha */}
+                  <div className="flex items-center justify-between gap-1 w-full mb-1">
+                    <span className="font-mono text-[9.5px] font-bold text-slate-600 bg-slate-50 px-1.5 py-0.5 rounded border border-slate-200/90 truncate max-w-[65px]">
+                      {p.barcode ? (p.barcode.length > 4 ? p.barcode.slice(-4) : p.barcode) : '759...'}
                     </span>
-                    <span className="text-[9.5px] font-extrabold px-2.5 py-0.5 rounded bg-[#0e4f5a] text-white uppercase tracking-wider shrink-0">
+                    <span className={`text-[8.5px] font-black px-1.5 py-0.5 rounded text-white uppercase tracking-wider shrink-0 truncate max-w-[90px] ${getCategoryBadgeColor(p.category)}`}>
                       {p.category}
                     </span>
                   </div>
 
                   {/* Nombre */}
-                  <h4 className="font-bold text-[13px] text-slate-900 truncate leading-snug my-1" title={p.name}>
+                  <h4 className="font-bold text-[12px] text-slate-900 truncate leading-tight my-1" title={p.name}>
                     {p.name}
                   </h4>
 
-                  {/* Contenedor de Imagen */}
-                  <div className="w-full h-24 sm:h-28 rounded-xl bg-slate-100 overflow-hidden relative border border-slate-200/60 my-1">
-                    {p.image ? (
+                  {/* Contenedor de Imagen Panorámica con esquinas redondeadas */}
+                  <div className="w-full h-18 sm:h-20 rounded-lg bg-slate-50 overflow-hidden relative border border-slate-200/80 mb-1.5">
+                    {p.image && showImages ? (
                       <img
                         src={p.image}
                         alt={p.name}
@@ -1750,25 +2070,25 @@ export default function DesktopPosPage() {
                       />
                     ) : (
                       <div className="w-full h-full flex flex-col items-center justify-center text-slate-300">
-                        <Package className="w-8 h-8 stroke-1" />
+                        <Package className="w-6 h-6 stroke-1" />
                       </div>
                     )}
                   </div>
 
                   {/* Precios y Stock */}
-                  <div className="flex items-end justify-between gap-1.5 pt-1 mt-1">
+                  <div className="flex items-end justify-between gap-1 pt-0.5 mt-auto">
                     <div className="leading-tight flex flex-col">
-                      <span className="text-[15px] font-black font-sans text-slate-950 tabular-numbers leading-tight">
+                      <span className="text-[13px] sm:text-[14px] font-black font-sans text-slate-950 tabular-numbers leading-tight">
                         {formatVES(p.priceUSD * bcvRate)}
                       </span>
-                      <span className="text-xs text-slate-500 font-medium">
-                        ${p.priceUSD.toFixed(2)} USD
+                      <span className="text-[10px] text-slate-500 font-semibold">
+                        ${p.priceUSD.toFixed(2)}
                       </span>
                     </div>
 
-                    <span className="text-[11px] font-medium px-2.5 py-0.5 rounded-full border border-slate-200 bg-slate-50 text-slate-700 shrink-0 flex items-center gap-1.5">
-                      <span className={`w-1.5 h-1.5 rounded-full ${isLowStock ? 'bg-rose-500 animate-pulse' : 'bg-emerald-500'}`} />
-                      <span>{p.stock} {p.unit}</span>
+                    <span className="text-[9.5px] font-medium px-1.5 py-0.5 rounded-full border border-slate-200/80 bg-slate-50 text-slate-700 shrink-0 flex items-center gap-1">
+                      <span className={`w-1.5 h-1.5 rounded-full ${isLowStock ? 'bg-rose-500 animate-pulse' : 'bg-emerald-500'} shrink-0`} />
+                      <span>{p.stock}</span>
                     </span>
                   </div>
                 </div>
@@ -1781,6 +2101,177 @@ export default function DesktopPosPage() {
               No se encontraron productos coincidentes.
             </div>
           )}
+        </div>
+
+        {/* ========================================================================= */}
+        {/* BARRA DE ATAJOS DE TECLADO INDUSTRIAL (TECLAS DE FUNCIÓN F2 A F12)        */}
+        {/* Realmente funcionales: físicas o mediante clic en pantalla táctil         */}
+        {/* ========================================================================= */}
+        <div className="shrink-0 bg-white dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-800 rounded-xl p-1.5 shadow-2xs flex items-center justify-between gap-1 overflow-x-auto no-scrollbar select-none">
+          <button
+            type="button"
+            onClick={() => {
+              setPrimaryCurrency((prev) => {
+                const next = prev === 'VES' ? 'USD' : 'VES';
+                localStorage.setItem('venematic_primary_currency', next);
+                showToast(`Moneda: ${next === 'VES' ? 'Bs.' : '$'} (F2)`, 'info');
+                soundEffects.playBeep();
+                return next;
+              });
+            }}
+            className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-750 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 text-xs font-bold transition-all active:scale-95 cursor-pointer shrink-0"
+            title="Alternar moneda principal entre Bolívares y Dólares"
+          >
+            <span className="fkey-badge px-2 py-0.5 rounded font-mono text-[11px] font-black tracking-wider shadow-2xs shrink-0 !text-white text-white">F2</span>
+            <span className="text-[11px] font-extrabold">Moneda ({primaryCurrency})</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              searchInputRef.current?.focus();
+              searchInputRef.current?.select();
+            }}
+            className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-750 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 text-xs font-bold transition-all active:scale-95 cursor-pointer shrink-0"
+            title="Enfocar buscador para escribir o escanear"
+          >
+            <span className="fkey-badge px-2 py-0.5 rounded font-mono text-[11px] font-black tracking-wider shadow-2xs shrink-0 !text-white text-white">F3</span>
+            <span className="text-[11px] font-extrabold">Buscar</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              if (cartRef.current.length > 0) {
+                setSelectedPaymentMethod('credit');
+                openPaymentModal();
+              } else {
+                showToast('Agrega productos al carrito para venta a crédito (F4)', 'info');
+              }
+            }}
+            className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-750 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 text-xs font-bold transition-all active:scale-95 cursor-pointer shrink-0"
+            title="Venta a Crédito / Fiado de clientes"
+          >
+            <span className="fkey-badge px-2 py-0.5 rounded font-mono text-[11px] font-black tracking-wider shadow-2xs shrink-0 !text-white text-white">F4</span>
+            <span className="text-[11px] font-extrabold">Crédito</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setShowManualWeightModal(true);
+              soundEffects.playBeep();
+            }}
+            className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-750 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 text-xs font-bold transition-all active:scale-95 cursor-pointer shrink-0"
+            title="Ingreso de peso manual para balanza"
+          >
+            <span className="fkey-badge px-2 py-0.5 rounded font-mono text-[11px] font-black tracking-wider shadow-2xs shrink-0 !text-white text-white">F5</span>
+            <span className="text-[11px] font-extrabold">Balanza</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setNumpadMode((prev) => {
+                const next = prev === 'qty' ? 'barcode' : 'qty';
+                showToast(`Modo numpad: ${next === 'qty' ? 'Cantidad' : 'Código'} (F6)`, 'info');
+                soundEffects.playBeep();
+                return next;
+              });
+            }}
+            className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-750 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 text-xs font-bold transition-all active:scale-95 cursor-pointer shrink-0"
+            title="Alternar modo del teclado numérico entre Cantidad y Código"
+          >
+            <span className="fkey-badge px-2 py-0.5 rounded font-mono text-[11px] font-black tracking-wider shadow-2xs shrink-0 !text-white text-white">F6</span>
+            <span className="text-[11px] font-extrabold">Pad ({numpadMode === 'qty' ? 'Cant' : 'Cód'})</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              if (cartRef.current.length > 0) {
+                setCart([]);
+                setSelectedCartItemId(null);
+                soundEffects.playTrash();
+                showToast('Carrito vaciado (F7)', 'info');
+              } else {
+                showToast('El carrito ya está vacío', 'info');
+              }
+            }}
+            className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-slate-100 hover:bg-rose-100 dark:bg-slate-800 dark:hover:bg-rose-950/40 text-slate-800 hover:text-rose-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 text-xs font-bold transition-all active:scale-95 cursor-pointer shrink-0"
+            title="Limpiar carrito de venta actual"
+          >
+            <span className="fkey-badge-danger px-2 py-0.5 rounded font-mono text-[11px] font-black tracking-wider shadow-2xs shrink-0 !text-white text-white">F7</span>
+            <span className="text-[11px] font-extrabold">Limpiar</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => openScannerModal()}
+            className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-750 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 text-xs font-bold transition-all active:scale-95 cursor-pointer shrink-0"
+            title="Vincular celular como escáner inalámbrico"
+          >
+            <span className="fkey-badge px-2 py-0.5 rounded font-mono text-[11px] font-black tracking-wider shadow-2xs shrink-0 !text-white text-white">F8</span>
+            <span className="text-[11px] font-extrabold">Móvil</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setShowCashShiftModal(true)}
+            className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-750 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 text-xs font-bold transition-all active:scale-95 cursor-pointer shrink-0"
+            title="Gestión de turno de caja y arqueo"
+          >
+            <span className="fkey-badge px-2 py-0.5 rounded font-mono text-[11px] font-black tracking-wider shadow-2xs shrink-0 !text-white text-white">F9</span>
+            <span className="text-[11px] font-extrabold">Turno</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              kickCashDrawer().then((res) => {
+                showToast(res.message, 'success');
+              });
+            }}
+            className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-750 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 text-xs font-bold transition-all active:scale-95 cursor-pointer shrink-0"
+            title="Abrir gaveta de dinero físico"
+          >
+            <span className="fkey-badge px-2 py-0.5 rounded font-mono text-[11px] font-black tracking-wider shadow-2xs shrink-0 !text-white text-white">F10</span>
+            <span className="text-[11px] font-extrabold">Gaveta</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(() => {});
+                showToast('Pantalla Completa Activada (F11)', 'info');
+              } else {
+                document.exitFullscreen().catch(() => {});
+                showToast('Pantalla Completa Desactivada (F11)', 'info');
+              }
+            }}
+            className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-750 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 text-xs font-bold transition-all active:scale-95 cursor-pointer shrink-0"
+            title="Alternar pantalla completa"
+          >
+            <span className="fkey-badge px-2 py-0.5 rounded font-mono text-[11px] font-black tracking-wider shadow-2xs shrink-0 !text-white text-white">F11</span>
+            <span className="text-[11px] font-extrabold">Pantalla</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              if (cartRef.current.length > 0) {
+                openPaymentModal();
+              } else {
+                showToast('Agrega productos al carrito antes de cobrar (F12)', 'error');
+              }
+            }}
+            className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-[var(--brand-primary)] hover:bg-[var(--brand-hover)] text-white border border-[var(--brand-primary)] text-xs font-black transition-all active:scale-95 shadow-xs cursor-pointer shrink-0"
+            title="Cobrar venta actual"
+          >
+            <span className="fkey-badge-success px-2 py-0.5 rounded font-mono text-[11px] font-black tracking-wider shadow-2xs shrink-0 !text-white text-white">F12</span>
+            <span className="text-[11px] uppercase tracking-wide font-black !text-white text-white">Cobrar</span>
+          </button>
         </div>
       </div>
 
@@ -2004,10 +2495,10 @@ export default function DesktopPosPage() {
             <button
               type="button"
               onClick={() => setNumpadMode('qty')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer border-2 ${
                 numpadMode === 'qty'
-                  ? 'bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-white'
-                  : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                  ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)] shadow-2xs'
+                  : 'bg-white hover:bg-slate-100 text-slate-800 border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200'
               }`}
             >
               Cantidad
@@ -2015,15 +2506,15 @@ export default function DesktopPosPage() {
             <button
               type="button"
               onClick={() => setNumpadMode('barcode')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer border-2 ${
                 numpadMode === 'barcode'
-                  ? 'bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-white'
-                  : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                  ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)] shadow-2xs'
+                  : 'bg-white hover:bg-slate-100 text-slate-800 border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200'
               }`}
             >
               Código
             </button>
-            <div className="flex-1 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 text-xs text-slate-500 dark:text-slate-300 font-bold truncate uppercase">
+            <div className="flex-1 bg-white dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 rounded-lg px-3 py-1.5 text-xs text-slate-500 dark:text-slate-300 font-bold truncate uppercase shadow-2xs">
               {numpadValue ? (
                 <span className="text-[var(--brand-primary)] dark:text-emerald-400 font-bold font-mono text-sm">{numpadValue}</span>
               ) : (
@@ -2032,40 +2523,40 @@ export default function DesktopPosPage() {
             </div>
           </div>
 
-          {/* Grid de teclas */}
+          {/* Grid de teclas con contornos oscurecidos y alto contraste táctil */}
           <div className="grid grid-cols-4 gap-1.5">
             {/* Fila 1: 7, 8, 9, Backspace */}
-            <button type="button" onClick={() => handleNumpadKey('7')} className="h-10 rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white font-bold text-base transition-colors active:scale-95 shadow-2xs cursor-pointer">7</button>
-            <button type="button" onClick={() => handleNumpadKey('8')} className="h-10 rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white font-bold text-base transition-colors active:scale-95 shadow-2xs cursor-pointer">8</button>
-            <button type="button" onClick={() => handleNumpadKey('9')} className="h-10 rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white font-bold text-base transition-colors active:scale-95 shadow-2xs cursor-pointer">9</button>
-            <button type="button" onClick={() => handleNumpadKey('BACK')} className="h-10 rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-bold text-base transition-colors active:scale-95 shadow-2xs flex items-center justify-center cursor-pointer" title="Borrar">
-              <svg className="w-5 h-5 text-slate-600 dark:text-slate-300" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+            <button type="button" onClick={() => handleNumpadKey('7')} className="h-10 rounded-xl bg-white hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 border-2 border-slate-300 hover:border-slate-500 dark:border-slate-600 dark:hover:border-slate-400 text-slate-950 dark:text-white font-black text-base transition-all active:scale-95 shadow-2xs cursor-pointer">7</button>
+            <button type="button" onClick={() => handleNumpadKey('8')} className="h-10 rounded-xl bg-white hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 border-2 border-slate-300 hover:border-slate-500 dark:border-slate-600 dark:hover:border-slate-400 text-slate-950 dark:text-white font-black text-base transition-all active:scale-95 shadow-2xs cursor-pointer">8</button>
+            <button type="button" onClick={() => handleNumpadKey('9')} className="h-10 rounded-xl bg-white hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 border-2 border-slate-300 hover:border-slate-500 dark:border-slate-600 dark:hover:border-slate-400 text-slate-950 dark:text-white font-black text-base transition-all active:scale-95 shadow-2xs cursor-pointer">9</button>
+            <button type="button" onClick={() => handleNumpadKey('BACK')} className="h-10 rounded-xl bg-white hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 border-2 border-slate-300 hover:border-slate-500 dark:border-slate-600 dark:hover:border-slate-400 text-slate-800 dark:text-slate-200 font-bold text-base transition-all active:scale-95 shadow-2xs flex items-center justify-center cursor-pointer" title="Borrar">
+              <svg className="w-5 h-5 text-slate-700 dark:text-slate-300" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M3 12l6-7h12a2 2 0 012 2v10a2 2 0 01-2 2H9l-6-7z" />
               </svg>
             </button>
 
             {/* Fila 2: 4, 5, 6, C */}
-            <button type="button" onClick={() => handleNumpadKey('4')} className="h-10 rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white font-bold text-base transition-colors active:scale-95 shadow-2xs cursor-pointer">4</button>
-            <button type="button" onClick={() => handleNumpadKey('5')} className="h-10 rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white font-bold text-base transition-colors active:scale-95 shadow-2xs cursor-pointer">5</button>
-            <button type="button" onClick={() => handleNumpadKey('6')} className="h-10 rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white font-bold text-base transition-colors active:scale-95 shadow-2xs cursor-pointer">6</button>
-            <button type="button" onClick={() => handleNumpadKey('C')} className="h-10 rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-bold text-base transition-colors active:scale-95 shadow-2xs cursor-pointer" title="Limpiar">C</button>
+            <button type="button" onClick={() => handleNumpadKey('4')} className="h-10 rounded-xl bg-white hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 border-2 border-slate-300 hover:border-slate-500 dark:border-slate-600 dark:hover:border-slate-400 text-slate-950 dark:text-white font-black text-base transition-all active:scale-95 shadow-2xs cursor-pointer">4</button>
+            <button type="button" onClick={() => handleNumpadKey('5')} className="h-10 rounded-xl bg-white hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 border-2 border-slate-300 hover:border-slate-500 dark:border-slate-600 dark:hover:border-slate-400 text-slate-950 dark:text-white font-black text-base transition-all active:scale-95 shadow-2xs cursor-pointer">5</button>
+            <button type="button" onClick={() => handleNumpadKey('6')} className="h-10 rounded-xl bg-white hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 border-2 border-slate-300 hover:border-slate-500 dark:border-slate-600 dark:hover:border-slate-400 text-slate-950 dark:text-white font-black text-base transition-all active:scale-95 shadow-2xs cursor-pointer">6</button>
+            <button type="button" onClick={() => handleNumpadKey('C')} className="h-10 rounded-xl bg-white hover:bg-rose-50 dark:bg-slate-800 dark:hover:bg-rose-950/40 border-2 border-slate-300 hover:border-rose-400 dark:border-slate-600 text-rose-600 dark:text-rose-400 font-black text-base transition-all active:scale-95 shadow-2xs cursor-pointer" title="Limpiar">C</button>
 
             {/* Fila 3: 1, 2, 3, Enter */}
-            <button type="button" onClick={() => handleNumpadKey('1')} className="h-10 rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white font-bold text-base transition-colors active:scale-95 shadow-2xs cursor-pointer">1</button>
-            <button type="button" onClick={() => handleNumpadKey('2')} className="h-10 rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white font-bold text-base transition-colors active:scale-95 shadow-2xs cursor-pointer">2</button>
-            <button type="button" onClick={() => handleNumpadKey('3')} className="h-10 rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white font-bold text-base transition-colors active:scale-95 shadow-2xs cursor-pointer">3</button>
+            <button type="button" onClick={() => handleNumpadKey('1')} className="h-10 rounded-xl bg-white hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 border-2 border-slate-300 hover:border-slate-500 dark:border-slate-600 dark:hover:border-slate-400 text-slate-950 dark:text-white font-black text-base transition-all active:scale-95 shadow-2xs cursor-pointer">1</button>
+            <button type="button" onClick={() => handleNumpadKey('2')} className="h-10 rounded-xl bg-white hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 border-2 border-slate-300 hover:border-slate-500 dark:border-slate-600 dark:hover:border-slate-400 text-slate-950 dark:text-white font-black text-base transition-all active:scale-95 shadow-2xs cursor-pointer">2</button>
+            <button type="button" onClick={() => handleNumpadKey('3')} className="h-10 rounded-xl bg-white hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 border-2 border-slate-300 hover:border-slate-500 dark:border-slate-600 dark:hover:border-slate-400 text-slate-950 dark:text-white font-black text-base transition-all active:scale-95 shadow-2xs cursor-pointer">3</button>
             <button
               type="button"
               onClick={handleNumpadApply}
-              className="row-span-2 rounded-xl bg-[var(--brand-primary)] hover:bg-[var(--brand-hover)] text-white font-bold text-xs flex flex-col items-center justify-center leading-tight transition-colors active:scale-95 shadow-2xs cursor-pointer p-1"
+              className="row-span-2 rounded-xl bg-[var(--brand-primary)] hover:bg-[var(--brand-hover)] border-2 border-[var(--brand-primary)] text-white font-bold text-xs flex flex-col items-center justify-center leading-tight transition-all active:scale-95 shadow-xs cursor-pointer p-1"
             >
-              <span className="font-bold text-sm">Enter</span>
-              <span className="text-[10px] text-emerald-200 font-normal">Aplicar</span>
+              <span className="font-black text-sm">Enter</span>
+              <span className="text-[10px] text-emerald-200 font-semibold">Aplicar</span>
             </button>
 
             {/* Fila 4: 0 (span 2), . */}
-            <button type="button" onClick={() => handleNumpadKey('0')} className="col-span-2 h-10 rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white font-bold text-base transition-colors active:scale-95 shadow-2xs cursor-pointer">0</button>
-            <button type="button" onClick={() => handleNumpadKey('.')} className="h-10 rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white font-bold text-base transition-colors active:scale-95 shadow-2xs cursor-pointer">.</button>
+            <button type="button" onClick={() => handleNumpadKey('0')} className="col-span-2 h-10 rounded-xl bg-white hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 border-2 border-slate-300 hover:border-slate-500 dark:border-slate-600 dark:hover:border-slate-400 text-slate-950 dark:text-white font-black text-base transition-all active:scale-95 shadow-2xs cursor-pointer">0</button>
+            <button type="button" onClick={() => handleNumpadKey('.')} className="h-10 rounded-xl bg-white hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 border-2 border-slate-300 hover:border-slate-500 dark:border-slate-600 dark:hover:border-slate-400 text-slate-950 dark:text-white font-black text-base transition-all active:scale-95 shadow-2xs cursor-pointer">.</button>
           </div>
         </div>
       </div>
@@ -3496,6 +3987,48 @@ export default function DesktopPosPage() {
         onShiftUpdated={(updated) => setActiveShift(updated)}
         storeInfo={storeInfo}
       />
+
+      {/* Modal de Configuración Rápida de Accesos Directos del Slider para Cajeros */}
+      {showQuickAccessModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-3 sm:p-4 animate-in fade-in duration-150">
+          <div className="bg-white dark:bg-[#121c29] border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden">
+            <div className="px-5 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0 bg-slate-50 dark:bg-slate-900/50">
+              <div className="flex items-center gap-2.5">
+                <span className="p-1.5 rounded-lg bg-[var(--brand-primary)]/10 text-[var(--brand-primary)]">
+                  <SlidersHorizontal className="w-5 h-5" />
+                </span>
+                <div>
+                  <h3 className="font-extrabold text-sm sm:text-base text-slate-900 dark:text-white">
+                    Configuración de Accesos Directos del Slider
+                  </h3>
+                  <p className="text-xs text-slate-500">
+                    Marca los artículos que deseas tener a un clic en la barra superior de caja
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowQuickAccessModal(false)}
+                className="w-8 h-8 rounded-full hover:bg-slate-200 dark:hover:bg-slate-800 flex items-center justify-center text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-4 sm:p-5 overflow-y-auto flex-1">
+              <PosQuickAccessSettings />
+            </div>
+            <div className="px-5 py-3 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 flex justify-end shrink-0">
+              <button
+                type="button"
+                onClick={() => setShowQuickAccessModal(false)}
+                className="px-5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100 text-white font-bold text-xs shadow-sm transition-all cursor-pointer"
+              >
+                Cerrar y Volver al Punto de Venta
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ========================================================================= */}
       {/* TOAST FLOTANTE DE NOTIFICACIONES (ESCÁNER & EVENTOS)                       */}

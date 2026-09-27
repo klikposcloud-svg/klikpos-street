@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { fetchLiveBcvRate } from '@/lib/services/bcv-service';
+import { scannerEmitter } from '@/lib/scanner-events';
 
 interface BcvRateResponse {
   rate: number;
@@ -72,7 +73,7 @@ export async function POST(request: Request) {
     const manualRate: BcvRateResponse = {
       rate: Number(rate.toFixed(2)),
       date: today,
-      source: `Manual (${updatedBy || 'Cajero'})`,
+      source: `Manual (${updatedBy || body.source || 'Cajero'})`,
       updatedAt: new Date().toISOString(),
     };
 
@@ -80,6 +81,11 @@ export async function POST(request: Request) {
       data: manualRate,
       timestamp: Date.now(),
     };
+
+    scannerEmitter.emit('inventory_updated', {
+      bcvRate: manualRate.rate,
+      timestamp: Date.now(),
+    });
 
     return NextResponse.json(manualRate);
   } catch (error) {

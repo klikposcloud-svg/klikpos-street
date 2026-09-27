@@ -30,13 +30,33 @@ import {
   Scale,
   Save,
   Tag,
+  FolderTree,
+  Check,
 } from 'lucide-react';
 import QRCode from 'qrcode';
 import { useAuth } from '@/context/AuthContext';
 import { removeBackgroundToWhiteCanvas } from '@/lib/background-remover';
+import { soundEffects } from '@/lib/utils/sound';
 import ProductCostCalculator from '@/components/ProductCostCalculator';
 import ProductLabelModal from '@/components/ProductLabelModal';
 import ProductImageSearchModal from '@/components/ProductImageSearchModal';
+import MasterCatalogModal from '@/components/MasterCatalogModal';
+import { SYSTEM_DEFAULTS } from '@/lib/constants/defaults';
+
+const DEFAULT_CATEGORIES = [
+  'Víveres',
+  'Charcutería',
+  'Carnicería',
+  'Frutería / Verduras',
+  'Bebidas',
+  'Limpieza',
+  'Cuidado Personal',
+  'Panadería',
+  'Snacks',
+  'Licores',
+  'Farmacia',
+  'Otros',
+];
 
 export default function DesktopInventoryPage() {
   const { user, isAdmin, isCajero, requireAdminAuth } = useAuth();
@@ -45,11 +65,22 @@ export default function DesktopInventoryPage() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState<LocalProduct | null>(null);
-  const [bcvRate, setBcvRate] = useState(848.55);
+  const [bcvRate, setBcvRate] = useState(SYSTEM_DEFAULTS.DEFAULT_BCV_RATE);
+
+  // Estados de Categorías y Rubros Personalizados
+  const [categoriesList, setCategoriesList] = useState<string[]>(DEFAULT_CATEGORIES);
+  const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<string>('all');
+  const [showCategoryModal, setShowCategoryModal] = useState<boolean>(false);
+  const [newCatNameInput, setNewCatNameInput] = useState<string>('');
+  const [editingCategoryOldName, setEditingCategoryOldName] = useState<string | null>(null);
+  const [editingCategoryNewName, setEditingCategoryNewName] = useState<string>('');
 
   // Estados de Búsqueda y Descarga de Fotos Web / Google
   const [showImageSearchModal, setShowImageSearchModal] = useState(false);
   const [imageSearchQuery, setImageSearchQuery] = useState('');
+
+  // Estado de Catálogo Maestro (+120 con Fotos)
+  const [showMasterCatalogModal, setShowMasterCatalogModal] = useState<boolean>(false);
 
   // Estados de Impresión de Etiquetas (Individual y Masivo)
   const [showLabelModal, setShowLabelModal] = useState(false);
@@ -153,12 +184,122 @@ export default function DesktopInventoryPage() {
     }
   };
 
+  const loadCategories = async (currentProducts?: LocalProduct[]) => {
+    const prods = currentProducts || await db.products.toArray();
+    const storedCatSetting = await db.settings.get('pos_categories');
+    let cats: string[] = [];
+    if (storedCatSetting && Array.isArray(storedCatSetting.value) && storedCatSetting.value.length > 0) {
+      cats = [...storedCatSetting.value];
+    } else {
+      cats = [...DEFAULT_CATEGORIES];
+    }
+    const prodCats = Array.from(new Set(prods.map((p) => p.category).filter(Boolean)));
+    for (const pc of prodCats) {
+      if (!cats.includes(pc)) {
+        cats.push(pc);
+      }
+    }
+    setCategoriesList(cats);
+    return cats;
+  };
+
   const loadProducts = async () => {
     const list = await db.products.toArray();
     setProducts(list);
     const bcv = await db.settings.get('bcv_rate');
     if (bcv) setBcvRate(bcv.value);
+    await loadCategories(list);
     return list;
+  };
+
+  const handleCreateCategory = async (catName: string) => {
+    const trimmed = catName.trim();
+    if (!trimmed) return;
+    if (categoriesList.some((c) => c.toLowerCase() === trimmed.toLowerCase())) {
+      alert(`La categoría "${trimmed}" ya existe.`);
+      return;
+    }
+    const updated = [...categoriesList, trimmed];
+    setCategoriesList(updated);
+    await db.settings.put({ key: 'pos_categories', value: updated });
+    setNewCatNameInput('');
+    soundEffects.playBeep();
+    setImportResultToast(`✓ Categoría "${trimmed}" creada exitosamente.`);
+    setTimeout(() => setImportResultToast(null), 3500);
+  };
+
+  const handleRenameCategory = async (oldName: string, newName: string) => {
+    const trimmed = newName.trim();
+    if (!trimmed || trimmed === oldName) {
+      setEditingCategoryOldName(null);
+      return;
+    }
+    if (categoriesList.some((c) => c.toLowerCase() === trimmed.toLowerCase() && c.toLowerCase() !== oldName.toLowerCase())) {
+      alert(`Ya existe una categoría con el nombre "${trimmed}".`);
+      return;
+    }
+    const updated = categoriesList.map((c) => (c === oldName ? trimmed : c));
+    setCategoriesList(updated);
+    await db.settings.put({ key: 'pos_categories', value: updated });
+
+    let count = 0;
+    await db.transaction('rw', db.products, async () => {
+      const matching = await db.products.where('category').equals(oldName).toArray();
+      for (const prod of matching) {
+        if (prod.id) {
+          await db.products.update(prod.id, {
+            category: trimmed,
+            updatedAt: new Date().toISOString(),
+          });
+          count++;
+        }
+      }
+    });
+
+    if (category === oldName) setCategory(trimmed);
+    if (selectedCategoryFilter === oldName) setSelectedCategoryFilter(trimmed);
+    setEditingCategoryOldName(null);
+    setEditingCategoryNewName('');
+    await loadProducts();
+    broadcastInventoryToMobile();
+    soundEffects.success();
+    setImportResultToast(`✓ Categoría renombrada a "${trimmed}" (${count} productos actualizados).`);
+    setTimeout(() => setImportResultToast(null), 4000);
+  };
+
+  const handleDeleteCategory = async (catName: string, reassignTo: string = 'Otros') => {
+    if (categoriesList.length <= 1) {
+      alert('Debe existir al menos una categoría en el sistema.');
+      return;
+    }
+    if (confirm(`¿Estás seguro de eliminar la categoría "${catName}"? Los productos vinculados se reasignarán a "${reassignTo}".`)) {
+      let count = 0;
+      await db.transaction('rw', db.products, async () => {
+        const matching = await db.products.where('category').equals(catName).toArray();
+        for (const prod of matching) {
+          if (prod.id) {
+            await db.products.update(prod.id, {
+              category: reassignTo,
+              updatedAt: new Date().toISOString(),
+            });
+            count++;
+          }
+        }
+      });
+
+      const updated = categoriesList.filter((c) => c !== catName);
+      if (!updated.includes(reassignTo)) updated.push(reassignTo);
+      setCategoriesList(updated);
+      await db.settings.put({ key: 'pos_categories', value: updated });
+
+      if (category === catName) setCategory(reassignTo);
+      if (selectedCategoryFilter === catName) setSelectedCategoryFilter('all');
+      await loadProducts();
+      broadcastInventoryToMobile();
+      soundEffects.playTrash();
+      setImportResultToast(`✓ Categoría "${catName}" eliminada (${count} productos reasignados a "${reassignTo}").`);
+      setTimeout(() => setImportResultToast(null), 4000);
+    }
   };
 
   // Sincronizar inventario al celular automáticamente después de cada cambio
@@ -166,7 +307,7 @@ export default function DesktopInventoryPage() {
     try {
       const list = await db.products.toArray();
       const bcvSetting = await db.settings.get('bcv_rate');
-      const currentRate = bcvSetting?.value || 848.55;
+      const currentRate = bcvSetting?.value || SYSTEM_DEFAULTS.DEFAULT_BCV_RATE;
       await fetch('/api/scanner/inventory', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -192,6 +333,14 @@ export default function DesktopInventoryPage() {
       broadcastInventoryToMobile();
     });
     loadScannerInfo();
+
+    const handleBcvUpdate = (e: any) => {
+      if (e.detail && typeof e.detail === 'number' && e.detail > 0) {
+        setBcvRate(e.detail);
+      }
+    };
+    window.addEventListener('pos:bcv_updated', handleBcvUpdate);
+    window.addEventListener('venematic:bcv_updated', handleBcvUpdate);
 
     // Suscripción en tiempo real al escáner y fotos enviadas desde el teléfono
     const eventSource = new EventSource('/api/scanner/events?session=caja-1');
@@ -243,6 +392,8 @@ export default function DesktopInventoryPage() {
 
     return () => {
       eventSource.close();
+      window.removeEventListener('pos:bcv_updated', handleBcvUpdate);
+      window.removeEventListener('venematic:bcv_updated', handleBcvUpdate);
     };
   }, []);
 
@@ -278,13 +429,18 @@ export default function DesktopInventoryPage() {
   const tableContainerRef = useRef<HTMLDivElement>(null);
   const rowRefs = useRef<(HTMLTableRowElement | null)[]>([]);
 
-  // Filtrado de productos
-  const filtered = products.filter(
-    (p) =>
-      p.name.toLowerCase().includes(search.toLowerCase()) ||
-      p.barcode.toLowerCase().includes(search.toLowerCase()) ||
-      p.category.toLowerCase().includes(search.toLowerCase())
-  );
+  // Filtrado de productos (búsqueda y categoría/rubro)
+  const filtered = products.filter((p) => {
+    const s = search.toLowerCase();
+    const matchesSearch =
+      !s ||
+      p.name.toLowerCase().includes(s) ||
+      p.barcode.toLowerCase().includes(s) ||
+      (p.category && p.category.toLowerCase().includes(s));
+    const matchesCategory =
+      selectedCategoryFilter === 'all' || p.category === selectedCategoryFilter;
+    return matchesSearch && matchesCategory;
+  });
 
   const filteredRef = useRef<LocalProduct[]>([]);
   filteredRef.current = filtered;
@@ -787,7 +943,7 @@ export default function DesktopInventoryPage() {
   };
 
   return (
-    <div className="flex-1 flex flex-col p-4 gap-4 overflow-hidden bg-[var(--industrial-bg,#ffffff)] font-sans">
+    <div className="flex-1 flex flex-col p-4 gap-4 overflow-hidden bg-white dark:bg-[#0B141F] font-sans">
       {/* Toast de Resultado de Importación */}
       {importResultToast && (
         <div className="p-3 bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-md flex items-center justify-between animate-in fade-in slide-in-from-top-2 duration-150">
@@ -805,12 +961,12 @@ export default function DesktopInventoryPage() {
       )}
 
       {/* Cabecera del Módulo */}
-      <div className="bg-white p-4 rounded-xl border border-slate-300 shadow-xs flex items-center justify-between">
+      <div className="bg-white dark:bg-[#121c29] p-4 rounded-xl border border-slate-200 dark:border-[#22303f] shadow-xs flex items-center justify-between">
         <div>
-          <h2 className="text-base font-black text-slate-900 uppercase tracking-tight">
+          <h2 className="text-base font-black text-slate-900 dark:text-white uppercase tracking-tight">
             Inventario y Catálogo de Productos
           </h2>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-slate-500 dark:text-slate-400">
             Control de existencias, fotos, precios en divisas y cálculo en bolívares (Tasa: Bs. {bcvRate.toFixed(2)})
           </p>
         </div>
@@ -823,9 +979,38 @@ export default function DesktopInventoryPage() {
               placeholder="Buscar por nombre, código o categoría..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-64 pl-8 pr-3 py-2 bg-white border border-slate-300 rounded-lg text-xs font-medium focus:outline-none focus:ring-2 focus:ring-sky-500"
+              className="w-64 pl-8 pr-3 py-2 bg-white dark:bg-[#0B141F] text-slate-900 dark:text-white border border-slate-300 dark:border-[#22303f] rounded-lg text-xs font-medium focus:outline-none focus:ring-2 focus:ring-sky-500"
             />
           </div>
+
+          {/* Filtro Dinámico por Categoría / Rubro */}
+          <div className="relative">
+            <select
+              value={selectedCategoryFilter}
+              onChange={(e) => setSelectedCategoryFilter(e.target.value)}
+              className="px-3 py-2 bg-white dark:bg-[#0B141F] text-slate-800 dark:text-white border border-slate-300 dark:border-[#22303f] rounded-lg text-xs font-bold focus:outline-none focus:ring-2 focus:ring-sky-500 cursor-pointer shadow-2xs"
+            >
+              <option value="all">Todas las Categorías ({products.length})</option>
+              {categoriesList.map((cat) => {
+                const count = products.filter((p) => p.category === cat).length;
+                return (
+                  <option key={cat} value={cat}>
+                    {cat} ({count})
+                  </option>
+                );
+              })}
+            </select>
+          </div>
+
+          {/* Botón Gestión de Categorías y Rubros */}
+          <button
+            onClick={() => setShowCategoryModal(true)}
+            className="px-3.5 py-2 bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600 text-slate-700 dark:text-white border border-slate-300 dark:border-slate-600 font-bold text-xs rounded-lg shadow-2xs flex items-center gap-1.5 transition-colors cursor-pointer"
+            title="Crear nuevas categorías y editar o renombrar las existentes"
+          >
+            <FolderTree className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+            <span>Categorías / Rubros</span>
+          </button>
 
           {/* Botón Imprimir Etiquetas (Individual o Masivo) */}
           <button
@@ -862,6 +1047,16 @@ export default function DesktopInventoryPage() {
             <span>Auditoría / Kardex</span>
           </button>
 
+          {/* Botón Catálogo Maestro KlikPOS (+120 con Fotos) */}
+          <button
+            onClick={() => setShowMasterCatalogModal(true)}
+            className="px-3.5 py-2 bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white font-black text-xs rounded-lg shadow-sm flex items-center gap-1.5 transition-all shadow-amber-500/20 active:scale-95 cursor-pointer"
+            title="Explorar e inyectar productos con fotos HD, códigos de barra y categorías por rubro comercial"
+          >
+            <Sparkles className="w-4 h-4 text-yellow-200 animate-pulse" />
+            <span>Catálogo Maestro (+120)</span>
+          </button>
+
           {/* Botón Importar desde Saint / CSV / JSON */}
           <button
             onClick={() => setShowImportModal(true)}
@@ -882,13 +1077,13 @@ export default function DesktopInventoryPage() {
         </div>
       </div>
 
-      {/* Tabla de Productos Industrial con Columna de Miniatura y Navegación */}
-      <div className="flex-1 bg-white rounded-xl border border-slate-300 shadow-xs overflow-hidden flex flex-col">
-        <div ref={tableContainerRef} className="flex-1 overflow-y-auto">
-          <table className="w-full text-left border-collapse text-xs">
-            <thead className="bg-slate-100 border-b border-slate-300 sticky top-0 font-black text-slate-800 uppercase tracking-wider text-[11px] z-10 shadow-xs">
+      {/* Tabla de Productos Industrial con Cápsulas Flotantes Esmeriladas / White / Dark */}
+      <div className="flex-1 bg-transparent rounded-2xl overflow-hidden flex flex-col">
+        <div ref={tableContainerRef} className="flex-1 overflow-y-auto px-2 py-1">
+          <table className="w-full text-left border-separate border-spacing-y-2.5 text-xs">
+            <thead className="bg-slate-100/90 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700/60 sticky top-0 font-black text-slate-800 dark:text-slate-200 uppercase tracking-wider text-[11px] z-10 backdrop-blur-md rounded-2xl shadow-xs">
               <tr>
-                <th className="py-3.5 px-3 text-center w-10">
+                <th className="py-3 px-3 text-center w-10 rounded-l-xl">
                   <input
                     type="checkbox"
                     checked={filtered.length > 0 && selectedProductIds.size === filtered.length}
@@ -897,22 +1092,21 @@ export default function DesktopInventoryPage() {
                     title="Seleccionar todos para imprimir etiquetas"
                   />
                 </th>
-                <th className="py-3.5 px-3 text-center w-14">Foto</th>
-                <th className="py-3.5 px-4 w-36">Código / Barras</th>
-                <th className="py-3.5 px-4 min-w-[200px]">Producto</th>
-                <th className="py-3.5 px-4 w-36">Categoría</th>
-                <th className="py-3.5 px-4 text-right w-28">Precio USD</th>
-                <th className="py-3.5 px-4 text-right w-32">Precio Bs</th>
-                <th className="py-3.5 px-4 text-center w-28">Stock Actual</th>
-                <th className="py-3.5 px-4 text-center w-28">Ajuste Rápido</th>
-                <th className="py-3.5 px-4 text-center w-40">Acciones</th>
+                <th className="py-3 px-3 text-center w-14">Foto</th>
+                <th className="py-3 px-4 w-36">Código / Barras</th>
+                <th className="py-3 px-4 min-w-[200px]">Producto</th>
+                <th className="py-3 px-4 w-36">Categoría</th>
+                <th className="py-3 px-4 text-right w-28">Precio USD</th>
+                <th className="py-3 px-4 text-right w-32">Precio Bs</th>
+                <th className="py-3 px-4 text-center w-28">Stock Actual</th>
+                <th className="py-3 px-4 text-center w-28">Ajuste Rápido</th>
+                <th className="py-3 px-4 text-center w-40 rounded-r-xl">Acciones</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-200/70">
+            <tbody>
               {filtered.map((p, idx) => {
                 const isLow = p.stock <= p.minStock;
                 const isSelected = selectedIndex === idx;
-                const isEven = idx % 2 === 0;
 
                 return (
                   <tr
@@ -921,16 +1115,14 @@ export default function DesktopInventoryPage() {
                       rowRefs.current[idx] = el;
                     }}
                     onClick={() => setSelectedIndex(idx)}
-                    className={`transition-colors cursor-pointer inventory-table-row ${
+                    className={`inventory-capsule-row cursor-pointer transition-all ${
                       isSelected
-                        ? 'bg-sky-500/15 border-l-4 border-l-sky-500 ring-1 ring-inset ring-sky-500/40'
-                        : isEven
-                        ? 'bg-white/95'
-                        : 'bg-slate-100/50'
-                    } hover:bg-sky-500/20`}
+                        ? 'ring-2 ring-sky-500 shadow-lg scale-[1.002]'
+                        : ''
+                    }`}
                   >
                     {/* Checkbox Selección para Etiquetas */}
-                    <td className="py-3.5 px-3 text-center" onClick={(e) => e.stopPropagation()}>
+                    <td className="py-3 px-3 text-center rounded-l-2xl border-l border-t border-b border-inherit" onClick={(e) => e.stopPropagation()}>
                       <input
                         type="checkbox"
                         checked={selectedProductIds.has(p.id!)}
@@ -941,8 +1133,8 @@ export default function DesktopInventoryPage() {
                     </td>
 
                     {/* Miniatura Foto */}
-                    <td className="py-3.5 px-3 text-center">
-                      <div className="w-12 h-12 rounded-lg bg-slate-100 border border-slate-300 overflow-hidden mx-auto flex items-center justify-center shadow-2xs">
+                    <td className="py-3 px-3 text-center border-t border-b border-inherit">
+                      <div className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-white/10 overflow-hidden mx-auto flex items-center justify-center shadow-2xs">
                         {p.image ? (
                           <img
                             src={p.image}
@@ -957,17 +1149,17 @@ export default function DesktopInventoryPage() {
                     </td>
 
                     {/* Código / Barras */}
-                    <td className="py-3.5 px-4 font-mono font-semibold text-slate-700 text-xs">
+                    <td className="py-3 px-4 font-mono font-semibold text-slate-700 dark:text-slate-300 text-xs border-t border-b border-inherit">
                       {p.barcode}
                     </td>
 
                     {/* Nombre del Producto */}
-                    <td className="py-3.5 px-4 font-bold text-slate-900 text-sm tracking-normal leading-normal">
+                    <td className="py-3 px-4 font-bold text-slate-900 dark:text-white text-sm tracking-normal leading-normal border-t border-b border-inherit">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span>{p.name}</span>
                         {(p.unit === 'kg' || p.unit === 'gr' || p.unit?.toLowerCase().includes('kg')) && (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-300 text-[11px] font-bold shadow-xs">
-                            <Scale className="w-3 h-3 text-amber-600" />
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-50 dark:bg-amber-950/50 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-700/60 text-[11px] font-bold shadow-xs">
+                            <Scale className="w-3 h-3 text-amber-600 dark:text-amber-400" />
                             Pesable ({p.unit || 'kg'})
                           </span>
                         )}
@@ -975,30 +1167,30 @@ export default function DesktopInventoryPage() {
                     </td>
 
                     {/* Categoría con Color Específico Distintivo */}
-                    <td className="py-3.5 px-4">
+                    <td className="py-3 px-4 border-t border-b border-inherit">
                       <span className={`inline-flex items-center h-6 px-2.5 rounded-md text-[10px] font-bold uppercase tracking-wider whitespace-nowrap ${getCategoryBadge(p.category)}`}>
                         {p.category}
                       </span>
                     </td>
 
                     {/* Precio USD */}
-                    <td className="py-3.5 px-4 text-right font-mono font-bold text-slate-900 text-sm tabular-numbers">
+                    <td className="py-3 px-4 text-right font-mono font-bold text-slate-900 dark:text-white text-sm tabular-numbers border-t border-b border-inherit">
                       <div>{formatUSD(p.priceUSD)}</div>
-                      <div className="text-[10px] text-slate-500 font-semibold">
+                      <div className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold">
                         {p.unit === 'kg' ? '/ kg' : p.unit === 'gr' ? '/ gr' : '/ unid'}
                       </div>
                     </td>
 
                     {/* Precio Bs */}
-                    <td className="py-3.5 px-4 text-right font-mono font-semibold text-slate-600 text-xs tabular-numbers">
+                    <td className="py-3 px-4 text-right font-mono font-semibold text-slate-600 dark:text-slate-300 text-xs tabular-numbers border-t border-b border-inherit">
                       <div>{formatVES(p.priceUSD * bcvRate)}</div>
-                      <div className="text-[10px] text-slate-400">
+                      <div className="text-[10px] text-slate-400 dark:text-slate-500">
                         {p.unit === 'kg' ? '/ kg' : p.unit === 'gr' ? '/ gr' : '/ unid'}
                       </div>
                     </td>
 
                     {/* Stock Actual */}
-                    <td className="py-3.5 px-4 text-center">
+                    <td className="py-3 px-4 text-center border-t border-b border-inherit">
                       <span
                         className={`inline-block font-mono font-bold px-2.5 py-1 rounded-md text-xs border ${
                           isLow
@@ -1011,14 +1203,14 @@ export default function DesktopInventoryPage() {
                     </td>
 
                     {/* Ajuste Rápido (+ / -) con alto contraste y visibilidad garantizada */}
-                    <td className="py-3.5 px-4 text-center">
+                    <td className="py-3 px-4 text-center border-t border-b border-inherit">
                       <div className="inline-flex items-center gap-1.5">
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
                             handleQuickStockUpdate(p.id!, -1);
                           }}
-                          className="btn-stock-minus w-8 h-8 rounded-lg bg-red-600 hover:bg-red-700 active:bg-red-800 text-white flex items-center justify-center border border-red-500 shadow-sm transition-all active:scale-95 group/btn"
+                          className="btn-stock-minus w-8 h-8 rounded-lg bg-red-600 hover:bg-red-700 active:bg-red-800 text-white flex items-center justify-center border border-red-500 shadow-sm transition-all active:scale-95 group/btn cursor-pointer"
                           title="Restar 1 (o tecla -)"
                         >
                           <Minus className="w-4 h-4 text-white stroke-[4] group-hover/btn:scale-110 transition-transform" />
@@ -1028,7 +1220,7 @@ export default function DesktopInventoryPage() {
                             e.stopPropagation();
                             handleQuickStockUpdate(p.id!, 1);
                           }}
-                          className="btn-stock-plus w-8 h-8 rounded-lg bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white flex items-center justify-center border border-emerald-500 shadow-sm transition-all active:scale-95 group/btn"
+                          className="btn-stock-plus w-8 h-8 rounded-lg bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white flex items-center justify-center border border-emerald-500 shadow-sm transition-all active:scale-95 group/btn cursor-pointer"
                           title="Sumar 1 (o tecla +)"
                         >
                           <Plus className="w-4 h-4 text-white stroke-[4] group-hover/btn:scale-110 transition-transform" />
@@ -1036,19 +1228,19 @@ export default function DesktopInventoryPage() {
                       </div>
                     </td>
 
-                    {/* Columna Acciones: Editar / Borrar (Editable con Rol Administrador) */}
-                    <td className="py-3.5 px-4 text-center">
+                    {/* Columna Acciones: Etiquetas / Motivo / Editar (Cápsulas Estilo Imagen) */}
+                    <td className="py-3 px-4 text-center rounded-r-2xl border-r border-t border-b border-inherit">
                       <div className="inline-flex items-center gap-1.5">
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
                             handleOpenLabelModal([p]);
                           }}
-                          className="px-2.5 py-1.5 rounded-lg bg-indigo-100/90 hover:bg-indigo-200 border border-indigo-300 flex items-center gap-1.5 text-[11px] font-black shadow-2xs transition-all active:scale-95 cursor-pointer"
+                          className="px-2.5 py-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/80 border border-indigo-200 dark:border-indigo-800/60 flex items-center gap-1.5 text-[11px] font-black shadow-2xs transition-all active:scale-95 cursor-pointer text-indigo-700 dark:text-indigo-300"
                           title="Diseñar e Imprimir Etiqueta con Código de Barras y Precios ($/Bs)"
                         >
-                          <Tag className="w-3.5 h-3.5 shrink-0 text-indigo-700" style={{ color: '#4338ca', stroke: '#4338ca' }} />
-                          <span className="text-slate-900 font-bold" style={{ color: '#0f172a' }}>Etiqueta</span>
+                          <Tag className="w-3.5 h-3.5 shrink-0 text-indigo-600 dark:text-indigo-400" />
+                          <span>Etiqueta</span>
                         </button>
 
                         <button
@@ -1056,11 +1248,11 @@ export default function DesktopInventoryPage() {
                             e.stopPropagation();
                             handleOpenAdjustmentModal(p);
                           }}
-                          className="px-2.5 py-1.5 rounded-lg bg-amber-100/90 hover:bg-amber-200 border border-amber-300 flex items-center gap-1 text-[11px] font-black shadow-2xs transition-all active:scale-95 cursor-pointer"
+                          className="px-2.5 py-1.5 rounded-lg bg-amber-50 dark:bg-amber-950/60 hover:bg-amber-100 dark:hover:bg-amber-900/80 border border-amber-200 dark:border-amber-800/60 flex items-center gap-1 text-[11px] font-black shadow-2xs transition-all active:scale-95 cursor-pointer text-amber-700 dark:text-amber-300"
                           title="Ajuste con Motivo (Mermas, Caducidad, Autoconsumo, Conteo)"
                         >
-                          <SlidersHorizontal className="w-3.5 h-3.5 text-amber-800 shrink-0" />
-                          <span className="text-slate-900 font-bold" style={{ color: '#0f172a' }}>Motivo</span>
+                          <SlidersHorizontal className="w-3.5 h-3.5 shrink-0 text-amber-600 dark:text-amber-400" />
+                          <span>Motivo</span>
                         </button>
 
                         <button
@@ -1068,11 +1260,11 @@ export default function DesktopInventoryPage() {
                             e.stopPropagation();
                             handleOpenEditModal(p);
                           }}
-                          className="px-2.5 py-1.5 rounded-lg bg-sky-100/90 hover:bg-sky-200 border border-sky-300 flex items-center gap-1 text-[11px] font-black shadow-2xs transition-all active:scale-95 cursor-pointer"
+                          className="px-2.5 py-1.5 rounded-lg bg-sky-50 dark:bg-sky-950/60 hover:bg-sky-100 dark:hover:bg-sky-900/80 border border-sky-200 dark:border-sky-800/60 flex items-center gap-1 text-[11px] font-black shadow-2xs transition-all active:scale-95 cursor-pointer text-sky-700 dark:text-sky-300"
                           title={isAdmin ? 'Editar producto completo (Administrador)' : 'Editar producto (Requiere clave de Admin)'}
                         >
-                          <Edit2 className="w-3.5 h-3.5 text-sky-800 shrink-0" />
-                          <span className="text-slate-900 font-bold" style={{ color: '#0f172a' }}>Editar</span>
+                          <Edit2 className="w-3.5 h-3.5 shrink-0 text-sky-600 dark:text-sky-400" />
+                          <span>Editar</span>
                         </button>
 
                         {isAdmin && (
@@ -1081,7 +1273,7 @@ export default function DesktopInventoryPage() {
                               e.stopPropagation();
                               handleDeleteProduct(p.id!, p.name);
                             }}
-                            className="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 transition-all active:scale-95"
+                            className="p-1.5 rounded-lg bg-rose-50 dark:bg-rose-950/60 hover:bg-rose-100 dark:hover:bg-rose-900/80 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800/60 transition-all active:scale-95 cursor-pointer"
                             title="Eliminar producto (Solo Admin)"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
@@ -1452,24 +1644,39 @@ export default function DesktopInventoryPage() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   <div>
-                    <label className="block font-semibold text-slate-700 mb-1">
-                      Categoría:
-                    </label>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="block font-semibold text-slate-700 text-xs">
+                        Categoría / Rubro *:
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => setShowCategoryModal(true)}
+                        className="text-[11px] text-sky-600 hover:text-sky-700 font-bold hover:underline flex items-center gap-0.5 cursor-pointer"
+                        title="Gestionar categorías y rubros"
+                      >
+                        <FolderTree className="w-3 h-3" />
+                        <span>+ Gestionar</span>
+                      </button>
+                    </div>
                     <select
                       value={category}
-                      onChange={(e) => setCategory(e.target.value)}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white focus:ring-2 focus:ring-sky-500 outline-none text-sm"
+                      onChange={(e) => {
+                        if (e.target.value === '__NEW__') {
+                          setShowCategoryModal(true);
+                        } else {
+                          setCategory(e.target.value);
+                        }
+                      }}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white focus:ring-2 focus:ring-sky-500 outline-none text-sm font-medium"
                     >
-                      <option value="Víveres">Víveres</option>
-                      <option value="Charcutería">Charcutería</option>
-                      <option value="Carnicería">Carnicería</option>
-                      <option value="Frutería / Verduras">Frutería / Verduras</option>
-                      <option value="Bebidas">Bebidas</option>
-                      <option value="Limpieza">Limpieza</option>
-                      <option value="Cuidado Personal">Cuidado Personal</option>
-                      <option value="Panadería">Panadería</option>
-                      <option value="Snacks">Snacks</option>
-                      <option value="Otros">Otros</option>
+                      {categoriesList.map((cat) => (
+                        <option key={cat} value={cat}>
+                          {cat}
+                        </option>
+                      ))}
+                      <option value="__NEW__" className="font-bold text-sky-600">
+                        + Crear nueva categoría...
+                      </option>
                     </select>
                   </div>
 
@@ -1815,24 +2022,39 @@ export default function DesktopInventoryPage() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   <div>
-                    <label className="block font-semibold text-slate-700 mb-1">
-                      Categoría:
-                    </label>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="block font-semibold text-slate-700 text-xs">
+                        Categoría / Rubro *:
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => setShowCategoryModal(true)}
+                        className="text-[11px] text-sky-600 hover:text-sky-700 font-bold hover:underline flex items-center gap-0.5 cursor-pointer"
+                        title="Gestionar categorías y rubros"
+                      >
+                        <FolderTree className="w-3 h-3" />
+                        <span>+ Gestionar</span>
+                      </button>
+                    </div>
                     <select
                       value={category}
-                      onChange={(e) => setCategory(e.target.value)}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white focus:ring-2 focus:ring-indigo-500 outline-none text-sm"
+                      onChange={(e) => {
+                        if (e.target.value === '__NEW__') {
+                          setShowCategoryModal(true);
+                        } else {
+                          setCategory(e.target.value);
+                        }
+                      }}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-medium"
                     >
-                      <option value="Víveres">Víveres</option>
-                      <option value="Charcutería">Charcutería</option>
-                      <option value="Carnicería">Carnicería</option>
-                      <option value="Frutería / Verduras">Frutería / Verduras</option>
-                      <option value="Bebidas">Bebidas</option>
-                      <option value="Limpieza">Limpieza</option>
-                      <option value="Cuidado Personal">Cuidado Personal</option>
-                      <option value="Panadería">Panadería</option>
-                      <option value="Snacks">Snacks</option>
-                      <option value="Otros">Otros</option>
+                      {categoriesList.map((cat) => (
+                        <option key={cat} value={cat}>
+                          {cat}
+                        </option>
+                      ))}
+                      <option value="__NEW__" className="font-bold text-sky-600">
+                        + Crear nueva categoría...
+                      </option>
                     </select>
                   </div>
 
@@ -2242,6 +2464,175 @@ export default function DesktopInventoryPage() {
           }}
         />
       )}
+      {/* ========================================================================= */}
+      {/* MODAL DE GESTIÓN DE CATEGORÍAS Y RUBROS COMERCIALES                       */}
+      {/* ========================================================================= */}
+      {showCategoryModal && (
+        <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-[#121c29] text-slate-900 dark:text-white rounded-2xl w-full max-w-xl max-h-[85vh] flex flex-col shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+            {/* Cabecera */}
+            <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-850">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400">
+                  <FolderTree className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-black text-sm uppercase tracking-wide text-slate-900 dark:text-white">
+                    Categorías y Rubros Comerciales
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    Crea nuevos rubros y edita los existentes. Los cambios se sincronizan en todo el inventario.
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowCategoryModal(false)}
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-white p-1 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Formulario Agregar Nueva Categoría */}
+            <div className="p-5 border-b border-slate-200 dark:border-slate-800 bg-emerald-50/40 dark:bg-emerald-950/20">
+              <label className="block text-xs font-black uppercase text-emerald-900 dark:text-emerald-300 mb-1.5">
+                + Crear Nueva Categoría / Rubro
+              </label>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (newCatNameInput.trim()) {
+                    handleCreateCategory(newCatNameInput);
+                  }
+                }}
+                className="flex gap-2"
+              >
+                <input
+                  type="text"
+                  placeholder="Ej: Licores y Vinos, Farmacia, Repuestos, Charcutería..."
+                  value={newCatNameInput}
+                  onChange={(e) => setNewCatNameInput(e.target.value)}
+                  className="flex-1 px-3 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-emerald-500 outline-none text-slate-900 dark:text-white"
+                />
+                <button
+                  type="submit"
+                  disabled={!newCatNameInput.trim()}
+                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-xs font-bold rounded-xl shadow-xs transition-all flex items-center gap-1.5 active:scale-95 shrink-0 cursor-pointer"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Agregar</span>
+                </button>
+              </form>
+            </div>
+
+            {/* Lista de Categorías Existentes */}
+            <div className="flex-1 overflow-y-auto p-5 space-y-2">
+              <div className="flex items-center justify-between text-[11px] font-black uppercase tracking-wider text-slate-400 mb-2">
+                <span>Categorías Activas ({categoriesList.length})</span>
+                <span>Productos Vinculados</span>
+              </div>
+
+              {categoriesList.map((cat) => {
+                const count = products.filter((p) => p.category === cat).length;
+                const isEditing = editingCategoryOldName === cat;
+
+                return (
+                  <div
+                    key={cat}
+                    className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-750 flex items-center justify-between gap-3 transition-all hover:border-slate-300 dark:hover:border-slate-650"
+                  >
+                    {isEditing ? (
+                      <div className="flex-1 flex items-center gap-2">
+                        <input
+                          type="text"
+                          value={editingCategoryNewName}
+                          onChange={(e) => setEditingCategoryNewName(e.target.value)}
+                          autoFocus
+                          className="flex-1 px-3 py-1.5 bg-white dark:bg-slate-900 border border-emerald-500 rounded-lg text-xs font-bold text-slate-900 dark:text-white outline-none ring-2 ring-emerald-500/20"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleRenameCategory(cat, editingCategoryNewName)}
+                          className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg flex items-center gap-1 cursor-pointer"
+                        >
+                          <Check className="w-3.5 h-3.5" />
+                          <span>Guardar</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setEditingCategoryOldName(null)}
+                          className="px-2.5 py-1.5 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-lg hover:bg-slate-300 cursor-pointer"
+                        >
+                          Cancelar
+                        </button>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <span className={`px-2.5 py-1 rounded-md text-[11px] ${getCategoryBadge(cat)}`}>
+                            {cat}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-3 shrink-0">
+                          <span className="text-xs font-bold text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-800 px-2 py-0.5 rounded-full border border-slate-200 dark:border-slate-700 font-mono">
+                            {count} {count === 1 ? 'producto' : 'productos'}
+                          </span>
+
+                          <div className="flex items-center gap-1">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setEditingCategoryOldName(cat);
+                                setEditingCategoryNewName(cat);
+                              }}
+                              className="p-1.5 text-slate-500 hover:text-sky-600 dark:text-slate-400 dark:hover:text-sky-400 rounded-lg hover:bg-white dark:hover:bg-slate-700 transition-colors cursor-pointer"
+                              title="Editar o renombrar categoría"
+                            >
+                              <Edit2 className="w-4 h-4" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteCategory(cat)}
+                              className="p-1.5 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 rounded-lg hover:bg-white dark:hover:bg-slate-700 transition-colors cursor-pointer"
+                              title="Eliminar categoría"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Footer */}
+            <div className="px-6 py-3 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-850 flex justify-between items-center text-xs text-slate-500">
+              <span>Al renombrar una categoría, todos los productos asociados se actualizan automáticamente.</span>
+              <button
+                onClick={() => setShowCategoryModal(false)}
+                className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-xs cursor-pointer"
+              >
+                Listo / Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Catálogo Maestro con Fotos */}
+      <MasterCatalogModal
+        isOpen={showMasterCatalogModal}
+        onClose={() => setShowMasterCatalogModal(false)}
+        onSuccess={async (count) => {
+          await loadProducts();
+          broadcastInventoryToMobile();
+          setImportResultToast(`✓ Catálogo Maestro: ${count} productos inyectados y sincronizados.`);
+          setTimeout(() => setImportResultToast(null), 5000);
+        }}
+      />
     </div>
   );
 }

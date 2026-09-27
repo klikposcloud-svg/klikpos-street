@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Klikpos — El Sistema de Cobro Inteligente para Venezuela | klikpos.online</title>
+  <meta name="description" content="Klikpos: Punto de venta offline-first, conciliación automática de Pago Móvil por SMS y control total de tu negocio desde el celular con Klikpos Cloud." />
+  
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
+
+  <!-- Tipografía Google Fonts Inter & Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Outfit', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#fef3c7',
+              400: '#fbbf24',
+              500: '#f59e0b',
+              600: '#d97706',
+            },
+            dark: {
+              900: '#070d19',
+              850: '#0b1325',
+              800: '#101b33',
+              700: '#1b2a4e',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    h1, h2, h3, h4, .font-display { font-family: 'Outfit', sans-serif; }
+    
+    /* Glow Effects */
+    .glow-amber {
+      box-shadow: 0 0 50px -10px rgba(245, 158, 11, 0.35);
+    }
+    .glow-cyan {
+      box-shadow: 0 0 50px -10px rgba(6, 182, 212, 0.35);
+    }
+    
+    /* Degradados modernos */
+    .bg-radial-hero {
+      background: radial-gradient(circle at 50% -20%, #1e3a8a 0%, #070d19 75%);
+    }
+
+    /* Animación flotante suave */
+    @keyframes floatSlow {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-8px); }
+    }
+    .animate-float {
+      animation: floatSlow 4s ease-in-out infinite;
+    }
+  </style>
+</head>
+<body class="bg-dark-900 text-slate-100 antialiased selection:bg-amber-500 selection:text-slate-950 overflow-x-hidden">
+
+  <!-- ========================================================================= -->
+  <!-- BARRA DE ANUNCIO SUPERIOR                                                 -->
+  <!-- ========================================================================= -->
+  <div class="bg-gradient-to-r from-amber-600 via-amber-500 to-amber-600 text-slate-950 text-xs font-bold py-2 px-4 text-center tracking-wide flex items-center justify-center gap-2 shadow-sm">
+    <span class="bg-black/20 text-slate-950 px-2 py-0.5 rounded-full text-[10px] uppercase font-black">Nuevo</span>
+    <span>⚡ Lanzamiento Oficial de <b>Klikpos v2.0</b> — ¡Prueba Flash de 5 Minutos sin Compromiso!</span>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- NAVEGACIÓN PRINCIPAL                                                      -->
+  <!-- ========================================================================= -->
+  <nav class="sticky top-0 z-50 backdrop-blur-md bg-dark-900/85 border-b border-slate-800/80 transition-all">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-24 flex items-center justify-between">
+      
+      <!-- Logotipo de Marca -->
+      <a href="#" class="flex items-center gap-3 group">
+        <img src="klikpos-logo-white.png" alt="KLIK POS" class="h-13 sm:h-14 w-auto object-contain group-hover:scale-105 transition-transform drop-shadow-md" />
+        <span class="text-xs text-slate-400 font-mono hidden sm:inline-block border-l border-slate-700 pl-3">klikpos.online</span>
+      </a>
+
+      <!-- Enlaces de Navegación -->
+      <div class="hidden md:flex items-center gap-8 text-sm font-semibold text-slate-300">
+        <a href="#caracteristicas" class="hover:text-amber-400 transition-colors">Características</a>
+        <a href="#pago-movil" class="hover:text-amber-400 transition-colors">Pago Móvil SMS</a>
+        <a href="#cloud" class="hover:text-amber-400 transition-colors">Klikpos Cloud ($5)</a>
+        <a href="#precios" class="hover:text-amber-400 transition-colors">Planes</a>
+        <a href="#faq" class="hover:text-amber-400 transition-colors">Preguntas</a>
+      </div>
+
+      <!-- Botón CTA WhatsApp -->
+      <div class="flex items-center gap-3">
+        <a href="https://wa.me/584240000000?text=Hola,%20quiero%20informaci%C3%B3n%20y%20demostraci%C3%B3n%20de%20Klikpos%20POS" target="_blank" class="hidden sm:inline-flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-bold text-xs uppercase tracking-wider px-4 py-2.5 rounded-xl shadow-lg shadow-emerald-600/25 active:scale-95 transition-all">
+          <span>💬</span>
+          <span>Contactar por WhatsApp</span>
+        </a>
+        <a href="#descargas" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs uppercase tracking-wider px-4 py-2.5 rounded-xl shadow-lg shadow-amber-500/25 active:scale-95 transition-all">
+          Descargar ➔
+        </a>
+      </div>
+
+    </div>
+  </nav>
+
+  <!-- ========================================================================= -->
+  <!-- HERO SECTION                                                              -->
+  <!-- ========================================================================= -->
+  <section class="relative pt-12 pb-20 md:pt-20 md:pb-32 bg-radial-hero overflow-hidden">
+    <!-- Luces ambientales de fondo -->
+    <div class="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[350px] bg-amber-500/10 blur-[130px] rounded-full pointer-events-none"></div>
+    <div class="absolute top-1/3 left-1/4 w-[400px] h-[300px] bg-cyan-500/10 blur-[120px] rounded-full pointer-events-none"></div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+      
+      <!-- Badge de Estado Oficial -->
+      <div class="inline-flex items-center gap-2 bg-slate-800/90 border border-slate-700/80 px-4 py-1.5 rounded-full text-xs font-semibold text-slate-300 mb-8 shadow-sm">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span>Diseñado especialmente para el comercio en Venezuela</span>
+        <span class="text-slate-500">•</span>
+        <span class="text-amber-400 font-bold">100% Offline-First</span>
+      </div>
+
+      <!-- Título Principal Impactante -->
+      <h1 class="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight text-white max-w-5xl mx-auto leading-[1.1] font-display">
+        El Sistema de Cobro <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500">Más Rápido e Inteligente</span> para tu Negocio.
+      </h1>
+
+      <!-- Subtítulo -->
+      <p class="mt-6 text-base sm:text-xl text-slate-300 max-w-3xl mx-auto font-normal leading-relaxed">
+        Punto de venta de escritorio para tu caja registradora, <b>conciliación automática de Pago Móvil por SMS</b> sin capturas falsas, y <b>control en vivo en tu celular desde cualquier lugar</b> con Klikpos Cloud.
+      </p>
+
+      <!-- Botones de Acción Inmediata -->
+      <div class="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4 max-w-md mx-auto">
+        <a href="#descargas" class="w-full sm:w-auto inline-flex items-center justify-center gap-3 bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 text-slate-950 font-black text-sm uppercase tracking-wider px-8 py-4 rounded-2xl shadow-xl shadow-amber-500/30 active:scale-95 transition-all">
+          <span>💻</span>
+          <span>Descargar Gratis para PC</span>
+        </a>
+        <a href="https://wa.me/584240000000?text=Hola,%20quiero%20activar%20mi%20prueba%20de%20Klikpos%20POS" target="_blank" class="w-full sm:w-auto inline-flex items-center justify-center gap-3 bg-slate-800/90 hover:bg-slate-700/90 border border-slate-700 text-white font-bold text-sm px-6 py-4 rounded-2xl shadow-md active:scale-95 transition-all">
+          <span>📲</span>
+          <span>Solicitar Demo por WhatsApp</span>
+        </a>
+      </div>
+
+      <!-- Muestra Visual: Maqueta del Sistema (Desktop + Móvil) -->
+      <div class="mt-16 max-w-5xl mx-auto relative group">
+        <div class="absolute -inset-1 bg-gradient-to-r from-amber-500 via-cyan-500 to-emerald-500 rounded-3xl blur-xl opacity-25 group-hover:opacity-40 transition-opacity"></div>
+        <div class="relative bg-dark-850 border border-slate-700/80 rounded-3xl p-3 sm:p-5 shadow-2xl overflow-hidden">
+          
+          <!-- Barra de Ventana Mac/App -->
+          <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-800 px-2 text-xs">
+            <div class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full bg-rose-500 inline-block"></span>
+              <span class="w-3 h-3 rounded-full bg-amber-500 inline-block"></span>
+              <span class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span>
+              <span class="ml-2 font-mono font-bold text-slate-400">Klikpos Enterprise v2.0 — Supermercado & Minimarket</span>
+            </div>
+            <div class="flex items-center gap-3 font-mono font-bold">
+              <span class="text-emerald-400 bg-emerald-950/80 border border-emerald-800 px-2 py-0.5 rounded-full text-[11px]">● Caja Operativa Offline</span>
+              <span class="text-amber-400 bg-amber-950/80 border border-amber-800 px-2 py-0.5 rounded-full text-[11px]">🏛️ Tasa BCV Oficial en Vivo</span>
+            </div>
+          </div>
+
+          <!-- Grid Preview de la Interfaz -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-left">
+            
+            <!-- Tarjeta 1: Venta Rápida -->
+            <div class="bg-dark-900 border border-slate-800 p-4 rounded-2xl space-y-3">
+              <div class="flex justify-between items-center">
+                <span class="text-xs font-bold text-slate-400 uppercase">Ticket Actual</span>
+                <span class="text-xs font-mono font-bold text-amber-400">#FACT-00428</span>
+              </div>
+              <div class="space-y-2 text-xs border-y border-slate-800/80 py-3">
+                <div class="flex justify-between">
+                  <span class="text-slate-300">Harina PAN 1kg (x2)</span>
+                  <span class="font-mono font-bold text-white">$2.40</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-slate-300">Queso Blanco Duro (0.85 kg)</span>
+                  <span class="font-mono font-bold text-white">$4.25</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-slate-300">Café Molido 500g</span>
+                  <span class="font-mono font-bold text-white">$3.80</span>
+                </div>
+              </div>
+              <div class="flex justify-between items-baseline pt-1">
+                <span class="text-xs font-bold text-slate-400">TOTAL:</span>
+                <div class="text-right">
+                  <span class="text-2xl font-black text-emerald-400 font-mono">$10.45</span>
+                  <span class="text-xs text-amber-400 block font-mono">Bs. 8,941.65</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tarjeta 2: Conciliador Pago Móvil -->
+            <div class="bg-dark-900 border border-emerald-500/30 p-4 rounded-2xl space-y-3 relative overflow-hidden">
+              <div class="absolute top-0 right-0 bg-emerald-500 text-slate-950 font-black text-[9px] uppercase px-3 py-0.5 rounded-bl-xl">
+                Cero Estafas
+              </div>
+              <span class="text-xs font-bold text-emerald-400 uppercase flex items-center gap-1.5">
+                <span>📲</span> <span>Pago Móvil por SMS</span>
+              </span>
+              <div class="bg-slate-950 border border-slate-800 p-3 rounded-xl space-y-1.5 text-xs">
+                <div class="flex justify-between text-[11px] text-slate-400 font-mono">
+                  <span>Banco de Venezuela</span>
+                  <span>12:34 PM</span>
+                </div>
+                <p class="text-slate-200 font-medium text-[11px]">
+                  "Pago Clave recibido por <b>Bs. 8,941.65</b> de 0414-***9281. Ref: <b>489201</b>"
+                </p>
+              </div>
+              <div class="p-2.5 rounded-xl bg-emerald-950/60 border border-emerald-500/40 text-emerald-300 text-xs font-bold flex items-center gap-2">
+                <span>✓</span>
+                <span>¡Referencia 489201 Validada y Cobrada!</span>
+              </div>
+            </div>
+
+            <!-- Tarjeta 3: Klikpos Cloud Móvil -->
+            <div class="bg-dark-900 border border-indigo-500/30 p-4 rounded-2xl space-y-3">
+              <div class="flex justify-between items-center">
+                <span class="text-xs font-bold text-indigo-400 uppercase flex items-center gap-1">
+                  <span>☁️</span> <span>Klikpos Cloud ($5/mes)</span>
+                </span>
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              </div>
+              <div class="space-y-2 text-xs">
+                <div class="p-2.5 bg-slate-950 rounded-xl border border-slate-800">
+                  <span class="text-[10px] text-slate-400 block uppercase font-bold">Ventas Totales Hoy</span>
+                  <span class="text-xl font-black text-white font-mono">$482.50</span>
+                  <span class="text-[11px] text-amber-400 block font-mono">Bs. 412,850.25</span>
+                </div>
+                <p class="text-[11px] text-slate-400 leading-tight">
+                  Mira tu arqueo en vivo en tu teléfono estés donde estés (4G o desde casa).
+                </p>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ========================================================================= -->
+  <!-- CARACTERÍSTICAS PRINCIPALES                                               -->
+  <!-- ========================================================================= -->
+  <section id="caracteristicas" class="py-20 bg-dark-850 border-t border-slate-800/80">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="text-center max-w-3xl mx-auto mb-16">
+        <h2 class="text-xs font-black uppercase tracking-widest text-amber-400 mb-2">Diseñado para la Realidad Venezolana</h2>
+        <p class="text-3xl sm:text-5xl font-black text-white tracking-tight font-display">
+          Todo lo que tu comercio necesita para vender sin dolores de cabeza.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+        <!-- Card 1 -->
+        <div class="bg-dark-900 border border-slate-800 p-6 rounded-3xl space-y-4 hover:border-amber-500/50 transition-all">
+          <div class="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-2xl">
+            ⚡
+          </div>
+          <h3 class="text-lg font-bold text-white">100% Offline-First</h3>
+          <p class="text-sm text-slate-400 leading-relaxed">
+            ¿Se cayó el internet o falló el Wi-Fi? Klikpos sigue cobrando, imprimiendo tickets y guardando ventas en la PC local sin detener la cola de clientes.
+          </p>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="bg-dark-900 border border-slate-800 p-6 rounded-3xl space-y-4 hover:border-emerald-500/50 transition-all">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-2xl">
+            📲
+          </div>
+          <h3 class="text-lg font-bold text-white">Conciliación Automática de Pago Móvil</h3>
+          <p class="text-sm text-slate-400 leading-relaxed">
+            Se acabaron los capturas falsas editadas. La APK en el teléfono lee el SMS del banco (BDV, Banesco, Mercantil, etc.) y valida la referencia en 2 segundos en caja.
+          </p>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="bg-dark-900 border border-slate-800 p-6 rounded-3xl space-y-4 hover:border-cyan-500/50 transition-all">
+          <div class="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-2xl">
+            🏛️
+          </div>
+          <h3 class="text-lg font-bold text-white">Tasa Oficial BCV en Tiempo Real</h3>
+          <p class="text-sm text-slate-400 leading-relaxed">
+            Sincronización automática de la tasa oficial del Banco Central de Venezuela. Precios multimoneda ($ y Bs) calculados con exactitud y redondeo fiscal.
+          </p>
+        </div>
+
+        <!-- Card 4 -->
+        <div class="bg-dark-900 border border-slate-800 p-6 rounded-3xl space-y-4 hover:border-indigo-500/50 transition-all">
+          <div class="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-2xl">
+            ⚖️
+          </div>
+          <h3 class="text-lg font-bold text-white">Integración con Balanzas y Peso</h3>
+          <p class="text-sm text-slate-400 leading-relaxed">
+            Ideal para carnicerías, charcuterías, verdulerías y panaderías. Conexión directa a balanzas electrónicas RS-232 y cálculo automático de gramos/kilos.
+          </p>
+        </div>
+
+        <!-- Card 5 -->
+        <div class="bg-dark-900 border border-slate-800 p-6 rounded-3xl space-y-4 hover:border-rose-500/50 transition-all">
+          <div class="w-12 h-12 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-2xl">
+            🔒
+          </div>
+          <h3 class="text-lg font-bold text-white">Seguridad Total por Roles y PIN</h3>
+          <p class="text-sm text-slate-400 leading-relaxed">
+            El cajero solo puede cobrar. Para anular una venta, hacer descuentos o ver los reportes confidenciales, se exige el PIN maestro del supervisor o dueño.
+          </p>
+        </div>
+
+        <!-- Card 6 -->
+        <div class="bg-dark-900 border border-slate-800 p-6 rounded-3xl space-y-4 hover:border-amber-500/50 transition-all">
+          <div class="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-2xl">
+            🖨️
+          </div>
+          <h3 class="text-lg font-bold text-white">Impresoras Térmicas y Fiscales</h3>
+          <p class="text-sm text-slate-400 leading-relaxed">
+            Compatible con impresoras de 58mm y 80mm (USB, Bluetooth, Red), gavetas de dinero electrónicas y generación de Libro de Ventas SENIAT.
+          </p>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ========================================================================= -->
+  <!-- SECCIÓN PAGO MÓVIL AUTOMÁTICO (FUNCIÓN ESTRELLA)                          -->
+  <!-- ========================================================================= -->
+  <section id="pago-movil" class="py-20 bg-dark-900 relative">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="bg-gradient-to-r from-emerald-950/40 via-dark-850 to-emerald-950/40 border border-emerald-500/30 rounded-3xl p-8 sm:p-12 shadow-2xl flex flex-col lg:flex-row items-center justify-between gap-10">
+        
+        <div class="space-y-6 max-w-2xl">
+          <div class="inline-flex items-center gap-2 bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 px-3 py-1 rounded-full text-xs font-bold">
+            <span>🛡️</span> Cero Fraudes en tu Negocio
+          </div>
+          <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black text-white font-display leading-tight">
+            Valida los Pagos Móviles en 2 Segundos sin Ver Capturas de Pantalla.
+          </h2>
+          <p class="text-slate-300 text-sm sm:text-base leading-relaxed">
+            Muchos comerciantes en Venezuela pierden miles de dólares al mes aceptando capturas falsas editadas por WhatsApp. Con Klikpos:
+          </p>
+          <ul class="space-y-3 text-sm text-slate-300">
+            <li class="flex items-center gap-3">
+              <span class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 font-bold flex items-center justify-center text-xs">✓</span>
+              <span>El cliente paga con su banco a tu número de teléfono.</span>
+            </li>
+            <li class="flex items-center gap-3">
+              <span class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 font-bold flex items-center justify-center text-xs">✓</span>
+              <span>La APK de Klikpos lee el mensaje de texto bancario original recibido.</span>
+            </li>
+            <li class="flex items-center gap-3">
+              <span class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 font-bold flex items-center justify-center text-xs">✓</span>
+              <span>La caja autoriza el ticket e imprime automáticamente. <b>Cero riesgo.</b></span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="bg-dark-900 border-2 border-emerald-500/40 rounded-3xl p-6 w-full max-w-sm shadow-xl text-center space-y-4">
+          <div class="w-16 h-16 rounded-full bg-emerald-500/20 text-emerald-400 text-3xl flex items-center justify-center mx-auto">
+            📲
+          </div>
+          <h3 class="text-lg font-black text-white">Klikpos Gateway SMS</h3>
+          <p class="text-xs text-slate-400">
+            Compatible con Banco de Venezuela, Banesco, Mercantil, Provincial, Bancamiga, BFC y todos los bancos nacionales.
+          </p>
+          <div class="pt-2">
+            <span class="text-2xl font-black text-emerald-400 font-mono">100% Automático</span>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ========================================================================= -->
+  <!-- SECCIÓN KLIKPOS CLOUD ($5/MES)                                             -->
+  <!-- ========================================================================= -->
+  <section id="cloud" class="py-20 bg-dark-850 border-t border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      
+      <div class="max-w-3xl mx-auto space-y-4 mb-16">
+        <div class="inline-flex items-center gap-2 bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 px-3.5 py-1 rounded-full text-xs font-bold">
+          <span>☁️</span> Klikpos Cloud Sync
+        </div>
+        <h2 class="text-3xl sm:text-5xl font-black text-white font-display">
+          Tu Negocio en tu Bolsillo por solo <span class="text-amber-400">$5 al mes</span>.
+        </h2>
+        <p class="text-slate-300 text-base sm:text-lg">
+          No necesitas estar físicamente en la tienda para saber cuánto dinero ha entrado a caja.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-left max-w-5xl mx-auto">
+        
+        <div class="bg-dark-900 border border-slate-800 p-6 rounded-3xl space-y-3">
+          <span class="text-3xl">📊</span>
+          <h3 class="text-base font-bold text-white">Arqueo y Cierre en Vivo</h3>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Mira el desglose multimoneda exacto: cuánto hay en efectivo Dólares, en Bolívares, en Pago Móvil, Punto de Venta, Zelle y Binance.
+          </p>
+        </div>
+
+        <div class="bg-dark-900 border border-slate-800 p-6 rounded-3xl space-y-3">
+          <span class="text-3xl">📱</span>
+          <h3 class="text-base font-bold text-white">Conexión Global 4G</h3>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Funciona con Digitel, Movistar, SimpleTV o cualquier Wi-Fi residencial. Vincula tu celular con un simple código QR y revisa tu tienda en cualquier parte.
+          </p>
+        </div>
+
+        <div class="bg-dark-900 border border-slate-800 p-6 rounded-3xl space-y-3">
+          <span class="text-3xl">💬</span>
+          <h3 class="text-base font-bold text-white">Reportes por WhatsApp</h3>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Comparte el Reporte Z oficial del día o el resumen de caja directamente a tu WhatsApp o al del contador con un solo clic.
+          </p>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ========================================================================= -->
+  <!-- SECCIÓN PRECIOS Y PLANES                                                  -->
+  <!-- ========================================================================= -->
+  <section id="precios" class="py-20 bg-dark-900 border-t border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="text-center max-w-3xl mx-auto mb-16 space-y-3">
+        <h2 class="text-xs font-black uppercase tracking-widest text-amber-400">Planes Transparentes y Accesibles</h2>
+        <p class="text-3xl sm:text-5xl font-black text-white font-display">
+          Elige el plan ideal para tu comercio.
+        </p>
+        <p class="text-sm text-slate-400">Sin contratos forzosos. Sin cargos ocultos. Aceptamos Pago Móvil, Binance y Zelle.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto items-stretch">
+        
+        <!-- Plan 1: Caja Local -->
+        <div class="bg-dark-850 border border-slate-800 rounded-3xl p-8 flex flex-col justify-between space-y-6">
+          <div class="space-y-4">
+            <span class="text-xs font-black uppercase px-3 py-1 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
+              Plan Caja Standalone
+            </span>
+            <h3 class="text-2xl font-black text-white">Klikpos Local</h3>
+            <p class="text-xs text-slate-400">
+              Ideal para negocios que solo necesitan una caja registradora rápida y confiable en su computadora.
+            </p>
+            <div class="pt-4 border-t border-slate-800">
+              <span class="text-4xl font-black text-white font-mono">$40</span>
+              <span class="text-xs text-slate-400"> / pago único (Licencia Vitalicia)</span>
+            </div>
+            <ul class="space-y-2.5 text-xs text-slate-300 pt-2">
+              <li class="flex items-center gap-2"><span>✓</span> Punto de Venta ilimitado para 1 PC</li>
+              <li class="flex items-center gap-2"><span>✓</span> 100% Offline (funciona sin internet)</li>
+              <li class="flex items-center gap-2"><span>✓</span> Control de inventario y código de barras</li>
+              <li class="flex items-center gap-2"><span>✓</span> Soporte balanzas e impresoras térmicas</li>
+              <li class="flex items-center gap-2"><span>✓</span> Tasa oficial BCV automática</li>
+            </ul>
+          </div>
+          <a href="https://wa.me/584240000000?text=Hola,%20quiero%20comprar%20la%20licencia%20local%20de%20Klikpos%20POS" target="_blank" class="w-full text-center bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs uppercase tracking-wider py-3.5 rounded-xl transition-all">
+            Adquirir Plan Local
+          </a>
+        </div>
+
+        <!-- Plan 2: Pro Cloud (Destacado) -->
+        <div class="bg-gradient-to-b from-dark-800 to-dark-850 border-2 border-amber-500 rounded-3xl p-8 flex flex-col justify-between space-y-6 relative shadow-2xl glow-amber">
+          <div class="absolute -top-3.5 right-6 bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 font-black text-[10px] uppercase px-3 py-1 rounded-full shadow-md">
+            Más Popular en Venezuela
+          </div>
+          <div class="space-y-4">
+            <span class="text-xs font-black uppercase px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-400/40">
+              Plan Dueño Conectado
+            </span>
+            <h3 class="text-2xl font-black text-white">Klikpos Pro + Cloud</h3>
+            <p class="text-xs text-slate-400">
+              Punto de venta completo en PC + Monitoreo móvil en tiempo real + Conciliador automático de Pago Móvil.
+            </p>
+            <div class="pt-4 border-t border-slate-800">
+              <span class="text-4xl font-black text-amber-400 font-mono">$5</span>
+              <span class="text-xs text-slate-400"> / mes (o $50 anual)</span>
+            </div>
+            <ul class="space-y-2.5 text-xs text-slate-300 pt-2">
+              <li class="flex items-center gap-2 text-white font-bold"><span>⚡</span> <b>Todo lo del Plan Local incluido</b></li>
+              <li class="flex items-center gap-2 text-emerald-400 font-bold"><span>✓</span> <b>Conciliador automático de Pago Móvil por SMS</b></li>
+              <li class="flex items-center gap-2 text-amber-300 font-bold"><span>✓</span> <b>App Móvil Android para Dueño y Gerencia</b></li>
+              <li class="flex items-center gap-2"><span>✓</span> Sincronización en la nube con Google Firestore</li>
+              <li class="flex items-center gap-2"><span>✓</span> Alertas de caja y stock crítico al celular</li>
+              <li class="flex items-center gap-2"><span>✓</span> Soporte técnico prioritario por WhatsApp</li>
+            </ul>
+          </div>
+          <a href="https://wa.me/584240000000?text=Hola,%20quiero%20activar%20el%20Plan%20Pro%20Cloud%20de%20Klikpos%20POS%20por%20$5" target="_blank" class="w-full text-center bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 text-slate-950 font-black text-xs uppercase tracking-wider py-3.5 rounded-xl shadow-lg shadow-amber-500/25 active:scale-95 transition-all">
+            Empezar con Klikpos Cloud ($5/mes)
+          </a>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ========================================================================= -->
+  <!-- ZONA DE DESCARGAS                                                         -->
+  <!-- ========================================================================= -->
+  <section id="descargas" class="py-20 bg-dark-850 border-t border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-8">
+      
+      <div class="max-w-2xl mx-auto space-y-3">
+        <h2 class="text-3xl sm:text-4xl font-black text-white font-display">Descarga Klikpos para tus Dispositivos</h2>
+        <p class="text-sm text-slate-400">Instalación rápida en menos de 1 minuto. Sin dependencias complicadas.</p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-3xl mx-auto text-left">
+        
+        <!-- Descarga Windows -->
+        <div class="bg-dark-900 border border-slate-800 p-6 rounded-3xl space-y-4 hover:border-slate-700 transition-all flex flex-col justify-between">
+          <div class="space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-3xl">💻</span>
+              <span class="text-[10px] font-mono bg-slate-800 text-slate-400 px-2 py-0.5 rounded-full">Windows 10 / 11 (64-bit)</span>
+            </div>
+            <h3 class="text-lg font-black text-white">Klikpos para PC</h3>
+            <p class="text-xs text-slate-400">
+              Instalador oficial para tu computadora de mostrador o caja principal.
+            </p>
+          </div>
+          <a href="/dist-installer/Venematic-POS-Full-Desktop-Setup-v2.0.0.exe" class="w-full text-center bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white font-bold text-xs py-3 rounded-xl block transition-all shadow-sm">
+            Descargar Instalador (.EXE)
+          </a>
+        </div>
+
+        <!-- Descarga Android -->
+        <div class="bg-dark-900 border border-slate-800 p-6 rounded-3xl space-y-4 hover:border-slate-700 transition-all flex flex-col justify-between">
+          <div class="space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-3xl">📱</span>
+              <span class="text-[10px] font-mono bg-slate-800 text-slate-400 px-2 py-0.5 rounded-full">Android 8.0 o Superior</span>
+            </div>
+            <h3 class="text-lg font-black text-white">Klikpos Admin Móvil</h3>
+            <p class="text-xs text-slate-400">
+              APK para el teléfono del dueño con lector de SMS de Pago Móvil y Arqueo.
+            </p>
+          </div>
+          <a href="/dist-apk/VenematicPOS-Admin-Mobile.apk" class="w-full text-center bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs py-3 rounded-xl block transition-all shadow-md">
+            Descargar APK Android (.APK)
+          </a>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ========================================================================= -->
+  <!-- PREGUNTAS FRECUENTES (FAQ)                                                -->
+  <!-- ========================================================================= -->
+  <section id="faq" class="py-20 bg-dark-900 border-t border-slate-800">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+      
+      <div class="text-center space-y-3">
+        <h2 class="text-xs font-black uppercase tracking-widest text-amber-400">Dudas Comunes</h2>
+        <p class="text-3xl sm:text-4xl font-black text-white font-display">Preguntas Frecuentes</p>
+      </div>
+
+      <div class="space-y-4">
+        
+        <details class="bg-dark-850 border border-slate-800 p-5 rounded-2xl cursor-pointer group">
+          <summary class="font-bold text-white text-sm list-none flex justify-between items-center">
+            <span>¿Qué pasa si en mi local se va el internet o la luz?</span>
+            <span class="text-amber-400 transition-transform group-open:rotate-180">▼</span>
+          </summary>
+          <p class="mt-3 text-xs text-slate-400 leading-relaxed">
+            Klikpos está programado con arquitectura 100% Offline-First. Toda la base de datos de productos, inventario y ventas reside físicamente en tu computadora. Cuando la luz o el internet regresan, el sistema se sincroniza automáticamente con la nube sin perder un solo centavo.
+          </p>
+        </details>
+
+        <details class="bg-dark-850 border border-slate-800 p-5 rounded-2xl cursor-pointer group">
+          <summary class="font-bold text-white text-sm list-none flex justify-between items-center">
+            <span>¿Cómo funciona la validación de Pago Móvil por SMS?</span>
+            <span class="text-amber-400 transition-transform group-open:rotate-180">▼</span>
+          </summary>
+          <p class="mt-3 text-xs text-slate-400 leading-relaxed">
+            Instalas la app Klikpos Admin en el teléfono que recibe los mensajes de texto del banco donde tienes tu Pago Móvil. Al recibir el SMS del banco con el monto y la referencia, la app transmite la confirmación a tu caja en 2 segundos, evitando estafas de capturas falsas editadas.
+          </p>
+        </details>
+
+        <details class="bg-dark-850 border border-slate-800 p-5 rounded-2xl cursor-pointer group">
+          <summary class="font-bold text-white text-sm list-none flex justify-between items-center">
+            <span>¿Cómo se pagan los $5 mensuales de Klikpos Cloud?</span>
+            <span class="text-amber-400 transition-transform group-open:rotate-180">▼</span>
+          </summary>
+          <p class="mt-3 text-xs text-slate-400 leading-relaxed">
+            Aceptamos Pago Móvil en Bolívares a la tasa oficial BCV del día, Binance Pay (USDT) o Zelle. Te enviamos tu factura digital y tu servicio cloud se renueva automáticamente por 30 días.
+          </p>
+        </details>
+
+        <details class="bg-dark-850 border border-slate-800 p-5 rounded-2xl cursor-pointer group">
+          <summary class="font-bold text-white text-sm list-none flex justify-between items-center">
+            <span>¿Puedo probar el software antes de pagar?</span>
+            <span class="text-amber-400 transition-transform group-open:rotate-180">▼</span>
+          </summary>
+          <p class="mt-3 text-xs text-slate-400 leading-relaxed">
+            ¡Sí! El instalador cuenta con una prueba flash de 5 minutos completamente funcional para que cargues productos, pruebes el cobro y verifiques su velocidad en tu propia computadora antes de comprar tu licencia.
+          </p>
+        </details>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ========================================================================= -->
+  <!-- FOOTER                                                                    -->
+  <!-- ========================================================================= -->
+  <footer class="bg-dark-950 border-t border-slate-800/80 py-12 text-slate-500 text-xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-6">
+      
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-xl bg-amber-500 flex items-center justify-center font-black text-slate-950 text-base">
+          ⚡
+        </div>
+        <div>
+          <span class="text-white font-bold font-display text-sm">KLIKPOS</span>
+          <p class="text-[11px] text-slate-500">Tecnología de Punto de Venta para Venezuela • <b>klikpos.online</b></p>
+        </div>
+      </div>
+
+      <div class="text-center sm:text-right space-y-1">
+        <p>© 2026 Klikpos. Todos los derechos reservados.</p>
+        <p class="text-[10px] text-slate-600">Marca comercial y desarrollo de software registrado.</p>
+      </div>
+
+    </div>
+  </footer>
+
+</body>
+</html>
