@@ -1,15 +1,16 @@
 {
-  "version": "2.4.3",
+  "version": "2.4.4",
   "releaseDate": "2026-09-27",
-  "title": "KlikPOS v2.4.3 - Modo Kiosco Minimalista, Fast Food Card & Escudo Antifraude",
+  "title": "KlikPOS v2.4.4 - Paleta Pastel por Categoría, Iconify Multilibrería & Kiosco Full Canvas",
   "notes": [
-    "Nuevo Modo Kiosco Minimalista & Café/Bakery con iconografía vectorial limpia, tipografía uppercase espaciada y adaptación total a paleta de branding.",
-    "Modo Comida Rápida / Fast Food & Restaurante con fotografía full-bleed y overlay flotante de precios en Bolívares y USD.",
-    "Escudo Antifraude en Tiempo Real: Detección y bloqueo automático de referencias bancarias duplicadas o capturas recicladas en Pago Móvil.",
-    "Soporte integral de Precios Fijos en Bolívares (VES) inmunes a fluctuaciones de la tasa BCV tanto en Desktop como en el Escáner Móvil Full.",
-    "Contraste Inverso perfeccionado en Modo Oscuro: Fondo azul marino profundo (#0a192f) con tarjetas blancas (#ffffff) de legibilidad WCAG AAA."
+    "Soporte completo de @iconify/react y react-icons con acceso a más de 200.000 íconos vectoriales modernos.",
+    "Modo Minimalista Kiosco con alternancia inteligente de íconos Outline y Fill (sólidos y líneas vectoriales).",
+    "Paleta de colores pasteles suaves asignada automáticamente según el rubro o categoría de cada producto.",
+    "Botón selector en el POS para alternar en 1 clic entre 'Colores Rubro' y 'Monocromático'.",
+    "Optimización de pantalla táctil completa (100% Canvas sin carruseles ni barras innecesarias).",
+    "Campos icon y color integrados en la base de datos local para personalización individual de cada producto."
   ],
-  "windowsUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v2.4.3/KlikPOS-Enterprise-Setup-v2.4.3.exe",
-  "androidUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v2.4.3/KlikPOS_Movil_Full.apk",
+  "windowsUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v2.4.4/KlikPOS-Enterprise-Setup-v2.4.4.exe",
+  "androidUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v2.4.4/KlikPOS_Movil_Full.apk",
   "mandatory": false
 }

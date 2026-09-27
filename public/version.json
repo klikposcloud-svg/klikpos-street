@@ -1,15 +1,16 @@
 {
-  "version": "2.4.1",
+  "version": "2.4.4",
   "releaseDate": "2026-09-27",
-  "title": "KlikPOS v2.4.1 - Interfaz Ultra-Espaciosa & Alto Contraste",
+  "title": "KlikPOS v2.4.4 - Paleta Pastel por Categoría, Iconify Multilibrería & Kiosco Full Canvas",
   "notes": [
-    "Diseño de catálogo optimizado: reducción de 7 a 4 columnas por fila con mayor espacio.",
-    "Títulos de productos en 2 líneas completas para lectura limpia sin truncamientos.",
-    "Corrección de alto contraste en textos claros (teclado numérico, balanza y reloj 100% legibles).",
-    "Accesos directos del carrusel ensanchados para mayor confort táctil en cajas rápidas.",
-    "Actualizador automático conectado a la nube oficial de KlikPOS."
+    "Soporte completo de @iconify/react y react-icons con acceso a más de 200.000 íconos vectoriales modernos.",
+    "Modo Minimalista Kiosco con alternancia inteligente de íconos Outline y Fill (sólidos y líneas vectoriales).",
+    "Paleta de colores pasteles suaves asignada automáticamente según el rubro o categoría de cada producto.",
+    "Botón selector en el POS para alternar en 1 clic entre 'Colores Rubro' y 'Monocromático'.",
+    "Optimización de pantalla táctil completa (100% Canvas sin carruseles ni barras innecesarias).",
+    "Campos icon y color integrados en la base de datos local para personalización individual de cada producto."
   ],
-  "windowsUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v2.4.1/KlikPOS-Enterprise-Setup-v2.4.1.exe",
-  "androidUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v2.4.1/KlikPOS_Movil_Full.apk",
+  "windowsUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v2.4.4/KlikPOS-Enterprise-Setup-v2.4.4.exe",
+  "androidUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v2.4.4/KlikPOS_Movil_Full.apk",
   "mandatory": false
 }

@@ -18,6 +18,8 @@ export interface LocalProduct {
   isTaxExempt?: boolean;
   isFixedPriceVES?: boolean;
   fixedPriceVES?: number;
+  icon?: string;
+  color?: string;
 }
 
 export interface SaleItem {
