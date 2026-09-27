@@ -46,6 +46,7 @@ import {
   Sandwich,
   ShieldAlert,
   ShieldCheck,
+  Palette,
 } from 'lucide-react';
 import { scaleService, WeightReading } from '@/lib/hardware/scale';
 import { kickCashDrawer } from '@/lib/hardware/cash-drawer';
@@ -311,18 +312,81 @@ const getProductIconAlternated = (p: LocalProduct, isOutline: boolean) => {
   );
 };
 
-// Contrastes suaves con cambio de tonalidades (Exactamente como la imagen de referencia)
-const getCardToneClasses = (index: number) => {
+// Contrastes suaves con cambio de tonalidades (Por Categoría/Rubro o Monocromático)
+const getCardToneClasses = (p: LocalProduct, index: number, paletteMode: 'category' | 'mono' = 'category') => {
+  // 1. Si el producto tiene un color personalizado asignado en db (p.color), se respeta
+  if ((p as any).color) {
+    return 'shadow-2xs border-2 border-slate-300 dark:border-slate-600';
+  }
+
+  // 2. Si el usuario seleccionó la paleta monocromática clásica de la referencia
+  if (paletteMode === 'mono') {
+    const mod = index % 3;
+    if (mod === 0) {
+      return 'bg-white text-slate-900 border-2 border-slate-300 dark:border-slate-500 shadow-sm';
+    } else if (mod === 1) {
+      return 'bg-[#dce3ec] dark:bg-slate-800 text-slate-800 dark:text-slate-100 border-2 border-[#9cb1c5] dark:border-slate-500 shadow-2xs';
+    } else {
+      return 'bg-[#d4dfea] dark:bg-slate-800/90 text-slate-800 dark:text-slate-100 border-2 border-[#93a9be] dark:border-slate-500 shadow-2xs';
+    }
+  }
+
+  // 3. Paleta Inteligente por Rubro / Categoría (Pasteles suaves con alto contraste)
+  const text = `${p.category || ''} ${p.name || ''}`.toLowerCase();
+
+  // Carnes, Pollo, Res, Cerdo -> Rosado / Salmón suave
+  if (text.includes('carne') || text.includes('pollo') || text.includes('res') || text.includes('cerdo') || text.includes('meat') || text.includes('chuleta')) {
+    return 'bg-[#ffe4e6] dark:bg-[#33181d] text-slate-950 dark:text-rose-100 border-2 border-[#fecdd3] dark:border-[#632a35] hover:border-[#fb7185] dark:hover:border-[#993e50] shadow-2xs';
+  }
+
+  // Charcutería, Jamón, Embutidos -> Rosa orquídea suave
+  if (text.includes('charcuter') || text.includes('jamon') || text.includes('jamón') || text.includes('salchicha') || text.includes('tocineta')) {
+    return 'bg-[#fce7f3] dark:bg-[#311728] text-slate-950 dark:text-pink-100 border-2 border-[#fbcfe8] dark:border-[#5f284e] hover:border-[#f472b6] dark:hover:border-[#943b78] shadow-2xs';
+  }
+
+  // Lácteos, Leche, Quesos, Mantequilla -> Celeste cielo suave
+  if (text.includes('lacteo') || text.includes('lácteo') || text.includes('leche') || text.includes('queso') || text.includes('mantequilla') || text.includes('dairy')) {
+    return 'bg-[#e0f2fe] dark:bg-[#142638] text-slate-950 dark:text-sky-100 border-2 border-[#bae6fd] dark:border-[#22486b] hover:border-[#38bdf8] dark:hover:border-[#3874aa] shadow-2xs';
+  }
+
+  // Frutas, Verduras, Hortalizas, Vegetales, Produce -> Menta fresca suave
+  if (text.includes('fruta') || text.includes('verdura') || text.includes('hortaliza') || text.includes('vegetal') || text.includes('produce') || text.includes('manzana') || text.includes('papa')) {
+    return 'bg-[#dcfce7] dark:bg-[#132c1c] text-slate-950 dark:text-emerald-100 border-2 border-[#bbf7d0] dark:border-[#205232] hover:border-[#4ade80] dark:hover:border-[#338150] shadow-2xs';
+  }
+
+  // Café, Té, Espresso, Desayuno -> Moca cálido / Trigo suave
+  if (text.includes('café') || text.includes('cafe') || text.includes('espresso') || text.includes('te') || text.includes('té') || text.includes('latte')) {
+    return 'bg-[#f5ede4] dark:bg-[#2e231c] text-slate-950 dark:text-amber-100 border-2 border-[#d6c5b3] dark:border-[#5a4332] hover:border-[#bca48d] dark:hover:border-[#8c6b50] shadow-2xs';
+  }
+
+  // Panadería, Repostería, Dulces, Cakes, Croissants -> Ámbar dorado suave
+  if (text.includes('pan') || text.includes('croissant') || text.includes('bakery') || text.includes('torta') || text.includes('cake') || text.includes('dulce') || text.includes('postre')) {
+    return 'bg-[#fef3c7] dark:bg-[#2d2210] text-slate-950 dark:text-amber-100 border-2 border-[#fcd34d] dark:border-[#5c4418] hover:border-[#f59e0b] dark:hover:border-[#966f28] shadow-2xs';
+  }
+
+  // Víveres, Abarrotes, Despensa, Harina, Arroz, Granos -> Vainilla cálida suave
+  if (text.includes('viveres') || text.includes('víveres') || text.includes('arroz') || text.includes('harina') || text.includes('pasta') || text.includes('aceite') || text.includes('grano')) {
+    return 'bg-[#fef9c3] dark:bg-[#292614] text-slate-950 dark:text-yellow-100 border-2 border-[#fde047] dark:border-[#4d4822] hover:border-[#eab308] dark:hover:border-[#7a7235] shadow-2xs';
+  }
+
+  // Bebidas, Refrescos, Jugos, Aguas -> Aqua / Turquesa suave
+  if (text.includes('bebida') || text.includes('refresco') || text.includes('jugo') || text.includes('agua') || text.includes('soda') || text.includes('beverage')) {
+    return 'bg-[#ccfbf1] dark:bg-[#102b28] text-slate-950 dark:text-teal-100 border-2 border-[#99f6e4] dark:border-[#1e524d] hover:border-[#2dd4bf] dark:hover:border-[#308179] shadow-2xs';
+  }
+
+  // Limpieza, Aseo, Hogar, Detergente -> Lavanda / Violeta suave
+  if (text.includes('limpieza') || text.includes('detergente') || text.includes('jabon') || text.includes('jabón') || text.includes('papel') || text.includes('aseo')) {
+    return 'bg-[#fae8ff] dark:bg-[#2a1733] text-slate-950 dark:text-purple-100 border-2 border-[#f5d0fe] dark:border-[#4d285e] hover:border-[#e879f9] dark:hover:border-[#783e92] shadow-2xs';
+  }
+
+  // Fallback: Alternancia elegante gris pizarra / niebla / blanco
   const mod = index % 3;
   if (mod === 0) {
-    // Tarjeta Blanca / Elevada (Como "COFFEE" en la referencia)
-    return 'bg-white text-slate-900 border-2 border-slate-300 dark:border-slate-500 shadow-sm';
+    return 'bg-white dark:bg-slate-800 text-slate-950 dark:text-white border-2 border-slate-300 dark:border-slate-600 hover:border-slate-500 shadow-2xs';
   } else if (mod === 1) {
-    // Tonalidad gris pizarra suave
-    return 'bg-[#dce3ec] dark:bg-slate-800 text-slate-800 dark:text-slate-100 border-2 border-[#9cb1c5] dark:border-slate-500 shadow-2xs';
+    return 'bg-[#dce3ec] dark:bg-slate-800/90 text-slate-950 dark:text-slate-100 border-2 border-[#9cb1c5] dark:border-slate-500 hover:border-slate-600 shadow-2xs';
   } else {
-    // Tonalidad gris niebla suave
-    return 'bg-[#d4dfea] dark:bg-slate-800/90 text-slate-800 dark:text-slate-100 border-2 border-[#93a9be] dark:border-slate-500 shadow-2xs';
+    return 'bg-[#d4dfea] dark:bg-slate-800/80 text-slate-950 dark:text-slate-100 border-2 border-[#93a9be] dark:border-slate-500 hover:border-slate-600 shadow-2xs';
   }
 };
 
@@ -444,6 +508,23 @@ export default function DesktopPosPage() {
     }
     return 'grid';
   });
+
+  // Paleta de Color para Modo Minimalista ('category' = pasteles suaves por rubro, 'mono' = escala monocromática)
+  const [minimalistColorPalette, setMinimalistColorPalette] = useState<'category' | 'mono'>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('venematic_pos_minimalist_colors');
+      if (saved === 'mono' || saved === 'category') return saved;
+    }
+    return 'category';
+  });
+
+  const toggleMinimalistPalette = () => {
+    const next = minimalistColorPalette === 'category' ? 'mono' : 'category';
+    setMinimalistColorPalette(next);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('venematic_pos_minimalist_colors', next);
+    }
+  };
   const [isSliderCollapsed, setIsSliderCollapsed] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
       return localStorage.getItem('klikpos_slider_collapsed') === 'true';
@@ -2511,6 +2592,20 @@ export default function DesktopPosPage() {
               <span className="hidden xl:inline">Minimalista</span>
             </button>
 
+            {posViewMode === 'touch' && (
+              <button
+                type="button"
+                onClick={toggleMinimalistPalette}
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-black transition-all cursor-pointer bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 border border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 shadow-2xs"
+                title="Alternar entre Colores por Categoría y Escala Monocromática Minimalista"
+              >
+                <Palette className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" />
+                <span className="hidden sm:inline">
+                  {minimalistColorPalette === 'category' ? '🎨 Colores Rubro' : '🔘 Monocromático'}
+                </span>
+              </button>
+            )}
+
             <button
               type="button"
               onClick={() => handleSetPosViewMode('fastfood')}
@@ -2683,13 +2778,14 @@ export default function DesktopPosPage() {
                 const displayVES = isFixed ? p.fixedPriceVES! : (p.priceUSD * bcvRate);
                 const displayUSD = isFixed ? (p.fixedPriceVES! / bcvRate) : p.priceUSD;
                 const isOutline = index % 2 === 0;
-                const toneClasses = getCardToneClasses(index);
+                const toneClasses = getCardToneClasses(p, index, minimalistColorPalette);
 
                 return (
                   <button
                     key={p.id}
                     type="button"
                     onClick={() => addToCart(p, 1)}
+                    style={(p as any).color ? { backgroundColor: (p as any).color } : undefined}
                     className={`pos-minimal-card aspect-square rounded-[22px] p-3 sm:p-3.5 flex flex-col justify-between items-center text-center transition-all duration-150 active:scale-[0.96] hover:scale-[1.02] cursor-pointer group select-none relative overflow-hidden hover:bg-white hover:border-slate-700 dark:hover:border-slate-300 hover:shadow-lg ${toneClasses}`}
                   >
                     {/* Tag superior discreto (Categoría o Fijo) */}
