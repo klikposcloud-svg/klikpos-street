@@ -1,12 +1,11 @@
 @echo off
-title KlikPOS Enterprise - Instalador Seguro
+title KlikPOS Enterprise - Instalador Directo
 color 1F
 cd /d "%~dp0"
 echo =====================================================================
-echo                 Instalando KlikPOS Enterprise
+echo                Iniciando Instalador KlikPOS Enterprise
 echo =====================================================================
-echo Desbloqueando instalador...
-powershell -NoProfile -ExecutionPolicy Bypass -Command "Unblock-File -Path '.\KlikPOS_Desktop_Setup.exe' -ErrorAction SilentlyContinue"
-echo Iniciando asistente de instalacion...
-start "" ".\KlikPOS_Desktop_Setup.exe"
+echo.
+echo Desbloqueando ejecutable y abriendo instalador...
+powershell -NoProfile -ExecutionPolicy Bypass -Command "Unblock-File -Path '.\KlikPOS_Desktop_Setup.exe' -ErrorAction SilentlyContinue; Start-Process -FilePath '.\KlikPOS_Desktop_Setup.exe'"
 exit
