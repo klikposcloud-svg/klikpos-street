@@ -17,9 +17,14 @@ export interface UpdateConfig {
   lastChecked?: string;
 }
 
-export const CURRENT_VERSION = '2.4.0';
+export const CURRENT_VERSION = '2.4.1';
 
-const DEFAULT_MANIFEST_URL = 'https://raw.githubusercontent.com/klikposcloud-svg/klikpos/main/klikpos-releases/version.json';
+const DEFAULT_MANIFEST_URL = 'https://raw.githubusercontent.com/klikposcloud-svg/klikpos-releases/main/version.json';
+const FALLBACK_MANIFEST_URLS = [
+  'https://raw.githubusercontent.com/klikposcloud-svg/klikpos-releases/main/version.json',
+  'https://raw.githubusercontent.com/klikposcloud-svg/klikpos/main/version.json',
+  '/version.json',
+];
 const UPDATE_CONFIG_KEY = 'klikpos_update_config';
 
 export function compareVersions(v1: string, v2: string): number {
@@ -51,7 +56,16 @@ class UpdateService {
     try {
       const saved = localStorage.getItem(UPDATE_CONFIG_KEY);
       if (saved) {
-        this.config = { ...this.config, ...JSON.parse(saved) };
+        const parsed = JSON.parse(saved);
+        // Autocorrección de URLs obsoletas o rutas internas rotas
+        if (
+          !parsed.updateManifestUrl ||
+          parsed.updateManifestUrl.includes('venematic-releases') ||
+          parsed.updateManifestUrl.includes('klikpos/main/klikpos-releases')
+        ) {
+          parsed.updateManifestUrl = DEFAULT_MANIFEST_URL;
+        }
+        this.config = { ...this.config, ...parsed };
       }
     } catch {}
   }
@@ -73,7 +87,7 @@ class UpdateService {
     return CURRENT_VERSION;
   }
 
-  // Comprueba si hay una nueva versión disponible consultando el servidor remoto
+  // Comprueba si hay una nueva versión disponible consultando los servidores remotos
   public async checkForUpdates(): Promise<{
     hasUpdate: boolean;
     currentVersion: string;
@@ -94,38 +108,53 @@ class UpdateService {
       };
     }
 
-    try {
-      const url = this.config.updateManifestUrl || DEFAULT_MANIFEST_URL;
-      // Añadir timestamp para evitar caché agresivo de CDNs
-      const bustCacheUrl = `${url}${url.includes('?') ? '&' : '?'}_t=${Date.now()}`;
+    const candidateUrls = [
+      this.config.updateManifestUrl,
+      DEFAULT_MANIFEST_URL,
+      ...FALLBACK_MANIFEST_URLS,
+    ].filter((u, i, arr): u is string => !!u && arr.indexOf(u) === i);
 
-      const res = await fetch(bustCacheUrl, {
-        headers: { Accept: 'application/json' },
-        cache: 'no-cache',
-      });
+    let lastError = 'No se pudo contactar el servidor de actualizaciones en línea.';
+    let manifest: VersionManifest | null = null;
 
-      if (!res.ok) {
-        throw new Error(`Servidor de actualizaciones respondió con estado ${res.status}`);
+    for (const rawUrl of candidateUrls) {
+      try {
+        const bustCacheUrl = `${rawUrl}${rawUrl.includes('?') ? '&' : '?'}_t=${Date.now()}`;
+        const res = await fetch(bustCacheUrl, {
+          headers: { Accept: 'application/json' },
+          cache: 'no-cache',
+        });
+
+        if (res.ok) {
+          manifest = await res.json();
+          if (manifest && manifest.version) {
+            break;
+          }
+        } else {
+          lastError = `Servidor de actualizaciones respondió con estado ${res.status}`;
+        }
+      } catch (err: any) {
+        lastError = err?.message || lastError;
       }
+    }
 
-      const manifest: VersionManifest = await res.json();
-      const hasUpdate = compareVersions(manifest.version, CURRENT_VERSION) > 0;
-
-      this.saveConfig({ lastChecked: new Date().toISOString() });
-
-      return {
-        hasUpdate,
-        currentVersion: CURRENT_VERSION,
-        latestManifest: manifest,
-      };
-    } catch (err: any) {
+    if (!manifest) {
       return {
         hasUpdate: false,
         currentVersion: CURRENT_VERSION,
         latestManifest: null,
-        error: err.message || 'No se pudo contactar el servidor de actualizaciones en línea.',
+        error: lastError,
       };
     }
+
+    const hasUpdate = compareVersions(manifest.version, CURRENT_VERSION) > 0;
+    this.saveConfig({ lastChecked: new Date().toISOString() });
+
+    return {
+      hasUpdate,
+      currentVersion: CURRENT_VERSION,
+      latestManifest: manifest,
+    };
   }
 
   // Ejecuta la actualización según el entorno de ejecución

@@ -7,7 +7,7 @@ Version: 2.4.1 (Interfaz Espaciosa, 4 Cols POS, Alto Contraste, Cloud Sync)
 Fecha de emision: 27 de September de 2026
 
 Algoritmo SHA256:
-40F894890CFFD5A0E263358B5A21ACAFAAF7E05E2C1BDAFA66271848BF4E7D8C
+D475E04F8995E2F31EF0E267E24820A6FE8D42743F946F4CA1FBBE9ED0CE805D
 
 Para verificar la integridad del instalador en cualquier computadora:
 PowerShell:

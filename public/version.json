@@ -1,0 +1,15 @@
+{
+  "version": "2.4.1",
+  "releaseDate": "2026-09-27",
+  "title": "KlikPOS v2.4.1 - Interfaz Ultra-Espaciosa & Alto Contraste",
+  "notes": [
+    "Diseño de catálogo optimizado: reducción de 7 a 4 columnas por fila con mayor espacio.",
+    "Títulos de productos en 2 líneas completas para lectura limpia sin truncamientos.",
+    "Corrección de alto contraste en textos claros (teclado numérico, balanza y reloj 100% legibles).",
+    "Accesos directos del carrusel ensanchados para mayor confort táctil en cajas rápidas.",
+    "Actualizador automático conectado a la nube oficial de KlikPOS."
+  ],
+  "windowsUrl": "https://github.com/klikposcloud-svg/klikpos/releases/download/v2.4.1/KlikPOS-Enterprise-Setup-v2.4.1.exe",
+  "androidUrl": "https://github.com/klikposcloud-svg/klikpos/releases/download/v2.4.1/KlikPOS_Movil_Full.apk",
+  "mandatory": false
+}
