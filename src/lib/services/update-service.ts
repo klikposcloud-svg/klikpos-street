@@ -48,7 +48,7 @@ export function compareVersions(v1: string, v2: string): number {
 class UpdateService {
   private config: UpdateConfig = {
     autoCheckOnStartup: true,
-    autoApplySilently: false,
+    autoApplySilently: true,
     scheduledCheckEnabled: true,
     scheduledTime: '00:00',
     updateManifestUrl: DEFAULT_MANIFEST_URL,

@@ -23,8 +23,13 @@ import {
   Search,
   ChevronLeft,
   ChevronRight,
+  ChevronUp,
+  ChevronDown,
   Sparkles,
   SlidersHorizontal,
+  LayoutGrid,
+  List,
+  Zap,
 } from 'lucide-react';
 import { scaleService, WeightReading } from '@/lib/hardware/scale';
 import { kickCashDrawer } from '@/lib/hardware/cash-drawer';
@@ -140,6 +145,39 @@ export default function DesktopPosPage() {
   const [pagoMovilAutoStatus, setPagoMovilAutoStatus] = useState<'idle' | 'monitoring' | 'confirmed' | 'error'>('idle');
   const [pagoMovilAutoConfirmation, setPagoMovilAutoConfirmation] = useState<PagoMovilConfirmation | null>(null);
   const [pagoMovilGmailConfigured] = useState<boolean>(() => pagoMovilMonitor.isConfigured());
+
+  // Modos de Vista del Catálogo POS (Cuadrícula, Lista Compacta, Botonera Táctil Express)
+  type PosViewMode = 'grid' | 'list' | 'touch';
+  const [posViewMode, setPosViewMode] = useState<PosViewMode>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('klikpos_pos_view_mode');
+      if (saved === 'grid' || saved === 'list' || saved === 'touch') return saved;
+    }
+    return 'grid';
+  });
+  const [isSliderCollapsed, setIsSliderCollapsed] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('klikpos_slider_collapsed') === 'true';
+    }
+    return false;
+  });
+
+  const handleSetPosViewMode = (mode: PosViewMode) => {
+    setPosViewMode(mode);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('klikpos_pos_view_mode', mode);
+    }
+  };
+
+  const handleToggleSliderCollapsed = () => {
+    setIsSliderCollapsed((prev) => {
+      const next = !prev;
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('klikpos_slider_collapsed', String(next));
+      }
+      return next;
+    });
+  };
 
   // Gestión Profesional de Turno de Caja y Arqueo Físico
   const [activeShift, setActiveShift] = useState<LocalCashShift | null>(null);
@@ -1886,70 +1924,249 @@ export default function DesktopPosPage() {
         </div>
 
         {/* ========================================================================= */}
-        {/* SUBSECCIÓN 1: SLIDER MANUAL DE CARDS RECTANGULARES (IMAGEN 1)             */}
-        {/* Acceso Ultrarrápido / Favoritos / Más Vendidos                            */}
+        {/* BANDEJA DOCK: ACCESOS RÁPIDOS Y FAVORITOS (Diferenciada y Colapsable)     */}
         {/* ========================================================================= */}
         {!searchQuery.trim() && sliderProducts.length > 0 && (
-          <div className="shrink-0 flex flex-col gap-1.5 bg-slate-50/70 dark:bg-slate-900/40 p-2 rounded-2xl border border-slate-200/80 dark:border-slate-800/80">
-            {/* Header del Slider con Controles Manuales & Configuración */}
+          <div className="shrink-0 flex flex-col gap-1.5 bg-gradient-to-r from-slate-100/90 via-slate-50/80 to-slate-100/90 dark:from-slate-900/80 dark:via-slate-900/60 dark:to-slate-900/80 p-2.5 rounded-2xl border-2 border-sky-600/20 dark:border-sky-500/20 shadow-xs transition-all">
+            {/* Header de la Bandeja con Controles de Desplazamiento & Colapso */}
             <div className="flex items-center justify-between px-1">
               <div className="flex items-center gap-2">
-                <span className="flex items-center justify-center w-6 h-6 rounded-lg bg-[var(--brand-primary)]/10 text-[var(--brand-primary)]">
+                <span className="flex items-center justify-center w-6 h-6 rounded-lg bg-sky-600/15 text-sky-700 dark:text-sky-300">
                   <Sparkles className="w-3.5 h-3.5" />
                 </span>
-                <span className="text-xs font-black uppercase tracking-wider text-slate-800 dark:text-slate-200">
-                  {customSliderIds.length > 0 ? 'Accesos Directos de Caja' : 'Más Vendidos & Acceso Rápido'}
+                <span className="text-xs font-black uppercase tracking-wider text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                  <span>⚡ Accesos Rápidos de Caja</span>
                 </span>
-                <span className="text-[10px] font-bold text-slate-500 bg-white dark:bg-slate-800 px-2 py-0.5 rounded-full border border-slate-200/80 dark:border-slate-700">
+                <span className="text-[10px] font-bold text-sky-800 dark:text-sky-300 bg-sky-50 dark:bg-sky-950/60 px-2 py-0.5 rounded-full border border-sky-200 dark:border-sky-800">
                   {sliderProducts.length} items
                 </span>
                 <button
                   type="button"
                   onClick={() => setShowQuickAccessModal(true)}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200/90 dark:border-slate-700 shadow-2xs transition-all active:scale-95 cursor-pointer ml-1"
+                  className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg text-[10.5px] font-bold bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 shadow-2xs transition-all active:scale-95 cursor-pointer ml-1"
                   title="Configurar los productos favoritos y accesos directos del carrusel"
                 >
-                  <SlidersHorizontal className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" />
-                  <span className="hidden sm:inline">Configurar Accesos</span>
+                  <SlidersHorizontal className="w-3 h-3 text-sky-600 dark:text-sky-400" />
+                  <span className="hidden sm:inline">Configurar</span>
                 </button>
               </div>
 
-              {/* Botones de Desplazamiento Manual */}
+              {/* Botones de Desplazamiento y Botón de Minimizar / Expandir */}
               <div className="flex items-center gap-1.5">
+                {!isSliderCollapsed && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => scrollSlider('left')}
+                      className="w-7 h-7 rounded-full bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 shadow-2xs flex items-center justify-center cursor-pointer transition-all active:scale-90"
+                      title="Desplazar hacia la izquierda"
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => scrollSlider('right')}
+                      className="w-7 h-7 rounded-full bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 shadow-2xs flex items-center justify-center cursor-pointer transition-all active:scale-90"
+                      title="Desplazar hacia la derecha"
+                    >
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+                  </>
+                )}
                 <button
                   type="button"
-                  onClick={() => scrollSlider('left')}
-                  className="w-7 h-7 rounded-full bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200/90 dark:border-slate-700 shadow-2xs flex items-center justify-center cursor-pointer transition-all active:scale-90"
-                  title="Desplazar hacia la izquierda"
+                  onClick={handleToggleSliderCollapsed}
+                  className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10.5px] font-bold bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 shadow-2xs transition-all cursor-pointer"
+                  title={isSliderCollapsed ? 'Expandir bandeja de accesos directos' : 'Minimizar bandeja para ganar espacio'}
                 >
-                  <ChevronLeft className="w-4 h-4" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => scrollSlider('right')}
-                  className="w-7 h-7 rounded-full bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200/90 dark:border-slate-700 shadow-2xs flex items-center justify-center cursor-pointer transition-all active:scale-90"
-                  title="Desplazar hacia la derecha"
-                >
-                  <ChevronRight className="w-4 h-4" />
+                  {isSliderCollapsed ? (
+                    <>
+                      <ChevronDown className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" />
+                      <span>Mostrar</span>
+                    </>
+                  ) : (
+                    <>
+                      <ChevronUp className="w-3.5 h-3.5 text-slate-500" />
+                      <span>Minimizar</span>
+                    </>
+                  )}
                 </button>
               </div>
             </div>
 
-            {/* Carrusel Desplazable de Cards Compactas (Más productos visibles simultáneamente) */}
-            <div
-              ref={sliderRef}
-              className="flex gap-2.5 overflow-x-auto snap-x scroll-smooth no-scrollbar py-1 px-0.5"
+            {/* Carrusel Desplazable de Cards Compactas (Visible cuando no está colapsado) */}
+            {!isSliderCollapsed && (
+              <div
+                ref={sliderRef}
+                className="flex gap-2.5 overflow-x-auto snap-x scroll-smooth no-scrollbar py-1 px-0.5 animate-in fade-in duration-150"
+              >
+                {sliderProducts.map((p) => {
+                  const isLowStock = p.stock <= p.minStock;
+                  return (
+                    <div
+                      key={`slider-${p.id}`}
+                      onClick={() => addToCart(p, 1)}
+                      className="w-[270px] sm:w-[290px] h-[98px] bg-white dark:bg-slate-800 rounded-xl border-l-4 border-l-sky-600 border-y border-r border-slate-200 dark:border-slate-700 p-2 shadow-2xs hover:shadow-md hover:border-sky-500 transition-all active:scale-[0.98] cursor-pointer flex gap-2.5 items-stretch shrink-0 snap-start group select-none"
+                    >
+                      {/* Foto rectangular a la izquierda */}
+                      <div className="w-16 sm:w-18 h-full rounded-lg bg-slate-50 dark:bg-slate-900 overflow-hidden relative border border-slate-200/80 dark:border-slate-700 shrink-0">
+                        {p.image && showImages ? (
+                          <img
+                            src={p.image}
+                            alt={p.name}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                            loading="lazy"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex flex-col items-center justify-center text-slate-300 dark:text-slate-600">
+                            <Package className="w-5 h-5 stroke-1" />
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Columna de Información a la derecha */}
+                      <div className="flex flex-col justify-between flex-1 min-w-0 py-0.5">
+                        <div className="flex items-center justify-between gap-1 w-full">
+                          <span className="font-mono text-[10px] font-bold text-slate-500 truncate max-w-[55px]">
+                            {p.barcode ? (p.barcode.length > 4 ? p.barcode.slice(-4) : p.barcode) : '7591'}
+                          </span>
+                          <span className="text-[9px] font-bold px-1.5 py-0.2 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 flex items-center gap-1 shrink-0 truncate max-w-[95px]">
+                            <span>{getCategoryEmoji(p.category)}</span>
+                            <span className="uppercase tracking-wide truncate">{p.category}</span>
+                          </span>
+                        </div>
+
+                        <h3
+                          className="font-bold text-[12px] text-slate-900 dark:text-white leading-tight line-clamp-1 my-0.5"
+                          title={p.name}
+                        >
+                          {p.name}
+                        </h3>
+
+                        <div className="flex items-end justify-between gap-1">
+                          <div className="leading-tight flex flex-col">
+                            <span className="text-[13px] font-black font-sans text-slate-950 dark:text-white tabular-numbers leading-none">
+                              {formatVES(p.priceUSD * bcvRate)}
+                            </span>
+                            <span className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold leading-tight mt-0.5">
+                              ${p.priceUSD.toFixed(2)}
+                            </span>
+                          </div>
+
+                          <span className="text-[9.5px] font-bold px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 flex items-center gap-1 shrink-0 border border-slate-200/70 dark:border-slate-600">
+                            <span className={`w-1.5 h-1.5 rounded-full ${isLowStock ? 'bg-rose-500 animate-pulse' : 'bg-emerald-500'} shrink-0`} />
+                            <span>{p.stock}</span>
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ========================================================================= */}
+        {/* BARRA DE CATEGORÍAS & SELECTOR DE 3 MODOS DE VISTA                        */}
+        {/* ========================================================================= */}
+        <div className="flex items-center justify-between gap-3 shrink-0 py-1 border-y border-slate-200/80 dark:border-slate-800/80 my-0.5">
+          {/* Categorías Rápidas a la izquierda */}
+          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 min-w-0">
+            {categories.map((cat) => {
+              const isSelected = selectedCategory === cat;
+              return (
+                <button
+                  key={cat}
+                  type="button"
+                  onClick={() => setSelectedCategory(cat)}
+                  className={`px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all duration-150 select-none active:scale-[0.97] cursor-pointer shadow-2xs ${
+                    isSelected
+                      ? 'bg-[var(--brand-primary)] text-white shadow-xs ring-2 ring-[var(--brand-primary)]/30'
+                      : 'bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200/90 dark:border-slate-700'
+                  }`}
+                >
+                  {cat}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Selector de los 3 Modos de Vista a la derecha */}
+          <div className="flex items-center p-1 bg-slate-100 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shrink-0 select-none shadow-2xs">
+            <button
+              type="button"
+              onClick={() => handleSetPosViewMode('grid')}
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-black transition-all cursor-pointer ${
+                posViewMode === 'grid'
+                  ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-xs border border-slate-200 dark:border-slate-700'
+                  : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
+              }`}
+              title="Vista de Cuadrícula Visual con Imágenes"
             >
-              {sliderProducts.map((p) => {
+              <LayoutGrid className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" />
+              <span className="hidden xl:inline">Cuadrícula</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleSetPosViewMode('list')}
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-black transition-all cursor-pointer ${
+                posViewMode === 'list'
+                  ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-xs border border-slate-200 dark:border-slate-700'
+                  : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
+              }`}
+              title="Vista en Lista Compacta de Alta Densidad (15+ productos por pantalla)"
+            >
+              <List className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+              <span className="hidden xl:inline">Lista</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleSetPosViewMode('touch')}
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-black transition-all cursor-pointer ${
+                posViewMode === 'touch'
+                  ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-xs border border-slate-200 dark:border-slate-700'
+                  : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
+              }`}
+              title="Vista Táctil Express / Cafetería y Panadería (Botones Grandes)"
+            >
+              <Zap className="w-3.5 h-3.5 text-amber-500" />
+              <span className="hidden xl:inline">Táctil Express</span>
+            </button>
+          </div>
+        </div>
+
+        {/* ========================================================================= */}
+        {/* CATÁLOGO DE PRODUCTOS: 3 MODOS DE VISTA (CUADRÍCULA, LISTA O TÁCTIL)      */}
+        {/* ========================================================================= */}
+        <div className="flex-1 overflow-y-auto pr-1">
+          {/* MODO 1: CUADRÍCULA VISUAL (GRID) */}
+          {posViewMode === 'grid' && (
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4 gap-3 content-start">
+              {filteredProducts.map((p) => {
                 const isLowStock = p.stock <= p.minStock;
                 return (
                   <div
-                    key={`slider-${p.id}`}
+                    key={p.id}
                     onClick={() => addToCart(p, 1)}
-                    className="w-[270px] sm:w-[300px] h-[104px] bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/90 dark:border-slate-700/80 p-2.5 shadow-xs hover:shadow-md hover:border-sky-500 transition-all active:scale-[0.98] cursor-pointer flex gap-3 items-stretch shrink-0 snap-start group select-none"
+                    className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/90 dark:border-slate-700/80 p-3 shadow-xs hover:shadow-lg hover:border-sky-500 transition-all active:scale-[0.98] cursor-pointer flex flex-col justify-between group select-none"
                   >
-                    {/* Foto rectangular a la izquierda */}
-                    <div className="w-18 sm:w-20 h-full rounded-lg bg-slate-50 overflow-hidden relative border border-slate-200/80 shrink-0">
+                    <div className="flex items-center justify-between gap-1.5 w-full mb-1.5">
+                      <span className="font-mono text-[10px] font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-700/60 px-2 py-0.5 rounded-md border border-slate-200 dark:border-slate-600 truncate">
+                        {p.barcode ? (p.barcode.length > 4 ? p.barcode.slice(-4) : p.barcode) : '759...'}
+                      </span>
+                      <span className={`text-[9.5px] font-black px-2 py-0.5 rounded-md text-white uppercase tracking-wider shrink-0 truncate max-w-[120px] ${getCategoryBadgeColor(p.category)}`}>
+                        {p.category}
+                      </span>
+                    </div>
+
+                    <h4 className="font-black text-[13px] text-slate-900 dark:text-white leading-snug my-1 line-clamp-2 min-h-[36px] flex items-center" title={p.name}>
+                      {p.name}
+                    </h4>
+
+                    <div className="w-full h-24 sm:h-28 rounded-xl bg-slate-50 dark:bg-slate-900 overflow-hidden relative border border-slate-200/80 dark:border-slate-700/80 mb-2">
                       {p.image && showImages ? (
                         <img
                           src={p.image}
@@ -1958,143 +2175,140 @@ export default function DesktopPosPage() {
                           loading="lazy"
                         />
                       ) : (
-                        <div className="w-full h-full flex flex-col items-center justify-center text-slate-300">
-                          <Package className="w-5 h-5 stroke-1" />
+                        <div className="w-full h-full flex flex-col items-center justify-center text-slate-300 dark:text-slate-600">
+                          <Package className="w-8 h-8 stroke-1" />
                         </div>
                       )}
                     </div>
 
-                    {/* Columna de Información a la derecha */}
-                    <div className="flex flex-col justify-between flex-1 min-w-0 py-0.5">
-                      {/* Fila Superior: Código SKU a la izquierda, Chip de Rubro con Emoji a la derecha */}
-                      <div className="flex items-center justify-between gap-1 w-full">
-                        <span className="font-mono text-[10px] font-bold text-slate-500 truncate max-w-[55px]">
-                          {p.barcode ? (p.barcode.length > 4 ? p.barcode.slice(-4) : p.barcode) : '7591'}
+                    <div className="flex items-end justify-between gap-1.5 pt-1 mt-auto border-t border-slate-100 dark:border-slate-700/60">
+                      <div className="leading-tight flex flex-col">
+                        <span className="text-[14.5px] sm:text-[15.5px] font-black font-sans text-slate-950 dark:text-white tabular-numbers leading-tight">
+                          {formatVES(p.priceUSD * bcvRate)}
                         </span>
-                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-700 flex items-center gap-1 shrink-0 truncate max-w-[100px]">
-                          <span>{getCategoryEmoji(p.category)}</span>
-                          <span className="uppercase tracking-wide truncate">{p.category}</span>
+                        <span className="text-[11px] text-slate-600 dark:text-slate-300 font-bold mt-0.5">
+                          ${p.priceUSD.toFixed(2)}
                         </span>
                       </div>
 
-                      {/* Título en Negrita Destacado */}
-                      <h3
-                        className="font-bold text-[12px] sm:text-[12.5px] text-slate-900 leading-tight line-clamp-1 my-0.5"
-                        title={p.name}
-                      >
-                        {p.name}
-                      </h3>
-
-                      {/* Fila Inferior: Precios duales a la izquierda, Badge de Stock con punto verde a la derecha */}
-                      <div className="flex items-end justify-between gap-1">
-                        <div className="leading-tight flex flex-col">
-                          <span className="text-[13px] sm:text-[14px] font-black font-sans text-slate-950 tabular-numbers leading-none">
-                            {formatVES(p.priceUSD * bcvRate)}
-                          </span>
-                          <span className="text-[10px] text-slate-500 font-semibold leading-tight mt-0.5">
-                            ${p.priceUSD.toFixed(2)}
-                          </span>
-                        </div>
-
-                        <span className="text-[9.5px] font-bold px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-700 flex items-center gap-1 shrink-0 border border-slate-200/70">
-                          <span className={`w-1.5 h-1.5 rounded-full ${isLowStock ? 'bg-rose-500 animate-pulse' : 'bg-emerald-500'} shrink-0`} />
-                          <span>{p.stock}</span>
-                        </span>
-                      </div>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-200 shrink-0 flex items-center gap-1.5">
+                        <span className={`w-2 h-2 rounded-full ${isLowStock ? 'bg-rose-500 animate-pulse' : 'bg-emerald-500'} shrink-0`} />
+                        <span>{p.stock}</span>
+                      </span>
                     </div>
                   </div>
                 );
               })}
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Categorías Rápidas */}
-        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5 shrink-0">
-          {categories.map((cat) => {
-            const isSelected = selectedCategory === cat;
-            return (
-              <button
-                key={cat}
-                type="button"
-                onClick={() => setSelectedCategory(cat)}
-                className={`px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-150 select-none active:scale-[0.97] cursor-pointer shadow-2xs ${
-                  isSelected
-                    ? 'bg-[var(--brand-primary)] text-white shadow-xs ring-2 ring-[var(--brand-primary)]/30 font-bold'
-                    : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200/90 font-medium'
-                }`}
-              >
-                {cat}
-              </button>
-            );
-          })}
-        </div>
-
-        {/* ========================================================================= */}
-        {/* SUBSECCIÓN 2: CUADRÍCULA CLÁSICA DE PRODUCTOS (CARDS COMPACTAS MULTI-COLUMNA)*/}
-        {/* Catálogo Completo / Filtrado Dinámico - Mayor densidad de productos       */}
-        {/* ========================================================================= */}
-        <div className="flex-1 overflow-y-auto pr-1">
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4 gap-3 content-start">
-            {filteredProducts.map((p) => {
-              const isLowStock = p.stock <= p.minStock;
-              return (
-                <div
-                  key={p.id}
-                  onClick={() => addToCart(p, 1)}
-                  className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/90 dark:border-slate-700/80 p-3 shadow-xs hover:shadow-lg hover:border-sky-500 transition-all active:scale-[0.98] cursor-pointer flex flex-col justify-between group select-none"
-                >
-                  {/* Encabezado: SKU con bordecito a la izquierda + Badge color sólido de Rubro a la derecha */}
-                  <div className="flex items-center justify-between gap-1.5 w-full mb-1.5">
-                    <span className="font-mono text-[10px] font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-700/60 px-2 py-0.5 rounded-md border border-slate-200 dark:border-slate-600 truncate">
-                      {p.barcode ? (p.barcode.length > 4 ? p.barcode.slice(-4) : p.barcode) : '759...'}
-                    </span>
-                    <span className={`text-[9.5px] font-black px-2 py-0.5 rounded-md text-white uppercase tracking-wider shrink-0 truncate max-w-[120px] ${getCategoryBadgeColor(p.category)}`}>
-                      {p.category}
-                    </span>
-                  </div>
-
-                  {/* Nombre con 2 líneas completas para que no se corte */}
-                  <h4 className="font-black text-[13px] text-slate-900 dark:text-white leading-snug my-1 line-clamp-2 min-h-[36px] flex items-center" title={p.name}>
-                    {p.name}
-                  </h4>
-
-                  {/* Contenedor de Imagen Panorámica con mayor altura y presencia */}
-                  <div className="w-full h-24 sm:h-28 rounded-xl bg-slate-50 dark:bg-slate-900 overflow-hidden relative border border-slate-200/80 dark:border-slate-700/80 mb-2">
-                    {p.image && showImages ? (
-                      <img
-                        src={p.image}
-                        alt={p.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-                        loading="lazy"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex flex-col items-center justify-center text-slate-300 dark:text-slate-600">
-                        <Package className="w-8 h-8 stroke-1" />
+          {/* MODO 2: LISTA COMPACTA DE ALTA DENSIDAD (LIST) */}
+          {posViewMode === 'list' && (
+            <div className="flex flex-col gap-1.5 content-start">
+              {filteredProducts.map((p) => {
+                const isLowStock = p.stock <= p.minStock;
+                return (
+                  <div
+                    key={p.id}
+                    onClick={() => addToCart(p, 1)}
+                    className="bg-white dark:bg-slate-800 hover:bg-sky-50/50 dark:hover:bg-slate-700/70 border border-slate-200/90 dark:border-slate-700/80 rounded-xl px-3 py-2 flex items-center justify-between gap-3 shadow-2xs hover:shadow-xs transition-all cursor-pointer group select-none active:scale-[0.99]"
+                  >
+                    {/* Miniatura / Ícono + Nombre + SKU */}
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                      <div className="w-10 h-10 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 overflow-hidden shrink-0 flex items-center justify-center">
+                        {p.image && showImages ? (
+                          <img src={p.image} alt={p.name} className="w-full h-full object-cover" loading="lazy" />
+                        ) : (
+                          <Package className="w-5 h-5 text-slate-400 stroke-1" />
+                        )}
                       </div>
-                    )}
-                  </div>
 
-                  {/* Precios y Stock amplios y claros */}
-                  <div className="flex items-end justify-between gap-1.5 pt-1 mt-auto border-t border-slate-100 dark:border-slate-700/60">
-                    <div className="leading-tight flex flex-col">
-                      <span className="text-[14.5px] sm:text-[15.5px] font-black font-sans text-slate-950 dark:text-white tabular-numbers leading-tight">
+                      <div className="min-w-0 flex-1 leading-tight">
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-xs sm:text-[13px] text-slate-900 dark:text-white truncate" title={p.name}>
+                            {p.name}
+                          </span>
+                          <span className={`text-[8.5px] font-black px-1.5 py-0.5 rounded text-white uppercase tracking-wider shrink-0 ${getCategoryBadgeColor(p.category)}`}>
+                            {p.category}
+                          </span>
+                        </div>
+                        <span className="font-mono text-[10px] text-slate-400 mt-0.5 block">
+                          SKU: {p.barcode || '759...'} {(p.unit === 'kg' || (p as any).isWeighable) && '• ⚖️ Pesable'}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Stock */}
+                    <span className="text-[10.5px] font-bold px-2.5 py-1 rounded-full border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-300 shrink-0 flex items-center gap-1.5">
+                      <span className={`w-2 h-2 rounded-full ${isLowStock ? 'bg-rose-500 animate-pulse' : 'bg-emerald-500'} shrink-0`} />
+                      <span>{p.stock} {p.unit === 'kg' || (p as any).isWeighable ? 'kg' : 'uds'}</span>
+                    </span>
+
+                    {/* Precios duales */}
+                    <div className="text-right leading-tight min-w-[110px] shrink-0">
+                      <span className="font-black text-sm text-slate-950 dark:text-white tabular-numbers block">
                         {formatVES(p.priceUSD * bcvRate)}
                       </span>
-                      <span className="text-[11px] text-slate-600 dark:text-slate-300 font-bold mt-0.5">
+                      <span className="text-[11px] text-slate-500 dark:text-slate-400 font-semibold block">
                         ${p.priceUSD.toFixed(2)}
                       </span>
                     </div>
 
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-200 shrink-0 flex items-center gap-1.5">
-                      <span className={`w-2 h-2 rounded-full ${isLowStock ? 'bg-rose-500 animate-pulse' : 'bg-emerald-500'} shrink-0`} />
-                      <span>{p.stock}</span>
-                    </span>
+                    {/* Botón rápido de agregar */}
+                    <button
+                      type="button"
+                      className="w-8 h-8 rounded-lg bg-sky-600 hover:bg-sky-700 text-white font-black text-base flex items-center justify-center shrink-0 shadow-2xs group-hover:scale-105 transition-all"
+                    >
+                      +
+                    </button>
                   </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* MODO 3: TÁCTIL EXPRESS (BOTONES GRANDES PARA PANTALLA TÁCTIL) */}
+          {posViewMode === 'touch' && (
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4 gap-2.5 content-start">
+              {filteredProducts.map((p) => {
+                const isLowStock = p.stock <= p.minStock;
+                return (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => addToCart(p, 1)}
+                    className="h-28 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 border-2 border-slate-200/90 dark:border-slate-700 hover:border-sky-500 rounded-2xl p-2.5 flex flex-col justify-between text-left shadow-2xs hover:shadow-md transition-all active:scale-[0.97] cursor-pointer group select-none relative overflow-hidden"
+                  >
+                    {/* Banda de color de categoría en el borde superior */}
+                    <div className="flex items-center justify-between w-full">
+                      <span className={`text-[9px] font-black px-1.5 py-0.5 rounded text-white uppercase tracking-wider shrink-0 ${getCategoryBadgeColor(p.category)}`}>
+                        {p.category}
+                      </span>
+                      <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1">
+                        <span className={`w-1.5 h-1.5 rounded-full ${isLowStock ? 'bg-rose-500' : 'bg-emerald-500'}`} />
+                        <span>{p.stock}</span>
+                      </span>
+                    </div>
+
+                    {/* Nombre grande */}
+                    <span className="font-black text-xs sm:text-[13px] text-slate-900 dark:text-white leading-tight line-clamp-2 my-1">
+                      {p.name}
+                    </span>
+
+                    {/* Precios gigantes táctiles */}
+                    <div className="flex items-baseline justify-between w-full pt-1 border-t border-slate-100 dark:border-slate-700/60">
+                      <span className="font-black text-sm sm:text-base font-sans text-slate-950 dark:text-white tabular-numbers">
+                        {formatVES(p.priceUSD * bcvRate)}
+                      </span>
+                      <span className="text-xs text-sky-700 dark:text-sky-300 font-black">
+                        ${p.priceUSD.toFixed(2)}
+                      </span>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          )}
 
           {filteredProducts.length === 0 && (
             <div className="py-16 text-center text-slate-400 text-sm">

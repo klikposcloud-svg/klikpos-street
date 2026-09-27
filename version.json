@@ -1,15 +1,15 @@
 {
-  "version": "2.4.1",
+  "version": "2.4.2",
   "releaseDate": "2026-09-27",
-  "title": "KlikPOS v2.4.1 - Interfaz Ultra-Espaciosa & Alto Contraste",
+  "title": "KlikPOS v2.4.2 - 3 Modos de Vista POS & Alto Contraste Completo",
   "notes": [
-    "Diseño de catálogo optimizado: reducción de 7 a 4 columnas por fila con mayor espacio.",
-    "Títulos de productos en 2 líneas completas para lectura limpia sin truncamientos.",
-    "Corrección de alto contraste en textos claros (teclado numérico, balanza y reloj 100% legibles).",
-    "Accesos directos del carrusel ensanchados para mayor confort táctil en cajas rápidas.",
-    "Actualizador automático conectado a la nube oficial de KlikPOS."
+    "3 Modos de vista seleccionables en el Punto de Venta: Cuadrícula Visual, Lista Compacta de Alta Densidad y Modo Táctil Express.",
+    "Bandeja Dock independiente de Accesos Rápidos con opción de Minimizar/Mostrar para ganar espacio vertical.",
+    "Corrección integral de contraste en Modo Oscuro y Esmerilado (logo blanco puro, pills en texto legible, inputs limpios).",
+    "Limpieza ergonómica del módulo de Inventario y automatización de actualizaciones silenciosas.",
+    "Persistencia permanente de vistas y preferencias en el terminal de caja."
   ],
-  "windowsUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v2.4.1/KlikPOS-Enterprise-Setup-v2.4.1.exe",
-  "androidUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v2.4.1/KlikPOS_Movil_Full.apk",
+  "windowsUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v2.4.2/KlikPOS-Enterprise-Setup-v2.4.2.exe",
+  "androidUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v2.4.2/KlikPOS_Movil_Full.apk",
   "mandatory": false
 }

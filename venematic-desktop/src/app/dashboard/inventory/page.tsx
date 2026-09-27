@@ -961,119 +961,129 @@ export default function DesktopInventoryPage() {
       )}
 
       {/* Cabecera del Módulo */}
-      <div className="bg-white dark:bg-[#121c29] p-4 rounded-xl border border-slate-200 dark:border-[#22303f] shadow-xs flex items-center justify-between">
-        <div>
-          <h2 className="text-base font-black text-slate-900 dark:text-white uppercase tracking-tight">
-            Inventario y Catálogo de Productos
-          </h2>
-          <p className="text-xs text-slate-500 dark:text-slate-400">
-            Control de existencias, fotos, precios en divisas y cálculo en bolívares (Tasa: Bs. {bcvRate.toFixed(2)})
-          </p>
+      <div className="bg-white dark:bg-[#121c29] p-4 rounded-xl border border-slate-200 dark:border-[#22303f] shadow-xs flex flex-col gap-3">
+        {/* Fila 1: Título Limpio y Acciones Principales */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800/80 pb-3">
+          <div className="flex items-center gap-3">
+            <h2 className="text-base font-black text-slate-900 dark:text-white uppercase tracking-tight whitespace-nowrap">
+              Inventario y Catálogo de Productos
+            </h2>
+            <span className="text-xs font-bold text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2.5 py-0.5 rounded-full border border-slate-200 dark:border-slate-700">
+              {products.length} productos
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2 flex-wrap">
+            {/* Botón Catálogo Maestro KlikPOS (+120 con Fotos) */}
+            <button
+              onClick={() => setShowMasterCatalogModal(true)}
+              className="px-3.5 py-2 bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white font-black text-xs rounded-lg shadow-sm flex items-center gap-1.5 transition-all shadow-amber-500/20 active:scale-95 cursor-pointer"
+              title="Explorar e inyectar productos con fotos HD, códigos de barra y categorías por rubro comercial"
+            >
+              <Sparkles className="w-4 h-4 text-yellow-200 animate-pulse" />
+              <span>Catálogo Maestro (+120)</span>
+            </button>
+
+            {/* Botón Importar desde Saint / CSV / JSON */}
+            <button
+              onClick={() => setShowImportModal(true)}
+              className="px-3.5 py-2 bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600 text-slate-700 dark:text-white border border-slate-300 dark:border-slate-600 font-bold text-xs rounded-lg shadow-2xs flex items-center gap-1.5 transition-colors cursor-pointer"
+            >
+              <UploadCloud className="w-4 h-4 text-sky-600 dark:text-sky-400" />
+              <span>Importar Catálogo</span>
+            </button>
+
+            {/* Botón Nuevo Producto */}
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="px-4 py-2 bg-sky-700 hover:bg-sky-800 text-white font-bold text-xs rounded-lg shadow-sm flex items-center gap-1.5 transition-colors cursor-pointer"
+            >
+              <Plus className="w-4 h-4" />
+              <span>+ Nuevo Producto</span>
+            </button>
+          </div>
         </div>
 
-        <div className="flex items-center gap-2.5">
-          <div className="relative">
-            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              placeholder="Buscar por nombre, código o categoría..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-64 pl-8 pr-3 py-2 bg-white dark:bg-[#0B141F] text-slate-900 dark:text-white border border-slate-300 dark:border-[#22303f] rounded-lg text-xs font-medium focus:outline-none focus:ring-2 focus:ring-sky-500"
-            />
+        {/* Fila 2: Barra de Búsqueda, Filtros y Herramientas */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5 flex-1 max-w-xl">
+            <div className="relative flex-1">
+              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                placeholder="Buscar por nombre, código o categoría..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full pl-8 pr-3 py-2 bg-white dark:bg-[#0B141F] text-slate-900 dark:text-white border border-slate-300 dark:border-[#22303f] rounded-lg text-xs font-medium focus:outline-none focus:ring-2 focus:ring-sky-500"
+              />
+            </div>
+
+            {/* Filtro Dinámico por Categoría / Rubro */}
+            <div className="relative shrink-0">
+              <select
+                value={selectedCategoryFilter}
+                onChange={(e) => setSelectedCategoryFilter(e.target.value)}
+                className="px-3 py-2 bg-white dark:bg-[#0B141F] text-slate-800 dark:text-white border border-slate-300 dark:border-[#22303f] rounded-lg text-xs font-bold focus:outline-none focus:ring-2 focus:ring-sky-500 cursor-pointer shadow-2xs"
+              >
+                <option value="all">Todas las Categorías ({products.length})</option>
+                {categoriesList.map((cat) => {
+                  const count = products.filter((p) => p.category === cat).length;
+                  return (
+                    <option key={cat} value={cat}>
+                      {cat} ({count})
+                    </option>
+                  );
+                })}
+              </select>
+            </div>
           </div>
 
-          {/* Filtro Dinámico por Categoría / Rubro */}
-          <div className="relative">
-            <select
-              value={selectedCategoryFilter}
-              onChange={(e) => setSelectedCategoryFilter(e.target.value)}
-              className="px-3 py-2 bg-white dark:bg-[#0B141F] text-slate-800 dark:text-white border border-slate-300 dark:border-[#22303f] rounded-lg text-xs font-bold focus:outline-none focus:ring-2 focus:ring-sky-500 cursor-pointer shadow-2xs"
+          <div className="flex items-center gap-2 flex-wrap">
+            {/* Botón Gestión de Categorías y Rubros */}
+            <button
+              onClick={() => setShowCategoryModal(true)}
+              className="px-3.5 py-2 bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600 text-slate-700 dark:text-white border border-slate-300 dark:border-slate-600 font-bold text-xs rounded-lg shadow-2xs flex items-center gap-1.5 transition-colors cursor-pointer"
+              title="Crear nuevas categorías y editar o renombrar las existentes"
             >
-              <option value="all">Todas las Categorías ({products.length})</option>
-              {categoriesList.map((cat) => {
-                const count = products.filter((p) => p.category === cat).length;
-                return (
-                  <option key={cat} value={cat}>
-                    {cat} ({count})
-                  </option>
-                );
-              })}
-            </select>
+              <FolderTree className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+              <span>Categorías / Rubros</span>
+            </button>
+
+            {/* Botón Imprimir Etiquetas (Individual o Masivo) */}
+            <button
+              onClick={() => {
+                const toPrint = selectedProductIds.size > 0 
+                  ? products.filter(p => selectedProductIds.has(p.id!)) 
+                  : (filtered.length > 0 ? [filtered[0]] : products.slice(0, 1));
+                if (toPrint.length > 0) {
+                  handleOpenLabelModal(toPrint);
+                }
+              }}
+              className={`px-3.5 py-2 font-bold text-xs rounded-lg shadow-2xs flex items-center gap-1.5 transition-all cursor-pointer ${
+                selectedProductIds.size > 0
+                  ? 'bg-gradient-to-r from-indigo-600 to-sky-600 text-white shadow-md shadow-indigo-500/25 ring-2 ring-indigo-400'
+                  : 'bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600 text-slate-700 dark:text-white border border-slate-300 dark:border-slate-600'
+              }`}
+              title="Diseñar e Imprimir Etiquetas de Productos con Código de Barras y Precios ($/Bs)"
+            >
+              <Tag className="w-4 h-4 text-indigo-500 dark:text-indigo-300" />
+              <span>
+                {selectedProductIds.size > 0
+                  ? `Imprimir Etiquetas (${selectedProductIds.size})`
+                  : 'Imprimir Etiquetas'}
+              </span>
+            </button>
+
+            {/* Botón Auditoría / Kardex */}
+            <button
+              onClick={handleOpenMovementsModal}
+              className="px-3.5 py-2 bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600 text-slate-700 dark:text-white border border-slate-300 dark:border-slate-600 font-bold text-xs rounded-lg shadow-2xs flex items-center gap-1.5 transition-colors cursor-pointer"
+              title="Ver historial de mermas, caducidades y ajustes de stock"
+            >
+              <History className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+              <span>Auditoría / Kardex</span>
+            </button>
           </div>
-
-          {/* Botón Gestión de Categorías y Rubros */}
-          <button
-            onClick={() => setShowCategoryModal(true)}
-            className="px-3.5 py-2 bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600 text-slate-700 dark:text-white border border-slate-300 dark:border-slate-600 font-bold text-xs rounded-lg shadow-2xs flex items-center gap-1.5 transition-colors cursor-pointer"
-            title="Crear nuevas categorías y editar o renombrar las existentes"
-          >
-            <FolderTree className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-            <span>Categorías / Rubros</span>
-          </button>
-
-          {/* Botón Imprimir Etiquetas (Individual o Masivo) */}
-          <button
-            onClick={() => {
-              const toPrint = selectedProductIds.size > 0 
-                ? products.filter(p => selectedProductIds.has(p.id!)) 
-                : (filtered.length > 0 ? [filtered[0]] : products.slice(0, 1));
-              if (toPrint.length > 0) {
-                handleOpenLabelModal(toPrint);
-              }
-            }}
-            className={`px-3.5 py-2 font-bold text-xs rounded-lg shadow-2xs flex items-center gap-1.5 transition-all ${
-              selectedProductIds.size > 0
-                ? 'bg-gradient-to-r from-indigo-600 to-sky-600 text-white shadow-md shadow-indigo-500/25 ring-2 ring-indigo-400'
-                : 'bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600 text-slate-700 dark:text-white border border-slate-300 dark:border-slate-600'
-            }`}
-            title="Diseñar e Imprimir Etiquetas de Productos con Código de Barras y Precios ($/Bs)"
-          >
-            <Tag className="w-4 h-4 text-indigo-500 dark:text-indigo-300" />
-            <span>
-              {selectedProductIds.size > 0
-                ? `Imprimir Etiquetas (${selectedProductIds.size})`
-                : 'Imprimir Etiquetas'}
-            </span>
-          </button>
-
-          {/* Botón Auditoría / Kardex */}
-          <button
-            onClick={handleOpenMovementsModal}
-            className="px-3.5 py-2 bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600 text-slate-700 dark:text-white border border-slate-300 dark:border-slate-600 font-bold text-xs rounded-lg shadow-2xs flex items-center gap-1.5 transition-colors"
-            title="Ver historial de mermas, caducidades y ajustes de stock"
-          >
-            <History className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-            <span>Auditoría / Kardex</span>
-          </button>
-
-          {/* Botón Catálogo Maestro KlikPOS (+120 con Fotos) */}
-          <button
-            onClick={() => setShowMasterCatalogModal(true)}
-            className="px-3.5 py-2 bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white font-black text-xs rounded-lg shadow-sm flex items-center gap-1.5 transition-all shadow-amber-500/20 active:scale-95 cursor-pointer"
-            title="Explorar e inyectar productos con fotos HD, códigos de barra y categorías por rubro comercial"
-          >
-            <Sparkles className="w-4 h-4 text-yellow-200 animate-pulse" />
-            <span>Catálogo Maestro (+120)</span>
-          </button>
-
-          {/* Botón Importar desde Saint / CSV / JSON */}
-          <button
-            onClick={() => setShowImportModal(true)}
-            className="px-3.5 py-2 bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600 text-slate-700 dark:text-white border border-slate-300 dark:border-slate-600 font-bold text-xs rounded-lg shadow-2xs flex items-center gap-1.5 transition-colors"
-          >
-            <UploadCloud className="w-4 h-4 text-sky-600 dark:text-sky-400" />
-            <span>Importar Catálogo</span>
-          </button>
-
-          {/* Botón Nuevo Producto */}
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="px-4 py-2 bg-sky-700 hover:bg-sky-800 text-white font-bold text-xs rounded-lg shadow-sm flex items-center gap-1.5 transition-colors"
-          >
-            <Plus className="w-4 h-4" />
-            <span>+ Nuevo Producto</span>
-          </button>
         </div>
       </div>
 

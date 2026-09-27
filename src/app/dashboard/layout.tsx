@@ -572,7 +572,7 @@ export default function DesktopDashboardLayout({
                 WebkitMaskRepeat: 'no-repeat',
                 maskPosition: 'center left',
                 WebkitMaskPosition: 'center left',
-                backgroundColor: currentTheme === 'dark' ? '#ffffff' : 'var(--brand-primary, #0f172a)',
+                backgroundColor: (currentTheme === 'dark' || currentTheme === 'glass') ? '#ffffff' : 'var(--brand-primary, #0f172a)',
               }}
               onClick={() => router.push('/dashboard/pos')}
               title="KlikPOS Cloud"
@@ -610,28 +610,28 @@ export default function DesktopDashboardLayout({
           <span
             className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border text-xs font-bold select-none shadow-2xs"
             style={{
-              backgroundColor: currentTheme === 'dark' ? '#1e293b' : '#f1f5f9',
-              borderColor: currentTheme === 'dark' ? '#334155' : '#cbd5e1',
-              color: currentTheme === 'dark' ? '#ffffff' : '#0f172a',
+              backgroundColor: (currentTheme === 'dark' || currentTheme === 'glass') ? '#162232' : '#f1f5f9',
+              borderColor: (currentTheme === 'dark' || currentTheme === 'glass') ? '#2b3d52' : '#cbd5e1',
+              color: (currentTheme === 'dark' || currentTheme === 'glass') ? '#ffffff' : '#0f172a',
             }}
             title="Terminal operando 100% en modo local offline seguro"
           >
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block animate-pulse shrink-0" />
-            <span style={{ color: currentTheme === 'dark' ? '#ffffff' : '#0f172a' }}>Offline</span>
+            <span style={{ color: (currentTheme === 'dark' || currentTheme === 'glass') ? '#ffffff' : '#0f172a' }}>Offline</span>
           </span>
 
           {/* Sincronización en la Nube */}
           <span
             className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border text-xs font-bold select-none cursor-pointer transition-colors shadow-2xs"
             style={{
-              backgroundColor: currentTheme === 'dark' ? '#1e293b' : '#f1f5f9',
-              borderColor: currentTheme === 'dark' ? '#334155' : '#cbd5e1',
-              color: currentTheme === 'dark' ? '#ffffff' : '#0f172a',
+              backgroundColor: (currentTheme === 'dark' || currentTheme === 'glass') ? '#162232' : '#f1f5f9',
+              borderColor: (currentTheme === 'dark' || currentTheme === 'glass') ? '#2b3d52' : '#cbd5e1',
+              color: (currentTheme === 'dark' || currentTheme === 'glass') ? '#ffffff' : '#0f172a',
             }}
             title="Sincronización en tiempo real"
           >
-            <Cloud className="w-4 h-4 text-sky-600 dark:text-sky-400" />
-            <span style={{ color: currentTheme === 'dark' ? '#ffffff' : '#0f172a' }}>Nube</span>
+            <Cloud className="w-4 h-4 text-sky-400" />
+            <span style={{ color: (currentTheme === 'dark' || currentTheme === 'glass') ? '#ffffff' : '#0f172a' }}>Nube</span>
           </span>
 
           {/* Estado Celular Escáner / Vincular Móvil */}
@@ -641,27 +641,27 @@ export default function DesktopDashboardLayout({
             className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border text-xs font-bold select-none cursor-pointer transition-colors shadow-2xs"
             style={{
               backgroundColor: phoneConnected
-                ? (currentTheme === 'dark' ? '#064e3b' : '#ecfdf5')
-                : (currentTheme === 'dark' ? '#1e293b' : '#f1f5f9'),
+                ? ((currentTheme === 'dark' || currentTheme === 'glass') ? '#064e3b' : '#ecfdf5')
+                : ((currentTheme === 'dark' || currentTheme === 'glass') ? '#162232' : '#f1f5f9'),
               borderColor: phoneConnected
-                ? (currentTheme === 'dark' ? '#047857' : '#6ee7b7')
-                : (currentTheme === 'dark' ? '#334155' : '#cbd5e1'),
+                ? ((currentTheme === 'dark' || currentTheme === 'glass') ? '#047857' : '#6ee7b7')
+                : ((currentTheme === 'dark' || currentTheme === 'glass') ? '#2b3d52' : '#cbd5e1'),
               color: phoneConnected
-                ? (currentTheme === 'dark' ? '#6ee7b7' : '#065f46')
-                : (currentTheme === 'dark' ? '#ffffff' : '#0f172a'),
+                ? ((currentTheme === 'dark' || currentTheme === 'glass') ? '#6ee7b7' : '#065f46')
+                : ((currentTheme === 'dark' || currentTheme === 'glass') ? '#ffffff' : '#0f172a'),
             }}
             title="Clic para vincular celular como escáner inalámbrico con código QR"
           >
-            <Smartphone className="w-4 h-4 text-emerald-600" />
-            <span style={{ color: currentTheme === 'dark' ? '#ffffff' : '#0f172a' }}>{phoneConnected ? 'Móvil Conectado' : 'Móvil'}</span>
+            <Smartphone className="w-4 h-4 text-emerald-500" />
+            <span style={{ color: (currentTheme === 'dark' || currentTheme === 'glass') ? '#ffffff' : '#0f172a' }}>{phoneConnected ? 'Móvil Conectado' : 'Móvil'}</span>
           </button>
 
           {/* Selector de Tema Inteligente: Modo Blanco, Oscuro, Esmerilado */}
           <div
             className="inline-flex items-center p-1 rounded-full border shadow-2xs select-none"
             style={{
-              backgroundColor: currentTheme === 'dark' ? '#1e293b' : '#f1f5f9',
-              borderColor: currentTheme === 'dark' ? '#334155' : '#cbd5e1',
+              backgroundColor: (currentTheme === 'dark' || currentTheme === 'glass') ? '#121c29' : '#f1f5f9',
+              borderColor: (currentTheme === 'dark' || currentTheme === 'glass') ? '#2b3d52' : '#cbd5e1',
             }}
           >
             <button
@@ -673,14 +673,16 @@ export default function DesktopDashboardLayout({
               }}
               className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black transition-all cursor-pointer ${
                 currentTheme === 'light'
-                  ? 'bg-white text-slate-950 shadow-xs border border-slate-300'
-                  : 'text-slate-800 hover:text-slate-950'
+                  ? 'bg-white shadow-xs border border-slate-300'
+                  : 'hover:opacity-80'
               }`}
-              style={{ color: currentTheme === 'light' ? '#0f172a' : (currentTheme === 'dark' ? '#94a3b8' : '#334155') }}
+              style={{
+                color: currentTheme === 'light' ? '#0f172a' : ((currentTheme === 'dark' || currentTheme === 'glass') ? '#94a3b8' : '#475569'),
+              }}
               title="Activar Modo Blanco Profesional"
             >
-              <Sun className={`w-3.5 h-3.5 ${currentTheme === 'light' ? 'text-amber-500' : 'text-slate-600'}`} />
-              <span>Modo Blanco</span>
+              <Sun className={`w-3.5 h-3.5 ${currentTheme === 'light' ? 'text-amber-500' : 'text-slate-400'}`} />
+              <span style={{ color: currentTheme === 'light' ? '#0f172a' : ((currentTheme === 'dark' || currentTheme === 'glass') ? '#cbd5e1' : '#475569') }}>Modo Blanco</span>
             </button>
             <button
               type="button"
@@ -691,14 +693,16 @@ export default function DesktopDashboardLayout({
               }}
               className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black transition-all cursor-pointer ${
                 currentTheme === 'dark'
-                  ? 'bg-[#121c29] text-amber-300 shadow-xs border border-slate-700'
-                  : 'text-slate-800 hover:text-slate-950'
+                  ? 'bg-[#1a2738] shadow-xs border border-amber-400/50'
+                  : 'hover:opacity-80'
               }`}
-              style={{ color: currentTheme === 'dark' ? '#fcd34d' : '#334155' }}
+              style={{
+                color: currentTheme === 'dark' ? '#fcd34d' : (currentTheme === 'glass' ? '#94a3b8' : '#475569'),
+              }}
               title="Activar Modo Oscuro"
             >
-              <Moon className={`w-3.5 h-3.5 ${currentTheme === 'dark' ? 'text-amber-400' : 'text-slate-600'}`} />
-              <span>Oscuro</span>
+              <Moon className={`w-3.5 h-3.5 ${currentTheme === 'dark' ? 'text-amber-400' : 'text-slate-400'}`} />
+              <span style={{ color: currentTheme === 'dark' ? '#fcd34d' : (currentTheme === 'glass' ? '#cbd5e1' : '#475569') }}>Oscuro</span>
             </button>
             <button
               type="button"
@@ -709,14 +713,16 @@ export default function DesktopDashboardLayout({
               }}
               className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black transition-all cursor-pointer ${
                 currentTheme === 'glass'
-                  ? 'bg-gradient-to-r from-sky-500/25 to-teal-500/25 text-sky-300 shadow-xs border border-sky-400/50 backdrop-blur-md'
-                  : 'text-slate-800 hover:text-slate-950'
+                  ? 'bg-sky-500/25 shadow-xs border border-sky-400/60 backdrop-blur-md'
+                  : 'hover:opacity-80'
               }`}
-              style={{ color: currentTheme === 'glass' ? '#7dd3fc' : (currentTheme === 'dark' ? '#94a3b8' : '#334155') }}
+              style={{
+                color: currentTheme === 'glass' ? '#38bdf8' : (currentTheme === 'dark' ? '#94a3b8' : '#475569'),
+              }}
               title="Activar Modo Esmerilado Translúcido (Glassmorphism)"
             >
-              <Sparkles className={`w-3.5 h-3.5 ${currentTheme === 'glass' ? 'text-sky-300 animate-pulse' : 'text-slate-600'}`} />
-              <span>Esmerilado</span>
+              <Sparkles className={`w-3.5 h-3.5 ${currentTheme === 'glass' ? 'text-sky-300 animate-pulse' : 'text-slate-400'}`} />
+              <span style={{ color: currentTheme === 'glass' ? '#38bdf8' : (currentTheme === 'dark' ? '#cbd5e1' : '#475569') }}>Esmerilado</span>
             </button>
           </div>
 
@@ -729,9 +735,9 @@ export default function DesktopDashboardLayout({
             }}
             className="inline-flex items-center gap-2 px-3 py-1 rounded-full border-2 text-xs transition-all shadow-xs active:scale-95 cursor-pointer group shrink-0"
             style={{
-              backgroundColor: currentTheme === 'light' ? '#f8fafc' : '#0f172a',
-              borderColor: currentTheme === 'light' ? '#cbd5e1' : '#334155',
-              color: currentTheme === 'light' ? '#0f172a' : '#ffffff',
+              backgroundColor: (currentTheme === 'dark' || currentTheme === 'glass') ? '#162232' : '#f8fafc',
+              borderColor: (currentTheme === 'dark' || currentTheme === 'glass') ? '#2b3d52' : '#cbd5e1',
+              color: (currentTheme === 'dark' || currentTheme === 'glass') ? '#ffffff' : '#0f172a',
             }}
             title="Clic para cambiar tasa oficial BCV"
           >
@@ -747,7 +753,7 @@ export default function DesktopDashboardLayout({
             <span
               className="font-mono font-black tabular-numbers text-xs sm:text-[13.5px] tracking-wide"
               style={{
-                color: currentTheme === 'light' ? '#020617' : '#ffffff',
+                color: (currentTheme === 'dark' || currentTheme === 'glass') ? '#ffffff' : '#020617',
               }}
             >
               Bs. {bcvRate.toFixed(2)}
@@ -758,15 +764,15 @@ export default function DesktopDashboardLayout({
           <div
             className="hidden md:inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border text-xs font-bold font-mono select-none shadow-2xs shrink-0"
             style={{
-              backgroundColor: currentTheme === 'dark' ? '#1e293b' : '#f1f5f9',
-              borderColor: currentTheme === 'dark' ? '#334155' : '#cbd5e1',
-              color: currentTheme === 'dark' ? '#ffffff' : '#0f172a',
+              backgroundColor: (currentTheme === 'dark' || currentTheme === 'glass') ? '#162232' : '#f1f5f9',
+              borderColor: (currentTheme === 'dark' || currentTheme === 'glass') ? '#2b3d52' : '#cbd5e1',
+              color: (currentTheme === 'dark' || currentTheme === 'glass') ? '#ffffff' : '#0f172a',
             }}
             title="Fecha y hora oficial del sistema"
           >
-            <span style={{ color: currentTheme === 'dark' ? '#cbd5e1' : '#0f172a' }}>{clockDate}</span>
-            <span style={{ color: currentTheme === 'dark' ? '#64748b' : '#94a3b8' }}>|</span>
-            <span className="font-black tabular-numbers" style={{ color: currentTheme === 'dark' ? '#ffffff' : '#000000' }}>{clockTime}</span>
+            <span style={{ color: (currentTheme === 'dark' || currentTheme === 'glass') ? '#cbd5e1' : '#0f172a' }}>{clockDate}</span>
+            <span style={{ color: (currentTheme === 'dark' || currentTheme === 'glass') ? '#64748b' : '#94a3b8' }}>|</span>
+            <span className="font-black tabular-numbers" style={{ color: (currentTheme === 'dark' || currentTheme === 'glass') ? '#ffffff' : '#000000' }}>{clockTime}</span>
           </div>
         </div>
       </header>

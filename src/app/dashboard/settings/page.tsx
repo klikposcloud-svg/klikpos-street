@@ -2085,98 +2085,76 @@ function SoftwareUpdatesSection() {
         )}
 
         <div className="space-y-4">
-          <h4 className="text-xs font-black uppercase tracking-wider text-slate-600 dark:text-slate-400">
-            Preferencias de Automatización & Despliegue
-          </h4>
-
-          {/* Opción 1: Comprobación al Iniciar */}
-          <div className="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-700">
-            <div>
-              <span className="font-bold text-xs text-slate-800 dark:text-slate-200 block">
-                Comprobación Automática en Línea al Iniciar
-              </span>
-              <span className="text-[11px] text-slate-500 dark:text-slate-400">
-                Al abrir el sistema, verifica discretamente en segundo plano si existe una versión superior.
-              </span>
-            </div>
-            <input
-              type="checkbox"
-              checked={config.autoCheckOnStartup}
-              onChange={(e) => handleToggleAutoCheck(e.target.checked)}
-              className="w-5 h-5 rounded text-emerald-600 focus:ring-emerald-500 cursor-pointer"
-            />
+          <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
+            <h4 className="text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300">
+              Despliegue y Mantenimiento Continuo en la Nube
+            </h4>
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10.5px] font-bold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <span>Servicio Oficial KlikPOS Cloud Activo</span>
+            </span>
           </div>
 
-          {/* Opción 2: Actualización Automática Silenciosa sin preguntar */}
-          <div className="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-700">
-            <div>
-              <span className="font-bold text-xs text-slate-800 dark:text-slate-200 block flex items-center gap-1.5">
-                <span>⚡ Actualización Silenciosa Desatendida (Sin Preguntar, Estilo PWA)</span>
-              </span>
-              <span className="text-[11px] text-slate-500 dark:text-slate-400">
-                Al detectarse una nueva versión, aplica los cambios y recarga la interfaz automáticamente sin abrir ventanas ni interrumpir con diálogos.
-              </span>
-            </div>
-            <input
-              type="checkbox"
-              checked={!!config.autoApplySilently}
-              onChange={(e) => handleToggleAutoApplySilently(e.target.checked)}
-              className="w-5 h-5 rounded text-emerald-600 focus:ring-emerald-500 cursor-pointer"
-            />
-          </div>
-
-          {/* Opción 3: Programación Nocturna a Hora Fija (00:00) */}
-          <div className="p-3.5 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-700 space-y-3">
-            <div className="flex items-center justify-between">
-              <div>
-                <span className="font-bold text-xs text-slate-800 dark:text-slate-200 block flex items-center gap-1.5">
-                  <span>🌙 Actualización Programada Nocturna (Cierre de Caja)</span>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {/* Estado 1: Comprobación al Iniciar */}
+            <div className="p-3.5 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800 space-y-1">
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-xs text-slate-800 dark:text-slate-200">
+                  Comprobación al Iniciar
                 </span>
-                <span className="text-[11px] text-slate-500 dark:text-slate-400">
-                  Verifica y actualiza automáticamente a una hora fija (ideal para la madrugada cuando no hay clientes en mostrador).
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-sky-100 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-800">
+                  Automático
                 </span>
               </div>
-              <input
-                type="checkbox"
-                checked={config.scheduledCheckEnabled ?? true}
-                onChange={(e) => handleToggleScheduledCheck(e.target.checked)}
-                className="w-5 h-5 rounded text-emerald-600 focus:ring-emerald-500 cursor-pointer"
-              />
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                Al abrir el software, verifica discretamente en segundo plano la existencia de mejoras y parches fiscales.
+              </p>
             </div>
 
-            {(config.scheduledCheckEnabled ?? true) && (
-              <div className="flex items-center gap-3 pt-2 border-t border-slate-200 dark:border-slate-700">
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                  Hora de Ejecución Automática:
-                </label>
-                <input
-                  type="time"
-                  value={config.scheduledTime || '00:00'}
-                  onChange={(e) => handleSaveScheduledTime(e.target.value)}
-                  className="px-2.5 py-1 border border-slate-300 dark:border-slate-600 rounded-lg text-xs font-mono font-bold text-slate-900 dark:text-white bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                />
-                <span className="text-[11px] text-slate-400">
-                  (Por defecto a las 00:00 hrs / medianoche)
+            {/* Estado 2: Actualización Silenciosa Desatendida */}
+            <div className="p-3.5 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800 space-y-1">
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-xs text-slate-800 dark:text-slate-200 flex items-center gap-1">
+                  <span>⚡ Despliegue Silencioso (Estilo PWA)</span>
+                </span>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                  Desatendido
                 </span>
               </div>
-            )}
-          </div>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                Aplica optimizaciones y novedades en vivo sin abrir ventanas emergentes ni interrumpir las ventas en mostrador.
+              </p>
+            </div>
 
-          {/* Opción 4: URL de Manifiesto */}
-          <div className="space-y-1.5">
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-              URL del Servidor de Manifiesto de Versiones (version.json):
-            </label>
-            <input
-              type="text"
-              value={config.updateManifestUrl}
-              onChange={(e) => handleSaveManifestUrl(e.target.value)}
-              placeholder="https://tudominio.com/releases/version.json"
-              className="w-full h-10 px-3 border border-slate-300 dark:border-slate-600 rounded-lg text-xs font-mono text-slate-900 dark:text-white bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-            />
-            <p className="text-[11px] text-slate-400">
-              Punto de enlace remoto donde el desarrollador publica los lanzamientos y notas de versión.
-            </p>
+            {/* Estado 3: Mantenimiento Nocturno Fijo */}
+            <div className="p-3.5 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800 space-y-1">
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-xs text-slate-800 dark:text-slate-200 flex items-center gap-1">
+                  <span>🌙 Ventana Nocturna de Mantenimiento</span>
+                </span>
+                <span className="text-[10px] font-bold font-mono px-2 py-0.5 rounded bg-indigo-100 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
+                  00:00 hrs
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                Comprobación fija de medianoche / cierre de turno, asegurando que cada jornada inicie con la versión más reciente.
+              </p>
+            </div>
+
+            {/* Estado 4: Canal de Entrega Seguro */}
+            <div className="p-3.5 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800 space-y-1">
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-xs text-slate-800 dark:text-slate-200 flex items-center gap-1">
+                  <span>🛡️ Canal Oficial de Lanzamientos</span>
+                </span>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                  Cifrado HTTPS
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                Conexión segura y certificada contra los servidores oficiales de KlikPOS Cloud Enterprise con integridad verificada.
+              </p>
+            </div>
           </div>
         </div>
 

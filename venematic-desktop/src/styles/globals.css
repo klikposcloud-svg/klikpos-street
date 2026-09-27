@@ -1,4 +1,4 @@
-﻿@tailwind base;
+@tailwind base;
 @tailwind components;
 @tailwind utilities;
 
@@ -916,21 +916,59 @@ html:not([data-ui-style="glassmorphism"]) .border-b.border-slate-200.bg-white {
   border-color: var(--industrial-border, #cbd5e1) !important;
 }
 
-/* Input de BÃºsqueda */
+/* Input de Búsqueda del POS (Exclusivo de la barra de búsqueda) */
 html[data-ui-style="industrial"] .pos-search-input,
-html[data-ui-style="industrial"] input[type="text"],
-html:not([data-ui-style="glassmorphism"]) .pos-search-input,
-html:not([data-ui-style="glassmorphism"]) input[type="text"] {
+html:not([data-ui-style="glassmorphism"]):not([data-theme="dark"]):not(.dark) .pos-search-input {
   background-color: var(--btn-secondary-bg, #f1f5f9) !important;
   border-color: var(--btn-secondary-border, #cbd5e1) !important;
-  color: var(--industrial-text, #0f172a) !important;
+  color: #0f172a !important;
+  -webkit-text-fill-color: #0f172a !important;
   border-radius: 9999px !important;
 }
 html[data-ui-style="industrial"] .pos-search-input::placeholder,
-html[data-ui-style="industrial"] input[type="text"]::placeholder,
-html:not([data-ui-style="glassmorphism"]) .pos-search-input::placeholder,
-html:not([data-ui-style="glassmorphism"]) input[type="text"]::placeholder {
-  color: var(--industrial-text-muted, #475569) !important;
+html:not([data-ui-style="glassmorphism"]):not([data-theme="dark"]):not(.dark) .pos-search-input::placeholder {
+  color: #64748b !important;
+  -webkit-text-fill-color: #64748b !important;
+}
+
+/* Inputs en Modo Oscuro (Formularios, Balanzas, Configuración, Webhooks) */
+html.dark input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="range"]):not([type="color"]):not(.keep-light),
+html[data-theme="dark"] input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="range"]):not([type="color"]):not(.keep-light),
+html.dark select,
+html[data-theme="dark"] select,
+html.dark textarea,
+html[data-theme="dark"] textarea {
+  background-color: #162232 !important;
+  border-color: #2b3d52 !important;
+  color: #f8fafc !important;
+  -webkit-text-fill-color: #f8fafc !important;
+}
+
+html.dark input::placeholder,
+html[data-theme="dark"] input::placeholder,
+html.dark textarea::placeholder,
+html[data-theme="dark"] textarea::placeholder {
+  color: #94a3b8 !important;
+  -webkit-text-fill-color: #94a3b8 !important;
+}
+
+/* Inputs en Modo Claro (Máximo contraste #0f172a) */
+html[data-theme="light"] input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="range"]):not([type="color"]),
+html:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]) input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="range"]):not([type="color"]),
+html[data-theme="light"] select,
+html:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]) select,
+html[data-theme="light"] textarea,
+html:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]) textarea {
+  color: #0f172a !important;
+  -webkit-text-fill-color: #0f172a !important;
+}
+
+html[data-theme="light"] input::placeholder,
+html:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]) input::placeholder,
+html[data-theme="light"] textarea::placeholder,
+html:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]) textarea::placeholder {
+  color: #94a3b8 !important;
+  -webkit-text-fill-color: #94a3b8 !important;
 }
 
 /* BotÃ³n Gaveta (Ãmbar / Naranja CÃ¡lido) */
