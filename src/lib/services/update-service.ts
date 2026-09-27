@@ -13,8 +13,12 @@ export interface VersionManifest {
 
 export interface UpdateConfig {
   autoCheckOnStartup: boolean;
+  autoApplySilently: boolean;        // Actualizar automáticamente sin preguntar
+  scheduledCheckEnabled: boolean;    // Comprobación a hora fija nocturna
+  scheduledTime: string;             // Hora programada (ej: "00:00")
   updateManifestUrl: string;
   lastChecked?: string;
+  lastUpdated?: string;
 }
 
 export const CURRENT_VERSION = '2.4.1';
@@ -44,6 +48,9 @@ export function compareVersions(v1: string, v2: string): number {
 class UpdateService {
   private config: UpdateConfig = {
     autoCheckOnStartup: true,
+    autoApplySilently: false,
+    scheduledCheckEnabled: true,
+    scheduledTime: '00:00',
     updateManifestUrl: DEFAULT_MANIFEST_URL,
   };
 
@@ -157,18 +164,17 @@ class UpdateService {
     };
   }
 
-  // Ejecuta la actualización según el entorno de ejecución
-  public applyUpdate(manifest: VersionManifest): { success: boolean; message: string; downloadUrl?: string } {
+  // Descarga manual del paquete instalador para uso fuera de línea o nueva instalación
+  public downloadInstaller(manifest: VersionManifest): { success: boolean; message: string; downloadUrl?: string } {
     if (typeof window === 'undefined') return { success: false, message: 'Entorno no soportado.' };
 
     const isAndroid = /android/i.test(navigator.userAgent);
     const downloadUrl = isAndroid ? (manifest.androidUrl || manifest.windowsUrl) : manifest.windowsUrl;
 
     if (downloadUrl) {
-      // Disparar la descarga del instalador / APK directamente en el navegador
       const link = document.createElement('a');
       link.href = downloadUrl;
-      link.download = downloadUrl.split('/').pop() || 'Venematic-Update';
+      link.download = downloadUrl.split('/').pop() || 'KlikPOS-Update.exe';
       link.target = '_blank';
       document.body.appendChild(link);
       link.click();
@@ -176,22 +182,62 @@ class UpdateService {
 
       return {
         success: true,
-        message: 'Descargando instalador de actualización...',
+        message: 'Descargando paquete de instalación...',
         downloadUrl,
       };
     }
 
-    // Si es aplicación Web/PWA sin instalador externo, forzar recarga de Service Worker
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistrations().then((registrations) => {
-        for (const reg of registrations) {
-          reg.update();
-        }
-      });
-    }
+    return { success: false, message: 'No hay URL de instalador configurada en el manifiesto.' };
+  }
 
-    window.location.reload();
-    return { success: true, message: 'Aplicación actualizada y recargada.' };
+  // Actualización en caliente instantánea estilo Web PWA (1 solo clic, limpia caché y recarga)
+  public async applyPwaUpdate(): Promise<{ success: boolean; message: string }> {
+    if (typeof window === 'undefined') return { success: false, message: 'Entorno no soportado.' };
+
+    try {
+      // 1. Purgar cachés de Service Worker y almacenamiento temporal de scripts
+      if ('caches' in window) {
+        const keys = await caches.keys();
+        await Promise.all(keys.map((k) => caches.delete(k)));
+      }
+
+      // 2. Activar el nuevo Service Worker inmediatamente
+      if ('serviceWorker' in navigator) {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        for (const reg of registrations) {
+          if (reg.waiting) {
+            reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+          }
+          await reg.update();
+        }
+      }
+
+      // 3. Registrar fecha de última actualización
+      this.saveConfig({ lastUpdated: new Date().toISOString() });
+
+      // 4. Recargar la interfaz en caliente
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
+
+      return { success: true, message: '¡Actualización aplicada con éxito! Recargando...' };
+    } catch (err: any) {
+      console.warn('[PWA Update Refresh]', err);
+      window.location.reload();
+      return { success: true, message: 'Recargando aplicación con la nueva versión...' };
+    }
+  }
+
+  // Método unificado de actualización
+  public applyUpdate(
+    manifest: VersionManifest,
+    mode: 'pwa' | 'installer' = 'pwa'
+  ): { success: boolean; message: string; downloadUrl?: string } {
+    if (mode === 'installer') {
+      return this.downloadInstaller(manifest);
+    }
+    this.applyPwaUpdate();
+    return { success: true, message: 'Aplicando actualización en vivo...' };
   }
 }
 

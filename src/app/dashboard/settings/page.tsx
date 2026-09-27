@@ -1983,10 +1983,38 @@ function SoftwareUpdatesSection() {
     updateService.saveConfig({ autoCheckOnStartup: enabled });
   };
 
+  const handleToggleAutoApplySilently = (enabled: boolean) => {
+    const updated = { ...config, autoApplySilently: enabled };
+    setConfig(updated);
+    updateService.saveConfig({ autoApplySilently: enabled });
+  };
+
+  const handleToggleScheduledCheck = (enabled: boolean) => {
+    const updated = { ...config, scheduledCheckEnabled: enabled };
+    setConfig(updated);
+    updateService.saveConfig({ scheduledCheckEnabled: enabled });
+  };
+
+  const handleSaveScheduledTime = (time: string) => {
+    const updated = { ...config, scheduledTime: time };
+    setConfig(updated);
+    updateService.saveConfig({ scheduledTime: time });
+  };
+
   const handleSaveManifestUrl = (url: string) => {
     const updated = { ...config, updateManifestUrl: url };
     setConfig(updated);
     updateService.saveConfig({ updateManifestUrl: url });
+  };
+
+  const handlePwaForceRefresh = () => {
+    setStatusResult({
+      hasUpdate: true,
+      msg: '⚡ Purgando caché y sincronizando archivos en caliente...',
+    });
+    setTimeout(() => {
+      updateService.applyPwaUpdate();
+    }, 600);
   };
 
   return (
@@ -2007,20 +2035,32 @@ function SoftwareUpdatesSection() {
                 </span>
               </div>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                Gestiona la recepción de actualizaciones automáticas en línea o la instalación manual acumulativa.
+                Gestiona la recepción de actualizaciones automáticas en vivo (PWA) o la instalación manual acumulativa.
               </p>
             </div>
           </div>
 
-          <button
-            type="button"
-            onClick={handleCheckNow}
-            disabled={isChecking}
-            className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs flex items-center justify-center gap-2 shadow-sm transition-all active:scale-95 cursor-pointer disabled:opacity-50 shrink-0"
-          >
-            <RefreshCw className={`w-4 h-4 ${isChecking ? 'animate-spin' : ''}`} />
-            <span>{isChecking ? 'Verificando...' : 'Buscar Actualizaciones Ahora'}</span>
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handlePwaForceRefresh}
+              className="px-3 py-2.5 rounded-xl border border-emerald-300 dark:border-emerald-700 bg-emerald-50/60 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-emerald-800 dark:text-emerald-300 font-bold text-xs flex items-center justify-center gap-1.5 shadow-xs transition-all active:scale-95 cursor-pointer shrink-0"
+              title="Limpia caché de scripts y recarga la interfaz en 1 clic"
+            >
+              <span>⚡</span>
+              <span>Refresco Rápido PWA</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={handleCheckNow}
+              disabled={isChecking}
+              className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs flex items-center justify-center gap-2 shadow-sm transition-all active:scale-95 cursor-pointer disabled:opacity-50 shrink-0"
+            >
+              <RefreshCw className={`w-4 h-4 ${isChecking ? 'animate-spin' : ''}`} />
+              <span>{isChecking ? 'Verificando...' : 'Buscar Actualizaciones Ahora'}</span>
+            </button>
+          </div>
         </div>
 
         {statusResult && (
@@ -2046,16 +2086,17 @@ function SoftwareUpdatesSection() {
 
         <div className="space-y-4">
           <h4 className="text-xs font-black uppercase tracking-wider text-slate-600 dark:text-slate-400">
-            Preferencias de Actualización
+            Preferencias de Automatización & Despliegue
           </h4>
 
+          {/* Opción 1: Comprobación al Iniciar */}
           <div className="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-700">
             <div>
               <span className="font-bold text-xs text-slate-800 dark:text-slate-200 block">
                 Comprobación Automática en Línea al Iniciar
               </span>
               <span className="text-[11px] text-slate-500 dark:text-slate-400">
-                Al abrir el sistema, verifica discretamente en segundo plano si existe una versión superior y te notifica.
+                Al abrir el sistema, verifica discretamente en segundo plano si existe una versión superior.
               </span>
             </div>
             <input
@@ -2066,6 +2107,62 @@ function SoftwareUpdatesSection() {
             />
           </div>
 
+          {/* Opción 2: Actualización Automática Silenciosa sin preguntar */}
+          <div className="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-700">
+            <div>
+              <span className="font-bold text-xs text-slate-800 dark:text-slate-200 block flex items-center gap-1.5">
+                <span>⚡ Actualización Silenciosa Desatendida (Sin Preguntar, Estilo PWA)</span>
+              </span>
+              <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                Al detectarse una nueva versión, aplica los cambios y recarga la interfaz automáticamente sin abrir ventanas ni interrumpir con diálogos.
+              </span>
+            </div>
+            <input
+              type="checkbox"
+              checked={!!config.autoApplySilently}
+              onChange={(e) => handleToggleAutoApplySilently(e.target.checked)}
+              className="w-5 h-5 rounded text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+            />
+          </div>
+
+          {/* Opción 3: Programación Nocturna a Hora Fija (00:00) */}
+          <div className="p-3.5 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-700 space-y-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <span className="font-bold text-xs text-slate-800 dark:text-slate-200 block flex items-center gap-1.5">
+                  <span>🌙 Actualización Programada Nocturna (Cierre de Caja)</span>
+                </span>
+                <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                  Verifica y actualiza automáticamente a una hora fija (ideal para la madrugada cuando no hay clientes en mostrador).
+                </span>
+              </div>
+              <input
+                type="checkbox"
+                checked={config.scheduledCheckEnabled ?? true}
+                onChange={(e) => handleToggleScheduledCheck(e.target.checked)}
+                className="w-5 h-5 rounded text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+              />
+            </div>
+
+            {(config.scheduledCheckEnabled ?? true) && (
+              <div className="flex items-center gap-3 pt-2 border-t border-slate-200 dark:border-slate-700">
+                <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                  Hora de Ejecución Automática:
+                </label>
+                <input
+                  type="time"
+                  value={config.scheduledTime || '00:00'}
+                  onChange={(e) => handleSaveScheduledTime(e.target.value)}
+                  className="px-2.5 py-1 border border-slate-300 dark:border-slate-600 rounded-lg text-xs font-mono font-bold text-slate-900 dark:text-white bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                />
+                <span className="text-[11px] text-slate-400">
+                  (Por defecto a las 00:00 hrs / medianoche)
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* Opción 4: URL de Manifiesto */}
           <div className="space-y-1.5">
             <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
               URL del Servidor de Manifiesto de Versiones (version.json):

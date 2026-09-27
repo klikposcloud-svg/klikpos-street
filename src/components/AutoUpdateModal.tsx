@@ -1,17 +1,19 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { updateService, VersionManifest, CURRENT_VERSION } from '@/lib/services/update-service';
-import { Sparkles, Download, CheckCircle2, X, AlertCircle, RefreshCw } from 'lucide-react';
+import { Sparkles, Download, CheckCircle2, X, AlertCircle, RefreshCw, Zap, Package } from 'lucide-react';
 
 export default function AutoUpdateModal() {
   const [manifest, setManifest] = useState<VersionManifest | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [updateMessage, setUpdateMessage] = useState<string | null>(null);
+  const [silentNotice, setSilentNotice] = useState<string | null>(null);
+  const lastScheduledCheckRef = useRef<string>('');
 
   useEffect(() => {
-    // Escuchar evento manual para verificar actualizaciones desde Ajustes
+    // 1. Escuchar evento manual para verificar actualizaciones desde Ajustes o teclado
     const handleManualCheck = async () => {
       const res = await updateService.checkForUpdates();
       if (res.hasUpdate && res.latestManifest) {
@@ -28,45 +30,99 @@ export default function AutoUpdateModal() {
 
     window.addEventListener('venematic:check_updates', handleManualCheck);
 
-    // Verificación automática al iniciar (con retardo de 4 segundos para no entorpecer el arranque del POS)
-    const timer = setTimeout(async () => {
+    // 2. Verificación automática al iniciar (con retardo de 3 segundos para no entorpecer el POS)
+    const startupTimer = setTimeout(async () => {
       const cfg = updateService.getConfig();
       if (cfg.autoCheckOnStartup && navigator.onLine) {
         const res = await updateService.checkForUpdates();
         if (res.hasUpdate && res.latestManifest) {
-          // Verificar si el usuario no ha pospuesto esta versión específica en esta sesión
-          const dismissedVersion = sessionStorage.getItem('venematic_dismissed_update');
-          if (dismissedVersion !== res.latestManifest.version || res.latestManifest.mandatory) {
+          const m = res.latestManifest;
+          // Si está activada la actualización silenciosa sin preguntar (Estilo PWA)
+          if (cfg.autoApplySilently) {
+            setSilentNotice(`⚡ Nueva versión v${m.version} detectada. Aplicando actualización silenciosa en vivo...`);
+            setTimeout(() => {
+              updateService.applyPwaUpdate();
+            }, 1800);
+            return;
+          }
+
+          // Si requiere confirmación del usuario
+          const dismissedVersion = sessionStorage.getItem('klikpos_dismissed_update');
+          if (dismissedVersion !== m.version || m.mandatory) {
+            setManifest(m);
+            setIsOpen(true);
+          }
+        }
+      }
+    }, 3000);
+
+    // 3. Programador a hora fija (por defecto 00:00 medianoche)
+    const intervalScheduler = setInterval(async () => {
+      const cfg = updateService.getConfig();
+      if (!cfg.scheduledCheckEnabled || !navigator.onLine) return;
+
+      const now = new Date();
+      const currentHHmm = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+      const targetTime = cfg.scheduledTime || '00:00';
+      const todayDate = now.toISOString().split('T')[0];
+      const checkKey = `${todayDate}_${targetTime}`;
+
+      if (currentHHmm === targetTime && lastScheduledCheckRef.current !== checkKey) {
+        lastScheduledCheckRef.current = checkKey;
+        console.log(`[KlikPOS Scheduler] Ejecutando verificación programada (${targetTime})...`);
+        const res = await updateService.checkForUpdates();
+        if (res.hasUpdate && res.latestManifest) {
+          if (cfg.autoApplySilently) {
+            console.log(`[KlikPOS Scheduler] Aplicando actualización programada silenciosa v${res.latestManifest.version}...`);
+            updateService.applyPwaUpdate();
+          } else {
             setManifest(res.latestManifest);
             setIsOpen(true);
           }
         }
       }
-    }, 4000);
+    }, 30000);
 
     return () => {
       window.removeEventListener('venematic:check_updates', handleManualCheck);
-      clearTimeout(timer);
+      clearTimeout(startupTimer);
+      clearInterval(intervalScheduler);
     };
   }, []);
 
+  // Notificación flotante para actualizaciones silenciosas automáticas
+  if (silentNotice) {
+    return (
+      <div className="fixed bottom-5 right-5 z-50 bg-slate-900 text-white border border-emerald-500/50 shadow-2xl rounded-2xl p-4 flex items-center gap-3 animate-in fade-in slide-in-from-bottom-5 duration-300">
+        <RefreshCw className="w-5 h-5 text-emerald-400 animate-spin shrink-0" />
+        <div>
+          <p className="text-xs font-black text-emerald-400">Actualización en Curso</p>
+          <p className="text-[11.5px] text-slate-200">{silentNotice}</p>
+        </div>
+      </div>
+    );
+  }
+
   if (!isOpen || !manifest) return null;
 
-  const handleApplyUpdate = () => {
+  // Actualización rápida en vivo estilo PWA (1 solo clic)
+  const handleApplyPwa = () => {
     setIsUpdating(true);
-    setUpdateMessage('Iniciando descarga del paquete de actualización...');
-
+    setUpdateMessage('⚡ Purgando caché y sincronizando con la última versión...');
     setTimeout(() => {
-      const res = updateService.applyUpdate(manifest);
-      setUpdateMessage(res.message);
-      setIsUpdating(false);
+      updateService.applyPwaUpdate();
+    }, 800);
+  };
 
-      if (res.downloadUrl) {
-        setTimeout(() => {
-          setIsOpen(false);
-        }, 3000);
-      }
-    }, 1200);
+  // Descarga manual del ejecutable (.exe)
+  const handleDownloadExe = () => {
+    const res = updateService.downloadInstaller(manifest);
+    setUpdateMessage(res.message);
+    if (res.downloadUrl) {
+      setTimeout(() => {
+        setIsOpen(false);
+      }, 3000);
+    }
   };
 
   const handleDismiss = () => {
@@ -74,7 +130,7 @@ export default function AutoUpdateModal() {
       alert('Esta actualización es obligatoria para garantizar la integridad fiscal y del inventario.');
       return;
     }
-    sessionStorage.setItem('venematic_dismissed_update', manifest.version);
+    sessionStorage.setItem('klikpos_dismissed_update', manifest.version);
     setIsOpen(false);
   };
 
@@ -106,7 +162,7 @@ export default function AutoUpdateModal() {
                 ¡Nueva Versión Disponible!
               </span>
               <h2 className="text-xl font-black tracking-tight text-white mt-0.5">
-                Venematic POS v{manifest.version}
+                KlikPOS Enterprise v{manifest.version}
               </h2>
             </div>
           </div>
@@ -138,48 +194,63 @@ export default function AutoUpdateModal() {
           <div className="bg-sky-50 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-800 rounded-xl p-3 text-xs text-sky-800 dark:text-sky-200 flex items-start gap-2">
             <AlertCircle className="w-4 h-4 text-sky-600 shrink-0 mt-0.5" />
             <span>
-              <b>Garantía de Datos:</b> La actualización conserva íntegramente todos tus productos, clientes, precios, ventas y turnos de caja sin interrupción.
+              <b>Garantía de Datos:</b> La actualización conserva íntegramente tus productos, clientes, ventas históricas y turnos de caja sin interrupción.
             </span>
           </div>
 
           {updateMessage && (
             <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-700 rounded-xl text-xs font-bold text-emerald-800 dark:text-emerald-200 flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+              <RefreshCw className="w-4 h-4 text-emerald-600 animate-spin shrink-0" />
               <span>{updateMessage}</span>
             </div>
           )}
 
-          {/* Botones de Acción */}
-          <div className="pt-2 flex items-center justify-end gap-2.5">
-            {!manifest.mandatory && (
-              <button
-                type="button"
-                onClick={handleDismiss}
-                disabled={isUpdating}
-                className="px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold transition-all cursor-pointer"
-              >
-                Recordar Más Tarde
-              </button>
-            )}
-
+          {/* Opciones de Actualización */}
+          <div className="pt-2 flex flex-col gap-2.5">
+            {/* Opción 1: Actualización Rápida en Vivo PWA */}
             <button
               type="button"
-              onClick={handleApplyUpdate}
+              onClick={handleApplyPwa}
               disabled={isUpdating}
-              className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-black flex items-center gap-2 shadow-md active:scale-95 transition-all cursor-pointer disabled:opacity-50"
+              className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs flex items-center justify-center gap-2.5 shadow-md active:scale-98 transition-all cursor-pointer disabled:opacity-50"
             >
               {isUpdating ? (
                 <>
                   <RefreshCw className="w-4 h-4 animate-spin" />
-                  <span>Actualizando...</span>
+                  <span>Aplicando Actualización en Vivo...</span>
                 </>
               ) : (
                 <>
-                  <Download className="w-4 h-4" />
-                  <span>Actualizar Ahora (v{manifest.version})</span>
+                  <Zap className="w-4 h-4 text-amber-300 fill-amber-300" />
+                  <span>Actualización Rápida en Vivo (Recomendado - 1 Clic)</span>
                 </>
               )}
             </button>
+
+            {/* Fila secundaria: Descarga manual de .exe y posponer */}
+            <div className="flex items-center justify-between gap-2 pt-1 border-t border-slate-100 dark:border-slate-800">
+              <button
+                type="button"
+                onClick={handleDownloadExe}
+                disabled={isUpdating}
+                className="text-[11.5px] font-bold text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 flex items-center gap-1.5 transition-colors cursor-pointer"
+                title="Descargar instalador para guardar en USB o instalar fuera de línea"
+              >
+                <Package className="w-3.5 h-3.5" />
+                <span>Descargar Instalador .exe (Uso Offline)</span>
+              </button>
+
+              {!manifest.mandatory && (
+                <button
+                  type="button"
+                  onClick={handleDismiss}
+                  disabled={isUpdating}
+                  className="text-[11.5px] font-bold text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors cursor-pointer"
+                >
+                  Recordar Más Tarde
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>
