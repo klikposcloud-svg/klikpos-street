@@ -11,9 +11,12 @@ $env:ANDROID_HOME = "C:\Users\pcpro\AppData\Local\Android\Sdk"
 Write-Host ">>> [1/3] Sincronizando assets web actualizados a Android..." -ForegroundColor Cyan
 node "$root\scripts\enhance-and-rebrand-mobile.js"
 
+$outputApk = "$androidDir\app\build\outputs\apk\debug\app-debug.apk"
+if (Test-Path $outputApk) { Remove-Item $outputApk -Force -ErrorAction SilentlyContinue }
+
 Write-Host ">>> [2/3] Compilando APK Móvil (KlikPOS_Movil_Full.apk / KlikPOS_Movil_Satelite.apk)..." -ForegroundColor Cyan
 Set-Location $androidDir
-cmd.exe /c ".\gradlew.bat assembleDebug"
+cmd.exe /c ".\gradlew.bat assembleDebug --no-daemon"
 if ($LASTEXITCODE -ne 0) {
     throw "Error compilando POS APK"
 }
