@@ -2,15 +2,21 @@ const fs = require('fs');
 const path = require('path');
 
 const TOKEN = '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';
-const TAG = 'v2.4.1';
+const TAG = 'v2.4.5';
 const REPO = 'klikposcloud-svg/klikpos-releases';
-const TITLE = 'KlikPOS Enterprise v2.4.1 - Interfaz Ultra-Espaciosa & Alto Contraste';
-const NOTES = `### Novedades en KlikPOS Enterprise v2.4.1:
-- **Diseño de catálogo optimizado:** Reducción de 7 a 4 columnas por fila con mayor amplitud.
-- **Títulos de productos en 2 líneas completas:** Lectura limpia sin truncamientos molestos.
-- **Corrección de alto contraste:** Teclado numérico, balanza, reloj y precios 100% legibles en modo claro.
-- **Accesos directos ergonómicos:** Tarjetas del carrusel superior ensanchadas a 270px-300px.
-- **Auto-actualizador integrado:** Conexión directa y resiliente con la nube de KlikPOS.`;
+const TITLE = 'KlikPOS Enterprise v2.4.5 - Modo Standalone Tablet & Móvil, Dock Curvo Animado y 4 Estilos de Cards';
+const NOTES = `### Novedades en KlikPOS Enterprise v2.4.5:
+- **Modo Standalone Tablet / Móvil (/tablet-pos):** Interfaz táctil 100% autónoma para puestos de comida rápida, food trucks y comercio ambulante sin requerir PC/laptop.
+- **Dock Inferior Curvo Animado:** Dock orgánico con hendidura cóncava y botón central flotante sobredimensionado 'Cobrar' con pulso de aura en vivo.
+- **4 Estilos de Vista de Cards:**
+  1. *Food:* Cards grandes con foto hero de alta resolución, chips de ingredientes, tiempo de preparación y etiquetas.
+  2. *Cuadrícula:* Estándar ergonómica de 2 a 4 columnas sin truncamiento de títulos.
+  3. *Lista:* Alta densidad para inventario masivo en abastos y bodegas.
+  4. *Minimalista:* Botones táctiles de alto contraste para máxima velocidad en horas pico.
+- **Identidad Oficial KlikPOS:** Blanco Puro con logotipo y acentos en Gris Grafito (#1e293b / #0f172a).
+- **Selector de Branding de Colores:** En el cajón de ajustes permite alternar al instante entre 9 paletas (Grafito, Esmeralda, Petróleo, Azul, etc.) y modo oscuro.
+- **Modal de Personalización de Comida:** Opciones rápidas de 1-tap (Con todo, Sin cebolla, Extra tártara/ajo, etc.).
+- **Doble Cajón Deslizable:** Ajustes con Menú QR WhatsApp e Impresora Bluetooth a la izquierda; Comanda activa a la derecha.`;
 
 async function main() {
   console.log(`[1/4] Creando / verificando Release ${TAG} en https://github.com/${REPO}...`);
@@ -49,17 +55,17 @@ async function main() {
     console.log(`Release existente encontrada (ID: ${release.id}). URL: ${release.html_url}`);
   }
 
-  // 2. Subir binario Windows
-  const exePath = path.resolve(__dirname, '../dist-installer/KlikPOS-Enterprise-Setup-v2.4.1.exe');
+  // 2. Subir binario Windows Oficial
+  const exePath = path.resolve(__dirname, '../DISTRIBUCION_KLIKPOS/02_Combo_Empresarial_Full/KlikPOS_Desktop_Full_Setup.exe');
   if (fs.existsSync(exePath)) {
-    const exeName = 'KlikPOS-Enterprise-Setup-v2.4.1.exe';
-    console.log(`[2/4] Subiendo binario de Windows: ${exeName} (${(fs.statSync(exePath).size / (1024*1024)).toFixed(2)} MB)...`);
+    const exeName = 'KlikPOS_Desktop_Full_Setup.exe';
+    console.log(`[2/4] Subiendo instalador oficial de Windows: ${exeName} (${(fs.statSync(exePath).size / (1024*1024)).toFixed(2)} MB)...`);
     await uploadAsset(release, exePath, exeName, 'application/vnd.microsoft.portable-executable');
   } else {
     console.warn(`[!] No se encontro el ejecutable en ${exePath}`);
   }
 
-  // 3. Subir APK Android si existe
+  // 3. Subir APK Android Oficial
   const apkPath = path.resolve(__dirname, '../DISTRIBUCION_KLIKPOS/03_Movil_Full_Autonomo/KlikPOS_Movil_Full.apk');
   if (fs.existsSync(apkPath)) {
     const apkName = 'KlikPOS_Movil_Full.apk';
@@ -67,8 +73,9 @@ async function main() {
     await uploadAsset(release, apkPath, apkName, 'application/vnd.android.package-archive');
   }
 
-  console.log(`[4/4] Proceso finalizado. Los binarios estan disponibles publicamente en:`);
-  console.log(`https://github.com/${REPO}/releases/download/${TAG}/KlikPOS-Enterprise-Setup-v2.4.1.exe`);
+  console.log(`[4/4] Proceso finalizado. Los binarios están disponibles públicamente en:`);
+  console.log(`Windows: https://github.com/${REPO}/releases/download/${TAG}/KlikPOS_Desktop_Full_Setup.exe`);
+  console.log(`Android: https://github.com/${REPO}/releases/download/${TAG}/KlikPOS_Movil_Full.apk`);
 }
 
 async function uploadAsset(release, filePath, fileName, contentType) {

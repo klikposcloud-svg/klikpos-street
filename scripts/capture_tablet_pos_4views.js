@@ -5,7 +5,7 @@ const path = require('path');
 const ARTIFACTS_DIR = 'C:\\Users\\pcpro\\.gemini\\antigravity-ide\\brain\\68b7f349-bb9c-4c0d-a3d6-76560e054f4f';
 
 (async () => {
-  const tmpDir = path.join(os.tmpdir(), 'pptr_pos_' + Date.now());
+  const tmpDir = path.join(os.tmpdir(), 'pptr_brand_' + Date.now());
   const browser = await puppeteer.launch({
     executablePath: 'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe',
     headless: 'new',
@@ -19,68 +19,49 @@ const ARTIFACTS_DIR = 'C:\\Users\\pcpro\\.gemini\\antigravity-ide\\brain\\68b7f3
   await page.goto('http://localhost:3000/tablet-pos', { waitUntil: 'domcontentloaded', timeout: 15000 });
   await new Promise(r => setTimeout(r, 2000));
 
-  // 1. VISTA FOOD (Cards Grandes)
-  console.log('Capturing Food View...');
-  await page.screenshot({ path: path.join(ARTIFACTS_DIR, 'tablet_pos_view_food.png') });
+  // 1. VISTA 1: FOOD CON CARDS GRANDES (Modo Blanco Oficial + Grafito)
+  console.log('Capturing Brand White Food View...');
+  await page.screenshot({ path: path.join(ARTIFACTS_DIR, 'tablet_pos_brand_white_food.png') });
 
-  // 2. VISTA CUADRÍCULA
-  console.log('Capturing Cuadrícula View...');
+  // 2. VISTA 2: CUADRÍCULA
+  console.log('Capturing Brand White Cuadrícula...');
   await page.evaluate(() => {
     const buttons = Array.from(document.querySelectorAll('button'));
     const btn = buttons.find(b => b.textContent && b.textContent.includes('Cuadrícula'));
     if (btn) btn.click();
   });
-  await new Promise(r => setTimeout(r, 600));
-  await page.screenshot({ path: path.join(ARTIFACTS_DIR, 'tablet_pos_view_cuadricula.png') });
+  await new Promise(r => setTimeout(r, 500));
+  await page.screenshot({ path: path.join(ARTIFACTS_DIR, 'tablet_pos_brand_white_cuadricula.png') });
 
-  // 3. VISTA LISTA
-  console.log('Capturing Lista View...');
+  // 3. VISTA 3: LISTA
+  console.log('Capturing Brand White Lista...');
   await page.evaluate(() => {
     const buttons = Array.from(document.querySelectorAll('button'));
     const btn = buttons.find(b => b.textContent && b.textContent.includes('Lista'));
     if (btn) btn.click();
   });
-  await new Promise(r => setTimeout(r, 600));
-  await page.screenshot({ path: path.join(ARTIFACTS_DIR, 'tablet_pos_view_lista.png') });
+  await new Promise(r => setTimeout(r, 500));
+  await page.screenshot({ path: path.join(ARTIFACTS_DIR, 'tablet_pos_brand_white_lista.png') });
 
-  // 4. VISTA MINIMALISTA
-  console.log('Capturing Minimalista View...');
+  // 4. VISTA 4: MINIMALISTA
+  console.log('Capturing Brand White Minimalista...');
   await page.evaluate(() => {
     const buttons = Array.from(document.querySelectorAll('button'));
     const btn = buttons.find(b => b.textContent && b.textContent.includes('Minimalista'));
     if (btn) btn.click();
   });
-  await new Promise(r => setTimeout(r, 600));
-  await page.screenshot({ path: path.join(ARTIFACTS_DIR, 'tablet_pos_view_minimalista.png') });
-
-  // 5. MODAL DE PERSONALIZACIÓN / NOTAS (volver a Food y abrir modal)
-  console.log('Capturing Customizer Modal...');
-  await page.evaluate(() => {
-    const buttons = Array.from(document.querySelectorAll('button'));
-    const btnFood = buttons.find(b => b.textContent && b.textContent.includes('Food'));
-    if (btnFood) btnFood.click();
-  });
   await new Promise(r => setTimeout(r, 500));
+  await page.screenshot({ path: path.join(ARTIFACTS_DIR, 'tablet_pos_brand_white_minimalista.png') });
 
+  // 5. DRAWER DE AJUSTES CON SELECTOR DE BRANDING DE COLORES
+  console.log('Capturing Brand Settings Drawer with Color Branding...');
   await page.evaluate(() => {
-    const noteBtn = document.querySelector('button[title*="Personalizar"]');
-    if (noteBtn) noteBtn.click();
+    const btnAjustes = Array.from(document.querySelectorAll('button')).find(b => b.textContent && b.textContent.includes('Ajustes'));
+    if (btnAjustes) btnAjustes.click();
   });
   await new Promise(r => setTimeout(r, 600));
-  await page.screenshot({ path: path.join(ARTIFACTS_DIR, 'tablet_pos_view_food_notes_modal.png') });
-
-  // 6. VISTA TABLET (820x1180)
-  console.log('Capturing Tablet Food View...');
-  await page.evaluate(() => {
-    // Cerrar modal de notas si está abierto
-    const closeBtns = Array.from(document.querySelectorAll('button'));
-    const xBtn = closeBtns.find(b => b.innerHTML.includes('svg') && b.closest('.fixed'));
-    if (xBtn) xBtn.click();
-  });
-  await page.setViewport({ width: 820, height: 1180, deviceScaleFactor: 2 });
-  await new Promise(r => setTimeout(r, 600));
-  await page.screenshot({ path: path.join(ARTIFACTS_DIR, 'tablet_pos_view_food_tablet.png') });
+  await page.screenshot({ path: path.join(ARTIFACTS_DIR, 'tablet_pos_settings_color_branding.png') });
 
   await browser.close();
-  console.log('All 4 views captured successfully!');
+  console.log('All captures with official branding completed successfully!');
 })();

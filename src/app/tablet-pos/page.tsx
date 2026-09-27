@@ -34,7 +34,8 @@ import {
   Check,
   Edit3,
   SlidersHorizontal,
-  Tag
+  Tag,
+  Palette
 } from 'lucide-react';
 
 interface CartItem {
@@ -57,10 +58,21 @@ interface Product {
   description: string;
   tag: string;
   prepTime: string;
-  badgeColor: 'emerald' | 'amber' | 'rose' | 'purple' | 'cyan';
   sku: string;
   ingredients?: string[];
 }
+
+const BRAND_PALETTES = [
+  { id: 'slate', name: 'Grafito Klik', primary: '#1e293b', hover: '#0f172a', accent: '#334155', glow: 'rgba(30, 41, 59, 0.4)' },
+  { id: 'emerald', name: 'Esmeralda', primary: '#059669', hover: '#047857', accent: '#10b981', glow: 'rgba(16, 185, 129, 0.4)' },
+  { id: 'petrol', name: 'Petróleo', primary: '#0e4f5a', hover: '#0a3d46', accent: '#15616d', glow: 'rgba(14, 79, 90, 0.4)' },
+  { id: 'blue', name: 'Azul Real', primary: '#2563eb', hover: '#1d4ed8', accent: '#3b82f6', glow: 'rgba(37, 99, 235, 0.4)' },
+  { id: 'sky', name: 'Cielo', primary: '#0284c7', hover: '#0369a1', accent: '#38bdf8', glow: 'rgba(2, 132, 199, 0.4)' },
+  { id: 'amber', name: 'Ámbar Sol', primary: '#d97706', hover: '#b45309', accent: '#f59e0b', glow: 'rgba(217, 119, 6, 0.4)' },
+  { id: 'ruby', name: 'Rubí', primary: '#dc2626', hover: '#b91c1c', accent: '#ef4444', glow: 'rgba(220, 38, 38, 0.4)' },
+  { id: 'purple', name: 'Púrpura', primary: '#7c3aed', hover: '#6d28d9', accent: '#8b5cf6', glow: 'rgba(124, 58, 237, 0.4)' },
+  { id: 'coral', name: 'Coral Cálido', primary: '#ea580c', hover: '#c2410c', accent: '#f97316', glow: 'rgba(234, 88, 12, 0.4)' }
+];
 
 const SAMPLE_PRODUCTS: Product[] = [
   {
@@ -70,7 +82,6 @@ const SAMPLE_PRODUCTS: Product[] = [
     priceUSD: 6.50,
     tag: '🔥 Más Vendido',
     prepTime: '8-10 min',
-    badgeColor: 'amber',
     image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&q=80',
     description: 'Carne 200g, doble queso cheddar fundido, tocineta crujiente, vegetales frescos y salsa especial.',
     sku: 'HMB-01',
@@ -83,7 +94,6 @@ const SAMPLE_PRODUCTS: Product[] = [
     priceUSD: 3.50,
     tag: '⭐ Favorito',
     prepTime: '4-6 min',
-    badgeColor: 'rose',
     image: 'https://images.unsplash.com/photo-1619740455993-9e612b1af08a?w=600&q=80',
     description: 'Salchicha polaca premium, lluvia de queso blanco rallado, papitas crocantes y combo de 4 salsas.',
     sku: 'PER-01',
@@ -96,7 +106,6 @@ const SAMPLE_PRODUCTS: Product[] = [
     priceUSD: 12.00,
     tag: '💥 Ahorro',
     prepTime: '12-15 min',
-    badgeColor: 'emerald',
     image: 'https://images.unsplash.com/photo-1544025162-d76694265947?w=600&q=80',
     description: 'Lomito de res, pechuga a la brasa, chorizo ahumado, papas rústicas, ensalada cole slaw y guasacaca.',
     sku: 'CMB-01',
@@ -109,7 +118,6 @@ const SAMPLE_PRODUCTS: Product[] = [
     priceUSD: 4.00,
     tag: '🥓 Crujiente',
     prepTime: '6-8 min',
-    badgeColor: 'purple',
     image: 'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=600&q=80',
     description: 'Canasta de papas fritas recién hechas bañadas en salsa cheddar y tocineta ahumada picada.',
     sku: 'EXT-01',
@@ -122,7 +130,6 @@ const SAMPLE_PRODUCTS: Product[] = [
     priceUSD: 8.50,
     tag: '🏆 Gigante',
     prepTime: '10-12 min',
-    badgeColor: 'amber',
     image: 'https://images.unsplash.com/photo-1509722747041-616f39b57569?w=600&q=80',
     description: 'Pan artesanal de 30cm, lomito jugoso, pollo grille, queso de mano gratinado, maíz y papitas.',
     sku: 'PEP-01',
@@ -135,7 +142,6 @@ const SAMPLE_PRODUCTS: Product[] = [
     priceUSD: 2.50,
     tag: '🧊 Bien Frío',
     prepTime: 'Inmediato',
-    badgeColor: 'cyan',
     image: 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=600&q=80',
     description: 'Coca-Cola, Pepsi, Chinotto o Frescolita a temperatura bajo cero.',
     sku: 'BEB-01',
@@ -148,7 +154,6 @@ const SAMPLE_PRODUCTS: Product[] = [
     priceUSD: 4.50,
     tag: '🧀 Crujientes',
     prepTime: '5-7 min',
-    badgeColor: 'purple',
     image: 'https://images.unsplash.com/photo-1541592106381-b31e9677c0e5?w=600&q=80',
     description: 'Masa fina dorada rellena de abundante queso llanero fundido acompañado de salsa tártara de ajo.',
     sku: 'EXT-02',
@@ -161,7 +166,6 @@ const SAMPLE_PRODUCTS: Product[] = [
     priceUSD: 7.00,
     tag: '🍗 Pollo Crispy',
     prepTime: '8-10 min',
-    badgeColor: 'amber',
     image: 'https://images.unsplash.com/photo-1625813506062-0aeb1d7a094b?w=600&q=80',
     description: 'Pechuga de pollo súper crujiente marinada con especias, lechuga romana, pepinillos y mayonesa chipotle.',
     sku: 'HMB-02',
@@ -174,7 +178,6 @@ const SAMPLE_PRODUCTS: Product[] = [
     priceUSD: 2.50,
     tag: '🌭 Callejero',
     prepTime: '3-5 min',
-    badgeColor: 'rose',
     image: 'https://images.unsplash.com/photo-1627054234036-749e4975f284?w=600&q=80',
     description: 'El clásico de la noche: salchicha, cebolla picadita, repollo, papitas, queso blanco y las 3 salsas.',
     sku: 'PER-02',
@@ -187,7 +190,6 @@ const SAMPLE_PRODUCTS: Product[] = [
     priceUSD: 14.50,
     tag: '👥 Para Dos',
     prepTime: '10-14 min',
-    badgeColor: 'emerald',
     image: 'https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?w=600&q=80',
     description: '2 Hamburguesas Clásicas completas + 1 porción grande de papas + 2 bebidas de lata a elección.',
     sku: 'CMB-02',
@@ -200,7 +202,6 @@ const SAMPLE_PRODUCTS: Product[] = [
     priceUSD: 1.25,
     tag: '🍺 Clásica',
     prepTime: 'Inmediato',
-    badgeColor: 'cyan',
     image: 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=600&q=80',
     description: 'Malta Polar con hielo frappé o servida directamente de la nevera.',
     sku: 'BEB-02',
@@ -213,7 +214,6 @@ const SAMPLE_PRODUCTS: Product[] = [
     priceUSD: 3.50,
     tag: '🧅 Frito',
     prepTime: '5-7 min',
-    badgeColor: 'purple',
     image: 'https://images.unsplash.com/photo-1639024471287-032f6640dc1f?w=600&q=80',
     description: 'Aros de cebolla dulce rebozados con panko extra crujiente servidos con salsa barbacoa.',
     sku: 'EXT-03',
@@ -243,6 +243,10 @@ export default function TabletMobilePosPage() {
   // 4 Modos de Vista: 'food' (cards grandes), 'cuadricula', 'lista', 'minimalista'
   const [cardViewMode, setCardViewMode] = useState<'food' | 'cuadricula' | 'lista' | 'minimalista'>('food');
 
+  // Identidad de Marca KlikPOS: Blanco Puro por defecto + Logo Gris Grafito
+  const [themeMode, setThemeMode] = useState<'light' | 'dark'>('light');
+  const [activePalette, setActivePalette] = useState('slate'); // Slate = Gris Grafito Oficial
+
   // Drawers y Modales
   const [isLeftDrawerOpen, setIsLeftDrawerOpen] = useState(false);
   const [isRightDrawerOpen, setIsRightDrawerOpen] = useState(false);
@@ -256,12 +260,20 @@ export default function TabletMobilePosPage() {
     { id: '6', name: 'Refresco Familiar 1.5L Frío', priceUSD: 2.50, qty: 1, category: 'Bebidas', sku: 'BEB-01', image: SAMPLE_PRODUCTS[5].image }
   ]);
 
-  // Cargar estado guardado al iniciar
+  // Cargar estado guardado de Marca y Carrito
   useEffect(() => {
     try {
       const savedMode = localStorage.getItem('klikpos_card_view_mode') as 'food' | 'cuadricula' | 'lista' | 'minimalista';
       if (savedMode && ['food', 'cuadricula', 'lista', 'minimalista'].includes(savedMode)) {
         setCardViewMode(savedMode);
+      }
+      const savedTheme = localStorage.getItem('venematic_theme') as 'light' | 'dark';
+      if (savedTheme && (savedTheme === 'light' || savedTheme === 'dark')) {
+        setThemeMode(savedTheme);
+      }
+      const savedPalette = localStorage.getItem('venematic_branding_palette');
+      if (savedPalette && BRAND_PALETTES.some(p => p.id === savedPalette)) {
+        setActivePalette(savedPalette);
       }
       const savedCart = localStorage.getItem('klikpos_tablet_cart');
       if (savedCart) {
@@ -271,19 +283,34 @@ export default function TabletMobilePosPage() {
         }
       }
     } catch {
-      // Ignorar errores de localStorage en modo incógnito
+      // Ignorar errores en modo incógnito
     }
   }, []);
 
-  // Guardar carrito y vista al cambiar
+  // Guardar cambios de branding y modo
+  const changePalette = (palId: string) => {
+    setActivePalette(palId);
+    try {
+      localStorage.setItem('venematic_branding_palette', palId);
+    } catch {}
+  };
+
+  const toggleTheme = () => {
+    const next = themeMode === 'light' ? 'dark' : 'light';
+    setThemeMode(next);
+    try {
+      localStorage.setItem('venematic_theme', next);
+    } catch {}
+  };
+
   useEffect(() => {
     try {
       localStorage.setItem('klikpos_card_view_mode', cardViewMode);
       localStorage.setItem('klikpos_tablet_cart', JSON.stringify(cart));
-    } catch {
-      // Ignorar
-    }
+    } catch {}
   }, [cardViewMode, cart]);
+
+  const currentPal = BRAND_PALETTES.find(p => p.id === activePalette) || BRAND_PALETTES[0];
 
   const totalUSD = cart.reduce((acc, item) => acc + (item.priceUSD * item.qty), 0);
   const totalVES = totalUSD * bcvRate;
@@ -330,50 +357,135 @@ export default function TabletMobilePosPage() {
     return matchesCategory && matchesSearch;
   });
 
+  const isLight = themeMode === 'light';
+
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans select-none overflow-x-hidden relative">
+    <div
+      className={`min-h-screen flex flex-col font-sans select-none overflow-x-hidden relative transition-colors duration-300 ${
+        isLight ? 'bg-slate-50 text-slate-900' : 'bg-slate-950 text-slate-100'
+      }`}
+      style={{
+        '--brand-color': currentPal.primary,
+        '--brand-hover': currentPal.hover,
+        '--brand-accent': currentPal.accent,
+        '--brand-glow': currentPal.glow,
+      } as React.CSSProperties}
+    >
       {/* ========================================================================= */}
-      {/* 1. HEADER SUPERIOR TÁCTIL (Alto Contraste y Acceso Directo a Drawers)       */}
+      {/* ESTILOS Y KEYFRAMES DINÁMICOS PARA FLUIDEZ Y MICROANIMACIONES             */}
+      {/* ========================================================================= */}
+      <style jsx global>{`
+        @keyframes cobrarBreathe {
+          0%, 100% {
+            box-shadow: 0 0 18px var(--brand-glow), 0 0 40px rgba(0,0,0,0.15);
+            transform: scale(1);
+          }
+          50% {
+            box-shadow: 0 0 32px var(--brand-glow), 0 0 60px rgba(0,0,0,0.25);
+            transform: scale(1.04);
+          }
+        }
+        @keyframes badgeSpring {
+          0% { transform: scale(0.6); }
+          60% { transform: scale(1.22); }
+          100% { transform: scale(1); }
+        }
+        @keyframes viewSwitchSmooth {
+          0% { opacity: 0; transform: scale(0.985) translateY(6px); }
+          100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        @keyframes drawerSlideInLeft {
+          from { transform: translateX(-100%); opacity: 0.5; }
+          to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes drawerSlideInRight {
+          from { transform: translateX(100%); opacity: 0.5; }
+          to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes staggeredItem {
+          from { opacity: 0; transform: translateY(8px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .anim-breathe {
+          animation: cobrarBreathe 3s ease-in-out infinite;
+        }
+        .anim-badge-spring {
+          animation: badgeSpring 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .anim-view-switch {
+          animation: viewSwitchSmooth 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .anim-drawer-left {
+          animation: drawerSlideInLeft 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .anim-drawer-right {
+          animation: drawerSlideInRight 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .stagger-1 { animation: staggeredItem 0.25s ease-out 0.05s both; }
+        .stagger-2 { animation: staggeredItem 0.25s ease-out 0.10s both; }
+        .stagger-3 { animation: staggeredItem 0.25s ease-out 0.15s both; }
+        .stagger-4 { animation: staggeredItem 0.25s ease-out 0.20s both; }
+        .stagger-5 { animation: staggeredItem 0.25s ease-out 0.25s both; }
+      `}</style>
+
+      {/* ========================================================================= */}
+      {/* 1. HEADER SUPERIOR OFICIAL KLIKPOS (BLANCO PURO + LOGO GRIS GRAFITO)       */}
       {/* ========================================================================= */}
       <header
-        className="h-14 border-b border-slate-800 px-3 flex items-center justify-between sticky top-0 z-30 shadow-md"
-        style={{ backgroundColor: '#090d16' }}
+        className={`h-14 px-3 flex items-center justify-between sticky top-0 z-30 shadow-xs border-b transition-colors duration-300 ${
+          isLight ? 'bg-white border-slate-200' : 'bg-slate-900 border-slate-800'
+        }`}
       >
-        {/* Left: Botón Drawer Izquierdo (Herramientas, Tasa BCV y Menú QR) */}
+        {/* Left: Botón Drawer Izquierdo (Ajustes, Branding y QR) */}
         <button
           onClick={() => setIsLeftDrawerOpen(true)}
-          className="flex items-center gap-2 px-2.5 py-1.5 bg-slate-800/90 hover:bg-slate-700 active:scale-95 border border-slate-700 rounded-xl transition-all shadow-xs"
-          title="Abrir Herramientas y Ajustes"
+          className={`flex items-center gap-2 px-2.5 py-1.5 rounded-xl border transition-all duration-200 shadow-2xs active:scale-92 ${
+            isLight
+              ? 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-800'
+              : 'bg-slate-800/90 hover:bg-slate-700 border-slate-700 text-slate-100'
+          }`}
+          title="Abrir Ajustes y Branding de Colores"
         >
-          <Menu className="w-5 h-5 text-emerald-400" />
-          <span className="text-xs font-black tracking-tight text-white hidden sm:inline" style={{ color: '#ffffff' }}>
-            Ajustes & QR
+          <Menu className="w-5 h-5 text-slate-700 dark:text-slate-300 transition-transform duration-200 group-hover:rotate-6" />
+          <span className="text-xs font-black tracking-tight hidden sm:inline" style={{ color: isLight ? '#0f172a' : '#f8fafc' }}>
+            Ajustes
           </span>
         </button>
 
-        {/* Center: Nombre del Puesto / Logo */}
+        {/* Center: Identidad Oficial KlikPOS (Logo Gris Grafito sobre Blanco) */}
         <div className="flex flex-col items-center">
           <div className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <h1 className="text-sm font-black tracking-tight uppercase" style={{ color: '#ffffff' }}>
-              KlikBurger Express
-            </h1>
+            <span
+              className="w-2.5 h-2.5 rounded-full animate-pulse shadow-xs"
+              style={{ backgroundColor: currentPal.primary }}
+            />
+            {/* Logo Oficial KlikPOS en Gris Grafito Intenso */}
+            <span
+              className="text-base font-black tracking-tight uppercase"
+              style={{ color: isLight ? '#0f172a' : '#ffffff' }}
+            >
+              Klik<span style={{ color: currentPal.primary }}>POS</span>
+            </span>
+            <span className="text-[10px] font-bold bg-slate-200/80 dark:bg-slate-800 px-1.5 py-0.2 rounded text-slate-700 dark:text-slate-300 font-mono">
+              PRO
+            </span>
           </div>
-          <span className="text-[10px] font-mono font-bold text-slate-400">
-            BCV: <b className="text-emerald-400 font-mono">Bs. {bcvRate.toFixed(2)}</b>
+          <span className="text-[10px] font-mono font-bold text-slate-500">
+            BCV: <b className="font-mono" style={{ color: isLight ? '#0f172a' : '#38bdf8' }}>Bs. {bcvRate.toFixed(2)}</b>
           </span>
         </div>
 
-        {/* Right: Botón Drawer Derecho (Comanda / Ticket Activo con Contador) */}
+        {/* Right: Botón Comanda / Carrito Activo */}
         <button
           onClick={() => setIsRightDrawerOpen(true)}
-          className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 active:scale-95 text-white rounded-xl shadow-md transition-all relative"
+          className="flex items-center gap-2 px-3 py-1.5 rounded-xl shadow-md text-white transition-all duration-200 relative active:scale-92"
+          style={{ backgroundColor: currentPal.primary }}
           title="Ver Comanda Activa"
         >
           <ShoppingCart className="w-4 h-4 text-white" />
-          <span className="text-xs font-black" style={{ color: '#ffffff' }}>${totalUSD.toFixed(2)}</span>
+          <span className="text-xs font-black text-white">${totalUSD.toFixed(2)}</span>
           {totalItems > 0 && (
-            <span className="absolute -top-1 -right-1 bg-amber-400 text-slate-950 text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center shadow-xs animate-bounce">
+            <span className="absolute -top-1 -right-1 bg-amber-400 text-slate-950 text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center shadow-xs anim-badge-spring">
               {totalItems}
             </span>
           )}
@@ -386,7 +498,7 @@ export default function TabletMobilePosPage() {
       <main className="flex-1 p-3 pb-28 max-w-5xl mx-auto w-full">
         {/* VISTA 1: MENÚ Y CATÁLOGO TÁCTIL */}
         {activeTab === 'menu' && (
-          <div className="space-y-3 animate-fadeIn">
+          <div className="space-y-3">
             {/* Buscador + Píldoras de Categoría + Selector de Modo de Vista */}
             <div className="space-y-2">
               <div className="relative">
@@ -396,37 +508,48 @@ export default function TabletMobilePosPage() {
                   placeholder="Buscar perros, hamburguesas, bebidas, combos o SKU..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-9 pr-4 py-2 bg-slate-900 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500"
+                  className={`w-full pl-9 pr-4 py-2 rounded-xl text-xs placeholder-slate-400 focus:outline-none transition-all duration-200 border ${
+                    isLight
+                      ? 'bg-white border-slate-300 text-slate-900 focus:border-slate-800'
+                      : 'bg-slate-900 border-slate-800 text-white focus:border-slate-400'
+                  }`}
                 />
                 {searchQuery && (
                   <button
                     onClick={() => setSearchQuery('')}
-                    className="absolute right-3 top-2.5 text-xs text-slate-400 hover:text-white"
+                    className="absolute right-3 top-2.5 text-xs text-slate-400 hover:text-slate-800"
                   >
                     ✕
                   </button>
                 )}
               </div>
 
-              {/* Fila 1: Categorías en Píldoras Horizontales con Conteo */}
+              {/* Fila 1: Categorías con Conteo */}
               <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
                 {CATEGORIES.map((cat) => {
                   const count = cat === 'Todos'
                     ? SAMPLE_PRODUCTS.length
                     : SAMPLE_PRODUCTS.filter((p) => p.category === cat).length;
+                  const isSelected = selectedCategory === cat;
                   return (
                     <button
                       key={cat}
                       onClick={() => setSelectedCategory(cat)}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-black whitespace-nowrap transition-all flex items-center gap-1.5 ${
-                        selectedCategory === cat
-                          ? 'bg-emerald-500 text-slate-950 shadow-md scale-102'
-                          : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'
+                      className={`px-3 py-1.5 rounded-xl text-xs font-black whitespace-nowrap transition-all duration-200 flex items-center gap-1.5 active:scale-95 border ${
+                        isSelected
+                          ? 'text-white shadow-sm scale-102 font-black'
+                          : isLight
+                          ? 'bg-white text-slate-600 hover:text-slate-900 border-slate-200 hover:border-slate-300'
+                          : 'bg-slate-900 text-slate-400 hover:text-white border-slate-800'
                       }`}
+                      style={{
+                        backgroundColor: isSelected ? currentPal.primary : undefined,
+                        borderColor: isSelected ? currentPal.primary : undefined
+                      }}
                     >
                       <span>{cat}</span>
                       <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
-                        selectedCategory === cat ? 'bg-slate-950/20 text-slate-950' : 'bg-slate-800 text-slate-400'
+                        isSelected ? 'bg-white/20 text-white' : isLight ? 'bg-slate-100 text-slate-500' : 'bg-slate-800 text-slate-400'
                       }`}>
                         {count}
                       </span>
@@ -436,23 +559,30 @@ export default function TabletMobilePosPage() {
               </div>
 
               {/* Fila 2: Selector de los 4 Estilos de Vista de Cards */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-1 border-t border-slate-800/80">
-                <div className="flex items-center gap-1.5 text-slate-400">
-                  <SlidersHorizontal className="w-3.5 h-3.5 text-emerald-400" />
+              <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-1.5 border-t ${
+                isLight ? 'border-slate-200' : 'border-slate-800'
+              }`}>
+                <div className="flex items-center gap-1.5 text-slate-500">
+                  <SlidersHorizontal className="w-3.5 h-3.5 text-slate-700 dark:text-slate-300" />
                   <span className="text-[10px] font-bold uppercase tracking-wider">
-                    Estilo de Cards:
+                    Estilo de Vista:
                   </span>
                 </div>
 
-                <div className="grid grid-cols-4 gap-1 bg-slate-900/90 p-1 rounded-xl border border-slate-800">
-                  {/* Botón 1: Food (Cards Grandes con Foto) */}
+                <div className={`grid grid-cols-4 gap-1 p-1 rounded-xl border ${
+                  isLight ? 'bg-slate-100 border-slate-200' : 'bg-slate-900 border-slate-800'
+                }`}>
+                  {/* Botón 1: Food (Cards Grandes) */}
                   <button
                     onClick={() => setCardViewMode('food')}
-                    className={`px-2 py-1.5 rounded-lg text-[11px] font-black transition-all flex items-center justify-center gap-1 ${
+                    className={`px-2 py-1.5 rounded-lg text-[11px] font-black transition-all duration-250 flex items-center justify-center gap-1 active:scale-95 ${
                       cardViewMode === 'food'
-                        ? 'bg-emerald-500 text-slate-950 shadow-xs'
-                        : 'text-slate-400 hover:text-white'
+                        ? 'bg-white text-slate-900 shadow-sm font-black dark:bg-slate-800 dark:text-white'
+                        : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
                     }`}
+                    style={{
+                      borderBottom: cardViewMode === 'food' ? `2px solid ${currentPal.primary}` : undefined
+                    }}
                     title="Tarjetas grandes de comida con fotos apetitosas e ingredientes"
                   >
                     <span>🍔 Food</span>
@@ -461,11 +591,14 @@ export default function TabletMobilePosPage() {
                   {/* Botón 2: Cuadrícula Estándar */}
                   <button
                     onClick={() => setCardViewMode('cuadricula')}
-                    className={`px-2 py-1.5 rounded-lg text-[11px] font-black transition-all flex items-center justify-center gap-1 ${
+                    className={`px-2 py-1.5 rounded-lg text-[11px] font-black transition-all duration-250 flex items-center justify-center gap-1 active:scale-95 ${
                       cardViewMode === 'cuadricula'
-                        ? 'bg-emerald-500 text-slate-950 shadow-xs'
-                        : 'text-slate-400 hover:text-white'
+                        ? 'bg-white text-slate-900 shadow-sm font-black dark:bg-slate-800 dark:text-white'
+                        : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
                     }`}
+                    style={{
+                      borderBottom: cardViewMode === 'cuadricula' ? `2px solid ${currentPal.primary}` : undefined
+                    }}
                     title="Cuadrícula compacta de 2 a 4 columnas"
                   >
                     <span>⊞ Cuadrícula</span>
@@ -474,11 +607,14 @@ export default function TabletMobilePosPage() {
                   {/* Botón 3: Lista Compacta */}
                   <button
                     onClick={() => setCardViewMode('lista')}
-                    className={`px-2 py-1.5 rounded-lg text-[11px] font-black transition-all flex items-center justify-center gap-1 ${
+                    className={`px-2 py-1.5 rounded-lg text-[11px] font-black transition-all duration-250 flex items-center justify-center gap-1 active:scale-95 ${
                       cardViewMode === 'lista'
-                        ? 'bg-emerald-500 text-slate-950 shadow-xs'
-                        : 'text-slate-400 hover:text-white'
+                        ? 'bg-white text-slate-900 shadow-sm font-black dark:bg-slate-800 dark:text-white'
+                        : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
                     }`}
+                    style={{
+                      borderBottom: cardViewMode === 'lista' ? `2px solid ${currentPal.primary}` : undefined
+                    }}
                     title="Lista de alta densidad para inventario o abastos"
                   >
                     <span>☰ Lista</span>
@@ -487,11 +623,14 @@ export default function TabletMobilePosPage() {
                   {/* Botón 4: Minimalista (Horas Pico) */}
                   <button
                     onClick={() => setCardViewMode('minimalista')}
-                    className={`px-2 py-1.5 rounded-lg text-[11px] font-black transition-all flex items-center justify-center gap-1 ${
+                    className={`px-2 py-1.5 rounded-lg text-[11px] font-black transition-all duration-250 flex items-center justify-center gap-1 active:scale-95 ${
                       cardViewMode === 'minimalista'
-                        ? 'bg-emerald-500 text-slate-950 shadow-xs'
-                        : 'text-slate-400 hover:text-white'
+                        ? 'bg-white text-slate-900 shadow-sm font-black dark:bg-slate-800 dark:text-white'
+                        : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
                     }`}
+                    style={{
+                      borderBottom: cardViewMode === 'minimalista' ? `2px solid ${currentPal.primary}` : undefined
+                    }}
                     title="Botones táctiles sin fotos para máxima velocidad"
                   >
                     <span>⚡ Minimalista</span>
@@ -501,30 +640,33 @@ export default function TabletMobilePosPage() {
             </div>
 
             {/* =================================================================== */}
-            {/* RENDERIZADO DE LAS 4 VISTAS DE PRODUCTOS                           */}
+            {/* RENDERIZADO DE LAS 4 VISTAS (EN BLANCO PURO + GRIS GRAFITO)        */}
             {/* =================================================================== */}
 
-            {/* VISTA 1: FOOD CON CARDS GRANDES (ESPECIAL COMIDA RÁPIDA / FOOD TRUCKS) */}
+            {/* VISTA 1: FOOD CON CARDS GRANDES */}
             {cardViewMode === 'food' && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 animate-fadeIn">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 anim-view-switch">
                 {filteredProducts.map((prod) => {
                   const qtyInCart = getCartQty(prod.id);
                   return (
                     <div
                       key={prod.id}
-                      className="bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-lg transition-all hover:border-emerald-500/50 flex flex-col justify-between group relative"
+                      className={`border rounded-3xl overflow-hidden shadow-xs hover:shadow-lg transition-all duration-300 flex flex-col justify-between group relative ${
+                        isLight
+                          ? 'bg-white border-slate-200 hover:border-slate-400'
+                          : 'bg-slate-900 border-slate-800 hover:border-slate-700'
+                      }`}
                     >
                       {/* Imagen Hero Grande Apetitosa con Badges */}
                       <div className="relative h-44 w-full overflow-hidden bg-slate-950 cursor-pointer" onClick={() => addToCart(prod)}>
                         <img
                           src={prod.image}
                           alt={prod.name}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500 ease-out"
                         />
-                        {/* Gradiente sutil inferior */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-black/30" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-black/25" />
 
-                        {/* Badge de Etiqueta (Más Vendido / Favorito) */}
+                        {/* Badge de Etiqueta */}
                         <div className="absolute top-2.5 left-2.5 flex items-center gap-1 bg-slate-950/80 backdrop-blur-md px-2.5 py-1 rounded-full border border-slate-800 text-[10px] font-black text-amber-400 shadow-md">
                           <span>{prod.tag}</span>
                         </div>
@@ -537,7 +679,10 @@ export default function TabletMobilePosPage() {
 
                         {/* Indicador Flotante si ya está en la Comanda */}
                         {qtyInCart > 0 && (
-                          <div className="absolute bottom-2.5 left-2.5 bg-emerald-500 text-slate-950 px-2.5 py-0.5 rounded-full text-xs font-black shadow-lg flex items-center gap-1 animate-pulse">
+                          <div
+                            className="absolute bottom-2.5 left-2.5 text-white px-2.5 py-0.5 rounded-full text-xs font-black shadow-lg flex items-center gap-1 anim-badge-spring"
+                            style={{ backgroundColor: currentPal.primary }}
+                          >
                             <Check className="w-3.5 h-3.5 stroke-[3]" />
                             <span>{qtyInCart} en comanda</span>
                           </div>
@@ -550,14 +695,15 @@ export default function TabletMobilePosPage() {
                           <div className="flex items-start justify-between gap-2">
                             <h3
                               onClick={() => addToCart(prod)}
-                              className="text-sm font-black text-white group-hover:text-emerald-400 transition-colors line-clamp-1 cursor-pointer"
+                              className="text-sm font-black transition-colors line-clamp-1 cursor-pointer"
+                              style={{ color: isLight ? '#0f172a' : '#ffffff' }}
                             >
                               {prod.name}
                             </h3>
-                            <span className="text-[10px] font-mono text-slate-500 shrink-0">#{prod.sku}</span>
+                            <span className="text-[10px] font-mono text-slate-400 shrink-0">#{prod.sku}</span>
                           </div>
 
-                          <p className="text-xs text-slate-400 line-clamp-2 mt-1 leading-relaxed">
+                          <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 mt-1 leading-relaxed">
                             {prod.description}
                           </p>
 
@@ -567,7 +713,11 @@ export default function TabletMobilePosPage() {
                               {prod.ingredients.slice(0, 3).map((ing, idx) => (
                                 <span
                                   key={idx}
-                                  className="text-[9px] bg-slate-800/80 text-slate-300 px-2 py-0.5 rounded-md border border-slate-700/50"
+                                  className={`text-[9px] px-2 py-0.5 rounded-md border ${
+                                    isLight
+                                      ? 'bg-slate-100 text-slate-700 border-slate-200'
+                                      : 'bg-slate-800/80 text-slate-300 border-slate-700/50'
+                                  }`}
                                 >
                                   {ing}
                                 </span>
@@ -577,32 +727,43 @@ export default function TabletMobilePosPage() {
                         </div>
 
                         {/* Barra Inferior: Precios Duales y Acciones */}
-                        <div className="pt-2.5 border-t border-slate-800/80 flex items-center justify-between gap-2">
+                        <div className={`pt-2.5 border-t flex items-center justify-between gap-2 ${
+                          isLight ? 'border-slate-100' : 'border-slate-800'
+                        }`}>
                           <div>
-                            <span className="text-base font-black text-emerald-400 font-mono block">
+                            <span
+                              className="text-base font-black font-mono block"
+                              style={{ color: currentPal.primary }}
+                            >
                               ${prod.priceUSD.toFixed(2)}
                             </span>
-                            <span className="text-[10px] font-mono text-slate-400 block">
+                            <span className="text-[10px] font-mono text-slate-500 block">
                               Bs. {(prod.priceUSD * bcvRate).toFixed(2)}
                             </span>
                           </div>
 
-                          {/* Botón de Añadir o Stepper Directo en la Card */}
+                          {/* Botón de Añadir o Stepper Directo */}
                           <div className="flex items-center gap-1.5">
                             {qtyInCart > 0 ? (
-                              <div className="flex items-center bg-slate-950 p-1 rounded-xl border border-slate-800 gap-1.5">
+                              <div className={`flex items-center p-1 rounded-xl border gap-1.5 shadow-2xs ${
+                                isLight ? 'bg-slate-100 border-slate-200' : 'bg-slate-950 border-slate-800'
+                              }`}>
                                 <button
                                   onClick={() => updateQty(prod.id, -1)}
-                                  className="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-white flex items-center justify-center active:scale-95"
+                                  className="w-7 h-7 rounded-lg bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-900 dark:text-white flex items-center justify-center active:scale-90 transition-transform"
                                 >
                                   <Minus className="w-3.5 h-3.5" />
                                 </button>
-                                <span className="font-mono font-black text-xs text-emerald-400 w-5 text-center">
+                                <span
+                                  className="font-mono font-black text-xs w-5 text-center anim-badge-spring"
+                                  style={{ color: currentPal.primary }}
+                                >
                                   {qtyInCart}
                                 </span>
                                 <button
                                   onClick={() => updateQty(prod.id, 1)}
-                                  className="w-7 h-7 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 flex items-center justify-center font-black active:scale-95"
+                                  className="w-7 h-7 rounded-lg text-white flex items-center justify-center font-black active:scale-90 transition-transform shadow-xs"
+                                  style={{ backgroundColor: currentPal.primary }}
                                 >
                                   <Plus className="w-3.5 h-3.5 stroke-[3]" />
                                 </button>
@@ -610,7 +771,8 @@ export default function TabletMobilePosPage() {
                             ) : (
                               <button
                                 onClick={() => addToCart(prod)}
-                                className="px-3.5 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 active:scale-95 text-slate-950 text-xs font-black rounded-xl shadow-md flex items-center gap-1.5"
+                                className="px-3.5 py-2 text-white text-xs font-black rounded-xl shadow-xs flex items-center gap-1.5 active:scale-92 transition-all duration-200"
+                                style={{ backgroundColor: currentPal.primary }}
                               >
                                 <Plus className="w-4 h-4 stroke-[3]" />
                                 <span>Agregar</span>
@@ -627,7 +789,11 @@ export default function TabletMobilePosPage() {
                                 category: prod.category,
                                 notes: ''
                               })}
-                              className="w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center border border-slate-700 active:scale-95"
+                              className={`w-8 h-8 rounded-xl flex items-center justify-center border active:scale-92 transition-all duration-200 ${
+                                isLight
+                                  ? 'bg-slate-100 hover:bg-slate-200 text-slate-600 border-slate-200'
+                                  : 'bg-slate-800 hover:bg-slate-700 text-slate-400 border-slate-700'
+                              }`}
                               title="Personalizar (sin cebolla, salsas extras)"
                             >
                               <Edit3 className="w-3.5 h-3.5" />
@@ -643,23 +809,30 @@ export default function TabletMobilePosPage() {
 
             {/* VISTA 2: CUADRÍCULA ESTÁNDAR (2 A 4 COLUMNAS - REGLA #3 CUMPLIDA) */}
             {cardViewMode === 'cuadricula' && (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-2.5 animate-fadeIn">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-2.5 anim-view-switch">
                 {filteredProducts.map((prod) => {
                   const qtyInCart = getCartQty(prod.id);
                   return (
                     <div
                       key={prod.id}
-                      className="bg-slate-900 border border-slate-800 rounded-2xl p-2.5 flex flex-col justify-between hover:border-emerald-500/60 transition-all shadow-sm group relative"
+                      className={`border rounded-2xl p-2.5 flex flex-col justify-between transition-all duration-200 shadow-2xs group relative ${
+                        isLight
+                          ? 'bg-white border-slate-200 hover:border-slate-400'
+                          : 'bg-slate-900 border-slate-800 hover:border-slate-700'
+                      }`}
                     >
-                      {/* Imagen Cuadrada con Zoom */}
+                      {/* Imagen Cuadrada con Zoom Suave */}
                       <div className="relative overflow-hidden rounded-xl bg-slate-950 cursor-pointer" onClick={() => addToCart(prod)}>
                         <img
                           src={prod.image}
                           alt={prod.name}
-                          className="w-full h-28 sm:h-32 object-cover group-hover:scale-105 transition-transform"
+                          className="w-full h-28 sm:h-32 object-cover group-hover:scale-108 transition-transform duration-300 ease-out"
                         />
                         {qtyInCart > 0 && (
-                          <span className="absolute top-1.5 right-1.5 bg-emerald-500 text-slate-950 font-black text-[10px] px-1.5 py-0.2 rounded-md shadow-md">
+                          <span
+                            className="absolute top-1.5 right-1.5 text-white font-black text-[10px] px-1.5 py-0.2 rounded-md shadow-md anim-badge-spring"
+                            style={{ backgroundColor: currentPal.primary }}
+                          >
                             x{qtyInCart}
                           </span>
                         )}
@@ -673,27 +846,34 @@ export default function TabletMobilePosPage() {
                         <div>
                           <h4
                             onClick={() => addToCart(prod)}
-                            className="text-xs font-black text-white group-hover:text-emerald-400 transition-colors line-clamp-2 min-h-[36px] leading-tight cursor-pointer"
+                            className="text-xs font-black transition-colors line-clamp-2 min-h-[36px] leading-tight cursor-pointer"
+                            style={{ color: isLight ? '#0f172a' : '#ffffff' }}
                           >
                             {prod.name}
                           </h4>
-                          <span className="text-[10px] text-slate-500 font-mono block mt-0.5">#{prod.sku}</span>
+                          <span className="text-[10px] text-slate-400 font-mono block mt-0.5">#{prod.sku}</span>
                         </div>
 
                         {/* Precios y Botón Tactil */}
-                        <div className="flex items-center justify-between mt-2 pt-1.5 border-t border-slate-800/80">
+                        <div className={`flex items-center justify-between mt-2 pt-1.5 border-t ${
+                          isLight ? 'border-slate-100' : 'border-slate-800'
+                        }`}>
                           <div>
-                            <span className="text-xs font-black font-mono text-emerald-400 block">
+                            <span
+                              className="text-xs font-black font-mono block"
+                              style={{ color: currentPal.primary }}
+                            >
                               ${prod.priceUSD.toFixed(2)}
                             </span>
-                            <span className="text-[9px] font-mono text-slate-400 block">
+                            <span className="text-[9px] font-mono text-slate-500 block">
                               Bs. {(prod.priceUSD * bcvRate).toFixed(2)}
                             </span>
                           </div>
 
                           <button
                             onClick={() => addToCart(prod)}
-                            className="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500 hover:text-slate-950 active:scale-95 flex items-center justify-center text-sm font-black transition-all shadow-xs"
+                            className="w-7 h-7 rounded-lg text-white active:scale-90 flex items-center justify-center text-sm font-black transition-all shadow-xs"
+                            style={{ backgroundColor: currentPal.primary }}
                           >
                             +
                           </button>
@@ -705,35 +885,49 @@ export default function TabletMobilePosPage() {
               </div>
             )}
 
-            {/* VISTA 3: LISTA COMPACTA (ALTA DENSIDAD PARA INVENTARIO / BODEGAS) */}
+            {/* VISTA 3: LISTA COMPACTA (ALTA DENSIDAD) */}
             {cardViewMode === 'lista' && (
-              <div className="bg-slate-900 border border-slate-800 rounded-2xl divide-y divide-slate-800/80 overflow-hidden animate-fadeIn">
+              <div className={`border rounded-2xl divide-y overflow-hidden anim-view-switch ${
+                isLight
+                  ? 'bg-white border-slate-200 divide-slate-100'
+                  : 'bg-slate-900 border-slate-800 divide-slate-800/80'
+              }`}>
                 {filteredProducts.map((prod) => {
                   const qtyInCart = getCartQty(prod.id);
                   return (
                     <div
                       key={prod.id}
-                      className="p-2.5 flex items-center justify-between hover:bg-slate-800/50 transition-colors gap-2"
+                      className={`p-2.5 flex items-center justify-between transition-colors duration-150 gap-2 ${
+                        isLight ? 'hover:bg-slate-50' : 'hover:bg-slate-850/60'
+                      }`}
                     >
                       <div className="flex items-center gap-2.5 min-w-0 pr-2 cursor-pointer flex-1" onClick={() => addToCart(prod)}>
                         <img
                           src={prod.image}
                           alt={prod.name}
-                          className="w-12 h-12 rounded-xl object-cover border border-slate-800 shrink-0"
+                          className="w-12 h-12 rounded-xl object-cover border border-slate-200 dark:border-slate-800 shrink-0"
                         />
                         <div className="min-w-0">
                           <div className="flex items-center gap-1.5">
-                            <h4 className="text-xs font-black text-white truncate">{prod.name}</h4>
+                            <h4
+                              className="text-xs font-black truncate"
+                              style={{ color: isLight ? '#0f172a' : '#ffffff' }}
+                            >
+                              {prod.name}
+                            </h4>
                             {qtyInCart > 0 && (
-                              <span className="bg-emerald-500/20 text-emerald-400 font-mono text-[10px] px-1.5 py-0.2 rounded font-black shrink-0">
+                              <span
+                                className="font-mono text-[10px] px-1.5 py-0.2 rounded font-black shrink-0 anim-badge-spring text-white"
+                                style={{ backgroundColor: currentPal.primary }}
+                              >
                                 x{qtyInCart}
                               </span>
                             )}
                           </div>
-                          <div className="flex items-center gap-2 text-[10px] text-slate-400 mt-0.5">
-                            <span className="text-slate-500 font-mono">#{prod.sku}</span>
+                          <div className="flex items-center gap-2 text-[10px] text-slate-500 mt-0.5">
+                            <span className="font-mono">#{prod.sku}</span>
                             <span>•</span>
-                            <span className="text-slate-300">{prod.category}</span>
+                            <span>{prod.category}</span>
                             <span>•</span>
                             <span>⏱️ {prod.prepTime}</span>
                           </div>
@@ -742,28 +936,37 @@ export default function TabletMobilePosPage() {
 
                       <div className="flex items-center gap-3 shrink-0">
                         <div className="text-right">
-                          <span className="text-xs font-black font-mono text-emerald-400 block">
+                          <span
+                            className="text-xs font-black font-mono block"
+                            style={{ color: currentPal.primary }}
+                          >
                             ${prod.priceUSD.toFixed(2)}
                           </span>
-                          <span className="text-[10px] font-mono text-slate-400 block">
+                          <span className="text-[10px] font-mono text-slate-500 block">
                             Bs. {(prod.priceUSD * bcvRate).toFixed(2)}
                           </span>
                         </div>
 
                         {qtyInCart > 0 ? (
-                          <div className="flex items-center bg-slate-950 p-0.5 rounded-lg border border-slate-800 gap-1">
+                          <div className={`flex items-center p-0.5 rounded-lg border gap-1 ${
+                            isLight ? 'bg-slate-100 border-slate-200' : 'bg-slate-950 border-slate-800'
+                          }`}>
                             <button
                               onClick={() => updateQty(prod.id, -1)}
-                              className="w-6 h-6 rounded bg-slate-800 hover:bg-slate-700 text-white flex items-center justify-center text-xs font-black"
+                              className="w-6 h-6 rounded bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-white flex items-center justify-center text-xs font-black active:scale-90"
                             >
                               -
                             </button>
-                            <span className="font-mono font-black text-xs text-emerald-400 w-4 text-center">
+                            <span
+                              className="font-mono font-black text-xs w-4 text-center anim-badge-spring"
+                              style={{ color: currentPal.primary }}
+                            >
                               {qtyInCart}
                             </span>
                             <button
                               onClick={() => updateQty(prod.id, 1)}
-                              className="w-6 h-6 rounded bg-emerald-500 hover:bg-emerald-400 text-slate-950 flex items-center justify-center text-xs font-black"
+                              className="w-6 h-6 rounded text-white flex items-center justify-center text-xs font-black active:scale-90"
+                              style={{ backgroundColor: currentPal.primary }}
                             >
                               +
                             </button>
@@ -772,7 +975,8 @@ export default function TabletMobilePosPage() {
                           <button
                             type="button"
                             onClick={() => addToCart(prod)}
-                            className="w-8 h-8 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 flex items-center justify-center font-black text-base shadow-xs active:scale-95"
+                            className="w-8 h-8 rounded-xl text-white flex items-center justify-center font-black text-base shadow-xs active:scale-90 transition-transform"
+                            style={{ backgroundColor: currentPal.primary }}
                           >
                             +
                           </button>
@@ -784,58 +988,50 @@ export default function TabletMobilePosPage() {
               </div>
             )}
 
-            {/* VISTA 4: MINIMALISTA (BOTONES TÁCTILES RÁPIDOS PARA HORAS PICO) */}
+            {/* VISTA 4: MINIMALISTA (BOTONES TÁCTILES RÁPIDOS) */}
             {cardViewMode === 'minimalista' && (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 animate-fadeIn">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 anim-view-switch">
                 {filteredProducts.map((prod) => {
                   const qtyInCart = getCartQty(prod.id);
-                  // Color coding táctil por categoría
-                  const borderClass =
-                    prod.category === 'Hamburguesas'
-                      ? 'border-amber-500/40 hover:border-amber-400'
-                      : prod.category === 'Perros'
-                      ? 'border-rose-500/40 hover:border-rose-400'
-                      : prod.category === 'Combos'
-                      ? 'border-emerald-500/40 hover:border-emerald-400'
-                      : prod.category === 'Bebidas'
-                      ? 'border-cyan-500/40 hover:border-cyan-400'
-                      : 'border-purple-500/40 hover:border-purple-400';
-
-                  const badgeBg =
-                    prod.category === 'Hamburguesas'
-                      ? 'bg-amber-500/20 text-amber-300'
-                      : prod.category === 'Perros'
-                      ? 'bg-rose-500/20 text-rose-300'
-                      : prod.category === 'Combos'
-                      ? 'bg-emerald-500/20 text-emerald-300'
-                      : prod.category === 'Bebidas'
-                      ? 'bg-cyan-500/20 text-cyan-300'
-                      : 'bg-purple-500/20 text-purple-300';
-
                   return (
                     <button
                       key={prod.id}
                       type="button"
                       onClick={() => addToCart(prod)}
-                      className={`p-3 bg-slate-900 hover:bg-slate-850 active:scale-96 border-2 ${borderClass} rounded-2xl text-left flex flex-col justify-between h-28 transition-all shadow-xs group relative overflow-hidden`}
+                      className={`p-3 rounded-2xl text-left flex flex-col justify-between h-28 transition-all duration-200 shadow-2xs group relative overflow-hidden active:scale-94 border-2 ${
+                        isLight
+                          ? 'bg-white hover:bg-slate-50 border-slate-200 hover:border-slate-400'
+                          : 'bg-slate-900 hover:bg-slate-850 border-slate-800 hover:border-slate-700'
+                      }`}
                     >
                       <div className="flex items-start justify-between w-full gap-1">
-                        <span className="text-xs font-black text-white group-hover:text-emerald-400 transition-colors line-clamp-2 leading-tight">
+                        <span
+                          className="text-xs font-black line-clamp-2 leading-tight"
+                          style={{ color: isLight ? '#0f172a' : '#ffffff' }}
+                        >
                           {prod.name}
                         </span>
                         {qtyInCart > 0 ? (
-                          <span className="bg-emerald-500 text-slate-950 font-black font-mono text-[10px] px-1.5 py-0.2 rounded-md shadow-xs shrink-0">
+                          <span
+                            className="text-white font-black font-mono text-[10px] px-1.5 py-0.2 rounded-md shadow-xs shrink-0 anim-badge-spring"
+                            style={{ backgroundColor: currentPal.primary }}
+                          >
                             x{qtyInCart}
                           </span>
                         ) : (
-                          <span className={`text-[9px] font-bold px-1.5 py-0.2 rounded shrink-0 ${badgeBg}`}>
+                          <span className="text-[9px] font-bold px-1.5 py-0.2 rounded shrink-0 bg-slate-100 dark:bg-slate-800 text-slate-500">
                             {prod.category}
                           </span>
                         )}
                       </div>
 
-                      <div className="w-full flex items-baseline justify-between pt-1.5 border-t border-slate-800">
-                        <span className="text-sm font-black font-mono text-emerald-400">
+                      <div className={`w-full flex items-baseline justify-between pt-1.5 border-t ${
+                        isLight ? 'border-slate-100' : 'border-slate-800'
+                      }`}>
+                        <span
+                          className="text-sm font-black font-mono"
+                          style={{ color: currentPal.primary }}
+                        >
                           ${prod.priceUSD.toFixed(2)}
                         </span>
                         <span className="text-[9px] font-mono text-slate-400">
@@ -852,13 +1048,13 @@ export default function TabletMobilePosPage() {
 
         {/* VISTA 2: MESAS Y COMANDAS */}
         {activeTab === 'mesas' && (
-          <div className="space-y-4 animate-fadeIn">
+          <div className="space-y-4 anim-view-switch">
             <div className="flex items-center justify-between">
-              <h2 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
-                <LayoutGrid className="w-4 h-4 text-emerald-400" />
+              <h2 className="text-sm font-black uppercase tracking-wider flex items-center gap-2" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
+                <LayoutGrid className="w-4 h-4" style={{ color: currentPal.primary }} />
                 <span>Gestión de Mesas y Cuentas de Barra</span>
               </h2>
-              <span className="text-xs text-slate-400">4 Cuentas Abiertas</span>
+              <span className="text-xs text-slate-500">4 Cuentas Abiertas</span>
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
@@ -878,39 +1074,39 @@ export default function TabletMobilePosPage() {
                     setActiveTable(m.id);
                     if (m.total > 0) setIsRightDrawerOpen(true);
                   }}
-                  className={`p-3.5 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between h-28 relative ${
+                  className={`p-3.5 rounded-2xl border transition-all duration-200 cursor-pointer flex flex-col justify-between h-28 relative active:scale-95 shadow-2xs ${
                     m.status === 'libre'
-                      ? 'bg-slate-900/60 border-slate-800 hover:border-slate-700'
-                      : m.status === 'preparando'
-                      ? 'bg-amber-950/30 border-amber-500/60 shadow-md'
-                      : 'bg-emerald-950/30 border-emerald-500/60 shadow-md'
+                      ? isLight ? 'bg-white border-slate-200 hover:border-slate-300' : 'bg-slate-900/60 border-slate-800'
+                      : isLight ? 'bg-slate-50 border-slate-300 shadow-sm' : 'bg-slate-900 border-slate-700 shadow-md'
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-black text-white">{m.name}</span>
+                    <span className="text-xs font-black" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
+                      {m.name}
+                    </span>
                     <span
                       className={`w-2.5 h-2.5 rounded-full ${
                         m.status === 'libre'
-                          ? 'bg-slate-600'
+                          ? 'bg-slate-400'
                           : m.status === 'preparando'
-                          ? 'bg-amber-400 animate-pulse'
-                          : 'bg-emerald-400 animate-pulse'
+                          ? 'bg-amber-500 animate-pulse'
+                          : 'bg-emerald-500 animate-pulse'
                       }`}
                     />
                   </div>
 
                   {m.status !== 'libre' ? (
                     <div>
-                      <span className="text-sm font-black font-mono text-emerald-400 block">
+                      <span className="text-sm font-black font-mono block" style={{ color: currentPal.primary }}>
                         ${m.total.toFixed(2)}
                       </span>
-                      <div className="flex items-center justify-between text-[10px] text-slate-400 mt-1">
+                      <div className="flex items-center justify-between text-[10px] text-slate-500 mt-1">
                         <span>{m.items} ítems</span>
                         <span>⏱️ {m.time}</span>
                       </div>
                     </div>
                   ) : (
-                    <div className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">
+                    <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
                       Disponible
                     </div>
                   )}
@@ -922,32 +1118,39 @@ export default function TabletMobilePosPage() {
 
         {/* VISTA 3: PEDIDOS ENTRANTES / COCINA */}
         {activeTab === 'pedidos' && (
-          <div className="space-y-4 animate-fadeIn">
+          <div className="space-y-4 anim-view-switch">
             <div className="flex items-center justify-between">
-              <h2 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
-                <ClipboardList className="w-4 h-4 text-emerald-400" />
+              <h2 className="text-sm font-black uppercase tracking-wider flex items-center gap-2" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
+                <ClipboardList className="w-4 h-4" style={{ color: currentPal.primary }} />
                 <span>Pedidos en Tiempo Real (QR, WhatsApp & Local)</span>
               </h2>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               {/* Columna 1: Nuevos */}
-              <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-3 space-y-2.5">
-                <div className="flex items-center justify-between text-xs font-black text-amber-400 pb-1 border-b border-slate-800">
+              <div className={`border rounded-2xl p-3 space-y-2.5 ${
+                isLight ? 'bg-white border-slate-200' : 'bg-slate-900/80 border-slate-800'
+              }`}>
+                <div className="flex items-center justify-between text-xs font-black text-amber-600 pb-1 border-b border-slate-200 dark:border-slate-800">
                   <span>🟡 NUEVOS ENTRANTES (2)</span>
-                  <span className="text-[10px] bg-amber-400/20 px-2 py-0.5 rounded-full">QR Mesa</span>
+                  <span className="text-[10px] bg-amber-100 dark:bg-amber-950/60 px-2 py-0.5 rounded-full">QR Mesa</span>
                 </div>
-                <div className="bg-slate-950 p-2.5 rounded-xl border border-slate-800 space-y-2">
+                <div className={`p-2.5 rounded-xl border space-y-2 ${
+                  isLight ? 'bg-slate-50 border-slate-200' : 'bg-slate-950 border-slate-800'
+                }`}>
                   <div className="flex justify-between items-center text-xs">
-                    <span className="font-black text-white">Mesa 4 • Juan C.</span>
-                    <span className="text-emerald-400 font-mono font-bold">$15.50</span>
+                    <span className="font-black" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>Mesa 4 • Juan C.</span>
+                    <span className="font-mono font-bold" style={{ color: currentPal.primary }}>$15.50</span>
                   </div>
-                  <p className="text-[11px] text-slate-400">2x Hamburguesa Especial, 1x Papas Gratinadas</p>
+                  <p className="text-[11px] text-slate-500">2x Hamburguesa Especial, 1x Papas Gratinadas</p>
                   <div className="flex gap-2 pt-1">
-                    <button className="flex-1 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-black">
+                    <button
+                      className="flex-1 py-1.5 text-white rounded-lg text-xs font-black active:scale-95 transition-all"
+                      style={{ backgroundColor: currentPal.primary }}
+                    >
                       Aceptar
                     </button>
-                    <button className="px-2 py-1.5 bg-slate-800 text-slate-300 rounded-lg text-xs font-bold">
+                    <button className="px-2 py-1.5 bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-bold active:scale-95">
                       Imprimir
                     </button>
                   </div>
@@ -955,28 +1158,34 @@ export default function TabletMobilePosPage() {
               </div>
 
               {/* Columna 2: En Preparación */}
-              <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-3 space-y-2.5">
-                <div className="flex items-center justify-between text-xs font-black text-sky-400 pb-1 border-b border-slate-800">
+              <div className={`border rounded-2xl p-3 space-y-2.5 ${
+                isLight ? 'bg-white border-slate-200' : 'bg-slate-900/80 border-slate-800'
+              }`}>
+                <div className="flex items-center justify-between text-xs font-black text-sky-600 pb-1 border-b border-slate-200 dark:border-slate-800">
                   <span>🔵 EN PLANCHA / COCINA (1)</span>
                 </div>
-                <div className="bg-slate-950 p-2.5 rounded-xl border border-slate-800 space-y-2">
+                <div className={`p-2.5 rounded-xl border space-y-2 ${
+                  isLight ? 'bg-slate-50 border-slate-200' : 'bg-slate-950 border-slate-800'
+                }`}>
                   <div className="flex justify-between items-center text-xs">
-                    <span className="font-black text-white">Barra Puesto • María P.</span>
-                    <span className="text-emerald-400 font-mono font-bold">$6.50</span>
+                    <span className="font-black" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>Barra Puesto • María P.</span>
+                    <span className="font-mono font-bold" style={{ color: currentPal.primary }}>$6.50</span>
                   </div>
-                  <p className="text-[11px] text-slate-400">1x Pepito Mixto (Sin cebolla)</p>
-                  <button className="w-full py-1.5 bg-sky-600 hover:bg-sky-500 text-white rounded-lg text-xs font-black">
+                  <p className="text-[11px] text-slate-500">1x Pepito Mixto (Sin cebolla)</p>
+                  <button className="w-full py-1.5 bg-sky-600 hover:bg-sky-500 text-white rounded-lg text-xs font-black active:scale-95">
                     Marcar Listo para Servir
                   </button>
                 </div>
               </div>
 
               {/* Columna 3: Listos */}
-              <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-3 space-y-2.5">
-                <div className="flex items-center justify-between text-xs font-black text-emerald-400 pb-1 border-b border-slate-800">
+              <div className={`border rounded-2xl p-3 space-y-2.5 ${
+                isLight ? 'bg-white border-slate-200' : 'bg-slate-900/80 border-slate-800'
+              }`}>
+                <div className="flex items-center justify-between text-xs font-black text-emerald-600 pb-1 border-b border-slate-200 dark:border-slate-800">
                   <span>🟢 LISTOS / ENTREGADOS</span>
                 </div>
-                <div className="p-3 text-center text-xs text-slate-500 italic">
+                <div className="p-3 text-center text-xs text-slate-400 italic">
                   Todos los pedidos listos fueron despachados.
                 </div>
               </div>
@@ -986,52 +1195,67 @@ export default function TabletMobilePosPage() {
 
         {/* VISTA 4: DELIVERY Y RUTAS */}
         {activeTab === 'delivery' && (
-          <div className="space-y-4 animate-fadeIn">
+          <div className="space-y-4 anim-view-switch">
             <div className="flex items-center justify-between">
-              <h2 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
-                <Bike className="w-4 h-4 text-emerald-400" />
+              <h2 className="text-sm font-black uppercase tracking-wider flex items-center gap-2" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
+                <Bike className="w-4 h-4" style={{ color: currentPal.primary }} />
                 <span>Despacho a Domicilio (Motorizados & WhatsApp)</span>
               </h2>
             </div>
-            <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 text-center space-y-3">
-              <Bike className="w-14 h-14 text-emerald-400 mx-auto opacity-80" />
-              <h3 className="text-sm font-black text-white">Módulo de Repartidores Autónomo</h3>
-              <p className="text-xs text-slate-400 max-w-md mx-auto">
+            <div className={`border rounded-2xl p-6 text-center space-y-3 ${
+              isLight ? 'bg-white border-slate-200' : 'bg-slate-900/80 border-slate-800'
+            }`}>
+              <Bike className="w-14 h-14 mx-auto opacity-80" style={{ color: currentPal.primary }} />
+              <h3 className="text-sm font-black" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
+                Módulo de Repartidores Autónomo
+              </h3>
+              <p className="text-xs text-slate-500 max-w-md mx-auto">
                 Controla los despachos con tu propio motorizado o canalízalos a través de la Red Universal de Delivery de KlikPOS.
               </p>
             </div>
           </div>
         )}
 
-        {/* VISTA 5: PANTALLA DE COBRO COMPLETA (CUANDO SE TOCA EL BOTÓN CENTRAL) */}
+        {/* VISTA 5: PANTALLA DE COBRO COMPLETA */}
         {activeTab === 'cobro' && (
-          <div className="max-w-md mx-auto bg-slate-900/90 border border-slate-800 rounded-3xl p-5 space-y-4 animate-fadeIn shadow-2xl">
-            <div className="text-center pb-2 border-b border-slate-800">
+          <div className={`max-w-md mx-auto border rounded-3xl p-5 space-y-4 anim-view-switch shadow-xl ${
+            isLight ? 'bg-white border-slate-200' : 'bg-slate-900 border-slate-800'
+          }`}>
+            <div className="text-center pb-2 border-b border-slate-200 dark:border-slate-800">
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Total a Liquidar</span>
-              <div className="text-3xl font-black text-emerald-400 font-mono mt-0.5">
+              <div className="text-3xl font-black font-mono mt-0.5" style={{ color: currentPal.primary }}>
                 ${totalUSD.toFixed(2)} USD
               </div>
-              <div className="text-sm font-mono font-bold text-slate-300">
+              <div className="text-sm font-mono font-bold text-slate-600 dark:text-slate-300">
                 Bs. {totalVES.toFixed(2)} BCV
               </div>
             </div>
 
             {/* Métodos de Pago Rápidos */}
             <div className="grid grid-cols-2 gap-2.5">
-              <button className="p-3.5 bg-emerald-600 hover:bg-emerald-500 active:scale-98 rounded-2xl text-white text-xs font-black flex flex-col items-center gap-1.5 shadow-md">
+              <button
+                className="p-3.5 text-white active:scale-95 rounded-2xl text-xs font-black flex flex-col items-center gap-1.5 shadow-sm transition-all duration-200"
+                style={{ backgroundColor: currentPal.primary }}
+              >
                 <Phone className="w-5 h-5" />
                 <span>Pago Móvil (QR)</span>
               </button>
-              <button className="p-3.5 bg-slate-800 hover:bg-slate-700 active:scale-98 rounded-2xl text-white text-xs font-black flex flex-col items-center gap-1.5 border border-slate-700">
-                <CircleDollarSign className="w-5 h-5 text-amber-400" />
+              <button className={`p-3.5 active:scale-95 rounded-2xl text-xs font-black flex flex-col items-center gap-1.5 border transition-all duration-200 ${
+                isLight ? 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-900' : 'bg-slate-800 hover:bg-slate-700 border-slate-700 text-white'
+              }`}>
+                <CircleDollarSign className="w-5 h-5 text-amber-500" />
                 <span>Efectivo ($ / Bs)</span>
               </button>
-              <button className="p-3.5 bg-slate-800 hover:bg-slate-700 active:scale-98 rounded-2xl text-white text-xs font-black flex flex-col items-center gap-1.5 border border-slate-700">
-                <Store className="w-5 h-5 text-sky-400" />
+              <button className={`p-3.5 active:scale-95 rounded-2xl text-xs font-black flex flex-col items-center gap-1.5 border transition-all duration-200 ${
+                isLight ? 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-900' : 'bg-slate-800 hover:bg-slate-700 border-slate-700 text-white'
+              }`}>
+                <Store className="w-5 h-5 text-sky-500" />
                 <span>Zelle</span>
               </button>
-              <button className="p-3.5 bg-slate-800 hover:bg-slate-700 active:scale-98 rounded-2xl text-white text-xs font-black flex flex-col items-center gap-1.5 border border-slate-700">
-                <Printer className="w-5 h-5 text-purple-400" />
+              <button className={`p-3.5 active:scale-95 rounded-2xl text-xs font-black flex flex-col items-center gap-1.5 border transition-all duration-200 ${
+                isLight ? 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-900' : 'bg-slate-800 hover:bg-slate-700 border-slate-700 text-white'
+              }`}>
+                <Printer className="w-5 h-5 text-purple-500" />
                 <span>Ticket Bluetooth</span>
               </button>
             </div>
@@ -1042,7 +1266,8 @@ export default function TabletMobilePosPage() {
                 setCart([]);
                 setActiveTab('menu');
               }}
-              className="w-full py-4 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-sm rounded-2xl shadow-xl active:scale-98 transition-all flex items-center justify-center gap-2"
+              className="w-full py-4 text-white font-black text-sm rounded-2xl shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2"
+              style={{ backgroundColor: currentPal.primary }}
             >
               <CheckCircle2 className="w-5 h-5" />
               <span>Confirmar y Finalizar Venta</span>
@@ -1052,13 +1277,13 @@ export default function TabletMobilePosPage() {
       </main>
 
       {/* ========================================================================= */}
-      {/* 3. DOCK INFERIOR CURVO ANIMADO (CON BOTÓN CENTRAL FLOTANTE MÁS GRANDE)     */}
+      {/* 3. DOCK INFERIOR CURVO ANIMADO (CON BOTÓN CENTRAL FLOTANTE "COBRAR")       */}
       {/* ========================================================================= */}
       <div className="fixed bottom-0 inset-x-0 z-40 flex justify-center pb-2 pointer-events-none">
         <div className="relative w-full max-w-md h-18 pointer-events-auto">
-          {/* Fondo SVG Curvo con Notcha Cóncava en el Centro (Exacto a la Imagen de Referencia) */}
+          {/* Fondo SVG Curvo con Notcha Cóncava en el Centro */}
           <svg
-            className="absolute inset-0 w-full h-full drop-shadow-[0_-8px_20px_rgba(0,0,0,0.6)]"
+            className="absolute inset-0 w-full h-full drop-shadow-[0_-6px_18px_rgba(0,0,0,0.18)]"
             viewBox="0 0 380 68"
             fill="none"
             preserveAspectRatio="none"
@@ -1080,52 +1305,78 @@ export default function TabletMobilePosPage() {
                 C 0 11 11 0 24 0
                 Z
               "
-              fill="#090d16"
-              stroke="#1e293b"
+              fill={isLight ? '#ffffff' : '#090d16'}
+              stroke={isLight ? '#cbd5e1' : '#1e293b'}
               strokeWidth="1.5"
             />
           </svg>
 
-          {/* Iconos de Navegación Distribuidos */}
+          {/* Iconos de Navegación Distribuidos con Animación de Selección Suave */}
           <div className="relative z-10 w-full h-full flex items-center justify-between px-5">
             {/* 1. Menú / Catálogo */}
             <button
               onClick={() => setActiveTab('menu')}
-              className={`flex flex-col items-center justify-center py-2 px-2.5 rounded-xl transition-all duration-200 active:scale-95 ${
-                activeTab === 'menu' ? 'text-emerald-400 font-black' : 'text-slate-400 hover:text-slate-200'
+              className={`relative flex flex-col items-center justify-center py-1.5 px-3 rounded-2xl transition-all duration-300 active:scale-90 ${
+                activeTab === 'menu' ? 'font-black scale-105' : 'text-slate-400 hover:text-slate-600'
               }`}
+              style={{ color: activeTab === 'menu' ? currentPal.primary : undefined }}
             >
-              <UtensilsCrossed className="w-5 h-5 stroke-[2.2]" />
-              <span className="text-[10px] mt-1 font-bold">Menú</span>
+              {activeTab === 'menu' && (
+                <span
+                  className="absolute inset-0 rounded-2xl -z-10 shadow-2xs opacity-15"
+                  style={{ backgroundColor: currentPal.primary }}
+                />
+              )}
+              <UtensilsCrossed className="w-5 h-5 stroke-[2.2] transition-transform duration-200" />
+              <span className="text-[10px] mt-0.5 font-bold">Menú</span>
+              {activeTab === 'menu' && (
+                <span
+                  className="w-1.5 h-1.5 rounded-full mt-0.5 anim-badge-spring shadow-xs"
+                  style={{ backgroundColor: currentPal.primary }}
+                />
+              )}
             </button>
 
             {/* 2. Mesas / Cuentas */}
             <button
               onClick={() => setActiveTab('mesas')}
-              className={`flex flex-col items-center justify-center py-2 px-2.5 rounded-xl transition-all duration-200 active:scale-95 mr-8 ${
-                activeTab === 'mesas' ? 'text-emerald-400 font-black' : 'text-slate-400 hover:text-slate-200'
+              className={`relative flex flex-col items-center justify-center py-1.5 px-3 rounded-2xl transition-all duration-300 active:scale-90 mr-8 ${
+                activeTab === 'mesas' ? 'font-black scale-105' : 'text-slate-400 hover:text-slate-600'
               }`}
+              style={{ color: activeTab === 'mesas' ? currentPal.primary : undefined }}
             >
-              <LayoutGrid className="w-5 h-5 stroke-[2.2]" />
-              <span className="text-[10px] mt-1 font-bold">Mesas</span>
+              {activeTab === 'mesas' && (
+                <span
+                  className="absolute inset-0 rounded-2xl -z-10 shadow-2xs opacity-15"
+                  style={{ backgroundColor: currentPal.primary }}
+                />
+              )}
+              <LayoutGrid className="w-5 h-5 stroke-[2.2] transition-transform duration-200" />
+              <span className="text-[10px] mt-0.5 font-bold">Mesas</span>
+              {activeTab === 'mesas' && (
+                <span
+                  className="w-1.5 h-1.5 rounded-full mt-0.5 anim-badge-spring shadow-xs"
+                  style={{ backgroundColor: currentPal.primary }}
+                />
+              )}
             </button>
 
             {/* =================================================================== */}
-            {/* BOTÓN CENTRAL FLOTANTE MÁS GRANDE (COBRAR)                         */}
+            {/* BOTÓN CENTRAL FLOTANTE MÁS GRANDE "COBRAR" CON PULSO Y BRANDING     */}
             {/* =================================================================== */}
-            <div className="absolute left-1/2 -top-4 -translate-x-1/2 flex flex-col items-center">
+            <div className="absolute left-1/2 -top-4.5 -translate-x-1/2 flex flex-col items-center">
               <button
                 onClick={() => setActiveTab('cobro')}
-                className={`w-14 h-14 rounded-full flex items-center justify-center shadow-[0_0_25px_rgba(34,197,94,0.45)] transition-all duration-200 active:scale-95 group ${
-                  activeTab === 'cobro'
-                    ? 'bg-emerald-400 text-slate-950 scale-105 ring-4 ring-emerald-500/30'
-                    : 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 hover:scale-105'
-                }`}
+                className="w-14 h-14 rounded-full flex items-center justify-center transition-all duration-200 active:scale-90 group cursor-pointer anim-breathe text-white shadow-lg"
+                style={{ backgroundColor: currentPal.primary }}
                 title="Cobrar Cuenta / Abrir Caja"
               >
-                <CircleDollarSign className="w-7 h-7 stroke-[2.5] text-slate-950 group-hover:rotate-12 transition-transform" />
+                <CircleDollarSign className="w-7 h-7 stroke-[2.5] text-white group-hover:rotate-12 transition-transform duration-200" />
               </button>
-              <span className="text-[9px] font-black uppercase tracking-wider text-emerald-400 mt-1 drop-shadow-xs">
+              <span
+                className="text-[9px] font-black uppercase tracking-wider mt-1 drop-shadow-xs"
+                style={{ color: currentPal.primary }}
+              >
                 Cobrar
               </span>
             </div>
@@ -1133,69 +1384,170 @@ export default function TabletMobilePosPage() {
             {/* 3. Pedidos / Cocina */}
             <button
               onClick={() => setActiveTab('pedidos')}
-              className={`flex flex-col items-center justify-center py-2 px-2.5 rounded-xl transition-all duration-200 active:scale-95 ml-8 ${
-                activeTab === 'pedidos' ? 'text-emerald-400 font-black' : 'text-slate-400 hover:text-slate-200'
+              className={`relative flex flex-col items-center justify-center py-1.5 px-3 rounded-2xl transition-all duration-300 active:scale-90 ml-8 ${
+                activeTab === 'pedidos' ? 'font-black scale-105' : 'text-slate-400 hover:text-slate-600'
               }`}
+              style={{ color: activeTab === 'pedidos' ? currentPal.primary : undefined }}
             >
-              <ClipboardList className="w-5 h-5 stroke-[2.2]" />
-              <span className="text-[10px] mt-1 font-bold">Pedidos</span>
+              {activeTab === 'pedidos' && (
+                <span
+                  className="absolute inset-0 rounded-2xl -z-10 shadow-2xs opacity-15"
+                  style={{ backgroundColor: currentPal.primary }}
+                />
+              )}
+              <ClipboardList className="w-5 h-5 stroke-[2.2] transition-transform duration-200" />
+              <span className="text-[10px] mt-0.5 font-bold">Pedidos</span>
+              {activeTab === 'pedidos' && (
+                <span
+                  className="w-1.5 h-1.5 rounded-full mt-0.5 anim-badge-spring shadow-xs"
+                  style={{ backgroundColor: currentPal.primary }}
+                />
+              )}
             </button>
 
             {/* 4. Delivery / Envíos */}
             <button
               onClick={() => setActiveTab('delivery')}
-              className={`flex flex-col items-center justify-center py-2 px-2.5 rounded-xl transition-all duration-200 active:scale-95 ${
-                activeTab === 'delivery' ? 'text-emerald-400 font-black' : 'text-slate-400 hover:text-slate-200'
+              className={`relative flex flex-col items-center justify-center py-1.5 px-3 rounded-2xl transition-all duration-300 active:scale-90 ${
+                activeTab === 'delivery' ? 'font-black scale-105' : 'text-slate-400 hover:text-slate-600'
               }`}
+              style={{ color: activeTab === 'delivery' ? currentPal.primary : undefined }}
             >
-              <Bike className="w-5 h-5 stroke-[2.2]" />
-              <span className="text-[10px] mt-1 font-bold">Delivery</span>
+              {activeTab === 'delivery' && (
+                <span
+                  className="absolute inset-0 rounded-2xl -z-10 shadow-2xs opacity-15"
+                  style={{ backgroundColor: currentPal.primary }}
+                />
+              )}
+              <Bike className="w-5 h-5 stroke-[2.2] transition-transform duration-200" />
+              <span className="text-[10px] mt-0.5 font-bold">Delivery</span>
+              {activeTab === 'delivery' && (
+                <span
+                  className="w-1.5 h-1.5 rounded-full mt-0.5 anim-badge-spring shadow-xs"
+                  style={{ backgroundColor: currentPal.primary }}
+                />
+              )}
             </button>
           </div>
         </div>
       </div>
 
       {/* ========================================================================= */}
-      {/* 4. DRAWER IZQUIERDO (Herramientas, Ajustes, QR, Tasa BCV)                 */}
+      {/* 4. DRAWER IZQUIERDO: CONFIGURACIONES Y SELECTOR DE BRANDING DE COLORES     */}
       {/* ========================================================================= */}
       {isLeftDrawerOpen && (
-        <div className="fixed inset-0 z-50 flex animate-fadeIn">
-          {/* Backdrop Blur oscuro */}
+        <div className="fixed inset-0 z-50 flex">
+          {/* Backdrop con Blur y Transición Suave */}
           <div
             onClick={() => setIsLeftDrawerOpen(false)}
-            className="fixed inset-0 bg-black/70 backdrop-blur-xs transition-opacity"
+            className="fixed inset-0 bg-black/60 backdrop-blur-md transition-opacity duration-300"
           />
 
-          {/* Panel Lateral Deslizable */}
-          <aside className="relative w-72 max-w-[85vw] bg-slate-900 border-r border-slate-800 h-full p-4 flex flex-col justify-between shadow-2xl z-10 animate-slideRight">
+          {/* Panel Lateral Deslizable de Ajustes */}
+          <aside
+            className={`relative w-80 max-w-[85vw] border-r h-full p-4 flex flex-col justify-between shadow-2xl z-10 anim-drawer-left overflow-y-auto ${
+              isLight ? 'bg-white border-slate-200' : 'bg-slate-900 border-slate-800'
+            }`}
+          >
             <div className="space-y-4">
-              <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
                 <div className="flex items-center gap-2">
-                  <Store className="w-5 h-5 text-emerald-400" />
-                  <span className="text-sm font-black text-white">Ajustes del Puesto</span>
+                  <Store className="w-5 h-5" style={{ color: currentPal.primary }} />
+                  <span className="text-sm font-black" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
+                    Configuración KlikPOS
+                  </span>
                 </div>
                 <button
                   onClick={() => setIsLeftDrawerOpen(false)}
-                  className="p-1 text-slate-400 hover:text-white rounded-lg"
+                  className="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-800 active:scale-90 transition-all duration-150"
                 >
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
-              {/* Botón Destacado: Menú QR */}
+              {/* SECCIÓN BRANDING DE COLORES (REQUERIMIENTO EXPLÍCITO) */}
+              <div className={`p-3 rounded-2xl border space-y-2.5 ${
+                isLight ? 'bg-slate-50 border-slate-200' : 'bg-slate-950 border-slate-800'
+              }`}>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5 text-xs font-black" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
+                    <Palette className="w-4 h-4" style={{ color: currentPal.primary }} />
+                    <span>Branding de Colores</span>
+                  </div>
+                  <span className="text-[10px] font-mono font-bold text-slate-400">
+                    {currentPal.name}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2 pt-1">
+                  {BRAND_PALETTES.map((pal) => (
+                    <button
+                      key={pal.id}
+                      onClick={() => changePalette(pal.id)}
+                      className={`p-2 rounded-xl border flex flex-col items-center gap-1 transition-all duration-200 active:scale-95 ${
+                        activePalette === pal.id
+                          ? 'ring-2 shadow-xs font-black'
+                          : 'opacity-80 hover:opacity-100'
+                      }`}
+                      style={{
+                        backgroundColor: isLight ? '#ffffff' : '#0f172a',
+                        borderColor: activePalette === pal.id ? pal.primary : isLight ? '#e2e8f0' : '#1e293b'
+                      }}
+                    >
+                      <span
+                        className="w-5 h-5 rounded-full shadow-xs flex items-center justify-center text-white text-[10px]"
+                        style={{ backgroundColor: pal.primary }}
+                      >
+                        {activePalette === pal.id && '✓'}
+                      </span>
+                      <span className="text-[10px] truncate max-w-full font-bold" style={{ color: isLight ? '#0f172a' : '#f8fafc' }}>
+                        {pal.name}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+
+                {/* Alternador de Tema Blanco / Oscuro */}
+                <div className="pt-2 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                  <span className="text-xs font-bold text-slate-500">Lienzo:</span>
+                  <button
+                    onClick={toggleTheme}
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-bold transition-all active:scale-95"
+                    style={{
+                      backgroundColor: isLight ? '#ffffff' : '#1e293b',
+                      borderColor: isLight ? '#cbd5e1' : '#334155',
+                      color: isLight ? '#0f172a' : '#ffffff'
+                    }}
+                  >
+                    {isLight ? <Moon className="w-3.5 h-3.5 text-slate-700" /> : <Sun className="w-3.5 h-3.5 text-amber-400" />}
+                    <span>{isLight ? 'Modo Oscuro' : 'Blanco Oficial'}</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Botón Destacado: Menú QR (Stagger 1) */}
               <button
                 onClick={() => {
                   setIsLeftDrawerOpen(false);
                   setShowQrModal(true);
                 }}
-                className="w-full p-3 bg-gradient-to-r from-emerald-600/30 to-teal-600/30 border border-emerald-500/50 rounded-2xl flex items-center gap-3 text-left hover:bg-emerald-600/40 transition-all shadow-xs"
+                className={`w-full p-3 rounded-2xl border flex items-center gap-3 text-left transition-all duration-200 shadow-2xs active:scale-96 stagger-1 ${
+                  isLight
+                    ? 'bg-slate-50 hover:bg-slate-100 border-slate-200'
+                    : 'bg-slate-950 hover:bg-slate-850 border-slate-800'
+                }`}
               >
-                <div className="w-10 h-10 rounded-xl bg-emerald-500 text-slate-950 flex items-center justify-center font-black shrink-0">
+                <div
+                  className="w-10 h-10 rounded-xl text-white flex items-center justify-center font-black shrink-0 shadow-xs"
+                  style={{ backgroundColor: currentPal.primary }}
+                >
                   <QrCode className="w-5 h-5" />
                 </div>
                 <div>
-                  <h4 className="text-xs font-black text-white">Menú Digital QR</h4>
-                  <p className="text-[10px] text-slate-400">Mostrar QR o Enviar por WhatsApp</p>
+                  <h4 className="text-xs font-black" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
+                    Menú Digital QR
+                  </h4>
+                  <p className="text-[10px] text-slate-500">Mostrar QR o Enviar por WhatsApp</p>
                 </div>
               </button>
 
@@ -1206,81 +1558,95 @@ export default function TabletMobilePosPage() {
                     const newRate = prompt('Ingresa nueva tasa BCV:', String(bcvRate));
                     if (newRate && !isNaN(Number(newRate))) setBcvRate(Number(newRate));
                   }}
-                  className="w-full p-2.5 rounded-xl hover:bg-slate-800 text-slate-300 flex items-center justify-between transition-colors"
+                  className={`w-full p-2.5 rounded-xl flex items-center justify-between transition-all duration-150 active:scale-96 stagger-2 ${
+                    isLight ? 'hover:bg-slate-100 text-slate-800' : 'hover:bg-slate-800 text-slate-200'
+                  }`}
                 >
                   <div className="flex items-center gap-2.5">
-                    <RefreshCw className="w-4 h-4 text-sky-400" />
+                    <RefreshCw className="w-4 h-4 text-sky-500" />
                     <span>Ajustar Tasa BCV</span>
                   </div>
-                  <span className="font-mono font-bold text-emerald-400">Bs. {bcvRate.toFixed(2)}</span>
+                  <span className="font-mono font-bold" style={{ color: currentPal.primary }}>
+                    Bs. {bcvRate.toFixed(2)}
+                  </span>
                 </button>
 
                 <button
                   onClick={() => alert('Datos de Pago Móvil configurados: Banco Banesco / 0414-1234567 / V-12345678')}
-                  className="w-full p-2.5 rounded-xl hover:bg-slate-800 text-slate-300 flex items-center justify-between transition-colors"
+                  className={`w-full p-2.5 rounded-xl flex items-center justify-between transition-all duration-150 active:scale-96 stagger-3 ${
+                    isLight ? 'hover:bg-slate-100 text-slate-800' : 'hover:bg-slate-800 text-slate-200'
+                  }`}
                 >
                   <div className="flex items-center gap-2.5">
-                    <Phone className="w-4 h-4 text-emerald-400" />
+                    <Phone className="w-4 h-4 text-emerald-500" />
                     <span>Datos Pago Móvil</span>
                   </div>
-                  <ChevronRight className="w-4 h-4 text-slate-500" />
+                  <ChevronRight className="w-4 h-4 text-slate-400" />
                 </button>
 
                 <button
                   onClick={() => alert('Ventas de Hoy:\nTotal $: $142.50\nTotal Bs: Bs. 120,918.37\nTickets: 18 ventas')}
-                  className="w-full p-2.5 rounded-xl hover:bg-slate-800 text-slate-300 flex items-center justify-between transition-colors"
+                  className={`w-full p-2.5 rounded-xl flex items-center justify-between transition-all duration-150 active:scale-96 stagger-4 ${
+                    isLight ? 'hover:bg-slate-100 text-slate-800' : 'hover:bg-slate-800 text-slate-200'
+                  }`}
                 >
                   <div className="flex items-center gap-2.5">
-                    <TrendingUp className="w-4 h-4 text-amber-400" />
+                    <TrendingUp className="w-4 h-4 text-amber-500" />
                     <span>Reporte X del Día</span>
                   </div>
-                  <ChevronRight className="w-4 h-4 text-slate-500" />
+                  <ChevronRight className="w-4 h-4 text-slate-400" />
                 </button>
 
                 <button
                   onClick={() => alert('Buscando impresoras Bluetooth portátiles de 58mm...')}
-                  className="w-full p-2.5 rounded-xl hover:bg-slate-800 text-slate-300 flex items-center justify-between transition-colors"
+                  className={`w-full p-2.5 rounded-xl flex items-center justify-between transition-all duration-150 active:scale-96 stagger-5 ${
+                    isLight ? 'hover:bg-slate-100 text-slate-800' : 'hover:bg-slate-800 text-slate-200'
+                  }`}
                 >
                   <div className="flex items-center gap-2.5">
-                    <Printer className="w-4 h-4 text-purple-400" />
+                    <Printer className="w-4 h-4 text-purple-500" />
                     <span>Impresora Bluetooth</span>
                   </div>
-                  <span className="text-[10px] text-slate-500">Conectar</span>
+                  <span className="text-[10px] text-slate-400">Conectar</span>
                 </button>
               </div>
             </div>
 
-            <div className="pt-3 border-t border-slate-800 text-center text-[10px] text-slate-500 font-mono">
-              KlikPOS Standalone v2.4 • Offline Ready
+            <div className="pt-3 border-t border-slate-200 dark:border-slate-800 text-center text-[10px] text-slate-400 font-mono">
+              KlikPOS Standalone v2.4.5 • Blanco & Grafito
             </div>
           </aside>
         </div>
       )}
 
       {/* ========================================================================= */}
-      {/* 5. DRAWER DERECHO (Comanda Activa, Desglose y Venta en Curso)              */}
+      {/* 5. DRAWER DERECHO CON DESGLOSE DE COMANDA Y COBRO                         */}
       {/* ========================================================================= */}
       {isRightDrawerOpen && (
-        <div className="fixed inset-0 z-50 flex justify-end animate-fadeIn">
-          {/* Backdrop Blur oscuro */}
+        <div className="fixed inset-0 z-50 flex justify-end">
+          {/* Backdrop con Blur */}
           <div
             onClick={() => setIsRightDrawerOpen(false)}
-            className="fixed inset-0 bg-black/70 backdrop-blur-xs transition-opacity"
+            className="fixed inset-0 bg-black/60 backdrop-blur-md transition-opacity duration-300"
           />
 
-          {/* Panel Lateral Deslizable */}
-          <aside className="relative w-80 max-w-[88vw] bg-slate-900 border-l border-slate-800 h-full p-4 flex flex-col justify-between shadow-2xl z-10 animate-slideLeft">
+          {/* Panel Lateral de Comanda */}
+          <aside
+            className={`relative w-84 max-w-[88vw] border-l h-full p-4 flex flex-col justify-between shadow-2xl z-10 anim-drawer-right ${
+              isLight ? 'bg-white border-slate-200' : 'bg-slate-900 border-slate-800'
+            }`}
+          >
             <div className="space-y-3 flex-1 flex flex-col min-h-0">
-              <div className="flex items-center justify-between pb-2 border-b border-slate-800 shrink-0">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-800 shrink-0">
                 <div className="flex items-center gap-2">
-                  <ShoppingCart className="w-5 h-5 text-emerald-400" />
-                  <span className="text-sm font-black text-white">
+                  <ShoppingCart className="w-5 h-5" style={{ color: currentPal.primary }} />
+                  <span className="text-sm font-black" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
                     {activeTable ? `Mesa #${activeTable}` : 'Comanda Actual'}
                   </span>
                 </div>
                 <button
                   onClick={() => setIsRightDrawerOpen(false)}
-                  className="p-1 text-slate-400 hover:text-white rounded-lg"
+                  className="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-800 active:scale-90 transition-all duration-150"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -1289,37 +1655,41 @@ export default function TabletMobilePosPage() {
               {/* Lista de Ítems en el Carrito */}
               <div className="flex-1 overflow-y-auto space-y-2 pr-1">
                 {cart.length === 0 ? (
-                  <div className="text-center py-10 text-slate-500 text-xs italic">
+                  <div className="text-center py-10 text-slate-400 text-xs italic">
                     No hay productos en esta cuenta. Toca el menú para agregar.
                   </div>
                 ) : (
                   cart.map((item) => (
                     <div
                       key={item.id}
-                      className="bg-slate-950 p-2.5 rounded-xl border border-slate-800/80 space-y-1.5"
+                      className={`p-2.5 rounded-xl border space-y-1.5 transition-all duration-200 ${
+                        isLight ? 'bg-slate-50 border-slate-200' : 'bg-slate-950 border-slate-800'
+                      }`}
                     >
                       <div className="flex items-start justify-between">
                         <div className="flex-1 pr-2">
-                          <h4 className="text-xs font-black text-white line-clamp-1">{item.name}</h4>
-                          <span className="text-[10px] text-emerald-400 font-mono">
+                          <h4 className="text-xs font-black line-clamp-1" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
+                            {item.name}
+                          </h4>
+                          <span className="text-[10px] font-mono" style={{ color: currentPal.primary }}>
                             ${item.priceUSD.toFixed(2)} c/u
                           </span>
                         </div>
-                        <span className="text-xs font-black font-mono text-white">
+                        <span className="text-xs font-black font-mono" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
                           ${(item.priceUSD * item.qty).toFixed(2)}
                         </span>
                       </div>
 
                       {item.notes && (
-                        <p className="text-[9px] text-amber-300 italic bg-amber-950/20 px-1.5 py-0.5 rounded">
+                        <p className="text-[9px] text-amber-700 dark:text-amber-300 italic bg-amber-50 dark:bg-amber-950/20 px-1.5 py-0.5 rounded border border-amber-200 dark:border-amber-900/40">
                           📝 {item.notes}
                         </p>
                       )}
 
-                      <div className="flex items-center justify-between pt-1 border-t border-slate-900">
+                      <div className="flex items-center justify-between pt-1 border-t border-slate-200 dark:border-slate-800">
                         <button
                           onClick={() => setEditingItemNotes(item)}
-                          className="text-[10px] text-slate-400 hover:text-white underline flex items-center gap-1"
+                          className="text-[10px] text-slate-500 hover:text-slate-800 dark:hover:text-white underline flex items-center gap-1 active:scale-95 transition-all"
                         >
                           <Edit3 className="w-3 h-3" />
                           <span>{item.notes ? 'Editar Nota' : '+ Nota'}</span>
@@ -1327,16 +1697,20 @@ export default function TabletMobilePosPage() {
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() => updateQty(item.id, -1)}
-                            className="w-6 h-6 rounded-lg bg-slate-800 hover:bg-slate-700 text-white flex items-center justify-center text-xs font-black"
+                            className="w-6 h-6 rounded-lg bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-white flex items-center justify-center text-xs font-black active:scale-90 transition-transform"
                           >
                             <Minus className="w-3 h-3" />
                           </button>
-                          <span className="text-xs font-mono font-black text-white w-4 text-center">
+                          <span
+                            className="text-xs font-mono font-black w-4 text-center anim-badge-spring"
+                            style={{ color: currentPal.primary }}
+                          >
                             {item.qty}
                           </span>
                           <button
                             onClick={() => updateQty(item.id, 1)}
-                            className="w-6 h-6 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white flex items-center justify-center text-xs font-black"
+                            className="w-6 h-6 rounded-lg text-white flex items-center justify-center text-xs font-black active:scale-90 transition-transform shadow-xs"
+                            style={{ backgroundColor: currentPal.primary }}
                           >
                             <Plus className="w-3 h-3" />
                           </button>
@@ -1350,16 +1724,16 @@ export default function TabletMobilePosPage() {
 
             {/* Totalizadores y Botón de Cobro Inmediato */}
             {cart.length > 0 && (
-              <div className="pt-3 border-t border-slate-800 space-y-2 shrink-0">
+              <div className="pt-3 border-t border-slate-200 dark:border-slate-800 space-y-2 shrink-0">
                 <div className="flex justify-between items-center text-xs">
-                  <span className="text-slate-400">Total USD:</span>
-                  <span className="font-mono font-black text-base text-emerald-400">
+                  <span className="text-slate-500">Total USD:</span>
+                  <span className="font-mono font-black text-base" style={{ color: currentPal.primary }}>
                     ${totalUSD.toFixed(2)}
                   </span>
                 </div>
                 <div className="flex justify-between items-center text-xs">
-                  <span className="text-slate-400">Total Bs (BCV):</span>
-                  <span className="font-mono font-black text-xs text-white">
+                  <span className="text-slate-500">Total Bs (BCV):</span>
+                  <span className="font-mono font-black text-xs" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
                     Bs. {totalVES.toFixed(2)}
                   </span>
                 </div>
@@ -1367,7 +1741,11 @@ export default function TabletMobilePosPage() {
                 <div className="grid grid-cols-2 gap-2 pt-1">
                   <button
                     onClick={() => setCart([])}
-                    className="py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold rounded-xl"
+                    className={`py-2.5 active:scale-95 text-xs font-bold rounded-xl border transition-all ${
+                      isLight
+                        ? 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200'
+                        : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border-slate-700'
+                    }`}
                   >
                     Vaciar
                   </button>
@@ -1376,7 +1754,8 @@ export default function TabletMobilePosPage() {
                       setIsRightDrawerOpen(false);
                       setActiveTab('cobro');
                     }}
-                    className="py-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-black rounded-xl shadow-lg"
+                    className="py-2.5 text-white text-xs font-black rounded-xl shadow-md active:scale-95 transition-all duration-200"
+                    style={{ backgroundColor: currentPal.primary }}
                   >
                     Ir a Cobrar ➔
                   </button>
@@ -1391,25 +1770,29 @@ export default function TabletMobilePosPage() {
       {/* 6. MODAL INTERACTIVO DE PERSONALIZACIÓN Y NOTAS DE COCINA                 */}
       {/* ========================================================================= */}
       {editingItemNotes && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fadeIn">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 max-w-sm w-full space-y-4 shadow-2xl relative">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md anim-view-switch">
+          <div className={`border rounded-3xl p-5 max-w-sm w-full space-y-4 shadow-2xl relative ${
+            isLight ? 'bg-white border-slate-200' : 'bg-slate-900 border-slate-800'
+          }`}>
             <button
               onClick={() => setEditingItemNotes(null)}
-              className="absolute top-4 right-4 p-1 text-slate-400 hover:text-white"
+              className="absolute top-4 right-4 p-1 text-slate-400 hover:text-slate-800 active:scale-90 transition-transform"
             >
               <X className="w-5 h-5" />
             </button>
 
             <div>
-              <span className="text-[10px] font-mono text-emerald-400 font-bold uppercase tracking-wider">
+              <span className="text-[10px] font-mono font-bold uppercase tracking-wider" style={{ color: currentPal.primary }}>
                 Personalizar Ítem
               </span>
-              <h3 className="text-sm font-black text-white">{editingItemNotes.name}</h3>
+              <h3 className="text-sm font-black" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
+                {editingItemNotes.name}
+              </h3>
             </div>
 
             {/* Presets de Comida Rápida Venezolana */}
             <div className="space-y-1.5">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
                 Opciones Frecuentes (1 Tap):
               </span>
               <div className="flex flex-wrap gap-1.5">
@@ -1421,7 +1804,11 @@ export default function TabletMobilePosPage() {
                       const updated = current ? `${current}, ${preset}` : preset;
                       setEditingItemNotes({ ...editingItemNotes, notes: updated });
                     }}
-                    className="text-[11px] px-2.5 py-1 bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-200 rounded-lg border border-slate-700 transition-all"
+                    className={`text-[11px] px-2.5 py-1 rounded-lg border transition-all duration-150 active:scale-95 ${
+                      isLight
+                        ? 'bg-slate-100 hover:bg-slate-200 text-slate-800 border-slate-200'
+                        : 'bg-slate-800 hover:bg-slate-750 text-slate-200 border-slate-700'
+                    }`}
                   >
                     {preset}
                   </button>
@@ -1431,7 +1818,7 @@ export default function TabletMobilePosPage() {
 
             {/* Campo Libre */}
             <div>
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">
                 Nota Específica:
               </label>
               <input
@@ -1439,7 +1826,11 @@ export default function TabletMobilePosPage() {
                 value={editingItemNotes.notes || ''}
                 onChange={(e) => setEditingItemNotes({ ...editingItemNotes, notes: e.target.value })}
                 placeholder="Ej. Tocineta bien crujiente, sin tártara..."
-                className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500"
+                className={`w-full px-3 py-2 rounded-xl text-xs border focus:outline-none transition-colors ${
+                  isLight
+                    ? 'bg-slate-50 border-slate-200 text-slate-900 focus:border-slate-800'
+                    : 'bg-slate-950 border-slate-800 text-white focus:border-slate-400'
+                }`}
               />
             </div>
 
@@ -1453,7 +1844,7 @@ export default function TabletMobilePosPage() {
                   );
                   setEditingItemNotes(null);
                 }}
-                className="py-2.5 px-3 bg-slate-800 hover:bg-slate-700 text-slate-400 text-xs font-bold rounded-xl"
+                className="py-2.5 px-3 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs font-bold rounded-xl active:scale-95 transition-all"
               >
                 Limpiar
               </button>
@@ -1466,7 +1857,6 @@ export default function TabletMobilePosPage() {
                         i.id === editingItemNotes.id ? { ...i, notes: editingItemNotes.notes } : i
                       );
                     }
-                    // Si se abrió desde la card sin estar en carrito, lo añade con la nota
                     return [...prev, {
                       id: editingItemNotes.id,
                       name: editingItemNotes.name,
@@ -1478,7 +1868,8 @@ export default function TabletMobilePosPage() {
                   });
                   setEditingItemNotes(null);
                 }}
-                className="flex-1 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-black rounded-xl shadow-lg"
+                className="flex-1 py-2.5 text-white text-xs font-black rounded-xl shadow-md active:scale-95 transition-all duration-200"
+                style={{ backgroundColor: currentPal.primary }}
               >
                 Guardar Nota
               </button>
@@ -1491,27 +1882,37 @@ export default function TabletMobilePosPage() {
       {/* 7. MODAL INTERACTIVO DE CÓDIGO QR PARA CLIENTES                           */}
       {/* ========================================================================= */}
       {showQrModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fadeIn">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 max-w-sm w-full space-y-4 shadow-2xl relative">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md anim-view-switch">
+          <div className={`border rounded-3xl p-5 max-w-sm w-full space-y-4 shadow-2xl relative ${
+            isLight ? 'bg-white border-slate-200' : 'bg-slate-900 border-slate-800'
+          }`}>
             <button
               onClick={() => setShowQrModal(false)}
-              className="absolute top-4 right-4 p-1 text-slate-400 hover:text-white"
+              className="absolute top-4 right-4 p-1 text-slate-400 hover:text-slate-800 active:scale-90 transition-transform"
             >
               <X className="w-5 h-5" />
             </button>
 
             <div className="text-center space-y-1">
-              <span className="text-[10px] bg-emerald-400/20 text-emerald-400 font-mono font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+              <span
+                className="text-[10px] font-mono font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider"
+                style={{
+                  backgroundColor: `${currentPal.primary}20`,
+                  color: currentPal.primary
+                }}
+              >
                 Menú Digital Interactivo
               </span>
-              <h3 className="text-sm font-black text-white">Escanea para Ordenar</h3>
-              <p className="text-xs text-slate-400">
+              <h3 className="text-sm font-black" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
+                Escanea para Ordenar
+              </h3>
+              <p className="text-xs text-slate-500">
                 Apunta con la cámara de tu teléfono para ver la carta y hacer tu pedido.
               </p>
             </div>
 
             {/* Código QR Ilustrado */}
-            <div className="bg-white p-4 rounded-2xl flex flex-col items-center justify-center shadow-inner mx-auto max-w-[210px]">
+            <div className="bg-white p-4 rounded-2xl flex flex-col items-center justify-center shadow-inner mx-auto max-w-[210px] border border-slate-200">
               <img
                 src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https://klikpos.app/menu/klikburger?mesa=barra"
                 alt="Código QR del Menú"
@@ -1528,7 +1929,11 @@ export default function TabletMobilePosPage() {
                   navigator.clipboard?.writeText('https://klikpos.app/menu/klikburger');
                   alert('¡Enlace copiado al portapapeles!');
                 }}
-                className="py-2.5 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-1.5"
+                className={`py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all border ${
+                  isLight
+                    ? 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-800'
+                    : 'bg-slate-800 hover:bg-slate-700 border-slate-700 text-white'
+                }`}
               >
                 <Copy className="w-3.5 h-3.5" />
                 <span>Copiar Enlace</span>
@@ -1540,7 +1945,8 @@ export default function TabletMobilePosPage() {
                     '_blank'
                   );
                 }}
-                className="py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black rounded-xl flex items-center justify-center gap-1.5"
+                className="py-2.5 text-white text-xs font-black rounded-xl flex items-center justify-center gap-1.5 transition-all shadow-xs"
+                style={{ backgroundColor: currentPal.primary }}
               >
                 <Share2 className="w-3.5 h-3.5" />
                 <span>WhatsApp</span>
