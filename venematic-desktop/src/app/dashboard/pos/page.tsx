@@ -135,6 +135,197 @@ const getProductVectorIcon = (p: LocalProduct) => {
   return <Package className="w-9 h-9 sm:w-11 sm:h-11 stroke-[1.5]" />;
 };
 
+// Íconos Alternados entre Fill (Sólido) y Outline (Línea) idénticos a la imagen de referencia
+const getProductIconAlternated = (p: LocalProduct, isOutline: boolean) => {
+  const text = `${p.category || ''} ${p.name || ''}`.toLowerCase();
+
+  // 1. Café / Espresso / Té
+  if (text.includes('café') || text.includes('cafe') || text.includes('espresso') || text.includes('latte') || text.includes('cappuccino')) {
+    if (isOutline) {
+      return (
+        <svg className="w-12 h-12 text-[#1e293b] dark:text-slate-100" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M17 8h1a4 4 0 1 1 0 8h-1" />
+          <path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z" />
+          <line x1="6" y1="2" x2="6" y2="4" />
+          <line x1="10" y1="2" x2="10" y2="4" />
+          <line x1="14" y1="2" x2="14" y2="4" />
+        </svg>
+      );
+    }
+    return (
+      <svg className="w-12 h-12 fill-current text-[#1e293b] dark:text-slate-100" viewBox="0 0 24 24">
+        <path d="M4 19h16v2H4z" />
+        <path d="M20 8h-2V5H4v9c0 2.21 1.79 4 4 4h6c2.21 0 4-1.79 4-4v-1h2c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm0 4h-2v-2h2v2z" />
+        <path d="M7 2h2v2H7zm4 0h2v2h-2zm4 0h2v2h-2z" />
+      </svg>
+    );
+  }
+
+  // 2. Panadería / Croissant / Bakery
+  if (text.includes('pan') || text.includes('croissant') || text.includes('bakery') || text.includes('hojaldre') || text.includes('pastel')) {
+    if (isOutline) {
+      return (
+        <svg className="w-12 h-12 text-[#1e293b] dark:text-slate-100" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="m4.6 13.4 4.8 4.8a2 2 0 0 0 2.8 0l7-7a6 6 0 0 0-8.5-8.5l-7 7a2 2 0 0 0 0 2.8z" />
+          <path d="m8.5 8.5 7 7" />
+          <path d="m11 5 7 7" />
+          <path d="m6 10 7 7" />
+        </svg>
+      );
+    }
+    return (
+      <svg className="w-12 h-12 fill-current text-[#1e293b] dark:text-slate-100" viewBox="0 0 24 24">
+        <path d="M12 4c-4.42 0-8 3.58-8 8 0 1.66.51 3.2 1.38 4.49L3 18.5c-.55.55-.55 1.45 0 2 .55.55 1.45.55 2 0l2.01-2.01C8.29 19.36 10.05 20 12 20s3.71-.64 4.99-1.51L19 20.5c.55.55 1.45.55 2 0 .55-.55.55-1.45 0-2l-2.38-2.01C19.49 15.2 20 13.66 20 12c0-4.42-3.58-8-8-8zm-2 3c.73 0 1.43.14 2.08.38l-1.04 2.08c-.34-.09-.69-.14-1.04-.14-.73 0-1.42.17-2.04.47L7 7.75C7.9 7.28 8.92 7 10 7zm4 0c1.08 0 2.1.28 3 .75l-.96 2.04c-.62-.3-1.31-.47-2.04-.47-.35 0-.7.05-1.04.14L12.92 7.38C13.57 7.14 14.27 7 15 7z" />
+      </svg>
+    );
+  }
+
+  // 3. Postres / Dulces / Delicates
+  if (text.includes('torta') || text.includes('dulce') || text.includes('postre') || text.includes('cake') || text.includes('delicate') || text.includes('pie')) {
+    if (isOutline) {
+      return (
+        <svg className="w-12 h-12 text-[#1e293b] dark:text-slate-100" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M20 21v-8a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8" />
+          <path d="M4 16s.5-1 2-1 2.5 2 4 2 2.5-2 4-2 2.5 2 4 2 2-1 2-1" />
+          <path d="M2 21h20" />
+          <path d="M7 8v2" />
+          <path d="M12 8v2" />
+          <path d="M17 8v2" />
+          <path d="M7 4h.01" />
+          <path d="M12 4h.01" />
+          <path d="M17 4h.01" />
+        </svg>
+      );
+    }
+    return (
+      <svg className="w-12 h-12 fill-current text-[#1e293b] dark:text-slate-100" viewBox="0 0 24 24">
+        <path d="M12 2c-1.1 0-2 .9-2 2 0 .19.03.37.08.54C7.72 5.3 6 7.42 6 10c0 .34.03.67.1 1H5c-1.1 0-2 .9-2 2v1h18v-1c0-1.1-.9-2-2-2h-1.1c.07-.33.1-.66.1-1 0-2.58-1.72-4.7-4.08-5.46.05-.17.08-.35.08-.54 0-1.1-.9-2-2-2zm-7 13v5c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2v-5H5z" />
+      </svg>
+    );
+  }
+
+  // 4. Bolsa de Compras / Goods / Shopping
+  if (text.includes('goods') || text.includes('shopping') || text.includes('viveres') || text.includes('mercado') || text.includes('arroz') || text.includes('harina')) {
+    if (isOutline) {
+      return (
+        <svg className="w-12 h-12 text-[#1e293b] dark:text-slate-100" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
+          <path d="M3 6h18" />
+          <path d="M16 10a4 4 0 0 1-8 0" />
+        </svg>
+      );
+    }
+    return (
+      <svg className="w-12 h-12 fill-current text-[#1e293b] dark:text-slate-100" viewBox="0 0 24 24">
+        <path d="M16 6V4c0-2.21-1.79-4-4-4S8 1.79 8 4v2H3c-1.1 0-2 .9-2 2l1.6 13.6c.12 1.05 1.01 1.85 2.07 1.85h14.66c1.06 0 1.95-.8 2.07-1.85L23 8c0-1.1-.9-2-2-2h-5zm-6-2c0-1.1.9-2 2-2s2 .9 2 2v2h-4V4zm8 16H6L4.71 8H8v2c0 .55.45 1 1 1s1-.45 1-1V8h4v2c0 .55.45 1 1 1s1-.45 1-1V8h3.29L18 20z" />
+      </svg>
+    );
+  }
+
+  // 5. Regalo / Stors / Promos
+  if (text.includes('regalo') || text.includes('promo') || text.includes('combo') || text.includes('pack') || text.includes('stors')) {
+    if (isOutline) {
+      return (
+        <svg className="w-12 h-12 text-[#1e293b] dark:text-slate-100" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="20 12 20 22 4 22 4 12" />
+          <rect width="20" height="5" x="2" y="7" />
+          <line x1="12" y1="22" x2="12" y2="7" />
+          <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z" />
+          <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z" />
+        </svg>
+      );
+    }
+    return (
+      <svg className="w-12 h-12 fill-current text-[#1e293b] dark:text-slate-100" viewBox="0 0 24 24">
+        <path d="M20 6h-2.18c.11-.31.18-.65.18-1 0-1.66-1.34-3-3-3-1.05 0-1.96.54-2.5 1.35l-.5.65-.5-.65C10.96 2.54 10.05 2 9 2 7.34 2 6 3.34 6 5c0 .35.07.69.18 1H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-5-2c.55 0 1 .45 1 1s-.45 1-1 1h-2V5c0-.55.45-1 1-1zm-6 0c.55 0 1 .45 1 1v1H8c-.55 0-1-.45-1-1s.45-1 1-1zm11 15H4v-2h16v2zm0-4H4V8h5.08L7 10.83 8.62 12 11 8.76V15h2V8.76L15.38 12 17 10.83 14.92 8H20v7z" />
+      </svg>
+    );
+  }
+
+  // 6. Lácteos / Leche / Queso
+  if (text.includes('leche') || text.includes('lacteo') || text.includes('queso') || text.includes('mantequilla')) {
+    if (isOutline) {
+      return (
+        <svg className="w-12 h-12 text-[#1e293b] dark:text-slate-100" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M8 2h8" />
+          <path d="M9 2v3a4 4 0 0 1-.8 2.4L6 10.4A4 4 0 0 0 5 13v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7a4 4 0 0 0-1-2.6l-2.2-3A4 4 0 0 1 15 5V2" />
+        </svg>
+      );
+    }
+    return (
+      <svg className="w-12 h-12 fill-current text-[#1e293b] dark:text-slate-100" viewBox="0 0 24 24">
+        <path d="M9 2h6v2H9zm9 7.5V6H6v3.5l2 2V21c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-9.5l2-2zM14 20h-4v-7h4v7zm-2-9l-1-1V8h2v2l-1 1z" />
+      </svg>
+    );
+  }
+
+  // 7. Carnes / Pollo / Charcutería
+  if (text.includes('carne') || text.includes('pollo') || text.includes('res') || text.includes('cerdo') || text.includes('chuleta') || text.includes('jamon') || text.includes('jamón')) {
+    if (isOutline) {
+      return (
+        <svg className="w-12 h-12 text-[#1e293b] dark:text-slate-100" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12.5" cy="8.5" r="2.5" />
+          <path d="M12.5 2a6.5 6.5 0 0 0-6.22 4.6c-1.1 3.13-.07 6.57 2.37 8.66A8 8 0 1 0 19 8.5h-6.5" />
+        </svg>
+      );
+    }
+    return (
+      <svg className="w-12 h-12 fill-current text-[#1e293b] dark:text-slate-100" viewBox="0 0 24 24">
+        <path d="M19.43 12.98c-.1-.4-.25-.79-.43-1.15-1.42-2.84-4.83-4.14-7.85-2.99l-2.02.77c-.52.2-1.09.2-1.61 0l-2.02-.77C3.12 7.9 1.48 10.9 2.06 13.56c.55 2.53 2.7 4.44 5.3 4.44 1.13 0 2.22-.36 3.12-1.04l1.52-1.14 1.52 1.14c.9.68 1.99 1.04 3.12 1.04 2.6 0 4.75-1.91 5.3-4.44.1-.47.11-.94.07-1.41zM8 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z" />
+      </svg>
+    );
+  }
+
+  // 8. Frutas / Manzanas / Vegetales
+  if (text.includes('fruta') || text.includes('manzana') || text.includes('verdura') || text.includes('vegetal') || text.includes('apple')) {
+    if (isOutline) {
+      return (
+        <svg className="w-12 h-12 text-[#1e293b] dark:text-slate-100" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 20.94c1.5 0 2.75 1.06 4 1.06 3 0 6-8 6-12.22A4.91 4.91 0 0 0 17 5c-2.22 0-4 1.44-5 2-1-.56-2.78-2-5-2a4.9 4.9 0 0 0-5 4.78C2 14 5 22 8 22c1.25 0 2.5-1.06 4-1.06Z" />
+          <path d="M10 2c1 .5 2 2 2 5" />
+        </svg>
+      );
+    }
+    return (
+      <svg className="w-12 h-12 fill-current text-[#1e293b] dark:text-slate-100" viewBox="0 0 24 24">
+        <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 4.29c.62-.75 1.04-1.8 1.01-2.29-.9.04-1.98.6-2.61 1.34-.56.64-1.05 1.69-.92 2.68.99.08 1.9-.98 2.52-1.73z" />
+      </svg>
+    );
+  }
+
+  // Fallback: Paquete / Caja
+  if (isOutline) {
+    return (
+      <svg className="w-12 h-12 text-[#1e293b] dark:text-slate-100" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M16.5 9.4 7.55 4.24a1.78 1.78 0 0 0-2.5 1.55v8.42a1.78 1.78 0 0 0 .89 1.54l8.96 5.16a1.78 1.78 0 0 0 2.5-1.55V10.94a1.78 1.78 0 0 0-.9-1.54Z" />
+        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+        <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+        <line x1="12" y1="22.08" x2="12" y2="12" />
+      </svg>
+    );
+  }
+  return (
+    <svg className="w-12 h-12 fill-current text-[#1e293b] dark:text-slate-100" viewBox="0 0 24 24">
+      <path d="M21 16.5c0 .38-.21.71-.53.88l-7.9 4.44c-.16.12-.36.18-.57.18s-.41-.06-.57-.18l-7.9-4.44A.991.991 0 0 1 3 16.5v-9c0-.38.21-.71.53-.88l7.9-4.44c.16-.12.36-.18.57-.18s.41.06.57.18l7.9 4.44c.32.17.53.5.53.88v9zM12 4.15L6.04 7.5 12 10.85l5.96-3.35L12 4.15z" />
+    </svg>
+  );
+};
+
+// Contrastes suaves con cambio de tonalidades (Exactamente como la imagen de referencia)
+const getCardToneClasses = (index: number) => {
+  const mod = index % 3;
+  if (mod === 0) {
+    // Tarjeta Blanca / Elevada (Como "COFFEE" en la referencia)
+    return 'bg-white text-slate-900 border-2 border-slate-300 dark:border-slate-500 shadow-sm';
+  } else if (mod === 1) {
+    // Tonalidad gris pizarra suave
+    return 'bg-[#dce3ec] dark:bg-slate-800 text-slate-800 dark:text-slate-100 border-2 border-[#9cb1c5] dark:border-slate-500 shadow-2xs';
+  } else {
+    // Tonalidad gris niebla suave
+    return 'bg-[#d4dfea] dark:bg-slate-800/90 text-slate-800 dark:text-slate-100 border-2 border-[#93a9be] dark:border-slate-500 shadow-2xs';
+  }
+};
+
 export default function DesktopPosPage() {
   const [products, setProducts] = useState<LocalProduct[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
@@ -1870,8 +2061,10 @@ export default function DesktopPosPage() {
 
         {/* ========================================================================= */}
         {/* BARRA DE BOTONES DE ACCIÓN RÁPIDA (Normal o Micro-Barra en Comida Rápida) */}
+        {/* En Modo Minimalista Táctil (touch), se oculta para llenar todo el canvas  */}
         {/* ========================================================================= */}
-        {posViewMode === 'fastfood' ? (
+        {posViewMode !== 'touch' && (
+          posViewMode === 'fastfood' ? (
           <div className="bg-white dark:bg-[#0e223f] border border-slate-200 dark:border-sky-500/30 rounded-xl px-2.5 py-1.5 shadow-2xs shrink-0 flex items-center justify-between gap-1.5 overflow-x-auto no-scrollbar">
             <button
               type="button"
@@ -2101,12 +2294,14 @@ export default function DesktopPosPage() {
             </button>
           </div>
         </div>
-      )}
+      )
+    )}
 
         {/* ========================================================================= */}
         {/* BANDEJA DOCK: ACCESOS RÁPIDOS Y FAVORITOS (Diferenciada y Colapsable)     */}
+        {/* En Modo Minimalista Táctil (touch), se oculta para llenar todo el canvas  */}
         {/* ========================================================================= */}
-        {!searchQuery.trim() && sliderProducts.length > 0 && posViewMode !== 'fastfood' && (
+        {posViewMode !== 'touch' && !searchQuery.trim() && sliderProducts.length > 0 && posViewMode !== 'fastfood' && (
           <div className="shrink-0 flex flex-col gap-1.5 bg-gradient-to-r from-slate-100/90 via-slate-50/80 to-slate-100/90 dark:from-slate-900/80 dark:via-slate-900/60 dark:to-slate-900/80 p-2.5 rounded-2xl border-2 border-sky-600/20 dark:border-sky-500/20 shadow-xs transition-all">
             {/* Header de la Bandeja con Controles de Desplazamiento & Colapso */}
             <div className="flex items-center justify-between px-1">
@@ -2310,10 +2505,10 @@ export default function DesktopPosPage() {
                   ? 'bg-amber-500 text-white shadow-xs border border-amber-600'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
-              title="Vista Táctil Express / Cafetería y Panadería (Botones Grandes)"
+              title="Tema Kiosco Minimalista (Iconos Fill/Outline alternados, 100% Canvas)"
             >
-              <Zap className="w-3.5 h-3.5" />
-              <span className="hidden xl:inline">Táctil Express</span>
+              <Coffee className="w-3.5 h-3.5" />
+              <span className="hidden xl:inline">Minimalista</span>
             </button>
 
             <button
@@ -2479,63 +2674,58 @@ export default function DesktopPosPage() {
             </div>
           )}
 
-          {/* MODO 3: TÁCTIL MINIMALISTA / KIOSK EXPRESS & CAFÉ (ESTILO IMAGEN 2) */}
+          {/* MODO 3: TÁCTIL MINIMALISTA / KIOSCO (LLENA EL CANVAS, BORDES MARCADOS, ÍCONOS FILL/OUTLINE ALTERNADOS) */}
           {posViewMode === 'touch' && (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4 gap-3 content-start">
-              {filteredProducts.map((p) => {
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-5 gap-3.5 sm:gap-4 content-start h-full py-1">
+              {filteredProducts.map((p, index) => {
                 const isLowStock = p.stock <= p.minStock;
                 const isFixed = p.isFixedPriceVES && p.fixedPriceVES;
                 const displayVES = isFixed ? p.fixedPriceVES! : (p.priceUSD * bcvRate);
                 const displayUSD = isFixed ? (p.fixedPriceVES! / bcvRate) : p.priceUSD;
+                const isOutline = index % 2 === 0;
+                const toneClasses = getCardToneClasses(index);
+
                 return (
                   <button
                     key={p.id}
                     type="button"
                     onClick={() => addToCart(p, 1)}
-                    className="pos-white-card aspect-square rounded-3xl p-3.5 flex flex-col justify-between items-center text-center shadow-xs hover:shadow-lg transition-all duration-200 active:scale-[0.96] cursor-pointer group select-none relative overflow-hidden border border-slate-200/90 dark:border-white/10 hover:border-sky-500 bg-white dark:bg-white"
-                    style={{
-                      borderColor: 'var(--industrial-border, rgba(226, 232, 240, 0.9))',
-                    }}
+                    className={`pos-minimal-card aspect-square rounded-[22px] p-3 sm:p-3.5 flex flex-col justify-between items-center text-center transition-all duration-150 active:scale-[0.96] hover:scale-[1.02] cursor-pointer group select-none relative overflow-hidden hover:bg-white hover:border-slate-700 dark:hover:border-slate-300 hover:shadow-lg ${toneClasses}`}
                   >
-                    {/* Indicador superior sutil (Categoría pequeña o Tag Fijo) */}
+                    {/* Tag superior discreto (Categoría o Fijo) */}
                     <div className="flex items-center justify-between w-full px-0.5">
-                      <span className="text-[10px] font-black tracking-wider uppercase text-slate-400 group-hover:text-sky-600 transition-colors truncate max-w-[90px]">
+                      <span className="text-[10px] font-black tracking-widest uppercase text-slate-500 dark:text-slate-400 truncate max-w-[85px]">
                         {p.category}
                       </span>
                       {isFixed ? (
-                        <span className="text-[8.5px] font-black px-1.5 py-0.5 rounded-full bg-amber-500 text-white shrink-0 shadow-2xs">
+                        <span className="text-[8.5px] font-black px-1.5 py-0.5 rounded-md bg-amber-500 text-white shrink-0 shadow-2xs">
                           🔒 Bs. Fijo
                         </span>
                       ) : (
-                        <span className="text-[10px] font-bold text-slate-400 flex items-center gap-1">
+                        <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1">
                           <span className={`w-1.5 h-1.5 rounded-full ${isLowStock ? 'bg-rose-500 animate-pulse' : 'bg-emerald-500'}`} />
                           <span>{p.stock}</span>
                         </span>
                       )}
                     </div>
 
-                    {/* Icono Vectorial Minimalista Central con Tinte Dinámico de Branding */}
-                    <div
-                      className="my-auto flex flex-col items-center justify-center p-3 rounded-2xl bg-slate-50 group-hover:bg-sky-50 transition-all duration-200 group-hover:scale-110"
-                      style={{
-                        color: 'var(--btn-primary-bg, #0284c7)',
-                      }}
-                    >
-                      {getProductVectorIcon(p)}
+                    {/* Ícono Centrado: Alternado entre Fill y Outline (Idéntico a imagen de referencia) */}
+                    <div className="my-auto flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+                      {getProductIconAlternated(p, isOutline)}
                     </div>
 
-                    {/* Nombre en Mayúsculas con Tracking Elegante (Estilo Imagen 2) */}
+                    {/* Nombre en Mayúsculas con Tracking & Precios */}
                     <div className="w-full flex flex-col items-center">
-                      <span className="font-black text-xs sm:text-[13px] tracking-widest uppercase text-slate-900 leading-tight line-clamp-1 group-hover:text-sky-600 transition-colors">
+                      <span className="font-black text-xs sm:text-[13px] tracking-widest uppercase text-[#1e293b] dark:text-white leading-tight line-clamp-1 group-hover:text-black dark:group-hover:text-white transition-colors">
                         {p.name}
                       </span>
 
-                      {/* Precios Minimalistas de Alto Contraste */}
-                      <div className="flex items-baseline justify-center gap-2 mt-1 w-full pt-1.5 border-t border-slate-100">
-                        <span className="font-black text-sm sm:text-base font-sans text-slate-950 tabular-numbers">
+                      {/* Precios Limpios de Alto Contraste */}
+                      <div className="flex items-baseline justify-center gap-1.5 mt-1 w-full pt-1 border-t border-slate-300/80 dark:border-slate-600/80">
+                        <span className="font-black text-xs sm:text-sm font-sans text-slate-950 dark:text-white tabular-numbers">
                           {formatVES(displayVES)}
                         </span>
-                        <span className="text-[11px] font-bold text-slate-500">
+                        <span className="text-[10.5px] font-bold text-slate-500 dark:text-slate-400">
                           ${displayUSD.toFixed(2)}
                         </span>
                       </div>
