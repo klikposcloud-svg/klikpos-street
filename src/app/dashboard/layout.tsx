@@ -841,16 +841,23 @@ export default function DesktopDashboardLayout({
                       }}
                       className={`w-12 h-12 mx-auto rounded-2xl flex items-center justify-center transition-all select-none cursor-pointer relative group ${
                         isActive
-                          ? 'bg-[var(--brand-primary,#0369a1)] text-white shadow-md shadow-sky-950/20 scale-105'
+                          ? 'nav-item-active bg-[var(--brand-primary,#0369a1)] text-white shadow-md shadow-sky-950/20 scale-105'
                           : (currentTheme === 'dark'
                               ? 'text-slate-300 hover:text-white hover:bg-slate-800/80 active:scale-95'
                               : 'text-slate-700 hover:text-slate-950 hover:bg-slate-100 active:scale-95')
                       }`}
+                      style={isActive ? { backgroundColor: 'var(--brand-primary, #4338ca)', color: '#ffffff' } : undefined}
                       title={`${item.label} (${item.shortcut})`}
                     >
-                      <div className="relative flex items-center justify-center">
-                        <span className={isActive ? 'text-white' : undefined}>
-                          {item.icon}
+                      <div className="relative flex items-center justify-center" style={isActive ? { color: '#ffffff' } : undefined}>
+                        <span
+                          className={isActive ? 'text-white' : undefined}
+                          style={isActive ? { color: '#ffffff' } : undefined}
+                        >
+                          {React.cloneElement(item.icon as React.ReactElement, {
+                            className: 'w-5 h-5',
+                            style: isActive ? { color: '#ffffff', stroke: '#ffffff' } : undefined,
+                          })}
                         </span>
                         {isLocked && (
                           <span className="absolute -top-1 -right-2 w-3.5 h-3.5 rounded-full bg-slate-800 border border-slate-700 text-white flex items-center justify-center shadow-xs">
@@ -883,20 +890,24 @@ export default function DesktopDashboardLayout({
                     }}
                     className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs transition-colors select-none cursor-pointer text-left ${
                       isActive
-                        ? 'nav-item-active font-black border shadow-xs'
+                        ? 'nav-item-active bg-[var(--brand-primary,#0369a1)] text-white font-black border border-transparent shadow-xs'
                         : (currentTheme === 'dark'
                             ? 'text-slate-100 hover:text-white hover:bg-slate-800 font-bold'
                             : 'text-slate-900 hover:text-slate-950 hover:bg-slate-100 font-black')
                     }`}
                     style={{
-                      color: isActive ? undefined : (currentTheme === 'dark' ? '#f1f5f9' : '#0f172a'),
+                      backgroundColor: isActive ? 'var(--brand-primary, #4338ca)' : undefined,
+                      color: isActive ? '#ffffff' : (currentTheme === 'dark' ? '#f1f5f9' : '#0f172a'),
                     }}
                   >
                     <div className="flex items-center gap-3">
-                      <span style={{ color: isActive ? undefined : (currentTheme === 'dark' ? '#94a3b8' : '#0f172a') }}>
-                        {item.icon}
+                      <span style={{ color: isActive ? '#ffffff' : (currentTheme === 'dark' ? '#94a3b8' : '#0f172a') }}>
+                        {React.cloneElement(item.icon as React.ReactElement, {
+                          className: 'w-5 h-5',
+                          style: isActive ? { color: '#ffffff', stroke: '#ffffff' } : undefined,
+                        })}
                       </span>
-                      <span>{item.label}</span>
+                      <span style={isActive ? { color: '#ffffff' } : undefined}>{item.label}</span>
                     </div>
                     {isLocked && (
                       <Lock className="w-3.5 h-3.5 text-slate-400 dark:text-slate-400 shrink-0" />

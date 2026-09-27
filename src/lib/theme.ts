@@ -170,7 +170,7 @@ export const THEME_PALETTES: ThemePalette[] = [
   },
 ];
 
-export type UIStyleMode = 'industrial' | 'glassmorphism';
+export type UIStyleMode = 'industrial' | 'glassmorphism' | 'dark';
 
 export type IndustrialBgPreset = 'white' | 'cream' | 'teal' | 'blue' | 'gray' | 'custom';
 
@@ -234,11 +234,89 @@ export const INDUSTRIAL_BG_PRESETS: IndustrialBgOption[] = [
   },
 ];
 
+export type DarkBgPreset = 'oled' | 'graphite' | 'midnight' | 'emerald' | 'purple' | 'custom';
+
+export interface DarkBgOption {
+  id: DarkBgPreset;
+  name: string;
+  tagline: string;
+  bgColor: string;
+  cardColor: string;
+  borderColor: string;
+  previewColor: string;
+  borderPreview: string;
+}
+
+export const DARK_BG_PRESETS: DarkBgOption[] = [
+  {
+    id: 'oled',
+    name: 'Negro Puro OLED',
+    tagline: 'Negro absoluto (#000000) de máximo contraste, cero reflejos y menor consumo',
+    bgColor: '#000000',
+    cardColor: '#09090b',
+    borderColor: '#27272a',
+    previewColor: '#000000',
+    borderPreview: '#3f3f46',
+  },
+  {
+    id: 'graphite',
+    name: 'Grafito Carbón Neutro',
+    tagline: 'Gris antracita sobrio sin tinte azulado (#121212) para máxima elegancia',
+    bgColor: '#121212',
+    cardColor: '#18181b',
+    borderColor: '#27272a',
+    previewColor: '#18181b',
+    borderPreview: '#3f3f46',
+  },
+  {
+    id: 'midnight',
+    name: 'Azul Medianoche',
+    tagline: 'Azul marino profundo corporativo (#0a192f) para entornos tecnológicos',
+    bgColor: '#0a192f',
+    cardColor: '#121c29',
+    borderColor: '#1e293b',
+    previewColor: '#0f172a',
+    borderPreview: '#38bdf8',
+  },
+  {
+    id: 'emerald',
+    name: 'Esmeralda Nocturno',
+    tagline: 'Verde bosque oscuro refinado (#051814) ideal para cajas, bancos y finanzas',
+    bgColor: '#051814',
+    cardColor: '#09231d',
+    borderColor: '#113a30',
+    previewColor: '#062820',
+    borderPreview: '#10b981',
+  },
+  {
+    id: 'purple',
+    name: 'Púrpura Nocturno',
+    tagline: 'Índigo oscuro sofisticado (#0f0d24) para boutiques, restaurantes y cafés',
+    bgColor: '#0f0d24',
+    cardColor: '#181534',
+    borderColor: '#2a2455',
+    previewColor: '#1e1b4b',
+    borderPreview: '#a855f7',
+  },
+  {
+    id: 'custom',
+    name: 'Tono Oscuro Libre (Hex)',
+    tagline: 'Define cualquier color hexadecimal con calibración automática de contraste WCAG',
+    bgColor: '#0f172a',
+    cardColor: '#1e293b',
+    borderColor: '#334155',
+    previewColor: '#6366f1',
+    borderPreview: '#818cf8',
+  },
+];
+
 export interface BrandingConfig {
   paletteId: string;
   uiStyle: UIStyleMode;
   industrialBg?: IndustrialBgPreset;
   customBgColor?: string;
+  darkBg?: DarkBgPreset;
+  customDarkBgColor?: string;
 }
 
 export const DEFAULT_BRANDING: BrandingConfig = {
@@ -246,6 +324,8 @@ export const DEFAULT_BRANDING: BrandingConfig = {
   uiStyle: 'industrial',
   industrialBg: 'white',
   customBgColor: '#eef2f5',
+  darkBg: 'midnight',
+  customDarkBgColor: '#0a192f',
 };
 
 /**
@@ -480,6 +560,76 @@ export function computeIndustrialThemeVariables(
   };
 }
 
+export interface DarkThemeVariables {
+  bgColor: string;
+  cardColor: string;
+  textColor: string;
+  textMuted: string;
+  borderColor: string;
+  primaryBg: string;
+  primaryHover: string;
+  primaryText: string;
+  secondaryBg: string;
+  secondaryBorder: string;
+  secondaryText: string;
+}
+
+export function computeDarkThemeVariables(
+  preset: DarkBgPreset,
+  customHex?: string,
+  activePalettePrimary?: string,
+  activePaletteHover?: string
+): DarkThemeVariables {
+  const brandPrimary = activePalettePrimary || '#0369a1';
+  const brandHover = activePaletteHover || '#075985';
+  const primaryText = getHighContrastTextColor(brandPrimary);
+
+  let bg = '#0a192f';
+  let card = '#121c29';
+  let border = '#1e293b';
+
+  if (preset === 'oled') {
+    bg = '#000000';
+    card = '#09090b';
+    border = '#27272a';
+  } else if (preset === 'graphite') {
+    bg = '#121212';
+    card = '#18181b';
+    border = '#27272a';
+  } else if (preset === 'emerald') {
+    bg = '#051814';
+    card = '#09231d';
+    border = '#113a30';
+  } else if (preset === 'purple') {
+    bg = '#0f0d24';
+    card = '#181534';
+    border = '#2a2455';
+  } else if (preset === 'custom' && customHex) {
+    bg = customHex;
+    card = 'color-mix(in srgb, ' + customHex + ' 80%, white 20%)';
+    border = 'color-mix(in srgb, ' + customHex + ' 60%, white 40%)';
+  } else {
+    // midnight default
+    bg = '#0a192f';
+    card = '#121c29';
+    border = '#1e293b';
+  }
+
+  return {
+    bgColor: bg,
+    cardColor: card,
+    textColor: '#f8fafc',
+    textMuted: '#94a3b8',
+    borderColor: border,
+    primaryBg: brandPrimary,
+    primaryHover: brandHover,
+    primaryText,
+    secondaryBg: card,
+    secondaryBorder: border,
+    secondaryText: '#f8fafc',
+  };
+}
+
 export function applyBrandingToDOM(config: BrandingConfig, forceTheme?: 'light' | 'dark' | 'glass') {
   if (typeof window === 'undefined') return;
 
@@ -518,6 +668,16 @@ export function applyBrandingToDOM(config: BrandingConfig, forceTheme?: 'light' 
     palette.primaryHover
   );
 
+  // Background y Adaptabilidad Dinámica para Modo Oscuro Personalizable
+  const darkBgPreset = config.darkBg || (typeof window !== 'undefined' ? localStorage.getItem('venematic_dark_bg') as DarkBgPreset : null) || 'midnight';
+  const customDarkHex = config.customDarkBgColor || (typeof window !== 'undefined' ? localStorage.getItem('venematic_custom_dark_bg') : null) || '#0a192f';
+  const darkThemeVars = computeDarkThemeVariables(
+    darkBgPreset,
+    customDarkHex,
+    palette.primary,
+    palette.primaryHover
+  );
+
   if (isLight) {
     root.setAttribute('data-industrial-bg', industrialBgPreset);
     root.style.setProperty('--industrial-bg', themeVars.bgColor);
@@ -525,21 +685,28 @@ export function applyBrandingToDOM(config: BrandingConfig, forceTheme?: 'light' 
     root.style.setProperty('--industrial-text', themeVars.textColor);
     root.style.setProperty('--industrial-text-muted', themeVars.textMuted);
     root.style.setProperty('--industrial-border', themeVars.borderColor);
+    root.style.setProperty('--color-bg-app', themeVars.bgColor);
+    root.style.setProperty('--color-bg-surface', themeVars.cardColor);
   } else if (isGlass) {
     root.setAttribute('data-industrial-bg', 'glass');
-    root.style.setProperty('--industrial-bg', '#0B141F'); // Azul Pizarra Noche
+    root.style.setProperty('--industrial-bg', '#070e17');
     root.style.setProperty('--industrial-card', 'rgba(18, 28, 41, 0.7)');
     root.style.setProperty('--industrial-text', '#f8fafc');
     root.style.setProperty('--industrial-text-muted', '#94a3b8');
-    root.style.setProperty('--industrial-border', 'rgba(255, 255, 255, 0.12)');
+    root.style.setProperty('--industrial-border', 'rgba(255, 255, 255, 0.14)');
+    root.style.setProperty('--color-bg-app', '#070e17');
+    root.style.setProperty('--color-bg-surface', 'rgba(18, 28, 41, 0.7)');
   } else {
-    // Modo Oscuro Industrial Clásico (Azul Pizarra)
+    // Modo Oscuro Personalizable (OLED, Carbón, Azul Medianoche, Esmeralda, Púrpura)
     root.setAttribute('data-industrial-bg', 'dark');
-    root.style.setProperty('--industrial-bg', '#0B141F'); // Azul Pizarra Profundo
-    root.style.setProperty('--industrial-card', '#121C29'); // Azul Pizarra Tarjeta
-    root.style.setProperty('--industrial-text', '#f8fafc');
-    root.style.setProperty('--industrial-text-muted', '#94a3b8');
-    root.style.setProperty('--industrial-border', '#22303F');
+    root.setAttribute('data-dark-bg', darkBgPreset);
+    root.style.setProperty('--industrial-bg', darkThemeVars.bgColor);
+    root.style.setProperty('--industrial-card', darkThemeVars.cardColor);
+    root.style.setProperty('--industrial-text', darkThemeVars.textColor);
+    root.style.setProperty('--industrial-text-muted', darkThemeVars.textMuted);
+    root.style.setProperty('--industrial-border', darkThemeVars.borderColor);
+    root.style.setProperty('--color-bg-app', darkThemeVars.bgColor);
+    root.style.setProperty('--color-bg-surface', darkThemeVars.cardColor);
   }
   root.style.setProperty('--btn-primary-bg', themeVars.primaryBg);
   root.style.setProperty('--btn-primary-hover', themeVars.primaryHover);
@@ -582,34 +749,35 @@ export function applyBrandingToDOM(config: BrandingConfig, forceTheme?: 'light' 
     root.setAttribute('data-ui-style', 'glassmorphism');
     root.classList.add('dark');
     root.classList.add('theme-glass');
-    root.style.backgroundColor = '#0b1320';
-    root.style.backgroundImage = 'radial-gradient(circle at 50% 35%, rgba(2, 132, 199, 0.20) 0%, rgba(245, 158, 11, 0.12) 30%, rgba(11, 19, 32, 0.96) 80%)';
+    const glassBg = 'radial-gradient(circle at 15% 20%, rgba(2, 132, 199, 0.28) 0%, transparent 45%), radial-gradient(circle at 85% 75%, rgba(245, 158, 11, 0.16) 0%, transparent 45%), radial-gradient(circle at 50% 50%, rgba(13, 148, 136, 0.12) 0%, transparent 60%), #070e17';
+    root.style.backgroundColor = '#070e17';
+    root.style.backgroundImage = glassBg;
     root.style.color = '#f8fafc';
     (root.style as any).colorScheme = 'dark';
     if (document.body) {
       document.body.classList.add('dark');
       document.body.classList.add('theme-glass');
-      document.body.style.backgroundColor = '#0b1320';
-      document.body.style.backgroundImage = 'radial-gradient(circle at 50% 35%, rgba(2, 132, 199, 0.20) 0%, rgba(245, 158, 11, 0.12) 30%, rgba(11, 19, 32, 0.96) 80%)';
+      document.body.style.backgroundColor = '#070e17';
+      document.body.style.backgroundImage = glassBg;
       document.body.style.color = '#f8fafc';
       (document.body.style as any).colorScheme = 'dark';
     }
   } else {
-    // Modo Oscuro Industrial Clásico
+    // Modo Oscuro Personalizable (OLED, Carbón, Azul Medianoche, Esmeralda, Púrpura)
     root.setAttribute('data-theme', 'dark');
     root.setAttribute('data-ui-style', 'dark');
     root.classList.add('dark');
     root.classList.remove('theme-glass');
-    root.style.backgroundColor = '#121c29';
+    root.style.backgroundColor = darkThemeVars.bgColor;
     root.style.backgroundImage = 'none';
-    root.style.color = '#f8fafc';
+    root.style.color = darkThemeVars.textColor;
     (root.style as any).colorScheme = 'dark';
     if (document.body) {
       document.body.classList.add('dark');
       document.body.classList.remove('theme-glass');
-      document.body.style.backgroundColor = '#121c29';
+      document.body.style.backgroundColor = darkThemeVars.bgColor;
       document.body.style.backgroundImage = 'none';
-      document.body.style.color = '#f8fafc';
+      document.body.style.color = darkThemeVars.textColor;
       (document.body.style as any).colorScheme = 'dark';
     }
   }
@@ -619,8 +787,12 @@ export function applyBrandingToDOM(config: BrandingConfig, forceTheme?: 'light' 
     localStorage.setItem('venematic_ui_style', isLight ? 'industrial' : (isGlass ? 'glassmorphism' : 'dark'));
     localStorage.setItem('venematic_branding_palette', config.paletteId);
     localStorage.setItem('venematic_industrial_bg', industrialBgPreset);
+    localStorage.setItem('venematic_dark_bg', darkBgPreset);
     if (config.customBgColor) {
       localStorage.setItem('venematic_custom_bg_color', config.customBgColor);
+    }
+    if (config.customDarkBgColor) {
+      localStorage.setItem('venematic_custom_dark_bg', config.customDarkBgColor);
     }
   } catch {}
 
@@ -632,7 +804,7 @@ export function applyBrandingToDOM(config: BrandingConfig, forceTheme?: 'light' 
 /**
  * §17 Tres Estilos Oficiales:
  * - light: Modo Blanco Profesional
- * - dark: Modo Oscuro Slate
+ * - dark: Modo Oscuro Personalizable
  * - glass: Modo Esmerilado Translúcido (Glassmorphism con ambient lighting)
  */
 export type ThemeMode = 'light' | 'dark' | 'glass';
@@ -648,12 +820,16 @@ export function applyTheme(mode: ThemeMode) {
   const savedPalette = localStorage.getItem('venematic_branding_palette') || 'petrol';
   const savedBg = (localStorage.getItem('venematic_industrial_bg') as IndustrialBgPreset) || 'white';
   const savedCustomBg = localStorage.getItem('venematic_custom_bg_color') || '#f8fafc';
+  const savedDarkBg = (localStorage.getItem('venematic_dark_bg') as DarkBgPreset) || 'midnight';
+  const savedCustomDarkBg = localStorage.getItem('venematic_custom_dark_bg') || '#0a192f';
 
   applyBrandingToDOM({
     paletteId: savedPalette,
     uiStyle: mode === 'light' ? 'industrial' : (mode === 'glass' ? 'glassmorphism' : 'dark' as any),
     industrialBg: savedBg,
     customBgColor: savedCustomBg,
+    darkBg: savedDarkBg,
+    customDarkBgColor: savedCustomDarkBg,
   }, mode);
 }
 

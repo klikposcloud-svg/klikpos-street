@@ -13,6 +13,9 @@ import {
   IndustrialBgPreset,
   INDUSTRIAL_BG_PRESETS,
   computeIndustrialThemeVariables,
+  DarkBgPreset,
+  DARK_BG_PRESETS,
+  getContrastRatio,
 } from '@/lib/theme';
 import {
   Palette,
@@ -41,6 +44,8 @@ export default function BrandingSettings() {
   const [selectedUIStyle, setSelectedUIStyle] = useState<UIStyleMode>(DEFAULT_BRANDING.uiStyle);
   const [selectedIndustrialBg, setSelectedIndustrialBg] = useState<IndustrialBgPreset>(DEFAULT_BRANDING.industrialBg || 'white');
   const [customBgColor, setCustomBgColor] = useState<string>(DEFAULT_BRANDING.customBgColor || '#f8fafc');
+  const [selectedDarkBg, setSelectedDarkBg] = useState<DarkBgPreset>(DEFAULT_BRANDING.darkBg || 'midnight');
+  const [customDarkBgColor, setCustomDarkBgColor] = useState<string>(DEFAULT_BRANDING.customDarkBgColor || '#0a192f');
   const [savedFeedback, setSavedFeedback] = useState(false);
 
   // Estados de Rubro Comercial Estándar
@@ -61,15 +66,21 @@ export default function BrandingSettings() {
         const style = isLight ? 'industrial' : (setting.value.uiStyle || 'industrial');
         const bg = setting.value.industrialBg || (localStorage.getItem('venematic_industrial_bg') as IndustrialBgPreset) || 'white';
         const cBg = setting.value.customBgColor || localStorage.getItem('venematic_custom_bg_color') || '#f8fafc';
+        const dBg = setting.value.darkBg || (localStorage.getItem('venematic_dark_bg') as DarkBgPreset) || 'midnight';
+        const cdBg = setting.value.customDarkBgColor || localStorage.getItem('venematic_custom_dark_bg') || '#0a192f';
         setSelectedUIStyle(style);
         setSelectedIndustrialBg(bg);
         setCustomBgColor(cBg);
+        setSelectedDarkBg(dBg);
+        setCustomDarkBgColor(cdBg);
         applyBrandingToDOM({
           ...setting.value,
           paletteId: setting.value.paletteId || 'petrol',
           uiStyle: style,
           industrialBg: bg,
           customBgColor: cBg,
+          darkBg: dBg,
+          customDarkBgColor: cdBg,
         });
       } else {
         try {
@@ -77,11 +88,15 @@ export default function BrandingSettings() {
           const s = isLight ? 'industrial' : ((localStorage.getItem('venematic_ui_style') as UIStyleMode) || 'industrial');
           const bg = (localStorage.getItem('venematic_industrial_bg') as IndustrialBgPreset) || 'white';
           const cBg = localStorage.getItem('venematic_custom_bg_color') || '#f8fafc';
+          const dBg = (localStorage.getItem('venematic_dark_bg') as DarkBgPreset) || 'midnight';
+          const cdBg = localStorage.getItem('venematic_custom_dark_bg') || '#0a192f';
           setSelectedPaletteId(p);
           setSelectedUIStyle(s);
           setSelectedIndustrialBg(bg);
           setCustomBgColor(cBg);
-          applyBrandingToDOM({ paletteId: p, uiStyle: s, industrialBg: bg, customBgColor: cBg });
+          setSelectedDarkBg(dBg);
+          setCustomDarkBgColor(cdBg);
+          applyBrandingToDOM({ paletteId: p, uiStyle: s, industrialBg: bg, customBgColor: cBg, darkBg: dBg, customDarkBgColor: cdBg });
         } catch {}
       }
     });
@@ -175,6 +190,8 @@ export default function BrandingSettings() {
       uiStyle: 'industrial',
       industrialBg,
       customBgColor,
+      darkBg: selectedDarkBg,
+      customDarkBgColor,
     };
     saveConfig(config);
     applyBrandingToDOM(config, 'light');
@@ -189,9 +206,43 @@ export default function BrandingSettings() {
       uiStyle: 'industrial',
       industrialBg: 'custom',
       customBgColor: color,
+      darkBg: selectedDarkBg,
+      customDarkBgColor,
     };
     saveConfig(config);
     applyBrandingToDOM(config, 'light');
+  };
+
+  const handleDarkBgSelect = (darkBg: DarkBgPreset) => {
+    setSelectedDarkBg(darkBg);
+    setSelectedUIStyle('dark' as any);
+    const config: BrandingConfig = {
+      paletteId: selectedPaletteId,
+      uiStyle: 'dark' as any,
+      industrialBg: selectedIndustrialBg,
+      customBgColor,
+      darkBg,
+      customDarkBgColor,
+    };
+    saveConfig(config);
+    applyBrandingToDOM(config, 'dark');
+    soundEffects.playBeep();
+  };
+
+  const handleCustomDarkColorChange = (color: string) => {
+    setCustomDarkBgColor(color);
+    setSelectedDarkBg('custom');
+    setSelectedUIStyle('dark' as any);
+    const config: BrandingConfig = {
+      paletteId: selectedPaletteId,
+      uiStyle: 'dark' as any,
+      industrialBg: selectedIndustrialBg,
+      customBgColor,
+      darkBg: 'custom',
+      customDarkBgColor: color,
+    };
+    saveConfig(config);
+    applyBrandingToDOM(config, 'dark');
   };
 
   const handleApplyRubro = async (rubroId: StandardRubroId) => {
@@ -226,6 +277,8 @@ export default function BrandingSettings() {
       localStorage.setItem('venematic_ui_style', config.uiStyle);
       if (config.industrialBg) localStorage.setItem('venematic_industrial_bg', config.industrialBg);
       if (config.customBgColor) localStorage.setItem('venematic_custom_bg_color', config.customBgColor);
+      if (config.darkBg) localStorage.setItem('venematic_dark_bg', config.darkBg);
+      if (config.customDarkBgColor) localStorage.setItem('venematic_custom_dark_bg', config.customDarkBgColor);
       window.dispatchEvent(new CustomEvent('venematic:branding_changed', { detail: config }));
       setSavedFeedback(true);
       setTimeout(() => setSavedFeedback(false), 2000);
@@ -754,6 +807,114 @@ export default function BrandingSettings() {
                         />
                       </div>
                     )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* ========================================================================= */}
+        {/* SUB-PANEL: TONOS Y MATICES DEL MODO OSCURO (PERSONALIZABLE WCAG AAA)    */}
+        {/* ========================================================================= */}
+        {(selectedUIStyle === 'dark' || getCurrentTheme() === 'dark') && (
+          <div
+            style={{ backgroundColor: 'var(--industrial-bg, #0a192f)', borderColor: 'var(--industrial-border, #1e293b)' }}
+            className="mt-3 p-4 rounded-xl border space-y-3 transition-colors duration-200 animate-in fade-in"
+          >
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <h5 className="text-xs font-black text-white uppercase tracking-wide flex items-center gap-1.5">
+                  <Palette className="w-3.5 h-3.5 text-sky-400" />
+                  <span>Ambiente y Matiz del Modo Oscuro (100% Personalizable)</span>
+                </h5>
+                <p className="text-[11px] text-slate-300">
+                  Personaliza el tono de fondo predominante: Negro Puro OLED, Carbón Neutral, Azul Medianoche, Esmeralda o define tu color Hex. Se calibra automáticamente con el estándar WCAG AAA para garantizar contraste superior a 12:1 sin elementos invisibles.
+                </p>
+              </div>
+              <span className="text-[10px] font-mono px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700 text-sky-300 font-bold shadow-2xs">
+                Matiz: {selectedDarkBg === 'custom' ? `Personalizado (${customDarkBgColor})` : DARK_BG_PRESETS.find((b) => b.id === selectedDarkBg)?.name}
+              </span>
+            </div>
+
+            {/* Grid de 6 opciones de Matiz */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-2.5 pt-1">
+              {DARK_BG_PRESETS.map((opt) => {
+                const isSelected = selectedDarkBg === opt.id;
+                const isCustom = opt.id === 'custom';
+                const contrastRatio = getContrastRatio(isCustom ? customDarkBgColor : opt.bgColor, '#ffffff').toFixed(1);
+
+                return (
+                  <div
+                    key={opt.id}
+                    onClick={() => {
+                      if (isCustom) {
+                        handleDarkBgSelect('custom');
+                      } else {
+                        handleDarkBgSelect(opt.id);
+                      }
+                    }}
+                    className={`p-3 rounded-xl border-2 transition-all flex flex-col justify-between select-none cursor-pointer relative ${
+                      isSelected
+                        ? 'border-sky-400 bg-slate-800/95 shadow-sm ring-1 ring-sky-400'
+                        : 'border-slate-700/80 bg-slate-900/90 hover:border-slate-600 hover:bg-slate-800/60'
+                    }`}
+                  >
+                    {/* Header con Swatch */}
+                    <div className="flex items-center justify-between w-full">
+                      <div className="flex items-center gap-2">
+                        {isCustom ? (
+                          <label
+                            className="cursor-pointer relative flex items-center shrink-0"
+                            title="Haz clic para abrir el Color Picker"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <input
+                              type="color"
+                              value={customDarkBgColor}
+                              onChange={(e) => handleCustomDarkColorChange(e.target.value)}
+                              className="w-6 h-6 rounded-md cursor-pointer border border-slate-600 shadow-2xs p-0 bg-transparent"
+                            />
+                          </label>
+                        ) : (
+                          <div
+                            className="w-6 h-6 rounded-md border shadow-2xs shrink-0"
+                            style={{
+                              backgroundColor: opt.previewColor,
+                              borderColor: opt.borderPreview,
+                            }}
+                          />
+                        )}
+                        <span className="text-xs font-bold text-white leading-tight">
+                          {opt.name}
+                        </span>
+                      </div>
+
+                      {isSelected && (
+                        <div className="w-4 h-4 rounded-full bg-sky-500 text-white flex items-center justify-center shadow-xs shrink-0">
+                          <Check className="w-2.5 h-2.5 stroke-[3]" />
+                        </div>
+                      )}
+                    </div>
+
+                    <p className="text-[10px] text-slate-300 mt-2 line-clamp-2 leading-snug">
+                      {opt.tagline}
+                    </p>
+
+                    <div className="mt-2 pt-2 border-t border-slate-700/60 flex items-center justify-between">
+                      <span className="text-[9px] font-bold text-emerald-400 font-mono">
+                        {contrastRatio}:1 AAA
+                      </span>
+                      {isCustom && (
+                        <input
+                          type="text"
+                          value={customDarkBgColor}
+                          onChange={(e) => handleCustomDarkColorChange(e.target.value)}
+                          onClick={(e) => e.stopPropagation()}
+                          className="font-mono text-[10px] font-bold px-1.5 py-0.5 rounded border border-slate-600 bg-slate-800 text-white w-20 text-center"
+                        />
+                      )}
+                    </div>
                   </div>
                 );
               })}

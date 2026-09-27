@@ -2,21 +2,23 @@ const fs = require('fs');
 const path = require('path');
 
 const TOKEN = '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';
-const TAG = 'v2.4.5';
+const TAG = 'v2.4.6';
 const REPO = 'klikposcloud-svg/klikpos-releases';
-const TITLE = 'KlikPOS Enterprise v2.4.5 - Modo Standalone Tablet & Móvil, Dock Curvo Animado y 4 Estilos de Cards';
-const NOTES = `### Novedades en KlikPOS Enterprise v2.4.5:
-- **Modo Standalone Tablet / Móvil (/tablet-pos):** Interfaz táctil 100% autónoma para puestos de comida rápida, food trucks y comercio ambulante sin requerir PC/laptop.
-- **Dock Inferior Curvo Animado:** Dock orgánico con hendidura cóncava y botón central flotante sobredimensionado 'Cobrar' con pulso de aura en vivo.
-- **4 Estilos de Vista de Cards:**
-  1. *Food:* Cards grandes con foto hero de alta resolución, chips de ingredientes, tiempo de preparación y etiquetas.
-  2. *Cuadrícula:* Estándar ergonómica de 2 a 4 columnas sin truncamiento de títulos.
-  3. *Lista:* Alta densidad para inventario masivo en abastos y bodegas.
-  4. *Minimalista:* Botones táctiles de alto contraste para máxima velocidad en horas pico.
-- **Identidad Oficial KlikPOS:** Blanco Puro con logotipo y acentos en Gris Grafito (#1e293b / #0f172a).
-- **Selector de Branding de Colores:** En el cajón de ajustes permite alternar al instante entre 9 paletas (Grafito, Esmeralda, Petróleo, Azul, etc.) y modo oscuro.
-- **Modal de Personalización de Comida:** Opciones rápidas de 1-tap (Con todo, Sin cebolla, Extra tártara/ajo, etc.).
-- **Doble Cajón Deslizable:** Ajustes con Menú QR WhatsApp e Impresora Bluetooth a la izquierda; Comanda activa a la derecha.`;
+const TITLE = 'KlikPOS Enterprise v2.4.6 - Modo Oscuro Personalizable WCAG AAA, Modo Esmerilado Diferenciado y Calculadora de Alto Contraste';
+const NOTES = `### Novedades en KlikPOS Enterprise v2.4.6:
+- **Modo Oscuro Personalizable con Motor WCAG AAA:**
+  - 6 Presets de matiz ambiental: Negro Puro OLED (#000000), Carbón Neutral (#121212), Azul Medianoche (#0a192f), Esmeralda Nocturno (#051814), Púrpura Nocturno (#0f0d24) y Selector Hexadecimal libre.
+  - Calibración automática de ratio de contraste en tiempo real (≥ 12:1) con badge de cumplimiento accesible.
+- **Diferenciación Visual Radical del Modo Esmerilado (Frosted Glass):**
+  - Ambient multi-point mesh gradient tricolor (#070e17 base) con paneles de vidrio satinado y desenfoque óptico de 16px.
+- **Teclado Numérico y Calculadora POS de Alto Contraste:**
+  - Números y caracteres 100% nítidos en blanco puro (#ffffff) sobre teclas slate en Modo Oscuro y cristal esmerilado, eliminando cualquier invisibilidad.
+- **Botón 'Regresar al Punto de Venta':**
+  - Ajustado con texto negro nítido (#0f172a) sobre fondo blanco (#ffffff) de acuerdo con los estándares de diseño.
+- **Ícono Activo de la Barra Lateral:**
+  - Ícono blanco puro (#ffffff) con relleno y trazo nítido al estar seleccionado sobre contenedor azul.
+- **APKs Móviles Distribuidas:**
+  - Actualizadas en DISTRIBUCION_KLIKPOS/03_Movil_Full_Autonomo/ y combos satélite.`;
 
 async function main() {
   console.log(`[1/4] Creando / verificando Release ${TAG} en https://github.com/${REPO}...`);

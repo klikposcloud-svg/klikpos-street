@@ -843,23 +843,25 @@ html:not([data-ui-style="glassmorphism"]) aside button:not(.nav-item-active) svg
   color: #475569 !important;
 }
 
-/* Ãtem Activo en Sidebar (Modo Claro): Pill suave con Color Primario de la Paleta */
-html[data-ui-style="industrial"]:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]) aside .nav-item-active,
-html[data-ui-style="professional"]:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]) aside .nav-item-active,
-html:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]):not([data-ui-style="glassmorphism"]) aside .nav-item-active {
-  background-color: var(--brand-light, #f0f9ff) !important;
-  color: var(--brand-primary, #0369a1) !important;
-  border-color: var(--brand-border, #cbd5e1) !important;
-  border-radius: 9999px !important;
-  box-shadow: 0 2px 8px var(--brand-glow, rgba(0, 0, 0, 0.05)) !important;
+/* Ítem Activo en Sidebar (Modo Claro y Oscuro): Fondo de la Paleta con texto e íconos en BLANCO PURO de alto contraste */
+aside .nav-item-active,
+aside button.nav-item-active,
+aside a.nav-item-active,
+html[data-ui-style="industrial"] aside .nav-item-active,
+html:not([data-ui-style="glassmorphism"]) aside .nav-item-active {
+  background-color: var(--brand-primary, #4338ca) !important;
+  color: #ffffff !important;
 }
-html[data-ui-style="industrial"]:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]) aside .nav-item-active span,
-html[data-ui-style="professional"]:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]) aside .nav-item-active span,
-html:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]):not([data-ui-style="glassmorphism"]) aside .nav-item-active span,
-html[data-ui-style="industrial"]:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]) aside .nav-item-active svg,
-html[data-ui-style="professional"]:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]) aside .nav-item-active svg,
-html:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]):not([data-ui-style="glassmorphism"]) aside .nav-item-active svg {
-  color: var(--brand-primary, #0369a1) !important;
+
+aside .nav-item-active *,
+aside .nav-item-active span,
+aside .nav-item-active svg,
+aside button.nav-item-active svg,
+aside a.nav-item-active svg,
+html[data-ui-style="industrial"] aside .nav-item-active svg,
+html:not([data-ui-style="glassmorphism"]) aside .nav-item-active svg {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
 }
 
 /* Ãtem Activo en Sidebar (Modo Oscuro): Fondo sÃ³lido de la Paleta con texto blanco */
@@ -1953,40 +1955,100 @@ aside a:not(.nav-item-active):hover svg {
   border: 1px solid rgba(255, 255, 255, 0.25) !important;
 }
 
-/* Teclas del Teclado Numérico / Calculadora POS (Botones Blancos de Máximo Contraste en Todos los Modos) */
-.pos-calc-key,
-button.pos-calc-key,
-html[data-ui-style="glassmorphism"] button.pos-calc-key,
-html.dark button.pos-calc-key,
-html[data-theme="dark"] button.pos-calc-key,
-html[data-theme="glass"] button.pos-calc-key {
+/* ==========================================================================
+   TECLAS DE CALCULADORA / TECLADO NUMÉRICO POS (WCAG AAA DINÁMICO)
+   - Modo Claro: Tecla Blanca (#ffffff) con números en Negro Profundo (#0f172a)
+   - Modo Oscuro: Tecla Slate Oscura (#1e293b) con números en Blanco Puro (#ffffff)
+   - Modo Esmerilado: Tecla Cristal Translúcida con números en Blanco Puro (#ffffff)
+   ========================================================================== */
+
+/* 1. MODO CLARO / INDUSTRIAL (DEFAULT) */
+html:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]):not(.theme-glass) .pos-calc-key,
+html:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]):not(.theme-glass) button.pos-calc-key {
   background-color: #ffffff !important;
   border-color: #cbd5e1 !important;
   color: #0f172a !important;
 }
-.pos-calc-key:hover,
-button.pos-calc-key:hover,
-html[data-ui-style="glassmorphism"] button.pos-calc-key:hover,
-html.dark button.pos-calc-key:hover,
-html[data-theme="dark"] button.pos-calc-key:hover,
-html[data-theme="glass"] button.pos-calc-key:hover {
+html:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]):not(.theme-glass) .pos-calc-key:hover,
+html:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]):not(.theme-glass) button.pos-calc-key:hover {
   background-color: #f1f5f9 !important;
   border-color: #94a3b8 !important;
 }
-.pos-calc-key span,
-.pos-calc-key svg,
-button.pos-calc-key span,
-button.pos-calc-key svg,
-html[data-ui-style="glassmorphism"] button.pos-calc-key span,
-html[data-ui-style="glassmorphism"] button.pos-calc-key svg,
-html.dark button.pos-calc-key span,
-html.dark button.pos-calc-key svg,
-html[data-theme="dark"] button.pos-calc-key span,
-html[data-theme="dark"] button.pos-calc-key svg,
-html[data-theme="glass"] button.pos-calc-key span,
-html[data-theme="glass"] button.pos-calc-key svg {
+html:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]):not(.theme-glass) .pos-calc-key span,
+html:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]):not(.theme-glass) .pos-calc-key svg,
+html:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]):not(.theme-glass) button.pos-calc-key span,
+html:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]):not(.theme-glass) button.pos-calc-key svg {
   color: #0f172a !important;
   -webkit-text-fill-color: #0f172a !important;
+  stroke: #0f172a !important;
+}
+
+/* 2. MODO OSCURO (MÁXIMO CONTRASTE: TECLAS SLATE OSCURAS CON CIFRAS EN BLANCO) */
+html.dark:not([data-theme="glass"]):not(.theme-glass) .pos-calc-key,
+html[data-theme="dark"]:not([data-theme="glass"]):not(.theme-glass) .pos-calc-key,
+html.dark:not([data-theme="glass"]):not(.theme-glass) button.pos-calc-key,
+html[data-theme="dark"]:not([data-theme="glass"]):not(.theme-glass) button.pos-calc-key {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+  color: #ffffff !important;
+}
+html.dark:not([data-theme="glass"]):not(.theme-glass) .pos-calc-key:hover,
+html[data-theme="dark"]:not([data-theme="glass"]):not(.theme-glass) .pos-calc-key:hover,
+html.dark:not([data-theme="glass"]):not(.theme-glass) button.pos-calc-key:hover,
+html[data-theme="dark"]:not([data-theme="glass"]):not(.theme-glass) button.pos-calc-key:hover {
+  background-color: #334155 !important;
+  border-color: #475569 !important;
+}
+html.dark:not([data-theme="glass"]):not(.theme-glass) .pos-calc-key span,
+html.dark:not([data-theme="glass"]):not(.theme-glass) .pos-calc-key svg,
+html[data-theme="dark"]:not([data-theme="glass"]):not(.theme-glass) .pos-calc-key span,
+html[data-theme="dark"]:not([data-theme="glass"]):not(.theme-glass) .pos-calc-key svg,
+html.dark:not([data-theme="glass"]):not(.theme-glass) button.pos-calc-key span,
+html.dark:not([data-theme="glass"]):not(.theme-glass) button.pos-calc-key svg,
+html[data-theme="dark"]:not([data-theme="glass"]):not(.theme-glass) button.pos-calc-key span,
+html[data-theme="dark"]:not([data-theme="glass"]):not(.theme-glass) button.pos-calc-key svg {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+/* 3. MODO ESMERILADO (CRISTAL TRANSLÚCIDO GLASSMORPHISM CON CIFRAS EN BLANCO) */
+html[data-theme="glass"] .pos-calc-key,
+html.theme-glass .pos-calc-key,
+html[data-ui-style="glassmorphism"] .pos-calc-key,
+html[data-theme="glass"] button.pos-calc-key,
+html.theme-glass button.pos-calc-key,
+html[data-ui-style="glassmorphism"] button.pos-calc-key {
+  background: rgba(24, 38, 60, 0.75) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border-color: rgba(255, 255, 255, 0.16) !important;
+  color: #ffffff !important;
+}
+html[data-theme="glass"] .pos-calc-key:hover,
+html.theme-glass .pos-calc-key:hover,
+html[data-ui-style="glassmorphism"] .pos-calc-key:hover,
+html[data-theme="glass"] button.pos-calc-key:hover,
+html.theme-glass button.pos-calc-key:hover,
+html[data-ui-style="glassmorphism"] button.pos-calc-key:hover {
+  background: rgba(40, 60, 92, 0.90) !important;
+  border-color: rgba(56, 189, 248, 0.40) !important;
+}
+html[data-theme="glass"] .pos-calc-key span,
+html[data-theme="glass"] .pos-calc-key svg,
+html.theme-glass .pos-calc-key span,
+html.theme-glass .pos-calc-key svg,
+html[data-ui-style="glassmorphism"] .pos-calc-key span,
+html[data-ui-style="glassmorphism"] .pos-calc-key svg,
+html[data-theme="glass"] button.pos-calc-key span,
+html[data-theme="glass"] button.pos-calc-key svg,
+html.theme-glass button.pos-calc-key span,
+html.theme-glass button.pos-calc-key svg,
+html[data-ui-style="glassmorphism"] button.pos-calc-key span,
+html[data-ui-style="glassmorphism"] button.pos-calc-key svg {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  stroke: #ffffff !important;
 }
 
 

@@ -1,16 +1,15 @@
 {
-  "version": "2.4.5",
+  "version": "2.4.6",
   "releaseDate": "2026-09-27",
-  "title": "KlikPOS v2.4.5 - Modo Standalone Tablet & Móvil, Dock Curvo Animado y 4 Estilos de Cards (Food, Cuadrícula, Lista, Minimalista)",
+  "title": "KlikPOS v2.4.6 - Modo Oscuro 100% Personalizable, Modo Esmerilado Diferenciado y Teclado Numérico WCAG AAA",
   "notes": [
-    "Nueva interfaz 100% autónoma para Tablets y Teléfonos (/tablet-pos) para puestos de comida rápida, food trucks y ambulantes sin requerir PC.",
-    "Dock inferior animado de diseño orgánico con hendidura cóncava y botón central flotante sobredimensionado 'Cobrar'.",
-    "4 Estilos de Vista de Cards intercambiables al instante: Food (cards grandes con foto hero y etiquetas), Cuadrícula (estándar ergonómica), Lista (alta densidad para inventario) y Minimalista (botones de máximo contraste para horas pico).",
-    "Modal de personalización con opciones frecuentes de comida rápida (Con todo, Sin cebolla, Extra salsa tártara/ajo, Para llevar, etc.).",
-    "Doble cajón deslizable: Izquierdo (Ajustes, Tasa BCV, Menú Digital QR con enlace de WhatsApp, Impresora Bluetooth) y Derecho (Comanda activa con desglose y notas de cocina).",
-    "Corrección de contraste visual para teclado y elementos críticos según las normativas de KlikPOS."
+    "Personalización total del Modo Oscuro con 6 matices de ambiente: Negro Puro OLED, Carbón Neutral, Azul Medianoche, Esmeralda Nocturno, Púrpura Nocturno y Selector Hexadecimal Libre.",
+    "Cálculo dinámico de luminancia relativa y ratio de contraste estándar WCAG AAA (≥ 12:1) para garantizar cero elementos invisibles en cualquier color de fondo.",
+    "Modo Esmerilado (Glassmorphism) totalmente diferenciado del Modo Oscuro, con fondo de malla ambiental profunda y paneles translúcidos con desenfoque óptico auténtico.",
+    "Corrección del teclado numérico / calculadora POS: cifras en blanco puro nítido (#ffffff) en modo oscuro y esmerilado, y negro profundo (#0f172a) en modo claro.",
+    "Corrección de barra lateral: íconos activos en blanco puro sobre fondo de marca y botón 'Regresar al Punto de Venta' con texto negro nítido de alto contraste."
   ],
-  "windowsUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v2.4.5/KlikPOS_Desktop_Full_Setup.exe",
-  "androidUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v2.4.5/KlikPOS_Movil_Full.apk",
+  "windowsUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v2.4.6/KlikPOS_Desktop_Full_Setup.exe",
+  "androidUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v2.4.6/KlikPOS_Movil_Full.apk",
   "mandatory": false
 }
