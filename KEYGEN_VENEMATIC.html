@@ -378,18 +378,21 @@
             <span class="hint">Planes 2026</span>
           </label>
           <select id="plan" onchange="updatePlanDesc()">
-            <option value="starter_trial">Starter - 1ra Cuota $25 (30 Días)</option>
-            <option value="starter_full">Starter - Completo $50 (PERMANENTE)</option>
-            <option value="pro_trial" selected>Pro - 1ra Cuota $37.50 (30 Días)</option>
-            <option value="pro_full">Pro - Completo $75 (PERMANENTE)</option>
+            <option value="promo_6m" selected>⭐ Promo Lanzamiento - 6 Meses con Nube ($35 - 180 Días)</option>
+            <option value="basico_local">Básico Local - PERMANENTE ($40 - Sin Nube, $0 Servidores)</option>
+            <option value="pro_full">Pro Full Empresarial - PERMANENTE ($75 - Todo Incluido)</option>
+            <option value="pro_trial">Plan a Crédito Pro - 1ra Cuota 50% ($37.50 - 30 Días)</option>
+            <option value="starter_trial">Plan a Crédito Starter - 1ra Cuota ($25 - 30 Días)</option>
+            <option value="starter_full">Starter - Licencia Completa ($50 - PERMANENTE)</option>
+            <option value="cloud_monthly">Suscripción Respaldo Nube ($5/mes - 30 Días)</option>
+            <option value="trial_15m">Prueba Flash - 15 Minutos (Evaluación)</option>
             <option value="demo">Demo Gratuita (15 Días de Evaluación)</option>
-            <option value="trial_15m">Prueba Flash (15 Minutos - Pre-Pago)</option>
             <option value="anual">Anual - 365 Días (Renovación Anual)</option>
             <option value="vitalicia">Vitalicia Legacy (Perpetua)</option>
           </select>
           <div id="plan-desc-box" class="plan-info-box">
-            <span class="tag">PRO TRIAL:</span>
-            <span id="plan-desc-text">30 días de acceso total con Balanza, Nube, BCV y Pago Móvil automático. Espera 2do pago de $37.50.</span>
+            <span class="tag">PLAN SELECCIONADO:</span>
+            <span id="plan-desc-text">6 meses (180 días) de acceso total con Respaldo en la Nube automático y descarga de configuraciones.</span>
           </div>
         </div>
 
@@ -428,7 +431,7 @@
     </div>
 
     <div class="footer-note">
-      <strong>Confidencial:</strong> Este archivo es para uso exclusivo del desarrollador/administrador de <strong>Venematic POS</strong>.
+      <strong>KlikPOS Enterprise:</strong> Este archivo es para uso exclusivo del desarrollador/administrador de <strong>KlikPOS / Venematic</strong>. Soporte WhatsApp: <strong>0424-8298026</strong>.
     </div>
   </div>
 
@@ -436,14 +439,17 @@
     const MASTER_SIGNING_SALT = 'VENEMATIC_SEC_SALT_2026_AIVYNTRAX_PRO_POS_V2';
 
     const PLAN_CONFIG = {
-      starter_trial: { prefix: 'STT', label: 'Starter - 1ra Cuota ($25)',           desc: '30 días Starter. Espera 2do pago de $25 para clave permanente.', days: 30 },
-      starter_full:  { prefix: 'STR', label: 'Starter - Licencia Completa ($50)',    desc: 'PERMANENTE sin vencimiento. POS, Inventario, Etiquetas y 2 cajeros.', days: null },
-      pro_trial:     { prefix: 'PTT', label: 'Pro - 1ra Cuota ($37.50)',             desc: '30 días Pro completo con Balanza, Nube y Pago Móvil. Espera 2do pago de $37.50.', days: 30 },
-      pro_full:      { prefix: 'PRO', label: 'Pro - Licencia Completa ($75)',        desc: 'PERMANENTE sin vencimiento. Todas las funciones Pro desbloqueadas de por vida.', days: null },
-      demo:          { prefix: 'DMO', label: 'Demo / Evaluación (GRATIS)',           desc: '15 días de prueba completa para demostración a nuevos comercios.', days: 15 },
-      trial_15m:     { prefix: 'T15', label: 'Prueba Flash - 15 Minutos',            desc: '15 minutos exactos desde la activación. Ideal para pruebas previas al pago.', days: '15m' },
-      anual:         { prefix: 'ANL', label: 'Anual (365 días)',                    desc: 'Renovación anual (365 días).', days: 365 },
-      vitalicia:     { prefix: 'VIT', label: 'Vitalicia Legacy',                     desc: 'Licencia permanente perpetua.', days: null }
+      promo_6m:      { prefix: 'PRM', label: '⭐ Promo Lanzamiento - 6 Meses con Nube ($35)', desc: '180 días (6 meses) con respaldo automático en la nube, sincronización y descarga de configuraciones.', days: 180 },
+      basico_local:  { prefix: 'BAS', label: 'Básico Local - PERMANENTE ($40)',               desc: 'PERMANENTE sin mensualidades. Operación offline 100%, inventario, tickets y $0 costo de servidor.', days: null },
+      pro_full:      { prefix: 'PRO', label: 'Pro Full Empresarial - PERMANENTE ($75)',       desc: 'PERMANENTE sin vencimiento. Balanza, Nube, BCV en vivo, Pago Móvil automático y cajeros ilimitados.', days: null },
+      pro_trial:     { prefix: 'PTT', label: 'Plan a Crédito Pro - 1ra Cuota 50% ($37.50)',    desc: '30 días Pro completo con Balanza, Nube y Pago Móvil. Espera 2do pago de $37.50.', days: 30 },
+      starter_trial: { prefix: 'STT', label: 'Plan a Crédito Starter - 1ra Cuota ($25)',       desc: '30 días Starter. Espera 2do pago de $25 para clave permanente.', days: 30 },
+      starter_full:  { prefix: 'STR', label: 'Starter - Licencia Completa ($50)',              desc: 'PERMANENTE sin vencimiento. POS, Inventario, Etiquetas y 2 cajeros.', days: null },
+      cloud_monthly: { prefix: 'CLD', label: 'Suscripción Respaldo Nube ($5/mes)',            desc: '30 días de sincronización y respaldo automático en la nube Firebase para terminales activas.', days: 30 },
+      trial_15m:     { prefix: 'T15', label: 'Prueba Flash - 15 Minutos',                     desc: '15 minutos exactos desde la activación. Despliega modal de compra con botón a WhatsApp 0424-8298026.', days: '15m' },
+      demo:          { prefix: 'DMO', label: 'Demo / Evaluación (GRATIS)',                    desc: '15 días de prueba completa para demostración a nuevos comercios.', days: 15 },
+      anual:         { prefix: 'ANL', label: 'Anual (365 días)',                             desc: 'Renovación anual (365 días).', days: 365 },
+      vitalicia:     { prefix: 'VIT', label: 'Vitalicia Legacy',                              desc: 'Licencia permanente perpetua.', days: null }
     };
 
     function updatePlanDesc() {
@@ -475,8 +481,10 @@
         expCode = '15MN';
       } else {
         const d = new Date(Date.now() + cfg.days * 86400000);
-        expires = d.toISOString().split('T')[0];
-        expCode = expires.replace(/-/g, '').slice(2, 6);
+        const yy = d.getFullYear().toString().slice(2);
+        const mm = (d.getMonth() + 1).toString().padStart(2, '0');
+        expires = `20${yy}-${mm}-28`;
+        expCode = `${yy}${mm}`;
       }
 
       const cleanHwid = hwid.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');

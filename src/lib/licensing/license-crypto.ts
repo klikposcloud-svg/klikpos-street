@@ -3,7 +3,12 @@
  * Genera y valida llaves criptográficas ligadas al HWID de la máquina.
  */
 
-export type LicensePlan = 'vitalicia' | 'anual' | 'demo' | 'starter_trial' | 'starter_full' | 'pro_trial' | 'pro_full' | 'trial_15m';
+export type LicensePlan =
+  | 'vitalicia' | 'anual' | 'demo'
+  | 'starter_trial' | 'starter_full'
+  | 'pro_trial' | 'pro_full'
+  | 'trial_15m'
+  | 'promo_6m' | 'basico_local' | 'cloud_monthly';
 
 export interface LicensePayload {
   hwid: string;
@@ -128,17 +133,23 @@ export function generateLicenseKey(
     pro_trial:     'PTT',
     pro_full:      'PRO',
     trial_15m:     'T15',
+    promo_6m:      'PRM',
+    basico_local:  'BAS',
+    cloud_monthly: 'CLD',
   };
   const planPrefix = planPrefixMap[plan] ?? 'DMO';
 
   // Expiry logic
   let expires: string;
-  if (plan === 'vitalicia' || plan === 'starter_full' || plan === 'pro_full') {
+  if (plan === 'vitalicia' || plan === 'starter_full' || plan === 'pro_full' || plan === 'basico_local') {
     expires = 'NEVER';
   } else if (plan === 'trial_15m') {
     expires = '15MIN';
-  } else if (plan === 'starter_trial' || plan === 'pro_trial') {
-    // 30 days trial
+  } else if (plan === 'promo_6m') {
+    // 180 days (6 months)
+    expires = expiresAtDateStr || new Date(Date.now() + 180 * 86400000).toISOString().split('T')[0];
+  } else if (plan === 'starter_trial' || plan === 'pro_trial' || plan === 'cloud_monthly') {
+    // 30 days trial or monthly
     expires = expiresAtDateStr || new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0];
   } else if (plan === 'demo') {
     // 15 days demo
@@ -148,8 +159,10 @@ export function generateLicenseKey(
     expires = expiresAtDateStr || new Date(Date.now() + 365 * 86400000).toISOString().split('T')[0];
   }
 
-  const sig = computeSignature(hwid, rif, plan, expires);
   const expCode = expires === 'NEVER' ? 'PERP' : expires === '15MIN' ? '15MN' : expires.replace(/-/g, '').slice(2, 6);
+  // Standardize signature date to 20${yy}-${mm}-28 for monthly/annual if not special code
+  const sigDate = (expires === 'NEVER' || expires === '15MIN') ? expires : `20${expCode.slice(0, 2)}-${expCode.slice(2, 4)}-28`;
+  const sig = computeSignature(hwid, rif, plan, sigDate);
   return `VNK-${planPrefix}-${expCode}-${sig}`;
 }
 
@@ -178,6 +191,9 @@ export function verifyLicenseKey(
     PTT: 'pro_trial',
     PRO: 'pro_full',
     T15: 'trial_15m',
+    PRM: 'promo_6m',
+    BAS: 'basico_local',
+    CLD: 'cloud_monthly',
   };
   const plan: LicensePlan = planCodeMap[planCode] ?? 'demo';
   if (!planCodeMap[planCode]) {
@@ -223,9 +239,24 @@ export function verifyLicenseKey(
     expiresAt = `20${yy}-${mm}-28`;
   }
 
-  const expectedSig = computeSignature(hwid, rif, plan, expiresAt);
+  let expectedSig = computeSignature(hwid, rif, plan, expiresAt);
+  let isSigValid = (sigProvided === expectedSig);
 
-  if (sigProvided !== expectedSig) {
+  // Fallback de compatibilidad: chequear días alternativos en caso de firmas con YYYY-MM-DD previo
+  if (!isSigValid && expCode !== 'PERP') {
+    const yy = expCode.slice(0, 2);
+    const mm = expCode.slice(2, 4);
+    for (let day = 1; day <= 31; day++) {
+      const altExp = `20${yy}-${mm}-${day.toString().padStart(2, '0')}`;
+      if (computeSignature(hwid, rif, plan, altExp) === sigProvided) {
+        isSigValid = true;
+        expiresAt = altExp;
+        break;
+      }
+    }
+  }
+
+  if (!isSigValid) {
     return {
       valid: false,
       error: 'La firma de la llave no corresponde a este computador o RIF. Licencia no transferible.',

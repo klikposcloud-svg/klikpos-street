@@ -4,14 +4,17 @@ import readline from 'readline';
 const MASTER_SIGNING_SALT = 'VENEMATIC_SEC_SALT_2026_AIVYNTRAX_PRO_POS_V2';
 
 const PLAN_CONFIG = {
-  starter_trial: { prefix: 'STT', label: 'Starter - 1ra Cuota ($25)',           desc: '30 dias (espera 2do pago $25)',    days: 30   },
-  starter_full:  { prefix: 'STR', label: 'Starter - Licencia Completa ($50)',    desc: 'PERMANENTE sin vencimiento',       days: null },
-  pro_trial:     { prefix: 'PTT', label: 'Pro     - 1ra Cuota ($37.50)',         desc: '30 dias (espera 2do pago $37.50)', days: 30   },
-  pro_full:      { prefix: 'PRO', label: 'Pro     - Licencia Completa ($75)',     desc: 'PERMANENTE sin vencimiento',       days: null },
-  demo:          { prefix: 'DMO', label: 'Demo / Evaluacion (GRATIS)',            desc: '15 dias, sin pago',               days: 15   },
-  anual:         { prefix: 'ANL', label: 'Anual (365 dias) [legacy]',            desc: 'Renovacion anual',                days: 365  },
-  vitalicia:     { prefix: 'VIT', label: 'Vitalicia [legacy]',                   desc: 'PERMANENTE',                      days: null },
-  trial_15m:     { prefix: 'T15', label: 'Prueba Flash - 15 Minutos (Pre-pago)', desc: '15 minutos exactos (se desactiva)', days: '15m' },
+  promo_6m:      { prefix: 'PRM', label: '⭐ Promo Lanzamiento - 6 Meses con Nube ($35)', desc: '180 dias (6 meses) con nube y configs', days: 180 },
+  basico_local:  { prefix: 'BAS', label: 'Basico Local - PERMANENTE ($40)',               desc: 'PERMANENTE sin mensualidades ($0 servidores)', days: null },
+  pro_full:      { prefix: 'PRO', label: 'Pro Full Empresarial - PERMANENTE ($75)',       desc: 'PERMANENTE con Balanza, Nube y Pago Movil', days: null },
+  pro_trial:     { prefix: 'PTT', label: 'Plan a Credito Pro - 1ra Cuota 50% ($37.50)',    desc: '30 dias (espera 2do pago $37.50)', days: 30 },
+  starter_trial: { prefix: 'STT', label: 'Plan a Credito Starter - 1ra Cuota ($25)',       desc: '30 dias (espera 2do pago $25)', days: 30 },
+  starter_full:  { prefix: 'STR', label: 'Starter - Licencia Completa ($50)',              desc: 'PERMANENTE sin vencimiento', days: null },
+  cloud_monthly: { prefix: 'CLD', label: 'Suscripcion Respaldo Nube ($5/mes)',            desc: '30 dias de sincronizacion Firebase', days: 30 },
+  trial_15m:     { prefix: 'T15', label: 'Prueba Flash - 15 Minutos (Pre-pago)',           desc: '15 minutos exactos (se desactiva)', days: '15m' },
+  demo:          { prefix: 'DMO', label: 'Demo / Evaluacion (GRATIS)',                    desc: '15 dias, sin pago', days: 15 },
+  anual:         { prefix: 'ANL', label: 'Anual (365 dias) [legacy]',                    desc: 'Renovacion anual', days: 365 },
+  vitalicia:     { prefix: 'VIT', label: 'Vitalicia [legacy]',                           desc: 'PERMANENTE', days: null },
 };
 
 function computeSignature(hwid, rif, plan, expiresAt) {
@@ -34,8 +37,11 @@ export function generateLicenseKey(hwid, rif, plan, expiresAtDateStr) {
     expires = '15MIN';
     expCode = '15MN';
   } else {
-    expires = expiresAtDateStr || new Date(Date.now() + cfg.days * 86400000).toISOString().split('T')[0];
-    expCode = expires.replace(/-/g, '').slice(2, 6);
+    const d = new Date(Date.now() + cfg.days * 86400000);
+    const yy = d.getFullYear().toString().slice(2);
+    const mm = (d.getMonth() + 1).toString().padStart(2, '0');
+    expires = `20${yy}-${mm}-28`;
+    expCode = `${yy}${mm}`;
   }
 
   const sig = computeSignature(hwid, rif, plan, expires);
@@ -47,7 +53,8 @@ if (process.argv[1] && process.argv[1].endsWith('generar-licencia.mjs')) {
 
   console.log('');
   console.log('=================================================================');
-  console.log('       VENEMATIC POS - GENERADOR MAESTRO DE LICENCIAS v2        ');
+  console.log('       KLIKPOS POS - GENERADOR MAESTRO DE LICENCIAS v2           ');
+  console.log('       Soporte WhatsApp Desarrollador: 0424-8298026             ');
   console.log('=================================================================\n');
 
   rl.question('1. HWID del cliente (ej: VN8F-3A12-9C84-7F21 o ANDR-...): ', (hwid) => {
@@ -57,28 +64,28 @@ if (process.argv[1] && process.argv[1].endsWith('generar-licencia.mjs')) {
       if (!rif.trim()) { console.log('\n[ERROR] RIF obligatorio.'); rl.close(); return; }
 
       console.log('\n--- PLANES DISPONIBLES ---');
-      console.log('  [1] Starter - 1ra Cuota      $25     -> 30 dias Starter completo');
-      console.log('  [2] Starter - Licencia Full  $50     -> PERMANENTE (2da cuota pagada)');
-      console.log('  [3] Pro     - 1ra Cuota      $37.50  -> 30 dias Pro completo');
-      console.log('  [4] Pro     - Licencia Full  $75     -> PERMANENTE (2da cuota pagada)');
-      console.log('  [5] Demo / Evaluacion        GRATIS  -> 15 dias');
-      console.log('  [6] Anual (legacy)                   -> 365 dias');
-      console.log('  [7] Prueba Flash - 15 Min    PRUEBA  -> 15 minutos (se bloquea si no paga)');
+      console.log('  [1] ⭐ Promo Lanzamiento (6 Meses Nube) $35     -> 180 dias con respaldo en la nube');
+      console.log('  [2] Basico Local                        $40     -> PERMANENTE sin mensualidad ($0 servidor)');
+      console.log('  [3] Pro Full Empresarial                $75     -> PERMANENTE Todo Incluido con Nube');
+      console.log('  [4] Plan a Credito Pro - 1ra Cuota 50%  $37.50  -> 30 dias Pro completo');
+      console.log('  [5] Plan a Credito Starter - 1ra Cuota  $25     -> 30 dias Starter');
+      console.log('  [6] Suscripcion Respaldo Nube           $5/mes  -> 30 dias de backup Firebase');
+      console.log('  [7] Prueba Flash - 15 Minutos           PRUEBA  -> 15 minutos exactos');
+      console.log('  [8] Demo / Evaluacion                   GRATIS  -> 15 dias');
       console.log('');
-      console.log('  STARTER: POS + Inventario + Impresion + Etiquetas + 2 cajeros');
-      console.log('  PRO agrega: +Nube Firebase +Gmail Pago Movil +Balanza +Reportes +Cajeros ilimitados\n');
 
-      rl.question('Opcion [1-7, ENTER=1]: ', (opt) => {
+      rl.question('Opcion [1-8, ENTER=1]: ', (opt) => {
         const planMap = { 
-          '1':'starter_trial',
-          '2':'starter_full',
-          '3':'pro_trial',
-          '4':'pro_full',
-          '5':'demo',
-          '6':'anual',
-          '7':'trial_15m'
+          '1':'promo_6m',
+          '2':'basico_local',
+          '3':'pro_full',
+          '4':'pro_trial',
+          '5':'starter_trial',
+          '6':'cloud_monthly',
+          '7':'trial_15m',
+          '8':'demo'
         };
-        const plan = planMap[opt.trim()] || 'starter_trial';
+        const plan = planMap[opt.trim()] || 'promo_6m';
         const cfg = PLAN_CONFIG[plan];
         const key = generateLicenseKey(hwid, rif, plan);
         const expiryInfo = cfg.days === null 

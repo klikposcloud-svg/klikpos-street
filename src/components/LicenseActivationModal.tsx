@@ -22,19 +22,24 @@ import {
   Lock,
   Building,
   Calendar,
+  Phone,
+  MessageCircle,
 } from 'lucide-react';
 import LegalViewerModal from '@/components/LegalViewerModal';
+import { getWhatsAppActivationUrl } from '@/lib/licensing/trial-manager';
 
 interface LicenseModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void;
+  isTrialNotice?: boolean;
 }
 
-export default function LicenseActivationModal({ isOpen, onClose, onSuccess }: LicenseModalProps) {
+export default function LicenseActivationModal({ isOpen, onClose, onSuccess, isTrialNotice }: LicenseModalProps) {
   const [hwid, setHwid] = useState('');
   const [copiedHwid, setCopiedHwid] = useState(false);
   const [rif, setRif] = useState('');
+  const [storeName, setStoreName] = useState('');
   const [productKey, setProductKey] = useState('');
   const [statusInfo, setStatusInfo] = useState<ActivatedLicenseInfo | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -69,6 +74,9 @@ export default function LicenseActivationModal({ isOpen, onClose, onSuccess }: L
           if (store.rif) {
             setRif(store.rif);
             setKeygenTargetRif(store.rif);
+          }
+          if (store.name || store.storeName) {
+            setStoreName(store.name || store.storeName);
           }
         }
       } catch {}
@@ -240,6 +248,49 @@ export default function LicenseActivationModal({ isOpen, onClose, onSuccess }: L
           {!showKeygenTab ? (
             /* ================= PESTAÑA 1: ACTIVACIÓN DE TERMINAL ================= */
             <div className="space-y-4">
+              {/* Tarjeta de Conversión de Alta Calidad (Para usuarios en prueba o sin licencia permanente) */}
+              {(statusInfo?.status !== 'active' || isTrialNotice) && (
+                <div className="p-4 bg-gradient-to-br from-emerald-50 via-teal-50 to-indigo-50 rounded-2xl border-2 border-emerald-400/80 shadow-sm space-y-3">
+                  <div className="flex items-start gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-sm">
+                      <Sparkles className="w-5 h-5 text-amber-300" />
+                    </div>
+                    <div>
+                      <h4 className="font-extrabold text-sm text-slate-900 leading-snug">
+                        ¡Nos alegra que KlikPOS impulse tu negocio!
+                      </h4>
+                      <p className="text-xs text-slate-700 mt-0.5 leading-relaxed font-medium">
+                        Has disfrutado tu período de prueba gratuita en esta terminal.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Garantía de Datos Seguros */}
+                  <div className="p-3 bg-white/95 rounded-xl border border-emerald-300 flex items-start gap-2.5">
+                    <ShieldCheck className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
+                    <div className="text-xs text-slate-800 leading-relaxed">
+                      <strong className="text-emerald-950 font-bold block mb-0.5">
+                        🛡️ ¡TUS PRODUCTOS Y DATOS ESTÁN 100% SEGUROS!
+                      </strong>
+                      Todos los productos, precios y configuraciones que acabas de ingresar están guardados localmente. Nada se borrará al activar tu licencia oficial.
+                    </div>
+                  </div>
+
+                  {/* Botón WhatsApp de 1 Toque */}
+                  <div className="pt-1 flex flex-col sm:flex-row gap-2">
+                    <a
+                      href={getWhatsAppActivationUrl(hwid, storeName, rif)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 py-3 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs uppercase tracking-wider rounded-xl shadow-md flex items-center justify-center gap-2 transition-all active:scale-95"
+                    >
+                      <Phone className="w-4 h-4 text-emerald-100" />
+                      <span>Chatear por WhatsApp (0424-8298026)</span>
+                    </a>
+                  </div>
+                </div>
+              )}
+
               {/* Tarjeta de Estado Actual */}
               <div className={`p-4 rounded-2xl border flex items-start gap-3 ${
                 statusInfo?.status === 'active'
@@ -462,10 +513,13 @@ export default function LicenseActivationModal({ isOpen, onClose, onSuccess }: L
                       onChange={(e) => setKeygenPlan(e.target.value as LicensePlan)}
                       className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-800"
                     >
-                      <option value="starter_trial">💳 Starter - 1ra Cuota $25 (30 Días)</option>
+                      <option value="promo_6m">⭐ Promo Lanzamiento - 6 Meses con Nube ($35 - 180 Días)</option>
+                      <option value="basico_local">⚡ Básico Local - PERMANENTE ($40 - Sin Nube)</option>
+                      <option value="pro_full">👑 Pro Full Empresarial - PERMANENTE ($75 - Todo Incluido)</option>
+                      <option value="pro_trial">💳 Plan a Crédito Pro - 1ra Cuota 50% ($37.50 - 30 Días)</option>
+                      <option value="starter_trial">💳 Plan a Crédito Starter - 1ra Cuota ($25 - 30 Días)</option>
                       <option value="starter_full">⭐ Starter - Licencia Full $50 (Permanente)</option>
-                      <option value="pro_trial">💳 Pro - 1ra Cuota $37.50 (30 Días)</option>
-                      <option value="pro_full">👑 Pro - Licencia Full $75 (Permanente)</option>
+                      <option value="cloud_monthly">☁️ Suscripción Respaldo Nube ($5/mes - 30 Días)</option>
                       <option value="trial_15m">⏱️ Prueba Flash - 15 Minutos (Pre-pago / Demo)</option>
                       <option value="vitalicia">🛡️ Vitalicia / Perpetua (Sin Vencimiento)</option>
                       <option value="anual">📅 Anual (1 Año de soporte)</option>

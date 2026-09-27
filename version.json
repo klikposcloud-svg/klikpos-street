@@ -1,15 +1,15 @@
 {
-  "version": "2.4.6",
+  "version": "2.4.7",
   "releaseDate": "2026-09-27",
-  "title": "KlikPOS v2.4.6 - Modo Oscuro 100% Personalizable, Modo Esmerilado Diferenciado y Teclado Numérico WCAG AAA",
+  "title": "KlikPOS v2.4.7 - Versión Móvil/Tablet Standalone Full con Gestión de Empresa, Pago Móvil, Clientes y Licencias Multiplan",
   "notes": [
-    "Personalización total del Modo Oscuro con 6 matices de ambiente: Negro Puro OLED, Carbón Neutral, Azul Medianoche, Esmeralda Nocturno, Púrpura Nocturno y Selector Hexadecimal Libre.",
-    "Cálculo dinámico de luminancia relativa y ratio de contraste estándar WCAG AAA (≥ 12:1) para garantizar cero elementos invisibles en cualquier color de fondo.",
-    "Modo Esmerilado (Glassmorphism) totalmente diferenciado del Modo Oscuro, con fondo de malla ambiental profunda y paneles translúcidos con desenfoque óptico auténtico.",
-    "Corrección del teclado numérico / calculadora POS: cifras en blanco puro nítido (#ffffff) en modo oscuro y esmerilado, y negro profundo (#0f172a) en modo claro.",
-    "Corrección de barra lateral: íconos activos en blanco puro sobre fondo de marca y botón 'Regresar al Punto de Venta' con texto negro nítido de alto contraste."
+    "Lanzamiento de la versión Tablet/Móvil Standalone autónoma (desligada de PC): configuración de datos de empresa, edición completa de Pago Móvil con copia rápida y gestión de clientes.",
+    "Pasarela de cobro multimoneda en Móvil/Tablet con cálculo automático de vuelto en USD y Bs. al cambio oficial BCV en tiempo real.",
+    "Generación de ticket digital e impresión Bluetooth directa o envío formateado por WhatsApp al cliente.",
+    "Navegación inferior fija permanente con pastilla elástica animada y tiradores laterales sutiles (> y <) para comanda y ajustes.",
+    "Integración del embudo de conversión de 15 minutos y nuevos planes de licencia: Promo Lanzamiento (6 meses por $35), Básico Local ($40 permanente), Pro Full ($75) y Cloud Mensual ($5/mes)."
   ],
-  "windowsUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v2.4.6/KlikPOS_Desktop_Full_Setup.exe",
-  "androidUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v2.4.6/KlikPOS_Movil_Full.apk",
+  "windowsUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v2.4.7/KlikPOS_Desktop_Full_Setup.exe",
+  "androidUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v2.4.7/KlikPOS_Movil_Full.apk",
   "mandatory": false
 }
