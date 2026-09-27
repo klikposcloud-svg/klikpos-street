@@ -21,12 +21,11 @@ export interface UpdateConfig {
   lastUpdated?: string;
 }
 
-export const CURRENT_VERSION = '2.4.1';
+export const CURRENT_VERSION = '2.4.5';
 
 const DEFAULT_MANIFEST_URL = 'https://raw.githubusercontent.com/klikposcloud-svg/klikpos-releases/main/version.json';
 const FALLBACK_MANIFEST_URLS = [
   'https://raw.githubusercontent.com/klikposcloud-svg/klikpos-releases/main/version.json',
-  'https://raw.githubusercontent.com/klikposcloud-svg/klikpos/main/version.json',
   '/version.json',
 ];
 const UPDATE_CONFIG_KEY = 'klikpos_update_config';

@@ -3,8 +3,8 @@ $ErrorActionPreference = "Stop"
 $rootDir = Split-Path -Parent $PSScriptRoot
 $desktopDir = Join-Path $rootDir "venematic-desktop"
 $issPath = Join-Path $desktopDir "installer.iss"
-$outputExeDesktop = Join-Path $desktopDir "dist-installer\KlikPOS-Enterprise-Setup-v2.4.4.exe"
-$outputExeRoot = Join-Path $rootDir "dist-installer\KlikPOS-Enterprise-Setup-v2.4.4.exe"
+$outputExeDesktop = Join-Path $desktopDir "dist-installer\KlikPOS-Enterprise-Setup-v2.4.5.exe"
+$outputExeRoot = Join-Path $rootDir "dist-installer\KlikPOS-Enterprise-Setup-v2.4.5.exe"
 $hashDesktop = Join-Path $desktopDir "dist-installer\VERIFICACION_HASHES.txt"
 $hashRoot = Join-Path $rootDir "dist-installer\VERIFICACION_HASHES.txt"
 
@@ -71,8 +71,8 @@ $hashContent = @"
              INTEGRIDAD Y SUMAS DE VERIFICACION CRIPTOGRAFICA (HASHES)
 ================================================================================
 
-Paquete: KlikPOS-Enterprise-Setup-v2.4.1.exe
-Version: 2.4.1 (Interfaz Espaciosa, 4 Cols POS, Alto Contraste, Cloud Sync)
+Paquete: KlikPOS-Enterprise-Setup-v2.4.5.exe
+Version: 2.4.5 (Standalone Tablet/Mobile POS, 4 Card Views, Minimalist Sidebar, White Brand Identity)
 Fecha de emision: $dateStr
 
 Algoritmo SHA256:
@@ -80,7 +80,7 @@ $hashVal
 
 Para verificar la integridad del instalador en cualquier computadora:
 PowerShell:
-  Get-FileHash KlikPOS-Enterprise-Setup-v2.4.1.exe -Algorithm SHA256
+  Get-FileHash KlikPOS-Enterprise-Setup-v2.4.5.exe -Algorithm SHA256
 ================================================================================
 "@
 
