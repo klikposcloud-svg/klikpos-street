@@ -342,9 +342,18 @@ if (!html.includes('id="quick-amount-modal"')) {
   console.log('✓ Inyectada lógica y modales de Venta Rápida y Auditor SMS');
 }
 
-// 7. GUARDAR EN out/index.html Y android/app/src/main/assets/public/index.html
+// 7. ASEGURAR TRUNCAMIENTO LIMPIO Y GUARDAR
+html = html.replace(/venematic_theme/g, 'klikpos_theme');
+html = html.replace(/Venematic/g, 'KlikPOS');
+html = html.replace(/venematic/g, 'klikpos');
+
+const htmlCloseIdx = html.indexOf('</html>');
+if (htmlCloseIdx !== -1) {
+  html = html.substring(0, htmlCloseIdx + 7);
+}
+
 fs.writeFileSync(outHtmlPath, html, 'utf8');
-console.log('✓ Guardado out/index.html con éxito (' + html.length + ' bytes)');
+console.log('✓ Guardado out/index.html limpio con éxito (' + html.length + ' bytes)');
 
 if (fs.existsSync(path.dirname(androidAssetPath))) {
   fs.writeFileSync(androidAssetPath, html, 'utf8');
