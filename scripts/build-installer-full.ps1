@@ -3,8 +3,8 @@ $ErrorActionPreference = "Stop"
 $rootDir = Split-Path -Parent $PSScriptRoot
 $desktopDir = Join-Path $rootDir "venematic-desktop"
 $issPath = Join-Path $desktopDir "installer.iss"
-$outputExeDesktop = Join-Path $desktopDir "dist-installer\KlikPOS-Enterprise-Setup-v2.4.1.exe"
-$outputExeRoot = Join-Path $rootDir "dist-installer\KlikPOS-Enterprise-Setup-v2.4.1.exe"
+$outputExeDesktop = Join-Path $desktopDir "dist-installer\KlikPOS-Enterprise-Setup-v2.4.4.exe"
+$outputExeRoot = Join-Path $rootDir "dist-installer\KlikPOS-Enterprise-Setup-v2.4.4.exe"
 $hashDesktop = Join-Path $desktopDir "dist-installer\VERIFICACION_HASHES.txt"
 $hashRoot = Join-Path $rootDir "dist-installer\VERIFICACION_HASHES.txt"
 

@@ -1919,16 +1919,77 @@ aside a:not(.nav-item-active) svg {
   color: #475569 !important;
 }
 aside button:not(.nav-item-active):hover,
-aside button:not(.nav-item-active):hover span,
-aside a:not(.nav-item-active):hover,
-aside a:not(.nav-item-active):hover span {
+aside a:not(.nav-item-active):hover {
   background-color: #f1f5f9 !important;
+  color: #0f172a !important;
+}
+aside button:not(.nav-item-active):hover > span,
+aside a:not(.nav-item-active):hover > span {
   color: #0f172a !important;
 }
 aside button:not(.nav-item-active):hover svg,
 aside a:not(.nav-item-active):hover svg {
   color: #0f172a !important;
 }
+
+/* Tooltip flotante de la barra lateral compacta */
+.sidebar-tooltip {
+  background-color: #020617 !important;
+  border: 1px solid rgba(51, 65, 85, 0.8) !important;
+  color: #ffffff !important;
+}
+.sidebar-tooltip,
+.sidebar-tooltip * {
+  -webkit-text-fill-color: #ffffff !important;
+}
+.sidebar-tooltip span:not(.sidebar-tooltip-badge) {
+  background-color: transparent !important;
+  background: transparent !important;
+  color: #ffffff !important;
+}
+.sidebar-tooltip .sidebar-tooltip-badge {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+}
+
+/* Teclas del Teclado Numérico / Calculadora POS (Botones Blancos de Máximo Contraste en Todos los Modos) */
+.pos-calc-key,
+button.pos-calc-key,
+html[data-ui-style="glassmorphism"] button.pos-calc-key,
+html.dark button.pos-calc-key,
+html[data-theme="dark"] button.pos-calc-key,
+html[data-theme="glass"] button.pos-calc-key {
+  background-color: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  color: #0f172a !important;
+}
+.pos-calc-key:hover,
+button.pos-calc-key:hover,
+html[data-ui-style="glassmorphism"] button.pos-calc-key:hover,
+html.dark button.pos-calc-key:hover,
+html[data-theme="dark"] button.pos-calc-key:hover,
+html[data-theme="glass"] button.pos-calc-key:hover {
+  background-color: #f1f5f9 !important;
+  border-color: #94a3b8 !important;
+}
+.pos-calc-key span,
+.pos-calc-key svg,
+button.pos-calc-key span,
+button.pos-calc-key svg,
+html[data-ui-style="glassmorphism"] button.pos-calc-key span,
+html[data-ui-style="glassmorphism"] button.pos-calc-key svg,
+html.dark button.pos-calc-key span,
+html.dark button.pos-calc-key svg,
+html[data-theme="dark"] button.pos-calc-key span,
+html[data-theme="dark"] button.pos-calc-key svg,
+html[data-theme="glass"] button.pos-calc-key span,
+html[data-theme="glass"] button.pos-calc-key svg {
+  color: #0f172a !important;
+  -webkit-text-fill-color: #0f172a !important;
+}
+
+
 
 /* SIDEBAR EN MODO OSCURO: TEXTO BLANCO/SLATE-100 NÃTIDO */
 html.dark aside button:not(.nav-item-active),

@@ -2524,11 +2524,10 @@ export default function DesktopPosPage() {
         )}
 
         {/* ========================================================================= */}
-        {/* BARRA DE CATEGORÍAS & SELECTOR DE 3 MODOS DE VISTA                        */}
+        {/* BARRA SUPERIOR: CATEGORÍAS EN TEXTO / PILLS (LÍNEA DEDICADA COMPLETA)    */}
         {/* ========================================================================= */}
-        <div className="flex items-center justify-between gap-3 shrink-0 py-1 border-y border-slate-200/80 dark:border-slate-800/80 my-0.5">
-          {/* Categorías Rápidas a la izquierda */}
-          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 min-w-0">
+        <div className="w-full shrink-0 border-b border-slate-200/80 dark:border-slate-800/80 pt-1 pb-1.5">
+          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 w-full">
             {categories.map((cat) => {
               const isSelected = selectedCategory === cat;
               return (
@@ -2536,10 +2535,10 @@ export default function DesktopPosPage() {
                   key={cat}
                   type="button"
                   onClick={() => setSelectedCategory(cat)}
-                  className={`px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all duration-150 select-none active:scale-[0.97] cursor-pointer shadow-2xs ${
+                  className={`px-3 py-1 rounded-xl text-xs sm:text-[12.5px] font-bold whitespace-nowrap transition-all duration-150 select-none active:scale-[0.97] cursor-pointer ${
                     isSelected
-                      ? 'bg-[var(--brand-primary)] text-white shadow-xs ring-2 ring-[var(--brand-primary)]/30'
-                      : 'bg-white dark:bg-white hover:bg-slate-100 text-slate-800 border-2 border-slate-200 dark:border-sky-500/20'
+                      ? 'bg-[var(--brand-primary)] text-white shadow-xs font-black ring-1 ring-[var(--brand-primary)]'
+                      : 'bg-transparent text-slate-700 dark:text-slate-200 hover:bg-slate-200/70 dark:hover:bg-slate-800/70 hover:text-slate-950 dark:hover:text-white'
                   }`}
                 >
                   {cat}
@@ -2547,61 +2546,69 @@ export default function DesktopPosPage() {
               );
             })}
           </div>
+        </div>
 
-          {/* Selector de los Modos de Vista a la derecha */}
-          <div className="flex items-center p-1 bg-white dark:bg-white rounded-xl border-2 border-slate-200 dark:border-sky-500/20 shrink-0 select-none shadow-2xs">
+        {/* ========================================================================= */}
+        {/* BARRA INFERIOR: OPCIONES DE VISUALIZACIÓN (MÁS PEQUEÑAS Y COMPACTAS)      */}
+        {/* ========================================================================= */}
+        <div className="w-full flex items-center justify-between shrink-0 py-1 border-b border-slate-200/60 dark:border-slate-800/60 mb-1">
+          <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500">
+            {filteredProducts.length} producto{filteredProducts.length === 1 ? '' : 's'}
+          </span>
+
+          <div className="flex items-center gap-1 p-0.5 bg-slate-100 dark:bg-slate-800/90 rounded-xl border border-slate-200 dark:border-slate-700/80 select-none shadow-2xs">
             <button
               type="button"
               onClick={() => handleSetPosViewMode('grid')}
-              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-black transition-all cursor-pointer ${
+              className={`flex items-center gap-1 px-2 py-0.5 rounded-lg text-[11px] font-black transition-all cursor-pointer ${
                 posViewMode === 'grid'
-                  ? 'bg-sky-600 text-white shadow-xs border border-sky-700'
-                  : 'text-slate-600 hover:text-slate-900'
+                  ? 'bg-sky-600 text-white shadow-2xs'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
               title="Vista de Cuadrícula Visual con Imágenes"
             >
-              <LayoutGrid className="w-3.5 h-3.5" />
-              <span className="hidden xl:inline">Cuadrícula</span>
+              <LayoutGrid className="w-3 h-3" />
+              <span>Cuadrícula</span>
             </button>
 
             <button
               type="button"
               onClick={() => handleSetPosViewMode('list')}
-              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-black transition-all cursor-pointer ${
+              className={`flex items-center gap-1 px-2 py-0.5 rounded-lg text-[11px] font-black transition-all cursor-pointer ${
                 posViewMode === 'list'
-                  ? 'bg-emerald-600 text-white shadow-xs border border-emerald-700'
-                  : 'text-slate-600 hover:text-slate-900'
+                  ? 'bg-emerald-600 text-white shadow-2xs'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
-              title="Vista en Lista Compacta de Alta Densidad (15+ productos por pantalla)"
+              title="Vista en Lista Compacta de Alta Densidad"
             >
-              <List className="w-3.5 h-3.5" />
-              <span className="hidden xl:inline">Lista</span>
+              <List className="w-3 h-3" />
+              <span>Lista</span>
             </button>
 
             <button
               type="button"
               onClick={() => handleSetPosViewMode('touch')}
-              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-black transition-all cursor-pointer ${
+              className={`flex items-center gap-1 px-2 py-0.5 rounded-lg text-[11px] font-black transition-all cursor-pointer ${
                 posViewMode === 'touch'
-                  ? 'bg-amber-500 text-white shadow-xs border border-amber-600'
-                  : 'text-slate-600 hover:text-slate-900'
+                  ? 'bg-amber-500 text-slate-950 shadow-2xs font-black'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
-              title="Tema Kiosco Minimalista (Iconos Fill/Outline alternados, 100% Canvas)"
+              title="Tema Kiosco Minimalista (Iconos Fill/Outline alternados)"
             >
-              <Coffee className="w-3.5 h-3.5" />
-              <span className="hidden xl:inline">Minimalista</span>
+              <Coffee className="w-3 h-3" />
+              <span>Minimalista</span>
             </button>
 
             {posViewMode === 'touch' && (
               <button
                 type="button"
                 onClick={toggleMinimalistPalette}
-                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-black transition-all cursor-pointer bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 border border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 shadow-2xs"
+                className="flex items-center gap-1 px-2 py-0.5 rounded-lg text-[11px] font-bold transition-all cursor-pointer bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 border border-slate-300 dark:border-slate-600 hover:bg-slate-50 shadow-2xs"
                 title="Alternar entre Colores por Categoría y Escala Monocromática Minimalista"
               >
-                <Palette className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" />
-                <span className="hidden sm:inline">
-                  {minimalistColorPalette === 'category' ? '🎨 Colores Rubro' : '🔘 Monocromático'}
+                <Palette className="w-3 h-3 text-sky-600 dark:text-sky-400" />
+                <span>
+                  {minimalistColorPalette === 'category' ? '🎨 Rubro' : '🔘 Mono'}
                 </span>
               </button>
             )}
@@ -2609,15 +2616,15 @@ export default function DesktopPosPage() {
             <button
               type="button"
               onClick={() => handleSetPosViewMode('fastfood')}
-              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-black transition-all cursor-pointer ${
+              className={`flex items-center gap-1 px-2 py-0.5 rounded-lg text-[11px] font-black transition-all cursor-pointer ${
                 posViewMode === 'fastfood'
-                  ? 'bg-amber-500 text-white shadow-xs border border-amber-600'
-                  : 'text-slate-600 hover:text-slate-900'
+                  ? 'bg-amber-500 text-slate-950 shadow-2xs font-black'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
-              title="Modo Comida Rápida / Fast Food & Restaurante (Cuadrícula Táctil 3x3)"
+              title="Modo Comida Rápida / Fast Food (Cuadrícula Táctil 3x3)"
             >
-              <UtensilsCrossed className="w-3.5 h-3.5" />
-              <span className="hidden xl:inline">Comida Rápida</span>
+              <UtensilsCrossed className="w-3 h-3" />
+              <span>Comida Rápida</span>
             </button>
           </div>
         </div>
@@ -2771,7 +2778,7 @@ export default function DesktopPosPage() {
 
           {/* MODO 3: TÁCTIL MINIMALISTA / KIOSCO (LLENA EL CANVAS, BORDES MARCADOS, ÍCONOS FILL/OUTLINE ALTERNADOS) */}
           {posViewMode === 'touch' && (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-5 gap-3.5 sm:gap-4 content-start h-full py-1">
+            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4 gap-4 xl:gap-5 content-start h-full py-2 pb-24">
               {filteredProducts.map((p, index) => {
                 const isLowStock = p.stock <= p.minStock;
                 const isFixed = p.isFixedPriceVES && p.fixedPriceVES;
@@ -2786,11 +2793,11 @@ export default function DesktopPosPage() {
                     type="button"
                     onClick={() => addToCart(p, 1)}
                     style={(p as any).color ? { backgroundColor: (p as any).color } : undefined}
-                    className={`pos-minimal-card aspect-square rounded-[22px] p-3 sm:p-3.5 flex flex-col justify-between items-center text-center transition-all duration-150 active:scale-[0.96] hover:scale-[1.02] cursor-pointer group select-none relative overflow-hidden hover:bg-white hover:border-slate-700 dark:hover:border-slate-300 hover:shadow-lg ${toneClasses}`}
+                    className={`pos-minimal-card min-h-[195px] sm:min-h-[205px] rounded-[24px] p-3.5 sm:p-4 flex flex-col justify-between items-center text-center transition-all duration-150 active:scale-[0.96] hover:scale-[1.02] cursor-pointer group select-none relative overflow-hidden hover:bg-white hover:border-slate-700 dark:hover:border-slate-300 hover:shadow-xl ${toneClasses}`}
                   >
                     {/* Tag superior discreto (Categoría o Fijo) */}
-                    <div className="flex items-center justify-between w-full px-0.5">
-                      <span className="text-[10px] font-black tracking-widest uppercase text-slate-500 dark:text-slate-400 truncate max-w-[85px]">
+                    <div className="flex items-center justify-between w-full px-1 mb-1">
+                      <span className="text-[10px] font-black tracking-widest uppercase text-slate-500 dark:text-slate-400 truncate max-w-[110px]">
                         {p.category}
                       </span>
                       {isFixed ? (
@@ -2806,22 +2813,22 @@ export default function DesktopPosPage() {
                     </div>
 
                     {/* Ícono Centrado: Alternado entre Fill y Outline (Idéntico a imagen de referencia) */}
-                    <div className="my-auto flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+                    <div className="my-auto py-2 flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
                       {getProductIconAlternated(p, isOutline)}
                     </div>
 
-                    {/* Nombre en Mayúsculas con Tracking & Precios */}
-                    <div className="w-full flex flex-col items-center">
-                      <span className="font-black text-xs sm:text-[13px] tracking-widest uppercase text-[#1e293b] dark:text-white leading-tight line-clamp-1 group-hover:text-black dark:group-hover:text-white transition-colors">
+                    {/* Nombre en Mayúsculas con Espacio para 2 Líneas & Precios */}
+                    <div className="w-full flex flex-col items-center mt-auto pt-1">
+                      <span className="font-black text-xs sm:text-[13px] tracking-wide uppercase text-[#1e293b] dark:text-white leading-snug line-clamp-2 min-h-[34px] flex items-center justify-center text-center group-hover:text-black dark:group-hover:text-white transition-colors">
                         {p.name}
                       </span>
 
                       {/* Precios Limpios de Alto Contraste */}
-                      <div className="flex items-baseline justify-center gap-1.5 mt-1 w-full pt-1 border-t border-slate-300/80 dark:border-slate-600/80">
-                        <span className="font-black text-xs sm:text-sm font-sans text-slate-950 dark:text-white tabular-numbers">
+                      <div className="flex items-baseline justify-center gap-2 mt-1.5 w-full pt-1.5 border-t border-slate-300/80 dark:border-slate-600/80">
+                        <span className="font-black text-sm sm:text-base font-sans text-slate-950 dark:text-white tabular-numbers">
                           {formatVES(displayVES)}
                         </span>
-                        <span className="text-[10.5px] font-bold text-slate-500 dark:text-slate-400">
+                        <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
                           ${displayUSD.toFixed(2)}
                         </span>
                       </div>
@@ -3331,32 +3338,32 @@ export default function DesktopPosPage() {
             </div>
           </div>
 
-          {/* Grid de teclas con contornos oscurecidos y alto contraste táctil */}
+          {/* Grid de teclas con contornos oscurecidos y alto contraste táctil (Botones Blancos) */}
           <div className="grid grid-cols-4 gap-1.5">
             {/* Fila 1: 7, 8, 9, Backspace */}
-            <button type="button" onClick={() => handleNumpadKey('7')} style={{ color: '#0f172a' }} className="h-10 rounded-xl bg-slate-100 hover:bg-slate-200 border-2 border-slate-300 hover:border-slate-500 transition-all active:scale-95 shadow-2xs cursor-pointer flex items-center justify-center">
+            <button type="button" onClick={() => handleNumpadKey('7')} style={{ color: '#0f172a' }} className="pos-calc-key h-10 rounded-xl bg-white hover:bg-slate-100 border-2 border-slate-300 hover:border-slate-500 transition-all active:scale-95 shadow-2xs cursor-pointer flex items-center justify-center">
               <span style={{ color: '#0f172a' }} className="font-black text-lg">7</span>
             </button>
-            <button type="button" onClick={() => handleNumpadKey('8')} style={{ color: '#0f172a' }} className="h-10 rounded-xl bg-slate-100 hover:bg-slate-200 border-2 border-slate-300 hover:border-slate-500 transition-all active:scale-95 shadow-2xs cursor-pointer flex items-center justify-center">
+            <button type="button" onClick={() => handleNumpadKey('8')} style={{ color: '#0f172a' }} className="pos-calc-key h-10 rounded-xl bg-white hover:bg-slate-100 border-2 border-slate-300 hover:border-slate-500 transition-all active:scale-95 shadow-2xs cursor-pointer flex items-center justify-center">
               <span style={{ color: '#0f172a' }} className="font-black text-lg">8</span>
             </button>
-            <button type="button" onClick={() => handleNumpadKey('9')} style={{ color: '#0f172a' }} className="h-10 rounded-xl bg-slate-100 hover:bg-slate-200 border-2 border-slate-300 hover:border-slate-500 transition-all active:scale-95 shadow-2xs cursor-pointer flex items-center justify-center">
+            <button type="button" onClick={() => handleNumpadKey('9')} style={{ color: '#0f172a' }} className="pos-calc-key h-10 rounded-xl bg-white hover:bg-slate-100 border-2 border-slate-300 hover:border-slate-500 transition-all active:scale-95 shadow-2xs cursor-pointer flex items-center justify-center">
               <span style={{ color: '#0f172a' }} className="font-black text-lg">9</span>
             </button>
-            <button type="button" onClick={() => handleNumpadKey('BACK')} style={{ color: '#0f172a' }} className="h-10 rounded-xl bg-slate-100 hover:bg-slate-200 border-2 border-slate-300 hover:border-slate-500 transition-all active:scale-95 shadow-2xs flex items-center justify-center cursor-pointer" title="Borrar">
+            <button type="button" onClick={() => handleNumpadKey('BACK')} style={{ color: '#0f172a' }} className="pos-calc-key h-10 rounded-xl bg-white hover:bg-slate-100 border-2 border-slate-300 hover:border-slate-500 transition-all active:scale-95 shadow-2xs flex items-center justify-center cursor-pointer" title="Borrar">
               <svg className="w-5 h-5 text-slate-900" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M3 12l6-7h12a2 2 0 012 2v10a2 2 0 01-2 2H9l-6-7z" />
               </svg>
             </button>
 
             {/* Fila 2: 4, 5, 6, C */}
-            <button type="button" onClick={() => handleNumpadKey('4')} style={{ color: '#0f172a' }} className="h-10 rounded-xl bg-slate-100 hover:bg-slate-200 border-2 border-slate-300 hover:border-slate-500 transition-all active:scale-95 shadow-2xs cursor-pointer flex items-center justify-center">
+            <button type="button" onClick={() => handleNumpadKey('4')} style={{ color: '#0f172a' }} className="pos-calc-key h-10 rounded-xl bg-white hover:bg-slate-100 border-2 border-slate-300 hover:border-slate-500 transition-all active:scale-95 shadow-2xs cursor-pointer flex items-center justify-center">
               <span style={{ color: '#0f172a' }} className="font-black text-lg">4</span>
             </button>
-            <button type="button" onClick={() => handleNumpadKey('5')} style={{ color: '#0f172a' }} className="h-10 rounded-xl bg-slate-100 hover:bg-slate-200 border-2 border-slate-300 hover:border-slate-500 transition-all active:scale-95 shadow-2xs cursor-pointer flex items-center justify-center">
+            <button type="button" onClick={() => handleNumpadKey('5')} style={{ color: '#0f172a' }} className="pos-calc-key h-10 rounded-xl bg-white hover:bg-slate-100 border-2 border-slate-300 hover:border-slate-500 transition-all active:scale-95 shadow-2xs cursor-pointer flex items-center justify-center">
               <span style={{ color: '#0f172a' }} className="font-black text-lg">5</span>
             </button>
-            <button type="button" onClick={() => handleNumpadKey('6')} style={{ color: '#0f172a' }} className="h-10 rounded-xl bg-slate-100 hover:bg-slate-200 border-2 border-slate-300 hover:border-slate-500 transition-all active:scale-95 shadow-2xs cursor-pointer flex items-center justify-center">
+            <button type="button" onClick={() => handleNumpadKey('6')} style={{ color: '#0f172a' }} className="pos-calc-key h-10 rounded-xl bg-white hover:bg-slate-100 border-2 border-slate-300 hover:border-slate-500 transition-all active:scale-95 shadow-2xs cursor-pointer flex items-center justify-center">
               <span style={{ color: '#0f172a' }} className="font-black text-lg">6</span>
             </button>
             <button type="button" onClick={() => handleNumpadKey('C')} className="h-10 rounded-xl bg-rose-100 hover:bg-rose-200 border-2 border-rose-300 hover:border-rose-500 transition-all active:scale-95 shadow-2xs cursor-pointer flex items-center justify-center" title="Limpiar">
@@ -3364,13 +3371,13 @@ export default function DesktopPosPage() {
             </button>
 
             {/* Fila 3: 1, 2, 3, Enter */}
-            <button type="button" onClick={() => handleNumpadKey('1')} style={{ color: '#0f172a' }} className="h-10 rounded-xl bg-slate-100 hover:bg-slate-200 border-2 border-slate-300 hover:border-slate-500 transition-all active:scale-95 shadow-2xs cursor-pointer flex items-center justify-center">
+            <button type="button" onClick={() => handleNumpadKey('1')} style={{ color: '#0f172a' }} className="pos-calc-key h-10 rounded-xl bg-white hover:bg-slate-100 border-2 border-slate-300 hover:border-slate-500 transition-all active:scale-95 shadow-2xs cursor-pointer flex items-center justify-center">
               <span style={{ color: '#0f172a' }} className="font-black text-lg">1</span>
             </button>
-            <button type="button" onClick={() => handleNumpadKey('2')} style={{ color: '#0f172a' }} className="h-10 rounded-xl bg-slate-100 hover:bg-slate-200 border-2 border-slate-300 hover:border-slate-500 transition-all active:scale-95 shadow-2xs cursor-pointer flex items-center justify-center">
+            <button type="button" onClick={() => handleNumpadKey('2')} style={{ color: '#0f172a' }} className="pos-calc-key h-10 rounded-xl bg-white hover:bg-slate-100 border-2 border-slate-300 hover:border-slate-500 transition-all active:scale-95 shadow-2xs cursor-pointer flex items-center justify-center">
               <span style={{ color: '#0f172a' }} className="font-black text-lg">2</span>
             </button>
-            <button type="button" onClick={() => handleNumpadKey('3')} style={{ color: '#0f172a' }} className="h-10 rounded-xl bg-slate-100 hover:bg-slate-200 border-2 border-slate-300 hover:border-slate-500 transition-all active:scale-95 shadow-2xs cursor-pointer flex items-center justify-center">
+            <button type="button" onClick={() => handleNumpadKey('3')} style={{ color: '#0f172a' }} className="pos-calc-key h-10 rounded-xl bg-white hover:bg-slate-100 border-2 border-slate-300 hover:border-slate-500 transition-all active:scale-95 shadow-2xs cursor-pointer flex items-center justify-center">
               <span style={{ color: '#0f172a' }} className="font-black text-lg">3</span>
             </button>
             <button
@@ -3383,10 +3390,10 @@ export default function DesktopPosPage() {
             </button>
 
             {/* Fila 4: 0 (span 2), . */}
-            <button type="button" onClick={() => handleNumpadKey('0')} style={{ color: '#0f172a' }} className="col-span-2 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 border-2 border-slate-300 hover:border-slate-500 transition-all active:scale-95 shadow-2xs cursor-pointer flex items-center justify-center">
+            <button type="button" onClick={() => handleNumpadKey('0')} style={{ color: '#0f172a' }} className="pos-calc-key col-span-2 h-10 rounded-xl bg-white hover:bg-slate-100 border-2 border-slate-300 hover:border-slate-500 transition-all active:scale-95 shadow-2xs cursor-pointer flex items-center justify-center">
               <span style={{ color: '#0f172a' }} className="font-black text-lg">0</span>
             </button>
-            <button type="button" onClick={() => handleNumpadKey('.')} style={{ color: '#0f172a' }} className="h-10 rounded-xl bg-slate-100 hover:bg-slate-200 border-2 border-slate-300 hover:border-slate-500 transition-all active:scale-95 shadow-2xs cursor-pointer flex items-center justify-center">
+            <button type="button" onClick={() => handleNumpadKey('.')} style={{ color: '#0f172a' }} className="pos-calc-key h-10 rounded-xl bg-white hover:bg-slate-100 border-2 border-slate-300 hover:border-slate-500 transition-all active:scale-95 shadow-2xs cursor-pointer flex items-center justify-center">
               <span style={{ color: '#0f172a' }} className="font-black text-lg">.</span>
             </button>
           </div>

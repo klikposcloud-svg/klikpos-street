@@ -1,15 +1,16 @@
 {
-  "version": "2.4.1",
+  "version": "2.4.5",
   "releaseDate": "2026-09-27",
-  "title": "KlikPOS v2.4.1 - Interfaz Ultra-Espaciosa & Alto Contraste",
+  "title": "KlikPOS v2.4.5 - Modo Standalone Tablet & Móvil, Dock Curvo Animado y 4 Estilos de Cards (Food, Cuadrícula, Lista, Minimalista)",
   "notes": [
-    "Diseño de catálogo optimizado: reducción de 7 a 4 columnas por fila con mayor espacio.",
-    "Títulos de productos en 2 líneas completas para lectura limpia sin truncamientos.",
-    "Corrección de alto contraste en textos claros (teclado numérico, balanza y reloj 100% legibles).",
-    "Accesos directos del carrusel ensanchados para mayor confort táctil en cajas rápidas.",
-    "Actualizador automático conectado a la nube oficial de KlikPOS."
+    "Nueva interfaz 100% autónoma para Tablets y Teléfonos (/tablet-pos) para puestos de comida rápida, food trucks y ambulantes sin requerir PC.",
+    "Dock inferior animado de diseño orgánico con hendidura cóncava y botón central flotante sobredimensionado 'Cobrar'.",
+    "4 Estilos de Vista de Cards intercambiables al instante: Food (cards grandes con foto hero y etiquetas), Cuadrícula (estándar ergonómica), Lista (alta densidad para inventario) y Minimalista (botones de máximo contraste para horas pico).",
+    "Modal de personalización con opciones frecuentes de comida rápida (Con todo, Sin cebolla, Extra salsa tártara/ajo, Para llevar, etc.).",
+    "Doble cajón deslizable: Izquierdo (Ajustes, Tasa BCV, Menú Digital QR con enlace de WhatsApp, Impresora Bluetooth) y Derecho (Comanda activa con desglose y notas de cocina).",
+    "Corrección de contraste visual para teclado y elementos críticos según las normativas de KlikPOS."
   ],
-  "windowsUrl": "https://github.com/klikposcloud-svg/klikpos/releases/download/v2.4.1/KlikPOS-Enterprise-Setup-v2.4.1.exe",
-  "androidUrl": "https://github.com/klikposcloud-svg/klikpos/releases/download/v2.4.1/KlikPOS_Movil_Full.apk",
+  "windowsUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v2.4.5/KlikPOS_Desktop_Full_Setup.exe",
+  "androidUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v2.4.5/KlikPOS_Movil_Full.apk",
   "mandatory": false
 }

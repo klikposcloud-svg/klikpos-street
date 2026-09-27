@@ -36,6 +36,7 @@ import {
   FileText,
 } from 'lucide-react';
 import { removeBackgroundToWhiteCanvas } from '@/lib/background-remover';
+import { Icon } from '@iconify/react';
 
 interface ScannedHistoryItem {
   barcode: string;
@@ -51,6 +52,8 @@ interface MobileCatalogItem {
   priceUSD: number;
   stock: number;
   image?: string;
+  icon?: string;
+  color?: string;
   isFixedPriceVES?: boolean;
   fixedPriceVES?: number;
 }
@@ -67,9 +70,299 @@ interface MobileCartItem {
   fixedPriceVES?: number;
 }
 
+// Icono Alternado Outline / Fill y Vectorial para Móvil
+const getMobileProductIcon = (p: MobileCatalogItem, isOutline: boolean) => {
+  if (p.icon) {
+    return (
+      <Icon 
+        icon={p.icon} 
+        className="w-10 h-10 text-slate-800 transition-transform group-hover:scale-110 drop-shadow-xs" 
+      />
+    );
+  }
+
+  const text = `${p.category || ''} ${p.name || ''}`.toLowerCase();
+
+  // 1. Fast Food / Hamburguesa / Perro / Pizza
+  if (text.includes('burger') || text.includes('hamburguesa') || text.includes('pizza') || text.includes('perro') || text.includes('snack') || text.includes('sandwich')) {
+    if (isOutline) {
+      return (
+        <svg className="w-10 h-10 text-slate-800" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M4 11h16a1 1 0 0 1 1 1v1a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4v-1a1 1 0 0 1 1-1Z" />
+          <path d="M6 11V7a6 6 0 0 1 12 0v4" />
+          <line x1="4" y1="17" x2="20" y2="17" />
+        </svg>
+      );
+    }
+    return (
+      <svg className="w-10 h-10 fill-current text-slate-800" viewBox="0 0 24 24">
+        <path d="M12 2C6.48 2 2 6.48 2 12v1h20v-1c0-5.52-4.48-10-10-10zm-8 13h16v1c0 2.21-1.79 4-4 4H8c-2.21 0-4-1.79-4-4v-1zm0 3h16v2H4z" />
+      </svg>
+    );
+  }
+
+  // 2. Café / Desayuno
+  if (text.includes('cafe') || text.includes('café') || text.includes('coffee') || text.includes('espresso') || text.includes('latte') || text.includes('te') || text.includes('té')) {
+    if (isOutline) {
+      return (
+        <svg className="w-10 h-10 text-slate-800" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M17 8h1a4 4 0 1 1 0 8h-1" />
+          <path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z" />
+          <line x1="6" y1="2" x2="6" y2="4" />
+          <line x1="10" y1="2" x2="10" y2="4" />
+          <line x1="14" y1="2" x2="14" y2="4" />
+        </svg>
+      );
+    }
+    return (
+      <svg className="w-10 h-10 fill-current text-slate-800" viewBox="0 0 24 24">
+        <path d="M4 19h16v2H4z" />
+        <path d="M20 8h-2V5H4v9c0 2.21 1.79 4 4 4h6c2.21 0 4-1.79 4-4v-1h2c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm0 4h-2v-2h2v2z" />
+        <path d="M7 2h2v2H7zm4 0h2v2h-2zm4 0h2v2h-2z" />
+      </svg>
+    );
+  }
+
+  // 3. Panadería / Croissant / Bakery
+  if (text.includes('pan') || text.includes('croissant') || text.includes('bakery') || text.includes('hojaldre') || text.includes('pastel')) {
+    if (isOutline) {
+      return (
+        <svg className="w-10 h-10 text-slate-800" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="m4.6 13.4 4.8 4.8a2 2 0 0 0 2.8 0l7-7a6 6 0 0 0-8.5-8.5l-7 7a2 2 0 0 0 0 2.8z" />
+          <path d="m8.5 8.5 7 7" />
+          <path d="m11 5 7 7" />
+          <path d="m6 10 7 7" />
+        </svg>
+      );
+    }
+    return (
+      <svg className="w-10 h-10 fill-current text-slate-800" viewBox="0 0 24 24">
+        <path d="M12 4c-4.42 0-8 3.58-8 8 0 1.66.51 3.2 1.38 4.49L3 18.5c-.55.55-.55 1.45 0 2 .55.55 1.45.55 2 0l2.01-2.01C8.29 19.36 10.05 20 12 20s3.71-.64 4.99-1.51L19 20.5c.55.55 1.45.55 2 0 .55-.55.55-1.45 0-2l-2.38-2.01C19.49 15.2 20 13.66 20 12c0-4.42-3.58-8-8-8zm-2 3c.73 0 1.43.14 2.08.38l-1.04 2.08c-.34-.09-.69-.14-1.04-.14-.73 0-1.42.17-2.04.47L7 7.75C7.9 7.28 8.92 7 10 7zm4 0c1.08 0 2.1.28 3 .75l-.96 2.04c-.62-.3-1.31-.47-2.04-.47-.35 0-.7.05-1.04.14L12.92 7.38C13.57 7.14 14.27 7 15 7z" />
+      </svg>
+    );
+  }
+
+  // 4. Postres / Dulces / Tortas
+  if (text.includes('torta') || text.includes('dulce') || text.includes('postre') || text.includes('cake') || text.includes('delicate') || text.includes('pie')) {
+    if (isOutline) {
+      return (
+        <svg className="w-10 h-10 text-slate-800" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M20 21v-8a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8" />
+          <path d="M4 16s.5-1 2-1 2.5 2 4 2 2.5-2 4-2 2.5 2 4 2 2-1 2-1" />
+          <path d="M2 21h20" />
+          <path d="M7 8v2" />
+          <path d="M12 8v2" />
+          <path d="M17 8v2" />
+        </svg>
+      );
+    }
+    return (
+      <svg className="w-10 h-10 fill-current text-slate-800" viewBox="0 0 24 24">
+        <path d="M12 2c-1.1 0-2 .9-2 2 0 .19.03.37.08.54C7.72 5.3 6 7.42 6 10c0 .34.03.67.1 1H5c-1.1 0-2 .9-2 2v1h18v-1c0-1.1-.9-2-2-2h-1.1c.07-.33.1-.66.1-1 0-2.58-1.72-4.7-4.08-5.46.05-.17.08-.35.08-.54 0-1.1-.9-2-2-2zm-7 13v5c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2v-5H5z" />
+      </svg>
+    );
+  }
+
+  // 5. Víveres / Goods / Abarrotes / Arroz
+  if (text.includes('goods') || text.includes('shopping') || text.includes('viveres') || text.includes('víveres') || text.includes('mercado') || text.includes('arroz') || text.includes('harina')) {
+    if (isOutline) {
+      return (
+        <svg className="w-10 h-10 text-slate-800" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
+          <path d="M3 6h18" />
+          <path d="M16 10a4 4 0 0 1-8 0" />
+        </svg>
+      );
+    }
+    return (
+      <svg className="w-10 h-10 fill-current text-slate-800" viewBox="0 0 24 24">
+        <path d="M16 6V4c0-2.21-1.79-4-4-4S8 1.79 8 4v2H3c-1.1 0-2 .9-2 2l1.6 13.6c.12 1.05 1.01 1.85 2.07 1.85h14.66c1.06 0 1.95-.8 2.07-1.85L23 8c0-1.1-.9-2-2-2h-5zm-6-2c0-1.1.9-2 2-2s2 .9 2 2v2h-4V4zm8 16H6L4.71 8H8v2c0 .55.45 1 1 1s1-.45 1-1V8h4v2c0 .55.45 1 1 1s1-.45 1-1V8h3.29L18 20z" />
+      </svg>
+    );
+  }
+
+  // 6. Lácteos / Leche / Queso
+  if (text.includes('leche') || text.includes('lacteo') || text.includes('lácteo') || text.includes('queso') || text.includes('mantequilla')) {
+    if (isOutline) {
+      return (
+        <svg className="w-10 h-10 text-slate-800" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M8 2h8" />
+          <path d="M9 2v3a4 4 0 0 1-.8 2.4L6 10.4A4 4 0 0 0 5 13v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7a4 4 0 0 0-1-2.6l-2.2-3A4 4 0 0 1 15 5V2" />
+        </svg>
+      );
+    }
+    return (
+      <svg className="w-10 h-10 fill-current text-slate-800" viewBox="0 0 24 24">
+        <path d="M9 2h6v2H9zm9 7.5V6H6v3.5l2 2V21c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-9.5l2-2zM14 20h-4v-7h4v7zm-2-9l-1-1V8h2v2l-1 1z" />
+      </svg>
+    );
+  }
+
+  // 7. Carnes / Pollo / Res / Charcutería
+  if (text.includes('carne') || text.includes('pollo') || text.includes('res') || text.includes('cerdo') || text.includes('chuleta') || text.includes('jamon') || text.includes('jamón')) {
+    if (isOutline) {
+      return (
+        <svg className="w-10 h-10 text-slate-800" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12.5" cy="8.5" r="2.5" />
+          <path d="M12.5 2a6.5 6.5 0 0 0-6.22 4.6c-1.1 3.13-.07 6.57 2.37 8.66A8 8 0 1 0 19 8.5h-6.5" />
+        </svg>
+      );
+    }
+    return (
+      <svg className="w-10 h-10 fill-current text-slate-800" viewBox="0 0 24 24">
+        <path d="M19.43 12.98c-.1-.4-.25-.79-.43-1.15-1.42-2.84-4.83-4.14-7.85-2.99l-2.02.77c-.52.2-1.09.2-1.61 0l-2.02-.77C3.12 7.9 1.48 10.9 2.06 13.56c.55 2.53 2.7 4.44 5.3 4.44 1.13 0 2.22-.36 3.12-1.04l1.52-1.14 1.52 1.14c.9.68 1.99 1.04 3.12 1.04 2.6 0 4.75-1.91 5.3-4.44.1-.47.11-.94.07-1.41zM8 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z" />
+      </svg>
+    );
+  }
+
+  // 8. Frutas / Vegetales
+  if (text.includes('fruta') || text.includes('manzana') || text.includes('verdura') || text.includes('vegetal') || text.includes('hortaliza')) {
+    if (isOutline) {
+      return (
+        <svg className="w-10 h-10 text-slate-800" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 20.94c1.5 0 2.75 1.06 4 1.06 3 0 6-8 6-12.22A4.91 4.91 0 0 0 17 5c-2.22 0-4 1.44-5 2-1-.56-2.78-2-5-2a4.9 4.9 0 0 0-5 4.78C2 14 5 22 8 22c1.25 0 2.5-1.06 4-1.06Z" />
+          <path d="M10 2c1 .5 2 2 2 5" />
+        </svg>
+      );
+    }
+    return (
+      <svg className="w-10 h-10 fill-current text-slate-800" viewBox="0 0 24 24">
+        <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 4.29c.62-.75 1.04-1.8 1.01-2.29-.9.04-1.98.6-2.61 1.34-.56.64-1.05 1.69-.92 2.68.99.08 1.9-.98 2.52-1.73z" />
+      </svg>
+    );
+  }
+
+  // 9. Bebidas / Refrescos
+  if (text.includes('bebida') || text.includes('refresco') || text.includes('jugo') || text.includes('agua') || text.includes('soda')) {
+    if (isOutline) {
+      return (
+        <svg className="w-10 h-10 text-slate-800" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M7 2h10l-1 10.5a4 4 0 0 1-4 3.5h0a4 4 0 0 1-4-3.5L7 2Z" />
+          <path d="M12 16v6" />
+          <path d="M8 22h8" />
+        </svg>
+      );
+    }
+    return (
+      <svg className="w-10 h-10 fill-current text-slate-800" viewBox="0 0 24 24">
+        <path d="M5 2h14l-1.5 12a4.5 4.5 0 0 1-4.5 4h-2a4.5 4.5 0 0 1-4.5-4L5 2zm6 17v3H8v2h8v-2h-3v-3h-2z" />
+      </svg>
+    );
+  }
+
+  // 10. Limpieza / Detergente
+  if (text.includes('limpieza') || text.includes('detergente') || text.includes('jabon') || text.includes('jabón') || text.includes('cloro')) {
+    if (isOutline) {
+      return (
+        <svg className="w-10 h-10 text-slate-800" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="m14 4-2-2-4 4 2 2" />
+          <path d="m16 8 2 2-7 7H7v-4l7-7Z" />
+          <path d="m19 11 2 2-3 3-2-2" />
+          <path d="m5 19-3 3" />
+        </svg>
+      );
+    }
+    return (
+      <svg className="w-10 h-10 fill-current text-slate-800" viewBox="0 0 24 24">
+        <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z" />
+      </svg>
+    );
+  }
+
+  // Fallback: Paquete / Caja
+  if (isOutline) {
+    return (
+      <svg className="w-10 h-10 text-slate-800" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M16.5 9.4 7.55 4.24a1.78 1.78 0 0 0-2.5 1.55v8.42a1.78 1.78 0 0 0 .89 1.54l8.96 5.16a1.78 1.78 0 0 0 2.5-1.55V10.94a1.78 1.78 0 0 0-.9-1.54Z" />
+        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+        <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+        <line x1="12" y1="22.08" x2="12" y2="12" />
+      </svg>
+    );
+  }
+  return (
+    <svg className="w-10 h-10 fill-current text-slate-800" viewBox="0 0 24 24">
+      <path d="M21 16.5c0 .38-.21.71-.53.88l-7.9 4.44c-.16.12-.36.18-.57.18s-.41-.06-.57-.18l-7.9-4.44A.991.991 0 0 1 3 16.5v-9c0-.38.21-.71.53-.88l7.9-4.44c.16-.12.36-.18.57-.18s.41.06.57.18l7.9 4.44c.32.17.53.5.53.88v9zM12 4.15L6.04 7.5 12 10.85l5.96-3.35L12 4.15z" />
+    </svg>
+  );
+};
+
+// Contrastes suaves con cambio de tonalidades por Rubro / Categoría para Móvil
+const getMobileCardToneClasses = (p: MobileCatalogItem, index: number, paletteMode: 'category' | 'mono' = 'category') => {
+  if (p.color) {
+    return 'shadow-2xs border-2 border-slate-300';
+  }
+
+  if (paletteMode === 'mono') {
+    const mod = index % 3;
+    if (mod === 0) return 'bg-white text-slate-900 border-2 border-slate-300 shadow-2xs';
+    if (mod === 1) return 'bg-[#dce3ec] text-slate-900 border-2 border-[#9cb1c5] shadow-2xs';
+    return 'bg-[#d4dfea] text-slate-900 border-2 border-[#93a9be] shadow-2xs';
+  }
+
+  const text = `${p.category || ''} ${p.name || ''}`.toLowerCase();
+
+  // Carnes, Pollo, Res, Cerdo -> Rosado / Salmón suave
+  if (text.includes('carne') || text.includes('pollo') || text.includes('res') || text.includes('cerdo') || text.includes('meat') || text.includes('chuleta')) {
+    return 'bg-[#ffe4e6] text-slate-950 border-2 border-[#fecdd3] hover:border-[#fb7185] shadow-2xs';
+  }
+
+  // Charcutería, Jamón, Embutidos -> Rosa orquídea suave
+  if (text.includes('charcuter') || text.includes('jamon') || text.includes('jamón') || text.includes('salchicha') || text.includes('tocineta')) {
+    return 'bg-[#fce7f3] text-slate-950 border-2 border-[#fbcfe8] hover:border-[#f472b6] shadow-2xs';
+  }
+
+  // Lácteos, Leche, Quesos, Mantequilla -> Celeste cielo suave
+  if (text.includes('lacteo') || text.includes('lácteo') || text.includes('leche') || text.includes('queso') || text.includes('mantequilla') || text.includes('dairy')) {
+    return 'bg-[#e0f2fe] text-slate-950 border-2 border-[#bae6fd] hover:border-[#38bdf8] shadow-2xs';
+  }
+
+  // Frutas, Verduras, Hortalizas, Vegetales -> Menta fresca suave
+  if (text.includes('fruta') || text.includes('verdura') || text.includes('hortaliza') || text.includes('vegetal') || text.includes('produce') || text.includes('manzana')) {
+    return 'bg-[#dcfce7] text-slate-950 border-2 border-[#bbf7d0] hover:border-[#4ade80] shadow-2xs';
+  }
+
+  // Café, Té, Espresso, Desayuno -> Moca cálido / Trigo suave
+  if (text.includes('café') || text.includes('cafe') || text.includes('espresso') || text.includes('te') || text.includes('té') || text.includes('latte')) {
+    return 'bg-[#f5ede4] text-slate-950 border-2 border-[#d6c5b3] hover:border-[#bca48d] shadow-2xs';
+  }
+
+  // Panadería, Repostería, Dulces, Cakes, Croissants -> Ámbar dorado suave
+  if (text.includes('pan') || text.includes('croissant') || text.includes('bakery') || text.includes('torta') || text.includes('cake') || text.includes('dulce') || text.includes('postre')) {
+    return 'bg-[#fef3c7] text-slate-950 border-2 border-[#fcd34d] hover:border-[#f59e0b] shadow-2xs';
+  }
+
+  // Víveres, Abarrotes, Despensa, Harina, Arroz, Granos -> Vainilla cálida suave
+  if (text.includes('viveres') || text.includes('víveres') || text.includes('arroz') || text.includes('harina') || text.includes('pasta') || text.includes('aceite') || text.includes('grano')) {
+    return 'bg-[#fef9c3] text-slate-950 border-2 border-[#fde047] hover:border-[#eab308] shadow-2xs';
+  }
+
+  // Bebidas, Refrescos, Jugos, Aguas -> Aqua / Turquesa suave
+  if (text.includes('bebida') || text.includes('refresco') || text.includes('jugo') || text.includes('agua') || text.includes('soda') || text.includes('beverage')) {
+    return 'bg-[#ccfbf1] text-slate-950 border-2 border-[#99f6e4] hover:border-[#2dd4bf] shadow-2xs';
+  }
+
+  // Limpieza, Aseo, Hogar, Detergente -> Lavanda / Violeta suave
+  if (text.includes('limpieza') || text.includes('detergente') || text.includes('jabon') || text.includes('jabón') || text.includes('papel') || text.includes('aseo')) {
+    return 'bg-[#fae8ff] text-slate-950 border-2 border-[#f5d0fe] hover:border-[#e879f9] shadow-2xs';
+  }
+
+  // Fallback suave
+  const mod = index % 3;
+  if (mod === 0) return 'bg-white text-slate-950 border-2 border-slate-300 hover:border-slate-500 shadow-2xs';
+  if (mod === 1) return 'bg-[#e2e8f0] text-slate-950 border-2 border-[#cbd5e1] hover:border-slate-500 shadow-2xs';
+  return 'bg-[#f1f5f9] text-slate-950 border-2 border-[#cbd5e1] hover:border-slate-500 shadow-2xs';
+};
+
 export default function MobileScannerPage() {
   const [session, setSession] = useState('caja-1');
-  const [activeTab, setActiveTab] = useState<'pos' | 'scale' | 'gun' | 'inventory' | 'create'>('pos');
+  const [activeTab, setActiveTab] = useState<'pos' | 'scale' | 'gun' | 'inventory' | 'create'>(() => {
+    if (typeof window !== 'undefined') {
+      const p = new URLSearchParams(window.location.search).get('tab');
+      if (p && ['pos', 'scale', 'gun', 'inventory', 'create'].includes(p)) return p as any;
+    }
+    return 'pos';
+  });
   const [scannerActive, setScannerActive] = useState(false);
   const [history, setHistory] = useState<ScannedHistoryItem[]>([]);
   const [lastScanned, setLastScanned] = useState<string | null>(null);
@@ -81,6 +374,24 @@ export default function MobileScannerPage() {
   const [mobileCart, setMobileCart] = useState<MobileCartItem[]>([]);
   const [posSearch, setPosSearch] = useState('');
   const [selectedMobileCategory, setSelectedMobileCategory] = useState('Todos');
+  const [mobilePaletteMode, setMobilePaletteMode] = useState<'category' | 'mono'>('category');
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('klikpos_mobile_palette');
+      if (saved === 'category' || saved === 'mono') {
+        setMobilePaletteMode(saved);
+      }
+    } catch {}
+  }, []);
+
+  const toggleMobilePaletteMode = () => {
+    const next = mobilePaletteMode === 'category' ? 'mono' : 'category';
+    setMobilePaletteMode(next);
+    try {
+      localStorage.setItem('klikpos_mobile_palette', next);
+    } catch {}
+  };
   const [showCartDrawer, setShowCartDrawer] = useState(false);
   const [showMobilePaymentModal, setShowMobilePaymentModal] = useState(false);
   const [mobilePaymentMethod, setMobilePaymentMethod] = useState<'cash_usd' | 'cash_ves' | 'pago_movil' | 'punto_venta' | 'zelle' | 'credit'>('cash_usd');
@@ -219,12 +530,26 @@ export default function MobileScannerPage() {
     }
   };
 
+  // Safe haptic feedback helper
+  const safeVibrate = (pattern: number | number[]) => {
+    try {
+      if (typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') {
+        navigator.vibrate(pattern);
+      }
+    } catch {}
+  };
+
   // Get session from URL query and maintain heartbeat
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
       const s = params.get('session') || 'caja-1';
       setSession(s);
+
+      const urlTab = params.get('tab');
+      if (urlTab && ['pos', 'scale', 'gun', 'inventory', 'create'].includes(urlTab)) {
+        setActiveTab(urlTab as any);
+      }
 
       // Restaurar última foto tomada si el navegador móvil recargó
       try {
@@ -1347,12 +1672,12 @@ export default function MobileScannerPage() {
       {/* Top Mobile Bar */}
       <header className="bg-white border-b border-slate-300 px-4 py-2.5 sticky top-0 z-40 flex items-center justify-between shadow-xs shrink-0">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-[var(--brand-primary,#0369a1)] text-white flex items-center justify-center font-black text-sm">
-            V
+          <div className="w-8 h-8 rounded-lg bg-[var(--brand-primary,#0369a1)] text-white flex items-center justify-center font-black text-sm shadow-xs">
+            K
           </div>
           <div>
             <h1 className="text-sm font-black text-slate-900 leading-tight tracking-tight">
-              Venematic Mobile
+              KlikPOS Móvil
             </h1>
             <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -1396,7 +1721,7 @@ export default function MobileScannerPage() {
           <div className="flex items-center gap-2.5">
             <span className="text-xl">📲</span>
             <div>
-              <p className="text-xs font-black leading-tight">Instala Venematic en tu Celular</p>
+              <p className="text-xs font-black leading-tight">Instala KlikPOS en tu Celular</p>
               <p className="text-xs text-white/80">Acceso directo como app nativa a pantalla completa</p>
             </div>
           </div>
@@ -3553,8 +3878,16 @@ export default function MobileScannerPage() {
               )}
             </div>
 
-            {/* Pastillas de Categorías */}
-            <div className="flex gap-1.5 overflow-x-auto pb-0.5 no-scrollbar text-[10px]">
+            {/* Pastillas de Categorías + Conmutador de Paleta */}
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 no-scrollbar text-[10px]">
+              <button
+                type="button"
+                onClick={toggleMobilePaletteMode}
+                className="px-2.5 py-1 rounded-lg font-black shrink-0 transition-all flex items-center gap-1 bg-white border border-slate-300 shadow-2xs text-slate-800 active:scale-95"
+                title="Alternar entre paleta por rubro o monocromática"
+              >
+                <span>{mobilePaletteMode === 'category' ? '🎨 Rubro' : '🔘 Mono'}</span>
+              </button>
               {['Todos', ...Array.from(new Set(inventoryList.map((p) => p.category).filter(Boolean)))].map((cat) => (
                 <button
                   key={cat}
@@ -3604,26 +3937,29 @@ export default function MobileScannerPage() {
                   const inCartQty = mobileCart.find((c) => c.barcode === p.barcode)?.qty || 0;
                   const liveStock = Math.max(0, p.stock - inCartQty);
                   const isOutOfStock = p.stock > 0 && liveStock === 0;
+                  const toneClasses = getMobileCardToneClasses(p, idx, mobilePaletteMode);
                   return (
                     <div
                       key={p.id || idx}
                       onClick={() => addToMobileCart(p)}
-                      className={`p-2.5 bg-white rounded-2xl border transition-all flex flex-col justify-between cursor-pointer group select-none relative overflow-hidden ${
+                      className={`p-2.5 rounded-2xl border-2 transition-all flex flex-col justify-between cursor-pointer group select-none relative overflow-hidden ${toneClasses} ${
                         isOutOfStock
-                          ? 'border-rose-200 opacity-80 shadow-none'
-                          : 'border-slate-200 shadow-2xs hover:border-emerald-400 active:scale-[0.97]'
+                          ? 'opacity-70 shadow-none'
+                          : 'active:scale-[0.97]'
                       }`}
                     >
-                      {/* Imagen con badges de Categoría y Stock en Vivo */}
-                      <div className="w-full h-24 rounded-xl bg-slate-50 border border-slate-100 overflow-hidden flex items-center justify-center mb-2 relative shrink-0">
+                      {/* Imagen o Icono Vectorial con badges de Categoría y Stock en Vivo */}
+                      <div className="w-full h-24 rounded-xl bg-white/70 border border-slate-200/80 overflow-hidden flex items-center justify-center mb-2 relative shrink-0 shadow-inner">
                         {p.image ? (
                           <img src={p.image} alt={p.name} className="w-full h-full object-contain p-1" />
                         ) : (
-                          <Tag className="w-8 h-8 text-slate-300" />
+                          <div className="w-full h-full flex items-center justify-center p-2 text-slate-800">
+                            {getMobileProductIcon(p, idx % 2 === 0)}
+                          </div>
                         )}
 
                         {/* Categoría Badge */}
-                        <span className="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded-md bg-white/90 backdrop-blur-xs text-[9px] font-bold text-slate-600 border border-slate-200/80 shadow-2xs truncate max-w-[85px]">
+                        <span className="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded-md bg-white/95 backdrop-blur-xs text-[9px] font-black text-slate-700 border border-slate-300 shadow-2xs truncate max-w-[85px]">
                           {p.category || 'General'}
                         </span>
 
@@ -3634,7 +3970,7 @@ export default function MobileScannerPage() {
                               ? 'bg-rose-600 text-white animate-pulse'
                               : liveStock <= 3
                               ? 'bg-amber-500 text-white'
-                              : 'bg-slate-900/85 backdrop-blur-xs text-white'
+                              : 'bg-slate-900/90 backdrop-blur-xs text-white'
                           }`}
                         >
                           {isOutOfStock ? 'Agotado (0)' : `Stk: ${liveStock}`}
@@ -3643,34 +3979,34 @@ export default function MobileScannerPage() {
 
                       {/* Nombre y Código */}
                       <div className="flex-1 min-w-0 mb-2">
-                        <h4 className="font-bold text-xs text-slate-900 line-clamp-2 leading-snug min-h-[30px]">
+                        <h4 className="font-extrabold text-xs text-slate-950 line-clamp-2 leading-snug min-h-[32px]">
                           {p.name}
                         </h4>
-                        <span className="text-[9px] font-mono text-slate-400 truncate block mt-0.5">
+                        <span className="text-[9px] font-mono text-slate-500 truncate block mt-0.5">
                           {p.barcode}
                         </span>
                       </div>
 
                       {/* Fila Inferior: Precios y Botón Directo de Sumar */}
-                      <div className="flex items-center justify-between pt-1 border-t border-slate-100">
+                      <div className="flex items-center justify-between pt-1.5 border-t border-slate-900/10">
                         <div>
-                          <span className="font-mono font-black text-xs text-emerald-700 block tabular-numbers leading-tight">
+                          <span className="font-mono font-black text-sm text-emerald-800 block tabular-numbers leading-tight">
                             ${p.priceUSD.toFixed(2)}
                           </span>
-                          <span className="font-mono text-[9px] text-slate-500 block tabular-numbers">
+                          <span className="font-mono text-[9px] font-bold text-slate-600 block tabular-numbers">
                             Bs. {priceVES.toFixed(2)}
                           </span>
                         </div>
 
-                        {/* Botón táctil + */}
+                        {/* Botón táctil + ergonómico */}
                         <div
-                          className={`w-7 h-7 rounded-xl border flex items-center justify-center transition-all shadow-2xs shrink-0 ${
+                          className={`w-9 h-9 rounded-xl border flex items-center justify-center transition-all shadow-xs shrink-0 ${
                             isOutOfStock
                               ? 'bg-slate-100 text-slate-400 border-slate-200'
-                              : 'bg-emerald-50 text-emerald-700 border border-emerald-300 group-hover:bg-emerald-600 group-hover:text-white group-active:scale-90'
+                              : 'bg-emerald-600 text-white border-emerald-700 hover:bg-emerald-700 active:scale-90 shadow-emerald-700/20'
                           }`}
                         >
-                          <Plus className="w-4 h-4 stroke-[2.5]" />
+                          <Plus className="w-5 h-5 stroke-[2.5]" />
                         </div>
                       </div>
                     </div>
@@ -3824,7 +4160,7 @@ export default function MobileScannerPage() {
           <button
             type="button"
             onClick={() => {
-              if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(25);
+              safeVibrate(25);
               setActiveTab('pos');
             }}
             className={`flex flex-col items-center justify-center py-1 px-2.5 rounded-xl transition-all duration-150 relative ${
@@ -3850,7 +4186,7 @@ export default function MobileScannerPage() {
           <button
             type="button"
             onClick={() => {
-              if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(25);
+              safeVibrate(25);
               setActiveTab('scale');
             }}
             className={`flex flex-col items-center justify-center py-1 px-2.5 rounded-xl transition-all duration-150 relative ${
@@ -3871,7 +4207,7 @@ export default function MobileScannerPage() {
           <button
             type="button"
             onClick={async () => {
-              if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate([40, 20, 40]);
+              safeVibrate([40, 20, 40]);
               setActiveTab('gun');
               if (!scannerActive) {
                 startScanner();
@@ -3898,7 +4234,7 @@ export default function MobileScannerPage() {
           <button
             type="button"
             onClick={() => {
-              if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(25);
+              safeVibrate(25);
               setActiveTab('inventory');
             }}
             className={`flex flex-col items-center justify-center py-1 px-2.5 rounded-xl transition-all duration-150 relative ${
@@ -3919,7 +4255,7 @@ export default function MobileScannerPage() {
           <button
             type="button"
             onClick={() => {
-              if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(25);
+              safeVibrate(25);
               setActiveTab('create');
             }}
             className={`flex flex-col items-center justify-center py-1 px-2.5 rounded-xl transition-all duration-150 relative ${

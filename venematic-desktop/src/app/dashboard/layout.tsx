@@ -10,7 +10,7 @@ import LoginModal from '@/components/LoginModal';
 import AdminPinModal from '@/components/AdminPinModal';
 import LockScreenModal from '@/components/LockScreenModal';
 import AutoUpdateModal from '@/components/AutoUpdateModal';
-import { LogOut, ShieldCheck, User, Lock, RefreshCw, CheckCircle2, Sun, Moon, Sparkles, Clock, Cloud, Smartphone, Users, X, QrCode } from 'lucide-react';
+import { LogOut, ShieldCheck, User, Lock, RefreshCw, CheckCircle2, Sun, Moon, Sparkles, Clock, Cloud, Smartphone, Users, X, QrCode, ShoppingCart, Package, Receipt, BarChart3, Settings, PanelLeftClose, PanelLeft } from 'lucide-react';
 import { STANDARD_RUBROS, StandardRubroId } from '@/lib/utils/business-rubros';
 import { applyBrandingToDOM, applyTheme, getCurrentTheme, ThemeMode } from '@/lib/theme';
 import CloudSyncWidget from '@/components/CloudSyncWidget';
@@ -32,55 +32,35 @@ const NAV_ITEMS: NavItem[] = [
     label: 'Punto de Venta',
     href: '/dashboard/pos',
     shortcut: 'F1',
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.75} viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z" />
-      </svg>
-    ),
+    icon: <ShoppingCart className="w-5 h-5" />,
   },
   {
     key: 'inventory',
     label: 'Inventario',
     href: '/dashboard/inventory',
     shortcut: 'F2',
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.75} viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-      </svg>
-    ),
+    icon: <Package className="w-5 h-5" />,
   },
   {
     key: 'sales',
     label: 'Ventas',
     href: '/dashboard/sales',
     shortcut: 'F3',
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.75} viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-      </svg>
-    ),
+    icon: <Receipt className="w-5 h-5" />,
   },
   {
     key: 'customers',
     label: 'Clientes',
     href: '/dashboard/customers',
     shortcut: 'F4',
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.75} viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-      </svg>
-    ),
+    icon: <Users className="w-5 h-5" />,
   },
   {
     key: 'reports',
     label: 'Cierres',
     href: '/dashboard/reports',
     shortcut: 'F5',
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.75} viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-      </svg>
-    ),
+    icon: <BarChart3 className="w-5 h-5" />,
   },
   {
     key: 'settings',
@@ -88,12 +68,7 @@ const NAV_ITEMS: NavItem[] = [
     href: '/dashboard/settings',
     shortcut: 'F8',
     adminOnly: true,
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.75} viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-        <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-      </svg>
-    ),
+    icon: <Settings className="w-5 h-5" />,
   },
 ];
 
@@ -116,8 +91,22 @@ export default function DesktopDashboardLayout({
   const [phoneConnected, setPhoneConnected] = useState<boolean>(false);
   const [phoneDeviceName, setPhoneDeviceName] = useState<string>('');
   const [currentTime, setCurrentTime] = useState('');
-  const [clockDate, setClockDate] = useState('');
-  const [clockTime, setClockTime] = useState('');
+  const [clockDate, setClockDate] = useState<string>(() => {
+    try {
+      const now = new Date();
+      const d = now.toLocaleDateString('es-VE', { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' });
+      return d.charAt(0).toUpperCase() + d.slice(1);
+    } catch {
+      return '';
+    }
+  });
+  const [clockTime, setClockTime] = useState<string>(() => {
+    try {
+      return new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+    } catch {
+      return '';
+    }
+  });
   const [isScreenLocked, setIsScreenLocked] = useState(false);
   const [isLoginDismissed, setIsLoginDismissed] = useState(false);
   const [activeRubroInfo, setActiveRubroInfo] = useState<{ id: string; name: string; icon: string }>({
@@ -129,6 +118,49 @@ export default function DesktopDashboardLayout({
   const [currentTheme, setCurrentTheme] = useState<ThemeMode>('light');
   const [currentUIStyle, setCurrentUIStyle] = useState<'industrial' | 'glassmorphism'>('industrial');
   const [currentPalette, setCurrentPalette] = useState<string>('petrol');
+  const [isSidebarCompact, setIsSidebarCompact] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('klikpos_sidebar_compact');
+      if (saved !== null) return saved === 'true';
+    }
+    return true; // Predeterminado: Barra Compacta de Solo Íconos para máxima amplitud del canvas POS
+  });
+
+  const toggleSidebarCompact = () => {
+    const next = !isSidebarCompact;
+    setIsSidebarCompact(next);
+    try {
+      localStorage.setItem('klikpos_sidebar_compact', String(next));
+    } catch {}
+  };
+
+  // Reloj Digital del Sistema Autónomo e Ininterrumpido
+  useEffect(() => {
+    const updateClock = () => {
+      const now = new Date();
+      const dateFormatted = now.toLocaleDateString('es-VE', {
+        weekday: 'short',
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+      });
+      const capitalizedDate = dateFormatted.charAt(0).toUpperCase() + dateFormatted.slice(1);
+      setClockDate(capitalizedDate);
+
+      const timeFormatted = now.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true,
+      });
+      setClockTime(timeFormatted);
+      setCurrentTime(`${capitalizedDate} ${timeFormatted}`);
+      console.log('UPDATE CLOCK EXECUTED:', capitalizedDate, timeFormatted);
+    };
+    updateClock();
+    const timer = setInterval(updateClock, 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   // Modal Global de Vinculación de Celular / Escáner Móvil
   const [showMobileModal, setShowMobileModal] = useState(false);
@@ -434,30 +466,6 @@ export default function DesktopDashboardLayout({
     };
     window.addEventListener('venematic:rubro_changed', handleRubroChanged);
 
-    const updateClock = () => {
-      const now = new Date();
-      // Fecha completa: ej. "Mar, 22 Sep 2026"
-      const dateFormatted = now.toLocaleDateString('es-VE', {
-        weekday: 'short',
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric',
-      });
-      const capitalizedDate = dateFormatted.charAt(0).toUpperCase() + dateFormatted.slice(1);
-      setClockDate(capitalizedDate);
-
-      // Hora precisa con segundos y formato AM/PM
-      const timeFormatted = now.toLocaleTimeString('en-US', {
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        hour12: true,
-      });
-      setClockTime(timeFormatted);
-      setCurrentTime(`${capitalizedDate} ${timeFormatted}`);
-    };
-    updateClock();
-    const timer = setInterval(updateClock, 1000);
 
     // Atajos de Teclado Globales (F1 a F8 y Ctrl+L)
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -496,7 +504,6 @@ export default function DesktopDashboardLayout({
     window.addEventListener('keydown', handleKeyDown);
 
     return () => {
-      clearInterval(timer);
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, [router, isAdmin, requireAdminAuth]);
@@ -762,7 +769,7 @@ export default function DesktopDashboardLayout({
 
           {/* Reloj Digital del Sistema */}
           <div
-            className="hidden md:inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border text-xs font-bold font-mono select-none shadow-2xs shrink-0"
+            className="hidden md:inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border text-xs font-bold font-mono select-none shadow-2xs shrink-0 whitespace-nowrap min-w-fit"
             style={{
               backgroundColor: (currentTheme === 'dark' || currentTheme === 'glass') ? '#162232' : '#f1f5f9',
               borderColor: (currentTheme === 'dark' || currentTheme === 'glass') ? '#2b3d52' : '#cbd5e1',
@@ -770,18 +777,21 @@ export default function DesktopDashboardLayout({
             }}
             title="Fecha y hora oficial del sistema"
           >
-            <span style={{ color: (currentTheme === 'dark' || currentTheme === 'glass') ? '#cbd5e1' : '#0f172a' }}>{clockDate}</span>
+            <Clock className="w-3.5 h-3.5 opacity-80 shrink-0" style={{ color: (currentTheme === 'dark' || currentTheme === 'glass') ? '#7dd3fc' : '#0369a1' }} />
+            <span style={{ color: (currentTheme === 'dark' || currentTheme === 'glass') ? '#e2e8f0' : '#0f172a' }}>{clockDate || 'Cargando...'}</span>
             <span style={{ color: (currentTheme === 'dark' || currentTheme === 'glass') ? '#64748b' : '#94a3b8' }}>|</span>
-            <span className="font-black tabular-numbers" style={{ color: (currentTheme === 'dark' || currentTheme === 'glass') ? '#ffffff' : '#000000' }}>{clockTime}</span>
+            <span className="font-black tabular-numbers tracking-wide" style={{ color: (currentTheme === 'dark' || currentTheme === 'glass') ? '#ffffff' : '#000000' }}>{clockTime || '--:--:--'}</span>
           </div>
         </div>
       </header>
 
       {/* Cuerpo Principal: Sidebar + Contenido */}
       <div className="flex-1 flex overflow-hidden">
-        {/* Barra Lateral Profesional */}
+        {/* Barra Lateral Profesional (Modo Compacto de Solo Íconos o Expandido) */}
         <aside
-          className="w-56 border-r flex flex-col justify-between shrink-0 p-3 z-10 layer-shell"
+          className={`${
+            isSidebarCompact ? 'w-[72px] px-2 py-3' : 'w-56 p-3'
+          } border-r flex flex-col justify-between shrink-0 z-20 layer-shell transition-all duration-200 select-none`}
           style={{
             backgroundColor: currentTheme === 'dark' ? '#0b1a30' : '#ffffff',
             borderColor: currentTheme === 'dark' ? '#1e3a5f' : '#e2e8f0',
@@ -789,61 +799,126 @@ export default function DesktopDashboardLayout({
           }}
         >
           <div className="space-y-1">
-            <div
-              className="px-3 py-2 text-[10.5px] font-black uppercase tracking-wider select-none"
-              style={{ color: currentTheme === 'dark' ? '#94a3b8' : '#0f172a' }}
-            >
-              Operaciones de Caja
+            {/* Cabecera / Botón de Conmutación de Sidebar */}
+            <div className={`flex items-center ${isSidebarCompact ? 'justify-center pb-2 mb-1 border-b' : 'justify-between px-2 py-1.5 mb-1'} border-slate-200 dark:border-slate-800`}>
+              {!isSidebarCompact && (
+                <span
+                  className="text-[10px] font-black uppercase tracking-wider select-none truncate"
+                  style={{ color: currentTheme === 'dark' ? '#94a3b8' : '#0f172a' }}
+                >
+                  Operaciones
+                </span>
+              )}
+              <button
+                type="button"
+                onClick={toggleSidebarCompact}
+                className="p-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-all cursor-pointer"
+                title={isSidebarCompact ? 'Expandir barra lateral' : 'Colapsar a solo íconos'}
+              >
+                {isSidebarCompact ? <PanelLeft className="w-5 h-5" /> : <PanelLeftClose className="w-5 h-5" />}
+              </button>
             </div>
 
-            {NAV_ITEMS.map((item) => {
-              const isActive = pathname === item.href || pathname?.startsWith(item.href + '/');
-              const isLocked = item.adminOnly && !isAdmin;
-              return (
-                <button
-                  key={item.key}
-                  type="button"
-                  onClick={async (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    if (isLocked) {
-                      const ok = await requireAdminAuth();
-                      if (!ok) return;
-                    }
-                    router.push(item.href);
-                  }}
-                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs transition-colors select-none cursor-pointer text-left ${
-                    isActive
-                      ? 'nav-item-active font-black border shadow-xs'
-                      : (currentTheme === 'dark'
-                          ? 'text-slate-100 hover:text-white hover:bg-slate-800 font-bold'
-                          : 'text-slate-900 hover:text-slate-950 hover:bg-slate-100 font-black')
-                  }`}
-                  style={{
-                    color: isActive ? undefined : (currentTheme === 'dark' ? '#f1f5f9' : '#0f172a')
-                  }}
-                >
-                  <div className="flex items-center gap-3">
-                    <span style={{ color: isActive ? undefined : (currentTheme === 'dark' ? '#94a3b8' : '#0f172a') }}>
-                      {item.icon}
-                    </span>
-                    <span>{item.label}</span>
-                  </div>
-                  {isLocked && (
-                    <Lock className="w-3.5 h-3.5 text-slate-400 dark:text-slate-400 shrink-0" />
-                  )}
-                </button>
-              );
-            })}
+            {/* Lista de Ítems de Navegación con Lucide React */}
+            <nav className="space-y-1.5">
+              {NAV_ITEMS.map((item) => {
+                const isActive = pathname === item.href || pathname?.startsWith(item.href + '/');
+                const isLocked = item.adminOnly && !isAdmin;
+
+                if (isSidebarCompact) {
+                  return (
+                    <button
+                      key={item.key}
+                      type="button"
+                      onClick={async (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (isLocked) {
+                          const ok = await requireAdminAuth();
+                          if (!ok) return;
+                        }
+                        router.push(item.href);
+                      }}
+                      className={`w-12 h-12 mx-auto rounded-2xl flex items-center justify-center transition-all select-none cursor-pointer relative group ${
+                        isActive
+                          ? 'bg-[var(--brand-primary,#0369a1)] text-white shadow-md shadow-sky-950/20 scale-105'
+                          : (currentTheme === 'dark'
+                              ? 'text-slate-300 hover:text-white hover:bg-slate-800/80 active:scale-95'
+                              : 'text-slate-700 hover:text-slate-950 hover:bg-slate-100 active:scale-95')
+                      }`}
+                      title={`${item.label} (${item.shortcut})`}
+                    >
+                      <div className="relative flex items-center justify-center">
+                        <span className={isActive ? 'text-white' : undefined}>
+                          {item.icon}
+                        </span>
+                        {isLocked && (
+                          <span className="absolute -top-1 -right-2 w-3.5 h-3.5 rounded-full bg-slate-800 border border-slate-700 text-white flex items-center justify-center shadow-xs">
+                            <Lock className="w-2 h-2 text-amber-400" />
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Tooltip flotante estético moderno */}
+                      <div className="sidebar-tooltip absolute left-[64px] px-2.5 py-1.5 text-white text-[11px] font-bold rounded-xl shadow-xl whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-all duration-150 z-50 flex items-center gap-1.5">
+                        <span className="text-white font-bold">{item.label}</span>
+                        <span className="sidebar-tooltip-badge text-[9.5px] font-mono px-1.5 py-0.5 rounded font-extrabold">{item.shortcut}</span>
+                      </div>
+                    </button>
+                  );
+                }
+
+                return (
+                  <button
+                    key={item.key}
+                    type="button"
+                    onClick={async (e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      if (isLocked) {
+                        const ok = await requireAdminAuth();
+                        if (!ok) return;
+                      }
+                      router.push(item.href);
+                    }}
+                    className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs transition-colors select-none cursor-pointer text-left ${
+                      isActive
+                        ? 'nav-item-active font-black border shadow-xs'
+                        : (currentTheme === 'dark'
+                            ? 'text-slate-100 hover:text-white hover:bg-slate-800 font-bold'
+                            : 'text-slate-900 hover:text-slate-950 hover:bg-slate-100 font-black')
+                    }`}
+                    style={{
+                      color: isActive ? undefined : (currentTheme === 'dark' ? '#f1f5f9' : '#0f172a'),
+                    }}
+                  >
+                    <div className="flex items-center gap-3">
+                      <span style={{ color: isActive ? undefined : (currentTheme === 'dark' ? '#94a3b8' : '#0f172a') }}>
+                        {item.icon}
+                      </span>
+                      <span>{item.label}</span>
+                    </div>
+                    {isLocked && (
+                      <Lock className="w-3.5 h-3.5 text-slate-400 dark:text-slate-400 shrink-0" />
+                    )}
+                  </button>
+                );
+              })}
+            </nav>
           </div>
 
-          {/* Pie del Sidebar: Avatar Circular + Administrador General + Pasar a */}
+          {/* Pie del Sidebar: Avatar Circular + Controles */}
           <div
             className="pt-3 border-t flex flex-col items-center text-center select-none"
             style={{ borderColor: currentTheme === 'dark' ? '#1e293b' : '#e2e8f0' }}
           >
             {/* Avatar circular con borde blanco */}
-            <div className="w-16 h-16 rounded-full border-2 border-white dark:border-slate-700 shadow-md overflow-hidden bg-slate-300 dark:bg-slate-700 relative flex items-center justify-center">
+            <div
+              className={`${
+                isSidebarCompact ? 'w-10 h-10' : 'w-16 h-16'
+              } rounded-full border-2 border-white dark:border-slate-700 shadow-md overflow-hidden bg-slate-300 dark:bg-slate-700 relative flex items-center justify-center transition-all`}
+              title={isAdmin ? 'Administrador General' : user ? user.name : 'Cajero Activo'}
+            >
               <img
                 src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80"
                 alt="Usuario"
@@ -852,23 +927,25 @@ export default function DesktopDashboardLayout({
                   e.currentTarget.style.display = 'none';
                 }}
               />
-              <div className="absolute inset-0 flex items-center justify-center bg-[var(--brand-primary)] text-white font-black text-sm">
+              <div className="absolute inset-0 flex items-center justify-center bg-[var(--brand-primary)] text-white font-black text-xs">
                 {isAdmin ? 'AD' : 'C1'}
               </div>
             </div>
 
-            <span
-              className="font-black text-xs mt-2"
-              style={{ color: currentTheme === 'dark' ? '#ffffff' : '#0f172a' }}
-            >
-              {isAdmin ? 'Administrador General' : user ? user.name : 'Cajero Activo'}
-            </span>
+            {!isSidebarCompact && (
+              <span
+                className="font-black text-xs mt-2"
+                style={{ color: currentTheme === 'dark' ? '#ffffff' : '#0f172a' }}
+              >
+                {isAdmin ? 'Administrador General' : user ? user.name : 'Cajero Activo'}
+              </span>
+            )}
 
             <div
-              className="flex items-center gap-1.5 mt-1 text-[11px] font-bold"
+              className={`flex items-center gap-1.5 ${isSidebarCompact ? 'flex-col mt-2.5' : 'mt-1 text-[11px]'} font-bold`}
               style={{ color: currentTheme === 'dark' ? '#cbd5e1' : '#0f172a' }}
             >
-              <span>Pasar a</span>
+              {!isSidebarCompact && <span>Pasar a</span>}
               <button
                 type="button"
                 onClick={() => switchToRole(isAdmin ? 'cajero' : 'admin')}
