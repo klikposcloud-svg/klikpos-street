@@ -7,20 +7,20 @@
   },
   "capacitor.config.json": {
     "mtime": 1789961534.1659245,
-    "seen": 1790363920.7983592,
-    "ast_hash": "",
+    "seen": 1790515219.3106532,
+    "ast_hash": "160299b8e6abc13e7a938640d3ea61b7",
     "semantic_hash": ""
   },
   "firebase.json": {
     "mtime": 1790031894.5012221,
-    "seen": 1790363920.7983627,
-    "ast_hash": "",
+    "seen": 1790515219.3106606,
+    "ast_hash": "6a7e94c3124e3d2552ee4ec011ae7b1d",
     "semantic_hash": ""
   },
   "firestore.indexes.json": {
     "mtime": 1790031903.1706526,
-    "seen": 1790469517.7749622,
-    "ast_hash": "",
+    "seen": 1790515219.3106632,
+    "ast_hash": "d80a9a9f660ee6b2dcefa934f68dbf72",
     "semantic_hash": ""
   },
   "next.config.js": {
@@ -30,9 +30,9 @@
     "semantic_hash": ""
   },
   "package.json": {
-    "mtime": 1790384029.961092,
-    "seen": 1790384074.5544128,
-    "ast_hash": "",
+    "mtime": 1790478367.1614454,
+    "seen": 1790515219.3106701,
+    "ast_hash": "2a7441aa5263173911b29ff5acea61fa",
     "semantic_hash": ""
   },
   "postcss.config.js": {
@@ -282,9 +282,9 @@
     "semantic_hash": ""
   },
   "src/app/dashboard/layout.tsx": {
-    "mtime": 1790481477.9076595,
-    "seen": 1790482593.2548068,
-    "ast_hash": "496c844405f781ee8e273341a66ba577",
+    "mtime": 1790482623.1001759,
+    "seen": 1790515219.310784,
+    "ast_hash": "e9d8057d8dc5ccffa6c0f7b10496e683",
     "semantic_hash": ""
   },
   "src/app/dashboard/pos/page.tsx": {
@@ -2845,14 +2845,14 @@
   },
   "dist-installer/version.json": {
     "mtime": 1790467651.1478846,
-    "seen": 1790469517.7749476,
-    "ast_hash": "",
+    "seen": 1790515219.3106573,
+    "ast_hash": "60b289b5ec5664bfbfcadba6ed722d5b",
     "semantic_hash": ""
   },
   "klikpos-releases/version.json": {
     "mtime": 1790467651.1478846,
-    "seen": 1790469517.7749672,
-    "ast_hash": "",
+    "seen": 1790515219.3106651,
+    "ast_hash": "60b289b5ec5664bfbfcadba6ed722d5b",
     "semantic_hash": ""
   },
   "src/lib/data/master-catalog.json": {
@@ -2925,6 +2925,12 @@
     "mtime": 1790476790.0538087,
     "seen": 1790482593.3195107,
     "ast_hash": "1d4a879a1064f734c0373b1b7ef943fc",
+    "semantic_hash": ""
+  },
+  ".vscode/settings.json": {
+    "mtime": 1790470302.1724997,
+    "seen": 1790515219.310647,
+    "ast_hash": "2d06b60b7caf61c40b4ebbd7f8a1afa2",
     "semantic_hash": ""
   }
 }

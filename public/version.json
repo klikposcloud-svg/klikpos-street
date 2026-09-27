@@ -9,7 +9,7 @@
     "Accesos directos del carrusel ensanchados para mayor confort táctil en cajas rápidas.",
     "Actualizador automático conectado a la nube oficial de KlikPOS."
   ],
-  "windowsUrl": "https://github.com/klikposcloud-svg/klikpos/releases/download/v2.4.1/KlikPOS-Enterprise-Setup-v2.4.1.exe",
-  "androidUrl": "https://github.com/klikposcloud-svg/klikpos/releases/download/v2.4.1/KlikPOS_Movil_Full.apk",
+  "windowsUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v2.4.1/KlikPOS-Enterprise-Setup-v2.4.1.exe",
+  "androidUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v2.4.1/KlikPOS_Movil_Full.apk",
   "mandatory": false
 }
