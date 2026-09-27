@@ -31,3 +31,11 @@ Todos los agentes de inteligencia artificial y desarrolladores que operen en est
   2. `git commit -m "..."` con mensaje semántico claro.
   3. `git push origin main` hacia el repositorio remoto `github.com/klikposcloud-svg/klikpos.git`.
   4. Mantener sincronizado el archivo de manifiesto `version.json` para actualizaciones en la nube.
+
+### 6. Carpeta Oficial Obligatoria de Distribución (DISTRIBUCION_KLIKPOS)
+- Toda entrega de software, instaladores para el cliente, combos para puntos de venta y APKs móviles se ubican y entregan **ESTRICTAMENTE** en la carpeta: `DISTRIBUCION_KLIKPOS/`.
+- El instalador principal oficial para el usuario es:
+  - `DISTRIBUCION_KLIKPOS/02_Combo_Empresarial_Full/INSTALAR_KLIKPOS_FULL.bat`
+  - `DISTRIBUCION_KLIKPOS/02_Combo_Empresarial_Full/KlikPOS_Desktop_Full_Setup.exe`
+- Queda terminantemente prohibido indicar al usuario carpetas intermedias de compilación técnica (como `dist-installer/` o `venematic-desktop/`). Toda referencia debe ser siempre dentro de `DISTRIBUCION_KLIKPOS/`.
+
