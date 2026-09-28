@@ -484,7 +484,7 @@ export default function CashShiftModal({
               </div>
 
               {/* Formato de Ticket Térmico 80mm */}
-              <div className="bg-white text-slate-900 font-mono text-xs p-6 rounded-xl border border-slate-300 max-w-sm mx-auto shadow-md leading-tight print:shadow-none print:border-none print:m-0 print:p-0">
+              <div id="corte-receipt" className="print-area print-corte bg-white text-slate-900 font-mono text-xs p-6 rounded-xl border border-slate-300 max-w-sm mx-auto shadow-md leading-tight print:shadow-none print:border-none print:m-0 print:p-0">
                 <div className="text-center pb-3 border-b border-dashed border-slate-400 space-y-1">
                   <p className="font-black text-sm uppercase">{storeInfo?.name || 'KLIKPOS ENTERPRISE'}</p>
                   <p className="text-[11px]">RIF: {storeInfo?.rif || 'J-50000000-0'}</p>
@@ -767,6 +767,76 @@ export default function CashShiftModal({
                 </div>
               </div>
 
+              {/* Plantilla de Impresión de Corte X para Modo view_x */}
+              <div id="corte-receipt" className="print-area print-corte hidden print:block bg-white text-black p-3 text-[11px] font-mono leading-tight">
+                <div className="text-center pb-2 border-b border-dashed border-black space-y-0.5">
+                  <p className="font-black text-xs uppercase">{storeInfo?.name || 'KLIKPOS ENTERPRISE'}</p>
+                  <p className="text-[10px]">RIF: {storeInfo?.rif || 'J-50000000-0'}</p>
+                  {storeInfo?.address && <p className="text-[9px]">{storeInfo.address}</p>}
+                  <p className="font-black text-xs pt-1">*** ARQUEO DE CAJA (CORTE X) ***</p>
+                  <p className="text-[10px]">Turno ID: #{activeShift?.id || '1'}</p>
+                  <p className="text-[10px]">Cajero: {activeShift?.cashierName || cashierName}</p>
+                  <p className="text-[10px]">Apertura: {activeShift?.openedAt ? new Date(activeShift.openedAt).toLocaleString('es-VE') : '--'}</p>
+                  <p className="text-[10px]">Impresión: {new Date().toLocaleString('es-VE')}</p>
+                  <p className="text-[10px]">Tasa BCV: {formatVES(bcvRate)}</p>
+                </div>
+
+                <div className="py-2 border-b border-dashed border-black space-y-1 text-[11px]">
+                  <p className="font-bold text-center">--- RESUMEN FINANCIERO EN VIVO ---</p>
+                  <div className="flex justify-between">
+                    <span>Fondo Inicial $:</span>
+                    <span>{formatUSD(activeShift?.initialCashUSD || 0)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Fondo Inicial Bs:</span>
+                    <span>{formatVES(activeShift?.initialCashVES || 0)}</span>
+                  </div>
+                  <div className="flex justify-between font-black pt-1">
+                    <span>VENTAS TOTALES ($):</span>
+                    <span>{formatUSD(systemSalesMetrics.salesUSD)}</span>
+                  </div>
+                  <div className="flex justify-between font-black">
+                    <span>VENTAS TOTALES (Bs):</span>
+                    <span>{formatVES(systemSalesMetrics.salesUSD * bcvRate)}</span>
+                  </div>
+                </div>
+
+                <div className="py-2 border-b border-dashed border-black space-y-1 text-[11px]">
+                  <p className="font-bold text-center">--- MEDIOS DE PAGO RECIBIDOS ---</p>
+                  <div className="flex justify-between">
+                    <span>Efectivo Dólares ($):</span>
+                    <span>{formatUSD(systemSalesMetrics.netCashUSDInSales)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Efectivo Bolívares (Bs):</span>
+                    <span>{formatVES(systemSalesMetrics.netCashVESInSales)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Pago Móvil (Bs):</span>
+                    <span>{formatVES(systemSalesMetrics.pagoMovilVES)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Punto / Débito (Bs):</span>
+                    <span>{formatVES(systemSalesMetrics.cardVES)}</span>
+                  </div>
+                  {systemSalesMetrics.zelleUSD > 0 && (
+                    <div className="flex justify-between">
+                      <span>Zelle ($):</span>
+                      <span>{formatUSD(systemSalesMetrics.zelleUSD)}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between font-black pt-1 border-t border-dashed border-black">
+                    <span>TOTAL ESTIMADO EN CAJA:</span>
+                    <span>{formatUSD(systemSalesMetrics.expectedUSD)}</span>
+                  </div>
+                </div>
+
+                <div className="text-center pt-3 space-y-2 text-[10px]">
+                  <p>*** REPORTE PARCIAL DE TURNO · NO CIERRA CAJA ***</p>
+                  <p className="font-bold">KLIKPOS ENTERPRISE · Sistema de Ventas</p>
+                </div>
+              </div>
+
               {/* Botones de Acción */}
               <div className="flex flex-wrap items-center justify-between gap-3 pt-3">
                 <div className="flex gap-2">
@@ -777,6 +847,15 @@ export default function CashShiftModal({
                   >
                     <Coins className="w-4 h-4" />
                     Registrar Entrada / Salida
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => window.print()}
+                    className="px-4 py-2.5 bg-sky-600 hover:bg-sky-500 text-white rounded-xl font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow-xs"
+                    style={{ color: '#ffffff' }}
+                  >
+                    <Printer className="w-4 h-4 text-white" />
+                    Imprimir Corte X
                   </button>
                 </div>
                 <div className="flex gap-2">

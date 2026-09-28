@@ -25,6 +25,11 @@ export default function CashierShiftSalesPage() {
   const [filterOrigin, setFilterOrigin] = useState<'all' | 'mobile' | 'desktop'>('all');
   const [filterPayment, setFilterPayment] = useState<string>('all');
   const [selectedSaleForView, setSelectedSaleForView] = useState<LocalSale | null>(null);
+  const [storeInfo, setStoreInfo] = useState({
+    name: 'KLIKPOS ENTERPRISE',
+    rif: 'J-50000000-0',
+    address: 'Venezuela',
+  });
   const [bcvRate, setBcvRate] = useState<number>(848.55);
   const [isVoiding, setIsVoiding] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -64,6 +69,9 @@ export default function CashierShiftSalesPage() {
 
       const rateSetting = await db.settings.get('bcv_rate');
       if (rateSetting) setBcvRate(rateSetting.value);
+
+      const infoSetting = await db.settings.get('store_info');
+      if (infoSetting?.value) setStoreInfo(infoSetting.value);
     } catch (err) {
       console.error('Error cargando ventas del turno:', err);
     } finally {
@@ -665,6 +673,60 @@ export default function CashierShiftSalesPage() {
                 </button>
               )}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* PLANTILLA DE IMPRESIÓN EXCLUSIVA PARA HISTORIAL DE VENTAS (@media print) */}
+      {selectedSaleForView && (
+        <div id="thermal-receipt" className="print-area hidden print:block bg-white text-black p-2 text-[11px] font-mono leading-tight">
+          <div className="text-center pb-2 border-b border-dashed border-black space-y-0.5">
+            <p className="font-black text-xs uppercase">{storeInfo.name}</p>
+            <p className="text-[10px]">RIF: {storeInfo.rif}</p>
+            {storeInfo.address && <p className="text-[9px]">{storeInfo.address}</p>}
+            <p className="font-black text-[11px] pt-1">*** COPIA / REIMPRESIÓN DE VENTA ***</p>
+            <p className="text-[10px]">Ticket N°: {selectedSaleForView.receiptNumber || selectedSaleForView.id}</p>
+            <p className="text-[10px]">Fecha: {new Date(selectedSaleForView.timestamp).toLocaleString('es-VE')}</p>
+            <p className="text-[10px]">Cajero: {selectedSaleForView.cashierName || 'Caja 1'}</p>
+            {selectedSaleForView.customerName && <p className="text-[10px]">Cliente: {selectedSaleForView.customerName}</p>}
+            {selectedSaleForView.status === 'voided' && (
+              <p className="text-rose-700 font-black text-xs pt-1">*** TICKET ANULADO ***</p>
+            )}
+          </div>
+
+          <div className="py-2 border-b border-dashed border-black space-y-1">
+            <div className="flex justify-between font-bold text-[10px]">
+              <span>CANT / ARTÍCULO</span>
+              <span>TOTAL $</span>
+            </div>
+            {selectedSaleForView.items?.map((it, idx) => (
+              <div key={idx} className="flex justify-between text-[10px]">
+                <span className="truncate max-w-[170px]">{it.qty}x {it.name}</span>
+                <span>${(it.totalUSD || it.priceUSD * it.qty).toFixed(2)}</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="py-2 border-b border-dashed border-black space-y-0.5 text-[11px]">
+            <div className="flex justify-between font-black">
+              <span>TOTAL USD:</span>
+              <span>${selectedSaleForView.totalUSD.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between font-black">
+              <span>TOTAL BS (BCV):</span>
+              <span>Bs. {selectedSaleForView.totalVES.toFixed(2)}</span>
+            </div>
+            {selectedSaleForView.changeUSD > 0 && (
+              <div className="flex justify-between text-[10px]">
+                <span>Vuelto USD:</span>
+                <span>${selectedSaleForView.changeUSD.toFixed(2)}</span>
+              </div>
+            )}
+          </div>
+
+          <div className="text-center pt-2 space-y-0.5 text-[9px]">
+            <p>*** REIMPRESIÓN HISTÓRICA ***</p>
+            <p className="font-bold">KLIKPOS ENTERPRISE · Sistema de Ventas</p>
           </div>
         </div>
       )}

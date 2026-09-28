@@ -548,8 +548,10 @@ body {
 
   #thermal-receipt, #thermal-receipt *,
   #seniat-receipt, #seniat-receipt *,
+  #corte-receipt, #corte-receipt *,
+  .print-corte, .print-corte *,
   .print-area, .print-area * {
-    visibility: visible;
+    visibility: visible !important;
     color: #000000 !important;
     text-shadow: none !important;
     -webkit-font-smoothing: none !important;
@@ -557,12 +559,12 @@ body {
     text-rendering: geometricPrecision !important;
   }
 
-  #thermal-receipt, #seniat-receipt, .print-area {
+  #thermal-receipt, #seniat-receipt, #corte-receipt, .print-corte, .print-area {
     position: absolute;
     left: 0;
     top: 0;
-    width: var(--receipt-width, 48mm) !important;
-    max-width: var(--receipt-width, 48mm) !important;
+    width: var(--receipt-width, 72mm) !important;
+    max-width: var(--receipt-width, 72mm) !important;
     height: auto !important;
     max-height: max-content !important;
     margin: 0 !important;
@@ -583,9 +585,11 @@ body {
     break-inside: avoid;
   }
 
-  /* Soporte especÃ­fico para rollo angosto 58mm (Cabezal tÃ©rmico real: 48mm / 384 dots) */
+  /* Soporte específico para rollo angosto 58mm (Cabezal térmico real: 48mm / 384 dots) */
   html[data-paper-width="58mm"] #thermal-receipt,
   html[data-paper-width="58mm"] #seniat-receipt,
+  html[data-paper-width="58mm"] #corte-receipt,
+  html[data-paper-width="58mm"] .print-corte,
   html[data-paper-width="58mm"] .print-area {
     width: 48mm !important;
     max-width: 48mm !important;
@@ -595,9 +599,11 @@ body {
     box-sizing: border-box !important;
   }
 
-  /* Para rollos de 80mm (Cabezal tÃ©rmico real: 72mm / 576 dots) */
+  /* Para rollos de 80mm (Cabezal térmico real: 72mm / 576 dots) */
   html[data-paper-width="80mm"] #thermal-receipt,
   html[data-paper-width="80mm"] #seniat-receipt,
+  html[data-paper-width="80mm"] #corte-receipt,
+  html[data-paper-width="80mm"] .print-corte,
   html[data-paper-width="80mm"] .print-area {
     width: 72mm !important;
     max-width: 72mm !important;
@@ -607,28 +613,28 @@ body {
   }
 
   /* Forzar negro puro (#000000) en todos los bordes para eliminar tramas grises borrosas */
-  #thermal-receipt hr, #seniat-receipt hr,
-  #thermal-receipt .border-dashed, #seniat-receipt .border-dashed,
-  #thermal-receipt .border-b, #seniat-receipt .border-b,
-  #thermal-receipt .border-t, #seniat-receipt .border-t,
-  #thermal-receipt .border, #seniat-receipt .border,
-  #thermal-receipt div, #seniat-receipt div {
+  #thermal-receipt hr, #seniat-receipt hr, #corte-receipt hr, .print-corte hr,
+  #thermal-receipt .border-dashed, #seniat-receipt .border-dashed, #corte-receipt .border-dashed, .print-corte .border-dashed,
+  #thermal-receipt .border-b, #seniat-receipt .border-b, #corte-receipt .border-b, .print-corte .border-b,
+  #thermal-receipt .border-t, #seniat-receipt .border-t, #corte-receipt .border-t, .print-corte .border-t,
+  #thermal-receipt .border, #seniat-receipt .border, #corte-receipt .border, .print-corte .border,
+  #thermal-receipt div, #seniat-receipt div, #corte-receipt div, .print-corte div {
     border-color: #000000 !important;
   }
 
-  /* Eliminar fondos coloreados que la impresora tÃ©rmica traduce en puntos grises tramados */
-  #thermal-receipt .bg-slate-50, #seniat-receipt .bg-slate-50,
-  #thermal-receipt .bg-sky-100, #seniat-receipt .bg-sky-100,
-  #thermal-receipt .bg-emerald-50, #seniat-receipt .bg-emerald-50,
-  #thermal-receipt .bg-indigo-50, #seniat-receipt .bg-indigo-50,
-  #thermal-receipt .bg-slate-100, #seniat-receipt .bg-slate-100,
-  #thermal-receipt .bg-slate-900, #seniat-receipt .bg-slate-900 {
+  /* Eliminar fondos coloreados que la impresora térmica traduce en puntos grises tramados */
+  #thermal-receipt .bg-slate-50, #seniat-receipt .bg-slate-50, #corte-receipt .bg-slate-50, .print-corte .bg-slate-50,
+  #thermal-receipt .bg-sky-100, #seniat-receipt .bg-sky-100, #corte-receipt .bg-sky-100, .print-corte .bg-sky-100,
+  #thermal-receipt .bg-emerald-50, #seniat-receipt .bg-emerald-50, #corte-receipt .bg-emerald-50, .print-corte .bg-emerald-50,
+  #thermal-receipt .bg-indigo-50, #seniat-receipt .bg-indigo-50, #corte-receipt .bg-indigo-50, .print-corte .bg-indigo-50,
+  #thermal-receipt .bg-slate-100, #seniat-receipt .bg-slate-100, #corte-receipt .bg-slate-100, .print-corte .bg-slate-100,
+  #thermal-receipt .bg-slate-900, #seniat-receipt .bg-slate-900, #corte-receipt .bg-slate-900, .print-corte .bg-slate-900 {
     background-color: transparent !important;
     color: #000000 !important;
   }
 
-  /* Logotipo nÃ­tido de alto contraste monocromÃ¡tico */
-  #thermal-receipt img, #seniat-receipt img {
+  /* Logotipo nítido de alto contraste monocromático */
+  #thermal-receipt img, #seniat-receipt img, #corte-receipt img, .print-corte img {
     image-rendering: pixelated !important;
     filter: grayscale(100%) contrast(250%) !important;
     max-width: 100% !important;

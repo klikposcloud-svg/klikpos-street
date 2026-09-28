@@ -1437,22 +1437,73 @@ export default function DesktopReportsPage() {
         </div>
       )}
 
+      {/* PLANTILLA DE IMPRESIÓN EXCLUSIVA PARA REIMPRESIÓN DE TICKET DESDE REPORTE */}
+      {selectedSaleForView && (
+        <div id="thermal-receipt" className="print-area hidden print:block bg-white text-black p-2 text-[11px] font-mono leading-tight">
+          <div className="text-center pb-2 border-b border-dashed border-black space-y-0.5">
+            <p className="font-black text-xs uppercase">{storeInfo.name}</p>
+            <p className="text-[10px]">RIF: {storeInfo.rif}</p>
+            {storeInfo.address && <p className="text-[9px]">{storeInfo.address}</p>}
+            <p className="font-black text-[11px] pt-1">*** COPIA / REIMPRESIÓN DE TICKET ***</p>
+            <p className="text-[10px]">Ticket N°: {selectedSaleForView.receiptNumber || selectedSaleForView.id}</p>
+            <p className="text-[10px]">Fecha: {new Date(selectedSaleForView.timestamp).toLocaleString('es-VE')}</p>
+            <p className="text-[10px]">Cajero: {selectedSaleForView.cashierName || 'Caja 1'}</p>
+            {selectedSaleForView.customerName && <p className="text-[10px]">Cliente: {selectedSaleForView.customerName}</p>}
+          </div>
+
+          <div className="py-2 border-b border-dashed border-black space-y-1">
+            <div className="flex justify-between font-bold text-[10px]">
+              <span>CANT / ARTÍCULO</span>
+              <span>TOTAL $</span>
+            </div>
+            {selectedSaleForView.items?.map((it, idx) => (
+              <div key={idx} className="flex justify-between text-[10px]">
+                <span className="truncate max-w-[170px]">{it.qty}x {it.name}</span>
+                <span>${(it.totalUSD || it.priceUSD * it.qty).toFixed(2)}</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="py-2 border-b border-dashed border-black space-y-0.5 text-[11px]">
+            <div className="flex justify-between font-black">
+              <span>TOTAL USD:</span>
+              <span>${selectedSaleForView.totalUSD.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between font-black">
+              <span>TOTAL BS (BCV):</span>
+              <span>Bs. {selectedSaleForView.totalVES.toFixed(2)}</span>
+            </div>
+            {selectedSaleForView.changeUSD > 0 && (
+              <div className="flex justify-between text-[10px]">
+                <span>Vuelto USD:</span>
+                <span>${selectedSaleForView.changeUSD.toFixed(2)}</span>
+              </div>
+            )}
+          </div>
+
+          <div className="text-center pt-2 space-y-0.5 text-[9px]">
+            <p>*** COPIA DE AUDITORÍA REPORTE ***</p>
+            <p>KLIKPOS ENTERPRISE · Sistema de Ventas</p>
+          </div>
+        </div>
+      )}
+
       {/* PLANTILLA DE IMPRESIÓN EXCLUSIVA PARA CORTE X / CORTE Z (CSS @media print) */}
-      <div className="hidden print:block fixed inset-0 bg-white text-black p-4 text-[12px] font-mono leading-tight z-9999">
-        <div className="max-w-xs mx-auto text-center space-y-1 pb-2 border-b border-dashed border-black">
-          <p className="font-black text-sm">{storeInfo.name}</p>
-          <p>RIF: {storeInfo.rif}</p>
-          {storeInfo.address && <p>{storeInfo.address}</p>}
-          <p className="font-black text-sm pt-1">
+      <div id="corte-receipt" className="print-area print-corte hidden print:block bg-white text-black p-3 text-[11px] font-mono leading-tight">
+        <div className="text-center space-y-1 pb-2 border-b border-dashed border-black">
+          <p className="font-black text-xs uppercase">{storeInfo.name}</p>
+          <p className="text-[10px]">RIF: {storeInfo.rif}</p>
+          {storeInfo.address && <p className="text-[9px]">{storeInfo.address}</p>}
+          <p className="font-black text-xs pt-1">
             {printReportType === 'Z' ? '*** CIERRE DE CAJA (CORTE Z) ***' : '*** ARQUEO DE CAJA (CORTE X) ***'}
           </p>
-          <p suppressHydrationWarning>Fecha/Hora: {printDateTime || (isMounted ? new Date().toLocaleString('es-VE') : '')}</p>
-          <p>Cajero: {activeShiftData?.cashierName || 'Caja 1'}</p>
-          <p>Apertura: {activeShiftData?.openedAt ? formatDateShort(activeShiftData.openedAt) : '--'}</p>
+          <p className="text-[10px]" suppressHydrationWarning>Fecha/Hora: {printDateTime || (isMounted ? new Date().toLocaleString('es-VE') : '')}</p>
+          <p className="text-[10px]">Cajero: {activeShiftData?.cashierName || 'Caja 1'}</p>
+          <p className="text-[10px]">Apertura: {activeShiftData?.openedAt ? formatDateShort(activeShiftData.openedAt) : '--'}</p>
         </div>
 
         {/* Resumen Financiero */}
-        <div className="py-2 border-b border-dashed border-black space-y-1">
+        <div className="py-2 border-b border-dashed border-black space-y-1 text-[11px]">
           <p className="font-bold text-center">--- RESUMEN FINANCIERO ---</p>
           <div className="flex justify-between">
             <span>Fondo Inicial $:</span>
@@ -1477,7 +1528,7 @@ export default function DesktopReportsPage() {
         </div>
 
         {/* Formas de Pago */}
-        <div className="py-2 border-b border-dashed border-black space-y-1">
+        <div className="py-2 border-b border-dashed border-black space-y-1 text-[11px]">
           <p className="font-bold text-center">--- FORMAS DE PAGO ---</p>
           <div className="flex justify-between">
             <span>Efectivo Dólares ($):</span>
@@ -1501,19 +1552,19 @@ export default function DesktopReportsPage() {
               <span>${paymentBreakdown.totalZelleUSD.toFixed(2)}</span>
             </div>
           )}
-          <div className="flex justify-between text-xs pt-1 border-t border-dashed border-black font-black">
+          <div className="flex justify-between pt-1 border-t border-dashed border-black font-black">
             <span>Vuelto entregado ($):</span>
             <span>-${paymentBreakdown.totalChangeUSD.toFixed(2)}</span>
           </div>
-          <div className="flex justify-between text-xs font-black">
+          <div className="flex justify-between font-black">
             <span>Vuelto entregado (Bs):</span>
             <span>-Bs. {paymentBreakdown.totalChangeVES.toFixed(2)}</span>
           </div>
-          <div className="flex justify-between text-xs pt-1 font-black">
+          <div className="flex justify-between pt-1 font-black">
             <span>TOTAL GAVETA ($):</span>
             <span>${paymentBreakdown.netCashUSDInDrawer.toFixed(2)}</span>
           </div>
-          <div className="flex justify-between text-xs font-black">
+          <div className="flex justify-between font-black">
             <span>TOTAL GAVETA (Bs):</span>
             <span>Bs. {paymentBreakdown.netCashVESInDrawer.toFixed(2)}</span>
           </div>
@@ -1521,7 +1572,7 @@ export default function DesktopReportsPage() {
 
         {/* Resumen de Artículos Vendidos para Auditoría */}
         <div className="py-2 border-b border-dashed border-black space-y-1">
-          <p className="font-bold text-center">--- MERCANCÍA VENDIDA ---</p>
+          <p className="font-bold text-center text-[11px]">--- MERCANCÍA VENDIDA ---</p>
           {inventoryAudit.map((item, idx) => (
             <div key={idx} className="flex justify-between text-[10px]">
               <span className="truncate max-w-[170px]">{item.name} (x{item.qtySold})</span>
@@ -1530,10 +1581,10 @@ export default function DesktopReportsPage() {
           ))}
         </div>
 
-        <div className="text-center pt-3 space-y-1 text-[10px]">
+        <div className="text-center pt-3 space-y-2 text-[10px]">
           <p>Firma Cajero: ___________________</p>
           <p>Firma Supervisor: ___________________</p>
-          <p className="pt-2">VENEMATIC POS · Sistema de Ventas</p>
+          <p className="pt-2 font-bold">KLIKPOS ENTERPRISE · Sistema de Ventas</p>
         </div>
       </div>
     </div>
