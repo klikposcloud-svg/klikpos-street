@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>KlikPOS Keygen</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #070b14;
+      --card-bg: rgba(13, 20, 36, 0.95);
+      --card-border: rgba(56, 189, 248, 0.25);
+      --emerald: #10b981;
+      --emerald-glow: rgba(16, 185, 129, 0.35);
+      --cyan: #06b6d4;
+      --cyan-glow: rgba(6, 182, 212, 0.35);
+      --sky: #0284c7;
+      --amber: #f59e0b;
+      --rose: #f43f5e;
+      --purple: #8b5cf6;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --radius: 20px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 1rem 0.85rem 2rem;
+      background-image: 
+        radial-gradient(circle at 10% 10%, rgba(6, 182, 212, 0.15) 0%, transparent 45%),
+        radial-gradient(circle at 90% 90%, rgba(16, 185, 129, 0.15) 0%, transparent 45%);
+      background-attachment: fixed;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 480px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    /* TOP BAR */
+    .top-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.5rem 0.25rem;
+    }
+
+    .brand-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .logo-badge {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #10b981, #06b6d4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      font-weight: 900;
+      color: #070b14;
+      box-shadow: 0 4px 18px var(--cyan-glow);
+      flex-shrink: 0;
+    }
+
+    .brand-titles h1 {
+      font-size: 1.15rem;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      color: #fff;
+      line-height: 1.1;
+    }
+
+    .brand-titles p {
+      font-size: 0.72rem;
+      color: #38bdf8;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      margin-top: 2px;
+    }
+
+    .badge-master {
+      font-size: 0.65rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      background: rgba(245, 158, 11, 0.18);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      color: #fbbf24;
+      padding: 4px 10px;
+      border-radius: 99px;
+      letter-spacing: 0.05em;
+    }
+
+    /* MAIN CARD */
+    .keygen-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(24px);
+      border: 1.5px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7), 0 0 30px rgba(6, 182, 212, 0.1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .keygen-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3.5px;
+      background: linear-gradient(90deg, #10b981, #06b6d4, #8b5cf6);
+    }
+
+    /* FORM GROUPS */
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    .form-group label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.75rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #cbd5e1;
+      margin-bottom: 0.4rem;
+    }
+
+    .form-group label span.hint {
+      font-size: 0.68rem;
+      font-weight: 600;
+      text-transform: none;
+      color: #38bdf8;
+    }
+
+    .input-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    input, select {
+      width: 100%;
+      background: rgba(7, 11, 20, 0.9);
+      border: 1.5px solid rgba(255, 255, 255, 0.15);
+      border-radius: 14px;
+      padding: 0.8rem 0.9rem;
+      font-size: 0.92rem;
+      font-family: inherit;
+      color: #fff;
+      transition: all 0.2s;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: #06b6d4;
+      box-shadow: 0 0 16px rgba(6, 182, 212, 0.3);
+      background: rgba(7, 11, 20, 0.98);
+    }
+
+    input.mono {
+      font-family: 'JetBrains Mono', monospace;
+      letter-spacing: 0.04em;
+      font-weight: 700;
+      font-size: 0.88rem;
+    }
+
+    .btn-paste-inside {
+      position: absolute;
+      right: 6px;
+      background: rgba(56, 189, 248, 0.15);
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      color: #38bdf8;
+      border-radius: 10px;
+      padding: 5px 9px;
+      font-size: 0.7rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      transition: all 0.15s;
+    }
+
+    .btn-paste-inside:active {
+      transform: scale(0.92);
+      background: #38bdf8;
+      color: #070b14;
+    }
+
+    select option {
+      background: #0d1424;
+      color: #fff;
+      padding: 10px;
+    }
+
+    .plan-info-box {
+      background: rgba(6, 182, 212, 0.08);
+      border: 1px solid rgba(6, 182, 212, 0.25);
+      border-radius: 12px;
+      padding: 0.65rem 0.85rem;
+      font-size: 0.74rem;
+      margin-top: 0.4rem;
+      line-height: 1.35;
+      color: #94a3b8;
+    }
+
+    .plan-info-box span.tag {
+      font-weight: 800;
+      color: #38bdf8;
+      display: block;
+      margin-bottom: 2px;
+      font-size: 0.68rem;
+    }
+
+    /* GENERATE BUTTON */
+    .btn-generate {
+      width: 100%;
+      background: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
+      color: #070b14;
+      border: none;
+      border-radius: 14px;
+      padding: 0.95rem;
+      font-size: 0.98rem;
+      font-weight: 900;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      box-shadow: 0 6px 20px var(--emerald-glow);
+      transition: all 0.2s;
+      margin-top: 1.25rem;
+      letter-spacing: 0.02em;
+    }
+
+    .btn-generate:active {
+      transform: scale(0.97);
+      box-shadow: 0 2px 10px rgba(16, 185, 129, 0.3);
+    }
+
+    /* RESULT CARD */
+    .result-container {
+      margin-top: 1rem;
+      background: rgba(7, 11, 20, 0.95);
+      border: 1.5px solid #10b981;
+      border-radius: 16px;
+      padding: 1.15rem;
+      display: none;
+      animation: slideUp 0.3s ease;
+      box-shadow: 0 0 25px rgba(16, 185, 129, 0.25);
+    }
+
+    .result-container.active {
+      display: block;
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .result-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.65rem;
+    }
+
+    .result-header span.title {
+      font-size: 0.72rem;
+      font-weight: 900;
+      color: #34d399;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .key-display {
+      background: #020617;
+      border: 1px dashed rgba(56, 189, 248, 0.5);
+      border-radius: 12px;
+      padding: 0.9rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1rem;
+      font-weight: 800;
+      color: #38bdf8;
+      text-align: center;
+      letter-spacing: 0.06em;
+      word-break: break-all;
+      user-select: all;
+    }
+
+    .details-box {
+      font-size: 0.72rem;
+      color: #cbd5e1;
+      margin-top: 0.65rem;
+      line-height: 1.45;
+      background: rgba(255, 255, 255, 0.04);
+      padding: 0.6rem 0.75rem;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .action-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.6rem;
+      margin-top: 0.85rem;
+    }
+
+    .btn-action {
+      padding: 0.75rem 0.5rem;
+      border-radius: 12px;
+      font-size: 0.82rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      transition: all 0.15s;
+    }
+
+    .btn-action:active {
+      transform: scale(0.95);
+    }
+
+    .btn-copy {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid #10b981;
+      color: #34d399;
+    }
+
+    .btn-whatsapp {
+      background: #25d366;
+      border: none;
+      color: #070b14;
+      box-shadow: 0 4px 14px rgba(37, 211, 102, 0.3);
+    }
+
+    /* HISTORY SECTION */
+    .history-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: var(--radius);
+      padding: 1.15rem;
+    }
+
+    .history-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
+    }
+
+    .history-header h2 {
+      font-size: 0.82rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #e2e8f0;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      max-height: 260px;
+      overflow-y: auto;
+      padding-right: 2px;
+    }
+
+    .history-item {
+      background: rgba(7, 11, 20, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 0.65rem 0.8rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+      transition: all 0.15s;
+    }
+
+    .history-item:hover {
+      border-color: rgba(56, 189, 248, 0.3);
+      background: rgba(7, 11, 20, 0.95);
+    }
+
+    .history-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .history-rif {
+      font-weight: 800;
+      color: #fff;
+      font-size: 0.78rem;
+    }
+
+    .history-plan {
+      font-size: 0.65rem;
+      background: rgba(56, 189, 248, 0.2);
+      color: #38bdf8;
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-weight: 800;
+    }
+
+    .history-key {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      color: #94a3b8;
+      word-break: break-all;
+    }
+
+    .history-actions {
+      display: flex;
+      gap: 0.4rem;
+      margin-top: 2px;
+    }
+
+    .history-btn {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #cbd5e1;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .history-btn:active {
+      transform: scale(0.92);
+    }
+
+    /* TOAST */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #10b981;
+      color: #070b14;
+      font-weight: 900;
+      font-size: 0.85rem;
+      padding: 0.65rem 1.25rem;
+      border-radius: 99px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+      z-index: 100;
+      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- TOP BAR -->
+    <header class="top-header">
+      <div class="brand-wrap">
+        <div class="logo-badge">K</div>
+        <div class="brand-titles">
+          <h1>KLIKPOS KEYGEN</h1>
+          <p>Generador Maestro Móvil</p>
+        </div>
+      </div>
+      <span class="badge-master">PRO MAESTRO</span>
+    </header>
+
+    <!-- KEYGEN FORM -->
+    <div class="keygen-card">
+      <form onsubmit="handleGenerate(event)">
+        <!-- HWID -->
+        <div class="form-group">
+          <label for="hwid">
+            <span>1. HWID del Cliente</span>
+            <span class="hint">Desde POS de caja/tablet</span>
+          </label>
+          <div class="input-wrap">
+            <input 
+              type="text" 
+              id="hwid" 
+              class="mono" 
+              placeholder="Ej: VN8F-3A12-9C84 o ANDR-..." 
+              required 
+              autocomplete="off"
+              oninput="this.value = this.value.toUpperCase()"
+            >
+            <button type="button" class="btn-paste-inside" onclick="pasteHWID()">
+              📋 Pegar
+            </button>
+          </div>
+        </div>
+
+        <!-- RIF / CÉDULA -->
+        <div class="form-group">
+          <label for="rif">
+            <span>2. RIF o Cédula</span>
+            <span class="hint">V-, J-, G-, E-</span>
+          </label>
+          <input 
+            type="text" 
+            id="rif" 
+            class="mono" 
+            placeholder="Ej: J-12345678-9 o V-12345678" 
+            required 
+            autocomplete="off"
+            oninput="this.value = this.value.toUpperCase()"
+          >
+        </div>
+
+        <!-- PLAN -->
+        <div class="form-group">
+          <label for="plan">
+            <span>3. Plan o Modalidad</span>
+            <span class="hint">Ediciones 2026</span>
+          </label>
+          <select id="plan" onchange="updatePlanDesc()">
+            <option value="promo_6m" selected>⭐ Promo Lanzamiento - 6 Meses ($35 - 180 Días)</option>
+            <option value="basico_local">Básico Local - PERMANENTE ($40 - Offline $0 Cuotas)</option>
+            <option value="pro_full">Pro Full Empresarial - PERMANENTE ($75 - Todo Incluido)</option>
+            <option value="pro_trial">Plan a Crédito Pro - 1ra Cuota ($37.50 - 30 Días)</option>
+            <option value="starter_trial">Plan a Crédito Starter - 1ra Cuota ($25 - 30 Días)</option>
+            <option value="starter_full">Starter - Licencia Completa ($50 - PERMANENTE)</option>
+            <option value="cloud_monthly">Suscripción Respaldo Nube ($5/mes - 30 Días)</option>
+            <option value="trial_15m">Prueba Flash - 15 Minutos (Evaluación)</option>
+            <option value="demo">Demo Gratuita (15 Días)</option>
+            <option value="anual">Anual - 365 Días (Renovación)</option>
+            <option value="vitalicia">Vitalicia Legacy (Perpetua)</option>
+          </select>
+          <div id="plan-desc-box" class="plan-info-box">
+            <span class="tag">PLAN SELECCIONADO:</span>
+            <span id="plan-desc-text">180 días de acceso total con Respaldo en la Nube y descarga de configuraciones.</span>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-generate">
+          <span>⚡</span> GENERAR CLAVE DE ACTIVACIÓN
+        </button>
+      </form>
+
+      <!-- RESULTADO -->
+      <div id="result-box" class="result-container">
+        <div class="result-header">
+          <span class="title">✓ Licencia Generada</span>
+          <span id="res-badge" style="font-size: 0.68rem; background: #0284c7; color: #fff; padding: 2px 8px; border-radius: 6px; font-weight: 800;">PRO</span>
+        </div>
+
+        <div id="key-output" class="key-display">
+          VNK-PRO-PERP-XXXX-XXXX-XXXX-XXXX
+        </div>
+
+        <div class="details-box">
+          <div>• <strong>Comercio:</strong> <span id="res-rif"></span></div>
+          <div>• <strong>HWID:</strong> <span id="res-hwid" style="font-family: monospace;"></span></div>
+          <div>• <strong>Vigencia:</strong> <span id="res-expiry" style="color: #34d399; font-weight: 800;"></span></div>
+        </div>
+
+        <div class="action-buttons">
+          <button type="button" class="btn-action btn-copy" onclick="copyLicenseKey()">
+            <span>📋</span> Copiar Clave
+          </button>
+          <button type="button" class="btn-action btn-whatsapp" onclick="shareViaWhatsApp()">
+            <span>💬</span> WhatsApp
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- HISTORIAL DE CLAVES GENERADAS -->
+    <div class="history-card">
+      <div class="history-header">
+        <h2><span>📜</span> Historial de Claves</h2>
+        <button onclick="clearHistory()" class="history-btn" style="color: #f43f5e; border-color: rgba(244,63,94,0.3);">
+          Limpiar
+        </button>
+      </div>
+      <div id="history-list" class="history-list">
+        <!-- Generado dinámicamente -->
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST FEEDBACK -->
+  <div id="toast" class="toast">
+    <span>✓</span> <span id="toast-msg">Clave copiada al portapapeles</span>
+  </div>
+
+  <script>
+    const MASTER_SIGNING_SALT = 'VENEMATIC_SEC_SALT_2026_AIVYNTRAX_PRO_POS_V2';
+
+    const PLAN_CONFIG = {
+      promo_6m:      { prefix: 'PRM', label: '⭐ Promo 6 Meses Nube ($35)', desc: '180 días con respaldo automático en la nube Firebase y descarga de configuraciones.', days: 180 },
+      basico_local:  { prefix: 'BAS', label: 'Básico Local - PERMANENTE ($40)', desc: 'PERMANENTE sin mensualidades. Operación offline 100%, inventario y $0 costo servidor.', days: null },
+      pro_full:      { prefix: 'PRO', label: 'Pro Full - PERMANENTE ($75)', desc: 'PERMANENTE sin vencimiento. Balanza, Nube, BCV en vivo, Pago Móvil automático y cajeros ilimitados.', days: null },
+      pro_trial:     { prefix: 'PTT', label: 'Plan a Crédito Pro ($37.50)', desc: '30 días Pro completo con Balanza, Nube y Pago Móvil. Espera 2da cuota.', days: 30 },
+      starter_trial: { prefix: 'STT', label: 'Plan a Crédito Starter ($25)', desc: '30 días Starter. Espera 2da cuota de $25 para clave permanente.', days: 30 },
+      starter_full:  { prefix: 'STR', label: 'Starter Permanente ($50)', desc: 'PERMANENTE sin vencimiento. POS, Inventario, Etiquetas y 2 cajeros.', days: null },
+      cloud_monthly: { prefix: 'CLD', label: 'Suscripción Nube ($5/mes)', desc: '30 días de sincronización y respaldo en la nube Firebase.', days: 30 },
+      trial_15m:     { prefix: 'T15', label: 'Prueba Flash (15 Minutos)', desc: '15 minutos exactos desde la activación. Despliega modal de compra.', days: '15m' },
+      demo:          { prefix: 'DMO', label: 'Demo Gratuita (15 Días)', desc: '15 días de prueba para demostración a nuevos comercios.', days: 15 },
+      anual:         { prefix: 'ANL', label: 'Anual (365 Días)', desc: 'Renovación anual de 365 días.', days: 365 },
+      vitalicia:     { prefix: 'VIT', label: 'Vitalicia Legacy', desc: 'Licencia permanente perpetua.', days: null }
+    };
+
+    function updatePlanDesc() {
+      const plan = document.getElementById('plan').value;
+      const cfg = PLAN_CONFIG[plan];
+      if (cfg) {
+        document.getElementById('plan-desc-text').innerText = cfg.desc;
+      }
+    }
+
+    async function sha256Hex(str) {
+      const encoder = new TextEncoder();
+      const data = encoder.encode(str);
+      const hashBuffer = await window.crypto.subtle.digest('SHA-256', data);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
+    }
+
+    async function generateLicenseKeyAsync(hwid, rif, plan) {
+      const cfg = PLAN_CONFIG[plan] || PLAN_CONFIG['demo'];
+      let expires;
+      let expCode;
+
+      if (cfg.days === null) {
+        expires = 'NEVER';
+        expCode = 'PERP';
+      } else if (cfg.days === '15m') {
+        expires = '15MIN';
+        expCode = '15MN';
+      } else {
+        const d = new Date(Date.now() + cfg.days * 86400000);
+        const yy = d.getFullYear().toString().slice(2);
+        const mm = (d.getMonth() + 1).toString().padStart(2, '0');
+        expires = `20${yy}-${mm}-28`;
+        expCode = `${yy}${mm}`;
+      }
+
+      const cleanHwid = hwid.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+      const cleanRif = rif.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+      const payloadStr = `${cleanHwid}#${cleanRif}#${plan}#${expires}#${MASTER_SIGNING_SALT}`;
+      const fullHash = await sha256Hex(payloadStr);
+      const sig = `${fullHash.slice(0,4)}-${fullHash.slice(4,8)}-${fullHash.slice(8,12)}-${fullHash.slice(12,16)}`;
+
+      return {
+        key: `VNK-${cfg.prefix}-${expCode}-${sig}`,
+        planLabel: cfg.label,
+        expiryDesc: cfg.days === null ? 'PERMANENTE (Sin vencimiento)' : cfg.days === '15m' ? '15 MINUTOS (Prueba Flash)' : `${cfg.days} días (Vence aprox. ${expires})`,
+        prefix: cfg.prefix
+      };
+    }
+
+    let lastGeneratedKey = '';
+    let lastClientRif = '';
+    let lastClientPlan = '';
+    let lastClientHwid = '';
+
+    async function pasteHWID() {
+      try {
+        const text = await navigator.clipboard.readText();
+        if (text) {
+          document.getElementById('hwid').value = text.trim().toUpperCase();
+          showToast('HWID pegado desde el portapapeles');
+        }
+      } catch (err) {
+        document.getElementById('hwid').focus();
+        showToast('Presiona mantener para pegar');
+      }
+    }
+
+    async function handleGenerate(e) {
+      e.preventDefault();
+      const hwid = document.getElementById('hwid').value.trim();
+      const rif = document.getElementById('rif').value.trim();
+      const plan = document.getElementById('plan').value;
+
+      if (!hwid || !rif) {
+        alert('Por favor introduce el HWID y el RIF del cliente');
+        return;
+      }
+
+      const res = await generateLicenseKeyAsync(hwid, rif, plan);
+      lastGeneratedKey = res.key;
+      lastClientRif = rif.toUpperCase();
+      lastClientPlan = res.planLabel;
+      lastClientHwid = hwid.toUpperCase();
+
+      document.getElementById('key-output').innerText = res.key;
+      document.getElementById('res-rif').innerText = lastClientRif;
+      document.getElementById('res-hwid').innerText = lastClientHwid;
+      document.getElementById('res-expiry').innerText = res.expiryDesc;
+      document.getElementById('res-badge').innerText = res.prefix;
+
+      const resultBox = document.getElementById('result-box');
+      resultBox.classList.add('active');
+      resultBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+      saveToHistory({
+        key: res.key,
+        rif: lastClientRif,
+        hwid: lastClientHwid,
+        plan: lastClientPlan,
+        date: new Date().toLocaleDateString('es-VE', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
+      });
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toast-msg').innerText = msg;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2500);
+    }
+
+    function copyLicenseKey() {
+      if (!lastGeneratedKey) return;
+      navigator.clipboard.writeText(lastGeneratedKey).then(() => {
+        showToast('¡Clave copiada al portapapeles!');
+      });
+    }
+
+    function shareViaWhatsApp() {
+      if (!lastGeneratedKey) return;
+      const text = `*ACTIVACIÓN KLIKPOS ENTERPRISE* 🚀\n\nHola, aquí tienes tu clave oficial de activación:\n\n🔑 *Clave de Producto:* \`${lastGeneratedKey}\`\n📋 *RIF:* ${lastClientRif}\n📦 *Plan:* ${lastClientPlan}\n\n*Pasos para activar:*\n1. Abre KlikPOS en tu equipo.\n2. Presiona en *Activar Licencia* o ve a *Ajustes > Licencia*.\n3. Pega esta clave y presiona *Validar y Activar*.\n\n¡Listo! Tu sistema queda desbloqueado de inmediato.`;
+      const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+      window.open(url, '_blank');
+    }
+
+    function saveToHistory(item) {
+      try {
+        let history = JSON.parse(localStorage.getItem('klikpos_keygen_history') || '[]');
+        history = [item, ...history.filter(h => h.key !== item.key)].slice(0, 30);
+        localStorage.setItem('klikpos_keygen_history', JSON.stringify(history));
+        renderHistory();
+      } catch (e) {}
+    }
+
+    function clearHistory() {
+      if (confirm('¿Deseas limpiar el historial de claves en este dispositivo?')) {
+        localStorage.removeItem('klikpos_keygen_history');
+        renderHistory();
+        showToast('Historial limpiado');
+      }
+    }
+
+    function renderHistory() {
+      const listEl = document.getElementById('history-list');
+      try {
+        const history = JSON.parse(localStorage.getItem('klikpos_keygen_history') || '[]');
+        if (history.length === 0) {
+          listEl.innerHTML = '<div style="font-size: 0.72rem; color: #64748b; text-align: center; padding: 1rem;">No hay claves generadas recientemente.</div>';
+          return;
+        }
+
+        listEl.innerHTML = history.map(item => `
+          <div class="history-item">
+            <div class="history-row">
+              <span class="history-rif">${item.rif}</span>
+              <span class="history-plan">${item.plan.split(' - ')[0]}</span>
+            </div>
+            <div class="history-key">${item.key}</div>
+            <div class="history-actions">
+              <button class="history-btn" onclick="copyHistoryKey('${item.key}')">📋 Copiar</button>
+              <button class="history-btn" onclick="sendHistoryWA('${item.key}', '${item.rif}', '${item.plan}')">💬 WhatsApp</button>
+              <span style="margin-left: auto; font-size: 0.65rem; color: #64748b; align-self: center;">${item.date}</span>
+            </div>
+          </div>
+        `).join('');
+      } catch (e) {
+        listEl.innerHTML = '<div style="font-size: 0.72rem; color: #64748b; text-align: center;">Sin historial</div>';
+      }
+    }
+
+    function copyHistoryKey(k) {
+      navigator.clipboard.writeText(k).then(() => {
+        showToast('Clave copiada: ' + k);
+      });
+    }
+
+    function sendHistoryWA(k, rif, plan) {
+      const text = `*ACTIVACIÓN KLIKPOS ENTERPRISE* 🚀\n\nHola, aquí tienes tu clave oficial de activación:\n\n🔑 *Clave de Producto:* \`${k}\`\n📋 *RIF:* ${rif}\n📦 *Plan:* ${plan}\n\n*Pasos para activar:*\n1. Abre KlikPOS en tu equipo.\n2. Presiona en *Activar Licencia* o ve a *Ajustes > Licencia*.\n3. Pega esta clave y presiona *Validar y Activar*.`;
+      const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+      window.open(url, '_blank');
+    }
+
+    updatePlanDesc();
+    renderHistory();
+  </script>
+</body>
+</html>
