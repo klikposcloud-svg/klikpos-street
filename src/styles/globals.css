@@ -974,15 +974,27 @@ html[data-theme="dark"] textarea::placeholder {
   -webkit-text-fill-color: #94a3b8 !important;
 }
 
-/* Inputs en Modo Claro (Máximo contraste #0f172a) */
-html[data-theme="light"] input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="range"]):not([type="color"]),
-html:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]) input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="range"]):not([type="color"]),
-html[data-theme="light"] select,
-html:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]) select,
-html[data-theme="light"] textarea,
-html:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]) textarea {
+/* Inputs en Modo Claro (Máximo contraste #0f172a, excluyendo inputs oscuros explícitos) */
+html[data-theme="light"] input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="range"]):not([type="color"]):not(.dark-input):not(.keep-dark):not([data-theme="dark"]),
+html:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]) input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="range"]):not([type="color"]):not(.dark-input):not(.keep-dark):not([data-theme="dark"]),
+html[data-theme="light"] select:not(.dark-input):not(.keep-dark),
+html:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]) select:not(.dark-input):not(.keep-dark),
+html[data-theme="light"] textarea:not(.dark-input):not(.keep-dark),
+html:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]) textarea:not(.dark-input):not(.keep-dark) {
   color: #0f172a !important;
   -webkit-text-fill-color: #0f172a !important;
+}
+
+/* Forzar blanco nítido y cursor visible para inputs oscuros garantizados */
+.dark-input,
+input.dark-input,
+input.keep-dark,
+.keep-dark input,
+.bg-slate-900 input,
+.bg-slate-950 input {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  caret-color: #38bdf8 !important;
 }
 
 html[data-theme="light"] input::placeholder,

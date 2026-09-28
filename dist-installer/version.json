@@ -1,16 +1,16 @@
 {
-  "version": "2.9.0",
+  "version": "3.0.0",
   "releaseDate": "2026-09-28",
-  "title": "KlikPOS Enterprise v2.9.0 - Dashboards Visuales Interactivos, Gráficos Circulares de Rentabilidad, Cobros y Top Productos",
+  "title": "KlikPOS Enterprise v3.0.0 - Vista Gourmet Uniforme, Selector Visual de Iconos y Experiencia de Venta Pulida",
   "notes": [
-    "Nuevos Gráficos Visuales Interactivos tipo Circular (Doughnut) y de Barras Estilizadas en Dashboard Financiero (/dashboard/financial) con desglose de Ganancia Neta, Costo de Mercancía (COGS) y Gastos Operativos.",
-    "Gráfico Circular de Medios de Pago y Cobros en Dashboard de Análisis (/dashboard/analytics) con soporte multimoneda ($ y Bs. BCV en vivo).",
-    "Ranking Visual de Top Productos Más Vendidos con gráfico de barras horizontales y unidades acumuladas.",
-    "Docker Flotante en KlikPOS Móvil con paridad desktop total: POS, Ventas WhatsApp, Clientes & Fiado, Cierre Z/X y Configuración.",
-    "Display Digital Mockup de Caja LED/LCD y buscador inteligente de imágenes Google con eliminación de fondo blanco.",
-    "Sincronización en la nube con Firestore y compilación nativa de alta fidelidad para Android y Windows Desktop."
+    "Nueva Vista Gourmet Uniforme (Warm Cream) con diseño refinado, imágenes de producto al 100% de contenedor y contraste perfecto.",
+    "Nueva Vista Minimalista Refinada sin efectos de ajedrez ni colores alternados, con fondo blanco/slate unificado y botón de personalización rápida.",
+    "Selector Visual de Iconos de Producto (IconSelectorModal) integrado en 1 solo clic con biblioteca Iconify y 8 categorías de comercio.",
+    "Corrección de visualización en el buscador de fotos de Google y la Web con soporte optimizado para modo oscuro y claro.",
+    "Sistema de Auto-Actualización Verificado desde GitHub Releases para Windows Desktop y Android.",
+    "Generación fresca de instaladores Desktop (Inno Setup) y APKs móviles oficiales con firma criptográfica V2."
   ],
-  "windowsUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v2.9.0/KlikPOS_Desktop_Full_Setup.exe",
-  "androidUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v2.9.0/KlikPOS_Movil_Full.apk",
+  "windowsUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.0/KlikPOS_Desktop_Full_Setup.exe",
+  "androidUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.0/KlikPOS_Movil_Full.apk",
   "mandatory": true
 }

@@ -2807,24 +2807,20 @@ export default function DesktopPosPage() {
             </div>
           )}
 
-          {/* MODO 3: TÁCTIL MINIMALISTA / KIOSCO (LLENA EL CANVAS, BORDES MARCADOS, ÍCONOS FILL/OUTLINE ALTERNADOS) */}
+          {/* MODO 3: TÁCTIL MINIMALISTA / KIOSCO (100% UNIFORME, FONDO LIMPIO, ALTO CONTRASTE & PERSONALIZADOR) */}
           {posViewMode === 'touch' && (
             <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4 gap-4 xl:gap-5 content-start h-full py-2 pb-24">
-              {filteredProducts.map((p, index) => {
+              {filteredProducts.map((p) => {
                 const isLowStock = p.stock <= p.minStock;
                 const isFixed = p.isFixedPriceVES && p.fixedPriceVES;
                 const displayVES = isFixed ? p.fixedPriceVES! : (p.priceUSD * bcvRate);
                 const displayUSD = isFixed ? (p.fixedPriceVES! / bcvRate) : p.priceUSD;
-                const isOutline = index % 2 === 0;
-                const toneClasses = getCardToneClasses(p, index, minimalistColorPalette);
 
                 return (
-                  <button
+                  <div
                     key={p.id}
-                    type="button"
                     onClick={() => addToCart(p, 1)}
-                    style={(p as any).color ? { backgroundColor: (p as any).color } : undefined}
-                    className={`pos-minimal-card min-h-[195px] sm:min-h-[205px] rounded-[24px] p-3.5 sm:p-4 flex flex-col justify-between items-center text-center transition-all duration-150 active:scale-[0.96] hover:scale-[1.02] cursor-pointer group select-none relative overflow-hidden hover:bg-white hover:border-slate-700 dark:hover:border-slate-300 hover:shadow-xl ${toneClasses}`}
+                    className="pos-minimal-card min-h-[195px] sm:min-h-[205px] bg-white dark:bg-slate-850 border-2 border-slate-200/90 dark:border-slate-700/80 rounded-[24px] p-3.5 sm:p-4 flex flex-col justify-between items-center text-center transition-all duration-150 active:scale-[0.96] hover:scale-[1.01] cursor-pointer group select-none relative overflow-hidden hover:border-sky-500/70 dark:hover:border-sky-400 hover:shadow-lg shadow-2xs"
                   >
                     {/* Tag superior discreto (Categoría o Fijo) */}
                     <div className="flex items-center justify-between w-full px-1 mb-1">
@@ -2843,9 +2839,23 @@ export default function DesktopPosPage() {
                       )}
                     </div>
 
-                    {/* Ícono Centrado: Alternado entre Fill y Outline (Idéntico a imagen de referencia) */}
+                    {/* Botón Flotante para Personalizar Ícono */}
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setIconSelectorProduct(p);
+                        setShowIconSelector(true);
+                      }}
+                      className="absolute top-2.5 right-2.5 w-6 h-6 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-500 hover:text-sky-600 hover:scale-110 shadow-2xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all z-20"
+                      title="Personalizar Ícono de este Producto"
+                    >
+                      <Palette className="w-3.5 h-3.5" />
+                    </button>
+
+                    {/* Ícono Centrado: Nítido y Proporcional */}
                     <div className="my-auto py-2 flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
-                      {getProductIconAlternated(p, isOutline)}
+                      {getProductIconAlternated(p, true)}
                     </div>
 
                     {/* Nombre en Mayúsculas con Espacio para 2 Líneas & Precios */}
@@ -2855,7 +2865,7 @@ export default function DesktopPosPage() {
                       </span>
 
                       {/* Precios Limpios de Alto Contraste */}
-                      <div className="flex items-baseline justify-center gap-2 mt-1.5 w-full pt-1.5 border-t border-slate-300/80 dark:border-slate-600/80">
+                      <div className="flex items-baseline justify-center gap-2 mt-1.5 w-full pt-1.5 border-t border-slate-200/80 dark:border-slate-700/80">
                         <span className="font-black text-sm sm:text-base font-sans text-slate-950 dark:text-white tabular-numbers">
                           {formatVES(displayVES)}
                         </span>
@@ -2864,7 +2874,7 @@ export default function DesktopPosPage() {
                         </span>
                       </div>
                     </div>
-                  </button>
+                  </div>
                 );
               })}
             </div>
@@ -2942,25 +2952,20 @@ export default function DesktopPosPage() {
             </div>
           )}
 
-          {/* MODO 5: CÁPSULAS HORIZONTALES GOURMET / GLASSMORPHISM (ESTILO PREMIUM BODEGÓN) */}
+          {/* MODO 5: CÁPSULAS HORIZONTALES GOURMET UNIFORMES (ESTILO BODEGÓN GOURMET - IMAGEN DE REFERENCIA) */}
           {posViewMode === 'capsule' && (
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3 gap-3.5 content-start">
-              {filteredProducts.map((p, index) => {
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3 gap-4 content-start">
+              {filteredProducts.map((p) => {
                 const isLowStock = p.stock <= p.minStock;
                 const isFixed = p.isFixedPriceVES && p.fixedPriceVES;
                 const displayVES = isFixed ? p.fixedPriceVES! : (p.priceUSD * bcvRate);
                 const displayUSD = isFixed ? (p.fixedPriceVES! / bcvRate) : p.priceUSD;
-                const isAltTheme = index % 2 === 1;
 
                 return (
                   <div
                     key={p.id}
                     onClick={() => addToCart(p, 1)}
-                    className={`relative rounded-[28px] p-3 shadow-xs hover:shadow-lg transition-all duration-200 active:scale-[0.98] cursor-pointer flex items-center gap-3.5 group select-none border ${
-                      isAltTheme
-                        ? 'bg-gradient-to-r from-sky-100 via-indigo-50 to-purple-100 dark:from-slate-800/90 dark:to-indigo-950/90 border-sky-200/60 dark:border-white/10'
-                        : 'bg-[#f8f6f0] dark:bg-slate-850 border-[#eae5d8] dark:border-slate-700/60'
-                    }`}
+                    className="relative bg-[#f8f6f0] dark:bg-slate-800/90 border border-[#eae5d8] dark:border-slate-700/60 rounded-[28px] p-3 shadow-xs hover:shadow-md transition-all duration-200 active:scale-[0.98] cursor-pointer flex items-center gap-3.5 group select-none"
                   >
                     {/* Badge de Stock en la esquina superior derecha */}
                     <div className="absolute top-2.5 right-3 flex items-center gap-1.5 z-10">
@@ -2969,13 +2974,7 @@ export default function DesktopPosPage() {
                           🔒 Bs. Fijo
                         </span>
                       )}
-                      <span
-                        className={`text-[10.5px] font-bold px-2.5 py-0.5 rounded-full ${
-                          isAltTheme
-                            ? 'bg-slate-900/40 backdrop-blur-md text-white dark:bg-white/15'
-                            : 'bg-[#e5e0d2]/80 dark:bg-slate-700/80 text-slate-700 dark:text-slate-200'
-                        }`}
-                      >
+                      <span className="text-[11px] font-bold px-3 py-0.5 rounded-full bg-[#e5e0d2]/80 dark:bg-slate-700/80 text-slate-700 dark:text-slate-200 shadow-2xs">
                         {p.stock} {p.unit === 'kg' ? 'kg' : 'uds'}
                       </span>
                     </div>
@@ -2994,18 +2993,18 @@ export default function DesktopPosPage() {
                       <Palette className="w-3.5 h-3.5" />
                     </button>
 
-                    {/* Contenedor Izquierdo: Imagen / Ícono en Caja Blanca Redondeada */}
-                    <div className="w-28 h-28 shrink-0 bg-white dark:bg-slate-900/90 rounded-2xl p-2 flex items-center justify-center shadow-xs relative overflow-hidden border border-black/5 dark:border-white/5">
+                    {/* Contenedor Izquierdo: Imagen / Ícono en Marco Blanco Redondeado */}
+                    <div className="w-32 h-32 shrink-0 bg-white dark:bg-slate-900 rounded-2xl p-1 flex items-center justify-center shadow-xs relative overflow-hidden border border-slate-200/50 dark:border-white/5">
                       {p.image && showImages ? (
                         <img
                           src={p.image}
                           alt={p.name}
-                          className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
+                          className="w-full h-full object-cover rounded-xl group-hover:scale-105 transition-transform duration-300"
                           loading="lazy"
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
-                          {getProductIconAlternated(p, index % 2 === 0)}
+                          {getProductIconAlternated(p, true)}
                         </div>
                       )}
 
@@ -3017,18 +3016,10 @@ export default function DesktopPosPage() {
                     </div>
 
                     {/* Contenedor Derecho: Cápsula Elevada de Datos */}
-                    <div
-                      className={`flex-1 min-w-0 rounded-2xl p-3 shadow-xs flex flex-col justify-between h-28 border ${
-                        isAltTheme
-                          ? 'bg-slate-900/60 dark:bg-slate-950/70 backdrop-blur-md border-white/15 text-white'
-                          : 'bg-white dark:bg-slate-900/70 border-white/80 dark:border-slate-700/50 text-slate-900 dark:text-slate-100'
-                      }`}
-                    >
+                    <div className="flex-1 min-w-0 bg-white dark:bg-slate-900/75 border border-white/80 dark:border-slate-700/50 rounded-2xl p-3 shadow-xs flex flex-col justify-between h-32 text-slate-900 dark:text-slate-100">
                       {/* Título a 2 Líneas */}
                       <h4
-                        className={`font-bold text-[13px] leading-tight line-clamp-2 min-h-[32px] ${
-                          isAltTheme ? 'text-white' : 'text-slate-900 dark:text-slate-100'
-                        }`}
+                        className="font-bold text-[14px] text-slate-900 dark:text-slate-100 leading-snug line-clamp-2 min-h-[36px]"
                         title={p.name}
                       >
                         {p.name}
@@ -3036,32 +3027,16 @@ export default function DesktopPosPage() {
 
                       {/* Precios & Badge de Categoría */}
                       <div className="flex flex-col mt-auto pt-1">
-                        <span
-                          className={`text-[17px] font-black tracking-tight tabular-numbers leading-tight ${
-                            isAltTheme
-                              ? 'text-cyan-300 drop-shadow-[0_0_8px_rgba(103,232,249,0.35)]'
-                              : 'text-slate-950 dark:text-white'
-                          }`}
-                        >
+                        <span className="text-xl sm:text-[22px] font-black text-slate-950 dark:text-white tracking-tight tabular-numbers leading-tight">
                           {formatVES(displayVES)}
                         </span>
 
                         <div className="flex items-center justify-between gap-1.5 mt-1">
-                          <span
-                            className={`text-[11px] font-bold ${
-                              isAltTheme ? 'text-cyan-100/70' : 'text-slate-500 dark:text-slate-400'
-                            }`}
-                          >
+                          <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
                             ${displayUSD.toFixed(2)} USD
                           </span>
 
-                          <span
-                            className={`text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider truncate max-w-[105px] ${
-                              isAltTheme
-                                ? 'bg-white/15 text-white border border-white/20'
-                                : 'bg-rose-50 dark:bg-rose-950/50 text-rose-700 dark:text-rose-300 border border-rose-200/60 dark:border-rose-900/50'
-                            }`}
-                          >
+                          <span className="text-[9.5px] font-black px-2.5 py-0.5 rounded-lg uppercase tracking-wider bg-rose-50 dark:bg-rose-950/50 text-rose-700 dark:text-rose-300 border border-rose-200/60 dark:border-rose-900/50 truncate max-w-[115px]">
                             {p.category}
                           </span>
                         </div>

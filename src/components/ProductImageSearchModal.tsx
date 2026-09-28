@@ -168,11 +168,12 @@ export default function ProductImageSearchModal({
                 placeholder="Escribe el nombre o descripción del producto a buscar..."
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 bg-slate-900 border-2 border-slate-700 rounded-xl text-xs sm:text-sm font-semibold placeholder-slate-400 focus:outline-hidden focus:border-sky-400 focus:ring-2 focus:ring-sky-500/40 transition-all shadow-inner"
+                className="dark-input keep-dark w-full pl-10 pr-4 py-2.5 bg-slate-900 border-2 border-slate-700 rounded-xl text-xs sm:text-sm font-semibold text-white placeholder-slate-400 focus:outline-hidden focus:border-sky-400 focus:ring-2 focus:ring-sky-500/40 transition-all shadow-inner"
                 style={{
                   color: '#ffffff',
                   WebkitTextFillColor: '#ffffff',
-                  backgroundColor: '#0f172a'
+                  backgroundColor: '#0f172a',
+                  caretColor: '#38bdf8'
                 }}
               />
             </div>
