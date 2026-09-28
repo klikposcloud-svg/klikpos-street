@@ -1,15 +1,15 @@
 {
   "version": "2.4.7",
   "releaseDate": "2026-09-27",
-  "title": "KlikPOS v2.4.7 - Versión Móvil/Tablet Standalone Full con Gestión de Empresa, Pago Móvil, Clientes y Licencias Multiplan",
+  "title": "KlikPOS Enterprise v2.4.7 - 5 Ediciones Oficiales, Modo Oscuro con Coloración Total y Sincronización Firestore",
   "notes": [
-    "Lanzamiento de la versión Tablet/Móvil Standalone autónoma (desligada de PC): configuración de datos de empresa, edición completa de Pago Móvil con copia rápida y gestión de clientes.",
-    "Pasarela de cobro multimoneda en Móvil/Tablet con cálculo automático de vuelto en USD y Bs. al cambio oficial BCV en tiempo real.",
-    "Generación de ticket digital e impresión Bluetooth directa o envío formateado por WhatsApp al cliente.",
-    "Navegación inferior fija permanente con pastilla elástica animada y tiradores laterales sutiles (> y <) para comanda y ajustes.",
-    "Integración del embudo de conversión de 15 minutos y nuevos planes de licencia: Promo Lanzamiento (6 meses por $35), Básico Local ($40 permanente), Pro Full ($75) y Cloud Mensual ($5/mes)."
+    "Modo Oscuro con Coloración Total Personalizable: eliminación de azules rígidos para permitir Negro Puro OLED (#000000), Grafito Carbón (#121212), Esmeralda Nocturno (#051814), Púrpura Nocturno (#0f0d24), Azul Medianoche y Selector Hexadecimal libre en toda la pantalla.",
+    "Lanzamiento de las 5 Ediciones Oficiales: Móvil Satélite PC (Contingencia), Desktop Empresarial Full PC, Tablet Standalone Mesas (Restaurantes), Móvil Full Autónomo Retail (Nube) y Móvil Full Companion para PC.",
+    "Botón Central Diferenciado en Dock: COBRAR en versión Restaurante/Tablet Standalone y ESCÁNER (Cámara 60 FPS) en versiones Retail y Companion.",
+    "Librería centralizada de sincronización en la nube con Firestore categorizada por Edición, Comercio y Licencia.",
+    "Módulo Tablet Standalone con gestión de datos de empresa, configuración de Pago Móvil con bancos venezolanos, cartera de clientes y pasarela multimoneda con cálculo automático de vuelto en USD y Bs. al cambio oficial BCV en vivo."
   ],
   "windowsUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v2.4.7/KlikPOS_Desktop_Full_Setup.exe",
   "androidUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v2.4.7/KlikPOS_Movil_Full.apk",
-  "mandatory": false
+  "mandatory": true
 }

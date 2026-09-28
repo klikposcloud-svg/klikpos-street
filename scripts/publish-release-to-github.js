@@ -2,23 +2,23 @@ const fs = require('fs');
 const path = require('path');
 
 const TOKEN = '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';
-const TAG = 'v2.4.6';
+const TAG = 'v2.4.7';
 const REPO = 'klikposcloud-svg/klikpos-releases';
-const TITLE = 'KlikPOS Enterprise v2.4.6 - Modo Oscuro Personalizable WCAG AAA, Modo Esmerilado Diferenciado y Calculadora de Alto Contraste';
-const NOTES = `### Novedades en KlikPOS Enterprise v2.4.6:
-- **Modo Oscuro Personalizable con Motor WCAG AAA:**
-  - 6 Presets de matiz ambiental: Negro Puro OLED (#000000), Carbón Neutral (#121212), Azul Medianoche (#0a192f), Esmeralda Nocturno (#051814), Púrpura Nocturno (#0f0d24) y Selector Hexadecimal libre.
-  - Calibración automática de ratio de contraste en tiempo real (≥ 12:1) con badge de cumplimiento accesible.
-- **Diferenciación Visual Radical del Modo Esmerilado (Frosted Glass):**
-  - Ambient multi-point mesh gradient tricolor (#070e17 base) con paneles de vidrio satinado y desenfoque óptico de 16px.
-- **Teclado Numérico y Calculadora POS de Alto Contraste:**
-  - Números y caracteres 100% nítidos en blanco puro (#ffffff) sobre teclas slate en Modo Oscuro y cristal esmerilado, eliminando cualquier invisibilidad.
-- **Botón 'Regresar al Punto de Venta':**
-  - Ajustado con texto negro nítido (#0f172a) sobre fondo blanco (#ffffff) de acuerdo con los estándares de diseño.
-- **Ícono Activo de la Barra Lateral:**
-  - Ícono blanco puro (#ffffff) con relleno y trazo nítido al estar seleccionado sobre contenedor azul.
-- **APKs Móviles Distribuidas:**
-  - Actualizadas en DISTRIBUCION_KLIKPOS/03_Movil_Full_Autonomo/ y combos satélite.`;
+const TITLE = 'KlikPOS Enterprise v2.4.7 - 5 Ediciones Oficiales, Modo Oscuro con Coloración Total y Sincronización Firestore';
+const NOTES = `### Novedades en KlikPOS Enterprise v2.4.7:
+- **Modo Oscuro con Coloración Total Personalizable:**
+  - Se eliminaron las reglas forzadas de color azul para permitir que la pantalla completa adopte el tono seleccionado: Negro Puro OLED (#000000), Grafito Carbón (#121212), Esmeralda Nocturno (#051814), Púrpura Nocturno (#0f0d24), Azul Medianoche (#0a192f) o cualquier código hexadecimal libre con contraste WCAG AAA.
+- **Lanzamiento de las 5 Ediciones Oficiales de KlikPOS:**
+  - 01_KlikPOS_Satelite_PC_Contingencia: Companion para PC con escáner y venta sin luz.
+  - 02_Combo_Empresarial_Full: Versión Windows completa con balanza, lector, impresora y servidor local.
+  - 03_KlikPOS_Tablet_Standalone_Mesas: 100% desligada de PC para restaurantes, mesas, comanda y Pago Móvil.
+  - 04_KlikPOS_Movil_Full_Autonomo_Nube: Retail autónomo en teléfono con escáner láser y balanza.
+  - 05_KlikPOS_Movil_Full_Para_PC: Companion remoto total conectado al servidor de la PC.
+- **Botón Central Diferenciado en Barra Inferior:**
+  - Botón COBRAR (CircleDollarSign) para la edición Tablet Mesas.
+  - Botón ESCÁNER (Cámara 60 FPS) para las ediciones Retail, Satélite y Companion.
+- **Librería de Sincronización en la Nube Firestore:**
+  - Colecciones estructuradas por edición, comercio y licencia con actualización automática de tasas BCV en vivo.`;
 
 async function main() {
   console.log(`[1/4] Creando / verificando Release ${TAG} en https://github.com/${REPO}...`);
