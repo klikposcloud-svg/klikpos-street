@@ -1,7 +1,7 @@
 apply plugin: 'com.android.application'
 
 android {
-    namespace = "com.venematic.pos"
+    namespace = "com.klikpos.pos"
     compileSdk = rootProject.ext.compileSdkVersion
     defaultConfig {
         applicationId "com.klikpos.pos"
