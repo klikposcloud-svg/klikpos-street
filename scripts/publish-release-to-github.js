@@ -83,12 +83,20 @@ async function main() {
     console.warn(`[!] No se encontro el ejecutable en ${exePath}`);
   }
 
-  // 3. Subir APK Android Oficial
+  // 3. Subir APK Android Oficial POS
   const apkPath = path.resolve(__dirname, '../DISTRIBUCION_KLIKPOS/03_Movil_Full_Autonomo/KlikPOS_Movil_Full.apk');
   if (fs.existsSync(apkPath)) {
     const apkName = 'KlikPOS_Movil_Full.apk';
     console.log(`[4/5] Subiendo APK Android: ${apkName} (${(fs.statSync(apkPath).size / (1024*1024)).toFixed(2)} MB)...`);
     await uploadAsset(release, apkPath, apkName, 'application/vnd.android.package-archive');
+  }
+
+  // 3b. Subir APK Android Keygen
+  const keygenApkPath = path.resolve(__dirname, '../DISTRIBUCION_KLIKPOS/00_Herramientas_Desarrollador/KlikPOS_Keygen.apk');
+  if (fs.existsSync(keygenApkPath)) {
+    const keygenName = 'KlikPOS_Keygen.apk';
+    console.log(`[4b/5] Subiendo APK Keygen: ${keygenName} (${(fs.statSync(keygenApkPath).size / (1024*1024)).toFixed(2)} MB)...`);
+    await uploadAsset(release, keygenApkPath, keygenName, 'application/vnd.android.package-archive');
   }
 
   // 4. Verificación en vivo del endpoint remoto

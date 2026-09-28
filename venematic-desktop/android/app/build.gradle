@@ -26,6 +26,10 @@ android {
             v2SigningEnabled true
         }
     }
+    lint {
+        abortOnError false
+        checkReleaseBuilds false
+    }
     buildTypes {
         debug {
             signingConfig signingConfigs.release

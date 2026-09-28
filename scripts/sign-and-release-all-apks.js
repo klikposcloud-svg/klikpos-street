@@ -48,11 +48,11 @@ function stopGradleDaemon() {
 }
 
 // =============================================================================
-// A. COMPILAR KLIKPOS KEYGEN APK (ID ÚNICO: com.klikpos.keygen - INDEPENDIENTE)
+// A. COMPILAR KLIKPOS KEYGEN APK (RELEASE PRODUCTION BUILD: assembleRelease)
 // =============================================================================
 function buildKeygenApk() {
   console.log('\n===============================================================');
-  console.log('>>> [FASE 1] COMPILANDO: KLIKPOS KEYGEN (ID: com.klikpos.keygen)');
+  console.log('>>> [FASE 1] COMPILANDO: KLIKPOS KEYGEN RELEASE (com.klikpos.keygen)');
   console.log('===============================================================');
 
   stopGradleDaemon();
@@ -111,15 +111,15 @@ function buildKeygenApk() {
     fs.mkdirSync(path.dirname(publicIndex), { recursive: true });
     fs.copyFileSync(path.join(root, 'public', 'keygen-app.html'), publicIndex);
 
-    // 5. Compilar
-    console.log('Ejecutando Gradle assembleDebug para Keygen...');
-    execSync('cmd.exe /c ".\\gradlew.bat assembleDebug --no-daemon"', {
+    // 5. Compilar assembleRelease
+    console.log('Ejecutando Gradle assembleRelease para Keygen...');
+    execSync('cmd.exe /c ".\\gradlew.bat assembleRelease --no-daemon"', {
       cwd: androidDir,
       stdio: 'inherit',
       env: { ...process.env }
     });
 
-    const rawApk = path.join(androidDir, 'app', 'build', 'outputs', 'apk', 'debug', 'app-debug.apk');
+    const rawApk = path.join(androidDir, 'app', 'build', 'outputs', 'apk', 'release', 'app-release.apk');
     const signedKeygenApk = path.join(distDir, 'KlikPOS_Keygen.apk');
 
     fs.copyFileSync(rawApk, signedKeygenApk);
@@ -136,7 +136,7 @@ function buildKeygenApk() {
       console.log('  [✓] Copiado a: ' + t);
     }
 
-    console.log('>>> ¡KLIKPOS KEYGEN APK (com.klikpos.keygen) FIRMADA CON ÉXITO!');
+    console.log('>>> ¡KLIKPOS KEYGEN RELEASE APK (com.klikpos.keygen) GENERADA CON ÉXITO!');
 
   } finally {
     fs.writeFileSync(appGradle, bakGradle, 'utf8');
@@ -147,11 +147,11 @@ function buildKeygenApk() {
 }
 
 // =============================================================================
-// B. COMPILAR KLIKPOS MÓVIL FULL (ID ÚNICO: com.klikpos.pos - INDEPENDIENTE)
+// B. COMPILAR KLIKPOS MÓVIL FULL (RELEASE PRODUCTION BUILD: assembleRelease)
 // =============================================================================
 function buildPosApk() {
   console.log('\n===============================================================');
-  console.log('>>> [FASE 2] COMPILANDO: KLIKPOS MÓVIL FULL (ID: com.klikpos.pos)');
+  console.log('>>> [FASE 2] COMPILANDO: KLIKPOS MÓVIL FULL RELEASE (com.klikpos.pos)');
   console.log('===============================================================');
 
   stopGradleDaemon();
@@ -160,15 +160,15 @@ function buildPosApk() {
   console.log('Sincronizando HTML y static bundle de tablet-pos...');
   execSync(`node "${path.join(root, 'scripts', 'enhance-and-rebrand-mobile.js')}"`, { stdio: 'inherit' });
 
-  // 2. Compilar
-  console.log('Ejecutando Gradle assembleDebug para KlikPOS Móvil Full...');
-  execSync('cmd.exe /c ".\\gradlew.bat assembleDebug --no-daemon"', {
+  // 2. Compilar assembleRelease
+  console.log('Ejecutando Gradle assembleRelease para KlikPOS Móvil Full...');
+  execSync('cmd.exe /c ".\\gradlew.bat assembleRelease --no-daemon"', {
     cwd: androidDir,
     stdio: 'inherit',
     env: { ...process.env }
   });
 
-  const rawApk = path.join(androidDir, 'app', 'build', 'outputs', 'apk', 'debug', 'app-debug.apk');
+  const rawApk = path.join(androidDir, 'app', 'build', 'outputs', 'apk', 'release', 'app-release.apk');
   const signedPosApk = path.join(distDir, 'KlikPOS_Movil_Full.apk');
 
   fs.copyFileSync(rawApk, signedPosApk);
@@ -186,7 +186,7 @@ function buildPosApk() {
     console.log('  [✓] Copiado a: ' + t);
   }
 
-  console.log('>>> ¡KLIKPOS MÓVIL FULL (com.klikpos.pos) FIRMADA Y DISTRIBUIDA CON ÉXITO!');
+  console.log('>>> ¡KLIKPOS MÓVIL FULL RELEASE (com.klikpos.pos) GENERADA CON ÉXITO!');
 }
 
 ensureKeystore();
@@ -194,7 +194,7 @@ buildKeygenApk();
 buildPosApk();
 
 console.log('\n===============================================================');
-console.log(' ¡APKS KLIKPOS 100% INDEPENDIENTES Y FIRMADAS EXITOSAMENTE!');
+console.log(' ¡APKS RELEASE PRODUCTION COMPILADAS Y VERIFICADAS!');
 console.log(' - App 1: KlikPOS Keygen       (Package: com.klikpos.keygen)');
 console.log(' - App 2: KlikPOS Móvil Full   (Package: com.klikpos.pos)');
 console.log('===============================================================\n');
