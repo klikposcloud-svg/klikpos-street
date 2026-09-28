@@ -10,7 +10,6 @@ const manifestXml = path.join(androidDir, 'app', 'src', 'main', 'AndroidManifest
 const publicIndex = path.join(androidDir, 'app', 'src', 'main', 'assets', 'public', 'index.html');
 const keystorePath = path.join(androidDir, 'klikpos-release.jks');
 
-const zipalignExe = 'C:\\Users\\pcpro\\AppData\\Local\\Android\\Sdk\\build-tools\\35.0.0\\zipalign.exe';
 const apksignerBat = 'C:\\Users\\pcpro\\AppData\\Local\\Android\\Sdk\\build-tools\\35.0.0\\apksigner.bat';
 
 const distDir = path.join(root, 'dist-apk');
@@ -37,27 +36,9 @@ function ensureKeystore() {
   }
 }
 
-// 2. Firmar y Alinear APK con zipalign y apksigner (V1, V2, V3)
-function signAndAlignApk(rawApkPath, finalApkPath) {
-  const alignedApk = path.join(path.dirname(rawApkPath), 'aligned-temp.apk');
-  if (fs.existsSync(alignedApk)) {
-    try { fs.unlinkSync(alignedApk); } catch (e) {}
-  }
-
-  // Alinear a 4 bytes
-  console.log(`  [1/2] Alineando con zipalign: ${path.basename(finalApkPath)}...`);
-  execSync(`"${zipalignExe}" -f -p 4 "${rawApkPath}" "${alignedApk}"`, { stdio: 'inherit' });
-
-  // Firmar con Release Keystore V1 + V2 + V3
-  console.log(`  [2/2] Firmando con apksigner (Esquema V1 + V2 + V3 Release KlikPOS)...`);
-  execSync(`cmd.exe /c ""${apksignerBat}" sign --ks "${keystorePath}" --ks-key-alias klikpos --ks-pass pass:klikpos2026 --key-pass pass:klikpos2026 --v1-signing-enabled true --v2-signing-enabled true --v3-signing-enabled true "${alignedApk}""`, { stdio: 'inherit' });
-
-  // Verificar firma
-  console.log(`  [✓] Verificando firma criptográfica con apksigner...`);
-  execSync(`cmd.exe /c ""${apksignerBat}" verify --verbose "${alignedApk}""`, { stdio: 'inherit' });
-
-  fs.copyFileSync(alignedApk, finalApkPath);
-  try { fs.unlinkSync(alignedApk); } catch (e) {}
+function verifyApk(apkPath) {
+  console.log(`  [✓] Verificando firma criptográfica (V1 + V2 + V3)...`);
+  execSync(`cmd.exe /c ""${apksignerBat}" verify --verbose "${apkPath}""`, { stdio: 'inherit' });
 }
 
 function stopGradleDaemon() {
@@ -141,7 +122,8 @@ function buildKeygenApk() {
     const rawApk = path.join(androidDir, 'app', 'build', 'outputs', 'apk', 'debug', 'app-debug.apk');
     const signedKeygenApk = path.join(distDir, 'KlikPOS_Keygen.apk');
 
-    signAndAlignApk(rawApk, signedKeygenApk);
+    fs.copyFileSync(rawApk, signedKeygenApk);
+    verifyApk(signedKeygenApk);
 
     // Distribuir
     const targets = [
@@ -189,7 +171,8 @@ function buildPosApk() {
   const rawApk = path.join(androidDir, 'app', 'build', 'outputs', 'apk', 'debug', 'app-debug.apk');
   const signedPosApk = path.join(distDir, 'KlikPOS_Movil_Full.apk');
 
-  signAndAlignApk(rawApk, signedPosApk);
+  fs.copyFileSync(rawApk, signedPosApk);
+  verifyApk(signedPosApk);
 
   // Distribuir a combos
   const targets = [
