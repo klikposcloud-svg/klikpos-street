@@ -1,16 +1,16 @@
 {
-  "version": "2.8.0",
+  "version": "2.9.0",
   "releaseDate": "2026-09-28",
-  "title": "KlikPOS Enterprise v2.8.0 - Docker Móvil Paridad Desktop, Display Digital de Caja, Búsqueda de Imágenes Google y Tasa BCV Dinámica",
+  "title": "KlikPOS Enterprise v2.9.0 - Dashboards Visuales Interactivos, Gráficos Circulares de Rentabilidad, Cobros y Top Productos",
   "notes": [
-    "Nuevo Docker Flotante en KlikPOS Móvil (/scanner) con paridad total: POS, Ventas & Tickets con reenvío WhatsApp, Clientes & Cuentas por Cobrar, Cierre de Caja Z/X y Configuración.",
-    "Display Digital Mockup de Caja LED/LCD en tiempo real con visor de totales multimoneda ($ y Bs. BCV) y carrusel deslizable de productos.",
-    "Buscador e integrador automático de imágenes Google en Móvil y Desktop con recorte y fondo blanco transparente.",
-    "Motor de Tasa BCV en Vivo optimizado con auto-actualización sin caché y ajuste manual instantáneo con persistencia local.",
-    "Menú Digital Interactivo en Mesa y Delivery (/menu) accesible vía QR dinámico con soporte multimoneda y pedidos por WhatsApp.",
+    "Nuevos Gráficos Visuales Interactivos tipo Circular (Doughnut) y de Barras Estilizadas en Dashboard Financiero (/dashboard/financial) con desglose de Ganancia Neta, Costo de Mercancía (COGS) y Gastos Operativos.",
+    "Gráfico Circular de Medios de Pago y Cobros en Dashboard de Análisis (/dashboard/analytics) con soporte multimoneda ($ y Bs. BCV en vivo).",
+    "Ranking Visual de Top Productos Más Vendidos con gráfico de barras horizontales y unidades acumuladas.",
+    "Docker Flotante en KlikPOS Móvil con paridad desktop total: POS, Ventas WhatsApp, Clientes & Fiado, Cierre Z/X y Configuración.",
+    "Display Digital Mockup de Caja LED/LCD y buscador inteligente de imágenes Google con eliminación de fondo blanco.",
     "Sincronización en la nube con Firestore y compilación nativa de alta fidelidad para Android y Windows Desktop."
   ],
-  "windowsUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v2.8.0/KlikPOS_Desktop_Full_Setup.exe",
-  "androidUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v2.8.0/KlikPOS_Movil_Full.apk",
+  "windowsUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v2.9.0/KlikPOS_Desktop_Full_Setup.exe",
+  "androidUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v2.9.0/KlikPOS_Movil_Full.apk",
   "mandatory": true
 }
