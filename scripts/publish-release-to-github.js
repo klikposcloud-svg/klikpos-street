@@ -99,6 +99,14 @@ async function main() {
     await uploadAsset(release, keygenApkPath, keygenName, 'application/vnd.android.package-archive');
   }
 
+  // 3c. Subir APK Android Satélite Scanner
+  const sateliteApkPath = path.resolve(__dirname, '../DISTRIBUCION_KLIKPOS/01_Combo_Basico_Desktop_Satelite/KlikPOS_Movil_Satelite.apk');
+  if (fs.existsSync(sateliteApkPath)) {
+    const sateliteName = 'KlikPOS_Movil_Satelite.apk';
+    console.log(`[4c/5] Subiendo APK Satélite Scanner: ${sateliteName} (${(fs.statSync(sateliteApkPath).size / (1024*1024)).toFixed(2)} MB)...`);
+    await uploadAsset(release, sateliteApkPath, sateliteName, 'application/vnd.android.package-archive');
+  }
+
   // 4. Verificación en vivo del endpoint remoto
   console.log(`[5/5] Verificando disponibilidad pública del manifiesto en GitHub...`);
   try {
