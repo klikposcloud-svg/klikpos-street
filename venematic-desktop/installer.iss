@@ -1,12 +1,12 @@
 [Setup]
 AppName=KlikPOS Enterprise
-AppVersion=2.5.0
+AppVersion=2.8.0
 AppPublisher=KlikPOS Cloud
 AppPublisherURL=https://klikposcloud.com
 DefaultDirName={autopf}\KlikPOS Enterprise
 DefaultGroupName=KlikPOS Enterprise
 OutputDir=c:\Users\pcpro\OneDrive\Documents\venematic-master\venematic-master\venematic-desktop\dist-installer
-OutputBaseFilename=KlikPOS-Enterprise-Setup-v2.5.0
+OutputBaseFilename=KlikPOS-Enterprise-Setup-v2.8.0
 Compression=lzma2/max
 SolidCompression=yes
 WizardStyle=modern

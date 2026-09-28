@@ -25,7 +25,8 @@ export async function GET(request: Request) {
   const todayStr = new Date().toISOString().split('T')[0];
   const needsSync = forceLive || latestBcvData.date !== todayStr || latestBcvData.source === 'Predeterminada' || !latestBcvData.lastUpdated;
 
-  if (needsSync && !latestBcvData.isManual) {
+  // Si se solicita refresco forzado (clic del usuario), forzar consulta en vivo sin importar el estado manual
+  if (forceLive || (needsSync && !latestBcvData.isManual)) {
     try {
       const live = await fetchLiveBcvRate();
       if (live.success && live.rate > 0) {
@@ -36,6 +37,10 @@ export async function GET(request: Request) {
           lastUpdated: live.lastUpdated,
           isManual: false,
         };
+        scannerEmitter.emit('inventory_updated', {
+          bcvRate: latestBcvData.rate,
+          timestamp: Date.now(),
+        });
       }
     } catch (e) {
       console.warn('Error fetching live BCV in API route:', e);
@@ -63,6 +68,10 @@ export async function POST(request: Request) {
           lastUpdated: live.lastUpdated,
           isManual: false,
         };
+        scannerEmitter.emit('inventory_updated', {
+          bcvRate: latestBcvData.rate,
+          timestamp: Date.now(),
+        });
         return NextResponse.json({ success: true, ...latestBcvData });
       }
     }
@@ -71,7 +80,7 @@ export async function POST(request: Request) {
       latestBcvData = {
         rate: Math.round(rate * 100) / 100,
         date: new Date().toISOString().split('T')[0],
-        source: 'Ajuste Manual en Terminal',
+        source: body.source || 'Ajuste Manual en Terminal',
         lastUpdated: new Date().toISOString(),
         isManual: true,
       };

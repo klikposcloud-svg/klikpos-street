@@ -30,9 +30,9 @@
     "semantic_hash": ""
   },
   "package.json": {
-    "mtime": 1790625675.9882636,
-    "seen": 1790626117.8857787,
-    "ast_hash": "455ab30385354ce4e408e98e89eb5882",
+    "mtime": 1790627899.5411568,
+    "seen": 1790628458.7657318,
+    "ast_hash": "139748ceddc5362f86f09246228c8af1",
     "semantic_hash": ""
   },
   "postcss.config.js": {
@@ -48,14 +48,14 @@
     "semantic_hash": ""
   },
   "public/sw.js": {
-    "mtime": 1790625564.830675,
-    "seen": 1790626117.8857856,
-    "ast_hash": "ebc35f962410830a0c4627b8927ab18e",
+    "mtime": 1790628287.7917972,
+    "seen": 1790628458.76574,
+    "ast_hash": "d7789c5a1752771241844e1be3cff44b",
     "semantic_hash": ""
   },
   "public/workbox-00a24876.js": {
-    "mtime": 1790625564.830675,
-    "seen": 1790626117.8857913,
+    "mtime": 1790628287.7917972,
+    "seen": 1790628458.7657487,
     "ast_hash": "2f569fb030b2a09996588b309a8d636e",
     "semantic_hash": "2f569fb030b2a09996588b309a8d636e"
   },
@@ -102,9 +102,9 @@
     "semantic_hash": ""
   },
   "src/app/api/bcv/rate/route.ts": {
-    "mtime": 1790470785.956176,
-    "seen": 1790482593.2471266,
-    "ast_hash": "f7ac68080ad7494751f5395de3862c31",
+    "mtime": 1790627392.720088,
+    "seen": 1790628458.7660062,
+    "ast_hash": "bf4db813d54246cc13e056a60d5c85af",
     "semantic_hash": ""
   },
   "src/app/api/delivery/orders/[id]/route.ts": {
@@ -348,9 +348,9 @@
     "semantic_hash": "dff31a89a0d04b3fe8a9f83520bac746"
   },
   "src/app/scanner/page.tsx": {
-    "mtime": 1790536499.7409582,
-    "seen": 1790542421.3542528,
-    "ast_hash": "bbf7c7752e7f69bd2c778eb78fe6211d",
+    "mtime": 1790628181.1948533,
+    "seen": 1790628458.7661664,
+    "ast_hash": "eed6f11796302e38eab64f0e19467adf",
     "semantic_hash": ""
   },
   "src/app/sw.ts": {
@@ -912,9 +912,9 @@
     "semantic_hash": "9e1d55fd6ac912e918c345bd5590f839"
   },
   "venematic-desktop/package.json": {
-    "mtime": 1790625676.2627783,
-    "seen": 1790626117.886224,
-    "ast_hash": "455ab30385354ce4e408e98e89eb5882",
+    "mtime": 1790627900.4153786,
+    "seen": 1790628458.766479,
+    "ast_hash": "139748ceddc5362f86f09246228c8af1",
     "semantic_hash": ""
   },
   "venematic-desktop/postcss.config.js": {
@@ -2832,15 +2832,15 @@
     "semantic_hash": ""
   },
   "dist-installer/version.json": {
-    "mtime": 1790625675.9942405,
-    "seen": 1790626117.885763,
-    "ast_hash": "d79a2e626e305cb00cf61da25688382a",
+    "mtime": 1790627899.554548,
+    "seen": 1790628458.7657092,
+    "ast_hash": "520a9358c9de281a87772603dbb3ac04",
     "semantic_hash": ""
   },
   "klikpos-releases/version.json": {
-    "mtime": 1790625675.9965563,
-    "seen": 1790626117.8857734,
-    "ast_hash": "d79a2e626e305cb00cf61da25688382a",
+    "mtime": 1790627899.5575838,
+    "seen": 1790628458.7657254,
+    "ast_hash": "520a9358c9de281a87772603dbb3ac04",
     "semantic_hash": ""
   },
   "src/lib/data/master-catalog.json": {
@@ -2922,9 +2922,9 @@
     "semantic_hash": ""
   },
   "public/version.json": {
-    "mtime": 1790625675.990796,
-    "seen": 1790626117.8857884,
-    "ast_hash": "d79a2e626e305cb00cf61da25688382a",
+    "mtime": 1790627899.5438242,
+    "seen": 1790628458.7657444,
+    "ast_hash": "520a9358c9de281a87772603dbb3ac04",
     "semantic_hash": ""
   },
   "scripts/fix-css.js": {
@@ -2934,9 +2934,9 @@
     "semantic_hash": ""
   },
   "version.json": {
-    "mtime": 1790625675.9854002,
-    "seen": 1790626117.8865156,
-    "ast_hash": "d79a2e626e305cb00cf61da25688382a",
+    "mtime": 1790627899.5370183,
+    "seen": 1790628458.7668815,
+    "ast_hash": "520a9358c9de281a87772603dbb3ac04",
     "semantic_hash": ""
   },
   ".agents/rules/klikpos-strict-ui-and-zero-regressions.md": {
@@ -3090,9 +3090,9 @@
     "semantic_hash": ""
   },
   "venematic-desktop/version.json": {
-    "mtime": 1790625676.260331,
-    "seen": 1790626117.8865142,
-    "ast_hash": "d79a2e626e305cb00cf61da25688382a",
+    "mtime": 1790627900.410155,
+    "seen": 1790628458.7668784,
+    "ast_hash": "520a9358c9de281a87772603dbb3ac04",
     "semantic_hash": ""
   },
   "DIRECTIVA_MAESTRA_INGENIERIA_Y_PROMPT_MAESTRO.md": {
