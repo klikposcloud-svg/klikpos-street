@@ -1,0 +1,13 @@
+﻿================================================================================
+                    GUIA OFICIAL: KlikPOS Pro v3.0.0
+================================================================================
+EdiciÃ³n comercial con EscÃ¡ner Celular SatÃ©lite y MÃ©tricas Profesionales
+
+ARCHIVO DE INSTALACION:
+- KlikPOS_Pro_Setup.exe
+
+INSTRUCCIONES:
+1. Haga doble clic en KlikPOS_Pro_Setup.exe o ejecute INSTALAR_KLIKPOS_PRO.bat.
+2. Siga los pasos del asistente de instalacion.
+3. El sistema creara los accesos directos oficiales en su Escritorio.
+================================================================================

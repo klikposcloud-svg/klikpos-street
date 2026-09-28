@@ -59,6 +59,7 @@ import { parseScaleBarcode, findProductByScalePLU } from '@/lib/hardware/scale-b
 import { pagoMovilMonitor, PagoMovilConfirmation } from '@/lib/payments/pago-movil-gmail-monitor';
 import PosQuickAccessSettings from '@/components/PosQuickAccessSettings';
 import { SYSTEM_DEFAULTS } from '@/lib/constants/defaults';
+import { isPosViewAllowed, getActiveCapabilities } from '@/lib/licensing/feature-flags';
 
 interface CartItem extends SaleItem {
   stock: number;
@@ -2588,35 +2589,39 @@ export default function DesktopPosPage() {
               <span>Cuadrícula</span>
             </button>
 
-            <button
-              type="button"
-              onClick={() => handleSetPosViewMode('list')}
-              className={`flex items-center gap-1 px-2 py-0.5 rounded-lg text-[11px] font-black transition-all cursor-pointer ${
-                posViewMode === 'list'
-                  ? 'bg-emerald-600 text-white shadow-2xs'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-              }`}
-              title="Vista en Lista Compacta de Alta Densidad"
-            >
-              <List className="w-3 h-3" />
-              <span>Lista</span>
-            </button>
+            {isPosViewAllowed('list') && (
+              <button
+                type="button"
+                onClick={() => handleSetPosViewMode('list')}
+                className={`flex items-center gap-1 px-2 py-0.5 rounded-lg text-[11px] font-black transition-all cursor-pointer ${
+                  posViewMode === 'list'
+                    ? 'bg-emerald-600 text-white shadow-2xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                }`}
+                title="Vista en Lista Compacta de Alta Densidad"
+              >
+                <List className="w-3 h-3" />
+                <span>Lista</span>
+              </button>
+            )}
 
-            <button
-              type="button"
-              onClick={() => handleSetPosViewMode('touch')}
-              className={`flex items-center gap-1 px-2 py-0.5 rounded-lg text-[11px] font-black transition-all cursor-pointer ${
-                posViewMode === 'touch'
-                  ? 'bg-amber-500 text-slate-950 shadow-2xs font-black'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-              }`}
-              title="Tema Kiosco Minimalista (Iconos Fill/Outline alternados)"
-            >
-              <Coffee className="w-3 h-3" />
-              <span>Minimalista</span>
-            </button>
+            {isPosViewAllowed('touch') && (
+              <button
+                type="button"
+                onClick={() => handleSetPosViewMode('touch')}
+                className={`flex items-center gap-1 px-2 py-0.5 rounded-lg text-[11px] font-black transition-all cursor-pointer ${
+                  posViewMode === 'touch'
+                    ? 'bg-amber-500 text-slate-950 shadow-2xs font-black'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                }`}
+                title="Tema Kiosco Minimalista (Iconos Fill/Outline alternados)"
+              >
+                <Coffee className="w-3 h-3" />
+                <span>Minimalista</span>
+              </button>
+            )}
 
-            {posViewMode === 'touch' && (
+            {isPosViewAllowed('touch') && posViewMode === 'touch' && (
               <button
                 type="button"
                 onClick={toggleMinimalistPalette}
@@ -2630,33 +2635,37 @@ export default function DesktopPosPage() {
               </button>
             )}
 
-            <button
-              type="button"
-              onClick={() => handleSetPosViewMode('fastfood')}
-              className={`flex items-center gap-1 px-2 py-0.5 rounded-lg text-[11px] font-black transition-all cursor-pointer ${
-                posViewMode === 'fastfood'
-                  ? 'bg-amber-500 text-slate-950 shadow-2xs font-black'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-              }`}
-              title="Modo Comida Rápida / Fast Food (Cuadrícula Táctil 3x3)"
-            >
-              <UtensilsCrossed className="w-3 h-3" />
-              <span>Comida Rápida</span>
-            </button>
+            {isPosViewAllowed('capsule') && (
+              <button
+                type="button"
+                onClick={() => handleSetPosViewMode('fastfood')}
+                className={`flex items-center gap-1 px-2 py-0.5 rounded-lg text-[11px] font-black transition-all cursor-pointer ${
+                  posViewMode === 'fastfood'
+                    ? 'bg-amber-500 text-slate-950 shadow-2xs font-black'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                }`}
+                title="Modo Comida Rápida / Fast Food (Cuadrícula Táctil 3x3)"
+              >
+                <UtensilsCrossed className="w-3 h-3" />
+                <span>Comida Rápida</span>
+              </button>
+            )}
 
-            <button
-              type="button"
-              onClick={() => handleSetPosViewMode('capsule')}
-              className={`flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-[11px] font-black transition-all cursor-pointer ${
-                posViewMode === 'capsule'
-                  ? 'bg-gradient-to-r from-amber-600 to-orange-600 text-white shadow-2xs'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-              }`}
-              title="Vista Gourmet en Cápsulas Horizontales (Estilo Bodegón & Glassmorphism)"
-            >
-              <Sparkles className="w-3 h-3 text-amber-300" />
-              <span>Gourmet</span>
-            </button>
+            {isPosViewAllowed('capsule') && (
+              <button
+                type="button"
+                onClick={() => handleSetPosViewMode('capsule')}
+                className={`flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-[11px] font-black transition-all cursor-pointer ${
+                  posViewMode === 'capsule'
+                    ? 'bg-gradient-to-r from-amber-600 to-orange-600 text-white shadow-2xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                }`}
+                title="Vista Gourmet en Cápsulas Horizontales (Estilo Bodegón & Glassmorphism)"
+              >
+                <Sparkles className="w-3 h-3 text-amber-300" />
+                <span>Gourmet</span>
+              </button>
+            )}
           </div>
         </div>
 

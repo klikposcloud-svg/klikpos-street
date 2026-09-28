@@ -1,0 +1,13 @@
+﻿================================================================================
+                    GUIA OFICIAL: KlikPOS Elite v3.0.0
+================================================================================
+EdiciÃ³n total con Vistas Gourmet, Mesas, Delivery, Temas Personalizables y Finanzas
+
+ARCHIVO DE INSTALACION:
+- KlikPOS_Elite_Setup.exe
+
+INSTRUCCIONES:
+1. Haga doble clic en KlikPOS_Elite_Setup.exe o ejecute INSTALAR_KLIKPOS_ELITE.bat.
+2. Siga los pasos del asistente de instalacion.
+3. El sistema creara los accesos directos oficiales en su Escritorio.
+================================================================================

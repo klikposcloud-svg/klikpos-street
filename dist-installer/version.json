@@ -1,14 +1,14 @@
 {
   "version": "3.0.0",
   "releaseDate": "2026-09-28",
-  "title": "KlikPOS Enterprise v3.0.0 - Vista Gourmet Uniforme, Selector Visual de Iconos y Experiencia de Venta Pulida",
+  "title": "KlikPOS Suite v3.0.0 - Ediciones Lite, Pro & Elite, Línea Móvil (Móvil, Satélite, Street, Admin) y Entrega Unificada",
   "notes": [
-    "Nueva Vista Gourmet Uniforme (Warm Cream) con diseño refinado, imágenes de producto al 100% de contenedor y contraste perfecto.",
-    "Nueva Vista Minimalista Refinada sin efectos de ajedrez ni colores alternados, con fondo blanco/slate unificado y botón de personalización rápida.",
-    "Selector Visual de Iconos de Producto (IconSelectorModal) integrado en 1 solo clic con biblioteca Iconify y 8 categorías de comercio.",
-    "Corrección de visualización en el buscador de fotos de Google y la Web con soporte optimizado para modo oscuro y claro.",
-    "Sistema de Auto-Actualización Verificado desde GitHub Releases para Windows Desktop y Android.",
-    "Generación fresca de instaladores Desktop (Inno Setup) y APKs móviles oficiales con firma criptográfica V2."
+    "Nueva estructura de distribución unificada 'KlikPOS Release' con 3 ediciones Desktop (Lite, Pro, Elite) y 5 APKs móviles.",
+    "KlikPOS Lite Desktop: Edición esencial para bodegas y pequeños comercios con solo vista cuadrícula y funciones de caja básicas.",
+    "KlikPOS Pro Desktop: Edición comercial con Escáner Celular Satélite, vistas cuadrícula/lista/minimalista y métricas profesionales.",
+    "KlikPOS Elite Desktop: Edición completa con todas las vistas (Gourmet Warm Cream), personalización total de temas/colores, mesas, delivery y finanzas.",
+    "Línea de Apps Android: KlikPOS Móvil (POS Full), KlikPOS Satélite (Escáner/Balanza), KlikPOS Street (Comida Rápida/Delivery/Bluetooth) y KlikAdmin (Vigía del Dueño/SMS Pago Móvil).",
+    "Generador Maestro de Licencias (KlikPOS Keygen) para desarrollador con firma criptográfica Ed25519."
   ],
   "windowsUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.0/KlikPOS_Desktop_Full_Setup.exe",
   "androidUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.0/KlikPOS_Movil_Full.apk",

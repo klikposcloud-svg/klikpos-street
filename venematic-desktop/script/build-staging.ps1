@@ -1,9 +1,13 @@
+param(
+    [string]$Edition = "KLIKPOS_ELITE"
+)
+
 $ErrorActionPreference = "Stop"
 $rootDir = "c:\Users\pcpro\OneDrive\Documents\venematic-master\venematic-master"
 $desktopDir = Join-Path $rootDir "venematic-desktop"
 $staging = Join-Path $desktopDir "build-staging"
 
-Write-Output "Limpiando directorio staging: $staging"
+Write-Output "Iniciando Staging de KlikPOS ($Edition) en: $staging"
 if (Test-Path $staging) {
     Remove-Item -Recurse -Force $staging
 }
@@ -47,5 +51,10 @@ if (Test-Path "$rootDir\public\brand") {
     Copy-Item -Recurse -Force "$rootDir\public\brand\*" "$staging\public\brand\"
 }
 
-Write-Output "Staging de KlikPOS Enterprise completado exitosamente!"
+# Inyectar Preset de Edición en el staging
+$editionPayload = @{ edition = $Edition } | ConvertTo-Json
+Set-Content -Path "$staging\preset-edition.json" -Value $editionPayload -Encoding UTF8
+Set-Content -Path "$staging\public\preset-edition.json" -Value $editionPayload -Encoding UTF8
+
+Write-Output "Staging de KlikPOS ($Edition) completado exitosamente!"
 Get-ChildItem $staging | Select-Object Name, Length

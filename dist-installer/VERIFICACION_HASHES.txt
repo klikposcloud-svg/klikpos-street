@@ -1,15 +1,15 @@
 ﻿================================================================================
-             INTEGRIDAD Y SUMAS DE VERIFICACION CRIPTOGRAFICA (HASHES)
+       INTEGRIDAD Y SUMAS DE VERIFICACION CRIPTOGRAFICA (KLIKPOS SUITE)
 ================================================================================
-
-Paquete: KlikPOS-Enterprise-Setup-v3.0.0.exe
 Version: 3.0.0
-Fecha de emision: 28 de September de 2026
+Fecha: 28 28e September 28e 2026
 
-Algoritmo SHA256:
-DDBDCB770B0CFDAD35629EFC6CA8754186151E742E7829ACC97C3AB93C7AD57F
+[KlikPOS Lite] KlikPOS_Lite_Setup.exe:
+SHA256: 7A2929E5ECAECDC439E08CEB75E6DAC56046914276FD78CE1487B34E73D41760
 
-Para verificar la integridad del instalador en cualquier computadora:
-PowerShell:
-  Get-FileHash KlikPOS-Enterprise-Setup-v3.0.0.exe -Algorithm SHA256
-================================================================================
+[KlikPOS Pro] KlikPOS_Pro_Setup.exe:
+SHA256: 294B24C2AB45C2940457E0E76E38A61CFC0CDA1A350BBD834CAA08E33873183E
+
+[KlikPOS Elite] KlikPOS_Elite_Setup.exe:
+SHA256: F6D0CF2239DD805BD29A8D1EDA9005773146CD0B78366217137109DF4D5AE4E7
+

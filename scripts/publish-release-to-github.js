@@ -73,46 +73,40 @@ async function main() {
     console.log(`Release existente encontrada (ID: ${release.id}). URL: ${release.html_url}`);
   }
 
-  // 2. Subir binario Windows Oficial
-  const exePath = path.resolve(__dirname, '../DISTRIBUCION_KLIKPOS/02_Combo_Empresarial_Full/KlikPOS_Desktop_Full_Setup.exe');
-  if (fs.existsSync(exePath)) {
-    const exeName = 'KlikPOS_Desktop_Full_Setup.exe';
-    console.log(`[3/5] Subiendo instalador oficial de Windows: ${exeName} (${(fs.statSync(exePath).size / (1024*1024)).toFixed(2)} MB)...`);
-    await uploadAsset(release, exePath, exeName, 'application/vnd.microsoft.portable-executable');
-  } else {
-    console.warn(`[!] No se encontro el ejecutable en ${exePath}`);
+  // 2. Subir binarios Windows Oficiales desde 'KlikPOS Release'
+  const windowsAssets = [
+    { name: 'KlikPOS_Lite_Setup.exe', relPath: 'KlikPOS Release/01_KlikPOS_Lite_Desktop/KlikPOS_Lite_Setup.exe' },
+    { name: 'KlikPOS_Pro_Setup.exe', relPath: 'KlikPOS Release/02_KlikPOS_Pro_Desktop/KlikPOS_Pro_Setup.exe' },
+    { name: 'KlikPOS_Elite_Setup.exe', relPath: 'KlikPOS Release/03_KlikPOS_Elite_Desktop/KlikPOS_Elite_Setup.exe' },
+    { name: 'KlikPOS_Desktop_Full_Setup.exe', relPath: 'KlikPOS Release/03_KlikPOS_Elite_Desktop/KlikPOS_Elite_Setup.exe' }
+  ];
+
+  for (const win of windowsAssets) {
+    const p = path.resolve(rootDir, win.relPath);
+    if (fs.existsSync(p)) {
+      console.log(`[3/5] Subiendo instalador Windows: ${win.name} (${(fs.statSync(p).size / (1024*1024)).toFixed(2)} MB)...`);
+      await uploadAsset(release, p, win.name, 'application/vnd.microsoft.portable-executable');
+    }
   }
 
-  // 3. Subir APK Android Oficial POS
-  const apkPath = path.resolve(__dirname, '../DISTRIBUCION_KLIKPOS/03_Movil_Full_Autonomo/KlikPOS_Movil_Full.apk');
-  if (fs.existsSync(apkPath)) {
-    const apkName = 'KlikPOS_Movil_Full.apk';
-    console.log(`[4/5] Subiendo APK Android: ${apkName} (${(fs.statSync(apkPath).size / (1024*1024)).toFixed(2)} MB)...`);
-    await uploadAsset(release, apkPath, apkName, 'application/vnd.android.package-archive');
-  }
+  // 3. Subir APKs Android Oficiales desde 'KlikPOS Release'
+  const androidAssets = [
+    { name: 'KlikPOS_Movil.apk', relPath: 'KlikPOS Release/04_Apps_Moviles_Android/KlikPOS_Movil.apk' },
+    { name: 'KlikPOS_Movil_Full.apk', relPath: 'KlikPOS Release/04_Apps_Moviles_Android/KlikPOS_Movil.apk' },
+    { name: 'KlikPOS_Satelite.apk', relPath: 'KlikPOS Release/04_Apps_Moviles_Android/KlikPOS_Satelite.apk' },
+    { name: 'KlikPOS_Movil_Satelite.apk', relPath: 'KlikPOS Release/04_Apps_Moviles_Android/KlikPOS_Satelite.apk' },
+    { name: 'KlikPOS_Street.apk', relPath: 'KlikPOS Release/04_Apps_Moviles_Android/KlikPOS_Street.apk' },
+    { name: 'KlikPOS_Tablet_Standalone_Mesas.apk', relPath: 'KlikPOS Release/04_Apps_Moviles_Android/KlikPOS_Street.apk' },
+    { name: 'KlikAdmin.apk', relPath: 'KlikPOS Release/04_Apps_Moviles_Android/KlikAdmin.apk' },
+    { name: 'KlikPOS_Keygen.apk', relPath: 'KlikPOS Release/00_Herramientas_Desarrollador/KlikPOS_Keygen.apk' }
+  ];
 
-  // 3b. Subir APK Android Keygen
-  const keygenApkPath = path.resolve(__dirname, '../DISTRIBUCION_KLIKPOS/00_Herramientas_Desarrollador/KlikPOS_Keygen.apk');
-  if (fs.existsSync(keygenApkPath)) {
-    const keygenName = 'KlikPOS_Keygen.apk';
-    console.log(`[4b/5] Subiendo APK Keygen: ${keygenName} (${(fs.statSync(keygenApkPath).size / (1024*1024)).toFixed(2)} MB)...`);
-    await uploadAsset(release, keygenApkPath, keygenName, 'application/vnd.android.package-archive');
-  }
-
-  // 3c. Subir APK Android Satélite Scanner
-  const sateliteApkPath = path.resolve(__dirname, '../DISTRIBUCION_KLIKPOS/01_Combo_Basico_Desktop_Satelite/KlikPOS_Movil_Satelite.apk');
-  if (fs.existsSync(sateliteApkPath)) {
-    const sateliteName = 'KlikPOS_Movil_Satelite.apk';
-    console.log(`[4c/5] Subiendo APK Satélite Scanner: ${sateliteName} (${(fs.statSync(sateliteApkPath).size / (1024*1024)).toFixed(2)} MB)...`);
-    await uploadAsset(release, sateliteApkPath, sateliteName, 'application/vnd.android.package-archive');
-  }
-
-  // 3d. Subir APK Android Tablet POS & Mesas
-  const tabletApkPath = path.resolve(__dirname, '../DISTRIBUCION_KLIKPOS/03_KlikPOS_Tablet_Standalone_Mesas/KlikPOS_Tablet_Standalone_Mesas.apk');
-  if (fs.existsSync(tabletApkPath)) {
-    const tabletName = 'KlikPOS_Tablet_Standalone_Mesas.apk';
-    console.log(`[4d/5] Subiendo APK Tablet & Mesas: ${tabletName} (${(fs.statSync(tabletApkPath).size / (1024*1024)).toFixed(2)} MB)...`);
-    await uploadAsset(release, tabletApkPath, tabletName, 'application/vnd.android.package-archive');
+  for (const apk of androidAssets) {
+    const p = path.resolve(rootDir, apk.relPath);
+    if (fs.existsSync(p)) {
+      console.log(`[4/5] Subiendo APK Android: ${apk.name} (${(fs.statSync(p).size / (1024*1024)).toFixed(2)} MB)...`);
+      await uploadAsset(release, p, apk.name, 'application/vnd.android.package-archive');
+    }
   }
 
   // 4. Verificación en vivo del endpoint remoto

@@ -1,10 +1,23 @@
+#ifndef AppName
+  #define AppName "KlikPOS Enterprise"
+#endif
+#ifndef AppEdition
+  #define AppEdition "KLIKPOS_ELITE"
+#endif
+#ifndef AppVersion
+  #define AppVersion "3.0.0"
+#endif
+#ifndef OutputBaseFilename
+  #define OutputBaseFilename "KlikPOS-Enterprise-Setup-v3.0.0"
+#endif
+
 [Setup]
-AppName=KlikPOS Enterprise
+AppName={#AppName}
 AppVersion=3.0.0
 AppPublisher=KlikPOS Cloud
 AppPublisherURL=https://klikposcloud.com
-DefaultDirName={autopf}\KlikPOS Enterprise
-DefaultGroupName=KlikPOS Enterprise
+DefaultDirName={autopf}\{#AppName}
+DefaultGroupName={#AppName}
 OutputDir=c:\Users\pcpro\OneDrive\Documents\venematic-master\venematic-master\venematic-desktop\dist-installer
 OutputBaseFilename=KlikPOS-Enterprise-Setup-v3.0.0
 Compression=lzma2/max
@@ -23,14 +36,14 @@ Name: "spanish"; MessagesFile: "compiler:Languages\Spanish.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"
 
 [Files]
-; Archivos autónomos de la aplicación con runtime portable Node.js integrado
 Source: "c:\Users\pcpro\OneDrive\Documents\venematic-master\venematic-master\venematic-desktop\build-staging\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
-Name: "{group}\KlikPOS Enterprise"; Filename: "{app}\KlikPOS.exe"; IconFilename: "{app}\app.ico"
-Name: "{group}\Detener KlikPOS Enterprise"; Filename: "{app}\detener-klikpos.bat"; IconFilename: "{app}\app.ico"
-Name: "{group}\Desinstalar KlikPOS Enterprise"; Filename: "{uninstallexe}"
-Name: "{autodesktop}\KlikPOS Enterprise"; Filename: "{app}\KlikPOS.exe"; IconFilename: "{app}\app.ico"; Tasks: desktopicon
+Name: "{group}\{#AppName}"; Filename: "{app}\KlikPOS.exe"; IconFilename: "{app}\app.ico"
+Name: "{group}\Detener {#AppName}"; Filename: "{app}\detener-klikpos.bat"; IconFilename: "{app}\app.ico"
+Name: "{group}\Desinstalar {#AppName}"; Filename: "{uninstallexe}"
+Name: "{autodesktop}\{#AppName}"; Filename: "{app}\KlikPOS.exe"; IconFilename: "{app}\app.ico"; Tasks: desktopicon
 
 [Run]
-Filename: "{app}\KlikPOS.exe"; Description: "Ejecutar KlikPOS Enterprise ahora"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\KlikPOS.exe"; Description: "Ejecutar {#AppName} ahora"; Flags: nowait postinstall skipifsilent
+
