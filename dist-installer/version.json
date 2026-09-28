@@ -1,15 +1,15 @@
 {
-  "version": "2.4.7",
-  "releaseDate": "2026-09-27",
-  "title": "KlikPOS Enterprise v2.4.7 - 5 Ediciones Oficiales, Modo Oscuro con Coloración Total y Sincronización Firestore",
+  "version": "2.4.8",
+  "releaseDate": "2026-09-28",
+  "title": "KlikPOS Enterprise v2.4.8 - Menú Digital QR Gourmet, Docker Flotante Vertical Puro, Barra Elástica Hero y Alto Contraste en Google",
   "notes": [
-    "Modo Oscuro con Coloración Total Personalizable: eliminación de azules rígidos para permitir Negro Puro OLED (#000000), Grafito Carbón (#121212), Esmeralda Nocturno (#051814), Púrpura Nocturno (#0f0d24), Azul Medianoche y Selector Hexadecimal libre en toda la pantalla.",
-    "Lanzamiento de las 5 Ediciones Oficiales: Móvil Satélite PC (Contingencia), Desktop Empresarial Full PC, Tablet Standalone Mesas (Restaurantes), Móvil Full Autónomo Retail (Nube) y Móvil Full Companion para PC.",
-    "Botón Central Diferenciado en Dock: COBRAR en versión Restaurante/Tablet Standalone y ESCÁNER (Cámara 60 FPS) en versiones Retail y Companion.",
-    "Librería centralizada de sincronización en la nube con Firestore categorizada por Edición, Comercio y Licencia.",
-    "Módulo Tablet Standalone con gestión de datos de empresa, configuración de Pago Móvil con bancos venezolanos, cartera de clientes y pasarela multimoneda con cálculo automático de vuelto en USD y Bs. al cambio oficial BCV en vivo."
+    "Menú Digital Interactivo en Mesa y Delivery (/menu) accesible vía QR dinámico con soporte multimoneda ($ y Bs. BCV en vivo) y pedidos automáticos por WhatsApp.",
+    "Nuevo Docker Flotante Vertical Puro en Tablet POS (/tablet-pos) con accesos directos de 1 clic a Inventario, Motorizados, Impresora Fiscal/Térmica, Rubros y Menú QR.",
+    "Barra de Navegación Pro con animaciones elásticas spring y Botón Hero Central 'COBRAR' 25% más grande con elevación y halo de respiración dinámico.",
+    "Corrección de alto contraste WCAG AAA en buscador de fotos de productos en Google / Web para Modo Blanco.",
+    "Sincronización en la nube con Firestore y optimización de rendimiento para terminales móviles y desktop."
   ],
-  "windowsUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v2.4.7/KlikPOS_Desktop_Full_Setup.exe",
-  "androidUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v2.4.7/KlikPOS_Movil_Full.apk",
+  "windowsUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v2.4.8/KlikPOS_Desktop_Full_Setup.exe",
+  "androidUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v2.4.8/KlikPOS_Movil_Full.apk",
   "mandatory": true
 }

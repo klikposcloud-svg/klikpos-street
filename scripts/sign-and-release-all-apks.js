@@ -47,7 +47,14 @@ function verifyApk(apkPath) {
 
 function stopGradleDaemon() {
   try {
-    execSync('cmd.exe /c ".\\gradlew.bat --stop"', { cwd: androidDir, stdio: 'ignore' });
+    execSync('powershell -Command "Get-Process -Name java, javaw, gradle -ErrorAction SilentlyContinue | Stop-Process -Force"', { stdio: 'ignore' });
+  } catch (e) {}
+}
+
+function cleanGradleBuild() {
+  stopGradleDaemon();
+  try {
+    execSync('powershell -Command "Get-ChildItem -Path \'venematic-desktop\\android\', \'venematic-desktop\\node_modules\\@capacitor\' -Filter \'build\' -Recurse -Directory -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue"', { stdio: 'ignore' });
   } catch (e) {}
 }
 
@@ -65,6 +72,7 @@ function buildKeygenApk() {
   console.log('===============================================================');
 
   stopGradleDaemon();
+  cleanGradleBuild();
   const bakGradle = fs.readFileSync(appGradle, 'utf8');
   const bakStrings = fs.readFileSync(stringsXml, 'utf8');
   const bakManifest = fs.readFileSync(manifestXml, 'utf8');
@@ -160,6 +168,7 @@ function buildMovilRetailApk() {
   console.log('===============================================================');
 
   stopGradleDaemon();
+  cleanGradleBuild();
   syncAssetsBase();
 
   const bakGradle = fs.readFileSync(appGradle, 'utf8');
@@ -239,6 +248,7 @@ function buildTabletMesasApk() {
   console.log('===============================================================');
 
   stopGradleDaemon();
+  cleanGradleBuild();
   syncAssetsBase();
 
   const bakGradle = fs.readFileSync(appGradle, 'utf8');

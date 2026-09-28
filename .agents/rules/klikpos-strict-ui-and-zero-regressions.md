@@ -25,11 +25,13 @@ Todos los agentes de inteligencia artificial y desarrolladores que operen en est
 - Al generar ejecutables o instaladores para Windows (`build-installer-full.ps1` o Inno Setup), es **obligatorio ejecutar previamente `npm run build`**.
 - Ningún instalador debe generarse reutilizando carpetas `.next/standalone` viejas sin previa compilación fresca y validación de tipos/sintaxis.
 
-### 5. Sincronización Continua con GitHub y Protocolo Anti-Falla de Actualizador
-- Cada vez que se finalice un bloque de mejoras o correcciones en el software, el agente debe ejecutar de inmediato:
-  1. `git add -A`
-  2. `git commit -m "..."` con mensaje semántico claro.
-  3. `git push origin main` hacia el repositorio remoto `github.com/klikposcloud-svg/klikpos.git`.
+### 5. Sincronización Continua con GitHub y Actualización Obligatoria de Instaladores
+- **REGLA DE ORO DE CIERRE DE CAMBIOS:** Cada vez que se finalice un bloque de mejoras, diseño o correcciones en el software, el agente debe ejecutar obligatoriamente en el mismo ciclo:
+  1. `node scripts/sync-version.js <version>` para sincronizar todos los manifiestos maestros.
+  2. `git add -A`
+  3. `git commit -m "..."` con mensaje semántico claro.
+  4. `git push origin main` hacia el repositorio remoto `github.com/klikposcloud-svg/klikpos.git`.
+  5. **Actualizar y compilar los instaladores y APKs oficiales** en `DISTRIBUCION_KLIKPOS/` para que los clientes finales y distribuidores dispongan de la versión recién mejorada.
 - **Protocolo de Auto-Actualizaciones (Zero-Regression):**
   - **Fuente Única de Verdad:** Toda modificación de versión se define en `version.json` raíz y se sincroniza obligatoriamente mediante `node scripts/sync-version.js` a todos los manifiestos (`public/version.json`, `dist-installer/version.json`, `klikpos-releases/version.json`, `venematic-desktop/version.json`, `package.json` e `installer.iss`).
   - **Prohibido Forzar Descargas Manuales:** Las actualizaciones en PC/Desktop y Web deben ejecutarse de forma **automática en 1 solo clic o en segundo plano silencioso** (`/api/system/update` o `applyPwaUpdate`). La opción de descarga manual `.exe` es estrictamente secundaria para respaldos offline o pendrives USB.
@@ -44,5 +46,8 @@ Todos los agentes de inteligencia artificial y desarrolladores que operen en est
 - El instalador principal oficial para el usuario es:
   - `DISTRIBUCION_KLIKPOS/02_Combo_Empresarial_Full/INSTALAR_KLIKPOS_FULL.bat`
   - `DISTRIBUCION_KLIKPOS/02_Combo_Empresarial_Full/KlikPOS_Desktop_Full_Setup.exe`
+  - `DISTRIBUCION_KLIKPOS/03_KlikPOS_Tablet_Standalone_Mesas/KlikPOS_Tablet_Standalone.apk`
+  - `DISTRIBUCION_KLIKPOS/04_KlikPOS_Movil_Full_Autonomo_Nube/KlikPOS_Movil_Full_Autonomo.apk`
+  - `DISTRIBUCION_KLIKPOS/05_KlikPOS_Movil_Full_Para_PC/KlikPOS_Movil_Full_PC.apk`
 - Queda terminantemente prohibido indicar al usuario carpetas intermedias de compilación técnica (como `dist-installer/` o `venematic-desktop/`). Toda referencia debe ser siempre dentro de `DISTRIBUCION_KLIKPOS/`.
 

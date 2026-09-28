@@ -32,6 +32,15 @@ if (fs.existsSync(scannerHtmlSrc)) {
   console.log('✓ Guardado scanner.html en assets/public/ (' + scannerHtml.length + ' bytes)');
 }
 
+// 2c. Copiar menu.html si existe
+const menuHtmlSrc = path.join(root, '.next', 'server', 'app', 'menu.html');
+if (fs.existsSync(menuHtmlSrc)) {
+  let menuHtml = fs.readFileSync(menuHtmlSrc, 'utf8');
+  menuHtml = menuHtml.replace(/<title>.*?<\/title>/, '<title>KlikPOS Menú Digital Interactivo</title>');
+  fs.writeFileSync(path.join(androidPublic, 'menu.html'), menuHtml, 'utf8');
+  console.log('✓ Guardado menu.html en assets/public/ (' + menuHtml.length + ' bytes)');
+}
+
 // 3. Copiar .next/static a assets/public/_next/static
 const nextStaticDest = path.join(androidPublic, '_next', 'static');
 fs.cpSync(nextStaticSrc, nextStaticDest, { recursive: true, force: true });
