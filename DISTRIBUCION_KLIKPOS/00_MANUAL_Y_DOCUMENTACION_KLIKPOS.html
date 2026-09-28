@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KlikPOS Enterprise — Manual Maestro, Informe Técnico y Catálogo Comercial</title>
+  <meta name="description" content="Guía maestra, informe técnico de ingeniería, catálogo de versiones y plantillas de atención para KlikPOS Enterprise Suite.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #0284c7;
+      --primary-dark: #0369a1;
+      --primary-light: #e0f2fe;
+      --accent: #10b981;
+      --accent-dark: #047857;
+      --accent-light: #d1fae5;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --bg-main: #f8fafc;
+      --bg-card: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --border-color: #e2e8f0;
+      --sidebar-width: 280px;
+    }
+
+    [data-theme="dark"] {
+      --primary: #38bdf8;
+      --primary-dark: #0284c7;
+      --primary-light: #0c4a6e;
+      --accent: #34d399;
+      --accent-dark: #059669;
+      --accent-light: #064e3b;
+      --bg-main: #0b1120;
+      --bg-card: #1e293b;
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --border-color: #334155;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      line-height: 1.6;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    code, pre {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Layout */
+    .app-container {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Sidebar Navigation */
+    .sidebar {
+      width: var(--sidebar-width);
+      background: var(--bg-card);
+      border-right: 1px solid var(--border-color);
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      display: flex;
+      flex-direction: column;
+      z-index: 50;
+      transition: transform 0.3s ease;
+    }
+
+    .sidebar-header {
+      padding: 1.5rem 1.25rem;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .logo-badge {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #0284c7, #10b981);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 900;
+      font-size: 1.4rem;
+      box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
+    }
+
+    .logo-text h1 {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: var(--text-main);
+      line-height: 1.2;
+    }
+
+    .logo-text span {
+      font-size: 0.75rem;
+      color: var(--accent);
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .nav-search {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 0.6rem 0.85rem;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-main);
+      color: var(--text-main);
+      font-size: 0.875rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .search-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+    }
+
+    .sidebar-menu {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem 0.75rem;
+      list-style: none;
+    }
+
+    .menu-item {
+      margin-bottom: 0.25rem;
+    }
+
+    .menu-link {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.65rem 0.85rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+
+    .menu-link:hover, .menu-link.active {
+      color: var(--primary);
+      background: var(--primary-light);
+    }
+
+    [data-theme="dark"] .menu-link:hover, [data-theme="dark"] .menu-link.active {
+      color: #38bdf8;
+      background: rgba(56, 189, 248, 0.15);
+    }
+
+    .sidebar-footer {
+      padding: 1rem 1.25rem;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .theme-toggle-btn {
+      background: var(--bg-main);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 0.4rem 0.8rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    /* Main Content Area */
+    .main-content {
+      margin-left: var(--sidebar-width);
+      flex: 1;
+      padding: 2.5rem 3.5rem;
+      max-width: 1300px;
+    }
+
+    /* Top Bar Mobile */
+    .mobile-header {
+      display: none;
+      position: sticky;
+      top: 0;
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border-color);
+      padding: 1rem;
+      z-index: 40;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .menu-toggle-btn {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--text-main);
+    }
+
+    /* Hero Banner */
+    .hero-banner {
+      background: linear-gradient(135deg, #0369a1 0%, #0f172a 100%);
+      color: white;
+      border-radius: 20px;
+      padding: 3rem;
+      margin-bottom: 3rem;
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.2);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-banner::after {
+      content: '';
+      position: absolute;
+      top: -50px;
+      right: -50px;
+      width: 250px;
+      height: 250px;
+      background: rgba(16, 185, 129, 0.2);
+      border-radius: 50%;
+      filter: blur(50px);
+    }
+
+    .hero-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      padding: 0.4rem 0.9rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      margin-bottom: 1.25rem;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .hero-title {
+      font-size: 2.5rem;
+      font-weight: 900;
+      line-height: 1.15;
+      margin-bottom: 1rem;
+    }
+
+    .hero-subtitle {
+      font-size: 1.15rem;
+      opacity: 0.9;
+      max-width: 800px;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    .hero-badge-pill {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 0.35rem 0.75rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    /* Section Cards */
+    .section-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 2.5rem;
+      margin-bottom: 2.5rem;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid var(--border-color);
+    }
+
+    .section-header h2 {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .section-header .icon {
+      font-size: 1.75rem;
+    }
+
+    /* Grids & Cards */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.25rem;
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+    }
+
+    .card {
+      background: var(--bg-main);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.5rem;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.05);
+    }
+
+    .card h3 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .card p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    /* Tables */
+    .table-container {
+      overflow-x: auto;
+      margin: 1.5rem 0;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.9rem;
+    }
+
+    th {
+      background: var(--bg-main);
+      padding: 1rem;
+      font-weight: 700;
+      color: var(--text-main);
+      border-bottom: 2px solid var(--border-color);
+    }
+
+    td {
+      padding: 1rem;
+      border-bottom: 1px solid var(--border-color);
+      color: var(--text-muted);
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover td {
+      background: rgba(2, 132, 199, 0.03);
+    }
+
+    /* Copy Boxes (WhatsApp & Social) */
+    .copy-box {
+      background: var(--bg-main);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin-bottom: 1.5rem;
+      position: relative;
+    }
+
+    .copy-box-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+
+    .copy-box-title {
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .copy-btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.4rem 0.85rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      transition: all 0.2s;
+    }
+
+    .copy-btn:hover {
+      background: var(--primary-dark);
+      transform: scale(1.02);
+    }
+
+    .copy-btn.copied {
+      background: var(--accent-dark);
+    }
+
+    .copy-text {
+      white-space: pre-wrap;
+      font-family: inherit;
+      font-size: 0.9rem;
+      color: var(--text-main);
+      background: var(--bg-card);
+      padding: 1rem;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      max-height: 250px;
+      overflow-y: auto;
+    }
+
+    /* Badges & Tags */
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.6rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .badge-success { background: var(--accent-light); color: var(--accent-dark); }
+    .badge-primary { background: var(--primary-light); color: var(--primary-dark); }
+    .badge-warning { background: #fef3c7; color: #b45309; }
+
+    /* Code Blocks */
+    pre {
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 1.25rem;
+      border-radius: 10px;
+      overflow-x: auto;
+      font-size: 0.85rem;
+      margin: 1rem 0;
+      border: 1px solid #1e293b;
+    }
+
+    /* Print Styles */
+    @media print {
+      .sidebar, .mobile-header, .copy-btn, .theme-toggle-btn, .nav-search {
+        display: none !important;
+      }
+      .main-content {
+        margin-left: 0;
+        padding: 0;
+        max-width: 100%;
+      }
+      .section-card {
+        border: 1px solid #ccc;
+        box-shadow: none;
+        page-break-inside: avoid;
+      }
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+      .sidebar.open {
+        transform: translateX(0);
+      }
+      .main-content {
+        margin-left: 0;
+        padding: 1.5rem;
+      }
+      .mobile-header {
+        display: flex;
+      }
+      .grid-2, .grid-3, .grid-4 {
+        grid-template-columns: 1fr;
+      }
+      .hero-title {
+        font-size: 1.85rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Mobile Header -->
+  <header class="mobile-header">
+    <div style="display: flex; align-items: center; gap: 0.75rem;">
+      <div class="logo-badge">K</div>
+      <div>
+        <h2 style="font-size: 1.1rem; font-weight: 800;">KlikPOS</h2>
+        <span style="font-size: 0.7rem; color: var(--accent); font-weight: 700;">MANUAL MAESTRO</span>
+      </div>
+    </div>
+    <button class="menu-toggle-btn" id="menuToggle" aria-label="Abrir Menú">☰</button>
+  </header>
+
+  <div class="app-container">
+    
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="logo-badge">K</div>
+        <div class="logo-text">
+          <h1>KlikPOS Enterprise</h1>
+          <span>Suite de Ingeniería v2.4.7</span>
+        </div>
+      </div>
+
+      <div class="nav-search">
+        <input type="text" id="searchInput" class="search-input" placeholder="🔍 Buscar contenido...">
+      </div>
+
+      <ul class="sidebar-menu">
+        <li class="menu-item"><a href="#resumen" class="menu-link active"><span>📘</span> 1. Resumen & Pilares</a></li>
+        <li class="menu-item"><a href="#stack" class="menu-link"><span>⚙️</span> 2. Stack Tecnológico</a></li>
+        <li class="menu-item"><a href="#ediciones" class="menu-link"><span>📱</span> 3. Las 5 Ediciones & APKs</a></li>
+        <li class="menu-item"><a href="#ingenieria" class="menu-link"><span>🛠️</span> 4. Soluciones de Ingeniería</a></li>
+        <li class="menu-item"><a href="#pagomovil" class="menu-link"><span>📲</span> 5. Verificación Pago Móvil</a></li>
+        <li class="menu-item"><a href="#licencias" class="menu-link"><span>🔑</span> 6. Licencias & Keygen</a></li>
+        <li class="menu-item"><a href="#planes" class="menu-link"><span>💳</span> 7. Planes & Financiamiento</a></li>
+        <li class="menu-item"><a href="#copys" class="menu-link"><span>💬</span> 8. Plantillas WhatsApp & Redes</a></li>
+        <li class="menu-item"><a href="#privacidad" class="menu-link"><span>⚖️</span> 9. Privacidad & Garantía</a></li>
+      </ul>
+
+      <div class="sidebar-footer">
+        <button class="theme-toggle-btn" id="themeToggle">
+          <span id="themeIcon">🌙</span> <span id="themeText">Modo Oscuro</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+      <!-- Hero Section -->
+      <section class="hero-banner">
+        <div class="hero-tag">🚀 GUÍA INTEGRAL DE PRODUCCIÓN Y VENTAS</div>
+        <h1 class="hero-title">KlikPOS Enterprise Suite</h1>
+        <p class="hero-subtitle">
+          Plataforma integral de Punto de Venta, facturación bimonetaria en tiempo real (USD / Bs. BCV), gestión de stock, sincronización híbrida local/nube y conciliación bancaria automatizada.
+        </p>
+        <div class="hero-badges">
+          <span class="hero-badge-pill">✅ 100% Offline-First</span>
+          <span class="hero-badge-pill">🛡️ Tasa BCV Oficial en Vivo</span>
+          <span class="hero-badge-pill">📶 Multicaja LAN & Firestore Nube</span>
+          <span class="hero-badge-pill">⚖️ Integración con Balanzas RS-232</span>
+          <span class="hero-badge-pill">🔒 Cero Dependencia de Terceros</span>
+        </div>
+      </section>
+
+      <!-- 1. RESUMEN Y PILARES -->
+      <section id="resumen" class="section-card">
+        <div class="section-header">
+          <span class="icon">📘</span>
+          <h2>1. Resumen Ejecutivo y Pilares de Ingeniería</h2>
+        </div>
+        <p style="margin-bottom: 1.5rem; color: var(--text-muted);">
+          <strong>KlikPOS Enterprise</strong> está diseñado desde sus cimientos para operar bajo los desafíos del comercio en Venezuela: cortes de energía, interrupciones de internet, fluctuación cambiaria y necesidad de cobros ultra-rápidos.
+        </p>
+
+        <div class="grid-3">
+          <div class="card">
+            <h3>⚡ 1. Offline-First Absoluto</h3>
+            <p>Toda la base de datos de productos, clientes y ventas reside en memoria local (IndexedDB y SQLite). El negocio sigue cobrando a máxima velocidad sin internet.</p>
+          </div>
+          <div class="card">
+            <h3>🔋 2. Resiliencia ante Apagones</h3>
+            <p>Si la computadora principal se apaga, las terminales móviles (smartphones/tablets Android) asumen la operación con batería y sincronización por datos 4G.</p>
+          </div>
+          <div class="card">
+            <h3>📲 3. Conciliación Pago Móvil</h3>
+            <p>Detección y validación automática de transferencias (BDV, Banesco, Mercantil, Provincial, Bancamiga) por SMS nativo, Webhook LAN y Monitor Gmail.</p>
+          </div>
+          <div class="card">
+            <h3>💵 4. Bimonetariedad Dinámica</h3>
+            <p>Conversión en vivo Dólares ($ USD) y Bolívares (Bs.) sincronizada con la API oficial del Banco Central de Venezuela, permitiendo pagos mixtos y vueltos exactos.</p>
+          </div>
+          <div class="card">
+            <h3>⚖️ 5. Ergonomía Industrial</h3>
+            <p>Diseño de alto contraste WCAG AAA (≥ 7:1) protegido contra errores de interfaz, soporte directo para balanzas de mostrador e impresoras térmicas ESC/POS.</p>
+          </div>
+          <div class="card">
+            <h3>🔄 6. Auto-Actualizador Cloud</h3>
+            <p>Actualizaciones en 1 clic en segundo plano sin instaladores manuales complejos ni bucles de recarga.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. STACK TECNOLÓGICO -->
+      <section id="stack" class="section-card">
+        <div class="section-header">
+          <span class="icon">⚙️</span>
+          <h2>2. Stack Tecnológico Multi-Capa</h2>
+        </div>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Capa del Sistema</th>
+                <th>Tecnologías Empleadas</th>
+                <th>Propósito y Beneficio</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Escritorio (PC)</strong></td>
+                <td>Next.js 14, React 18, TypeScript, Tailwind CSS Safe</td>
+                <td>Servidor local autónomo en puerto 3000, soporte multicaja LAN y visualización reactiva.</td>
+              </tr>
+              <tr>
+                <td><strong>Almacenamiento Local</strong></td>
+                <td>Dexie.js (IndexedDB) + SQLite</td>
+                <td>Búsqueda de 20,000 artículos en &lt; 5ms, cola de sincronización resiliente (Sync Queue).</td>
+              </tr>
+              <tr>
+                <td><strong>Móvil Nativo (Android)</strong></td>
+                <td>Java 21, Android SDK 34, Capacitor Core, WebViews</td>
+                <td>Acceso a cámara 60fps para escáner, Bluetooth térmico y receptor estático de SMS.</td>
+              </tr>
+              <tr>
+                <td><strong>Hardware Industrial</strong></td>
+                <td>Web Serial API, Sockets TCP/IP, ESC/POS Direct Bytes</td>
+                <td>Lectura continua de balanzas Torrey/Systel/Toledo a 9600 baudios y corte de ticket.</td>
+              </tr>
+              <tr>
+                <td><strong>Sincronización Nube</strong></td>
+                <td>Google Cloud Firestore + Server-Sent Events (SSE)</td>
+                <td>Sincronización multi-caja en tiempo real y respaldo ante robos o fallas de hardware.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 3. LAS 5 EDICIONES Y APKS -->
+      <section id="ediciones" class="section-card">
+        <div class="section-header">
+          <span class="icon">📱</span>
+          <h2>3. Ecosistema de las 5 Ediciones Oficiales y APKs</h2>
+        </div>
+        <p style="margin-bottom: 1.5rem; color: var(--text-muted);">
+          El ecosistema se distribuye en <strong>5 soluciones empaquetadas</strong> dentro de la carpeta oficial <code>DISTRIBUCION_KLIKPOS/</code>:
+        </p>
+
+        <div class="grid-2">
+          <div class="card" style="border-left: 4px solid var(--primary);">
+            <span class="badge badge-primary">Edición 01</span>
+            <h3 style="margin-top: 0.5rem;">KlikPOS Móvil Satélite PC (Contingencia y Escáner)</h3>
+            <p><strong>Para:</strong> Supermercados, abastos y ferreterías con PC en caja.<br>
+            <strong>Función:</strong> Convierte teléfonos Android en pistolas lectoras inalámbricas para cobrar en pasillos y seguir vendiendo en contingencias.</p>
+          </div>
+
+          <div class="card" style="border-left: 4px solid var(--accent);">
+            <span class="badge badge-success">Edición 02</span>
+            <h3 style="margin-top: 0.5rem;">KlikPOS Desktop Empresarial Full PC (Buque Insignia)</h3>
+            <p><strong>Para:</strong> Mostrador principal, farmacias, bodegones y minimarkets.<br>
+            <strong>Función:</strong> Centro neurálgico del negocio. Balanzas de mostrador, cajones de dinero, lectores USB, multicaja y validación bancaria.</p>
+          </div>
+
+          <div class="card" style="border-left: 4px solid var(--warning);">
+            <span class="badge badge-warning">Edición 03</span>
+            <h3 style="margin-top: 0.5rem;">KlikPOS Tablet Standalone (Restaurantes & Mesas)</h3>
+            <p><strong>Para:</strong> Restaurantes, pizzerías, cafeterías y food trucks.<br>
+            <strong>Función:</strong> 100% autónomo en tablet. Docker lateral flotante, botón central COBRAR, gestión de comandas y mapa de mesas.</p>
+          </div>
+
+          <div class="card" style="border-left: 4px solid var(--primary);">
+            <span class="badge badge-primary">Edición 04</span>
+            <h3 style="margin-top: 0.5rem;">KlikPOS Móvil Full Autónomo (Retail 100% Celular)</h3>
+            <p><strong>Para:</strong> Emprendedores, distribuidores independientes y boutiques.<br>
+            <strong>Función:</strong> Todo el negocio en el teléfono sin PC. Escaneo por cámara, tickets digitales por WhatsApp y respaldo en la nube.</p>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top: 1.5rem; border-left: 4px solid #6366f1;">
+          <span class="badge" style="background: #e0e7ff; color: #4338ca;">Edición 05</span>
+          <h3 style="margin-top: 0.5rem;">KlikPOS Móvil Companion (Control Remoto LAN)</h3>
+          <p><strong>Para:</strong> Dueños, supervisores y gerentes de inventario.<br>
+          <strong>Función:</strong> Monitoreo en vivo de las ventas del turno, arqueo de caja y consulta de existencias en tiempo real por Wi-Fi sin interrumpir al cajero.</p>
+        </div>
+      </section>
+
+      <!-- 4. INGENIERÍA Y SOLUCIONES -->
+      <section id="ingenieria" class="section-card">
+        <div class="section-header">
+          <span class="icon">🛠️</span>
+          <h2>4. Soluciones de Ingeniería y Cero Regresiones</h2>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <h3>🛡️ Solución al Permiso SMS en Android</h3>
+            <p style="font-size: 0.9rem;">
+              Declaración estática en <code>AndroidManifest.xml</code> con <code>priority=999</code>, petición en tiempo de ejecución para Android 6.0+ a 14+, y puente dual de eventos JavaScript para asegurar recepción continua en segundo plano.
+            </p>
+          </div>
+
+          <div class="card">
+            <h3>🎨 Protección CSS Tailwind Safe</h3>
+            <p style="font-size: 0.9rem;">
+              Erradicación total de selectores comodín como <code>[class*="text-white"]</code> que volvían invisibles los números del teclado en Modo Claro. Estilos defensivos inline y contraste WCAG AAA (≥ 7:1).
+            </p>
+          </div>
+
+          <div class="card">
+            <h3>📐 Ergonomía POS (Máximo 4 Columnas)</h3>
+            <p style="font-size: 0.9rem;">
+              Catálogo visual optimizado para 4 columnas en escritorio con reserva para 2 líneas completas de título (<code>line-clamp-2 min-h-[36px]</code>), evitando nombres cortados.
+            </p>
+          </div>
+
+          <div class="card">
+            <h3>🚀 Protocolo de Auto-Actualizaciones</h3>
+            <p style="font-size: 0.9rem;">
+              Fuente única de verdad en <code>version.json</code> sincronizada automáticamente a instaladores y repositorios en la nube. Actualizaciones en 1 clic silenciosas.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. VALIDACIÓN PAGO MÓVIL -->
+      <section id="pagomovil" class="section-card">
+        <div class="section-header">
+          <span class="icon">📲</span>
+          <h2>5. Conciliación y Validación de Pago Móvil</h2>
+        </div>
+
+        <p style="color: var(--text-muted); margin-bottom: 1rem;">
+          KlikPOS implementa una <strong>triple vía de validación automática</strong> para evitar fraudes y capturas falsas:
+        </p>
+
+        <pre><code>[ TELÉFONO DEL DUEÑO / BANCO ] ──► (SMS Push o Correo Gmail Oficial)
+                                           │
+          ┌────────────────────────────────┴────────────────────────────────┐
+          ▼                                                                 ▼
+[ Vía 1: APK Móvil SMS Gateway ]                        [ Vía 2: Monitor Gmail API ]
+   Dispara Webhook en LAN o Firestore                      Sondeo cada 5 seg en PC
+          │                                                                 │
+          └────────────────────────────────┬────────────────────────────────┘
+                                           ▼
+                    ┌─────────────────────────────────────────────┐
+                    │            KLIKPOS PC EN CAJA               │
+                    │ 1. Parser Regex de Alta Precisión           │
+                    │ 2. Búfer Volátil en Memoria (TTL 10 Min)    │
+                    │ 3. Match de Monto Exacto + 4 Dígitos        │
+                    │ 4. Campanazo de Éxito + Toast Verde         │
+                    └─────────────────────────────────────────────┘</code></pre>
+      </section>
+
+      <!-- 6. GENERACIÓN DE LICENCIAS -->
+      <section id="licencias" class="section-card">
+        <div class="section-header">
+          <span class="icon">🔑</span>
+          <h2>6. Sistema de Licenciamiento y Keygen Maestro</h2>
+        </div>
+
+        <p style="color: var(--text-muted); margin-bottom: 1.5rem;">
+          Las licencias se generan con firma criptográfica HMAC-SHA256 y quedan vinculadas al RIF o Identificador del Comercio:
+        </p>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Tipo de Plan</th>
+                <th>Código del Plan</th>
+                <th>Duración</th>
+                <th>Formato de Clave</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Demostración Gratuita</strong></td>
+                <td><code>TRIAL</code></td>
+                <td>7 días</td>
+                <td><code>KLIKPOS-TRIAL-YYYYMMDD-XXXX</code></td>
+              </tr>
+              <tr>
+                <td><strong>Starter (Cuota 1)</strong></td>
+                <td><code>STARTER_C1</code></td>
+                <td>30 días</td>
+                <td><code>KLIKPOS-STARTER-YYYYMMDD-XXXX</code></td>
+              </tr>
+              <tr>
+                <td><strong>Licencia Permanente / Full</strong></td>
+                <td><code>LIFETIME</code> / <code>PRO_MASTER</code></td>
+                <td>Ilimitada (Vitalicia)</td>
+                <td><code>KLIKPOS-LIFE-YYYYMMDD-XXXX</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 7. PLANES Y FINANCIAMIENTO -->
+      <section id="planes" class="section-card">
+        <div class="section-header">
+          <span class="icon">💳</span>
+          <h2>7. Planes Comerciales y Financiamiento en 2 Cuotas</h2>
+        </div>
+
+        <div class="grid-2">
+          <div class="card" style="border: 2px solid var(--border-color);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+              <h3 style="font-size: 1.3rem;">📦 Plan Starter</h3>
+              <span style="font-size: 1.5rem; font-weight: 800; color: var(--primary);">$50.00 USD</span>
+            </div>
+            <p style="margin-bottom: 1rem;"><strong>Financiamiento en 2 Cuotas:</strong></p>
+            <ul style="list-style: none; margin-bottom: 1.5rem; color: var(--text-muted); font-size: 0.95rem;">
+              <li style="margin-bottom: 0.5rem;">🔹 <strong>1ra Cuota inicial:</strong> $25.00 (Activa 30 días full).</li>
+              <li style="margin-bottom: 0.5rem;">🔹 <strong>2da Cuota final:</strong> $25.00 (Libera Licencia Definitiva).</li>
+            </ul>
+            <p style="font-size: 0.85rem; color: var(--text-muted);">
+              <strong>Incluye:</strong> Sistema POS completo, inventario, facturación multimoneda, tickets térmicos y 2 cajeros.
+            </p>
+          </div>
+
+          <div class="card" style="border: 2px solid var(--accent); background: rgba(16, 185, 129, 0.03);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+              <h3 style="font-size: 1.3rem; color: var(--accent-dark);">🚀 Plan Pro Master</h3>
+              <span style="font-size: 1.5rem; font-weight: 800; color: var(--accent);">$75.00 USD</span>
+            </div>
+            <p style="margin-bottom: 1rem;"><strong>Financiamiento en 2 Cuotas:</strong></p>
+            <ul style="list-style: none; margin-bottom: 1.5rem; color: var(--text-muted); font-size: 0.95rem;">
+              <li style="margin-bottom: 0.5rem;">🔹 <strong>1ra Cuota inicial:</strong> $37.50 (Activa 30 días full).</li>
+              <li style="margin-bottom: 0.5rem;">🔹 <strong>2da Cuota final:</strong> $37.50 (Libera Licencia Definitiva).</li>
+            </ul>
+            <p style="font-size: 0.85rem; color: var(--text-muted);">
+              <strong>Incluye:</strong> Todo el Plan Starter + Sincronización Nube Firestore, balanzas de mostrador, cajeros ilimitados y App de Dueño.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 8. COPYS WHATSAPP Y REDES -->
+      <section id="copys" class="section-card">
+        <div class="section-header">
+          <span class="icon">💬</span>
+          <h2>8. Plantillas de Copys (WhatsApp, Redes y FAQ)</h2>
+        </div>
+        <p style="color: var(--text-muted); margin-bottom: 1.5rem;">
+          Haz clic en <strong>"Copiar Texto"</strong> para enviar directamente a clientes potenciales:
+        </p>
+
+        <!-- Copy 1: Saludo WhatsApp -->
+        <div class="copy-box">
+          <div class="copy-box-header">
+            <div class="copy-box-title">🟢 Mensaje de Bienvenida Inicial (WhatsApp Business)</div>
+            <button class="copy-btn" onclick="copySnippet('copy-saludo', this)">📋 Copiar Texto</button>
+          </div>
+          <div class="copy-text" id="copy-saludo">¡Hola! 👋 Qué gusto saludarte. Bienvenido/a a *KlikPOS Enterprise* 🚀
+
+El sistema de Punto de Venta y Facturación #1 en Venezuela 🇻🇪:
+✅ 100% Autónomo (Funciona CON o SIN internet).
+✅ Tasa BCV automática en tiempo real.
+✅ Doble moneda simultánea ($ USD y Bs.).
+✅ Integración con Balanzas, Lectores de Código de Barra e Impresoras Térmicas.
+✅ Compatible con Computadoras (Windows), Tablets y Teléfonos Android.
+
+¿Para qué tipo de negocio necesitas el sistema? (Ej: Supermercado, Restaurante, Bodegón, Farmacia, Tienda de Ropa, Panadería). 🛒✨</div>
+        </div>
+
+        <!-- Copy 2: Planes y Precios -->
+        <div class="copy-box">
+          <div class="copy-box-header">
+            <div class="copy-box-title">🔹 Explicación de Planes Comerciales y Precios</div>
+            <button class="copy-btn" onclick="copySnippet('copy-planes', this)">📋 Copiar Texto</button>
+          </div>
+          <div class="copy-text" id="copy-planes">¡Excelente! Aquí te comparto nuestras soluciones comerciales disponibles 👇
+
+🔹 *1. PLAN BÁSICO SATÉLITE (Emprendedores y Kioscos)*
+• 1 PC de Caja Principal + 1 Punto Satélite Móvil (Teléfono/Tablet).
+• Facturación rápida, control de inventario, Tasa BCV y reportes diarios.
+• *Modalidad:* Licencia Anual o Vitalicia.
+
+🔹 *2. COMBO EMPRESARIAL FULL (Bodegones, Supermercados y Tiendas)*
+• Multicaja ilimitada para varias computadoras en red local.
+• Módulo de Comandas / Mesas para Restaurantes.
+• Control de inventario con alertas de stock bajo y balanza de peso.
+• Respaldo automático local y en la nube.
+
+🔹 *3. PLAN MÓVIL FULL AUTÓNOMO (Ventas en Calle / Delivery)*
+• Funciona directamente desde tu teléfono o tablet Android sin necesidad de PC.
+• Emite tickets, cobra en $ y Bs., calcula vueltos exactos y sincroniza ventas.
+
+🎁 *Todas las versiones incluyen:*
+✔️ Instalación en 1 solo clic.
+✔️ Sin comisiones por ventas.
+✔️ Soporte técnico y actualizaciones automáticas.
+
+¿Te gustaría que te enviemos un video demostrativo de cómo funciona en vivo? 🎥</div>
+        </div>
+
+        <!-- Copy 3: Envío de Licencia -->
+        <div class="copy-box">
+          <div class="copy-box-header">
+            <div class="copy-box-title">🎉 Envío y Activación de Licencia</div>
+            <button class="copy-btn" onclick="copySnippet('copy-licencia', this)">📋 Copiar Texto</button>
+          </div>
+          <div class="copy-text" id="copy-licencia">🎉 *¡Felicidades! Tu licencia de KlikPOS Enterprise está lista.*
+
+📌 *Datos de la Licencia:*
+• *Comercio / RIF:* [NOMBRE DEL NEGOCIO / J-12345678-9]
+• *Plan:* [COMBO EMPRESARIAL FULL / STANDALONE]
+• *Clave de Activación:*
+`[PEGAR_AQUI_LA_CLAVE_GENERADA]`
+
+📲 *Pasos sencillos para activar:*
+1. Abre tu KlikPOS en la computadora o teléfono.
+2. Ingresa en *Configuración* ⚙️ -> *Licencia del Sistema*.
+3. Pega la clave que te enviamos arriba y presiona *Activar Licencia*.
+
+¡Listo! Tu sistema queda habilitado de forma inmediata. Si necesitas ayuda con la configuración inicial, con gusto te asistimos. 🤝</div>
+        </div>
+
+        <!-- Copy 4: Redes Sociales -->
+        <div class="copy-box">
+          <div class="copy-box-header">
+            <div class="copy-box-title">📢 Post para Instagram / Facebook / TikTok</div>
+            <button class="copy-btn" onclick="copySnippet('copy-redes', this)">📋 Copiar Texto</button>
+          </div>
+          <div class="copy-text" id="copy-redes">¿Cansado de perder ventas cuando se cae el internet o calculando la tasa del día a mano? 📉❌
+
+Te presentamos **KlikPOS Enterprise** 🚀, el sistema de Punto de Venta más rápido, intuitivo y seguro de Venezuela 🇻🇪.
+
+🔥 ¿Por qué tu negocio necesita KlikPOS?
+👉 **100% Operativo Sin Internet:** Cobra sin interrupciones aunque no tengas conexión.
+👉 **Tasa BCV Automática:** Precios actualizados en $ y Bs. al instante.
+👉 **Multimoneda Inteligente:** Pago Móvil, Zelle, Efectivo y cálculo exacto de vueltos.
+👉 **Control de Inventario y Reportes:** Conoce tus ganancias reales diarias y mensuales.
+👉 **Compatible con tus Equipos:** Úsalo en PC, Laptops, Tablets o Teléfonos Android.
+
+Ideal para:
+🛒 Supermercados y Bodegones
+🍽️ Restaurantes, Cafés y Pizzerías
+💊 Farmacias y Tiendas de Salud
+👗 Boutiques, Zapaterías y Ferreterías
+
+📲 ¡Escríbenos al enlace de la biografía o envíanos un DM para enviarte una DEMO GRATIS hoy mismo! 💬✨
+
+#KlikPOS #PuntoDeVenta #Venezuela #ComercioVenezolano #Facturacion #EmprendedoresVenezuela #Caracas #Maracaibo #Valencia #Barquisimeto #NegociosVenezuela</div>
+        </div>
+      </section>
+
+      <!-- 9. PRIVACIDAD Y GARANTÍA -->
+      <section id="privacidad" class="section-card">
+        <div class="section-header">
+          <span class="icon">⚖️</span>
+          <h2>9. Términos, Privacidad y Garantía de Servicio</h2>
+        </div>
+
+        <div class="grid-3">
+          <div class="card">
+            <h3>🔒 Soberanía de Datos</h3>
+            <p>La base de datos pertenece exclusivamente al cliente. No se comercializan estadísticas ni se transfieren datos a terceros sin autorización.</p>
+          </div>
+          <div class="card">
+            <h3>🛠️ Soporte Técnico</h3>
+            <p>Asistencia técnica remota y presencial para instalación llave en mano, configuración de impresoras y capacitación del personal.</p>
+          </div>
+          <div class="card">
+            <h3>📜 Cumplimiento Fiscal</h3>
+            <p>Formatos de factura compatibles con regulaciones fiscales del SENIAT (desglose de IVA 16%, IGTF 3% y Base Imponible).</p>
+          </div>
+        </div>
+
+        <div style="margin-top: 2rem; text-align: center; color: var(--text-muted); font-size: 0.85rem; border-top: 1px solid var(--border-color); padding-top: 1.5rem;">
+          <strong>KlikPOS Enterprise Suite v2.4.7</strong> — Desarrollado para el Comercio y la Industria.<br>
+          © 2026 Todos los derechos reservados.
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script>
+    // Theme Toggle
+    const themeToggle = document.getElementById('themeToggle');
+    const themeIcon = document.getElementById('themeIcon');
+    const themeText = document.getElementById('themeText');
+    const htmlEl = document.documentElement;
+
+    function setTheme(theme) {
+      if (theme === 'dark') {
+        htmlEl.setAttribute('data-theme', 'dark');
+        themeIcon.textContent = '☀️';
+        themeText.textContent = 'Modo Claro';
+        localStorage.setItem('klikpos_doc_theme', 'dark');
+      } else {
+        htmlEl.removeAttribute('data-theme');
+        themeIcon.textContent = '🌙';
+        themeText.textContent = 'Modo Oscuro';
+        localStorage.setItem('klikpos_doc_theme', 'light');
+      }
+    }
+
+    const savedTheme = localStorage.getItem('klikpos_doc_theme') || 'light';
+    setTheme(savedTheme);
+
+    themeToggle.addEventListener('click', () => {
+      const currentTheme = htmlEl.getAttribute('data-theme');
+      setTheme(currentTheme === 'dark' ? 'light' : 'dark');
+    });
+
+    // Mobile Menu
+    const menuToggle = document.getElementById('menuToggle');
+    const sidebar = document.getElementById('sidebar');
+
+    menuToggle.addEventListener('click', () => {
+      sidebar.classList.toggle('open');
+    });
+
+    // Close menu when clicking links on mobile
+    document.querySelectorAll('.menu-link').forEach(link => {
+      link.addEventListener('click', () => {
+        sidebar.classList.remove('open');
+      });
+    });
+
+    // Copy to Clipboard
+    function copySnippet(elementId, btnElement) {
+      const textToCopy = document.getElementById(elementId).innerText;
+      navigator.clipboard.writeText(textToCopy).then(() => {
+        const originalText = btnElement.innerHTML;
+        btnElement.innerHTML = '✅ ¡Copiado!';
+        btnElement.classList.add('copied');
+        setTimeout(() => {
+          btnElement.innerHTML = originalText;
+          btnElement.classList.remove('copied');
+        }, 2000);
+      });
+    }
+
+    // Search filter
+    const searchInput = document.getElementById('searchInput');
+    searchInput.addEventListener('input', (e) => {
+      const query = e.target.value.toLowerCase().trim();
+      const sections = document.querySelectorAll('.section-card');
+
+      sections.forEach(section => {
+        const text = section.innerText.toLowerCase();
+        if (query === '' || text.includes(query)) {
+          section.style.display = 'block';
+        } else {
+          section.style.display = 'none';
+        }
+      });
+    });
+  </script>
+</body>
+</html>
