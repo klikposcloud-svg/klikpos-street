@@ -2502,17 +2502,23 @@ textarea,
   overscroll-behavior-y: contain;
 }
 
-/* 6. Prevención de auto-zoom indeseado en inputs de iOS (Safari requiere font-size >= 16px) */
-@media screen and (max-width: 768px) {
-  input[type="text"],
-  input[type="number"],
-  input[type="search"],
-  input[type="password"],
-  select,
-  textarea {
-    font-size: 16px !important;
-  }
+/* 7. Animaciones Elásticas Pro-Level para Barra de Navegación */
+.nav-elastic-pill {
+  transition: all 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
+.nav-item-spring {
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.2s ease, opacity 0.2s ease;
+}
+.nav-hero-button {
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+}
+.nav-hero-button:hover {
+  transform: translateY(-4px) scale(1.06);
+}
+.nav-hero-button:active {
+  transform: scale(0.92);
+}
+
 
 
 

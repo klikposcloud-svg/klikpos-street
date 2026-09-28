@@ -28,5 +28,6 @@ export async function GET() {
     serverUrl,
     adminConnectUrl: serverUrl,
     scannerUrl: `${serverUrl}/scanner?session=caja-1`,
+    menuUrl: `${serverUrl}/menu`,
   });
 }

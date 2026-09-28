@@ -439,6 +439,7 @@ export default function TabletMobilePosPage() {
   const [isLeftDrawerOpen, setIsLeftDrawerOpen] = useState(false);
   const [isRightDrawerOpen, setIsRightDrawerOpen] = useState(false);
   const [showQrModal, setShowQrModal] = useState(false);
+  const [menuQrUrl, setMenuQrUrl] = useState('');
   const [editingItemNotes, setEditingItemNotes] = useState<CartItem | null>(null);
   const [activeTable, setActiveTable] = useState<number | null>(null);
 
@@ -695,6 +696,24 @@ export default function TabletMobilePosPage() {
         const parsed = JSON.parse(savedPrinter);
         if (parsed) setPrinterConfig(parsed);
       }
+
+      // Resolver URL dinámica del Menú Digital para la red local / Wi-Fi
+      fetch('/api/system/network-ip')
+        .then(res => res.json())
+        .then(data => {
+          if (data.menuUrl) {
+            setMenuQrUrl(data.menuUrl);
+          } else if (data.serverUrl) {
+            setMenuQrUrl(`${data.serverUrl}/menu`);
+          } else if (typeof window !== 'undefined') {
+            setMenuQrUrl(`${window.location.origin}/menu`);
+          }
+        })
+        .catch(() => {
+          if (typeof window !== 'undefined') {
+            setMenuQrUrl(`${window.location.origin}/menu`);
+          }
+        });
     } catch {
       // Continuar silenciosamente
     }
@@ -1143,14 +1162,14 @@ export default function TabletMobilePosPage() {
       `}</style>
 
       {/* ========================================================================= */}
-      {/* 1. DOCKER FLOTANTE MINIMALISTA Y CONMUTABLE (IZQUIERDA / DERECHA)         */}
+      {/* 1. DOCKER FLOTANTE MINIMALISTA: PILL VERTICAL PURO DIRECTO                */}
       {/* ========================================================================= */}
-      {/* Tirador Único Minimalista Pegado al Borde Lateral */}
+      {/* Botón Píldora Colapsado cuando el Docker está cerrado */}
       {!isDockerOpen && (
         <button
           type="button"
           onClick={() => setIsDockerOpen(true)}
-          className={`fixed top-1/2 -translate-y-1/2 z-40 shadow-2xl flex flex-col items-center justify-center transition-all duration-200 active:scale-90 border border-white/20 backdrop-blur-md group cursor-pointer ${
+          className={`fixed top-1/2 -translate-y-1/2 z-40 shadow-2xl flex flex-col items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 border border-white/20 backdrop-blur-md group cursor-pointer ${
             dockSide === 'left' ? 'left-0 rounded-r-2xl border-l-0' : 'right-0 rounded-l-2xl border-r-0'
           }`}
           style={{
@@ -1159,7 +1178,7 @@ export default function TabletMobilePosPage() {
             backgroundColor: `${currentPal.primary}e6`,
             boxShadow: `0 8px 24px ${currentPal.glow || 'rgba(0,0,0,0.3)'}`
           }}
-          title={`Abrir Panel Rápido (${dockSide === 'left' ? 'Izquierda' : 'Derecha'})`}
+          title={`Abrir Docker Rápido (${dockSide === 'left' ? 'Izquierda' : 'Derecha'})`}
         >
           <div className="flex flex-col items-center gap-1">
             <Sparkles className="w-4 h-4 text-amber-300 drop-shadow-xs group-hover:rotate-12 transition-transform" />
@@ -1173,300 +1192,110 @@ export default function TabletMobilePosPage() {
         </button>
       )}
 
-      {/* Docker Flotante Abierto: Cápsula Vertical + Tarjeta de Opciones Conectada */}
+      {/* Docker Flotante Abierto: EXCLUSIVAMENTE Pill Vertical con Íconos Directos */}
       {isDockerOpen && (
-        <>
-          {/* Fondo semi-transparente para cerrar con clic afuera */}
-          <div
-            className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs transition-opacity animate-in fade-in duration-200"
-            onClick={() => setIsDockerOpen(false)}
-          />
-
-          {/* Contenedor Flotante posicionado en el lado seleccionado */}
-          <div
-            className={`fixed top-1/2 -translate-y-1/2 z-50 flex items-center gap-3 animate-in fade-in zoom-in-95 duration-200 ${
-              dockSide === 'left' ? 'left-3 flex-row' : 'right-3 flex-row-reverse'
-            }`}
-          >
-            {/* Cápsula Vertical Oscura con Íconos */}
-            <aside className="w-14 bg-slate-950/95 backdrop-blur-xl rounded-[32px] py-4 flex flex-col items-center justify-between shadow-2xl border border-slate-800 text-white select-none shrink-0 min-h-[380px]">
-              {/* Top: Sparkles */}
-              <div className="w-9 h-9 rounded-2xl bg-gradient-to-tr from-amber-500 to-amber-300 flex items-center justify-center shadow-lg shadow-amber-500/20">
-                <Sparkles className="w-5 h-5 text-slate-950" />
-              </div>
-
-              {/* Íconos Centrales de Acceso Directo */}
-              <div className="flex flex-col items-center gap-3 my-auto">
-                {/* Catálogo POS */}
-                <button
-                  onClick={() => { setActiveTab('menu'); setIsDockerOpen(false); }}
-                  className={`p-2 rounded-2xl transition-all ${
-                    activeTab === 'menu' ? 'bg-sky-500/20 text-sky-400' : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
-                  }`}
-                  title="Catálogo POS"
-                >
-                  <LayoutGrid className="w-5 h-5" />
-                </button>
-
-                {/* Inventario */}
-                <button
-                  onClick={() => { setShowInventoryModal(true); setIsDockerOpen(false); }}
-                  className="p-2 rounded-2xl text-slate-400 hover:text-emerald-400 hover:bg-slate-800/60 transition-all"
-                  title="Gestión de Inventario"
-                >
-                  <Package className="w-5 h-5" />
-                </button>
-
-                {/* Motorizados / Delivery */}
-                <button
-                  onClick={() => { setShowDriversModal(true); setIsDockerOpen(false); }}
-                  className="p-2 rounded-2xl text-slate-400 hover:text-amber-400 hover:bg-slate-800/60 transition-all"
-                  title="Motorizados & Despacho"
-                >
-                  <Truck className="w-5 h-5" />
-                </button>
-
-                {/* Impresora */}
-                <button
-                  onClick={() => { setShowPrinterModal(true); setIsDockerOpen(false); }}
-                  className="p-2 rounded-2xl text-slate-400 hover:text-indigo-400 hover:bg-slate-800/60 transition-all"
-                  title="Impresora POS"
-                >
-                  <Printer className="w-5 h-5" />
-                </button>
-
-                {/* Rubro Comercial */}
-                <button
-                  onClick={() => { setShowRubroModal(true); setIsDockerOpen(false); }}
-                  className="p-2 rounded-2xl text-slate-400 hover:text-purple-400 hover:bg-slate-800/60 transition-all"
-                  title="Cambiar Rubro Comercial"
-                >
-                  <Boxes className="w-5 h-5" />
-                </button>
-
-                {/* Comanda / Carrito */}
-                <button
-                  onClick={() => { setIsRightDrawerOpen(true); setIsDockerOpen(false); }}
-                  className="p-2 rounded-2xl text-slate-400 hover:text-sky-400 hover:bg-slate-800/60 transition-all relative"
-                  title="Ver Comanda Activa"
-                >
-                  <ShoppingCart className="w-5 h-5" />
-                  {totalItems > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-amber-400 text-slate-950 text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center">
-                      {totalItems}
-                    </span>
-                  )}
-                </button>
-              </div>
-
-              {/* Bottom: Alternar Lado (Izq/Der) y Cerrar */}
-              <div className="flex flex-col items-center gap-2 pt-2 border-t border-slate-850">
-                <button
-                  onClick={handleToggleDockSide}
-                  className="p-2 rounded-xl text-slate-400 hover:text-amber-300 hover:bg-slate-800/80 transition-all"
-                  title={dockSide === 'left' ? 'Mover Docker a la Derecha' : 'Mover Docker a la Izquierda'}
-                >
-                  <ArrowLeftRight className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => setIsDockerOpen(false)}
-                  className="p-1.5 rounded-xl text-slate-500 hover:text-rose-400 hover:bg-slate-800/80 transition-all"
-                  title="Cerrar Docker"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-            </aside>
-
-            {/* Tarjeta Rectangular Glass Conectada */}
-            <div className={`w-80 rounded-[28px] p-4.5 shadow-2xl border transition-all ${
-              isLight
-                ? 'bg-white/95 border-slate-200 text-slate-900 shadow-slate-300/50'
-                : 'bg-slate-900/95 border-slate-800 text-white shadow-black/60'
-            } backdrop-blur-2xl max-h-[85vh] overflow-y-auto space-y-4`}>
-              {/* Header de la tarjeta */}
-              <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
-                <div className="flex items-center gap-2">
-                  <span className="text-xl">{RUBROS_CATALOG[activeRubro]?.icon || '🍔'}</span>
-                  <div>
-                    <h3 className="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white">
-                      KlikPOS Admin
-                    </h3>
-                    <p className="text-[10px] text-slate-500 font-bold">
-                      {RUBROS_CATALOG[activeRubro]?.name}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Botón rápido conmutar lado */}
-                <button
-                  onClick={handleToggleDockSide}
-                  className="flex items-center gap-1 px-2.5 py-1 rounded-xl text-[10px] font-black border border-slate-200 dark:border-slate-700 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 transition-colors text-slate-700 dark:text-slate-300"
-                  title="Alternar entre borde izquierdo o derecho"
-                >
-                  <ArrowLeftRight className="w-3 h-3 text-amber-500" />
-                  <span>{dockSide === 'left' ? 'Mover a Der' : 'Mover a Izq'}</span>
-                </button>
-              </div>
-
-              {/* SECCIÓN 1: OPERACIONES */}
-              <div className="space-y-1.5">
-                <span className="text-[10px] font-mono font-black text-slate-400 dark:text-slate-500 tracking-wider uppercase">
-                  OPERACIONES
-                </span>
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    onClick={() => { setActiveTab('menu'); setIsDockerOpen(false); }}
-                    className={`flex items-center gap-2 p-2.5 rounded-xl border text-left transition-all ${
-                      activeTab === 'menu'
-                        ? 'bg-sky-50 dark:bg-sky-950/40 border-sky-300 dark:border-sky-800 text-sky-700 dark:text-sky-300'
-                        : 'bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-800 hover:border-slate-300 text-slate-800 dark:text-slate-200'
-                    }`}
-                  >
-                    <LayoutGrid className="w-4 h-4 text-sky-500 shrink-0" />
-                    <div>
-                      <div className="text-[11px] font-black">Catálogo POS</div>
-                      <div className="text-[9px] text-slate-400">Venta rápida</div>
-                    </div>
-                  </button>
-
-                  <button
-                    onClick={() => { setIsRightDrawerOpen(true); setIsDockerOpen(false); }}
-                    className="flex items-center gap-2 p-2.5 rounded-xl border bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-800 hover:border-slate-300 text-slate-800 dark:text-slate-200 text-left transition-all"
-                  >
-                    <ShoppingCart className="w-4 h-4 text-amber-500 shrink-0" />
-                    <div>
-                      <div className="text-[11px] font-black">Comanda ({totalItems})</div>
-                      <div className="text-[9px] text-emerald-600 font-bold">${totalUSD.toFixed(2)}</div>
-                    </div>
-                  </button>
-
-                  <button
-                    onClick={() => { setActiveTab('mesas'); setIsDockerOpen(false); }}
-                    className={`flex items-center gap-2 p-2.5 rounded-xl border text-left transition-all ${
-                      activeTab === 'mesas'
-                        ? 'bg-sky-50 dark:bg-sky-950/40 border-sky-300 dark:border-sky-800 text-sky-700 dark:text-sky-300'
-                        : 'bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-800 hover:border-slate-300 text-slate-800 dark:text-slate-200'
-                    }`}
-                  >
-                    <UtensilsCrossed className="w-4 h-4 text-indigo-500 shrink-0" />
-                    <div>
-                      <div className="text-[11px] font-black">Mesas / Cuentas</div>
-                      <div className="text-[9px] text-slate-400">Ambientes</div>
-                    </div>
-                  </button>
-
-                  <button
-                    onClick={() => { setActiveTab('pedidos'); setIsDockerOpen(false); }}
-                    className={`flex items-center gap-2 p-2.5 rounded-xl border text-left transition-all ${
-                      activeTab === 'pedidos'
-                        ? 'bg-sky-50 dark:bg-sky-950/40 border-sky-300 dark:border-sky-800 text-sky-700 dark:text-sky-300'
-                        : 'bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-800 hover:border-slate-300 text-slate-800 dark:text-slate-200'
-                    }`}
-                  >
-                    <ClipboardList className="w-4 h-4 text-emerald-500 shrink-0" />
-                    <div>
-                      <div className="text-[11px] font-black">Comandas / Cocina</div>
-                      <div className="text-[9px] text-slate-400">Pedidos y QR</div>
-                    </div>
-                  </button>
-                </div>
-              </div>
-
-              {/* SECCIÓN 2: INVENTARIO & DELIVERY */}
-              <div className="space-y-1.5">
-                <span className="text-[10px] font-mono font-black text-slate-400 dark:text-slate-500 tracking-wider uppercase">
-                  INVENTARIO & DELIVERY
-                </span>
-                <div className="space-y-2">
-                  <button
-                    onClick={() => { setShowInventoryModal(true); setIsDockerOpen(false); }}
-                    className="w-full flex items-center justify-between p-2.5 rounded-xl border bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-800 hover:border-emerald-400 text-slate-800 dark:text-slate-200 transition-all text-left"
-                  >
-                    <div className="flex items-center gap-2.5">
-                      <div className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-500">
-                        <Package className="w-4 h-4" />
-                      </div>
-                      <div>
-                        <div className="text-xs font-black">Gestión de Inventario</div>
-                        <div className="text-[10px] text-slate-400">Agregar productos y editar precios en vivo</div>
-                      </div>
-                    </div>
-                    <span className="text-[10px] font-mono font-bold bg-emerald-500/10 text-emerald-600 px-2 py-0.5 rounded-md">
-                      {products.length} ítem{products.length !== 1 ? 's' : ''}
-                    </span>
-                  </button>
-
-                  <button
-                    onClick={() => { setShowDriversModal(true); setIsDockerOpen(false); }}
-                    className="w-full flex items-center justify-between p-2.5 rounded-xl border bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-800 hover:border-amber-400 text-slate-800 dark:text-slate-200 transition-all text-left"
-                  >
-                    <div className="flex items-center gap-2.5">
-                      <div className="p-1.5 rounded-lg bg-amber-500/10 text-amber-500">
-                        <Truck className="w-4 h-4" />
-                      </div>
-                      <div>
-                        <div className="text-xs font-black">Motorizados & Delivery</div>
-                        <div className="text-[10px] text-slate-400">Despacho de comandas por WhatsApp</div>
-                      </div>
-                    </div>
-                    <span className="text-[10px] font-mono font-bold bg-amber-500/10 text-amber-600 px-2 py-0.5 rounded-md">
-                      {drivers.length} chofer{drivers.length !== 1 ? 'es' : ''}
-                    </span>
-                  </button>
-
-                  <button
-                    onClick={() => { setShowRubroModal(true); setIsDockerOpen(false); }}
-                    className="w-full flex items-center justify-between p-2.5 rounded-xl border bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-800 hover:border-purple-400 text-slate-800 dark:text-slate-200 transition-all text-left"
-                  >
-                    <div className="flex items-center gap-2.5">
-                      <div className="p-1.5 rounded-lg bg-purple-500/10 text-purple-500">
-                        <Boxes className="w-4 h-4" />
-                      </div>
-                      <div>
-                        <div className="text-xs font-black">Rubro Comercial</div>
-                        <div className="text-[10px] text-slate-400">Adaptar rubro y catálogo predeterminado</div>
-                      </div>
-                    </div>
-                    <span className="text-[10px] font-bold bg-purple-500/10 text-purple-600 px-2 py-0.5 rounded-md">
-                      {RUBROS_CATALOG[activeRubro]?.name}
-                    </span>
-                  </button>
-                </div>
-              </div>
-
-              {/* SECCIÓN 3: HARDWARE & SISTEMA */}
-              <div className="space-y-1.5">
-                <span className="text-[10px] font-mono font-black text-slate-400 dark:text-slate-500 tracking-wider uppercase">
-                  HARDWARE & SISTEMA
-                </span>
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    onClick={() => { setShowPrinterModal(true); setIsDockerOpen(false); }}
-                    className="flex items-center gap-2 p-2.5 rounded-xl border bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-800 hover:border-slate-300 text-slate-800 dark:text-slate-200 text-left transition-all"
-                  >
-                    <Printer className="w-4 h-4 text-indigo-500 shrink-0" />
-                    <div>
-                      <div className="text-[11px] font-black">Impresora POS</div>
-                      <div className="text-[9px] text-slate-400">{printerConfig.paperWidth} ({printerConfig.connection})</div>
-                    </div>
-                  </button>
-
-                  <button
-                    onClick={() => { setIsLeftDrawerOpen(true); setIsDockerOpen(false); }}
-                    className="flex items-center gap-2 p-2.5 rounded-xl border bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-800 hover:border-slate-300 text-slate-800 dark:text-slate-200 text-left transition-all"
-                  >
-                    <Settings className="w-4 h-4 text-slate-500 shrink-0" />
-                    <div>
-                      <div className="text-[11px] font-black">Ajustes & RIF</div>
-                      <div className="text-[9px] text-slate-400">Datos y branding</div>
-                    </div>
-                  </button>
-                </div>
-              </div>
+        <div
+          className={`fixed top-1/2 -translate-y-1/2 z-50 animate-in fade-in zoom-in-95 duration-200 ${
+            dockSide === 'left' ? 'left-2.5' : 'right-2.5'
+          }`}
+        >
+          {/* Cápsula Vertical Oscura con Íconos de Herramientas Directas */}
+          <aside className="w-13 bg-slate-950/92 dark:bg-slate-900/95 backdrop-blur-2xl rounded-[32px] py-3.5 px-1.5 flex flex-col items-center justify-between shadow-2xl border border-slate-700/70 text-white select-none shrink-0 min-h-[390px]">
+            {/* Top: Sparkles Icon / Brand Pill */}
+            <div className="w-9 h-9 rounded-2xl bg-gradient-to-tr from-amber-500 to-amber-300 flex items-center justify-center shadow-lg shadow-amber-500/20 shrink-0">
+              <Sparkles className="w-4.5 h-4.5 text-slate-950" />
             </div>
-          </div>
-        </>
+
+            {/* Íconos Centrales de Acceso Directo a Ventanas y Modales */}
+            <div className="flex flex-col items-center gap-2.5 my-auto">
+              {/* 1. Inventario & Stock */}
+              <button
+                onClick={() => setShowInventoryModal(true)}
+                className="p-2.5 rounded-2xl text-slate-300 hover:text-emerald-400 hover:bg-slate-800/80 active:scale-90 transition-all group relative cursor-pointer"
+                title="Gestión de Inventario & Stock"
+              >
+                <Package className="w-5 h-5 group-hover:scale-110 transition-transform" />
+              </button>
+
+              {/* 2. Motorizados / Despacho */}
+              <button
+                onClick={() => setShowDriversModal(true)}
+                className="p-2.5 rounded-2xl text-slate-300 hover:text-amber-400 hover:bg-slate-800/80 active:scale-90 transition-all group relative cursor-pointer"
+                title="Motorizados & Despacho Delivery"
+              >
+                <Truck className="w-5 h-5 group-hover:scale-110 transition-transform" />
+              </button>
+
+              {/* 3. Impresora Térmica POS */}
+              <button
+                onClick={() => setShowPrinterModal(true)}
+                className="p-2.5 rounded-2xl text-slate-300 hover:text-indigo-400 hover:bg-slate-800/80 active:scale-90 transition-all group relative cursor-pointer"
+                title="Configuración de Impresora POS"
+              >
+                <Printer className="w-5 h-5 group-hover:scale-110 transition-transform" />
+              </button>
+
+              {/* 4. Cambiar Rubro Comercial */}
+              <button
+                onClick={() => setShowRubroModal(true)}
+                className="p-2.5 rounded-2xl text-slate-300 hover:text-purple-400 hover:bg-slate-800/80 active:scale-90 transition-all group relative cursor-pointer"
+                title="Cambiar Rubro Comercial (Comida, Farmacia, Bodega, etc.)"
+              >
+                <Boxes className="w-5 h-5 group-hover:scale-110 transition-transform" />
+              </button>
+
+              {/* 5. Menú QR Dinámico para Clientes */}
+              <button
+                onClick={() => setShowQrModal(true)}
+                className="p-2.5 rounded-2xl text-slate-300 hover:text-sky-400 hover:bg-slate-800/80 active:scale-90 transition-all group relative cursor-pointer"
+                title="Generar Menú QR Digital para Clientes"
+              >
+                <QrCode className="w-5 h-5 group-hover:scale-110 transition-transform" />
+              </button>
+
+              {/* 6. Comanda / Ticket Activo */}
+              <button
+                onClick={() => setIsRightDrawerOpen(true)}
+                className="p-2.5 rounded-2xl text-slate-300 hover:text-emerald-400 hover:bg-slate-800/80 active:scale-90 transition-all relative group cursor-pointer"
+                title="Ver Comanda Activa"
+              >
+                <ShoppingCart className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                {totalItems > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-amber-400 text-slate-950 text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center shadow-xs">
+                    {totalItems}
+                  </span>
+                )}
+              </button>
+
+              {/* 7. Ajustes & Configuración */}
+              <button
+                onClick={() => setIsLeftDrawerOpen(true)}
+                className="p-2.5 rounded-2xl text-slate-300 hover:text-cyan-400 hover:bg-slate-800/80 active:scale-90 transition-all group relative cursor-pointer"
+                title="Ajustes de Empresa & RIF"
+              >
+                <Settings className="w-5 h-5 group-hover:scale-110 transition-transform" />
+              </button>
+            </div>
+
+            {/* Bottom: Alternar Lado (Izq/Der) y Colapsar */}
+            <div className="flex flex-col items-center gap-1.5 pt-2 border-t border-slate-800/80 shrink-0">
+              <button
+                onClick={handleToggleDockSide}
+                className="p-2 rounded-xl text-slate-400 hover:text-amber-300 hover:bg-slate-800/80 active:scale-90 transition-all cursor-pointer"
+                title={dockSide === 'left' ? 'Mover Docker a la Derecha' : 'Mover Docker a la Izquierda'}
+              >
+                <ArrowLeftRight className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => setIsDockerOpen(false)}
+                className="p-1.5 rounded-xl text-slate-500 hover:text-rose-400 hover:bg-slate-800/80 active:scale-90 transition-all cursor-pointer"
+                title="Minimizar Docker"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          </aside>
+        </div>
       )}
 
       {/* ========================================================================= */}
@@ -2541,126 +2370,136 @@ export default function TabletMobilePosPage() {
       </main>
 
       {/* ========================================================================= */}
-      {/* 4. NAV BAR INFERIOR FIJA PERMANENTE CON PÍLDORA ELÁSTICA ANIMADA          */}
+      {/* 4. NAV BAR INFERIOR FIJA CON ANIMACIÓN ELÁSTICA PRO & HERO COBRO           */}
       {/* ========================================================================= */}
       <nav
-        className={`fixed bottom-0 inset-x-0 w-full h-16 z-40 border-t flex items-center justify-around px-2 shadow-2xl transition-colors duration-300 ${
+        className={`fixed bottom-0 inset-x-0 w-full h-17 z-40 border-t flex items-center justify-around px-3 pb-safe shadow-2xl transition-colors duration-300 ${
           isLight ? 'bg-white/95 border-slate-200' : 'bg-slate-900/95 border-slate-800'
-        } backdrop-blur-md`}
+        } backdrop-blur-xl`}
       >
-        {/* 1. Menú / Catálogo */}
-        <button
-          onClick={() => setActiveTab('menu')}
-          className={`flex flex-col items-center justify-center py-1 px-3 rounded-2xl transition-all duration-300 active:scale-90 relative ${
-            activeTab === 'menu' ? 'font-black scale-105' : 'text-slate-400 hover:text-slate-600'
-          }`}
-          style={{ color: activeTab === 'menu' ? currentPal.primary : undefined }}
-        >
-          {activeTab === 'menu' && (
-            <span
-              className="absolute inset-0 rounded-2xl -z-10 shadow-2xs opacity-15"
-              style={{ backgroundColor: currentPal.primary }}
-            />
-          )}
-          <UtensilsCrossed className="w-5 h-5 stroke-[2.2]" />
-          <span className="text-[10px] mt-0.5 font-bold">Menú</span>
-          {activeTab === 'menu' && (
-            <span
-              className="w-1.5 h-1.5 rounded-full mt-0.5 anim-badge-spring shadow-xs"
-              style={{ backgroundColor: currentPal.primary }}
-            />
-          )}
-        </button>
-
-        {/* 2. Mesas */}
-        <button
-          onClick={() => setActiveTab('mesas')}
-          className={`flex flex-col items-center justify-center py-1 px-3 rounded-2xl transition-all duration-300 active:scale-90 relative ${
-            activeTab === 'mesas' ? 'font-black scale-105' : 'text-slate-400 hover:text-slate-600'
-          }`}
-          style={{ color: activeTab === 'mesas' ? currentPal.primary : undefined }}
-        >
-          {activeTab === 'mesas' && (
-            <span
-              className="absolute inset-0 rounded-2xl -z-10 shadow-2xs opacity-15"
-              style={{ backgroundColor: currentPal.primary }}
-            />
-          )}
-          <LayoutGrid className="w-5 h-5 stroke-[2.2]" />
-          <span className="text-[10px] mt-0.5 font-bold">Mesas</span>
-          {activeTab === 'mesas' && (
-            <span
-              className="w-1.5 h-1.5 rounded-full mt-0.5 anim-badge-spring shadow-xs"
-              style={{ backgroundColor: currentPal.primary }}
-            />
-          )}
-        </button>
-
-        {/* 3. BOTÓN CENTRAL DESTACADO "COBRAR" */}
-        <div className="flex flex-col items-center -mt-5">
+        <div className="max-w-xl w-full mx-auto flex items-center justify-between relative">
+          {/* 1. Menú / Catálogo */}
           <button
-            onClick={() => setActiveTab('cobro')}
-            className="w-13 h-13 rounded-full flex items-center justify-center transition-all duration-200 active:scale-90 group cursor-pointer anim-breathe text-white shadow-xl"
-            style={{ backgroundColor: currentPal.primary }}
-            title="Cobrar Cuenta / Abrir Caja"
+            onClick={() => setActiveTab('menu')}
+            className={`flex-1 flex flex-col items-center justify-center py-1.5 px-2 rounded-2xl nav-item-spring active:scale-90 relative cursor-pointer ${
+              activeTab === 'menu' ? 'font-black scale-105' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'
+            }`}
+            style={{ color: activeTab === 'menu' ? currentPal.primary : undefined }}
           >
-            <CircleDollarSign className="w-7 h-7 stroke-[2.5] text-white group-hover:rotate-12 transition-transform" />
+            {activeTab === 'menu' && (
+              <span
+                className="absolute inset-0 rounded-2xl -z-10 shadow-sm opacity-15 nav-elastic-pill border border-current"
+                style={{ backgroundColor: currentPal.primary }}
+              />
+            )}
+            <UtensilsCrossed className={`w-5.5 h-5.5 stroke-[2.2] transition-transform duration-300 ${activeTab === 'menu' ? '-translate-y-0.5 scale-110' : ''}`} />
+            <span className="text-[10.5px] mt-0.5 font-bold tracking-tight">Menú</span>
+            {activeTab === 'menu' && (
+              <span
+                className="w-1.5 h-1.5 rounded-full mt-0.5 anim-badge-spring shadow-xs"
+                style={{ backgroundColor: currentPal.primary }}
+              />
+            )}
           </button>
-          <span
-            className="text-[9px] font-black uppercase tracking-wider mt-0.5"
-            style={{ color: currentPal.primary }}
+
+          {/* 2. Mesas */}
+          <button
+            onClick={() => setActiveTab('mesas')}
+            className={`flex-1 flex flex-col items-center justify-center py-1.5 px-2 rounded-2xl nav-item-spring active:scale-90 relative cursor-pointer ${
+              activeTab === 'mesas' ? 'font-black scale-105' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'
+            }`}
+            style={{ color: activeTab === 'mesas' ? currentPal.primary : undefined }}
           >
-            Cobrar
-          </span>
+            {activeTab === 'mesas' && (
+              <span
+                className="absolute inset-0 rounded-2xl -z-10 shadow-sm opacity-15 nav-elastic-pill border border-current"
+                style={{ backgroundColor: currentPal.primary }}
+              />
+            )}
+            <LayoutGrid className={`w-5.5 h-5.5 stroke-[2.2] transition-transform duration-300 ${activeTab === 'mesas' ? '-translate-y-0.5 scale-110' : ''}`} />
+            <span className="text-[10.5px] mt-0.5 font-bold tracking-tight">Mesas</span>
+            {activeTab === 'mesas' && (
+              <span
+                className="w-1.5 h-1.5 rounded-full mt-0.5 anim-badge-spring shadow-xs"
+                style={{ backgroundColor: currentPal.primary }}
+              />
+            )}
+          </button>
+
+          {/* 3. BOTÓN CENTRAL DESTACADO HERO "COBRAR" (20% MÁS GRANDE) */}
+          <div className="flex-1 flex flex-col items-center -mt-7 shrink-0 z-10">
+            <button
+              onClick={() => setActiveTab('cobro')}
+              className="w-16 h-16 rounded-full flex items-center justify-center nav-hero-button cursor-pointer anim-breathe text-white shadow-2xl relative border-4 border-white dark:border-slate-900 group"
+              style={{
+                backgroundColor: currentPal.primary,
+                boxShadow: `0 10px 28px -4px ${currentPal.primary}66, 0 4px 12px rgba(0,0,0,0.15)`,
+              }}
+              title="Cobrar Cuenta / Abrir Caja Registradora"
+            >
+              <CircleDollarSign className="w-8.5 h-8.5 stroke-[2.4] text-white group-hover:rotate-12 transition-transform duration-300" />
+              {totalItems > 0 && (
+                <span className="absolute -top-1 -right-1 bg-amber-400 text-slate-950 text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center shadow-md border-2 border-white dark:border-slate-900 anim-badge-spring">
+                  {totalItems}
+                </span>
+              )}
+            </button>
+            <span
+              className="text-[9.5px] font-black uppercase tracking-wider mt-1 text-center"
+              style={{ color: currentPal.primary }}
+            >
+              Cobrar
+            </span>
+          </div>
+
+          {/* 4. Pedidos */}
+          <button
+            onClick={() => setActiveTab('pedidos')}
+            className={`flex-1 flex flex-col items-center justify-center py-1.5 px-2 rounded-2xl nav-item-spring active:scale-90 relative cursor-pointer ${
+              activeTab === 'pedidos' ? 'font-black scale-105' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'
+            }`}
+            style={{ color: activeTab === 'pedidos' ? currentPal.primary : undefined }}
+          >
+            {activeTab === 'pedidos' && (
+              <span
+                className="absolute inset-0 rounded-2xl -z-10 shadow-sm opacity-15 nav-elastic-pill border border-current"
+                style={{ backgroundColor: currentPal.primary }}
+              />
+            )}
+            <ClipboardList className={`w-5.5 h-5.5 stroke-[2.2] transition-transform duration-300 ${activeTab === 'pedidos' ? '-translate-y-0.5 scale-110' : ''}`} />
+            <span className="text-[10.5px] mt-0.5 font-bold tracking-tight">Pedidos</span>
+            {activeTab === 'pedidos' && (
+              <span
+                className="w-1.5 h-1.5 rounded-full mt-0.5 anim-badge-spring shadow-xs"
+                style={{ backgroundColor: currentPal.primary }}
+              />
+            )}
+          </button>
+
+          {/* 5. Delivery */}
+          <button
+            onClick={() => setActiveTab('delivery')}
+            className={`flex-1 flex flex-col items-center justify-center py-1.5 px-2 rounded-2xl nav-item-spring active:scale-90 relative cursor-pointer ${
+              activeTab === 'delivery' ? 'font-black scale-105' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'
+            }`}
+            style={{ color: activeTab === 'delivery' ? currentPal.primary : undefined }}
+          >
+            {activeTab === 'delivery' && (
+              <span
+                className="absolute inset-0 rounded-2xl -z-10 shadow-sm opacity-15 nav-elastic-pill border border-current"
+                style={{ backgroundColor: currentPal.primary }}
+              />
+            )}
+            <Bike className={`w-5.5 h-5.5 stroke-[2.2] transition-transform duration-300 ${activeTab === 'delivery' ? '-translate-y-0.5 scale-110' : ''}`} />
+            <span className="text-[10.5px] mt-0.5 font-bold tracking-tight">Delivery</span>
+            {activeTab === 'delivery' && (
+              <span
+                className="w-1.5 h-1.5 rounded-full mt-0.5 anim-badge-spring shadow-xs"
+                style={{ backgroundColor: currentPal.primary }}
+              />
+            )}
+          </button>
         </div>
-
-        {/* 4. Pedidos */}
-        <button
-          onClick={() => setActiveTab('pedidos')}
-          className={`flex flex-col items-center justify-center py-1 px-3 rounded-2xl transition-all duration-300 active:scale-90 relative ${
-            activeTab === 'pedidos' ? 'font-black scale-105' : 'text-slate-400 hover:text-slate-600'
-          }`}
-          style={{ color: activeTab === 'pedidos' ? currentPal.primary : undefined }}
-        >
-          {activeTab === 'pedidos' && (
-            <span
-              className="absolute inset-0 rounded-2xl -z-10 shadow-2xs opacity-15"
-              style={{ backgroundColor: currentPal.primary }}
-            />
-          )}
-          <ClipboardList className="w-5 h-5 stroke-[2.2]" />
-          <span className="text-[10px] mt-0.5 font-bold">Pedidos</span>
-          {activeTab === 'pedidos' && (
-            <span
-              className="w-1.5 h-1.5 rounded-full mt-0.5 anim-badge-spring shadow-xs"
-              style={{ backgroundColor: currentPal.primary }}
-            />
-          )}
-        </button>
-
-        {/* 5. Delivery */}
-        <button
-          onClick={() => setActiveTab('delivery')}
-          className={`flex flex-col items-center justify-center py-1 px-3 rounded-2xl transition-all duration-300 active:scale-90 relative ${
-            activeTab === 'delivery' ? 'font-black scale-105' : 'text-slate-400 hover:text-slate-600'
-          }`}
-          style={{ color: activeTab === 'delivery' ? currentPal.primary : undefined }}
-        >
-          {activeTab === 'delivery' && (
-            <span
-              className="absolute inset-0 rounded-2xl -z-10 shadow-2xs opacity-15"
-              style={{ backgroundColor: currentPal.primary }}
-            />
-          )}
-          <Bike className="w-5 h-5 stroke-[2.2]" />
-          <span className="text-[10px] mt-0.5 font-bold">Delivery</span>
-          {activeTab === 'delivery' && (
-            <span
-              className="w-1.5 h-1.5 rounded-full mt-0.5 anim-badge-spring shadow-xs"
-              style={{ backgroundColor: currentPal.primary }}
-            />
-          )}
-        </button>
       </nav>
 
       {/* ========================================================================= */}
@@ -3573,43 +3412,51 @@ export default function TabletMobilePosPage() {
                 Escanea para Ordenar
               </h3>
               <p className="text-xs text-slate-500">
-                Apunta con la cámara de tu teléfono para ver la carta y ordenar.
+                Apunta con la cámara de tu teléfono para ver la carta y ordenar en mesa.
               </p>
             </div>
 
-            <div className="bg-white p-4 rounded-2xl flex flex-col items-center justify-center shadow-inner mx-auto max-w-[200px] border border-slate-200">
-              <img
-                src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=https://klikpos.app/menu"
-                alt="Código QR del Menú"
-                className="w-36 h-36"
-              />
-              <span className="text-[10px] font-mono font-black text-slate-900 mt-1">
-                klikpos.app/menu
-              </span>
-            </div>
+            {(() => {
+              const activeMenuUrl = menuQrUrl || (typeof window !== 'undefined' ? `${window.location.origin}/menu` : 'http://localhost:3000/menu');
+              const qrImgSrc = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(activeMenuUrl)}`;
+              return (
+                <>
+                  <div className="bg-white p-4 rounded-2xl flex flex-col items-center justify-center shadow-inner mx-auto max-w-[220px] border border-slate-200">
+                    <img
+                      src={qrImgSrc}
+                      alt="Código QR del Menú"
+                      className="w-36 h-36"
+                    />
+                    <span className="text-[10px] font-mono font-black text-slate-900 mt-2 text-center break-all">
+                      {activeMenuUrl.replace(/^https?:\/\//, '')}
+                    </span>
+                  </div>
 
-            <div className="grid grid-cols-2 gap-2 pt-1">
-              <button
-                onClick={() => {
-                  navigator.clipboard?.writeText('https://klikpos.app/menu');
-                  alert('¡Enlace copiado al portapapeles!');
-                }}
-                className="py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 border"
-              >
-                <Copy className="w-3.5 h-3.5" />
-                <span>Copiar Enlace</span>
-              </button>
-              <button
-                onClick={() => {
-                  window.open('https://api.whatsapp.com/send?text=Mira%20nuestro%20menú%20aquí:%20https://klikpos.app/menu', '_blank');
-                }}
-                className="py-2 text-white text-xs font-black rounded-xl flex items-center justify-center gap-1.5"
-                style={{ backgroundColor: currentPal.primary }}
-              >
-                <Share2 className="w-3.5 h-3.5" />
-                <span>WhatsApp</span>
-              </button>
-            </div>
+                  <div className="grid grid-cols-2 gap-2 pt-1">
+                    <button
+                      onClick={() => {
+                        navigator.clipboard?.writeText(activeMenuUrl);
+                        alert('¡Enlace del Menú copiado al portapapeles!');
+                      }}
+                      className="py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 border hover:bg-slate-50 active:scale-95 transition-transform"
+                    >
+                      <Copy className="w-3.5 h-3.5" />
+                      <span>Copiar Enlace</span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent('Mira nuestro menú digital interactivo aquí: ' + activeMenuUrl)}`, '_blank');
+                      }}
+                      className="py-2 text-white text-xs font-black rounded-xl flex items-center justify-center gap-1.5 active:scale-95 transition-transform shadow-md"
+                      style={{ backgroundColor: currentPal.primary }}
+                    >
+                      <Share2 className="w-3.5 h-3.5" />
+                      <span>WhatsApp</span>
+                    </button>
+                  </div>
+                </>
+              );
+            })()}
           </div>
         </div>
       )}
