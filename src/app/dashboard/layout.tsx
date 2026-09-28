@@ -10,7 +10,7 @@ import LoginModal from '@/components/LoginModal';
 import AdminPinModal from '@/components/AdminPinModal';
 import LockScreenModal from '@/components/LockScreenModal';
 import AutoUpdateModal from '@/components/AutoUpdateModal';
-import { LogOut, ShieldCheck, User, Lock, RefreshCw, CheckCircle2, Sun, Moon, Sparkles, Clock, Cloud, Smartphone, Users, X, QrCode, ShoppingCart, Package, Receipt, BarChart3, Settings, PanelLeftClose, PanelLeft } from 'lucide-react';
+import { LogOut, ShieldCheck, User, Lock, RefreshCw, CheckCircle2, Sun, Moon, Sparkles, Clock, Cloud, Smartphone, Users, X, QrCode, ShoppingCart, Package, Receipt, BarChart3, Settings, PanelLeftClose, PanelLeft, DollarSign, CreditCard, Truck, Sliders } from 'lucide-react';
 import { STANDARD_RUBROS, StandardRubroId } from '@/lib/utils/business-rubros';
 import { applyBrandingToDOM, applyTheme, getCurrentTheme, ThemeMode } from '@/lib/theme';
 import CloudSyncWidget from '@/components/CloudSyncWidget';
@@ -56,11 +56,42 @@ const NAV_ITEMS: NavItem[] = [
     icon: <Users className="w-5 h-5" />,
   },
   {
+    key: 'financial',
+    label: 'Finanzas & P&L',
+    href: '/dashboard/financial',
+    shortcut: 'F6',
+    adminOnly: true,
+    icon: <DollarSign className="w-5 h-5" />,
+  },
+  {
+    key: 'credits',
+    label: 'Créditos & Fiados',
+    href: '/dashboard/credits',
+    shortcut: 'F7',
+    icon: <CreditCard className="w-5 h-5" />,
+  },
+  {
+    key: 'suppliers',
+    label: 'Proveedores',
+    href: '/dashboard/suppliers',
+    shortcut: 'F9',
+    adminOnly: true,
+    icon: <Truck className="w-5 h-5" />,
+  },
+  {
     key: 'reports',
     label: 'Cierres',
     href: '/dashboard/reports',
     shortcut: 'F5',
     icon: <BarChart3 className="w-5 h-5" />,
+  },
+  {
+    key: 'licensing',
+    label: 'Licencias & Planes',
+    href: '/dashboard/licensing',
+    shortcut: 'F10',
+    adminOnly: true,
+    icon: <ShieldCheck className="w-5 h-5" />,
   },
   {
     key: 'settings',

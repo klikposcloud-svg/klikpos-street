@@ -2,14 +2,14 @@
              INTEGRIDAD Y SUMAS DE VERIFICACION CRIPTOGRAFICA (HASHES)
 ================================================================================
 
-Paquete: KlikPOS-Enterprise-Setup-v2.4.8.exe
-Version: 2.4.8
+Paquete: KlikPOS-Enterprise-Setup-v2.5.0.exe
+Version: 2.5.0
 Fecha de emision: 28 de September de 2026
 
 Algoritmo SHA256:
-43BF8615C1D10FE2678CE5CBDB39DBA76CEF17940041F1ED054C800C53E4E5D2
+1E63BB5B3EA983FAD210E462B595BD3967C4B610AD97F9995D92D23F60AFC6E6
 
 Para verificar la integridad del instalador en cualquier computadora:
 PowerShell:
-  Get-FileHash KlikPOS-Enterprise-Setup-v2.4.8.exe -Algorithm SHA256
+  Get-FileHash KlikPOS-Enterprise-Setup-v2.5.0.exe -Algorithm SHA256
 ================================================================================

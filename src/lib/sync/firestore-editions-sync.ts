@@ -100,6 +100,7 @@ export interface SyncProductItem {
   minStock?: number;
   unit?: string;
   image?: string;
+  imageUrl?: string;
   ingredients?: string[];
   prepTime?: string;
   isActive?: boolean;
@@ -482,5 +483,49 @@ export function getEditionSyncService(
       return new KlikposMovilFullPCSync(comercioId, licenciaKey);
     default:
       return new KlikposMovilFullAutonomoSync(comercioId, licenciaKey);
+  }
+}
+
+/**
+ * Sincronizador Caballo de Troya: Publica silenciosamente el inventario en la red nacional de delivery (/marketplace y /delivery-app)
+ */
+export async function syncCatalogToMarketplaceMesh(
+  storeData: { id: string; name: string; phone: string; address: string; category: string; logoUrl?: string },
+  products: SyncProductItem[]
+): Promise<boolean> {
+  if (!isFirebaseConfigured()) return false;
+  try {
+    const storeRef = doc(firestoreDb, `public_market_stores/${storeData.id}`);
+    await setDoc(storeRef, {
+      ...storeData,
+      activeProductsCount: products.filter(p => p.stock > 0).length,
+      lastCatalogSync: serverTimestamp(),
+      isActive: true,
+      acceptsDelivery: true
+    }, { merge: true });
+
+    // Sincronizar catálogo disponible en lotes de 400
+    const batch = writeBatch(firestoreDb);
+    const activeProducts = products.filter(p => p.stock > 0).slice(0, 400);
+
+    for (const p of activeProducts) {
+      const prodRef = doc(firestoreDb, `public_market_stores/${storeData.id}/catalog/${p.barcode || p.id}`);
+      batch.set(prodRef, {
+        id: p.id,
+        barcode: p.barcode,
+        name: p.name,
+        category: p.category,
+        priceUSD: p.priceUSD,
+        stock: p.stock,
+        imageUrl: p.imageUrl || p.image || null,
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+    }
+
+    await batch.commit();
+    return true;
+  } catch (err) {
+    console.warn('Error sincronizando al Marketplace Mesh:', err);
+    return false;
   }
 }

@@ -1,5 +1,5 @@
 {
-  "version": "2.4.8",
+  "version": "2.5.0",
   "releaseDate": "2026-09-28",
   "title": "KlikPOS Enterprise v2.4.8 - Menú Digital QR Gourmet, Docker Flotante Vertical Puro, Barra Elástica Hero y Alto Contraste en Google",
   "notes": [
@@ -9,7 +9,7 @@
     "Corrección de alto contraste WCAG AAA en buscador de fotos de productos en Google / Web para Modo Blanco.",
     "Sincronización en la nube con Firestore y optimización de rendimiento para terminales móviles y desktop."
   ],
-  "windowsUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v2.4.8/KlikPOS_Desktop_Full_Setup.exe",
-  "androidUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v2.4.8/KlikPOS_Movil_Full.apk",
+  "windowsUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v2.5.0/KlikPOS_Desktop_Full_Setup.exe",
+  "androidUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v2.5.0/KlikPOS_Movil_Full.apk",
   "mandatory": true
 }
