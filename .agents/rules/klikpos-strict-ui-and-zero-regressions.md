@@ -26,12 +26,15 @@ Todos los agentes de inteligencia artificial y desarrolladores que operen en est
 - Ningún instalador debe generarse reutilizando carpetas `.next/standalone` viejas sin previa compilación fresca y validación de tipos/sintaxis.
 
 ### 5. Sincronización Continua con GitHub y Actualización Obligatoria de Instaladores
-- **REGLA DE ORO DE CIERRE DE CAMBIOS:** Cada vez que se finalice un bloque de mejoras, diseño o correcciones en el software, el agente debe ejecutar obligatoriamente en el mismo ciclo:
-  1. `node scripts/sync-version.js <version>` para sincronizar todos los manifiestos maestros.
-  2. `git add -A`
-  3. `git commit -m "..."` con mensaje semántico claro.
-  4. `git push origin main` hacia el repositorio remoto `github.com/klikposcloud-svg/klikpos.git`.
-  5. **Actualizar y compilar los instaladores y APKs oficiales** en `DISTRIBUCION_KLIKPOS/` para que los clientes finales y distribuidores dispongan de la versión recién mejorada.
+- **REGLA DE ORO DE CIERRE DE CAMBIOS (MANDATORIA E INCONDICIONAL):** 
+  - **NUNCA dar por finalizada una tarea ni responder al usuario con cambios de código sin antes haber re-compilado los instaladores físicos (`.exe` y `.apk`).**
+  - Cada vez que se finalice un bloque de mejoras, diseño, visualización, gráficos o correcciones en el software, el agente debe ejecutar obligatoriamente en el mismo ciclo:
+    1. `node scripts/sync-version.js <version>` para sincronizar todos los manifiestos maestros.
+    2. `node scripts/build-all-and-release.js` (o la secuencia `npm run build` -> `node scripts/sign-and-release-all-apks.js` -> `build-installer-full.ps1` -> `publish-release-to-github.js`).
+    3. `git add -A`
+    4. `git commit -m "..."` con mensaje semántico claro.
+    5. `git push origin main` hacia el repositorio remoto `github.com/klikposcloud-svg/klikpos.git`.
+    6. **Verificar que los instaladores y APKs oficiales** en `DISTRIBUCION_KLIKPOS/` tengan la fecha y hora de la sesión actual antes de reportar el éxito al usuario.
 - **Protocolo de Auto-Actualizaciones (Zero-Regression):**
   - **Fuente Única de Verdad:** Toda modificación de versión se define en `version.json` raíz y se sincroniza obligatoriamente mediante `node scripts/sync-version.js` a todos los manifiestos (`public/version.json`, `dist-installer/version.json`, `klikpos-releases/version.json`, `venematic-desktop/version.json`, `package.json` e `installer.iss`).
   - **Prohibido Forzar Descargas Manuales:** Las actualizaciones en PC/Desktop y Web deben ejecutarse de forma **automática en 1 solo clic o en segundo plano silencioso** (`/api/system/update` o `applyPwaUpdate`). La opción de descarga manual `.exe` es estrictamente secundaria para respaldos offline o pendrives USB.
