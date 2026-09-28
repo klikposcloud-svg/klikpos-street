@@ -144,7 +144,7 @@ export default function CloudBackupDashboardPage() {
           <div className="text-[11px] text-slate-500 pt-2">
             ¿Deseas activar tu suscripción mensual?{' '}
             <a
-              href="https://wa.me/584141234567?text=Hola,%20deseo%20activar%20el%20servicio%20de%20respaldo%20en%20la%20nube%20de%20Venematic"
+              href="https://wa.me/584141234567?text=Hola,%20deseo%20activar%20el%20servicio%20de%20respaldo%20en%20la%20nube%20de%20KlikPOS"
               target="_blank"
               rel="noreferrer"
               className="font-bold text-blue-600 dark:text-blue-400 hover:underline"

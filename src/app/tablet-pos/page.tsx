@@ -48,7 +48,12 @@ import {
   Settings,
   DollarSign,
   ArrowRight,
-  AlertCircle
+  AlertCircle,
+  Package,
+  Users,
+  ArrowLeftRight,
+  Boxes,
+  Truck
 } from 'lucide-react';
 import LicenseActivationModal from '@/components/LicenseActivationModal';
 import { evaluateTrialState, TrialState } from '@/lib/licensing/trial-manager';
@@ -117,6 +122,104 @@ interface CompletedSaleTicket {
   customer: Customer;
   table?: string;
 }
+
+interface Motorizado {
+  id: string;
+  name: string;
+  phone: string;
+  vehicle: string;
+  status: 'disponible' | 'en_ruta' | 'inactivo';
+}
+
+interface PrinterConfig {
+  connection: 'bluetooth' | 'lan' | 'usb';
+  ip: string;
+  port: number;
+  paperWidth: '58mm' | '80mm';
+  autoCut: boolean;
+}
+
+type RubroId = 'comida' | 'ropa' | 'panaderia' | 'minimarket' | 'farmacia' | 'ferreteria';
+
+const DEFAULT_DRIVERS: Motorizado[] = [
+  { id: '1', name: 'Alexander Morales', phone: '04141234567', vehicle: 'Bera SBR Azul - AF1G22', status: 'disponible' },
+  { id: '2', name: 'José Luis Rivas', phone: '04249876543', vehicle: 'Empire Keeway Rojo - AA4B11', status: 'en_ruta' },
+  { id: '3', name: 'Manuel Bastidas', phone: '04125556677', vehicle: 'Haojin Águila Negro - AB99CC', status: 'disponible' }
+];
+
+const RUBROS_CATALOG: Record<RubroId, { name: string; label: string; icon: string; description: string; categories: string[]; sampleProducts: Product[] }> = {
+  comida: {
+    name: 'Comida & Gastronomía',
+    label: 'Comida & Gastronomía',
+    icon: '🍔',
+    description: 'Hamburguesas, pizzas, combos, perros calientes y bebidas.',
+    categories: ['Todos', 'Combos', 'Hamburguesas', 'Perros', 'Bebidas', 'Extras'],
+    sampleProducts: [] // Se llena con SAMPLE_PRODUCTS
+  },
+  ropa: {
+    name: 'Ropa, Calzado & Boutique',
+    label: 'Ropa, Calzado & Boutique',
+    icon: '👕',
+    description: 'Moda femenina, masculina, calzado y accesorios de vestir.',
+    categories: ['Todos', 'Caballeros', 'Damas', 'Calzado', 'Accesorios', 'Ofertas'],
+    sampleProducts: [
+      { id: 'r1', name: 'Camiseta Oversize Algodón Premium', category: 'Caballeros', priceUSD: 14.00, tag: '🔥 En Tendencia', prepTime: 'Inmediato', image: 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=600&q=80', description: 'Algodón 100% peruano peinado, corte relajado.', sku: 'ROP-01' },
+      { id: 'r2', name: 'Jeans Skinny Denim Stretch', category: 'Damas', priceUSD: 22.00, tag: '⭐ Favorito', prepTime: 'Inmediato', image: 'https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=600&q=80', description: 'Denim stretch levanta cola tiro alto.', sku: 'ROP-02' },
+      { id: 'r3', name: 'Zapatos Deportivos Sneakers Urban', category: 'Calzado', priceUSD: 35.00, tag: '💥 Premium', prepTime: 'Inmediato', image: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?w=600&q=80', description: 'Suela amortiguada antideslizante con acabado transpirable.', sku: 'ROP-03' },
+      { id: 'r4', name: 'Gorra Clásica Vintage Ajustable', category: 'Accesorios', priceUSD: 8.50, tag: '🧢 Estilo', prepTime: 'Inmediato', image: 'https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=600&q=80', description: 'Broche metálico trasero con visera curva.', sku: 'ROP-04' }
+    ]
+  },
+  panaderia: {
+    name: 'Panadería, Café & Pastelería',
+    label: 'Panadería, Café & Pastelería',
+    icon: '🥖',
+    description: 'Panes artesanales, repostería fina, desayunos y cafetería.',
+    categories: ['Todos', 'Panes', 'Café', 'Pastelería', 'Charcutería', 'Bebidas'],
+    sampleProducts: [
+      { id: 'p1', name: 'Canilla Tradicional Crujiente', category: 'Panes', priceUSD: 0.80, tag: '🥖 Fresco', prepTime: 'Inmediato', image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600&q=80', description: 'Pan tipo canilla recién horneado con corteza dorada.', sku: 'PAN-01' },
+      { id: 'p2', name: 'Café Capuchino Cremoso Grande', category: 'Café', priceUSD: 2.00, tag: '☕ Caliente', prepTime: '3 min', image: 'https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=600&q=80', description: 'Espresso doble con leche espumada y canela.', sku: 'PAN-02' },
+      { id: 'p3', name: 'Croissant Mantequilla con Jamón y Queso', category: 'Pastelería', priceUSD: 3.50, tag: '🥐 Relleno', prepTime: '2 min', image: 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=600&q=80', description: 'Masa hojaldrada con mantequilla y relleno horneado.', sku: 'PAN-03' },
+      { id: 'p4', name: 'Torta Tres Leches Casera Porción', category: 'Pastelería', priceUSD: 3.00, tag: '🍰 Dulce', prepTime: 'Inmediato', image: 'https://images.unsplash.com/photo-1588195538326-c5b1e9f80a1b?w=600&q=80', description: 'Bizcocho bañado en mezcla de tres leches y merengue tostado.', sku: 'PAN-04' }
+    ]
+  },
+  minimarket: {
+    name: 'Abastos, Minimarkets & Víveres',
+    label: 'Abastos, Minimarkets & Víveres',
+    icon: '🛒',
+    description: 'Alimentos no perecederos, bebidas, víveres y charcutería.',
+    categories: ['Todos', 'Víveres', 'Lácteos', 'Snacks', 'Bebidas', 'Limpieza'],
+    sampleProducts: [
+      { id: 'm1', name: 'Harina de Maíz Blanco 1Kg', category: 'Víveres', priceUSD: 1.15, tag: '🌽 Esencial', prepTime: 'Inmediato', image: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=600&q=80', description: 'Harina precocida tradicional para arepas.', sku: 'VIV-01' },
+      { id: 'm2', name: 'Arroz Blanco Tradicional 1Kg', category: 'Víveres', priceUSD: 1.30, tag: '🍚 Básico', prepTime: 'Inmediato', image: 'https://images.unsplash.com/photo-1536304993881-ff6e9eefa2a6?w=600&q=80', description: 'Grano entero de primera calidad.', sku: 'VIV-02' },
+      { id: 'm3', name: 'Queso Paisa Rebanado 250g', category: 'Lácteos', priceUSD: 2.80, tag: '🧀 Fresco', prepTime: 'Inmediato', image: 'https://images.unsplash.com/photo-1624806992066-5ffcf7ca186b?w=600&q=80', description: 'Queso blanco semiduro pasteurizado.', sku: 'VIV-03' },
+      { id: 'm4', name: 'Snack Papitas Tostadas Onduladas', category: 'Snacks', priceUSD: 1.50, tag: '🥔 Crujiente', prepTime: 'Inmediato', image: 'https://images.unsplash.com/photo-1566478989037-eec170784d0b?w=600&q=80', description: 'Papas fritas saladas crujientes bolsa familiar.', sku: 'VIV-04' }
+    ]
+  },
+  farmacia: {
+    name: 'Farmacia & Cuidado Personal',
+    label: 'Farmacia & Cuidado Personal',
+    icon: '💊',
+    description: 'Medicamentos sin récipe, productos de higiene y primeros auxilios.',
+    categories: ['Todos', 'Analgésicos', 'Cuidado Personal', 'Primeros Auxilios', 'Vitaminas'],
+    sampleProducts: [
+      { id: 'f1', name: 'Acetaminofén 500mg (10 Tabletas)', category: 'Analgésicos', priceUSD: 1.20, tag: '💊 Farmacia', prepTime: 'Inmediato', image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=600&q=80', description: 'Alivio del dolor y la fiebre.', sku: 'FAR-01' },
+      { id: 'f2', name: 'Alcohol Antiséptico 70% 500ml', category: 'Primeros Auxilios', priceUSD: 2.50, tag: '🩹 Botiquín', prepTime: 'Inmediato', image: 'https://images.unsplash.com/photo-1584744982491-665216d95f8b?w=600&q=80', description: 'Solución desinfectante tópica para curas.', sku: 'FAR-02' },
+      { id: 'f3', name: 'Vitamina C 1000mg Efervescente', category: 'Vitaminas', priceUSD: 3.80, tag: '🍊 Inmunidad', prepTime: 'Inmediato', image: 'https://images.unsplash.com/photo-1577401239170-897942555fb3?w=600&q=80', description: 'Tubo con 10 tabletas efervescentes sabor naranja.', sku: 'FAR-03' }
+    ]
+  },
+  ferreteria: {
+    name: 'Ferretería & Repuestos',
+    label: 'Ferretería & Repuestos',
+    icon: '🔧',
+    description: 'Herramientas, material eléctrico, plomería y pinturas.',
+    categories: ['Todos', 'Herramientas', 'Fijación', 'Eléctricos', 'Pinturas', 'Plomería'],
+    sampleProducts: [
+      { id: 'fe1', name: 'Cinta Métrica Profesional 5 Metros', category: 'Herramientas', priceUSD: 4.50, tag: '📏 Precisión', prepTime: 'Inmediato', image: 'https://images.unsplash.com/photo-1586864387967-d02ef85d93e8?w=600&q=80', description: 'Carcasa engomada de alto impacto con traba.', sku: 'FER-01' },
+      { id: 'fe2', name: 'Tirro Plástico Aislante Negro 3M', category: 'Eléctricos', priceUSD: 1.20, tag: '⚡ Electricidad', prepTime: 'Inmediato', image: 'https://images.unsplash.com/photo-1581783342308-f792dbdd27c5?w=600&q=80', description: 'Cinta aislante para empalmes de hasta 600V.', sku: 'FER-02' },
+      { id: 'fe3', name: 'Bombillo LED 12W Luz Blanca 6500K', category: 'Eléctricos', priceUSD: 1.80, tag: '💡 Ahorrador', prepTime: 'Inmediato', image: 'https://images.unsplash.com/photo-1550524514-9b69b5961e93?w=600&q=80', description: 'Rosca estándar E27 larga duración.', sku: 'FER-03' }
+    ]
+  }
+};
 
 const BRAND_PALETTES = [
   { id: 'slate', name: 'Grafito Klik', primary: '#1e293b', hover: '#0f172a', accent: '#334155', glow: 'rgba(30, 41, 59, 0.4)' },
@@ -292,6 +395,7 @@ const SAMPLE_PRODUCTS: Product[] = [
     ingredients: ['8 Aros Grandes', 'Rebozado Panko', 'Salsa BBQ Ahumada']
   }
 ];
+RUBROS_CATALOG.comida.sampleProducts = SAMPLE_PRODUCTS;
 
 const CATEGORIES = ['Todos', 'Combos', 'Hamburguesas', 'Perros', 'Bebidas', 'Extras'];
 
@@ -337,6 +441,44 @@ export default function TabletMobilePosPage() {
   const [showQrModal, setShowQrModal] = useState(false);
   const [editingItemNotes, setEditingItemNotes] = useState<CartItem | null>(null);
   const [activeTable, setActiveTable] = useState<number | null>(null);
+
+  // 4b. Docker Flotante Minimalista & Nuevos Módulos
+  const [dockSide, setDockSide] = useState<'left' | 'right'>('left');
+  const [isDockerOpen, setIsDockerOpen] = useState(false);
+  const [activeRubro, setActiveRubro] = useState<RubroId>('comida');
+  const [products, setProducts] = useState<Product[]>(SAMPLE_PRODUCTS);
+  const [categoriesList, setCategoriesList] = useState<string[]>(CATEGORIES);
+
+  // Modales del Docker
+  const [showInventoryModal, setShowInventoryModal] = useState(false);
+  const [showDriversModal, setShowDriversModal] = useState(false);
+  const [showPrinterModal, setShowPrinterModal] = useState(false);
+  const [showRubroModal, setShowRubroModal] = useState(false);
+
+  // Motorizados
+  const [drivers, setDrivers] = useState<Motorizado[]>(DEFAULT_DRIVERS);
+  const [newDriverForm, setNewDriverForm] = useState({ name: '', phone: '', vehicle: '' });
+
+  // Impresora
+  const [printerConfig, setPrinterConfig] = useState<PrinterConfig>({
+    connection: 'bluetooth',
+    ip: '192.168.1.200',
+    port: 9100,
+    paperWidth: '80mm',
+    autoCut: true
+  });
+  const [printerTestAlert, setPrinterTestAlert] = useState(false);
+
+  // Gestión de Productos
+  const [newProductForm, setNewProductForm] = useState({
+    name: '',
+    category: 'Hamburguesas',
+    priceUSD: '',
+    sku: '',
+    tag: '⭐ Nuevo'
+  });
+  const [editingPriceId, setEditingPriceId] = useState<string | null>(null);
+  const [editingPriceValue, setEditingPriceValue] = useState<string>('');
 
   // 5. Configuración de Empresa (Nombre, RIF, Teléfono, Dirección)
   const [companyInfo, setCompanyInfo] = useState<CompanyInfo>({
@@ -525,6 +667,34 @@ export default function TabletMobilePosPage() {
         const parsed = JSON.parse(savedSpots);
         if (Array.isArray(parsed) && parsed.length > 0) setDiningSpots(parsed);
       }
+
+      // 8. Docker Flotante y Configuración
+      const savedDockSide = localStorage.getItem('klikpos_dock_side') as 'left' | 'right';
+      if (savedDockSide === 'left' || savedDockSide === 'right') setDockSide(savedDockSide);
+
+      const savedRubro = localStorage.getItem('klikpos_active_rubro') as RubroId;
+      if (savedRubro && RUBROS_CATALOG[savedRubro]) {
+        setActiveRubro(savedRubro);
+        setCategoriesList(RUBROS_CATALOG[savedRubro].categories);
+      }
+
+      const savedProducts = localStorage.getItem('klikpos_tablet_products');
+      if (savedProducts) {
+        const parsed = JSON.parse(savedProducts);
+        if (Array.isArray(parsed) && parsed.length > 0) setProducts(parsed);
+      }
+
+      const savedDrivers = localStorage.getItem('klikpos_tablet_drivers');
+      if (savedDrivers) {
+        const parsed = JSON.parse(savedDrivers);
+        if (Array.isArray(parsed) && parsed.length > 0) setDrivers(parsed);
+      }
+
+      const savedPrinter = localStorage.getItem('klikpos_printer_config');
+      if (savedPrinter) {
+        const parsed = JSON.parse(savedPrinter);
+        if (parsed) setPrinterConfig(parsed);
+      }
     } catch {
       // Continuar silenciosamente
     }
@@ -612,13 +782,144 @@ export default function TabletMobilePosPage() {
     return found ? found.qty : 0;
   };
 
-  const filteredProducts = SAMPLE_PRODUCTS.filter((p) => {
+  const filteredProducts = products.filter((p) => {
     const matchesCategory = selectedCategory === 'Todos' || p.category === selectedCategory;
     const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          p.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          p.sku.toLowerCase().includes(searchQuery.toLowerCase());
+                          (p.description || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          (p.sku || '').toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
+
+  // Alternar Lado del Docker Flotante (Izquierda / Derecha)
+  const handleToggleDockSide = () => {
+    const nextSide = dockSide === 'left' ? 'right' : 'left';
+    setDockSide(nextSide);
+    try { localStorage.setItem('klikpos_dock_side', nextSide); } catch {}
+  };
+
+  // Selector de Rubro Comercial
+  const handleSelectRubro = (rubroId: RubroId) => {
+    setActiveRubro(rubroId);
+    const rubroData = RUBROS_CATALOG[rubroId];
+    if (rubroData) {
+      setCategoriesList(rubroData.categories);
+      setSelectedCategory('Todos');
+      setProducts(rubroData.sampleProducts);
+      try {
+        localStorage.setItem('klikpos_active_rubro', rubroId);
+        localStorage.setItem('klikpos_tablet_products', JSON.stringify(rubroData.sampleProducts));
+      } catch {}
+    }
+    setShowRubroModal(false);
+  };
+
+  // Gestión de Productos e Inventario
+  const handleAddProduct = (e: React.FormEvent) => {
+    e.preventDefault();
+    const priceNum = parseFloat(newProductForm.priceUSD);
+    if (isNaN(priceNum) || priceNum <= 0) return;
+    const newProd: Product = {
+      id: 'prod_' + Date.now(),
+      name: newProductForm.name.trim(),
+      category: newProductForm.category.trim() || 'General',
+      priceUSD: priceNum,
+      sku: newProductForm.sku.trim() || `SKU-${Date.now().toString().slice(-4)}`,
+      tag: newProductForm.tag.trim() || '⭐ Nuevo',
+      prepTime: 'Inmediato',
+      image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&q=80',
+      description: `${newProductForm.name} - Calidad garantizada.`
+    };
+    const updated = [newProd, ...products];
+    setProducts(updated);
+    try { localStorage.setItem('klikpos_tablet_products', JSON.stringify(updated)); } catch {}
+    setNewProductForm({ name: '', category: categoriesList[1] || 'General', priceUSD: '', sku: '', tag: '⭐ Nuevo' });
+  };
+
+  const handleDeleteProduct = (id: string) => {
+    if (!window.confirm('¿Eliminar este producto del catálogo?')) return;
+    const updated = products.filter(p => p.id !== id);
+    setProducts(updated);
+    try { localStorage.setItem('klikpos_tablet_products', JSON.stringify(updated)); } catch {}
+  };
+
+  const handleSavePriceEdit = (id: string) => {
+    const val = parseFloat(editingPriceValue.replace(',', '.'));
+    if (!isNaN(val) && val > 0) {
+      const updated = products.map(p => p.id === id ? { ...p, priceUSD: val } : p);
+      setProducts(updated);
+      try { localStorage.setItem('klikpos_tablet_products', JSON.stringify(updated)); } catch {}
+    }
+    setEditingPriceId(null);
+  };
+
+  // Gestión de Motorizados y Despachos
+  const handleAddDriver = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newDriverForm.name || !newDriverForm.phone) return;
+    const newDriver: Motorizado = {
+      id: 'drv_' + Date.now(),
+      name: newDriverForm.name.trim(),
+      phone: newDriverForm.phone.trim(),
+      vehicle: newDriverForm.vehicle.trim() || 'Moto Particular',
+      status: 'disponible'
+    };
+    const updated = [...drivers, newDriver];
+    setDrivers(updated);
+    try { localStorage.setItem('klikpos_tablet_drivers', JSON.stringify(updated)); } catch {}
+    setNewDriverForm({ name: '', phone: '', vehicle: '' });
+  };
+
+  const handleDeleteDriver = (id: string) => {
+    const updated = drivers.filter(d => d.id !== id);
+    setDrivers(updated);
+    try { localStorage.setItem('klikpos_tablet_drivers', JSON.stringify(updated)); } catch {}
+  };
+
+  const handleToggleDriverStatus = (id: string) => {
+    const updated = drivers.map(d => {
+      if (d.id === id) {
+        const nextStatus = d.status === 'disponible' ? 'en_ruta' : d.status === 'en_ruta' ? 'inactivo' : 'disponible';
+        return { ...d, status: nextStatus as any };
+      }
+      return d;
+    });
+    setDrivers(updated);
+    try { localStorage.setItem('klikpos_tablet_drivers', JSON.stringify(updated)); } catch {}
+  };
+
+  const handleDispatchOrderWhatsApp = (driverPhone: string, driverName: string) => {
+    const cleanPhone = driverPhone.replace(/[^0-9]/g, '');
+    let fullPhone = cleanPhone;
+    if (fullPhone.startsWith('04')) fullPhone = '58' + fullPhone.slice(1);
+    else if (fullPhone.length === 10 && fullPhone.startsWith('4')) fullPhone = '58' + fullPhone;
+
+    const itemsSummary = cart.map(i => `• ${i.qty}x ${i.name} ($${(i.priceUSD * i.qty).toFixed(2)})${i.notes ? ` [Nota: ${i.notes}]` : ''}`).join('\n');
+    const msg = `🛵 *DESPACHO DE ORDEN - ${companyInfo.name}*\n\n` +
+      `¡Hola ${driverName}! Tienes un nuevo pedido asignado:\n\n` +
+      `👤 *Cliente:* ${selectedCustomer.name}\n` +
+      `📞 *Teléfono Cliente:* ${selectedCustomer.phone || 'No especificado'}\n` +
+      `📍 *Dirección de Entrega:*\n${selectedCustomer.address || 'Entrega a Domicilio'}\n\n` +
+      `📦 *Detalle del Pedido:*\n${itemsSummary || '• 1x Orden estándar'}\n\n` +
+      `💰 *TOTAL A COBRAR EN DESTINO:*\n` +
+      `💵 *$${totalUSD.toFixed(2)} USD* (o *Bs. ${totalVES.toFixed(2)}* a tasa BCV ${bcvRate.toFixed(2)})\n\n` +
+      `Por favor confirmar recepción de esta orden. ¡Buen viaje! 🚀`;
+
+    window.open(`https://api.whatsapp.com/send?phone=${fullPhone}&text=${encodeURIComponent(msg)}`, '_blank');
+  };
+
+  // Configuración de Impresora
+  const handleSavePrinterConfig = (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      localStorage.setItem('klikpos_printer_config', JSON.stringify(printerConfig));
+    } catch {}
+    setShowPrinterModal(false);
+  };
+
+  const handleTestPrint = () => {
+    setPrinterTestAlert(true);
+    setTimeout(() => setPrinterTestAlert(false), 3000);
+  };
 
   // Guardar Empresa
   const handleSaveCompany = (e: React.FormEvent) => {
@@ -842,48 +1143,331 @@ export default function TabletMobilePosPage() {
       `}</style>
 
       {/* ========================================================================= */}
-      {/* 1. BOTONES FLOTANTES LATERALES PEGADOS AL BORDE (SEMI-TRASLÚCIDOS BRANDING)*/}
+      {/* 1. DOCKER FLOTANTE MINIMALISTA Y CONMUTABLE (IZQUIERDA / DERECHA)         */}
       {/* ========================================================================= */}
-      {/* Botón Flotante Lateral Izquierdo: Abre Ajustes y Empresa */}
-      <button
-        type="button"
-        onClick={() => setIsLeftDrawerOpen(true)}
-        className="fixed top-1/2 -translate-y-1/2 z-40 rounded-r-2xl shadow-xl flex items-center justify-center transition-all duration-200 active:scale-90 border-t border-b border-r border-l-0 border-white/20 backdrop-blur-md group cursor-pointer"
-        style={{
-          left: 0,
-          width: '36px',
-          height: '58px',
-          maxWidth: '36px',
-          backgroundColor: `${currentPal.primary}d9`,
-          boxShadow: `0 4px 14px ${currentPal.glow || 'rgba(0,0,0,0.25)'}`
-        }}
-        title="Abrir Ajustes de Empresa y Branding"
-      >
-        <ChevronRight className="w-5 h-5 text-white group-hover:translate-x-0.5 transition-transform drop-shadow-xs" />
-      </button>
+      {/* Tirador Único Minimalista Pegado al Borde Lateral */}
+      {!isDockerOpen && (
+        <button
+          type="button"
+          onClick={() => setIsDockerOpen(true)}
+          className={`fixed top-1/2 -translate-y-1/2 z-40 shadow-2xl flex flex-col items-center justify-center transition-all duration-200 active:scale-90 border border-white/20 backdrop-blur-md group cursor-pointer ${
+            dockSide === 'left' ? 'left-0 rounded-r-2xl border-l-0' : 'right-0 rounded-l-2xl border-r-0'
+          }`}
+          style={{
+            width: '38px',
+            height: '64px',
+            backgroundColor: `${currentPal.primary}e6`,
+            boxShadow: `0 8px 24px ${currentPal.glow || 'rgba(0,0,0,0.3)'}`
+          }}
+          title={`Abrir Panel Rápido (${dockSide === 'left' ? 'Izquierda' : 'Derecha'})`}
+        >
+          <div className="flex flex-col items-center gap-1">
+            <Sparkles className="w-4 h-4 text-amber-300 drop-shadow-xs group-hover:rotate-12 transition-transform" />
+            <span className="text-[9px] font-black text-white tracking-tighter uppercase font-mono">DOCK</span>
+          </div>
+          {totalItems > 0 && (
+            <span className="absolute -top-1.5 -right-1 bg-amber-400 text-slate-950 text-[10px] font-black w-4.5 h-4.5 rounded-full flex items-center justify-center shadow-md anim-badge-spring">
+              {totalItems}
+            </span>
+          )}
+        </button>
+      )}
 
-      {/* Botón Flotante Lateral Derecho: Abre Comanda Activa */}
-      <button
-        type="button"
-        onClick={() => setIsRightDrawerOpen(true)}
-        className="fixed top-1/2 -translate-y-1/2 z-40 rounded-l-2xl shadow-xl flex items-center justify-center transition-all duration-200 active:scale-90 border-t border-b border-l border-r-0 border-white/20 backdrop-blur-md group cursor-pointer"
-        style={{
-          right: 0,
-          width: '36px',
-          height: '58px',
-          maxWidth: '36px',
-          backgroundColor: `${currentPal.primary}d9`,
-          boxShadow: `0 4px 14px ${currentPal.glow || 'rgba(0,0,0,0.25)'}`
-        }}
-        title="Ver Comanda Activa"
-      >
-        <ChevronLeft className="w-5 h-5 text-white group-hover:-translate-x-0.5 transition-transform drop-shadow-xs" />
-        {totalItems > 0 && (
-          <span className="absolute -top-1.5 -left-1.5 bg-amber-400 text-slate-950 text-[10px] font-black w-4.5 h-4.5 rounded-full flex items-center justify-center shadow-md anim-badge-spring">
-            {totalItems}
-          </span>
-        )}
-      </button>
+      {/* Docker Flotante Abierto: Cápsula Vertical + Tarjeta de Opciones Conectada */}
+      {isDockerOpen && (
+        <>
+          {/* Fondo semi-transparente para cerrar con clic afuera */}
+          <div
+            className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs transition-opacity animate-in fade-in duration-200"
+            onClick={() => setIsDockerOpen(false)}
+          />
+
+          {/* Contenedor Flotante posicionado en el lado seleccionado */}
+          <div
+            className={`fixed top-1/2 -translate-y-1/2 z-50 flex items-center gap-3 animate-in fade-in zoom-in-95 duration-200 ${
+              dockSide === 'left' ? 'left-3 flex-row' : 'right-3 flex-row-reverse'
+            }`}
+          >
+            {/* Cápsula Vertical Oscura con Íconos */}
+            <aside className="w-14 bg-slate-950/95 backdrop-blur-xl rounded-[32px] py-4 flex flex-col items-center justify-between shadow-2xl border border-slate-800 text-white select-none shrink-0 min-h-[380px]">
+              {/* Top: Sparkles */}
+              <div className="w-9 h-9 rounded-2xl bg-gradient-to-tr from-amber-500 to-amber-300 flex items-center justify-center shadow-lg shadow-amber-500/20">
+                <Sparkles className="w-5 h-5 text-slate-950" />
+              </div>
+
+              {/* Íconos Centrales de Acceso Directo */}
+              <div className="flex flex-col items-center gap-3 my-auto">
+                {/* Catálogo POS */}
+                <button
+                  onClick={() => { setActiveTab('menu'); setIsDockerOpen(false); }}
+                  className={`p-2 rounded-2xl transition-all ${
+                    activeTab === 'menu' ? 'bg-sky-500/20 text-sky-400' : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+                  }`}
+                  title="Catálogo POS"
+                >
+                  <LayoutGrid className="w-5 h-5" />
+                </button>
+
+                {/* Inventario */}
+                <button
+                  onClick={() => { setShowInventoryModal(true); setIsDockerOpen(false); }}
+                  className="p-2 rounded-2xl text-slate-400 hover:text-emerald-400 hover:bg-slate-800/60 transition-all"
+                  title="Gestión de Inventario"
+                >
+                  <Package className="w-5 h-5" />
+                </button>
+
+                {/* Motorizados / Delivery */}
+                <button
+                  onClick={() => { setShowDriversModal(true); setIsDockerOpen(false); }}
+                  className="p-2 rounded-2xl text-slate-400 hover:text-amber-400 hover:bg-slate-800/60 transition-all"
+                  title="Motorizados & Despacho"
+                >
+                  <Truck className="w-5 h-5" />
+                </button>
+
+                {/* Impresora */}
+                <button
+                  onClick={() => { setShowPrinterModal(true); setIsDockerOpen(false); }}
+                  className="p-2 rounded-2xl text-slate-400 hover:text-indigo-400 hover:bg-slate-800/60 transition-all"
+                  title="Impresora POS"
+                >
+                  <Printer className="w-5 h-5" />
+                </button>
+
+                {/* Rubro Comercial */}
+                <button
+                  onClick={() => { setShowRubroModal(true); setIsDockerOpen(false); }}
+                  className="p-2 rounded-2xl text-slate-400 hover:text-purple-400 hover:bg-slate-800/60 transition-all"
+                  title="Cambiar Rubro Comercial"
+                >
+                  <Boxes className="w-5 h-5" />
+                </button>
+
+                {/* Comanda / Carrito */}
+                <button
+                  onClick={() => { setIsRightDrawerOpen(true); setIsDockerOpen(false); }}
+                  className="p-2 rounded-2xl text-slate-400 hover:text-sky-400 hover:bg-slate-800/60 transition-all relative"
+                  title="Ver Comanda Activa"
+                >
+                  <ShoppingCart className="w-5 h-5" />
+                  {totalItems > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-amber-400 text-slate-950 text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center">
+                      {totalItems}
+                    </span>
+                  )}
+                </button>
+              </div>
+
+              {/* Bottom: Alternar Lado (Izq/Der) y Cerrar */}
+              <div className="flex flex-col items-center gap-2 pt-2 border-t border-slate-850">
+                <button
+                  onClick={handleToggleDockSide}
+                  className="p-2 rounded-xl text-slate-400 hover:text-amber-300 hover:bg-slate-800/80 transition-all"
+                  title={dockSide === 'left' ? 'Mover Docker a la Derecha' : 'Mover Docker a la Izquierda'}
+                >
+                  <ArrowLeftRight className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setIsDockerOpen(false)}
+                  className="p-1.5 rounded-xl text-slate-500 hover:text-rose-400 hover:bg-slate-800/80 transition-all"
+                  title="Cerrar Docker"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </aside>
+
+            {/* Tarjeta Rectangular Glass Conectada */}
+            <div className={`w-80 rounded-[28px] p-4.5 shadow-2xl border transition-all ${
+              isLight
+                ? 'bg-white/95 border-slate-200 text-slate-900 shadow-slate-300/50'
+                : 'bg-slate-900/95 border-slate-800 text-white shadow-black/60'
+            } backdrop-blur-2xl max-h-[85vh] overflow-y-auto space-y-4`}>
+              {/* Header de la tarjeta */}
+              <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
+                <div className="flex items-center gap-2">
+                  <span className="text-xl">{RUBROS_CATALOG[activeRubro]?.icon || '🍔'}</span>
+                  <div>
+                    <h3 className="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white">
+                      KlikPOS Admin
+                    </h3>
+                    <p className="text-[10px] text-slate-500 font-bold">
+                      {RUBROS_CATALOG[activeRubro]?.name}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Botón rápido conmutar lado */}
+                <button
+                  onClick={handleToggleDockSide}
+                  className="flex items-center gap-1 px-2.5 py-1 rounded-xl text-[10px] font-black border border-slate-200 dark:border-slate-700 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 transition-colors text-slate-700 dark:text-slate-300"
+                  title="Alternar entre borde izquierdo o derecho"
+                >
+                  <ArrowLeftRight className="w-3 h-3 text-amber-500" />
+                  <span>{dockSide === 'left' ? 'Mover a Der' : 'Mover a Izq'}</span>
+                </button>
+              </div>
+
+              {/* SECCIÓN 1: OPERACIONES */}
+              <div className="space-y-1.5">
+                <span className="text-[10px] font-mono font-black text-slate-400 dark:text-slate-500 tracking-wider uppercase">
+                  OPERACIONES
+                </span>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => { setActiveTab('menu'); setIsDockerOpen(false); }}
+                    className={`flex items-center gap-2 p-2.5 rounded-xl border text-left transition-all ${
+                      activeTab === 'menu'
+                        ? 'bg-sky-50 dark:bg-sky-950/40 border-sky-300 dark:border-sky-800 text-sky-700 dark:text-sky-300'
+                        : 'bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-800 hover:border-slate-300 text-slate-800 dark:text-slate-200'
+                    }`}
+                  >
+                    <LayoutGrid className="w-4 h-4 text-sky-500 shrink-0" />
+                    <div>
+                      <div className="text-[11px] font-black">Catálogo POS</div>
+                      <div className="text-[9px] text-slate-400">Venta rápida</div>
+                    </div>
+                  </button>
+
+                  <button
+                    onClick={() => { setIsRightDrawerOpen(true); setIsDockerOpen(false); }}
+                    className="flex items-center gap-2 p-2.5 rounded-xl border bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-800 hover:border-slate-300 text-slate-800 dark:text-slate-200 text-left transition-all"
+                  >
+                    <ShoppingCart className="w-4 h-4 text-amber-500 shrink-0" />
+                    <div>
+                      <div className="text-[11px] font-black">Comanda ({totalItems})</div>
+                      <div className="text-[9px] text-emerald-600 font-bold">${totalUSD.toFixed(2)}</div>
+                    </div>
+                  </button>
+
+                  <button
+                    onClick={() => { setActiveTab('mesas'); setIsDockerOpen(false); }}
+                    className={`flex items-center gap-2 p-2.5 rounded-xl border text-left transition-all ${
+                      activeTab === 'mesas'
+                        ? 'bg-sky-50 dark:bg-sky-950/40 border-sky-300 dark:border-sky-800 text-sky-700 dark:text-sky-300'
+                        : 'bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-800 hover:border-slate-300 text-slate-800 dark:text-slate-200'
+                    }`}
+                  >
+                    <UtensilsCrossed className="w-4 h-4 text-indigo-500 shrink-0" />
+                    <div>
+                      <div className="text-[11px] font-black">Mesas / Cuentas</div>
+                      <div className="text-[9px] text-slate-400">Ambientes</div>
+                    </div>
+                  </button>
+
+                  <button
+                    onClick={() => { setActiveTab('pedidos'); setIsDockerOpen(false); }}
+                    className={`flex items-center gap-2 p-2.5 rounded-xl border text-left transition-all ${
+                      activeTab === 'pedidos'
+                        ? 'bg-sky-50 dark:bg-sky-950/40 border-sky-300 dark:border-sky-800 text-sky-700 dark:text-sky-300'
+                        : 'bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-800 hover:border-slate-300 text-slate-800 dark:text-slate-200'
+                    }`}
+                  >
+                    <ClipboardList className="w-4 h-4 text-emerald-500 shrink-0" />
+                    <div>
+                      <div className="text-[11px] font-black">Comandas / Cocina</div>
+                      <div className="text-[9px] text-slate-400">Pedidos y QR</div>
+                    </div>
+                  </button>
+                </div>
+              </div>
+
+              {/* SECCIÓN 2: INVENTARIO & DELIVERY */}
+              <div className="space-y-1.5">
+                <span className="text-[10px] font-mono font-black text-slate-400 dark:text-slate-500 tracking-wider uppercase">
+                  INVENTARIO & DELIVERY
+                </span>
+                <div className="space-y-2">
+                  <button
+                    onClick={() => { setShowInventoryModal(true); setIsDockerOpen(false); }}
+                    className="w-full flex items-center justify-between p-2.5 rounded-xl border bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-800 hover:border-emerald-400 text-slate-800 dark:text-slate-200 transition-all text-left"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <div className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-500">
+                        <Package className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <div className="text-xs font-black">Gestión de Inventario</div>
+                        <div className="text-[10px] text-slate-400">Agregar productos y editar precios en vivo</div>
+                      </div>
+                    </div>
+                    <span className="text-[10px] font-mono font-bold bg-emerald-500/10 text-emerald-600 px-2 py-0.5 rounded-md">
+                      {products.length} ítem{products.length !== 1 ? 's' : ''}
+                    </span>
+                  </button>
+
+                  <button
+                    onClick={() => { setShowDriversModal(true); setIsDockerOpen(false); }}
+                    className="w-full flex items-center justify-between p-2.5 rounded-xl border bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-800 hover:border-amber-400 text-slate-800 dark:text-slate-200 transition-all text-left"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <div className="p-1.5 rounded-lg bg-amber-500/10 text-amber-500">
+                        <Truck className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <div className="text-xs font-black">Motorizados & Delivery</div>
+                        <div className="text-[10px] text-slate-400">Despacho de comandas por WhatsApp</div>
+                      </div>
+                    </div>
+                    <span className="text-[10px] font-mono font-bold bg-amber-500/10 text-amber-600 px-2 py-0.5 rounded-md">
+                      {drivers.length} chofer{drivers.length !== 1 ? 'es' : ''}
+                    </span>
+                  </button>
+
+                  <button
+                    onClick={() => { setShowRubroModal(true); setIsDockerOpen(false); }}
+                    className="w-full flex items-center justify-between p-2.5 rounded-xl border bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-800 hover:border-purple-400 text-slate-800 dark:text-slate-200 transition-all text-left"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <div className="p-1.5 rounded-lg bg-purple-500/10 text-purple-500">
+                        <Boxes className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <div className="text-xs font-black">Rubro Comercial</div>
+                        <div className="text-[10px] text-slate-400">Adaptar rubro y catálogo predeterminado</div>
+                      </div>
+                    </div>
+                    <span className="text-[10px] font-bold bg-purple-500/10 text-purple-600 px-2 py-0.5 rounded-md">
+                      {RUBROS_CATALOG[activeRubro]?.name}
+                    </span>
+                  </button>
+                </div>
+              </div>
+
+              {/* SECCIÓN 3: HARDWARE & SISTEMA */}
+              <div className="space-y-1.5">
+                <span className="text-[10px] font-mono font-black text-slate-400 dark:text-slate-500 tracking-wider uppercase">
+                  HARDWARE & SISTEMA
+                </span>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => { setShowPrinterModal(true); setIsDockerOpen(false); }}
+                    className="flex items-center gap-2 p-2.5 rounded-xl border bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-800 hover:border-slate-300 text-slate-800 dark:text-slate-200 text-left transition-all"
+                  >
+                    <Printer className="w-4 h-4 text-indigo-500 shrink-0" />
+                    <div>
+                      <div className="text-[11px] font-black">Impresora POS</div>
+                      <div className="text-[9px] text-slate-400">{printerConfig.paperWidth} ({printerConfig.connection})</div>
+                    </div>
+                  </button>
+
+                  <button
+                    onClick={() => { setIsLeftDrawerOpen(true); setIsDockerOpen(false); }}
+                    className="flex items-center gap-2 p-2.5 rounded-xl border bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-800 hover:border-slate-300 text-slate-800 dark:text-slate-200 text-left transition-all"
+                  >
+                    <Settings className="w-4 h-4 text-slate-500 shrink-0" />
+                    <div>
+                      <div className="text-[11px] font-black">Ajustes & RIF</div>
+                      <div className="text-[9px] text-slate-400">Datos y branding</div>
+                    </div>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
 
       {/* ========================================================================= */}
       {/* 2. HEADER SUPERIOR CON TASA BCV INTERACTIVA Y CONTRASTE WCAG AAA          */}
@@ -1514,22 +2098,147 @@ export default function TabletMobilePosPage() {
         )}
 
         {/* ======================================================================= */}
-        {/* VISTA 4: DELIVERY Y RUTAS                                               */}
+        {/* VISTA 4: DELIVERY Y RUTAS DE MOTORIZADOS                                */}
         {/* ======================================================================= */}
         {activeTab === 'delivery' && (
           <div className="space-y-4">
-            <h2 className="text-sm font-black uppercase tracking-wider flex items-center gap-2" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
-              <Bike className="w-4 h-4" style={{ color: currentPal.primary }} />
-              <span>Despachos y Delivery Autónomo</span>
-            </h2>
-            <div className={`border rounded-2xl p-6 text-center space-y-3 ${isLight ? 'bg-white border-slate-200' : 'bg-slate-900 border-slate-800'}`}>
-              <Bike className="w-12 h-12 mx-auto opacity-70" style={{ color: currentPal.primary }} />
-              <h3 className="text-sm font-black" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
-                Módulo de Motorizados y Despachos
-              </h3>
-              <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                Coordina las rutas de entrega a domicilio y envía la comanda formateada directamente al WhatsApp de tu motorizado.
-              </p>
+            {/* Header con estadísticas y botón de alta rápida */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-slate-200 dark:border-slate-800">
+              <div>
+                <h2 className="text-sm font-black uppercase tracking-wider flex items-center gap-2" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
+                  <Bike className="w-5 h-5 text-amber-500" />
+                  <span>Despachos y Delivery Autónomo</span>
+                </h2>
+                <p className="text-[11px] text-slate-500 font-medium">
+                  {drivers.filter(d => d.status === 'disponible').length} disponibles • {drivers.filter(d => d.status === 'en_ruta').length} en ruta • {drivers.length} choferes registrados
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setShowDriversModal(true)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-white text-xs font-black shadow-md active:scale-95 transition-all"
+                  style={{ backgroundColor: currentPal.primary }}
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Nuevo Chofer</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Banner de Comanda Activa Lista para Despachar */}
+            <div className={`border rounded-2xl p-4 transition-all shadow-xs ${
+              totalItems > 0
+                ? 'bg-amber-500/10 border-amber-500/30'
+                : isLight ? 'bg-white border-slate-200' : 'bg-slate-900 border-slate-800'
+            }`}>
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-black uppercase tracking-wider text-amber-600 dark:text-amber-400 flex items-center gap-1">
+                      <ShoppingCart className="w-3.5 h-3.5" />
+                      Comanda Actual para Despacho:
+                    </span>
+                    <span className="text-xs font-mono font-black px-2 py-0.5 rounded-lg bg-amber-500/20 text-amber-700 dark:text-amber-300">
+                      {totalItems} producto{totalItems !== 1 ? 's' : ''} • ${totalUSD.toFixed(2)} USD (Bs. {totalVES.toFixed(2)})
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-600 dark:text-slate-300">
+                    <span className="font-bold">Cliente:</span> {selectedCustomer.name} • <span className="font-bold">Destino:</span> {selectedCustomer.address || 'Mostrador / Por acordar'}
+                  </p>
+                </div>
+
+                {totalItems === 0 && (
+                  <button
+                    onClick={() => setActiveTab('menu')}
+                    className="px-3 py-1.5 rounded-xl text-xs font-bold border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-100 transition-colors"
+                  >
+                    + Cargar Productos al Carrito
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Cuadrícula de Motorizados */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              {drivers.map((driver) => {
+                const isDisponible = driver.status === 'disponible';
+                const isEnRuta = driver.status === 'en_ruta';
+                return (
+                  <div
+                    key={driver.id}
+                    className={`border rounded-2xl p-4 space-y-3 transition-all relative ${
+                      isLight ? 'bg-white border-slate-200 shadow-xs' : 'bg-slate-900 border-slate-800'
+                    }`}
+                  >
+                    {/* Encabezado del Chofer */}
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-10 h-10 rounded-2xl flex items-center justify-center font-black ${
+                          isDisponible ? 'bg-emerald-500/10 text-emerald-500' :
+                          isEnRuta ? 'bg-amber-500/10 text-amber-500' :
+                          'bg-slate-200 dark:bg-slate-800 text-slate-400'
+                        }`}>
+                          <Bike className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <h4 className="text-xs font-black" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
+                            {driver.name}
+                          </h4>
+                          <p className="text-[10px] text-slate-400 font-mono">
+                            {driver.vehicle}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Estado conmutable */}
+                      <button
+                        onClick={() => handleToggleDriverStatus(driver.id)}
+                        className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-lg border transition-all active:scale-95 ${
+                          isDisponible ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-600' :
+                          isEnRuta ? 'bg-amber-500/10 border-amber-500/30 text-amber-600' :
+                          'bg-slate-150 dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-500'
+                        }`}
+                        title="Toca para cambiar estado"
+                      >
+                        {isDisponible ? '● Disponible' : isEnRuta ? '◐ En Ruta' : '○ Inactivo'}
+                      </button>
+                    </div>
+
+                    {/* Teléfono WhatsApp */}
+                    <div className="flex items-center gap-1.5 text-[11px] text-slate-500 font-mono">
+                      <Phone className="w-3.5 h-3.5 text-emerald-500" />
+                      <span>{driver.phone}</span>
+                    </div>
+
+                    {/* Botón de Acción Principal: Despachar Comanda por WhatsApp */}
+                    <div className="flex items-center gap-2 pt-1 border-t border-slate-100 dark:border-slate-800">
+                      <button
+                        type="button"
+                        onClick={() => handleDispatchOrderWhatsApp(driver.phone, driver.name)}
+                        className={`flex-1 py-2 px-3 rounded-xl text-xs font-black flex items-center justify-center gap-1.5 transition-all shadow-xs active:scale-95 ${
+                          totalItems > 0
+                            ? 'bg-emerald-600 hover:bg-emerald-500 text-white'
+                            : 'bg-emerald-600/80 text-white hover:bg-emerald-600'
+                        }`}
+                        title="Enviar comanda activa por WhatsApp a este motorizado"
+                      >
+                        <Share2 className="w-3.5 h-3.5" />
+                        <span>Despachar Orden (WhatsApp)</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteDriver(driver.id)}
+                        className="p-2 rounded-xl text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
+                        title="Eliminar chofer"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
@@ -3001,6 +3710,644 @@ export default function TabletMobilePosPage() {
                 style={{ backgroundColor: currentPal.primary }}
               >
                 Guardar Nota
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* 13b. MODAL 1: GESTIÓN DE INVENTARIO Y CATÁLOGO                            */}
+      {/* ========================================================================= */}
+      {showInventoryModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
+          <div className={`border rounded-3xl p-5 max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl relative ${
+            isLight ? 'bg-white border-slate-200 text-slate-900' : 'bg-slate-900 border-slate-800 text-white'
+          }`}>
+            {/* Header del Modal */}
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800 shrink-0">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-500">
+                  <Package className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-black uppercase tracking-wider" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
+                    Gestor de Inventario y Precios
+                  </h3>
+                  <p className="text-[11px] text-slate-500 font-medium">
+                    {products.length} productos en el catálogo activo • Precios en tiempo real
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowInventoryModal(false)}
+                className="p-1.5 rounded-xl text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Contenido scrolleable */}
+            <div className="flex-1 overflow-y-auto space-y-4 py-3 pr-1">
+              {/* Formulario de Alta Rápida de Producto */}
+              <form onSubmit={handleAddProduct} className={`p-3.5 rounded-2xl border space-y-3 ${
+                isLight ? 'bg-slate-50 border-slate-200' : 'bg-slate-950/60 border-slate-800'
+              }`}>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
+                    <Plus className="w-4 h-4" />
+                    Nuevo Producto al Catálogo
+                  </span>
+                  <span className="text-[10px] text-slate-400 font-mono font-bold">1 Tap para guardar</span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                  <div className="sm:col-span-2">
+                    <label className="text-[10px] font-bold text-slate-500 block mb-0.5">Nombre del Producto *</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Ej. Salchipapa Especial Familiar"
+                      value={newProductForm.name}
+                      onChange={(e) => setNewProductForm({ ...newProductForm, name: e.target.value })}
+                      className={`w-full px-3 py-1.5 rounded-xl text-xs border outline-none font-semibold ${
+                        isLight ? 'bg-white border-slate-300 text-slate-900 focus:border-emerald-500' : 'bg-slate-900 border-slate-700 text-white'
+                      }`}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-[10px] font-bold text-slate-500 block mb-0.5">Precio ($ USD) *</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      required
+                      placeholder="5.50"
+                      value={newProductForm.priceUSD}
+                      onChange={(e) => setNewProductForm({ ...newProductForm, priceUSD: e.target.value })}
+                      className={`w-full px-3 py-1.5 rounded-xl text-xs border outline-none font-mono font-bold ${
+                        isLight ? 'bg-white border-slate-300 text-slate-900 focus:border-emerald-500' : 'bg-slate-900 border-slate-700 text-white'
+                      }`}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-[10px] font-bold text-slate-500 block mb-0.5">Categoría</label>
+                    <select
+                      value={newProductForm.category}
+                      onChange={(e) => setNewProductForm({ ...newProductForm, category: e.target.value })}
+                      className={`w-full px-3 py-1.5 rounded-xl text-xs border outline-none font-bold ${
+                        isLight ? 'bg-white border-slate-300 text-slate-900' : 'bg-slate-900 border-slate-700 text-white'
+                      }`}
+                    >
+                      {categoriesList.filter(c => c !== 'Todos').map((cat) => (
+                        <option key={cat} value={cat}>{cat}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="text-[10px] font-bold text-slate-500 block mb-0.5">Código / SKU</label>
+                    <input
+                      type="text"
+                      placeholder="Ej. COMBO-01"
+                      value={newProductForm.sku}
+                      onChange={(e) => setNewProductForm({ ...newProductForm, sku: e.target.value })}
+                      className={`w-full px-3 py-1.5 rounded-xl text-xs border outline-none font-mono ${
+                        isLight ? 'bg-white border-slate-300 text-slate-900' : 'bg-slate-900 border-slate-700 text-white'
+                      }`}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-[10px] font-bold text-slate-500 block mb-0.5">Etiqueta / Badge</label>
+                    <input
+                      type="text"
+                      placeholder="⭐ Nuevo, 🔥 Popular"
+                      value={newProductForm.tag}
+                      onChange={(e) => setNewProductForm({ ...newProductForm, tag: e.target.value })}
+                      className={`w-full px-3 py-1.5 rounded-xl text-xs border outline-none font-semibold ${
+                        isLight ? 'bg-white border-slate-300 text-slate-900' : 'bg-slate-900 border-slate-700 text-white'
+                      }`}
+                    />
+                  </div>
+                </div>
+
+                <div className="flex justify-end pt-1">
+                  <button
+                    type="submit"
+                    className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black rounded-xl shadow-md transition-all active:scale-95 flex items-center gap-1.5"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>Guardar en Inventario</span>
+                  </button>
+                </div>
+              </form>
+
+              {/* Lista de Productos con Edición Inline de Precios */}
+              <div className="space-y-2">
+                <span className="text-xs font-black uppercase tracking-wider text-slate-500 block">
+                  Productos Registrados ({products.length})
+                </span>
+
+                <div className="divide-y divide-slate-200 dark:divide-slate-800 border rounded-2xl overflow-hidden">
+                  {products.map((p) => {
+                    const isEditing = editingPriceId === p.id;
+                    return (
+                      <div
+                        key={p.id}
+                        className={`p-3 flex items-center justify-between gap-3 transition-colors ${
+                          isLight ? 'bg-white hover:bg-slate-50' : 'bg-slate-900 hover:bg-slate-850'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          {p.image && (
+                            <img
+                              src={p.image}
+                              alt={p.name}
+                              className="w-10 h-10 rounded-xl object-cover border border-slate-200 dark:border-slate-800 shrink-0"
+                            />
+                          )}
+                          <div className="min-w-0">
+                            <h4 className="text-xs font-black truncate" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
+                              {p.name}
+                            </h4>
+                            <div className="flex items-center gap-2 text-[10px] text-slate-400 font-mono">
+                              <span>SKU: {p.sku}</span>
+                              <span>•</span>
+                              <span className="text-slate-500 font-bold">{p.category}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Precio con edición en vivo */}
+                        <div className="flex items-center gap-2 shrink-0">
+                          {isEditing ? (
+                            <div className="flex items-center gap-1">
+                              <span className="text-xs font-mono font-bold">$</span>
+                              <input
+                                type="number"
+                                step="0.01"
+                                autoFocus
+                                value={editingPriceValue}
+                                onChange={(e) => setEditingPriceValue(e.target.value)}
+                                className="w-16 px-1.5 py-1 text-xs font-mono font-black border rounded-lg outline-none bg-white dark:bg-slate-800 border-emerald-500 text-slate-900 dark:text-white"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => handleSavePriceEdit(p.id)}
+                                className="p-1 bg-emerald-600 text-white rounded-lg text-xs"
+                                title="Guardar precio"
+                              >
+                                <Check className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setEditingPriceId(null)}
+                                className="p-1 bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-lg text-xs"
+                              >
+                                <X className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setEditingPriceId(p.id);
+                                setEditingPriceValue(String(p.priceUSD));
+                              }}
+                              className="flex items-center gap-1 px-2.5 py-1 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-emerald-500 transition-colors"
+                              title="Toca para editar precio"
+                            >
+                              <span className="text-xs font-mono font-black text-emerald-600 dark:text-emerald-400">
+                                ${p.priceUSD.toFixed(2)}
+                              </span>
+                              <Edit3 className="w-3 h-3 text-slate-400" />
+                            </button>
+                          )}
+
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteProduct(p.id)}
+                            className="p-1.5 text-slate-400 hover:text-rose-500 rounded-lg transition-colors"
+                            title="Eliminar producto"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="pt-3 border-t border-slate-200 dark:border-slate-800 flex justify-end shrink-0">
+              <button
+                type="button"
+                onClick={() => setShowInventoryModal(false)}
+                className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white text-xs font-black rounded-xl"
+              >
+                Cerrar Gestor
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* 13c. MODAL 2: GESTIÓN DE MOTORIZADOS & DESPACHOS                          */}
+      {/* ========================================================================= */}
+      {showDriversModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
+          <div className={`border rounded-3xl p-5 max-w-xl w-full max-h-[90vh] flex flex-col shadow-2xl relative ${
+            isLight ? 'bg-white border-slate-200 text-slate-900' : 'bg-slate-900 border-slate-800 text-white'
+          }`}>
+            {/* Header */}
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800 shrink-0">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-xl bg-amber-500/10 text-amber-500">
+                  <Truck className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-black uppercase tracking-wider" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
+                    Motorizados y Delivery WhatsApp
+                  </h3>
+                  <p className="text-[11px] text-slate-500 font-medium">
+                    Despacha pedidos en 1 clic directamente al teléfono de tus repartidores
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowDriversModal(false)}
+                className="p-1.5 rounded-xl text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Contenido scrolleable */}
+            <div className="flex-1 overflow-y-auto space-y-4 py-3 pr-1">
+              {/* Formulario de Alta Rápida de Motorizado */}
+              <form onSubmit={handleAddDriver} className={`p-3.5 rounded-2xl border space-y-3 ${
+                isLight ? 'bg-slate-50 border-slate-200' : 'bg-slate-950/60 border-slate-800'
+              }`}>
+                <span className="text-xs font-black uppercase tracking-wider text-amber-600 dark:text-amber-400 flex items-center gap-1.5">
+                  <Plus className="w-4 h-4" />
+                  Registrar Nuevo Chofer
+                </span>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <div>
+                    <label className="text-[10px] font-bold text-slate-500 block mb-0.5">Nombre Completo *</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Ej. Daniel Pérez"
+                      value={newDriverForm.name}
+                      onChange={(e) => setNewDriverForm({ ...newDriverForm, name: e.target.value })}
+                      className={`w-full px-3 py-1.5 rounded-xl text-xs border outline-none font-semibold ${
+                        isLight ? 'bg-white border-slate-300 text-slate-900' : 'bg-slate-900 border-slate-700 text-white'
+                      }`}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-[10px] font-bold text-slate-500 block mb-0.5">Teléfono WhatsApp *</label>
+                    <input
+                      type="tel"
+                      required
+                      placeholder="04121234567"
+                      value={newDriverForm.phone}
+                      onChange={(e) => setNewDriverForm({ ...newDriverForm, phone: e.target.value })}
+                      className={`w-full px-3 py-1.5 rounded-xl text-xs border outline-none font-mono font-bold ${
+                        isLight ? 'bg-white border-slate-300 text-slate-900' : 'bg-slate-900 border-slate-700 text-white'
+                      }`}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-[10px] font-bold text-slate-500 block mb-0.5">Vehículo / Placa</label>
+                    <input
+                      type="text"
+                      placeholder="Bera SBR Azul / AE34F"
+                      value={newDriverForm.vehicle}
+                      onChange={(e) => setNewDriverForm({ ...newDriverForm, vehicle: e.target.value })}
+                      className={`w-full px-3 py-1.5 rounded-xl text-xs border outline-none font-semibold ${
+                        isLight ? 'bg-white border-slate-300 text-slate-900' : 'bg-slate-900 border-slate-700 text-white'
+                      }`}
+                    />
+                  </div>
+                </div>
+
+                <div className="flex justify-end pt-1">
+                  <button
+                    type="submit"
+                    className="px-4 py-2 bg-amber-600 hover:bg-amber-500 text-white text-xs font-black rounded-xl shadow-md transition-all active:scale-95 flex items-center gap-1.5"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>Guardar Motorizado</span>
+                  </button>
+                </div>
+              </form>
+
+              {/* Lista de Motorizados */}
+              <div className="space-y-2">
+                <span className="text-xs font-black uppercase tracking-wider text-slate-500 block">
+                  Choferes Afiliados ({drivers.length})
+                </span>
+
+                <div className="space-y-2">
+                  {drivers.map((d) => (
+                    <div
+                      key={d.id}
+                      className={`p-3 rounded-2xl border flex items-center justify-between gap-3 ${
+                        isLight ? 'bg-white border-slate-200' : 'bg-slate-900 border-slate-800'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center font-black">
+                          <Bike className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h4 className="text-xs font-black" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
+                              {d.name}
+                            </h4>
+                            <button
+                              onClick={() => handleToggleDriverStatus(d.id)}
+                              className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-md ${
+                                d.status === 'disponible' ? 'bg-emerald-500/10 text-emerald-600' :
+                                d.status === 'en_ruta' ? 'bg-amber-500/10 text-amber-600' :
+                                'bg-slate-150 text-slate-500'
+                              }`}
+                            >
+                              {d.status}
+                            </button>
+                          </div>
+                          <p className="text-[10px] text-slate-400 font-mono">
+                            {d.vehicle} • WhatsApp: {d.phone}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => handleDispatchOrderWhatsApp(d.phone, d.name)}
+                          className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-black rounded-xl flex items-center gap-1 shadow-xs active:scale-95 transition-all"
+                          title="Enviar comanda activa por WhatsApp"
+                        >
+                          <Share2 className="w-3.5 h-3.5" />
+                          <span>WhatsApp</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteDriver(d.id)}
+                          className="p-1.5 text-slate-400 hover:text-rose-500 rounded-lg transition-colors"
+                          title="Eliminar chofer"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="pt-3 border-t border-slate-200 dark:border-slate-800 flex justify-end shrink-0">
+              <button
+                type="button"
+                onClick={() => setShowDriversModal(false)}
+                className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white text-xs font-black rounded-xl"
+              >
+                Cerrar Motorizados
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* 13d. MODAL 3: CONFIGURACIÓN DE IMPRESORA POS TÉRMICA                      */}
+      {/* ========================================================================= */}
+      {showPrinterModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
+          <div className={`border rounded-3xl p-5 max-w-md w-full shadow-2xl relative ${
+            isLight ? 'bg-white border-slate-200 text-slate-900' : 'bg-slate-900 border-slate-800 text-white'
+          }`}>
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-500">
+                  <Printer className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-black uppercase tracking-wider" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
+                    Impresora Térmica POS
+                  </h3>
+                  <p className="text-[11px] text-slate-500 font-medium">
+                    Tickets de comanda y recibos fiscales
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowPrinterModal(false)}
+                className="p-1.5 rounded-xl text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSavePrinterConfig} className="space-y-4 py-4">
+              {/* Tipo de Conexión */}
+              <div>
+                <label className="text-xs font-bold text-slate-500 block mb-1.5">Tipo de Conexión</label>
+                <div className="grid grid-cols-3 gap-2">
+                  {(['bluetooth', 'lan', 'usb'] as const).map((type) => (
+                    <button
+                      key={type}
+                      type="button"
+                      onClick={() => setPrinterConfig({ ...printerConfig, connection: type })}
+                      className={`py-2 px-2 rounded-xl border text-xs font-black uppercase transition-all ${
+                        printerConfig.connection === type
+                          ? 'bg-indigo-600 text-white border-indigo-600 shadow-md'
+                          : isLight ? 'bg-slate-100 border-slate-200 text-slate-700' : 'bg-slate-800 border-slate-700 text-slate-300'
+                      }`}
+                    >
+                      {type === 'lan' ? 'Red LAN' : type}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Parámetros de Red LAN si aplica */}
+              {printerConfig.connection === 'lan' && (
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-[10px] font-bold text-slate-500 block mb-1">IP de la Impresora</label>
+                    <input
+                      type="text"
+                      value={printerConfig.ip || '192.168.1.200'}
+                      onChange={(e) => setPrinterConfig({ ...printerConfig, ip: e.target.value })}
+                      className={`w-full px-3 py-1.5 rounded-xl text-xs font-mono font-bold border outline-none ${
+                        isLight ? 'bg-white border-slate-300 text-slate-900' : 'bg-slate-950 border-slate-700 text-white'
+                      }`}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-bold text-slate-500 block mb-1">Puerto (Default 9100)</label>
+                    <input
+                      type="number"
+                      value={printerConfig.port || 9100}
+                      onChange={(e) => setPrinterConfig({ ...printerConfig, port: parseInt(e.target.value) || 9100 })}
+                      className={`w-full px-3 py-1.5 rounded-xl text-xs font-mono font-bold border outline-none ${
+                        isLight ? 'bg-white border-slate-300 text-slate-900' : 'bg-slate-950 border-slate-700 text-white'
+                      }`}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Ancho del Papel */}
+              <div>
+                <label className="text-xs font-bold text-slate-500 block mb-1.5">Ancho del Papel Térmico</label>
+                <div className="grid grid-cols-2 gap-2">
+                  {(['58mm', '80mm'] as const).map((w) => (
+                    <button
+                      key={w}
+                      type="button"
+                      onClick={() => setPrinterConfig({ ...printerConfig, paperWidth: w })}
+                      className={`py-2 px-3 rounded-xl border text-xs font-black transition-all ${
+                        printerConfig.paperWidth === w
+                          ? 'bg-indigo-600 text-white border-indigo-600 shadow-md'
+                          : isLight ? 'bg-slate-100 border-slate-200 text-slate-700' : 'bg-slate-800 border-slate-700 text-slate-300'
+                      }`}
+                    >
+                      {w} (Formato Estándar)
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Alerta de prueba de impresión */}
+              {printerTestAlert && (
+                <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 text-xs font-bold flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 shrink-0" />
+                  <span>¡Comando de prueba enviado exitosamente a la impresora!</span>
+                </div>
+              )}
+
+              {/* Botón de prueba y guardado */}
+              <div className="flex gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={handleTestPrint}
+                  className="py-2.5 px-3 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 text-slate-700 dark:text-slate-200 text-xs font-bold rounded-xl active:scale-95 transition-all flex items-center gap-1.5"
+                >
+                  <Receipt className="w-4 h-4" />
+                  <span>Ticket Prueba</span>
+                </button>
+
+                <button
+                  type="submit"
+                  className="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-black rounded-xl shadow-md active:scale-95 transition-all"
+                >
+                  Guardar Impresora
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* 13e. MODAL 4: SELECTOR DE RUBRO COMERCIAL                                 */}
+      {/* ========================================================================= */}
+      {showRubroModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
+          <div className={`border rounded-3xl p-5 max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl relative ${
+            isLight ? 'bg-white border-slate-200 text-slate-900' : 'bg-slate-900 border-slate-800 text-white'
+          }`}>
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800 shrink-0">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-xl bg-purple-500/10 text-purple-500">
+                  <Boxes className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-black uppercase tracking-wider" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
+                    Seleccionar Rubro Comercial
+                  </h3>
+                  <p className="text-[11px] text-slate-500 font-medium">
+                    Adapta categorías y productos de muestra con 1 solo toque
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowRubroModal(false)}
+                className="p-1.5 rounded-xl text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto py-3 grid grid-cols-1 sm:grid-cols-2 gap-3 pr-1">
+              {(Object.keys(RUBROS_CATALOG) as RubroId[]).map((rubroKey) => {
+                const r = RUBROS_CATALOG[rubroKey];
+                const isSelected = activeRubro === rubroKey;
+                return (
+                  <button
+                    key={rubroKey}
+                    type="button"
+                    onClick={() => handleSelectRubro(rubroKey)}
+                    className={`p-4 rounded-2xl border text-left transition-all active:scale-98 flex flex-col justify-between space-y-2 ${
+                      isSelected
+                        ? 'border-purple-500 bg-purple-500/10 shadow-md ring-2 ring-purple-500/30'
+                        : isLight
+                        ? 'bg-slate-50 hover:bg-slate-100 border-slate-200'
+                        : 'bg-slate-950/60 hover:bg-slate-800 border-slate-800'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-3xl">{r.icon}</span>
+                      {isSelected && (
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-purple-600 text-white">
+                          Rubro Activo
+                        </span>
+                      )}
+                    </div>
+
+                    <div>
+                      <h4 className="text-xs font-black" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
+                        {r.name}
+                      </h4>
+                      <p className="text-[10px] text-slate-400 mt-0.5 line-clamp-2">
+                        {r.description}
+                      </p>
+                    </div>
+
+                    <div className="flex flex-wrap gap-1 pt-1">
+                      {r.categories.filter(c => c !== 'Todos').slice(0, 4).map((c) => (
+                        <span key={c} className="text-[9px] font-medium px-1.5 py-0.5 rounded bg-slate-200/60 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                          {c}
+                        </span>
+                      ))}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="pt-3 border-t border-slate-200 dark:border-slate-800 flex justify-end shrink-0">
+              <button
+                type="button"
+                onClick={() => setShowRubroModal(false)}
+                className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white text-xs font-black rounded-xl"
+              >
+                Cerrar
               </button>
             </div>
           </div>

@@ -105,8 +105,8 @@ export default function LicenseActivationModal({ isOpen, onClose, onSuccess, isT
     const next = devClicks + 1;
     if (next >= 5) {
       setDevClicks(0);
-      const pin = window.prompt('Ingrese PIN Maestro de Desarrollador Venematic:');
-      if (pin === 'VNMT-2026-DEV' || pin === 'venematic2026') {
+      const pin = window.prompt('Ingrese PIN Maestro de Desarrollador KlikPOS:');
+      if (pin === 'KLIK-2026-DEV' || pin === 'VNMT-2026-DEV' || pin === 'klikpos2026' || pin === 'venematic2026') {
         setDeveloperUnlocked(true);
         setShowKeygenTab(true);
       } else if (pin !== null) {

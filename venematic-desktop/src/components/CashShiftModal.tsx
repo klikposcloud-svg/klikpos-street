@@ -486,7 +486,7 @@ export default function CashShiftModal({
               {/* Formato de Ticket Térmico 80mm */}
               <div className="bg-white text-slate-900 font-mono text-xs p-6 rounded-xl border border-slate-300 max-w-sm mx-auto shadow-md leading-tight print:shadow-none print:border-none print:m-0 print:p-0">
                 <div className="text-center pb-3 border-b border-dashed border-slate-400 space-y-1">
-                  <p className="font-black text-sm uppercase">{storeInfo?.name || 'VENEMATIC POS'}</p>
+                  <p className="font-black text-sm uppercase">{storeInfo?.name || 'KLIKPOS ENTERPRISE'}</p>
                   <p className="text-[11px]">RIF: {storeInfo?.rif || 'J-50000000-0'}</p>
                   <p className="text-[10px] text-slate-600">{storeInfo?.address || 'Venezuela'}</p>
                   <p className="font-black text-[12px] pt-1">*** REPORTE CORTE Z (CIERRE) ***</p>

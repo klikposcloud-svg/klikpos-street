@@ -874,7 +874,7 @@ Aquí tiene los datos oficiales de activación para su negocio *${c.businessName
 \`${c.licenseKey}\`
 
 📋 *INSTRUCCIONES DE ACTIVACIÓN:*
-1. Abra Venematic POS en su computadora o celular.
+1. Abra KlikPOS en su computadora o celular.
 2. Vaya al menú de Activación de Licencia.
 3. Copie y pegue la clave exacta de arriba y presione "Activar".
 
@@ -884,7 +884,7 @@ Aquí tiene los datos oficiales de activación para su negocio *${c.businessName
 ¡Mucho éxito en sus ventas hoy! Cualquier duda estamos a su orden por aquí. 🚀`;
       } else if (type === 'cuota2_reminder') {
         msg = 
-`¡Hola, estimado(a) ${c.contactName}! 👋 Saludos de *Venematic POS*.
+`¡Hola, estimado(a) ${c.contactName}! 👋 Saludos de *KlikPOS Enterprise*.
 
 Le escribimos para recordarle que su primera cuota de 30 días para *${c.businessName}* está próxima a vencer.
 
@@ -895,7 +895,7 @@ Para liberar su **Licencia Permanente Definitiva (sin vencimiento ni mensualidad
 Al confirmar el pago, le enviamos de inmediato su clave de por vida. ¡Gracias por confiar en nosotros! 🚀`;
       } else if (type === 'cloud_renewal') {
         msg = 
-`¡Hola, ${c.contactName}! ☁️ Saludos de *Venematic POS*.
+`¡Hola, ${c.contactName}! ☁️ Saludos de *KlikPOS Enterprise*.
 
 Le recordamos la mensualidad de su servicio de **Respaldo en la Nube (Google Cloud)** para su negocio *${c.businessName}*.
 
@@ -905,7 +905,7 @@ Garantiza que todo su inventario y ventas estén protegidos ante cualquier daño
 Por favor avísenos para registrar su comprobante y mantener su sincronización activa. ¡Feliz día!`;
       } else if (type === 'tiktok_promo') {
         msg = 
-`¡Hola, ${c.contactName}! 👋 Le escribo con respecto a la consulta en TikTok sobre *Venematic POS*.
+`¡Hola, ${c.contactName}! 👋 Le escribo con respecto a la consulta sobre *KlikPOS Enterprise*.
 
 Le tenemos apartado el **Bono Especial de Lanzamiento de $15** (Licencia Permanente de por vida para ${c.businessName}).
 
@@ -946,7 +946,7 @@ Instálelo con confianza y empiece a cobrar con tasa BCV automática. Estamos at
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(clients, null, 2));
       const dlAnchor = document.createElement('a');
       dlAnchor.setAttribute("href", dataStr);
-      dlAnchor.setAttribute("download", `VENEMATIC_MASTER_CRM_${new Date().toISOString().split('T')[0]}.json`);
+      dlAnchor.setAttribute("download", `KLIKPOS_MASTER_CRM_${new Date().toISOString().split('T')[0]}.json`);
       document.body.appendChild(dlAnchor);
       dlAnchor.click();
       dlAnchor.remove();

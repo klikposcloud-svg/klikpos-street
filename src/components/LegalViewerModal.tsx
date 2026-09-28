@@ -55,7 +55,7 @@ export default function LegalViewerModal({
                 </span>
               </div>
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                VENEMATIC POS • República Bolivariana de Venezuela • Versión {currentDoc.lastUpdated}
+                KLIKPOS ENTERPRISE • República Bolivariana de Venezuela • Versión {currentDoc.lastUpdated}
               </p>
             </div>
           </div>

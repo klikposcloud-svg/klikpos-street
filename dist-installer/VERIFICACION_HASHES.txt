@@ -7,7 +7,7 @@ Version: 2.4.7
 Fecha de emision: 27 de September de 2026
 
 Algoritmo SHA256:
-8CB6F01B3E6ACB1CD1EE2F33B1669AB238C4DDC26BC5F696256ABFA5671F5F88
+5C12B436CCEEE5F301324C1A11B34C8B74717D81E9E2DF29AD92B5C0EB392042
 
 Para verificar la integridad del instalador en cualquier computadora:
 PowerShell:
