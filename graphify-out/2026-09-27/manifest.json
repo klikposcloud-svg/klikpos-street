@@ -30,8 +30,8 @@
     "semantic_hash": ""
   },
   "package.json": {
-    "mtime": 1790555353.5231855,
-    "seen": 1790557064.3329284,
+    "mtime": 1790561882.935762,
+    "seen": 1790562053.3021407,
     "ast_hash": "2c5a781cb1d8b584392cf4ae41725887",
     "semantic_hash": ""
   },
@@ -48,14 +48,14 @@
     "semantic_hash": ""
   },
   "public/sw.js": {
-    "mtime": 1790555127.8125596,
-    "seen": 1790557064.332939,
-    "ast_hash": "6eaf1fe3b8e847092042494fac2f6d57",
+    "mtime": 1790561752.9153814,
+    "seen": 1790562053.3021479,
+    "ast_hash": "c89b29564a79b1a175bb2c263f0f514f",
     "semantic_hash": ""
   },
   "public/workbox-00a24876.js": {
-    "mtime": 1790555127.806424,
-    "seen": 1790557064.3329484,
+    "mtime": 1790561752.9153814,
+    "seen": 1790562053.3021522,
     "ast_hash": "2f569fb030b2a09996588b309a8d636e",
     "semantic_hash": "2f569fb030b2a09996588b309a8d636e"
   },
@@ -246,10 +246,10 @@
     "semantic_hash": "066cd88ac47ca9ae5202e816cb3c0d34"
   },
   "src/app/dashboard/backup/page.tsx": {
-    "mtime": 1789789405.171809,
-    "seen": 1790363920.7984192,
-    "ast_hash": "ecb5b1df16a0fdb128776487fb52e287",
-    "semantic_hash": "ecb5b1df16a0fdb128776487fb52e287"
+    "mtime": 1790557910.7105365,
+    "seen": 1790562053.3023114,
+    "ast_hash": "297d189592bd309e29fc0e491732048b",
+    "semantic_hash": ""
   },
   "src/app/dashboard/crm/page.tsx": {
     "mtime": 1790116040.4179907,
@@ -264,10 +264,10 @@
     "semantic_hash": ""
   },
   "src/app/dashboard/delivery/page.tsx": {
-    "mtime": 1789788548.9466033,
-    "seen": 1790363920.7984242,
-    "ast_hash": "f96aec5bff68f1ae3bd3d13d7282c58a",
-    "semantic_hash": "f96aec5bff68f1ae3bd3d13d7282c58a"
+    "mtime": 1790557868.0198836,
+    "seen": 1790562053.302317,
+    "ast_hash": "8c383a3132d6f25b510f402add424d25",
+    "semantic_hash": ""
   },
   "src/app/dashboard/inventory/import/page.tsx": {
     "mtime": 1789833521.3811622,
@@ -390,9 +390,9 @@
     "semantic_hash": "8d93fddd557cb002c76c8d2c32875a72"
   },
   "src/components/LicenseActivationModal.tsx": {
-    "mtime": 1790549179.0741203,
-    "seen": 1790553340.5116124,
-    "ast_hash": "a425bc1175ad0e1c78f3703795e0908d",
+    "mtime": 1790558017.990777,
+    "seen": 1790562053.3023663,
+    "ast_hash": "bec978a1aa94e2cf5456c9fde49449eb",
     "semantic_hash": ""
   },
   "src/components/LockScreenModal.tsx": {
@@ -918,8 +918,8 @@
     "semantic_hash": "9e1d55fd6ac912e918c345bd5590f839"
   },
   "venematic-desktop/package.json": {
-    "mtime": 1790555353.8699696,
-    "seen": 1790557064.3358066,
+    "mtime": 1790561883.4884255,
+    "seen": 1790562053.3025725,
     "ast_hash": "2c5a781cb1d8b584392cf4ae41725887",
     "semantic_hash": ""
   },
@@ -1176,9 +1176,9 @@
     "semantic_hash": "8d93fddd557cb002c76c8d2c32875a72"
   },
   "venematic-desktop/src/components/LicenseActivationModal.tsx": {
-    "mtime": 1790549179.0741203,
-    "seen": 1790553340.515578,
-    "ast_hash": "a425bc1175ad0e1c78f3703795e0908d",
+    "mtime": 1790558030.5138154,
+    "seen": 1790562053.3027303,
+    "ast_hash": "bec978a1aa94e2cf5456c9fde49449eb",
     "semantic_hash": ""
   },
   "venematic-desktop/src/components/LockScreenModal.tsx": {
@@ -1566,9 +1566,9 @@
     "semantic_hash": ""
   },
   "KEYGEN_VENEMATIC.html": {
-    "mtime": 1790549040.878536,
-    "seen": 1790553340.5159326,
-    "ast_hash": "f1d7d67faf2f2aa2fa533a94da84f3c5",
+    "mtime": 1790557819.5433755,
+    "seen": 1790562053.3030345,
+    "ast_hash": "9b4fbdfa80fcac6d8d7d2864e134e903",
     "semantic_hash": ""
   },
   "README.md": {
@@ -1602,9 +1602,9 @@
     "semantic_hash": ""
   },
   "dist-installer/VERIFICACION_HASHES.txt": {
-    "mtime": 1790555445.692372,
-    "seen": 1790557064.33665,
-    "ast_hash": "fd39a9b6d7784b9f9ca4690f0daabb52",
+    "mtime": 1790561990.8947628,
+    "seen": 1790562053.3030515,
+    "ast_hash": "e32617d015ce4e1c8738f68963287117",
     "semantic_hash": ""
   },
   "docs/INFORME_CLIENTES_VENEMATIC_POS.md": {
@@ -1662,9 +1662,9 @@
     "semantic_hash": ""
   },
   "venematic-desktop/dist-installer/VERIFICACION_HASHES.txt": {
-    "mtime": 1790555445.6976483,
-    "seen": 1790557064.337159,
-    "ast_hash": "fd39a9b6d7784b9f9ca4690f0daabb52",
+    "mtime": 1790561990.8997712,
+    "seen": 1790562053.3031507,
+    "ast_hash": "e32617d015ce4e1c8738f68963287117",
     "semantic_hash": ""
   },
   "venematic-desktop/refinancion.md": {
@@ -1962,15 +1962,15 @@
     "semantic_hash": ""
   },
   "src/components/CashShiftModal.tsx": {
-    "mtime": 1790434574.904269,
-    "seen": 1790435266.9764712,
-    "ast_hash": "c271abdbac4141c45280cfa7253a0d64",
+    "mtime": 1790557986.4789574,
+    "seen": 1790562053.3023553,
+    "ast_hash": "19036244effce2e9cffb45946bd53a89",
     "semantic_hash": ""
   },
   "venematic-desktop/src/components/CashShiftModal.tsx": {
-    "mtime": 1790434574.904269,
-    "seen": 1790435266.976832,
-    "ast_hash": "c271abdbac4141c45280cfa7253a0d64",
+    "mtime": 1790557998.3788176,
+    "seen": 1790562053.3027112,
+    "ast_hash": "19036244effce2e9cffb45946bd53a89",
     "semantic_hash": ""
   },
   "scripts/VenematicKeygen.cs": {
@@ -2022,9 +2022,9 @@
     "semantic_hash": ""
   },
   "DASHBOARD_DESARROLLADOR.html": {
-    "mtime": 1790433843.9648354,
-    "seen": 1790433880.7000053,
-    "ast_hash": "93943be302b95d79d3cabd75d99e4a42",
+    "mtime": 1790557851.9232128,
+    "seen": 1790562053.3030124,
+    "ast_hash": "7410aa5b5e773b769208484a673ed423",
     "semantic_hash": ""
   },
   "audit systema y optimizacion.md": {
@@ -2148,9 +2148,9 @@
     "semantic_hash": ""
   },
   "venematic-desktop/src/app/dashboard/backup/page.tsx": {
-    "mtime": 1789789405.171809,
-    "seen": 1790435266.9767694,
-    "ast_hash": "ecb5b1df16a0fdb128776487fb52e287",
+    "mtime": 1790557934.832445,
+    "seen": 1790562053.3026648,
+    "ast_hash": "297d189592bd309e29fc0e491732048b",
     "semantic_hash": ""
   },
   "venematic-desktop/src/app/dashboard/crm/page.tsx": {
@@ -2160,9 +2160,9 @@
     "semantic_hash": ""
   },
   "venematic-desktop/src/app/dashboard/delivery/page.tsx": {
-    "mtime": 1789788548.9466033,
-    "seen": 1790435266.9767754,
-    "ast_hash": "f96aec5bff68f1ae3bd3d13d7282c58a",
+    "mtime": 1790557879.3507922,
+    "seen": 1790562053.302671,
+    "ast_hash": "8c383a3132d6f25b510f402add424d25",
     "semantic_hash": ""
   },
   "venematic-desktop/src/app/dashboard/inventory/import/page.tsx": {
@@ -2520,9 +2520,9 @@
     "semantic_hash": ""
   },
   "src/components/LegalViewerModal.tsx": {
-    "mtime": 1790459002.8714542,
-    "seen": 1790460441.6091013,
-    "ast_hash": "50bb47c3cf95cd4b62403bab8404bb5c",
+    "mtime": 1790557953.9584484,
+    "seen": 1790562053.302364,
+    "ast_hash": "2d0b2da8cc4d90d55e93cf0a6fb82c11",
     "semantic_hash": ""
   },
   "src/components/PosQuickAccessSettings.tsx": {
@@ -2550,9 +2550,9 @@
     "semantic_hash": ""
   },
   "venematic-desktop/src/components/LegalViewerModal.tsx": {
-    "mtime": 1790458989.006621,
-    "seen": 1790460441.6093998,
-    "ast_hash": "50bb47c3cf95cd4b62403bab8404bb5c",
+    "mtime": 1790557966.0805962,
+    "seen": 1790562053.3027205,
+    "ast_hash": "2d0b2da8cc4d90d55e93cf0a6fb82c11",
     "semantic_hash": ""
   },
   "venematic-desktop/src/components/PosQuickAccessSettings.tsx": {
@@ -2844,14 +2844,14 @@
     "semantic_hash": ""
   },
   "dist-installer/version.json": {
-    "mtime": 1790555353.5295238,
-    "seen": 1790557064.332903,
+    "mtime": 1790561882.9454274,
+    "seen": 1790562053.3021252,
     "ast_hash": "2604cdfd4b099a629a2a087a50123ceb",
     "semantic_hash": ""
   },
   "klikpos-releases/version.json": {
-    "mtime": 1790555353.5318232,
-    "seen": 1790557064.3329206,
+    "mtime": 1790561882.9476366,
+    "seen": 1790562053.3021355,
     "ast_hash": "2604cdfd4b099a629a2a087a50123ceb",
     "semantic_hash": ""
   },
@@ -2934,8 +2934,8 @@
     "semantic_hash": ""
   },
   "public/version.json": {
-    "mtime": 1790555353.525655,
-    "seen": 1790557064.3329425,
+    "mtime": 1790561882.9424243,
+    "seen": 1790562053.3021498,
     "ast_hash": "2604cdfd4b099a629a2a087a50123ceb",
     "semantic_hash": ""
   },
@@ -2946,8 +2946,8 @@
     "semantic_hash": ""
   },
   "version.json": {
-    "mtime": 1790555353.5180616,
-    "seen": 1790557064.3364623,
+    "mtime": 1790561882.9331317,
+    "seen": 1790562053.3029299,
     "ast_hash": "2604cdfd4b099a629a2a087a50123ceb",
     "semantic_hash": ""
   },
@@ -3090,20 +3090,20 @@
     "semantic_hash": ""
   },
   "src/app/tablet-pos/page.tsx": {
-    "mtime": 1790551991.4542246,
-    "seen": 1790553340.5115788,
-    "ast_hash": "26e08b99a2f9c03b18a9de00fe3b72e4",
+    "mtime": 1790561088.0580165,
+    "seen": 1790562053.3023455,
+    "ast_hash": "6f7443e53092de628594beff66b65d4a",
     "semantic_hash": ""
   },
   "venematic-desktop/src/app/tablet-pos/page.tsx": {
-    "mtime": 1790540928.9902985,
-    "seen": 1790542421.3545759,
-    "ast_hash": "d5bbbdd3e3b2727c1bfea11e68eb9e98",
+    "mtime": 1790561088.0580165,
+    "seen": 1790562053.3027027,
+    "ast_hash": "6f7443e53092de628594beff66b65d4a",
     "semantic_hash": ""
   },
   "venematic-desktop/version.json": {
-    "mtime": 1790555353.8657973,
-    "seen": 1790557064.3364573,
+    "mtime": 1790561883.4854283,
+    "seen": 1790562053.3029273,
     "ast_hash": "2604cdfd4b099a629a2a087a50123ceb",
     "semantic_hash": ""
   },
@@ -3189,6 +3189,12 @@
     "mtime": 1790554706.4749093,
     "seen": 1790557064.3359306,
     "ast_hash": "2d153c7d20c260d158231028a8f318a0",
+    "semantic_hash": ""
+  },
+  "Logo Klik-POS/K logo white mini.png": {
+    "mtime": 1790561971.6669028,
+    "seen": 1790562053.3032162,
+    "ast_hash": "25a0aff8bfa1b9466ac54ff227a24d61",
     "semantic_hash": ""
   }
 }
