@@ -19,10 +19,13 @@ foreach ($f in $allFolders) {
 }
 
 # 2. Origenes de archivos binarios
-$srcDesktopSetup = Join-Path $root "dist-installer\KlikPOS-Enterprise-Setup-v2.4.6.exe"
-if (-not (Test-Path $srcDesktopSetup)) {
-    $srcDesktopSetup = Join-Path $root "dist-installer\KlikPOS_Setup_v2.4.0.exe"
+$setups = Get-ChildItem -Path (Join-Path $root "dist-installer") -Filter "KlikPOS-Enterprise-Setup-*.exe" | Sort-Object Name -Descending
+if ($setups.Count -gt 0) {
+    $srcDesktopSetup = $setups[0].FullName
+} else {
+    $srcDesktopSetup = Join-Path $root "dist-installer\KlikPOS-Enterprise-Setup-v2.4.7.exe"
 }
+Write-Host "Instalador Desktop detectado: $srcDesktopSetup" -ForegroundColor Gray
 
 $srcSateliteApk = Join-Path $root "dist-apk\KlikPOS_Movil_Satelite.apk"
 $srcFullApk     = Join-Path $root "dist-apk\KlikPOS_Movil_Full.apk"

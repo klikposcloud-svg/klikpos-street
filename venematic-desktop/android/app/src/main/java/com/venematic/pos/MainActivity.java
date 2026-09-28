@@ -67,9 +67,10 @@ public class MainActivity extends BridgeActivity {
                                                   .replace("\r", "");
                             String safeSender = sender.replace("\\", "\\\\")
                                                       .replace("\"", "\\\"");
-                            String script = "window.dispatchEvent(new CustomEvent('venematic:sms_received', { detail: { body: \"" + safeBody + "\", sender: \"" + safeSender + "\" } }));";
+                            String script = "window.dispatchEvent(new CustomEvent('venematic:sms_received', { detail: { body: \"" + safeBody + "\", sender: \"" + safeSender + "\" } }));" +
+                                            "window.dispatchEvent(new CustomEvent('klikpos:sms_received', { detail: { body: \"" + safeBody + "\", sender: \"" + safeSender + "\" } }));";
                             webView.evaluateJavascript(script, null);
-                            Log.d(TAG, "Evento venematic:sms_received inyectado al WebView con éxito");
+                            Log.d(TAG, "Eventos venematic:sms_received y klikpos:sms_received inyectados al WebView con éxito");
                         }
                     } catch (Exception e) {
                         Log.e(TAG, "Error evaluando script en WebView", e);

@@ -2038,11 +2038,13 @@
     }
 
     // Escuchador nativo para Android Bridge
-    window.addEventListener('venematic:sms_received', function(e) {
+    function onNativeSmsReceived(e) {
       if (e.detail && e.detail.body) {
         handleSmsPaymentDetected(e.detail.body, e.detail.sender || 'SMS');
       }
-    });
+    }
+    window.addEventListener('klikpos:sms_received', onNativeSmsReceived);
+    window.addEventListener('venematic:sms_received', onNativeSmsReceived);
   </script>
 </body>
 </html>
