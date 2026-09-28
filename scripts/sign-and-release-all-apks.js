@@ -174,14 +174,23 @@ function buildPosApk() {
   fs.copyFileSync(rawApk, signedPosApk);
   verifyApk(signedPosApk);
 
-  // Distribuir a combos
+  // Distribuir a combos y variantes
   const targets = [
     path.join(distDir, 'KlikPOS_Movil_Satelite.apk'),
-    path.join(combo3Folder, 'KlikPOS_Movil_Full.apk'),
-    path.join(combo1Folder, 'KlikPOS_Movil_Satelite.apk'),
-    path.join(combo2Folder, 'KlikPOS_Movil_Satelite.apk')
+    path.join(distFolder, '01_Combo_Basico_Desktop_Satelite', 'KlikPOS_Movil_Satelite.apk'),
+    path.join(distFolder, '01_KlikPOS_Satelite_PC_Contingencia', 'KlikPOS_Movil_Satelite.apk'),
+    path.join(distFolder, '02_Combo_Empresarial_Full', 'KlikPOS_Movil_Satelite.apk'),
+    path.join(distFolder, '02_Combo_Empresarial_Full', 'KlikPOS_Movil_Administrador.apk'),
+    path.join(distFolder, '03_KlikPOS_Tablet_Standalone_Mesas', 'KlikPOS_Tablet_Standalone.apk'),
+    path.join(distFolder, '03_KlikPOS_Tablet_Standalone_Mesas', 'KlikPOS_Tablet_Standalone_Mesas.apk'),
+    path.join(distFolder, '03_Movil_Full_Autonomo', 'KlikPOS_Movil_Full.apk'),
+    path.join(distFolder, '04_KlikPOS_Movil_Full_Autonomo_Nube', 'KlikPOS_Movil_Full.apk'),
+    path.join(distFolder, '04_KlikPOS_Movil_Full_Autonomo_Nube', 'KlikPOS_Movil_Full_Autonomo.apk'),
+    path.join(distFolder, '05_KlikPOS_Movil_Full_Para_PC', 'KlikPOS_Movil_Full.apk'),
+    path.join(distFolder, '05_KlikPOS_Movil_Full_Para_PC', 'KlikPOS_Movil_Full_PC.apk')
   ];
   for (const t of targets) {
+    fs.mkdirSync(path.dirname(t), { recursive: true });
     fs.copyFileSync(signedPosApk, t);
     console.log('  [✓] Copiado a: ' + t);
   }
