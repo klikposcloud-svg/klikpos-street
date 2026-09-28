@@ -107,6 +107,14 @@ async function main() {
     await uploadAsset(release, sateliteApkPath, sateliteName, 'application/vnd.android.package-archive');
   }
 
+  // 3d. Subir APK Android Tablet POS & Mesas
+  const tabletApkPath = path.resolve(__dirname, '../DISTRIBUCION_KLIKPOS/03_KlikPOS_Tablet_Standalone_Mesas/KlikPOS_Tablet_Standalone_Mesas.apk');
+  if (fs.existsSync(tabletApkPath)) {
+    const tabletName = 'KlikPOS_Tablet_Standalone_Mesas.apk';
+    console.log(`[4d/5] Subiendo APK Tablet & Mesas: ${tabletName} (${(fs.statSync(tabletApkPath).size / (1024*1024)).toFixed(2)} MB)...`);
+    await uploadAsset(release, tabletApkPath, tabletName, 'application/vnd.android.package-archive');
+  }
+
   // 4. Verificación en vivo del endpoint remoto
   console.log(`[5/5] Verificando disponibilidad pública del manifiesto en GitHub...`);
   try {

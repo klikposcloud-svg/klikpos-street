@@ -61,7 +61,7 @@ function syncAssetsBase() {
 // =============================================================================
 function buildKeygenApk() {
   console.log('\n===============================================================');
-  console.log('>>> [FASE 1/3] COMPILANDO: KLIKPOS KEYGEN RELEASE (com.klikpos.keygen)');
+  console.log('>>> [FASE 1/3] COMPILANDO: KLIKPOS KEYGEN (com.klikpos.keygen)');
   console.log('===============================================================');
 
   stopGradleDaemon();
@@ -150,11 +150,13 @@ function buildKeygenApk() {
 }
 
 // =============================================================================
-// FASE 2: KLIKPOS SATÉLITE SCANNER APK (com.klikpos.satelite)
+// FASE 2: KLIKPOS MÓVIL RETAIL & SCANNER (com.klikpos.movil)
+// Interfaz: scanner.html (Punto de venta móvil con inventario, escáner, balanza y sync PC)
 // =============================================================================
-function buildSateliteApk() {
+function buildMovilRetailApk() {
   console.log('\n===============================================================');
-  console.log('>>> [FASE 2/3] COMPILANDO: KLIKPOS SATÉLITE SCANNER (com.klikpos.satelite)');
+  console.log('>>> [FASE 2/3] COMPILANDO: KLIKPOS MÓVIL RETAIL & SCANNER (com.klikpos.movil)');
+  console.log('    (Punto de venta con Inventario, Balanza, Escáner y Conexión PC)');
   console.log('===============================================================');
 
   stopGradleDaemon();
@@ -167,25 +169,25 @@ function buildSateliteApk() {
   if (fs.existsSync(publicIndex)) bakIndex = fs.readFileSync(publicIndex, 'utf8');
 
   try {
-    let gradle = bakGradle.replace(/applicationId\s+"[^"]+"/, 'applicationId "com.klikpos.satelite"');
+    let gradle = bakGradle.replace(/applicationId\s+"[^"]+"/, 'applicationId "com.klikpos.movil"');
     fs.writeFileSync(appGradle, gradle, 'utf8');
 
-    const sateliteStrings = `<?xml version='1.0' encoding='utf-8'?>
+    const movilStrings = `<?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">KlikPOS Satélite</string>
-    <string name="title_activity_main">KlikPOS Satélite</string>
-    <string name="package_name">com.klikpos.satelite</string>
-    <string name="custom_url_scheme">com.klikpos.satelite</string>
+    <string name="app_name">KlikPOS Móvil</string>
+    <string name="title_activity_main">KlikPOS Móvil</string>
+    <string name="package_name">com.klikpos.movil</string>
+    <string name="custom_url_scheme">com.klikpos.movil</string>
 </resources>`;
-    fs.writeFileSync(stringsXml, sateliteStrings, 'utf8');
+    fs.writeFileSync(stringsXml, movilStrings, 'utf8');
 
-    // Inyectar scanner.html como pantalla principal para Satelite
+    // Inyectar scanner.html (Retail, Inventario, Balanza, Escáner, Venta) como pantalla principal
     const scannerHtmlSrc = path.join(publicDir, 'scanner.html');
     if (fs.existsSync(scannerHtmlSrc)) {
       fs.copyFileSync(scannerHtmlSrc, publicIndex);
     }
 
-    console.log('Ejecutando Gradle assembleRelease para KlikPOS Satélite...');
+    console.log('Ejecutando Gradle assembleRelease para KlikPOS Móvil Retail & Scanner...');
     execSync('cmd.exe /c ".\\gradlew.bat assembleRelease --no-daemon"', {
       cwd: androidDir,
       stdio: 'inherit',
@@ -193,22 +195,30 @@ function buildSateliteApk() {
     });
 
     const rawApk = path.join(androidDir, 'app', 'build', 'outputs', 'apk', 'release', 'app-release.apk');
+    const signedMovilApk = path.join(distDir, 'KlikPOS_Movil_Full.apk');
     const signedSateliteApk = path.join(distDir, 'KlikPOS_Movil_Satelite.apk');
 
+    fs.copyFileSync(rawApk, signedMovilApk);
     fs.copyFileSync(rawApk, signedSateliteApk);
-    verifyApk(signedSateliteApk);
+    verifyApk(signedMovilApk);
 
+    // Distribuir a los combos móviles y satélites
     const targets = [
       path.join(combo1Folder, 'KlikPOS_Movil_Satelite.apk'),
       path.join(combo1Contingencia, 'KlikPOS_Movil_Satelite.apk'),
-      path.join(combo2Folder, 'KlikPOS_Movil_Satelite.apk')
+      path.join(combo2Folder, 'KlikPOS_Movil_Satelite.apk'),
+      path.join(combo3Folder, 'KlikPOS_Movil_Full.apk'),
+      path.join(combo4Folder, 'KlikPOS_Movil_Full.apk'),
+      path.join(combo4Folder, 'KlikPOS_Movil_Full_Autonomo.apk'),
+      path.join(combo5Folder, 'KlikPOS_Movil_Full.apk'),
+      path.join(combo5Folder, 'KlikPOS_Movil_Full_PC.apk')
     ];
     for (const t of targets) {
-      fs.copyFileSync(signedSateliteApk, t);
+      fs.copyFileSync(signedMovilApk, t);
       console.log('  [✓] Copiado a: ' + t);
     }
 
-    console.log('>>> ¡KLIKPOS SATÉLITE SCANNER RELEASE APK GENERADA CON ÉXITO!');
+    console.log('>>> ¡KLIKPOS MÓVIL RETAIL & SCANNER RELEASE GENERADA CON ÉXITO!');
 
   } finally {
     fs.writeFileSync(appGradle, bakGradle, 'utf8');
@@ -219,11 +229,13 @@ function buildSateliteApk() {
 }
 
 // =============================================================================
-// FASE 3: KLIKPOS MÓVIL FULL / TABLET POS (com.klikpos.pos)
+// FASE 3: KLIKPOS TABLET POS & MESAS (com.klikpos.tablet)
+// Interfaz: tablet-pos.html (Docker lateral flotante, botón COBRAR, mesas y catálogo)
 // =============================================================================
-function buildPosApk() {
+function buildTabletMesasApk() {
   console.log('\n===============================================================');
-  console.log('>>> [FASE 3/3] COMPILANDO: KLIKPOS MÓVIL FULL & TABLET POS (com.klikpos.pos)');
+  console.log('>>> [FASE 3/3] COMPILANDO: KLIKPOS TABLET & MESAS (com.klikpos.tablet)');
+  console.log('    (Punto de Venta Tablet con Docker Flotante, Botón COBRAR y Mesas)');
   console.log('===============================================================');
 
   stopGradleDaemon();
@@ -233,25 +245,25 @@ function buildPosApk() {
   const bakStrings = fs.readFileSync(stringsXml, 'utf8');
 
   try {
-    let gradle = bakGradle.replace(/applicationId\s+"[^"]+"/, 'applicationId "com.klikpos.pos"');
+    let gradle = bakGradle.replace(/applicationId\s+"[^"]+"/, 'applicationId "com.klikpos.tablet"');
     fs.writeFileSync(appGradle, gradle, 'utf8');
 
-    const posStrings = `<?xml version='1.0' encoding='utf-8'?>
+    const tabletStrings = `<?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">KlikPOS Móvil</string>
-    <string name="title_activity_main">KlikPOS Móvil</string>
-    <string name="package_name">com.klikpos.pos</string>
-    <string name="custom_url_scheme">com.klikpos.pos</string>
+    <string name="app_name">KlikPOS Tablet</string>
+    <string name="title_activity_main">KlikPOS Tablet</string>
+    <string name="package_name">com.klikpos.tablet</string>
+    <string name="custom_url_scheme">com.klikpos.tablet</string>
 </resources>`;
-    fs.writeFileSync(stringsXml, posStrings, 'utf8');
+    fs.writeFileSync(stringsXml, tabletStrings, 'utf8');
 
-    // Inyectar tablet-pos.html como index.html para Movil Full
+    // Inyectar tablet-pos.html (Docker, Botón COBRAR, Mesas, Catálogo con fotos)
     const tabletHtmlSrc = path.join(publicDir, 'tablet-pos.html');
     if (fs.existsSync(tabletHtmlSrc)) {
       fs.copyFileSync(tabletHtmlSrc, publicIndex);
     }
 
-    console.log('Ejecutando Gradle assembleRelease para KlikPOS Móvil Full...');
+    console.log('Ejecutando Gradle assembleRelease para KlikPOS Tablet & Mesas...');
     execSync('cmd.exe /c ".\\gradlew.bat assembleRelease --no-daemon"', {
       cwd: androidDir,
       stdio: 'inherit',
@@ -259,27 +271,22 @@ function buildPosApk() {
     });
 
     const rawApk = path.join(androidDir, 'app', 'build', 'outputs', 'apk', 'release', 'app-release.apk');
-    const signedPosApk = path.join(distDir, 'KlikPOS_Movil_Full.apk');
+    const signedTabletApk = path.join(distDir, 'KlikPOS_Tablet_Standalone_Mesas.apk');
 
-    fs.copyFileSync(rawApk, signedPosApk);
-    verifyApk(signedPosApk);
+    fs.copyFileSync(rawApk, signedTabletApk);
+    verifyApk(signedTabletApk);
 
     const targets = [
       path.join(combo2Folder, 'KlikPOS_Movil_Administrador.apk'),
-      path.join(combo3Folder, 'KlikPOS_Movil_Full.apk'),
       path.join(combo3Mesas, 'KlikPOS_Tablet_Standalone.apk'),
-      path.join(combo3Mesas, 'KlikPOS_Tablet_Standalone_Mesas.apk'),
-      path.join(combo4Folder, 'KlikPOS_Movil_Full.apk'),
-      path.join(combo4Folder, 'KlikPOS_Movil_Full_Autonomo.apk'),
-      path.join(combo5Folder, 'KlikPOS_Movil_Full.apk'),
-      path.join(combo5Folder, 'KlikPOS_Movil_Full_PC.apk')
+      path.join(combo3Mesas, 'KlikPOS_Tablet_Standalone_Mesas.apk')
     ];
     for (const t of targets) {
-      fs.copyFileSync(signedPosApk, t);
+      fs.copyFileSync(signedTabletApk, t);
       console.log('  [✓] Copiado a: ' + t);
     }
 
-    console.log('>>> ¡KLIKPOS MÓVIL FULL RELEASE (com.klikpos.pos) GENERADA CON ÉXITO!');
+    console.log('>>> ¡KLIKPOS TABLET & MESAS RELEASE GENERADA CON ÉXITO!');
 
   } finally {
     fs.writeFileSync(appGradle, bakGradle, 'utf8');
@@ -289,12 +296,12 @@ function buildPosApk() {
 
 ensureKeystore();
 buildKeygenApk();
-buildSateliteApk();
-buildPosApk();
+buildMovilRetailApk();
+buildTabletMesasApk();
 
 console.log('\n===============================================================');
-console.log(' ¡LAS 3 APLICACIONES ANDROID RELEASE HAN SIDO COMPILADAS Y DISTRIBUIDAS!');
-console.log(' 1. KlikPOS Keygen       (Package: com.klikpos.keygen)   -> Herramientas');
-console.log(' 2. KlikPOS Satélite     (Package: com.klikpos.satelite) -> Scanner/Caja');
-console.log(' 3. KlikPOS Móvil Full   (Package: com.klikpos.pos)      -> POS Autónomo/Tablet');
+console.log(' ¡LAS 3 APLICACIONES ANDROID RELEASE HAN SIDO GENERADAS!');
+console.log(' 1. KlikPOS Keygen       (Package: com.klikpos.keygen)  -> Claves de Licencia');
+console.log(' 2. KlikPOS Móvil        (Package: com.klikpos.movil)   -> Retail, Inventario, Balanza, Escáner');
+console.log(' 3. KlikPOS Tablet Mesas (Package: com.klikpos.tablet)  -> Docker Lateral, Mesas, Botón COBRAR');
 console.log('===============================================================\n');
