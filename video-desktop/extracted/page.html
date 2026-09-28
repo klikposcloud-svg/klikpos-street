@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="es" data-theme="light" data-ui-style="industrial" data-theme-palette="petrol" data-industrial-bg="white" style="background-color: rgb(255, 255, 255); color: rgb(15, 23, 42); color-scheme: light; --industrial-bg: #ffffff; --industrial-card: #ffffff; --industrial-text: #0f172a; --industrial-text-muted: #475569; --industrial-border: #cbd5e1; --btn-primary-bg: #0e4f5a; --btn-primary-hover: #0a3d46; --btn-secondary-bg: #f1f5f9; --btn-secondary-border: #cbd5e1; --btn-secondary-text: #0f172a; --brand-primary: #0e4f5a; --brand-hover: #0a3d46; --brand-light: #e6f4f6; --brand-border: #7fc1cc; --brand-accent: #0a3d46; --brand-glow: rgba(14, 79, 90, 0.35); --brand-glass-border: rgba(127, 193, 204, 0.30); --color-brand-600: #0e4f5a; --color-brand-700: #0a3d46;">
+<head>
+
+
+<script src="/_next/static/chunks/app-pages-internals.js" async></script>
+
+
+<script>
+              (function() {
+                try {
+                  var t = localStorage.getItem('venematic_theme');
+                  // Preestablecido: SIEMPRE entrar en Modo Blanco Profesional por defecto
+                  if (!t || t !== 'dark' && t !== 'glass') {
+                    t = 'light';
+                    try { localStorage.setItem('venematic_theme', 'light'); } catch(e) {}
+                  }
+                  var p = localStorage.getItem('venematic_branding_palette') || 'petrol';
+                  var s = t === 'light' ? 'industrial' : (localStorage.getItem('venematic_ui_style') || 'industrial');
+                  var bgPreset = t === 'light' ? (localStorage.getItem('venematic_industrial_bg') || 'white') : (localStorage.getItem('venematic_industrial_bg') || 'white');
+                  var customBg = localStorage.getItem('venematic_custom_bg_color') || '#ffffff';
+
+                  var palettes = {
+                    petrol: { primary: '#0e4f5a', hover: '#0a3d46', light: '#e6f4f6', border: '#7fc1cc', accent: '#0a3d46', glow: 'rgba(14, 79, 90, 0.35)', glassBorder: 'rgba(127, 193, 204, 0.30)' },
+                    sky: { primary: '#0369a1', hover: '#075985', light: '#f0f9ff', border: '#7dd3fc', accent: '#0284c7', glow: 'rgba(2, 132, 199, 0.35)', glassBorder: 'rgba(56, 189, 248, 0.30)' },
+                    emerald: { primary: '#047857', hover: '#065f46', light: '#ecfdf5', border: '#6ee7b7', accent: '#059669', glow: 'rgba(5, 150, 105, 0.35)', glassBorder: 'rgba(52, 211, 153, 0.30)' },
+                    blue: { primary: '#1d4ed8', hover: '#1e40af', light: '#eff6ff', border: '#93c5fd', accent: '#2563eb', glow: 'rgba(37, 99, 235, 0.35)', glassBorder: 'rgba(96, 165, 250, 0.30)' },
+                    amber: { primary: '#b45309', hover: '#92400e', light: '#fffbeb', border: '#fcd34d', accent: '#d97706', glow: 'rgba(217, 119, 6, 0.35)', glassBorder: 'rgba(251, 191, 36, 0.30)' },
+                    ruby: { primary: '#b91c1c', hover: '#991b1b', light: '#fef2f2', border: '#fca5a5', accent: '#dc2626', glow: 'rgba(220, 38, 38, 0.35)', glassBorder: 'rgba(248, 113, 113, 0.30)' },
+                    purple: { primary: '#6d28d9', hover: '#5b21b6', light: '#f5f3ff', border: '#d8b4fe', accent: '#7c3aed', glow: 'rgba(124, 58, 237, 0.35)', glassBorder: 'rgba(192, 132, 252, 0.30)' },
+                    slate: { primary: '#334155', hover: '#1e293b', light: '#f8fafc', border: '#cbd5e1', accent: '#475569', glow: 'rgba(71, 85, 105, 0.35)', glassBorder: 'rgba(148, 163, 184, 0.30)' },
+                    teal: { primary: '#0f766e', hover: '#115e59', light: '#f0fdfa', border: '#5eead4', accent: '#0d9488', glow: 'rgba(13, 148, 136, 0.35)', glassBorder: 'rgba(45, 212, 191, 0.30)' },
+                    coral: { primary: '#c2410c', hover: '#9a3412', light: '#fff7ed', border: '#fdba74', accent: '#ea580c', glow: 'rgba(234, 88, 12, 0.35)', glassBorder: 'rgba(251, 146, 60, 0.30)' },
+                    indigo: { primary: '#4338ca', hover: '#3730a3', light: '#eef2ff', border: '#a5b4fc', accent: '#4f46e5', glow: 'rgba(79, 70, 229, 0.35)', glassBorder: 'rgba(129, 140, 248, 0.30)' }
+                  };
+                  var pal = palettes[p] || palettes.petrol;
+                  var root = document.documentElement;
+                  var isDark = t === 'dark' || t === 'glass' || s === 'glassmorphism';
+
+                  var bgThemes = {
+                    white: { bg: '#ffffff', card: '#ffffff', text: '#0f172a', muted: '#475569', border: '#cbd5e1', secBg: '#f1f5f9', secBorder: '#cbd5e1', secText: '#0f172a' },
+                    cream: { bg: '#f3eee7', card: '#ffffff', text: '#0f172a', muted: '#475569', border: '#ded8cd', secBg: '#ede8df', secBorder: '#ded8cd', secText: '#0f172a' },
+                    teal: { bg: '#f0fdfa', card: '#ffffff', text: '#042f2e', muted: '#115e59', border: '#99f6e4', secBg: '#e6fffa', secBorder: '#5eead4', secText: '#042f2e' },
+                    blue: { bg: '#f0f9ff', card: '#ffffff', text: '#082f49', muted: '#0369a1', border: '#bae6fd', secBg: '#e0f2fe', secBorder: '#7dd3fc', secText: '#082f49' },
+                    gray: { bg: '#f1f5f9', card: '#ffffff', text: '#0f172a', muted: '#475569', border: '#cbd5e1', secBg: '#e2e8f0', secBorder: '#cbd5e1', secText: '#0f172a' }
+                  };
+                  var ind = bgThemes[bgPreset] || bgThemes.white;
+                  if (bgPreset === 'custom' && customBg) {
+                    var hex = customBg.replace('#', '');
+                    if (hex.length === 3) hex = hex.split('').map(function(c) { return c + c; }).join('');
+                    var num = parseInt(hex, 16);
+                    var r = ((num >> 16) & 255) / 255;
+                    var g = ((num >> 8) & 255) / 255;
+                    var b = (num & 255) / 255;
+                    var lum = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+                    if (lum > 0.45) {
+                      ind = { bg: customBg, card: '#ffffff', text: '#0f172a', muted: '#475569', border: '#cbd5e1', secBg: '#f1f5f9', secBorder: '#cbd5e1', secText: '#0f172a' };
+                    } else {
+                      ind = { bg: customBg, card: '#132030', text: '#ffffff', muted: '#cbd5e1', border: '#2b3e55', secBg: '#1e2d40', secBorder: '#334a66', secText: '#ffffff' };
+                      isDark = true;
+                    }
+                  }
+
+                  root.setAttribute('data-theme', isDark ? 'dark' : 'light');
+                  root.setAttribute('data-ui-style', isDark ? 'glassmorphism' : s);
+                  root.setAttribute('data-theme-palette', p);
+                  root.setAttribute('data-industrial-bg', bgPreset);
+
+                  if (isDark) {
+                    root.classList.add('dark');
+                    root.style.backgroundColor = ind.bg || '#1a2636';
+                    root.style.color = ind.text || '#f8fafc';
+                    root.style.colorScheme = 'dark';
+                  } else {
+                    root.classList.remove('dark');
+                    root.style.backgroundColor = ind.bg;
+                    root.style.color = ind.text;
+                    root.style.colorScheme = 'light';
+                  }
+
+                  root.style.setProperty('--industrial-bg', ind.bg);
+                  root.style.setProperty('--industrial-card', ind.card);
+                  root.style.setProperty('--industrial-text', ind.text);
+                  root.style.setProperty('--industrial-text-muted', ind.muted);
+                  root.style.setProperty('--industrial-border', ind.border);
+                  root.style.setProperty('--btn-primary-bg', pal.primary);
+                  root.style.setProperty('--btn-primary-hover', pal.hover);
+                  root.style.setProperty('--btn-secondary-bg', ind.secBg);
+                  root.style.setProperty('--btn-secondary-border', ind.secBorder);
+                  root.style.setProperty('--btn-secondary-text', ind.secText);
+
+                  root.style.setProperty('--brand-primary', pal.primary);
+                  root.style.setProperty('--brand-hover', pal.hover);
+                  root.style.setProperty('--brand-light', pal.light);
+                  root.style.setProperty('--brand-border', pal.border);
+                  root.style.setProperty('--brand-accent', pal.accent);
+                  root.style.setProperty('--brand-glow', pal.glow);
+                  root.style.setProperty('--brand-glass-border', pal.glassBorder);
+                  root.style.setProperty('--color-brand-600', pal.primary);
+                  root.style.setProperty('--color-brand-700', pal.hover);
+                  root.style.setProperty('--btn-primary-bg', pal.primary);
+                  root.style.setProperty('--btn-primary-hover', pal.hover);
+                } catch(e) {}
+              })();
+            </script>
+<script src="/_next/static/chunks/polyfills.js" nomodule></script>
+</head>
+<body>
+<div class="h-screen w-screen flex flex-col items-center justify-center font-sans select-none overflow-hidden bg-white" style="background:linear-gradient(145deg, #f8fafc 0%, #ffffff 50%, #f1f5f9 100%);opacity:1;transition:opacity 0.35s ease"><div style="position:absolute;top:-10%;left:-10%;width:50vw;height:50vw;max-width:400px;max-height:400px;border-radius:50%;background:radial-gradient(circle, rgba(14,79,90,0.06) 0%, transparent 70%);filter:blur(40px);pointer-events:none"></div><div style="position:absolute;bottom:-10%;right:-10%;width:45vw;height:45vw;max-width:360px;max-height:360px;border-radius:50%;background:radial-gradient(circle, rgba(2,132,199,0.06) 0%, transparent 70%);filter:blur(40px);pointer-events:none"></div><div class="flex flex-col items-center gap-5 z-10"><div class="p-4 rounded-3xl bg-white border border-slate-200/90 shadow-lg flex items-center justify-center transition-transform hover:scale-105"><img src="http://localhost:3000/brand/klikpos-logo-dark.png" alt="KLIK POS" class="h-12 sm:h-14 w-auto object-contain"></div><div class="text-center"><h1 class="text-2xl font-black text-slate-900 tracking-tight">KLIK-POS</h1><p class="text-[11px] font-bold text-slate-500 tracking-widest uppercase mt-1">Punto de Venta Profesional · Terminal Local</p></div><div class="w-56 mt-2"><div class="h-1.5 rounded-full bg-slate-200/80 overflow-hidden"><div class="h-full rounded-full bg-gradient-to-r from-sky-600 to-teal-600 transition-all duration-300" style="width:0%"></div></div><p class="text-center mt-2.5 text-xs text-slate-500 font-semibold tracking-normal">Iniciando sistema...</p></div></div><p class="absolute bottom-7 text-[11px] text-slate-400 font-bold tracking-wider uppercase">v2.0 · Modo Blanco Profesional</p></div><script src="/_next/static/chunks/webpack.js?v=1790629133387" async></script>
+</body>
+</html>

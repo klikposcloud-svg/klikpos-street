@@ -9,16 +9,18 @@ import {
   BarElement,
   LineElement,
   PointElement,
+  ArcElement,
   Title,
   Tooltip,
   Legend,
   Filler,
 } from 'chart.js'
-import { Bar, Line } from 'react-chartjs-2'
+import { Bar, Line, Doughnut } from 'react-chartjs-2'
 import { jsPDF } from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import { AnalyticsService, type CurrencySummary, type IGTFCalculation, type HourlyHeatmapData, type DailyTrend } from '@/lib/utils/analytics-service'
 import { venematicDB } from '@/lib/indexeddb/db'
+import { db } from '@/lib/db'
 
 ChartJS.register(
   CategoryScale,
@@ -26,6 +28,7 @@ ChartJS.register(
   BarElement,
   LineElement,
   PointElement,
+  ArcElement,
   Title,
   Tooltip,
   Legend,
@@ -69,6 +72,7 @@ export default function AnalyticsPage() {
   const [totalSalesBS, setTotalSalesBS] = useState(0)
   const [totalTransactions, setTotalTransactions] = useState(0)
   const [avgTicketUSD, setAvgTicketUSD] = useState(0)
+  const [topProducts, setTopProducts] = useState<{ name: string; qty: number; totalUSD: number }[]>([])
 
   const dateRange = useMemo(() => {
     const now = new Date()
@@ -119,6 +123,27 @@ export default function AnalyticsPage() {
     setTotalSalesBS(data.totalSalesBS)
     setTotalTransactions(data.totalTransactions)
     setAvgTicketUSD(data.avgTicketUSD)
+
+    // Cargar y computar Top Productos Más Vendidos del período
+    try {
+      const allSales = await db.sales.toArray()
+      const prodMap = new Map<string, { name: string; qty: number; totalUSD: number }>()
+      allSales.forEach((s: any) => {
+        const d = new Date(s.timestamp || s.createdAt || Date.now()).toISOString().split('T')[0]
+        if (d >= dateRange.start && d <= dateRange.end && Array.isArray(s.items)) {
+          s.items.forEach((it: any) => {
+            const name = it.name || 'Producto'
+            const prev = prodMap.get(name) || { name, qty: 0, totalUSD: 0 }
+            prev.qty += it.qty || 1
+            prev.totalUSD += (it.priceUSD || 0) * (it.qty || 1)
+            prodMap.set(name, prev)
+          })
+        }
+      })
+      const sorted = Array.from(prodMap.values()).sort((a, b) => b.qty - a.qty).slice(0, 6)
+      setTopProducts(sorted)
+    } catch {}
+
     setLoading(false)
   }, [dateRange])
 
@@ -390,24 +415,24 @@ export default function AnalyticsPage() {
           <div className="card">
             <h2 className="text-lg font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2">
               <span className="text-xl">💱</span>
-              Resumen de Divisas
+              Resumen de Divisas y Medios de Pago
             </h2>
             <div className="space-y-3">
               {currencySummary.map((item) => (
-                <div key={item.method} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700/50 rounded-lg">
+                <div key={item.method} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700/50 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
                   <div className="flex items-center gap-3">
                     <span className="text-2xl">{item.icon}</span>
                     <div>
-                      <p className="text-sm font-medium text-slate-800 dark:text-white">{item.label}</p>
-                      <p className="text-xs text-slate-500 dark:text-slate-400">{item.transactionCount} transacciones</p>
+                      <p className="text-sm font-black text-slate-800 dark:text-white">{item.label}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">{item.transactionCount} operaciones</p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm font-bold text-slate-800 dark:text-white">${item.totalUSD.toFixed(2)}</p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">Bs. {item.totalBS.toFixed(2)}</p>
-                    <div className="w-16 h-1.5 bg-slate-200 dark:bg-slate-600 rounded-full mt-1 ml-auto">
+                    <p className="text-sm font-black font-mono text-slate-800 dark:text-white">${item.totalUSD.toFixed(2)}</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 font-mono">Bs. {item.totalBS.toFixed(2)}</p>
+                    <div className="w-20 h-2 bg-slate-200 dark:bg-slate-600 rounded-full mt-1.5 ml-auto overflow-hidden">
                       <div
-                        className="h-full bg-emerald-500 rounded-full"
+                        className="h-full bg-emerald-500 rounded-full transition-all duration-500"
                         style={{ width: `${item.percentage}%` }}
                       />
                     </div>
@@ -423,14 +448,82 @@ export default function AnalyticsPage() {
             </div>
           </div>
 
-          <div className="card">
-            <h2 className="text-lg font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2">
-              <span className="text-xl">📊</span>
-              Distribución por Método de Pago
-            </h2>
-            <div className="h-64">
+          {/* Gráfico Circular: Distribución de Métodos de Pago */}
+          <div className="card flex flex-col justify-between">
+            <div className="flex items-center justify-between mb-2">
+              <h2 className="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                <span className="text-xl">🍩</span>
+                Distribución de Cobros (Circular)
+              </h2>
+              <span className="text-xs font-mono font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-md">
+                ${totalSalesUSD.toFixed(2)}
+              </span>
+            </div>
+
+            <div className="relative h-64 flex items-center justify-center my-2">
               {currencySummary.length > 0 ? (
-                <Bar data={paymentChartData} options={barChartOptions} />
+                <>
+                  <Doughnut
+                    data={{
+                      labels: currencySummary.map((c) => c.label),
+                      datasets: [
+                        {
+                          data: currencySummary.map((c) => c.totalUSD),
+                          backgroundColor: [
+                            '#10b981',
+                            '#0284c7',
+                            '#f59e0b',
+                            '#8b5cf6',
+                            '#ec4899',
+                            '#64748b',
+                          ],
+                          borderColor: [
+                            '#059669',
+                            '#0369a1',
+                            '#d97706',
+                            '#7c3aed',
+                            '#db2777',
+                            '#475569',
+                          ],
+                          borderWidth: 2,
+                          hoverOffset: 6,
+                        },
+                      ],
+                    }}
+                    options={{
+                      responsive: true,
+                      maintainAspectRatio: false,
+                      cutout: '68%',
+                      plugins: {
+                        legend: {
+                          position: 'bottom',
+                          labels: {
+                            font: { family: 'Montserrat', size: 10, weight: 600 },
+                            boxWidth: 12,
+                            padding: 10,
+                          },
+                        },
+                        tooltip: {
+                          callbacks: {
+                            label: function (ctx) {
+                              const val = ctx.parsed || 0;
+                              const pct = totalSalesUSD > 0 ? ((val / totalSalesUSD) * 100).toFixed(1) : '0';
+                              return ` ${ctx.label}: $${val.toFixed(2)} (${pct}%)`;
+                            },
+                          },
+                        },
+                      },
+                    }}
+                  />
+                  <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center pb-8">
+                    <span className="text-[10px] uppercase tracking-wider font-extrabold text-slate-400">
+                      Total Facturado
+                    </span>
+                    <span className="font-mono font-black text-base text-slate-900 dark:text-white leading-tight">
+                      ${totalSalesUSD.toFixed(2)}
+                    </span>
+                  </div>
+                </>
               ) : (
                 <div className="h-full flex items-center justify-center text-slate-400 dark:text-slate-500">
                   <p className="text-sm">Sin datos disponibles</p>
@@ -439,6 +532,80 @@ export default function AnalyticsPage() {
             </div>
           </div>
         </div>
+
+        {/* Gráfico 3: Top Productos Más Vendidos del Período */}
+        {topProducts.length > 0 && (
+          <div className="card mb-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                <span className="text-xl">🏆</span>
+                Top Productos Más Vendidos en el Período
+              </h2>
+              <span className="text-xs font-bold text-slate-500">
+                Ranking por unidades facturadas
+              </span>
+            </div>
+
+            <div className="h-56">
+              <Bar
+                data={{
+                  labels: topProducts.map((p) => p.name),
+                  datasets: [
+                    {
+                      label: 'Unidades Vendidas',
+                      data: topProducts.map((p) => p.qty),
+                      backgroundColor: [
+                        'rgba(16, 185, 129, 0.85)',
+                        'rgba(2, 132, 199, 0.85)',
+                        'rgba(245, 158, 11, 0.85)',
+                        'rgba(139, 92, 246, 0.85)',
+                        'rgba(236, 72, 153, 0.85)',
+                        'rgba(100, 116, 139, 0.85)',
+                      ],
+                      borderColor: [
+                        '#059669',
+                        '#0284c7',
+                        '#d97706',
+                        '#7c3aed',
+                        '#db2777',
+                        '#475569',
+                      ],
+                      borderWidth: 2,
+                      borderRadius: 8,
+                    },
+                  ],
+                }}
+                options={{
+                  indexAxis: 'y',
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                      callbacks: {
+                        label: function (ctx) {
+                          const idx = ctx.dataIndex;
+                          const p = topProducts[idx];
+                          return ` ${p.qty} unidades | $${p.totalUSD.toFixed(2)} acumulados`;
+                        },
+                      },
+                    },
+                  },
+                  scales: {
+                    x: {
+                      ticks: { font: { family: 'monospace', size: 11 }, color: '#64748b' },
+                      grid: { color: 'rgba(148, 163, 184, 0.1)' },
+                    },
+                    y: {
+                      ticks: { font: { weight: 'bold', size: 11 }, color: '#64748b' },
+                      grid: { display: false },
+                    },
+                  },
+                }}
+              />
+            </div>
+          </div>
+        )}
 
         {igtf && igtf.taxableTransactions > 0 && (
           <div className="card mb-6 border-red-200 dark:border-red-900/30">

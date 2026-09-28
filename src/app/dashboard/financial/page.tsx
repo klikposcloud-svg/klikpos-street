@@ -4,6 +4,20 @@ import React, { useState, useEffect, useMemo } from 'react';
 import FeatureGate from '@/components/FeatureGate';
 import { financialDB, OperationalExpense } from '@/lib/db/financial-db';
 import { db } from '@/lib/db';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement,
+  PointElement,
+  LineElement,
+  Filler,
+} from 'chart.js';
+import { Bar, Doughnut } from 'react-chartjs-2';
 import { 
   DollarSign, 
   TrendingUp, 
@@ -19,8 +33,22 @@ import {
   ArrowUpRight, 
   ArrowDownRight,
   Filter,
-  CreditCard
+  CreditCard,
+  BarChart3
 } from 'lucide-react';
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  PointElement,
+  LineElement,
+  ArcElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+);
 
 export default function FinancialDashboardPage() {
   const [bcvRate, setBcvRate] = useState<number>(848.55);
@@ -305,6 +333,191 @@ export default function FinancialDashboardPage() {
             </div>
             <div className="mt-2 text-[11px] text-emerald-100">
               Utilidad neta de bolsillo disponible
+            </div>
+          </div>
+        </div>
+
+        {/* ========================================================================= */}
+        {/* SECCIÓN VISUAL DE GRÁFICOS INTERACTIVOS (CIRCULAR Y BARRAS WOW)          */}
+        {/* ========================================================================= */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+          {/* Gráfico 1: Estructura Financiera & Margen de Rentabilidad (Doughnut Circular) */}
+          <div className="lg:col-span-4 bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col justify-between">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+              <div className="flex items-center gap-2">
+                <PieChart className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                <h3 className="text-xs font-black uppercase tracking-wider text-slate-800 dark:text-white">
+                  Estructura del Ingreso
+                </h3>
+              </div>
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 font-mono">
+                {metrics.marginPct.toFixed(1)}% Margen
+              </span>
+            </div>
+
+            <div className="relative h-56 flex items-center justify-center my-3">
+              <Doughnut
+                data={{
+                  labels: ['Ganancia Neta', 'Costo de Mercancía', 'Gastos Operativos'],
+                  datasets: [
+                    {
+                      data: [
+                        Math.max(0, metrics.netProfitUSD),
+                        metrics.cogsUSD,
+                        metrics.totalExpensesUSD,
+                      ],
+                      backgroundColor: ['#10b981', '#f59e0b', '#f43f5e'],
+                      borderColor: ['#059669', '#d97706', '#e11d48'],
+                      borderWidth: 2,
+                      hoverOffset: 6,
+                    },
+                  ],
+                }}
+                options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  cutout: '72%',
+                  plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                      callbacks: {
+                        label: function (ctx) {
+                          const val = ctx.parsed || 0;
+                          const total = metrics.grossIncomeUSD || 1;
+                          const pct = ((val / total) * 100).toFixed(1);
+                          return ` ${ctx.label}: $${val.toFixed(2)} (${pct}%)`;
+                        },
+                      },
+                    },
+                  },
+                }}
+              />
+              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center">
+                <span className="text-[10px] uppercase tracking-wider font-extrabold text-slate-400">
+                  Ingreso Total
+                </span>
+                <span className="font-mono font-black text-base text-slate-900 dark:text-white leading-tight">
+                  ${metrics.grossIncomeUSD.toFixed(2)}
+                </span>
+                <span className="font-mono text-[9px] font-bold text-slate-500">
+                  Bs. {metrics.grossIncomeVES.toLocaleString('es-VE', { maximumFractionDigits: 0 })}
+                </span>
+              </div>
+            </div>
+
+            {/* Leyenda Visual del Gráfico Circular */}
+            <div className="grid grid-cols-3 gap-2 pt-3 border-t border-slate-100 dark:border-slate-800 text-center">
+              <div className="p-2 rounded-xl bg-emerald-50/60 dark:bg-emerald-950/30">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block mb-1" />
+                <span className="text-[9px] font-extrabold uppercase text-slate-500 block">Ganancia</span>
+                <span className="font-mono font-black text-xs text-emerald-600 dark:text-emerald-400">
+                  ${Math.max(0, metrics.netProfitUSD).toFixed(0)}
+                </span>
+              </div>
+              <div className="p-2 rounded-xl bg-amber-50/60 dark:bg-amber-950/30">
+                <span className="w-2 h-2 rounded-full bg-amber-500 inline-block mb-1" />
+                <span className="text-[9px] font-extrabold uppercase text-slate-500 block">Costos</span>
+                <span className="font-mono font-black text-xs text-amber-600 dark:text-amber-400">
+                  ${metrics.cogsUSD.toFixed(0)}
+                </span>
+              </div>
+              <div className="p-2 rounded-xl bg-rose-50/60 dark:bg-rose-950/30">
+                <span className="w-2 h-2 rounded-full bg-rose-500 inline-block mb-1" />
+                <span className="text-[9px] font-extrabold uppercase text-slate-500 block">Gastos</span>
+                <span className="font-mono font-black text-xs text-rose-600 dark:text-rose-400">
+                  ${metrics.totalExpensesUSD.toFixed(0)}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Gráfico 2: Comparativa de Ingresos vs Utilidad Real (Barras Duales) */}
+          <div className="lg:col-span-8 bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col justify-between">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+              <div className="flex items-center gap-2">
+                <BarChart3 className="w-4 h-4 text-sky-600 dark:text-sky-400" />
+                <h3 className="text-xs font-black uppercase tracking-wider text-slate-800 dark:text-white">
+                  Comparativa de Rendimiento Financiero
+                </h3>
+              </div>
+              <div className="flex items-center gap-3 text-[11px] font-bold">
+                <span className="flex items-center gap-1.5 text-blue-600 dark:text-blue-400">
+                  <span className="w-2.5 h-2.5 rounded-sm bg-blue-500" /> Venta Bruta
+                </span>
+                <span className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400">
+                  <span className="w-2.5 h-2.5 rounded-sm bg-emerald-500" /> Ganancia Neta
+                </span>
+              </div>
+            </div>
+
+            <div className="h-64 pt-3">
+              <Bar
+                data={{
+                  labels: ['Ventas Brutas', 'Costo Reposición', 'Gastos Fijos/Variables', 'Utilidad Neta'],
+                  datasets: [
+                    {
+                      label: 'Monto en USD ($)',
+                      data: [
+                        metrics.grossIncomeUSD,
+                        metrics.cogsUSD,
+                        metrics.totalExpensesUSD,
+                        Math.max(0, metrics.netProfitUSD),
+                      ],
+                      backgroundColor: [
+                        'rgba(59, 130, 246, 0.85)',
+                        'rgba(245, 158, 11, 0.85)',
+                        'rgba(244, 63, 94, 0.85)',
+                        'rgba(16, 185, 129, 0.85)',
+                      ],
+                      borderColor: [
+                        '#2563eb',
+                        '#d97706',
+                        '#e11d48',
+                        '#059669',
+                      ],
+                      borderWidth: 2,
+                      borderRadius: 10,
+                    },
+                  ],
+                }}
+                options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                      callbacks: {
+                        label: function (ctx) {
+                          const val = ctx.parsed.y || 0;
+                          const ves = val * bcvRate;
+                          return ` Monto: $${val.toFixed(2)} | Bs. ${ves.toLocaleString('es-VE', { maximumFractionDigits: 2 })}`;
+                        },
+                      },
+                    },
+                  },
+                  scales: {
+                    x: {
+                      ticks: { font: { weight: 'bold', size: 11 }, color: '#64748b' },
+                      grid: { display: false },
+                    },
+                    y: {
+                      ticks: {
+                        font: { family: 'monospace', size: 11 },
+                        color: '#64748b',
+                        callback: function (value) {
+                          return '$' + value;
+                        },
+                      },
+                      grid: { color: 'rgba(148, 163, 184, 0.1)' },
+                    },
+                  },
+                }}
+              />
+            </div>
+
+            <div className="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-500 font-medium">
+              <span>Indicador de Salud de Caja: <strong>{metrics.marginPct >= 25 ? '🟢 Excelente' : metrics.marginPct >= 15 ? '🟡 Estable' : '🔴 Ajustar Costos'}</strong></span>
+              <span>Margen sobre Ventas: <strong className="text-slate-800 dark:text-white font-mono">{metrics.marginPct.toFixed(1)}%</strong></span>
             </div>
           </div>
         </div>

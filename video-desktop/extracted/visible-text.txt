@@ -1,0 +1,4 @@
+[h1] KLIK-POS
+[p] Punto de Venta Profesional · Terminal Local
+[p] Iniciando sistema...
+[p] v2.0 · Modo Blanco Profesional
