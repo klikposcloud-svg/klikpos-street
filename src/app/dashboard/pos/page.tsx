@@ -48,6 +48,8 @@ import {
   ShieldCheck,
   Palette,
 } from 'lucide-react';
+import { Icon } from '@iconify/react';
+import IconSelectorModal from '@/components/pos/IconSelectorModal';
 import { scaleService, WeightReading } from '@/lib/hardware/scale';
 import { kickCashDrawer } from '@/lib/hardware/cash-drawer';
 import { LocalCustomer, LocalCashShift } from '@/lib/db';
@@ -93,6 +95,9 @@ const getCategoryBadgeColor = (category: string) => {
 };
 
 const getProductVectorIcon = (p: LocalProduct) => {
+  if (p.icon) {
+    return <Icon icon={p.icon} className="w-9 h-9 sm:w-11 sm:h-11" />;
+  }
   const text = `${p.category || ''} ${p.name || ''}`.toLowerCase();
   if (text.includes('café') || text.includes('cafe') || text.includes('espresso') || text.includes('latte') || text.includes('cappuccino')) {
     return <Coffee className="w-9 h-9 sm:w-11 sm:h-11 stroke-[1.5]" />;
@@ -138,6 +143,14 @@ const getProductVectorIcon = (p: LocalProduct) => {
 
 // Íconos Alternados entre Fill (Sólido) y Outline (Línea) idénticos a la imagen de referencia
 const getProductIconAlternated = (p: LocalProduct, isOutline: boolean) => {
+  if (p.icon) {
+    return (
+      <Icon
+        icon={p.icon}
+        className="w-12 h-12 text-[#1e293b] dark:text-slate-100 transition-transform duration-200"
+      />
+    );
+  }
   const text = `${p.category || ''} ${p.name || ''}`.toLowerCase();
 
   // 1. Café / Espresso / Té
@@ -499,15 +512,19 @@ export default function DesktopPosPage() {
   const [pagoMovilAutoConfirmation, setPagoMovilAutoConfirmation] = useState<PagoMovilConfirmation | null>(null);
   const [pagoMovilGmailConfigured] = useState<boolean>(() => pagoMovilMonitor.isConfigured());
 
-  // Modos de Vista del Catálogo POS (Cuadrícula, Lista Compacta, Botonera Táctil Express, Comida Rápida 3x3)
-  type PosViewMode = 'grid' | 'list' | 'touch' | 'fastfood';
+  // Modos de Vista del Catálogo POS (Cuadrícula, Lista Compacta, Minimalista, Comida Rápida, Gourmet Cápsula)
+  type PosViewMode = 'grid' | 'list' | 'touch' | 'fastfood' | 'capsule';
   const [posViewMode, setPosViewMode] = useState<PosViewMode>(() => {
     if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('klikpos_pos_view_mode');
-      if (saved === 'grid' || saved === 'list' || saved === 'touch' || saved === 'fastfood') return saved;
+      const saved = localStorage.getItem('klikpos_pos_view_mode') as PosViewMode;
+      if (saved === 'grid' || saved === 'list' || saved === 'touch' || saved === 'fastfood' || saved === 'capsule') return saved;
     }
     return 'grid';
   });
+
+  // Modal de Personalización de Íconos Iconify
+  const [iconSelectorProduct, setIconSelectorProduct] = useState<LocalProduct | null>(null);
+  const [showIconSelector, setShowIconSelector] = useState<boolean>(false);
 
   // Paleta de Color para Modo Minimalista ('category' = pasteles suaves por rubro, 'mono' = escala monocromática)
   const [minimalistColorPalette, setMinimalistColorPalette] = useState<'category' | 'mono'>(() => {
@@ -2626,6 +2643,20 @@ export default function DesktopPosPage() {
               <UtensilsCrossed className="w-3 h-3" />
               <span>Comida Rápida</span>
             </button>
+
+            <button
+              type="button"
+              onClick={() => handleSetPosViewMode('capsule')}
+              className={`flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-[11px] font-black transition-all cursor-pointer ${
+                posViewMode === 'capsule'
+                  ? 'bg-gradient-to-r from-amber-600 to-orange-600 text-white shadow-2xs'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+              }`}
+              title="Vista Gourmet en Cápsulas Horizontales (Estilo Bodegón & Glassmorphism)"
+            >
+              <Sparkles className="w-3 h-3 text-amber-300" />
+              <span>Gourmet</span>
+            </button>
           </div>
         </div>
 
@@ -2903,6 +2934,137 @@ export default function DesktopPosPage() {
                         <span className="text-[9.5px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-white/20 text-white truncate max-w-[120px]">
                           {p.category}
                         </span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* MODO 5: CÁPSULAS HORIZONTALES GOURMET / GLASSMORPHISM (ESTILO PREMIUM BODEGÓN) */}
+          {posViewMode === 'capsule' && (
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3 gap-3.5 content-start">
+              {filteredProducts.map((p, index) => {
+                const isLowStock = p.stock <= p.minStock;
+                const isFixed = p.isFixedPriceVES && p.fixedPriceVES;
+                const displayVES = isFixed ? p.fixedPriceVES! : (p.priceUSD * bcvRate);
+                const displayUSD = isFixed ? (p.fixedPriceVES! / bcvRate) : p.priceUSD;
+                const isAltTheme = index % 2 === 1;
+
+                return (
+                  <div
+                    key={p.id}
+                    onClick={() => addToCart(p, 1)}
+                    className={`relative rounded-[28px] p-3 shadow-xs hover:shadow-lg transition-all duration-200 active:scale-[0.98] cursor-pointer flex items-center gap-3.5 group select-none border ${
+                      isAltTheme
+                        ? 'bg-gradient-to-r from-sky-100 via-indigo-50 to-purple-100 dark:from-slate-800/90 dark:to-indigo-950/90 border-sky-200/60 dark:border-white/10'
+                        : 'bg-[#f8f6f0] dark:bg-slate-850 border-[#eae5d8] dark:border-slate-700/60'
+                    }`}
+                  >
+                    {/* Badge de Stock en la esquina superior derecha */}
+                    <div className="absolute top-2.5 right-3 flex items-center gap-1.5 z-10">
+                      {isFixed && (
+                        <span className="text-[8.5px] font-black px-1.5 py-0.5 rounded-md bg-amber-500 text-white shadow-2xs">
+                          🔒 Bs. Fijo
+                        </span>
+                      )}
+                      <span
+                        className={`text-[10.5px] font-bold px-2.5 py-0.5 rounded-full ${
+                          isAltTheme
+                            ? 'bg-slate-900/40 backdrop-blur-md text-white dark:bg-white/15'
+                            : 'bg-[#e5e0d2]/80 dark:bg-slate-700/80 text-slate-700 dark:text-slate-200'
+                        }`}
+                      >
+                        {p.stock} {p.unit === 'kg' ? 'kg' : 'uds'}
+                      </span>
+                    </div>
+
+                    {/* Botón Flotante para Personalizar Ícono */}
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setIconSelectorProduct(p);
+                        setShowIconSelector(true);
+                      }}
+                      className="absolute bottom-2.5 left-2.5 w-6 h-6 rounded-full bg-white/90 dark:bg-slate-800/90 text-slate-500 hover:text-sky-600 hover:scale-110 shadow-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all z-20"
+                      title="Personalizar Ícono Iconify de este Producto"
+                    >
+                      <Palette className="w-3.5 h-3.5" />
+                    </button>
+
+                    {/* Contenedor Izquierdo: Imagen / Ícono en Caja Blanca Redondeada */}
+                    <div className="w-28 h-28 shrink-0 bg-white dark:bg-slate-900/90 rounded-2xl p-2 flex items-center justify-center shadow-xs relative overflow-hidden border border-black/5 dark:border-white/5">
+                      {p.image && showImages ? (
+                        <img
+                          src={p.image}
+                          alt={p.name}
+                          className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          {getProductIconAlternated(p, index % 2 === 0)}
+                        </div>
+                      )}
+
+                      {/* Mini Dots de Carrusel */}
+                      <div className="absolute bottom-1 right-2 flex items-center gap-0.5 text-[8px] text-slate-400 dark:text-slate-500 font-mono select-none">
+                        <span>•••</span>
+                        <span className="text-[7px]">▶</span>
+                      </div>
+                    </div>
+
+                    {/* Contenedor Derecho: Cápsula Elevada de Datos */}
+                    <div
+                      className={`flex-1 min-w-0 rounded-2xl p-3 shadow-xs flex flex-col justify-between h-28 border ${
+                        isAltTheme
+                          ? 'bg-slate-900/60 dark:bg-slate-950/70 backdrop-blur-md border-white/15 text-white'
+                          : 'bg-white dark:bg-slate-900/70 border-white/80 dark:border-slate-700/50 text-slate-900 dark:text-slate-100'
+                      }`}
+                    >
+                      {/* Título a 2 Líneas */}
+                      <h4
+                        className={`font-bold text-[13px] leading-tight line-clamp-2 min-h-[32px] ${
+                          isAltTheme ? 'text-white' : 'text-slate-900 dark:text-slate-100'
+                        }`}
+                        title={p.name}
+                      >
+                        {p.name}
+                      </h4>
+
+                      {/* Precios & Badge de Categoría */}
+                      <div className="flex flex-col mt-auto pt-1">
+                        <span
+                          className={`text-[17px] font-black tracking-tight tabular-numbers leading-tight ${
+                            isAltTheme
+                              ? 'text-cyan-300 drop-shadow-[0_0_8px_rgba(103,232,249,0.35)]'
+                              : 'text-slate-950 dark:text-white'
+                          }`}
+                        >
+                          {formatVES(displayVES)}
+                        </span>
+
+                        <div className="flex items-center justify-between gap-1.5 mt-1">
+                          <span
+                            className={`text-[11px] font-bold ${
+                              isAltTheme ? 'text-cyan-100/70' : 'text-slate-500 dark:text-slate-400'
+                            }`}
+                          >
+                            ${displayUSD.toFixed(2)} USD
+                          </span>
+
+                          <span
+                            className={`text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider truncate max-w-[105px] ${
+                              isAltTheme
+                                ? 'bg-white/15 text-white border border-white/20'
+                                : 'bg-rose-50 dark:bg-rose-950/50 text-rose-700 dark:text-rose-300 border border-rose-200/60 dark:border-rose-900/50'
+                            }`}
+                          >
+                            {p.category}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -4926,6 +5088,22 @@ export default function DesktopPosPage() {
           </div>
         </div>
       )}
+
+      {/* ========================================================================= */}
+      {/* MODAL PERSONALIZADOR DE ÍCONOS ICONIFY                                     */}
+      {/* ========================================================================= */}
+      <IconSelectorModal
+        isOpen={showIconSelector}
+        onClose={() => {
+          setShowIconSelector(false);
+          setIconSelectorProduct(null);
+          loadData();
+        }}
+        product={iconSelectorProduct}
+        onIconSelected={async () => {
+          await loadData();
+        }}
+      />
     </div>
   );
 }

@@ -1,13 +1,30 @@
 'use client';
 
 import React from 'react';
+import { Icon } from '@iconify/react';
 
-export function getProductIcon(name: string, category: string = '', image?: string, sizeClass: string = 'w-16 h-16') {
+export function getProductIcon(name: string, category: string = '', image?: string, sizeClass: string = 'w-16 h-16', customIcon?: string) {
+  if (customIcon) {
+    return (
+      <div className={`${sizeClass} rounded-2xl bg-slate-100 dark:bg-slate-700/60 flex items-center justify-center text-3xl shadow-xs text-slate-800 dark:text-slate-100`}>
+        <Icon icon={customIcon} className="w-4/5 h-4/5" />
+      </div>
+    );
+  }
+
   if (image) {
     if (image.startsWith('data:') || image.startsWith('http://') || image.startsWith('https://') || image.startsWith('/')) {
       return (
         <div className={`${sizeClass} rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-700 shadow-xs flex items-center justify-center`}>
           <img src={image} alt={name} className="w-full h-full object-cover" />
+        </div>
+      );
+    }
+    // If it's an Iconify icon string (contains :)
+    if (image.includes(':')) {
+      return (
+        <div className={`${sizeClass} rounded-2xl bg-slate-100 dark:bg-slate-700/60 flex items-center justify-center text-3xl shadow-xs text-slate-800 dark:text-slate-100`}>
+          <Icon icon={image} className="w-4/5 h-4/5" />
         </div>
       );
     }
