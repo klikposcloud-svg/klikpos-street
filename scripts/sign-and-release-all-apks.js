@@ -27,7 +27,7 @@ process.env.ANDROID_HOME = 'C:\\Users\\pcpro\\AppData\\Local\\Android\\Sdk';
   fs.mkdirSync(d, { recursive: true });
 });
 
-// 1. Asegurar Keystore Release oficial
+// 1. Asegurar Keystore Release oficial KlikPOS
 function ensureKeystore() {
   if (!fs.existsSync(keystorePath)) {
     console.log('Generando Keystore Release Oficial: ' + keystorePath);
@@ -45,11 +45,11 @@ function signAndAlignApk(rawApkPath, finalApkPath) {
   }
 
   // Alinear a 4 bytes
-  console.log(`  [1/2] Alineando APK con zipalign: ${path.basename(finalApkPath)}...`);
+  console.log(`  [1/2] Alineando con zipalign: ${path.basename(finalApkPath)}...`);
   execSync(`"${zipalignExe}" -f -p 4 "${rawApkPath}" "${alignedApk}"`, { stdio: 'inherit' });
 
   // Firmar con Release Keystore V1 + V2 + V3
-  console.log(`  [2/2] Firmando con apksigner (V1 + V2 + V3 Release)...`);
+  console.log(`  [2/2] Firmando con apksigner (Esquema V1 + V2 + V3 Release KlikPOS)...`);
   execSync(`cmd.exe /c ""${apksignerBat}" sign --ks "${keystorePath}" --ks-key-alias klikpos --ks-pass pass:klikpos2026 --key-pass pass:klikpos2026 --v1-signing-enabled true --v2-signing-enabled true --v3-signing-enabled true "${alignedApk}""`, { stdio: 'inherit' });
 
   // Verificar firma
@@ -67,11 +67,11 @@ function stopGradleDaemon() {
 }
 
 // =============================================================================
-// A. COMPILAR KLIKPOS KEYGEN APK (LIMPIO DE PERMISOS SMS / SIN PLAY PROTECT RISK)
+// A. COMPILAR KLIKPOS KEYGEN APK (ID ÚNICO: com.klikpos.keygen - INDEPENDIENTE)
 // =============================================================================
 function buildKeygenApk() {
   console.log('\n===============================================================');
-  console.log('>>> [FASE 1] COMPILANDO: KLIKPOS KEYGEN (APK PARA CELULAR)');
+  console.log('>>> [FASE 1] COMPILANDO: KLIKPOS KEYGEN (ID: com.klikpos.keygen)');
   console.log('===============================================================');
 
   stopGradleDaemon();
@@ -82,7 +82,11 @@ function buildKeygenApk() {
   if (fs.existsSync(publicIndex)) bakIndex = fs.readFileSync(publicIndex, 'utf8');
 
   try {
-    // Strings
+    // 1. Cambiar applicationId a com.klikpos.keygen en build.gradle
+    let gradle = bakGradle.replace(/applicationId\s+"[^"]+"/, 'applicationId "com.klikpos.keygen"');
+    fs.writeFileSync(appGradle, gradle, 'utf8');
+
+    // 2. Strings para Keygen
     const keygenStrings = `<?xml version='1.0' encoding='utf-8'?>
 <resources>
     <string name="app_name">KlikPOS Keygen</string>
@@ -92,7 +96,7 @@ function buildKeygenApk() {
 </resources>`;
     fs.writeFileSync(stringsXml, keygenStrings, 'utf8');
 
-    // Manifest limpio (Sin SMS, sin Receiver, sin riesgo de Play Protect)
+    // 3. Manifest limpio (Sin SMS, sin Receiver, sin riesgo de Play Protect)
     const keygenManifest = `<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
@@ -122,12 +126,12 @@ function buildKeygenApk() {
 </manifest>`;
     fs.writeFileSync(manifestXml, keygenManifest, 'utf8');
 
-    // Inyectar HTML
+    // 4. Inyectar HTML de Keygen
     fs.mkdirSync(path.dirname(publicIndex), { recursive: true });
     fs.copyFileSync(path.join(root, 'public', 'keygen-app.html'), publicIndex);
 
-    // Compilar
-    console.log('Ejecutando Gradle assembleDebug...');
+    // 5. Compilar
+    console.log('Ejecutando Gradle assembleDebug para Keygen...');
     execSync('cmd.exe /c ".\\gradlew.bat assembleDebug --no-daemon"', {
       cwd: androidDir,
       stdio: 'inherit',
@@ -150,7 +154,7 @@ function buildKeygenApk() {
       console.log('  [✓] Copiado a: ' + t);
     }
 
-    console.log('>>> ¡KLIKPOS KEYGEN APK FIRMADA Y BLINDADA CON ÉXITO!');
+    console.log('>>> ¡KLIKPOS KEYGEN APK (com.klikpos.keygen) FIRMADA CON ÉXITO!');
 
   } finally {
     fs.writeFileSync(appGradle, bakGradle, 'utf8');
@@ -161,11 +165,11 @@ function buildKeygenApk() {
 }
 
 // =============================================================================
-// B. COMPILAR KLIKPOS MÓVIL / TABLET POS (CON RELEASE SIGNATURE & ASSETS FRESH)
+// B. COMPILAR KLIKPOS MÓVIL FULL (ID ÚNICO: com.klikpos.pos - INDEPENDIENTE)
 // =============================================================================
 function buildPosApk() {
   console.log('\n===============================================================');
-  console.log('>>> [FASE 2] COMPILANDO: KLIKPOS MÓVIL / TABLET POS (PRODUCCIÓN)');
+  console.log('>>> [FASE 2] COMPILANDO: KLIKPOS MÓVIL FULL (ID: com.klikpos.pos)');
   console.log('===============================================================');
 
   stopGradleDaemon();
@@ -175,7 +179,7 @@ function buildPosApk() {
   execSync(`node "${path.join(root, 'scripts', 'enhance-and-rebrand-mobile.js')}"`, { stdio: 'inherit' });
 
   // 2. Compilar
-  console.log('Ejecutando Gradle assembleDebug para POS Móvil...');
+  console.log('Ejecutando Gradle assembleDebug para KlikPOS Móvil Full...');
   execSync('cmd.exe /c ".\\gradlew.bat assembleDebug --no-daemon"', {
     cwd: androidDir,
     stdio: 'inherit',
@@ -190,8 +194,6 @@ function buildPosApk() {
   // Distribuir a combos
   const targets = [
     path.join(distDir, 'KlikPOS_Movil_Satelite.apk'),
-    path.join(distDir, 'VenematicPOS-Full-Mobile.apk'),
-    path.join(distDir, 'VenematicPOS-Caja-Mobile.apk'),
     path.join(combo3Folder, 'KlikPOS_Movil_Full.apk'),
     path.join(combo1Folder, 'KlikPOS_Movil_Satelite.apk'),
     path.join(combo2Folder, 'KlikPOS_Movil_Satelite.apk')
@@ -201,7 +203,7 @@ function buildPosApk() {
     console.log('  [✓] Copiado a: ' + t);
   }
 
-  console.log('>>> ¡KLIKPOS MÓVIL FULL / TABLET POS FIRMADA Y DISTRIBUIDA CON ÉXITO!');
+  console.log('>>> ¡KLIKPOS MÓVIL FULL (com.klikpos.pos) FIRMADA Y DISTRIBUIDA CON ÉXITO!');
 }
 
 ensureKeystore();
@@ -209,7 +211,7 @@ buildKeygenApk();
 buildPosApk();
 
 console.log('\n===============================================================');
-console.log(' ¡TODAS LAS APKS HAN SIDO FIRMADAS CON CERTIFICADO RELEASE OFICIAL!');
-console.log(' - KlikPOS Keygen (Celular): DISTRIBUCION_KLIKPOS/00_Herramientas_Desarrollador/KlikPOS_Keygen.apk');
-console.log(' - KlikPOS Móvil Full (Tablet): DISTRIBUCION_KLIKPOS/03_Movil_Full_Autonomo/KlikPOS_Movil_Full.apk');
+console.log(' ¡APKS KLIKPOS 100% INDEPENDIENTES Y FIRMADAS EXITOSAMENTE!');
+console.log(' - App 1: KlikPOS Keygen       (Package: com.klikpos.keygen)');
+console.log(' - App 2: KlikPOS Móvil Full   (Package: com.klikpos.pos)');
 console.log('===============================================================\n');

@@ -4,7 +4,7 @@ android {
     namespace = "com.venematic.pos"
     compileSdk = rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "com.venematic.pos"
+        applicationId "com.klikpos.pos"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
