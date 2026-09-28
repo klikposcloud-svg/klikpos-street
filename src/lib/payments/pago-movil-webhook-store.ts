@@ -26,11 +26,13 @@ if (!globalForWebhook.webhookPaymentsBuffer) {
 }
 export const webhookPaymentsBuffer = globalForWebhook.webhookPaymentsBuffer;
 
-export const DEFAULT_WEBHOOK_SECRET = 'venematic-pm-2026-sec';
+export const DEFAULT_WEBHOOK_SECRET = 'klikpos-pm-secure-secret-2026';
 
 export function getWebhookSecret(): string {
   if (typeof window !== 'undefined') {
-    return localStorage.getItem('venematic_pm_webhook_secret') || DEFAULT_WEBHOOK_SECRET;
+    return localStorage.getItem('klikpos_pm_webhook_secret') || 
+           localStorage.getItem('venematic_pm_webhook_secret') || 
+           DEFAULT_WEBHOOK_SECRET;
   }
   return globalForWebhook.webhookSecret || DEFAULT_WEBHOOK_SECRET;
 }
@@ -38,7 +40,7 @@ export function getWebhookSecret(): string {
 export function setWebhookSecret(secret: string) {
   globalForWebhook.webhookSecret = secret;
   if (typeof window !== 'undefined') {
-    localStorage.setItem('venematic_pm_webhook_secret', secret);
+    localStorage.setItem('klikpos_pm_webhook_secret', secret);
   }
 }
 

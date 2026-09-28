@@ -197,11 +197,11 @@ export default function WalletPage() {
         <div className="max-w-2xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 text-white flex items-center justify-center font-black text-lg shadow-md shadow-emerald-500/20">
-              V
+              K
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <h1 className="text-sm font-black text-slate-900 dark:text-white">Venematic Pay</h1>
+                <h1 className="text-sm font-black text-slate-900 dark:text-white">KlikPOS Pay</h1>
                 <span className="bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 text-[10px] font-bold px-1.5 py-0.5 rounded-full">
                   Tokens USD
                 </span>

@@ -1,8 +1,12 @@
 import { WalletAccount, WalletTransaction, TopupRequest, P2PTransferRequest, MerchantPayRequest } from '@/types/wallet';
 
-const WALLETS_STORAGE_KEY = 'venematic_wallets_db';
-const TRANSACTIONS_STORAGE_KEY = 'venematic_wallet_txs_db';
-const CURRENT_ACTIVE_WALLET_KEY = 'venematic_current_wallet_id';
+const WALLETS_STORAGE_KEY = 'klikpos_wallets_db';
+const TRANSACTIONS_STORAGE_KEY = 'klikpos_wallet_txs_db';
+const CURRENT_ACTIVE_WALLET_KEY = 'klikpos_current_wallet_id';
+
+const LEGACY_WALLETS_STORAGE_KEY = 'venematic_wallets_db';
+const LEGACY_TRANSACTIONS_STORAGE_KEY = 'venematic_wallet_txs_db';
+const LEGACY_CURRENT_ACTIVE_WALLET_KEY = 'venematic_current_wallet_id';
 
 // Cuentas de demostración iniciales
 const INITIAL_WALLETS: WalletAccount[] = [
@@ -98,7 +102,7 @@ class TokenWalletService {
 
   private init() {
     try {
-      const savedWallets = localStorage.getItem(WALLETS_STORAGE_KEY);
+      const savedWallets = localStorage.getItem(WALLETS_STORAGE_KEY) || localStorage.getItem(LEGACY_WALLETS_STORAGE_KEY);
       if (savedWallets) {
         this.wallets = JSON.parse(savedWallets);
       } else {
@@ -106,7 +110,7 @@ class TokenWalletService {
         this.persistWallets();
       }
 
-      const savedTxs = localStorage.getItem(TRANSACTIONS_STORAGE_KEY);
+      const savedTxs = localStorage.getItem(TRANSACTIONS_STORAGE_KEY) || localStorage.getItem(LEGACY_TRANSACTIONS_STORAGE_KEY);
       if (savedTxs) {
         this.transactions = JSON.parse(savedTxs);
       } else {
@@ -114,7 +118,7 @@ class TokenWalletService {
         this.persistTransactions();
       }
 
-      const savedActive = localStorage.getItem(CURRENT_ACTIVE_WALLET_KEY);
+      const savedActive = localStorage.getItem(CURRENT_ACTIVE_WALLET_KEY) || localStorage.getItem(LEGACY_CURRENT_ACTIVE_WALLET_KEY);
       if (savedActive) {
         this.activeWalletId = savedActive;
       }
@@ -253,15 +257,23 @@ class TokenWalletService {
    */
   public transferP2P(req: P2PTransferRequest, rateBCV: number = 49.00): { success: boolean; message: string; tx?: WalletTransaction } {
     this.init();
+
+    const transferAmount = Number(req.amountUSD);
+    if (!Number.isFinite(transferAmount) || isNaN(transferAmount) || transferAmount <= 0) {
+      return { success: false, message: 'El monto de la transferencia debe ser un número válido mayor a 0.' };
+    }
+
+    const sanitizedAmount = Number(transferAmount.toFixed(2));
+
     const sender = this.wallets.find(w => w.walletId === req.senderWalletId);
     if (!sender) {
       return { success: false, message: 'Billetera emisora no encontrada.' };
     }
 
-    if (sender.balanceUSD < req.amountUSD) {
+    if (sender.balanceUSD < sanitizedAmount) {
       return { 
         success: false, 
-        message: `Saldo insuficiente. Tienes ${sender.balanceUSD.toFixed(2)} Tokens USD e intentas transferir ${req.amountUSD.toFixed(2)} Tokens.` 
+        message: `Saldo insuficiente. Tienes ${sender.balanceUSD.toFixed(2)} Tokens USD e intentas transferir ${sanitizedAmount.toFixed(2)} Tokens.` 
       };
     }
 
@@ -275,21 +287,21 @@ class TokenWalletService {
     }
 
     // Efectuar débito y crédito
-    sender.balanceUSD = Number((sender.balanceUSD - req.amountUSD).toFixed(2));
+    sender.balanceUSD = Number((sender.balanceUSD - sanitizedAmount).toFixed(2));
     sender.updatedAt = new Date().toISOString();
 
-    recipient.balanceUSD = Number((recipient.balanceUSD + req.amountUSD).toFixed(2));
+    recipient.balanceUSD = Number((recipient.balanceUSD + sanitizedAmount).toFixed(2));
     recipient.updatedAt = new Date().toISOString();
 
     const ref = `TRF-${Date.now().toString().slice(-6)}`;
-    const vesEquivalent = Number((req.amountUSD * rateBCV).toFixed(2));
+    const vesEquivalent = Number((sanitizedAmount * rateBCV).toFixed(2));
 
     // Registro de transacción para el emisor
     const senderTx: WalletTransaction = {
       id: `tx_${Date.now()}_out`,
       walletId: sender.walletId,
       type: 'p2p_transfer_out',
-      amountUSD: req.amountUSD,
+      amountUSD: sanitizedAmount,
       rateBCV,
       amountVES: vesEquivalent,
       recipientId: recipient.walletId,
@@ -334,30 +346,38 @@ class TokenWalletService {
    */
   public payMerchant(req: MerchantPayRequest, rateBCV: number = 49.00): { success: boolean; message: string; tx?: WalletTransaction } {
     this.init();
+
+    const payAmount = Number(req.amountUSD);
+    if (!Number.isFinite(payAmount) || isNaN(payAmount) || payAmount <= 0) {
+      return { success: false, message: 'El monto de pago debe ser un número válido mayor a 0.' };
+    }
+
+    const sanitizedAmount = Number(payAmount.toFixed(2));
+
     const customer = this.wallets.find(w => w.walletId === req.customerWalletId);
     if (!customer) {
       return { success: false, message: 'Billetera del cliente no encontrada.' };
     }
 
-    if (customer.balanceUSD < req.amountUSD) {
+    if (customer.balanceUSD < sanitizedAmount) {
       return { 
         success: false, 
-        message: `Saldo insuficiente en Billetera (${customer.balanceUSD.toFixed(2)} Tokens). Requiere ${req.amountUSD.toFixed(2)} Tokens.` 
+        message: `Saldo insuficiente en Billetera (${customer.balanceUSD.toFixed(2)} Tokens). Requiere ${sanitizedAmount.toFixed(2)} Tokens.` 
       };
     }
 
     // Descontar saldo de tokens
-    customer.balanceUSD = Number((customer.balanceUSD - req.amountUSD).toFixed(2));
+    customer.balanceUSD = Number((customer.balanceUSD - sanitizedAmount).toFixed(2));
     customer.updatedAt = new Date().toISOString();
 
     const ref = req.orderNumber || `PAY-${Date.now().toString().slice(-6)}`;
-    const vesEquivalent = Number((req.amountUSD * rateBCV).toFixed(2));
+    const vesEquivalent = Number((sanitizedAmount * rateBCV).toFixed(2));
 
     const payTx: WalletTransaction = {
       id: `tx_${Date.now()}_pay`,
       walletId: customer.walletId,
       type: 'purchase_payment',
-      amountUSD: req.amountUSD,
+      amountUSD: sanitizedAmount,
       rateBCV,
       amountVES: vesEquivalent,
       storeId: req.storeId,
@@ -374,7 +394,7 @@ class TokenWalletService {
 
     return {
       success: true,
-      message: `¡Pago de ${req.amountUSD.toFixed(2)} Tokens ($${req.amountUSD.toFixed(2)}) procesado en ${req.storeName}!`,
+      message: `¡Pago de ${sanitizedAmount.toFixed(2)} Tokens ($${sanitizedAmount.toFixed(2)}) procesado en ${req.storeName}!`,
       tx: payTx,
     };
   }
@@ -393,26 +413,34 @@ class TokenWalletService {
     feePercent?: number;
   }): { success: boolean; message: string; tx?: WalletTransaction; netVES?: number } {
     this.init();
+
+    const withdrawAmount = Number(req.amountUSD);
+    if (!Number.isFinite(withdrawAmount) || isNaN(withdrawAmount) || withdrawAmount <= 0) {
+      return { success: false, message: 'El monto de retiro debe ser un número válido mayor a 0.' };
+    }
+
+    const sanitizedAmount = Number(withdrawAmount.toFixed(2));
+
     const wallet = this.wallets.find(w => w.walletId === req.walletId);
     if (!wallet) {
       return { success: false, message: 'Billetera no encontrada.' };
     }
 
-    if (wallet.balanceUSD < req.amountUSD) {
+    if (wallet.balanceUSD < sanitizedAmount) {
       return {
         success: false,
-        message: `Saldo insuficiente. Tienes ${wallet.balanceUSD.toFixed(2)} Tokens e intentas retirar ${req.amountUSD.toFixed(2)} Tokens.`,
+        message: `Saldo insuficiente. Tienes ${wallet.balanceUSD.toFixed(2)} Tokens e intentas retirar ${sanitizedAmount.toFixed(2)} Tokens.`,
       };
     }
 
     const feePct = req.feePercent !== undefined ? req.feePercent : 2.0; // 2% fee de plataforma
-    const feeUSD = Number(((req.amountUSD * feePct) / 100).toFixed(2));
-    const netUSD = Number((req.amountUSD - feeUSD).toFixed(2));
+    const feeUSD = Number(((sanitizedAmount * feePct) / 100).toFixed(2));
+    const netUSD = Number((sanitizedAmount - feeUSD).toFixed(2));
     const netVES = Number((netUSD * req.rateBCV).toFixed(2));
-    const totalGrossVES = Number((req.amountUSD * req.rateBCV).toFixed(2));
+    const totalGrossVES = Number((sanitizedAmount * req.rateBCV).toFixed(2));
 
     // Descontar saldo total
-    wallet.balanceUSD = Number((wallet.balanceUSD - req.amountUSD).toFixed(2));
+    wallet.balanceUSD = Number((wallet.balanceUSD - sanitizedAmount).toFixed(2));
     wallet.updatedAt = new Date().toISOString();
 
     const ref = `PM-RET-${Date.now().toString().slice(-6)}`;

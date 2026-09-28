@@ -10,10 +10,48 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const imageUrl = body?.url?.trim();
 
-    if (!imageUrl || !imageUrl.startsWith('http')) {
+    if (!imageUrl || typeof imageUrl !== 'string') {
       return NextResponse.json(
         { error: 'URL de imagen no válida' },
         { status: 400 }
+      );
+    }
+
+    let parsedUrl: URL;
+    try {
+      parsedUrl = new URL(imageUrl);
+    } catch {
+      return NextResponse.json(
+        { error: 'Formato de URL no válido' },
+        { status: 400 }
+      );
+    }
+
+    if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
+      return NextResponse.json(
+        { error: 'Protocolo no permitido. Solo se aceptan URLs http/https.' },
+        { status: 400 }
+      );
+    }
+
+    // Prevención de SSRF (Server-Side Request Forgery)
+    const hostname = parsedUrl.hostname.toLowerCase();
+    const isLocalOrPrivate = 
+      hostname === 'localhost' ||
+      hostname === '127.0.0.1' ||
+      hostname === '0.0.0.0' ||
+      hostname === '::1' ||
+      hostname === '169.254.169.254' || // AWS/GCP/Azure instance metadata
+      hostname.endsWith('.internal') ||
+      hostname.endsWith('.local') ||
+      /^10\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(hostname) ||
+      /^172\.(1[6-9]|2\d|3[0-1])\.\d{1,3}\.\d{1,3}$/.test(hostname) ||
+      /^192\.168\.\d{1,3}\.\d{1,3}$/.test(hostname);
+
+    if (isLocalOrPrivate) {
+      return NextResponse.json(
+        { error: 'Acceso a redes internas o direcciones locales bloqueado por seguridad.' },
+        { status: 403 }
       );
     }
 

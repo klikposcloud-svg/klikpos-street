@@ -14,9 +14,19 @@ export const dynamic = 'force-dynamic';
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const action = searchParams.get('action');
+  const configuredSecret = getWebhookSecret();
 
-  // 1. Simulación de pago de prueba (ideal para configuración del comerciante)
+  const tokenHeader = req.headers.get('authorization')?.replace(/bearer\s+/i, '') ||
+                      req.headers.get('x-klikpos-secret') ||
+                      req.headers.get('x-venematic-secret') ||
+                      searchParams.get('secret');
+
+  // 1. Simulación de pago de prueba (requiere autenticación para evitar inyección externa maliciosa)
   if (action === 'test') {
+    if (configuredSecret && tokenHeader !== configuredSecret) {
+      return NextResponse.json({ error: 'No autorizado para emitir pagos de prueba.' }, { status: 401 });
+    }
+
     const testAmount = parseFloat(searchParams.get('monto') || '150.00');
     const testBank = searchParams.get('banco') || 'Banco de Venezuela';
     const testRef = searchParams.get('ref') || Math.floor(100000 + Math.random() * 900000).toString();
@@ -67,12 +77,13 @@ export async function POST(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const configuredSecret = getWebhookSecret();
 
-    // Verificación de clave secreta (opcional si el comercio configuró una clave)
+    // Verificación de clave secreta
     const tokenHeader = req.headers.get('authorization')?.replace(/bearer\s+/i, '') ||
+                        req.headers.get('x-klikpos-secret') ||
                         req.headers.get('x-venematic-secret') ||
                         searchParams.get('secret');
 
-    if (configuredSecret && configuredSecret !== 'venematic-pm-2026-sec' && tokenHeader !== configuredSecret) {
+    if (configuredSecret && tokenHeader !== configuredSecret) {
       return NextResponse.json({ error: 'No autorizado. Token de webhook inválido.' }, { status: 401 });
     }
 
