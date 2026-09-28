@@ -1,16 +1,15 @@
 {
-  "version": "2.4.5",
+  "version": "2.4.7",
   "releaseDate": "2026-09-27",
-  "title": "KlikPOS v2.4.5 - Modo Standalone Tablet & Móvil, Dock Curvo Animado y 4 Estilos de Cards (Food, Cuadrícula, Lista, Minimalista)",
+  "title": "KlikPOS Enterprise v2.4.7 - 5 Ediciones Oficiales, Modo Oscuro con Coloración Total y Sincronización Firestore",
   "notes": [
-    "Nueva interfaz 100% autónoma para Tablets y Teléfonos (/tablet-pos) para puestos de comida rápida, food trucks y ambulantes sin requerir PC.",
-    "Dock inferior animado de diseño orgánico con hendidura cóncava y botón central flotante sobredimensionado 'Cobrar'.",
-    "4 Estilos de Vista de Cards intercambiables al instante: Food (cards grandes con foto hero y etiquetas), Cuadrícula (estándar ergonómica), Lista (alta densidad para inventario) y Minimalista (botones de máximo contraste para horas pico).",
-    "Modal de personalización con opciones frecuentes de comida rápida (Con todo, Sin cebolla, Extra salsa tártara/ajo, Para llevar, etc.).",
-    "Doble cajón deslizable: Izquierdo (Ajustes, Tasa BCV, Menú Digital QR con enlace de WhatsApp, Impresora Bluetooth) y Derecho (Comanda activa con desglose y notas de cocina).",
-    "Corrección de contraste visual para teclado y elementos críticos según las normativas de KlikPOS."
+    "Modo Oscuro con Coloración Total Personalizable: eliminación de azules rígidos para permitir Negro Puro OLED (#000000), Grafito Carbón (#121212), Esmeralda Nocturno (#051814), Púrpura Nocturno (#0f0d24), Azul Medianoche y Selector Hexadecimal libre en toda la pantalla.",
+    "Lanzamiento de las 5 Ediciones Oficiales: Móvil Satélite PC (Contingencia), Desktop Empresarial Full PC, Tablet Standalone Mesas (Restaurantes), Móvil Full Autónomo Retail (Nube) y Móvil Full Companion para PC.",
+    "Botón Central Diferenciado en Dock: COBRAR en versión Restaurante/Tablet Standalone y ESCÁNER (Cámara 60 FPS) en versiones Retail y Companion.",
+    "Librería centralizada de sincronización en la nube con Firestore categorizada por Edición, Comercio y Licencia.",
+    "Módulo Tablet Standalone con gestión de datos de empresa, configuración de Pago Móvil con bancos venezolanos, cartera de clientes y pasarela multimoneda con cálculo automático de vuelto en USD y Bs. al cambio oficial BCV en vivo."
   ],
-  "windowsUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v2.4.5/KlikPOS_Desktop_Full_Setup.exe",
-  "androidUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v2.4.5/KlikPOS_Movil_Full.apk",
-  "mandatory": false
+  "windowsUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v2.4.7/KlikPOS_Desktop_Full_Setup.exe",
+  "androidUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v2.4.7/KlikPOS_Movil_Full.apk",
+  "mandatory": true
 }

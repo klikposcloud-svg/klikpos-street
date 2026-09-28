@@ -25,12 +25,19 @@ Todos los agentes de inteligencia artificial y desarrolladores que operen en est
 - Al generar ejecutables o instaladores para Windows (`build-installer-full.ps1` o Inno Setup), es **obligatorio ejecutar previamente `npm run build`**.
 - Ningún instalador debe generarse reutilizando carpetas `.next/standalone` viejas sin previa compilación fresca y validación de tipos/sintaxis.
 
-### 5. Sincronización Continua con GitHub
+### 5. Sincronización Continua con GitHub y Protocolo Anti-Falla de Actualizador
 - Cada vez que se finalice un bloque de mejoras o correcciones en el software, el agente debe ejecutar de inmediato:
   1. `git add -A`
   2. `git commit -m "..."` con mensaje semántico claro.
   3. `git push origin main` hacia el repositorio remoto `github.com/klikposcloud-svg/klikpos.git`.
-  4. Mantener sincronizado el archivo de manifiesto `version.json` para actualizaciones en la nube.
+- **Protocolo de Auto-Actualizaciones (Zero-Regression):**
+  - **Fuente Única de Verdad:** Toda modificación de versión se define en `version.json` raíz y se sincroniza obligatoriamente mediante `node scripts/sync-version.js` a todos los manifiestos (`public/version.json`, `dist-installer/version.json`, `klikpos-releases/version.json`, `venematic-desktop/version.json`, `package.json` e `installer.iss`).
+  - **Prohibido Forzar Descargas Manuales:** Las actualizaciones en PC/Desktop y Web deben ejecutarse de forma **automática en 1 solo clic o en segundo plano silencioso** (`/api/system/update` o `applyPwaUpdate`). La opción de descarga manual `.exe` es estrictamente secundaria para respaldos offline o pendrives USB.
+  - **Publicación Obligatoria en la Nube:** Al generar un instalador con `build-installer-full.ps1`, el pipeline debe obligatoriamente:
+    1. Pushear `version.json` al repositorio `klikposcloud-svg/klikpos-releases.git`.
+    2. Publicar la Release y subir los binarios mediante `node scripts/publish-release-to-github.js`.
+    3. Validar con llamada HTTP activa que `https://raw.githubusercontent.com/klikposcloud-svg/klikpos-releases/main/version.json` responde la nueva versión.
+  - **Prevención de Bucles de Recarga:** Nunca hardcodear `CURRENT_VERSION` en `update-service.ts`. La versión debe importarse dinámicamente de `version.json` y persistirse en `localStorage` (`klikpos_applied_pwa_version`) para evitar recargas infinitas.
 
 ### 6. Carpeta Oficial Obligatoria de Distribución (DISTRIBUCION_KLIKPOS)
 - Toda entrega de software, instaladores para el cliente, combos para puntos de venta y APKs móviles se ubican y entregan **ESTRICTAMENTE** en la carpeta: `DISTRIBUCION_KLIKPOS/`.

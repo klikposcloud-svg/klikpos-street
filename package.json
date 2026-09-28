@@ -1,6 +1,6 @@
 {
   "name": "klikpos",
-  "version": "2.4.6",
+  "version": "2.4.7",
   "description": "KlikPOS Enterprise - Sistema Inteligente de Punto de Venta y Facturación",
   "private": true,
   "scripts": {
@@ -9,6 +9,9 @@
     "start": "next start",
     "lint": "next lint",
     "test:contrast": "node scripts/check-contrast.mjs",
+    "sync:version": "node scripts/sync-version.js",
+    "release:publish": "node scripts/publish-release-to-github.js",
+    "release": "powershell -ExecutionPolicy Bypass -File scripts/build-installer-full.ps1",
     "build:installer": "powershell -ExecutionPolicy Bypass -File scripts/build-installer-full.ps1",
     "scraper": "node src/scripts/bcv-scraper.js"
   },

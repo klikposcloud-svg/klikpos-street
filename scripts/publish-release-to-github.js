@@ -1,27 +1,43 @@
 const fs = require('fs');
 const path = require('path');
 
-const TOKEN = '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';
-const TAG = 'v2.4.7';
+const TOKEN = process.env.GITHUB_RELEASE_TOKEN || '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';
 const REPO = 'klikposcloud-svg/klikpos-releases';
-const TITLE = 'KlikPOS Enterprise v2.4.7 - 5 Ediciones Oficiales, Modo Oscuro con Coloración Total y Sincronización Firestore';
-const NOTES = `### Novedades en KlikPOS Enterprise v2.4.7:
-- **Modo Oscuro con Coloración Total Personalizable:**
-  - Se eliminaron las reglas forzadas de color azul para permitir que la pantalla completa adopte el tono seleccionado: Negro Puro OLED (#000000), Grafito Carbón (#121212), Esmeralda Nocturno (#051814), Púrpura Nocturno (#0f0d24), Azul Medianoche (#0a192f) o cualquier código hexadecimal libre con contraste WCAG AAA.
-- **Lanzamiento de las 5 Ediciones Oficiales de KlikPOS:**
-  - 01_KlikPOS_Satelite_PC_Contingencia: Companion para PC con escáner y venta sin luz.
-  - 02_Combo_Empresarial_Full: Versión Windows completa con balanza, lector, impresora y servidor local.
-  - 03_KlikPOS_Tablet_Standalone_Mesas: 100% desligada de PC para restaurantes, mesas, comanda y Pago Móvil.
-  - 04_KlikPOS_Movil_Full_Autonomo_Nube: Retail autónomo en teléfono con escáner láser y balanza.
-  - 05_KlikPOS_Movil_Full_Para_PC: Companion remoto total conectado al servidor de la PC.
-- **Botón Central Diferenciado en Barra Inferior:**
-  - Botón COBRAR (CircleDollarSign) para la edición Tablet Mesas.
-  - Botón ESCÁNER (Cámara 60 FPS) para las ediciones Retail, Satélite y Companion.
-- **Librería de Sincronización en la Nube Firestore:**
-  - Colecciones estructuradas por edición, comercio y licencia con actualización automática de tasas BCV en vivo.`;
+
+// Cargar dinámicamente del manifiesto maestro version.json
+const rootDir = path.resolve(__dirname, '..');
+const manifestPath = path.join(rootDir, 'version.json');
+if (!fs.existsSync(manifestPath)) {
+  throw new Error(`No se encontró version.json en ${manifestPath}`);
+}
+const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+
+const TAG = `v${manifest.version.replace(/^v/, '')}`;
+const TITLE = manifest.title || `KlikPOS Enterprise ${TAG}`;
+const NOTES = Array.isArray(manifest.notes)
+  ? `### Novedades en KlikPOS Enterprise ${TAG}:\n` + manifest.notes.map(n => `- ${n}`).join('\n')
+  : (manifest.notes || `Lanzamiento de ${TAG}`);
+
+const { execSync } = require('child_process');
 
 async function main() {
-  console.log(`[1/4] Creando / verificando Release ${TAG} en https://github.com/${REPO}...`);
+  console.log(`[1/5] Sincronizando repositorio klikpos-releases hacia GitHub...`);
+  const releasesDir = path.join(rootDir, 'klikpos-releases');
+  if (fs.existsSync(releasesDir)) {
+    try {
+      execSync('git add -A', { cwd: releasesDir, stdio: 'pipe' });
+      const status = execSync('git status --porcelain', { cwd: releasesDir, stdio: 'pipe' }).toString();
+      if (status.trim().length > 0) {
+        execSync(`git commit -m "release: actualizar manifiesto a ${TAG}"`, { cwd: releasesDir, stdio: 'pipe' });
+      }
+      execSync('git push origin main', { cwd: releasesDir, stdio: 'pipe' });
+      console.log(' [✓] Repositorio klikpos-releases sincronizado y pusheado exitosamente.');
+    } catch (err) {
+      console.warn(' [!] Advertencia al sincronizar klikpos-releases:', err.message);
+    }
+  }
+
+  console.log(`[2/5] Creando / verificando Release ${TAG} en https://github.com/${REPO}...`);
   
   // 1. Obtener o crear Release
   let release;
@@ -61,7 +77,7 @@ async function main() {
   const exePath = path.resolve(__dirname, '../DISTRIBUCION_KLIKPOS/02_Combo_Empresarial_Full/KlikPOS_Desktop_Full_Setup.exe');
   if (fs.existsSync(exePath)) {
     const exeName = 'KlikPOS_Desktop_Full_Setup.exe';
-    console.log(`[2/4] Subiendo instalador oficial de Windows: ${exeName} (${(fs.statSync(exePath).size / (1024*1024)).toFixed(2)} MB)...`);
+    console.log(`[3/5] Subiendo instalador oficial de Windows: ${exeName} (${(fs.statSync(exePath).size / (1024*1024)).toFixed(2)} MB)...`);
     await uploadAsset(release, exePath, exeName, 'application/vnd.microsoft.portable-executable');
   } else {
     console.warn(`[!] No se encontro el ejecutable en ${exePath}`);
@@ -71,13 +87,31 @@ async function main() {
   const apkPath = path.resolve(__dirname, '../DISTRIBUCION_KLIKPOS/03_Movil_Full_Autonomo/KlikPOS_Movil_Full.apk');
   if (fs.existsSync(apkPath)) {
     const apkName = 'KlikPOS_Movil_Full.apk';
-    console.log(`[3/4] Subiendo APK Android: ${apkName} (${(fs.statSync(apkPath).size / (1024*1024)).toFixed(2)} MB)...`);
+    console.log(`[4/5] Subiendo APK Android: ${apkName} (${(fs.statSync(apkPath).size / (1024*1024)).toFixed(2)} MB)...`);
     await uploadAsset(release, apkPath, apkName, 'application/vnd.android.package-archive');
   }
 
-  console.log(`[4/4] Proceso finalizado. Los binarios están disponibles públicamente en:`);
-  console.log(`Windows: https://github.com/${REPO}/releases/download/${TAG}/KlikPOS_Desktop_Full_Setup.exe`);
-  console.log(`Android: https://github.com/${REPO}/releases/download/${TAG}/KlikPOS_Movil_Full.apk`);
+  // 4. Verificación en vivo del endpoint remoto
+  console.log(`[5/5] Verificando disponibilidad pública del manifiesto en GitHub...`);
+  try {
+    const verifyRes = await fetch(`https://raw.githubusercontent.com/${REPO}/main/version.json?_t=${Date.now()}`, {
+      cache: 'no-cache'
+    });
+    if (verifyRes.ok) {
+      const liveManifest = await verifyRes.json();
+      console.log(` [✓] Verificación en vivo exitosa: Servidor responde versión v${liveManifest.version}`);
+    } else {
+      console.warn(` [!] Endpoint respondió con código HTTP ${verifyRes.status}`);
+    }
+  } catch (err) {
+    console.warn(' [!] Error al contactar endpoint de verificación:', err.message);
+  }
+
+  console.log(`\n===============================================================`);
+  console.log(`  ¡PUBLICACIÓN EN LA NUBE COMPLETADA CON ÉXITO!`);
+  console.log(`  Windows: https://github.com/${REPO}/releases/download/${TAG}/KlikPOS_Desktop_Full_Setup.exe`);
+  console.log(`  Android: https://github.com/${REPO}/releases/download/${TAG}/KlikPOS_Movil_Full.apk`);
+  console.log(`===============================================================\n`);
 }
 
 async function uploadAsset(release, filePath, fileName, contentType) {

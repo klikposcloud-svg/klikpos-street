@@ -42,19 +42,28 @@ export default function AutoUpdateModal() {
           const isLocalDesktop = typeof window !== 'undefined' &&
             (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:');
 
-          const alreadyAttempted = typeof sessionStorage !== 'undefined' && sessionStorage.getItem('klikpos_pwa_attempted') === m.version;
+          const appliedVer = typeof localStorage !== 'undefined' ? localStorage.getItem('klikpos_applied_pwa_version') : null;
+          if (appliedVer && appliedVer === m.version) {
+            return; // Ya se encuentra aplicada esta versión
+          }
 
-          // Si es entorno web/PWA y tiene autoApplySilently activado
-          if (cfg.autoApplySilently && !isLocalDesktop && !alreadyAttempted) {
-            sessionStorage.setItem('klikpos_pwa_attempted', m.version);
-            setSilentNotice(`⚡ Nueva versión v${m.version} detectada. Aplicando actualización silenciosa en vivo...`);
-            setTimeout(() => {
-              updateService.applyPwaUpdate();
+          const alreadyAttempted = typeof sessionStorage !== 'undefined' && sessionStorage.getItem('klikpos_update_attempted') === m.version;
+
+          // Si tiene autoApplySilently activado
+          if (cfg.autoApplySilently && !alreadyAttempted) {
+            sessionStorage.setItem('klikpos_update_attempted', m.version);
+            setSilentNotice(`⚡ Nueva versión v${m.version} detectada. Aplicando actualización automática en segundo plano...`);
+            setTimeout(async () => {
+              if (isLocalDesktop && m.windowsUrl) {
+                await updateService.applyDesktopSilentUpdate(m);
+              } else {
+                await updateService.applyPwaUpdate(m.version);
+              }
             }, 1800);
             return;
           }
 
-          // Si requiere confirmación o es entorno de escritorio local (requiere instalador .exe)
+          // Si requiere confirmación
           const dismissedVersion = sessionStorage.getItem('klikpos_dismissed_update');
           if (dismissedVersion !== m.version || m.mandatory) {
             setManifest(m);
@@ -113,13 +122,20 @@ export default function AutoUpdateModal() {
 
   if (!isOpen || !manifest) return null;
 
-  // Actualización rápida en vivo estilo PWA (1 solo clic)
-  const handleApplyPwa = () => {
+  // Actualización automática unificada (1 Clic)
+  const handleAutoUpdate = async () => {
     setIsUpdating(true);
-    setUpdateMessage('⚡ Purgando caché y sincronizando con la última versión...');
-    setTimeout(() => {
-      updateService.applyPwaUpdate();
-    }, 800);
+    const isLocalDesktop = typeof window !== 'undefined' &&
+      (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:');
+
+    if (isLocalDesktop && manifest.windowsUrl) {
+      setUpdateMessage('⚡ Descargando e instalando actualización en segundo plano sin interrumpir...');
+      const res = await updateService.applyDesktopSilentUpdate(manifest);
+      setUpdateMessage(res.message);
+    } else {
+      setUpdateMessage('⚡ Sincronizando con la última versión y purgando caché...');
+      await updateService.applyPwaUpdate(manifest.version);
+    }
   };
 
   // Descarga manual del ejecutable (.exe)
@@ -215,56 +231,39 @@ export default function AutoUpdateModal() {
 
           {/* Opciones de Actualización */}
           <div className="pt-2 flex flex-col gap-2.5">
-            {typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:') ? (
-              <>
-                <button
-                  type="button"
-                  onClick={handleDownloadExe}
-                  disabled={isUpdating}
-                  className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs flex items-center justify-center gap-2.5 shadow-md active:scale-98 transition-all cursor-pointer disabled:opacity-50"
-                >
-                  <Download className="w-4 h-4 text-white" />
-                  <span>Descargar Instalador Desktop v{manifest.version} (.exe)</span>
-                </button>
-                <p className="text-[11px] text-center text-slate-500 dark:text-slate-400">
-                  Al descargar, ejecuta el instalador para actualizar KlikPOS en tu computadora sin perder datos.
-                </p>
-              </>
-            ) : (
-              <>
-                <button
-                  type="button"
-                  onClick={handleApplyPwa}
-                  disabled={isUpdating}
-                  className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs flex items-center justify-center gap-2.5 shadow-md active:scale-98 transition-all cursor-pointer disabled:opacity-50"
-                >
-                  {isUpdating ? (
-                    <>
-                      <RefreshCw className="w-4 h-4 animate-spin" />
-                      <span>Aplicando Actualización en Vivo...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Zap className="w-4 h-4 text-amber-300 fill-amber-300" />
-                      <span>Actualización Rápida en Vivo (Recomendado - 1 Clic)</span>
-                    </>
-                  )}
-                </button>
+            {/* Botón Principal: Actualización Automática en 1 Clic */}
+            <button
+              type="button"
+              onClick={handleAutoUpdate}
+              disabled={isUpdating}
+              className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs flex items-center justify-center gap-2.5 shadow-lg active:scale-98 transition-all cursor-pointer disabled:opacity-50"
+            >
+              {isUpdating ? (
+                <>
+                  <RefreshCw className="w-4 h-4 animate-spin text-white" />
+                  <span>Aplicando Actualización Automática...</span>
+                </>
+              ) : (
+                <>
+                  <Zap className="w-4 h-4 text-amber-300 fill-amber-300" />
+                  <span>Actualizar Automáticamente a v{manifest.version} (1 Clic)</span>
+                </>
+              )}
+            </button>
 
-                <div className="flex items-center justify-between gap-2 pt-1 border-t border-slate-100 dark:border-slate-800">
-                  <button
-                    type="button"
-                    onClick={handleDownloadExe}
-                    disabled={isUpdating}
-                    className="text-[11.5px] font-bold text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 flex items-center gap-1.5 transition-colors cursor-pointer"
-                    title="Descargar instalador para guardar en USB o instalar fuera de línea"
-                  >
-                    <Package className="w-3.5 h-3.5" />
-                    <span>Descargar Instalador .exe (Uso Offline)</span>
-                  </button>
-                </div>
-              </>
-            )}
+            {/* Fila secundaria: Descarga manual de .exe para USB/offline y posponer */}
+            <div className="flex items-center justify-between gap-2 pt-1 border-t border-slate-100 dark:border-slate-800">
+              <button
+                type="button"
+                onClick={handleDownloadExe}
+                disabled={isUpdating}
+                className="text-[11.5px] font-bold text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 flex items-center gap-1.5 transition-colors cursor-pointer"
+                title="Descargar instalador para guardar en USB o instalar fuera de línea"
+              >
+                <Package className="w-3.5 h-3.5" />
+                <span>Descargar Instalador .exe (Uso Offline / USB)</span>
+              </button>
+            </div>
 
             {!manifest.mandatory && (
               <div className="flex justify-end pt-1">

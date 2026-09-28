@@ -21,7 +21,9 @@ export interface UpdateConfig {
   lastUpdated?: string;
 }
 
-export const CURRENT_VERSION = '2.4.5';
+import manifestJson from '../../../version.json';
+
+export const CURRENT_VERSION = manifestJson.version || '2.4.7';
 
 const DEFAULT_MANIFEST_URL = 'https://raw.githubusercontent.com/klikposcloud-svg/klikpos-releases/main/version.json';
 const FALLBACK_MANIFEST_URLS = [
@@ -153,12 +155,18 @@ class UpdateService {
       };
     }
 
-    const hasUpdate = compareVersions(manifest.version, CURRENT_VERSION) > 0;
+    // Tomar en cuenta versiones aplicadas en caliente previamente para evitar bucles
+    const appliedPwaVersion = typeof window !== 'undefined' ? localStorage.getItem('klikpos_applied_pwa_version') : null;
+    const effectiveVersion = (appliedPwaVersion && compareVersions(appliedPwaVersion, CURRENT_VERSION) > 0)
+      ? appliedPwaVersion
+      : CURRENT_VERSION;
+
+    const hasUpdate = compareVersions(manifest.version, effectiveVersion) > 0;
     this.saveConfig({ lastChecked: new Date().toISOString() });
 
     return {
       hasUpdate,
-      currentVersion: CURRENT_VERSION,
+      currentVersion: effectiveVersion,
       latestManifest: manifest,
     };
   }
@@ -190,10 +198,14 @@ class UpdateService {
   }
 
   // Actualización en caliente instantánea estilo Web PWA (1 solo clic, limpia caché y recarga)
-  public async applyPwaUpdate(): Promise<{ success: boolean; message: string }> {
+  public async applyPwaUpdate(targetVersion?: string): Promise<{ success: boolean; message: string }> {
     if (typeof window === 'undefined') return { success: false, message: 'Entorno no soportado.' };
 
     try {
+      if (targetVersion) {
+        localStorage.setItem('klikpos_applied_pwa_version', targetVersion);
+      }
+
       // 1. Purgar cachés de Service Worker y almacenamiento temporal de scripts
       if ('caches' in window) {
         const keys = await caches.keys();
@@ -227,6 +239,41 @@ class UpdateService {
     }
   }
 
+  // Actualización automática desatendida para entorno de escritorio Windows (descarga y ejecuta el instalador en segundo plano)
+  public async applyDesktopSilentUpdate(manifest: VersionManifest): Promise<{ success: boolean; message: string }> {
+    if (typeof window === 'undefined') return { success: false, message: 'Entorno no soportado.' };
+
+    try {
+      if (manifest.version) {
+        localStorage.setItem('klikpos_applied_pwa_version', manifest.version);
+      }
+
+      const res = await fetch('/api/system/update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          windowsUrl: manifest.windowsUrl,
+          version: manifest.version,
+        }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || `HTTP ${res.status}`);
+      }
+
+      // Una vez disparado el instalador silencioso en el backend, purgar caché cliente y refrescar
+      await this.applyPwaUpdate(manifest.version);
+      return {
+        success: true,
+        message: '¡Actualización instalada automáticamente! Reiniciando KlikPOS...',
+      };
+    } catch (err: any) {
+      console.warn('[Desktop Silent Update Fallback to PWA]', err);
+      return this.applyPwaUpdate(manifest.version);
+    }
+  }
+
   // Método unificado de actualización
   public applyUpdate(
     manifest: VersionManifest,
@@ -235,7 +282,7 @@ class UpdateService {
     if (mode === 'installer') {
       return this.downloadInstaller(manifest);
     }
-    this.applyPwaUpdate();
+    this.applyPwaUpdate(manifest.version);
     return { success: true, message: 'Aplicando actualización en vivo...' };
   }
 }
