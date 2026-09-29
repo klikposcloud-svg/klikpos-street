@@ -542,23 +542,81 @@ export default function TabletMobilePosPage() {
     { id: '6', name: 'Refresco Familiar 1.5L Frío', priceUSD: 2.50, qty: 1, category: 'Bebidas', sku: 'BEB-01', image: SAMPLE_PRODUCTS[5].image }
   ]);
 
-  // Consulta automática de la Tasa Oficial BCV
+  // Consulta automática de la Tasa Oficial BCV Multi-Fuente
   const fetchBcvRateAuto = async () => {
     setIsFetchingBcv(true);
     try {
-      const res = await fetch('https://ve.dolarapi.com/v1/dolares/oficial');
-      if (res.ok) {
-        const data = await res.json();
-        const rate = data.promedio || data.precio;
-        if (typeof rate === 'number' && rate > 0) {
-          setBcvRate(rate);
-          setCustomBcvInput(rate.toFixed(2));
-          try {
-            localStorage.setItem('klikpos_bcv_rate', String(rate));
-            localStorage.setItem('klikpos_bcv_mode', 'auto');
-          } catch {}
+      // 1. Intento primario: Endpoint interno del servidor (con 4 capas de scraping y caché)
+      try {
+        const res = await fetch('/api/bcv/rate?refresh=true');
+        if (res.ok) {
+          const data = await res.json();
+          if (data && typeof data.rate === 'number' && data.rate > 0) {
+            setBcvRate(data.rate);
+            setCustomBcvInput(data.rate.toFixed(2));
+            try {
+              localStorage.setItem('klikpos_bcv_rate', String(data.rate));
+              localStorage.setItem('klikpos_bcv_mode', 'auto');
+            } catch {}
+            return;
+          }
         }
-      }
+      } catch {}
+
+      // 2. Espejo 1: DolarAPI Venezuela
+      try {
+        const res = await fetch('https://ve.dolarapi.com/v1/dolares/oficial');
+        if (res.ok) {
+          const data = await res.json();
+          const rate = data.promedio || data.precio || data.valor;
+          if (typeof rate === 'number' && rate > 0) {
+            setBcvRate(rate);
+            setCustomBcvInput(rate.toFixed(2));
+            try {
+              localStorage.setItem('klikpos_bcv_rate', String(rate));
+              localStorage.setItem('klikpos_bcv_mode', 'auto');
+            } catch {}
+            return;
+          }
+        }
+      } catch {}
+
+      // 3. Espejo 2: Open Exchange Rates VES
+      try {
+        const res = await fetch('https://open.er-api.com/v6/latest/USD');
+        if (res.ok) {
+          const data = await res.json();
+          const val = parseFloat(data?.rates?.VES);
+          if (!isNaN(val) && val > 0) {
+            setBcvRate(val);
+            setCustomBcvInput(val.toFixed(2));
+            try {
+              localStorage.setItem('klikpos_bcv_rate', String(val));
+              localStorage.setItem('klikpos_bcv_mode', 'auto');
+            } catch {}
+            return;
+          }
+        }
+      } catch {}
+
+      // 4. Espejo 3: CDN Fawaz Ahmed Currency
+      try {
+        const res = await fetch('https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json');
+        if (res.ok) {
+          const data = await res.json();
+          const val = parseFloat(data?.usd?.ves);
+          if (!isNaN(val) && val > 0) {
+            setBcvRate(val);
+            setCustomBcvInput(val.toFixed(2));
+            try {
+              localStorage.setItem('klikpos_bcv_rate', String(val));
+              localStorage.setItem('klikpos_bcv_mode', 'auto');
+            } catch {}
+            return;
+          }
+        }
+      } catch {}
+
     } catch {
       try {
         const saved = localStorage.getItem('klikpos_bcv_rate');

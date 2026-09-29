@@ -2932,25 +2932,25 @@ export default function DesktopPosPage() {
                       </span>
                     </div>
 
-                    {/* Caja Inferior Flotante (Overlay tipo Card Interna idéntica a la imagen de referencia) */}
-                    <div className="relative m-2.5 p-3 rounded-2xl bg-black/65 backdrop-blur-md border border-white/20 text-white flex flex-col gap-0.5 z-10 shadow-lg">
-                      {/* Título del Plato */}
-                      <h4 className="font-bold text-[15px] sm:text-[16px] text-white leading-tight truncate drop-shadow-xs" title={p.name}>
+                    {/* Caja Inferior Flotante (Overlay tipo Card Interna Blanco Traslúcido con Texto Oscuro de Alto Contraste) */}
+                    <div className="relative m-2.5 p-3.5 rounded-2xl bg-white/90 dark:bg-white/95 backdrop-blur-md border border-white/60 text-slate-900 flex flex-col gap-1 z-10 shadow-lg">
+                      {/* Título del Plato / Producto */}
+                      <h4 className="font-black text-[15px] sm:text-[16px] text-slate-900 leading-tight truncate" title={p.name}>
                         {p.name}
                       </h4>
 
                       {/* Precio en Bolívares Gigante */}
-                      <div className="font-black text-[18px] sm:text-[20px] font-sans text-white tabular-numbers leading-tight drop-shadow-xs">
+                      <div className="font-black text-[19px] sm:text-[21px] font-sans text-slate-950 tabular-numbers leading-tight">
                         {formatVES(displayVES)}
                       </div>
 
                       {/* Fila Inferior: Precio en Dólares + Pill de Categoría */}
-                      <div className="flex items-center justify-between gap-2 pt-1 border-t border-white/15 mt-0.5">
-                        <span className="text-xs text-slate-300 font-semibold tracking-wide">
+                      <div className="flex items-center justify-between gap-2 pt-1.5 border-t border-slate-900/15 mt-0.5">
+                        <span className="text-xs text-slate-700 font-bold tracking-wide">
                           ${displayUSD.toFixed(2)} USD
                         </span>
 
-                        <span className="text-[9.5px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-white/20 text-white truncate max-w-[120px]">
+                        <span className="text-[9.5px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-slate-900/10 text-slate-800 border border-slate-900/15 truncate max-w-[125px]">
                           {p.category}
                         </span>
                       </div>
