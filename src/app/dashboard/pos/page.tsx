@@ -2974,20 +2974,8 @@ export default function DesktopPosPage() {
                   <div
                     key={p.id}
                     onClick={() => addToCart(p, 1)}
-                    className="relative bg-[#f8f6f0] dark:bg-slate-800/90 border border-[#eae5d8] dark:border-slate-700/60 rounded-[28px] p-3 shadow-xs hover:shadow-md transition-all duration-200 active:scale-[0.98] cursor-pointer flex items-center gap-3.5 group select-none"
+                    className="relative bg-[#f8f6f0] dark:bg-slate-800/90 border border-[#eae5d8] dark:border-slate-700/60 rounded-[24px] p-2.5 sm:p-3 shadow-xs hover:shadow-md transition-all duration-200 active:scale-[0.98] cursor-pointer flex items-stretch gap-3 group select-none"
                   >
-                    {/* Badge de Stock en la esquina superior derecha */}
-                    <div className="absolute top-2.5 right-3 flex items-center gap-1.5 z-10">
-                      {isFixed && (
-                        <span className="text-[8.5px] font-black px-1.5 py-0.5 rounded-md bg-amber-500 text-white shadow-2xs">
-                          🔒 Bs. Fijo
-                        </span>
-                      )}
-                      <span className="text-[11px] font-bold px-3 py-0.5 rounded-full bg-[#e5e0d2]/80 dark:bg-slate-700/80 text-slate-700 dark:text-slate-200 shadow-2xs">
-                        {p.stock} {p.unit === 'kg' ? 'kg' : 'uds'}
-                      </span>
-                    </div>
-
                     {/* Botón Flotante para Personalizar Ícono */}
                     <button
                       type="button"
@@ -2996,14 +2984,26 @@ export default function DesktopPosPage() {
                         setIconSelectorProduct(p);
                         setShowIconSelector(true);
                       }}
-                      className="absolute bottom-2.5 left-2.5 w-6 h-6 rounded-full bg-white/90 dark:bg-slate-800/90 text-slate-500 hover:text-sky-600 hover:scale-110 shadow-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all z-20"
+                      className="absolute bottom-2 left-2 w-6 h-6 rounded-full bg-white/90 dark:bg-slate-800/90 text-slate-500 hover:text-sky-600 hover:scale-110 shadow-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all z-20"
                       title="Personalizar Ícono Iconify de este Producto"
                     >
                       <Palette className="w-3.5 h-3.5" />
                     </button>
 
                     {/* Contenedor Izquierdo: Imagen / Ícono en Marco Blanco Redondeado */}
-                    <div className="w-32 h-32 shrink-0 bg-white dark:bg-slate-900 rounded-2xl p-1 flex items-center justify-center shadow-xs relative overflow-hidden border border-slate-200/50 dark:border-white/5">
+                    <div className="w-28 sm:w-32 shrink-0 bg-white dark:bg-slate-900 rounded-2xl p-1 flex items-center justify-center shadow-xs relative overflow-hidden border border-slate-200/60 dark:border-white/5 min-h-[128px]">
+                      {/* Badge de Stock flotante sobre la imagen (sin pisar la tarjeta derecha) */}
+                      <div className="absolute top-1.5 left-1.5 flex items-center gap-1 z-10">
+                        <span className="text-[10px] font-black px-2 py-0.5 rounded-md bg-slate-950/80 backdrop-blur-xs text-white border border-white/20 shadow-xs">
+                          {p.stock} {p.unit === 'kg' ? 'kg' : 'uds'}
+                        </span>
+                        {isFixed && (
+                          <span className="text-[8.5px] font-black px-1.5 py-0.5 rounded-md bg-amber-500 text-white shadow-xs">
+                            🔒 Fijo
+                          </span>
+                        )}
+                      </div>
+
                       {p.image && showImages ? (
                         <img
                           src={p.image}
@@ -3025,28 +3025,31 @@ export default function DesktopPosPage() {
                     </div>
 
                     {/* Contenedor Derecho: Cápsula Elevada de Datos */}
-                    <div className="flex-1 min-w-0 bg-white dark:bg-slate-900/75 border border-white/80 dark:border-slate-700/50 rounded-2xl p-3 shadow-xs flex flex-col justify-between h-32 text-slate-900 dark:text-slate-100">
+                    <div className="flex-1 min-w-0 bg-white dark:bg-slate-900/90 border border-white/90 dark:border-slate-700/60 rounded-2xl p-2.5 sm:p-3 shadow-xs flex flex-col justify-between min-h-[128px] text-slate-900 dark:text-slate-100">
+                      {/* Fila Superior: Categoría */}
+                      <div className="flex items-center justify-between gap-1 w-full">
+                        <span className="text-[9.5px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 truncate max-w-[140px]">
+                          {p.category}
+                        </span>
+                      </div>
+
                       {/* Título a 2 Líneas */}
                       <h4
-                        className="font-bold text-[14px] text-slate-900 dark:text-slate-100 leading-snug line-clamp-2 min-h-[36px]"
+                        className="font-bold text-[13px] sm:text-[13.5px] text-slate-900 dark:text-slate-100 leading-snug line-clamp-2 my-auto"
                         title={p.name}
                       >
                         {p.name}
                       </h4>
 
-                      {/* Precios & Badge de Categoría */}
-                      <div className="flex flex-col mt-auto pt-1">
-                        <span className="text-xl sm:text-[22px] font-black text-slate-950 dark:text-white tracking-tight tabular-numbers leading-tight">
+                      {/* Precios Limpios en una sola línea sin desbordes */}
+                      <div className="flex flex-col pt-1.5 border-t border-slate-100 dark:border-slate-800/80 mt-auto">
+                        <span className="text-[16px] sm:text-[17px] font-black text-slate-950 dark:text-white tracking-tight tabular-numbers leading-tight whitespace-nowrap truncate">
                           {formatVES(displayVES)}
                         </span>
 
-                        <div className="flex items-center justify-between gap-1.5 mt-1">
-                          <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
-                            ${displayUSD.toFixed(2)} USD
-                          </span>
-
-                          <span className="text-[9.5px] font-black px-2.5 py-0.5 rounded-lg uppercase tracking-wider bg-rose-50 dark:bg-rose-950/50 text-rose-700 dark:text-rose-300 border border-rose-200/60 dark:border-rose-900/50 truncate max-w-[115px]">
-                            {p.category}
+                        <div className="flex items-center justify-between mt-0.5">
+                          <span className="text-[11px] sm:text-[11.5px] font-bold text-slate-600 dark:text-slate-400 whitespace-nowrap">
+                            $ {displayUSD.toFixed(2)} USD
                           </span>
                         </div>
                       </div>
