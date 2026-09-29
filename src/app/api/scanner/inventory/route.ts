@@ -11,15 +11,19 @@ export async function OPTIONS() {
   return new Response(null, { status: 204, headers: CORS_HEADERS });
 }
 
+import masterCatalog from '@/lib/data/master-catalog.json';
+
 // Caché en memoria de productos compartidos por la caja para consulta rápida del celular
-let cachedProducts: any[] = [];
-let lastCacheUpdate = 0;
+// Inicializado con el Catálogo Maestro (+130 productos) para disponibilidad inmediata
+let cachedProducts: any[] = Array.isArray(masterCatalog) && masterCatalog.length > 0 ? masterCatalog : [];
+let lastCacheUpdate = Date.now();
 let cachedBcvRate = 848.55;
 
 export async function GET(req: NextRequest) {
   try {
     // Si la caché está vacía, notificar al desktop que envíe el inventario
     if (cachedProducts.length === 0) {
+      cachedProducts = Array.isArray(masterCatalog) ? masterCatalog : [];
       scannerEmitter.emit('request_inventory', { timestamp: Date.now() });
     }
 

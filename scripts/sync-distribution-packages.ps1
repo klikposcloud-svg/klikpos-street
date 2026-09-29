@@ -29,7 +29,12 @@ Write-Host "Instalador Desktop detectado: $srcDesktopSetup" -ForegroundColor Gra
 
 $srcSateliteApk = Join-Path $root "dist-apk\KlikPOS_Movil_Satelite.apk"
 $srcFullApk     = Join-Path $root "dist-apk\KlikPOS_Movil_Full.apk"
-$srcAdminApk    = Join-Path $root "dist-apk\Klikpos-Admin-Mobile.apk"
+$srcStreetApk   = Join-Path $root "dist-apk\KlikPOS_Street.apk"
+$srcTabletApk   = Join-Path $root "dist-apk\KlikPOS_Tablet_Standalone.apk"
+$srcAdminApk    = Join-Path $root "dist-apk\KlikAdmin.apk"
+if (-not (Test-Path $srcAdminApk)) {
+    $srcAdminApk = Join-Path $root "dist-apk\Klikpos-Admin-Mobile.apk"
+}
 
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host "  KLIKPOS ENTERPRISE - SINCRONIZACION DE 5 EDICIONES      " -ForegroundColor Cyan
@@ -104,8 +109,16 @@ $doc2 | Out-File -FilePath (Join-Path $folderDesktopFull "LEEME_DESKTOP_EMPRESAR
 # EDICION 3: KlikPOS Tablet / Movil Standalone
 # -----------------------------------------------------------------------------
 Write-Host "[3/5] Sincronizando Edicion 3: Tablet Standalone Mesas..." -ForegroundColor Yellow
-if (Test-Path $srcFullApk) {
-    Copy-Item -Path $srcFullApk -Destination (Join-Path $folderTabletStand "KlikPOS_Tablet_Standalone.apk") -Force
+$targetTabletSrc = $null
+if (Test-Path $srcTabletApk) {
+    $targetTabletSrc = $srcTabletApk
+} elseif (Test-Path $srcStreetApk) {
+    $targetTabletSrc = $srcStreetApk
+}
+
+if ($targetTabletSrc) {
+    Copy-Item -Path $targetTabletSrc -Destination (Join-Path $folderTabletStand "KlikPOS_Tablet_Standalone.apk") -Force
+    Copy-Item -Path $targetTabletSrc -Destination (Join-Path $folderTabletStand "KlikPOS_Tablet_Standalone_Mesas.apk") -Force
 }
 $doc3 = @"
 ================================================================================

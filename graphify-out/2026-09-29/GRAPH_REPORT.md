@@ -1,12 +1,12 @@
 # Graph Report - venematic-master  (2026-09-29)
 
 ## Corpus Check
-- 558 files · ~1,279,520 words
+- 558 files · ~1,277,941 words
 - Verdict: corpus is large enough that graph structure adds value.
-- Unclassified: 154 file(s) not represented in the graph (top: .apk 51, .exe 42, .bat 24)
+- Unclassified: 145 file(s) not represented in the graph (top: .apk 42, .exe 42, .bat 24)
 
 ## Summary
-- 5461 nodes · 7780 edges · 333 communities (272 shown, 61 thin omitted)
+- 5427 nodes · 7721 edges · 332 communities (270 shown, 62 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 17 edges (avg confidence: 0.86)
 - Token cost: 0 input · 0 output
 
@@ -30,7 +30,7 @@
 - KLIKPOS ENTERPRISE SUITE (v2.4.0)
 - paymentService
 - venematic-desktop/src/lib/scanner-events.ts
-- venematic-desktop/src/app/dashboard/settings/page.tsx
+- venematic-desktop/src/app/dashboard/pos/page.tsx
 - ref_next
 - sign-and-release-all-apks.js
 - src/lib/theme.ts
@@ -69,9 +69,9 @@
 - PagoMovilGmailMonitor
 - venematic-desktop/src/lib/theme.ts
 - src/lib/payments/pago-movil-webhook-store.ts
-- venematic-desktop/src/app/dashboard/pos/page.tsx
+- cloudSyncService
 - enhance-and-rebrand-mobile.js
-- venematic-desktop/src/app/dashboard/inventory/page.tsx
+- formatUSD
 - src/lib/firebase/cloud-sync-service.ts
 - devDependencies
 - venematic-desktop/src/lib/sync/firestore-editions-sync.ts
@@ -95,16 +95,16 @@
 - BarcodeScanner
 - soundEffects
 - Write Swift
-- licenseManager
+- ref_fs
 - venematic-desktop/src/lib/payments/pago-movil-webhook-store.ts
 - venematicDB
-- ref_firebase
+- src/components/payment/PaymentModal.tsx
 - next-pwa.d.ts
 - gradlew
 - 📖 LA BIBLIA DE VENEMATIC POS: GUÍA MAESTRA DE DESARROLLO, ARQUITECTURA Y MARKETING (2026)
 - venematic-desktop
 - 🏛️ Pilares de Auditoría Técnica y Normativas Requeridas
-- venematic-desktop/src/lib/indexeddb/db.ts
+- ImportService
 - Apple Design
 - The Fixes
 - Prototyping Variants
@@ -122,7 +122,7 @@
 - venematic-desktop/src/app/tablet-pos/page.tsx
 - Working With Sonner
 - VENEMATIC POS · Solución Punto de Venta Inteligente
-- 🎞️ STORYBOARD COMPLETO SEGUNDO A SEGUNDO
+- venematic-desktop/src/lib/utils/email-service.ts
 - Venematic POS Enterprise v2.0 (Stack: Tauri/Rust + Next.js + SQLite WAL)
 - rules
 - Venematic POS Enterprise v2.0 (Stack: Tauri/Rust + Next.js + SQLite WAL)
@@ -151,7 +151,7 @@
 - Coding Standards & Best Practices
 - SUITE VENEMATIC POS (Desktop, Móvil y Servicios Conectados)
 - Debugging Animations
-- venematic-desktop/src/components/ManualWeightModal.tsx
+- src/lib/utils/email-service.ts
 - Core Philosophy
 - updateService
 - devDependencies
@@ -166,11 +166,11 @@
 - Windows Desktop E2E Testing
 - CONTRATO DE LICENCIA DE USO DE SOFTWARE DE USUARIO FINAL (EULA)
 - BarcodeScanner
-- ref_qrcode
+- FeatureGate.tsx
 - TorchController
 - venematic-desktop/src/context/AuthContext.tsx
 - AnalyticsService
-- isFirebaseConfigured
+- venematic-desktop/src/lib/firebase/config.ts
 - sync-version.js
 - ExampleInstrumentedTest.java
 - feature-flags.ts
@@ -180,11 +180,11 @@
 - apply-all-logos.ps1
 - TÉRMINOS Y CONDICIONES DE SERVICIO Y USO (T&C)
 - venematic-desktop/src/app/scanner/page.tsx
-- cloudBackupService
+- licenseManager
 - AVISO DE PRIVACIDAD Y ENCARGO DE TRATAMIENTO DE DATOS (DPA)
 - AVISO DE PRIVACIDAD Y ENCARGO DE TRATAMIENTO DE DATOS (DPA)
 - probar-sms-pagomovil.ps1
-- CrashReporterService
+- soundEffects
 - seed-master-catalog.js
 - venematic-desktop/src/lib/db.ts
 - Cloud Security Checklist
@@ -196,7 +196,7 @@
 - ref_react
 - scripts
 - architect.md
-- src/app/api/products/search-images/route.ts
+- isFirebaseConfigured
 - src/lib/delivery/marketplace-engine.ts
 - src/lib/indexeddb/db.ts
 - capture_all_scanner_tabs.js
@@ -269,7 +269,7 @@
 - Review Priorities
 - React Performance
 - Verification Phases
-- src/app/dashboard/inventory/page.tsx
+- src/app/scanner/page.tsx
 - Workflow
 - Kotlin Build Error Resolver
 - PyTorch Build/Runtime Error Resolver
@@ -285,7 +285,7 @@
 - network-troubleshooter.md
 - How It Works
 - 3. Detalle Técnico de Vulnerabilidades y Parches Aplicados
-- ref_fs
+- integrate-ecc.js
 - Analysis Process
 - fastapi-reviewer.md
 - harness-optimizer.md
@@ -305,50 +305,48 @@
 - gan-planner.md
 - 1. Eliminating Waterfalls (CRITICAL)
 - 2. Bundle Size Optimization (CRITICAL)
-- next.config.js
+- venematic-desktop/src/lib/indexeddb/db.ts
 - homelab-architect.md
 - loop-operator.md
 - network-architect.md
 - record-premium-showcase.js
 - src/lib/i18n/I18nProvider.tsx
 - ECC (Everything Claude Code) Testing & Quality Assurance Integration
-- src/app/api/system/network-ip/route.ts
+- src/lib/utils/payment-service.ts
 - 🤖 CONFIGURACIÓN Y PROMPT PARA HEYGEN / AVATAR IA: KLIKPOS v3.0.0
-- venematic-desktop/src/app/api/system/network-ip/route.ts
-- venematic-desktop/src/app/layout.tsx
+- src/lib/importers.ts
 - venematic-desktop/src/app/dashboard/inventory/import/page.tsx
-- KlikPOS Enterprise - Terminal Comercial y Facturación
-- KlikPOS Enterprise - Terminal Comercial y Facturación
-- venematic-desktop/src/components/ProductLabelModal.tsx
+- src/lib/sync/firestore-editions-sync.ts
+- venematic-desktop/src/app/dashboard/inventory/page.tsx
 
 ## God Nodes (most connected - your core abstractions)
 1. `venematicDB` - 47 edges
 2. `venematicDB` - 47 edges
 3. `tokenWalletService` - 25 edges
 4. `tokenWalletService` - 24 edges
-5. `db` - 23 edges
+5. `scaleService` - 21 edges
 6. `scaleService` - 21 edges
-7. `scaleService` - 21 edges
-8. `Apple Design` - 21 edges
-9. `isFirebaseConfigured()` - 20 edges
-10. `formatUSD()` - 20 edges
+7. `Apple Design` - 21 edges
+8. `db` - 21 edges
+9. `formatUSD()` - 20 edges
+10. `isFirebaseConfigured()` - 20 edges
 
 ## Surprising Connections (you probably didn't know these)
+- `ScanResult` --references--> `IDBProduct`  [EXTRACTED]
+  src/lib/utils/barcode-scanner.ts → src/lib/indexeddb/db.ts
 - `CashiersManagementSection()` --calls--> `useAuth()`  [EXTRACTED]
   src/app/dashboard/settings/page.tsx → src/context/AuthContext.tsx
-- `CashiersManagementSection()` --calls--> `useAuth()`  [EXTRACTED]
-  venematic-desktop/src/app/dashboard/settings/page.tsx → venematic-desktop/src/context/AuthContext.tsx
-- `GET()` --calls--> `fetchLiveBcvRate()`  [EXTRACTED]
-  src/app/api/bcv-rate/route.ts → src/lib/services/bcv-service.ts
-- `GET()` --calls--> `fetchLiveBcvRate()`  [EXTRACTED]
-  src/app/api/bcv/rate/route.ts → src/lib/services/bcv-service.ts
-- `POST()` --calls--> `fetchLiveBcvRate()`  [EXTRACTED]
-  src/app/api/bcv/rate/route.ts → src/lib/services/bcv-service.ts
+- `syncCatalogToMarketplaceMesh()` --calls--> `isFirebaseConfigured()`  [EXTRACTED]
+  src/lib/sync/firestore-editions-sync.ts → src/lib/firebase/config.ts
+- `DesktopPosPage()` --calls--> `formatUSD()`  [EXTRACTED]
+  src/app/dashboard/pos/page.tsx → src/lib/formatters.ts
+- `DesktopPosPage()` --calls--> `formatVES()`  [EXTRACTED]
+  src/app/dashboard/pos/page.tsx → src/lib/formatters.ts
 
 ## Import Cycles
 - None detected.
 
-## Communities (333 total, 61 thin omitted)
+## Communities (332 total, 62 thin omitted)
 
 ### Community 0 - "public/workbox-00a24876.js"
 Cohesion: 0.06
@@ -356,7 +354,7 @@ Nodes (24): a, b(), constructor(), deleteCacheAndMetadata(), et(), F, g(), get()
 
 ### Community 1 - "venematic-desktop/src/lib/firebase/firestore-schema.ts"
 Cohesion: 0.08
-Nodes (25): ref_firebase_admin, COLLECTION_INDEXES, CreditVoucher, FIRESTORE_COLLECTIONS, FirestoreActivityLog, FirestoreBcvRate, FirestoreCategory, FirestoreCustomer (+17 more)
+Nodes (24): COLLECTION_INDEXES, CreditVoucher, FIRESTORE_COLLECTIONS, FirestoreActivityLog, FirestoreBcvRate, FirestoreCategory, FirestoreCustomer, FirestoreInventoryLog (+16 more)
 
 ### Community 2 - "ref_c"
 Cohesion: 0.07
@@ -367,16 +365,16 @@ Cohesion: 0.06
 Nodes (24): a, b(), constructor(), deleteCacheAndMetadata(), et(), F, g(), get() (+16 more)
 
 ### Community 4 - "src/lib/scanner-events.ts"
-Cohesion: 0.07
-Nodes (15): CORS_HEADERS, dynamic, CORS_HEADERS, lastCacheUpdate, CORS_HEADERS, CORS_HEADERS, CORS_HEADERS, GET() (+7 more)
+Cohesion: 0.06
+Nodes (16): ref_events, CORS_HEADERS, dynamic, cachedProducts, CORS_HEADERS, CORS_HEADERS, CORS_HEADERS, CORS_HEADERS (+8 more)
 
 ### Community 5 - "BaseCurrencyAdapter"
 Cohesion: 0.05
 Nodes (11): BaseCurrencyAdapter, BcvRateProvider, ColombiaCOPAdapter, CurrencyAdapterFactory, CurrencyCalculation, CurrencyConfig, ExchangeRate, ManualRateProvider (+3 more)
 
 ### Community 6 - "isFirebaseConfigured"
-Cohesion: 0.07
-Nodes (18): cloudSyncService, isFirebaseConfigured(), EditionMetadata, getEditionSyncService(), KLIKPOS_EDITIONS_REGISTRY, KlikposDesktopSync, KlikposEditionBaseSync, KlikposEditionType (+10 more)
+Cohesion: 0.15
+Nodes (7): isFirebaseConfigured(), getEditionSyncService(), KlikposDesktopSync, KlikposEditionBaseSync, KlikposMovilFullAutonomoSync, KlikposSateliteSync, KlikposTabletStandaloneSync
 
 ### Community 7 - "transaction.rs"
 Cohesion: 0.06
@@ -384,27 +382,23 @@ Nodes (43): AppHandle, base64, DecodeError, ed25519_dalek, FromHexError, fs, Lic
 
 ### Community 8 - "src/app/dashboard/pos/page.tsx"
 Cohesion: 0.07
-Nodes (43): CartItem, DesktopPosPage(), getCategoryBadgeColor(), getCategoryEmoji(), getProductIconAlternated(), CashiersManagementSection(), DesktopSettingsPage(), DigitalScaleSettingsSection() (+35 more)
+Nodes (42): CartItem, DesktopPosPage(), getCategoryBadgeColor(), getCategoryEmoji(), getProductIconAlternated(), CashiersManagementSection(), DesktopSettingsPage(), DigitalScaleSettingsSection() (+34 more)
 
 ### Community 11 - "KLIKPOS ENTERPRISE SUITE (v2.4.0)"
 Cohesion: 0.12
 Nodes (16): 1. RESUMEN EJECUTIVO Y PROPUESTA DE VALOR, 2. AUDITORÍA FRENTE A VECTORES DE ATAQUE WEB / BUG BOUNTY, 3. PILARES CRIPTOGRÁFICOS Y DE INTEGRIDAD FORENSE, 4. HERRAMIENTAS DE ALTO IMPACTO PARA COMERCIO AMBULANTE (MÓVIL FULL), 5. RESULTADOS DE LA AUDITORÍA AUTOMATIZADA, 6. MATRIZ DE DISTRIBUCIÓN OFICIAL DE INSTALADORES, 7. CONCLUSIÓN Y DICTAMEN DE AUDITORÍA, A. Criptografía SHA-256 Pura con Salt Dinámico (+8 more)
 
-### Community 12 - "paymentService"
-Cohesion: 0.08
-Nodes (19): CartModalItem, PaymentModal(), PaymentModalProps, PaymentResult, handleNumericInputFocus(), handleNumpadInputKeyDown(), BcvQrData, CashChange (+11 more)
-
 ### Community 13 - "venematic-desktop/src/lib/scanner-events.ts"
 Cohesion: 0.06
 Nodes (15): CORS_HEADERS, dynamic, cachedProducts, CORS_HEADERS, CORS_HEADERS, CORS_HEADERS, CORS_HEADERS, GET() (+7 more)
 
-### Community 14 - "venematic-desktop/src/app/dashboard/settings/page.tsx"
-Cohesion: 0.15
-Nodes (18): CashiersManagementSection(), DesktopSettingsPage(), DigitalScaleSettingsSection(), SettingsTabId, DEFAULT_SCALE_BARCODE_CONFIG, getScaleBarcodeConfig(), ParsedScaleBarcode, saveScaleBarcodeConfig() (+10 more)
+### Community 14 - "venematic-desktop/src/app/dashboard/pos/page.tsx"
+Cohesion: 0.08
+Nodes (37): CartItem, DesktopPosPage(), getCardToneClasses(), getCategoryBadgeColor(), getCategoryEmoji(), getProductIconAlternated(), DesktopSettingsPage(), DigitalScaleSettingsSection() (+29 more)
 
 ### Community 15 - "ref_next"
-Cohesion: 0.09
-Nodes (5): ref_dns, ref_google_genai, ref_next, dynamic, version
+Cohesion: 0.10
+Nodes (8): ref_dns, ref_google_genai, ref_next, GET(), ImageResult, searchDuckDuckGo(), searchOpenFoodFacts(), searchWikimedia()
 
 ### Community 16 - "sign-and-release-all-apks.js"
 Cohesion: 0.09
@@ -427,12 +421,12 @@ Cohesion: 0.04
 Nodes (48): 10. Dependency Security, 1. Secrets Management, 2. Input Validation, 3. SQL Injection Prevention, 4. Authentication & Authorization, 5. XSS Prevention, 6. CSRF Protection, 7. Rate Limiting (+40 more)
 
 ### Community 21 - "src/app/api/bcv-rate/route.ts"
-Cohesion: 0.23
-Nodes (9): BcvRateResponse, latestBcvData, memoryCache, GET(), GET(), POST(), BcvRateResult, fetchLiveBcvRate() (+1 more)
+Cohesion: 0.21
+Nodes (10): ref_https, BcvRateResponse, latestBcvData, memoryCache, GET(), GET(), POST(), BcvRateResult (+2 more)
 
 ### Community 22 - "src/app/dashboard/analytics/page.tsx"
-Cohesion: 0.21
-Nodes (12): ref_react_chartjs_2, AnalyticsPage(), DAY_LABELS, DAY_SHORT, getHeatmapColor(), getHeatmapTextColor(), AnalyticsData, CurrencySummary (+4 more)
+Cohesion: 0.18
+Nodes (14): ref_chart_js, ref_react_chartjs_2, AnalyticsPage(), DAY_LABELS, DAY_SHORT, getHeatmapColor(), getHeatmapTextColor(), useTranslation() (+6 more)
 
 ### Community 23 - "🚀 CATÁLOGO OFICIAL DE VERSIONES Y SOLUCIONES COMERCIALES"
 Cohesion: 0.10
@@ -440,7 +434,7 @@ Nodes (20): 1. Computadora Mostrador Principal (Windows Server & POS), 2. App M�
 
 ### Community 24 - "src/lib/firebase/firestore-schema.ts"
 Cohesion: 0.08
-Nodes (24): COLLECTION_INDEXES, CreditVoucher, FIRESTORE_COLLECTIONS, FirestoreActivityLog, FirestoreBcvRate, FirestoreCategory, FirestoreCustomer, FirestoreInventoryLog (+16 more)
+Nodes (25): ref_firebase_admin, COLLECTION_INDEXES, CreditVoucher, FIRESTORE_COLLECTIONS, FirestoreActivityLog, FirestoreBcvRate, FirestoreCategory, FirestoreCustomer (+17 more)
 
 ### Community 25 - "compilerOptions"
 Cohesion: 0.08
@@ -459,7 +453,7 @@ Cohesion: 0.06
 Nodes (33): Bottom sheet you can drag to dismiss, Collapsing header on scroll, Expo Animation Recipes, Firing something once at a threshold, Keyboard-synced UI, List entrances, Press feedback, Screen transitions (Expo Router) (+25 more)
 
 ### Community 29 - "tokenWalletService"
-Cohesion: 0.13
+Cohesion: 0.12
 Nodes (13): VENEZUELAN_BANKS, WalletPage(), INITIAL_TRANSACTIONS, INITIAL_WALLETS, tokenWalletService, MerchantPayRequest, P2PTransferRequest, TopupRequest (+5 more)
 
 ### Community 30 - "BaseCurrencyAdapter"
@@ -491,20 +485,20 @@ Cohesion: 0.04
 Nodes (52): description, autoprefixer, chart.js, date-fns, dexie, eslint, eslint-config-next, eslint-plugin-jsx-a11y (+44 more)
 
 ### Community 39 - "src/types/index.ts"
-Cohesion: 0.10
-Nodes (19): ref_jspdf_autotable, ref_nodemailer, SyncStatus, EmailConfig, emailService, ReportGenerator, BcvRate, Customer (+11 more)
+Cohesion: 0.17
+Nodes (13): SyncStatus, BcvRate, Customer, InventoryLog, PaymentDetail, PendingSync, Product, Sale (+5 more)
 
 ### Community 40 - "package.json"
 Cohesion: 0.04
 Nodes (52): description, autoprefixer, chart.js, date-fns, dexie, eslint, eslint-config-next, eslint-plugin-jsx-a11y (+44 more)
 
 ### Community 41 - "venematic-desktop/src/types/index.ts"
-Cohesion: 0.11
-Nodes (17): SyncStatus, EmailConfig, emailService, ReportGenerator, BcvRate, Customer, InventoryLog, PaymentDetail (+9 more)
+Cohesion: 0.19
+Nodes (12): SyncStatus, BcvRate, Customer, InventoryLog, PaymentDetail, PendingSync, Product, SaleItem (+4 more)
 
 ### Community 42 - "src/app/dashboard/inventory/import/page.tsx"
-Cohesion: 0.11
-Nodes (16): ref_xlsx, ImportPage(), ImportStep, ParsedRow, useTranslation(), IDBProduct, ScannerState, ScanResult (+8 more)
+Cohesion: 0.15
+Nodes (11): ImportStep, ParsedRow, IDBProduct, DB_FIELD_OPTIONS, ImportColumn, ImportProduct, ImportService, ImportStats (+3 more)
 
 ### Community 43 - "sw.ts"
 Cohesion: 0.18
@@ -542,29 +536,25 @@ Nodes (31): DesktopDashboardLayout(), BrandingSettings(), applyBrandingToDOM(), 
 Cohesion: 0.26
 Nodes (13): dynamic, GET(), POST(), DEFAULT_WEBHOOK_SECRET, findMatchingPayment(), getWebhookSecret(), globalForWebhook, markPaymentAsUsed() (+5 more)
 
-### Community 53 - "venematic-desktop/src/app/dashboard/pos/page.tsx"
-Cohesion: 0.19
-Nodes (14): CartItem, DesktopPosPage(), getCardToneClasses(), getCategoryBadgeColor(), getCategoryEmoji(), getProductIconAlternated(), CashShiftModal(), SaleItem (+6 more)
-
 ### Community 54 - "enhance-and-rebrand-mobile.js"
 Cohesion: 0.17
 Nodes (11): androidPublic, fs, html, menuHtmlSrc, nextStaticDest, nextStaticSrc, path, publicSrc (+3 more)
 
-### Community 55 - "venematic-desktop/src/app/dashboard/inventory/page.tsx"
-Cohesion: 0.13
-Nodes (20): DesktopCustomersPage(), DEFAULT_CATEGORIES, DesktopInventoryPage(), CashierShiftSalesPage(), MasterCatalogModal(), MasterCatalogModalProps, RUBRO_FILTERS, PosQuickAccessSettings() (+12 more)
+### Community 55 - "formatUSD"
+Cohesion: 0.20
+Nodes (14): DesktopCustomersPage(), DesktopInventoryPage(), CashierShiftSalesPage(), ManualWeightModal(), ManualWeightModalProps, ManualWeightProduct, PosQuickAccessSettings(), ProductCostCalculator() (+6 more)
 
 ### Community 56 - "src/lib/firebase/cloud-sync-service.ts"
-Cohesion: 0.28
-Nodes (11): CloudSyncSettingsCard(), CloudSyncWidget(), CloudSyncStatus, SyncState, clearCustomFirebaseConfig(), config, db, FirebaseClientConfig (+3 more)
+Cohesion: 0.19
+Nodes (16): ref_firebase, CloudSyncSettingsCard(), CloudSyncWidget(), authService, CloudSyncStatus, SyncState, auth, clearCustomFirebaseConfig() (+8 more)
 
 ### Community 57 - "devDependencies"
 Cohesion: 0.15
 Nodes (13): devDependencies, autoprefixer, eslint, eslint-config-next, eslint-plugin-jsx-a11y, postcss, tailwindcss, @types/jsbarcode (+5 more)
 
 ### Community 58 - "venematic-desktop/src/lib/sync/firestore-editions-sync.ts"
-Cohesion: 0.09
-Nodes (15): EditionMetadata, getEditionSyncService(), KLIKPOS_EDITIONS_REGISTRY, KlikposDesktopSync, KlikposEditionBaseSync, KlikposEditionType, KlikposMovilFullAutonomoSync, KlikposMovilFullPCSync (+7 more)
+Cohesion: 0.11
+Nodes (14): EditionMetadata, getEditionSyncService(), KLIKPOS_EDITIONS_REGISTRY, KlikposDesktopSync, KlikposEditionType, KlikposMovilFullAutonomoSync, KlikposMovilFullPCSync, KlikposSateliteSync (+6 more)
 
 ### Community 59 - "Test-Driven Development Workflow"
 Cohesion: 0.04
@@ -607,32 +597,40 @@ Cohesion: 0.12
 Nodes (13): VENEZUELAN_BANKS, WalletPage(), INITIAL_TRANSACTIONS, INITIAL_WALLETS, tokenWalletService, MerchantPayRequest, P2PTransferRequest, TopupRequest (+5 more)
 
 ### Community 71 - "ref_path"
-Cohesion: 0.08
-Nodes (20): ref_child_process, ref_os, ref_path, { execSync }, path, root, os, path (+12 more)
+Cohesion: 0.06
+Nodes (26): nextConfig, path, withPWA, ref_child_process, ref_os, ref_path, os, path (+18 more)
 
 ### Community 72 - "scripts"
 Cohesion: 0.18
 Nodes (11): scripts, build, build:installer, dev, lint, release, release:publish, scraper (+3 more)
 
 ### Community 74 - "src/lib/db.ts"
-Cohesion: 0.11
-Nodes (31): DesktopCustomersPage(), DesktopReportsPage(), ProductSoldAudit, CashierShiftSalesPage(), CashShiftModal(), CashShiftModalProps, DEFAULT_USD_DENOMS, PosQuickAccessSettings() (+23 more)
+Cohesion: 0.09
+Nodes (39): DesktopCustomersPage(), DEFAULT_CATEGORIES, DesktopInventoryPage(), DesktopReportsPage(), ProductSoldAudit, CashierShiftSalesPage(), CashShiftModal(), CashShiftModalProps (+31 more)
 
 ### Community 75 - "venematic-desktop/src/components/payment/PaymentModal.tsx"
 Cohesion: 0.12
 Nodes (19): CartModalItem, PaymentModal(), PaymentModalProps, PaymentResult, handleNumericInputFocus(), handleNumpadInputKeyDown(), BcvQrData, CashChange (+11 more)
 
+### Community 77 - "soundEffects"
+Cohesion: 0.18
+Nodes (8): MasterCatalogModal(), MasterCatalogModalProps, RUBRO_FILTERS, MASTER_CATALOG_PRODUCTS, MasterCatalogProduct, CashDrawerResult, playErrorBeep(), soundEffects
+
 ### Community 78 - "Write Swift"
 Cohesion: 0.09
 Nodes (22): 10. ARC and object lifetime, 11. Testing — Swift Testing by default, 12. Macros, 13. Logging and debugging, 14. Unsafe code and interop, 15. Modern syntax you should be using, 16. Migrating an existing codebase to Swift 6, 1. Model data with value types (+14 more)
 
-### Community 80 - "venematic-desktop/src/lib/payments/pago-movil-webhook-store.ts"
-Cohesion: 0.23
-Nodes (14): ref_events, dynamic, GET(), POST(), DEFAULT_WEBHOOK_SECRET, findMatchingPayment(), getWebhookSecret(), globalForWebhook (+6 more)
+### Community 79 - "ref_fs"
+Cohesion: 0.14
+Nodes (11): ref_fs, ref_tweetnacl, ref_url, files, fs, fs, puppeteer, __dirname (+3 more)
 
-### Community 82 - "ref_firebase"
-Cohesion: 0.21
-Nodes (9): ref_firebase, authService, auth, firestore, UserRole, authService, auth, firestore (+1 more)
+### Community 80 - "venematic-desktop/src/lib/payments/pago-movil-webhook-store.ts"
+Cohesion: 0.25
+Nodes (13): dynamic, GET(), POST(), DEFAULT_WEBHOOK_SECRET, findMatchingPayment(), getWebhookSecret(), globalForWebhook, markPaymentAsUsed() (+5 more)
+
+### Community 82 - "src/components/payment/PaymentModal.tsx"
+Cohesion: 0.24
+Nodes (10): CartModalItem, PaymentModal(), PaymentModalProps, PaymentResult, handleNumericInputFocus(), handleNumpadInputKeyDown(), CashChange, PaymentMethod (+2 more)
 
 ### Community 83 - "next-pwa.d.ts"
 Cohesion: 0.50
@@ -650,9 +648,9 @@ Nodes (31): 10. DIRECTORIO MAESTRO DE ARCHIVOS, BINARIOS E INSTALADORES, 1. RESU
 Cohesion: 0.15
 Nodes (12): 1. Paginación, Límites de Payload y Anti-Overfetching (Local & Cloud), 2. Detección y Erradicación del Problema N+1 y Bloqueo de Ciclos, 3. Estrategia de Indexación, Planes de Consulta y Búsquedas Rápidas (Barcode/PLU), 4. Seguridad a Nivel de Fila (RLS), RBAC y Aislamiento Multi-Caja, 5. Transaccionalidad Fiscal, Balanza y Finanzas Multi-Moneda (SENIAT & BCV), 6. Caching, Estado en el Cliente y Prevención de Re-Renders, 7. Sincronización Offline-to-Cloud y Resiliencia de Red, 📋 Formato de Salida Requerido en la Auditoría: (+4 more)
 
-### Community 99 - "venematic-desktop/src/lib/indexeddb/db.ts"
-Cohesion: 0.12
-Nodes (10): ref_html5_qrcode, SAMPLE_CUSTOMERS, IDBBcvRate, IDBCustomer, IDBProduct, INDEX_CONFIG, STORES, ScannerState (+2 more)
+### Community 99 - "ImportService"
+Cohesion: 0.23
+Nodes (4): IDBProduct, ScannerState, ScanResult, ImportService
 
 ### Community 104 - "Apple Design"
 Cohesion: 0.09
@@ -722,9 +720,9 @@ Nodes (11): Functions, Sonner API Reference, `toast()` options, `<Toaster />`, I
 Cohesion: 0.15
 Nodes (12): 🌟 1. ¿Qué es Venematic POS?, 🚀 2. Nuevas Características y Mejoras Recientes, 🔒 3. Seguridad y Soberanía de sus Datos (Privacidad Total), 💼 4. Planes y Precios Transparentes, 📞 5. Soporte y Activación, A. ⏱️ Licencia de Prueba Flash de 15 Minutos (Sin Compromiso), B. 📱 Nueva Interfaz Táctil Móvil para Artículos (Catálogo Inteligente), C. ⚡ Confirmación Automática de Pago Móvil por Webhook (Dueño Fuera del Local) (+4 more)
 
-### Community 121 - "🎞️ STORYBOARD COMPLETO SEGUNDO A SEGUNDO"
-Cohesion: 0.17
-Nodes (11): 🕒 BLOQUE 1: EL GANCHO DE ATENCIÓN (HOOK), 🕒 BLOQUE 2: LA PRESENTACIÓN ESTELAR (REVEAL), 🕒 BLOQUE 3: VISTAS ADAPTABLES PARA CADA TIPO DE COMERCIO, 🕒 BLOQUE 4: INNOVACIÓN SATÉLITE QR (EL CELULAR ES EL ESCÁNER), 🕒 BLOQUE 5: RESTAURANTES, MESAS, COCINA & WHATSAPP, 🕒 BLOQUE 6: 3 PLANES TRANSPARENTES & ACTIVACIÓN INSTANTÁNEA, 🕒 BLOQUE 7: LLAMADO A LA ACCIÓN (CALL TO ACTION), 📋 FICHA TÉCNICA Y ESPECIFICACIONES DE RODAJE (+3 more)
+### Community 121 - "venematic-desktop/src/lib/utils/email-service.ts"
+Cohesion: 0.20
+Nodes (6): ref_jspdf_autotable, EmailConfig, emailService, ReportGenerator, Report, Sale
 
 ### Community 123 - "Venematic POS Enterprise v2.0 (Stack: Tauri/Rust + Next.js + SQLite WAL)"
 Cohesion: 0.17
@@ -803,8 +801,8 @@ Cohesion: 0.40
 Nodes (5): Interruptibility advantage, Spring Animations, Spring-based mouse interactions, Spring configuration, When to use springs
 
 ### Community 145 - "venematic-desktop/src/app/dashboard/analytics/page.tsx"
-Cohesion: 0.19
-Nodes (13): ref_chart_js, ref_jspdf, AnalyticsPage(), DAY_LABELS, DAY_SHORT, getHeatmapColor(), getHeatmapTextColor(), AnalyticsData (+5 more)
+Cohesion: 0.23
+Nodes (11): AnalyticsPage(), DAY_LABELS, DAY_SHORT, getHeatmapColor(), getHeatmapTextColor(), AnalyticsData, CurrencySummary, DailyTrend (+3 more)
 
 ### Community 148 - "CONTRATO DE LICENCIA DE USO DE SOFTWARE DE USUARIO FINAL (EULA)"
 Cohesion: 0.22
@@ -826,9 +824,9 @@ Nodes (6): 1. PROPIEDAD Y CONFIDENCIALIDAD DE LOS DATOS COMERCIALES, 2. POLÍTIC
 Cohesion: 0.50
 Nodes (4): Debugging Animations, Frame-by-frame inspection, Slow motion testing, Test on real devices
 
-### Community 153 - "venematic-desktop/src/components/ManualWeightModal.tsx"
-Cohesion: 0.24
-Nodes (9): ManualWeightModal(), ManualWeightModalProps, ManualWeightProduct, calculateWeightPrice(), PriceMultiplierBasis, ScaleConfig, ScaleProtocol, WeightListener (+1 more)
+### Community 153 - "src/lib/utils/email-service.ts"
+Cohesion: 0.21
+Nodes (6): ref_jspdf, ref_nodemailer, EmailConfig, emailService, ReportGenerator, Report
 
 ### Community 154 - "Core Philosophy"
 Cohesion: 0.50
@@ -841,10 +839,6 @@ Nodes (9): dynamic, AutoUpdateModal(), compareVersions(), CURRENT_VERSION, FALLB
 ### Community 156 - "devDependencies"
 Cohesion: 0.15
 Nodes (13): devDependencies, autoprefixer, eslint, eslint-config-next, eslint-plugin-jsx-a11y, postcss, tailwindcss, @types/jsbarcode (+5 more)
-
-### Community 157 - "updateService"
-Cohesion: 0.17
-Nodes (6): compareVersions(), CURRENT_VERSION, FALLBACK_MANIFEST_URLS, UpdateConfig, updateService, VersionManifest
 
 ### Community 159 - "venematic-desktop/src/app/sw.ts"
 Cohesion: 0.18
@@ -859,8 +853,8 @@ Cohesion: 0.26
 Nodes (5): BusinessType, DEFAULT_STORES, RegisteredStore, StoreChangeListener, storeManager
 
 ### Community 163 - "src/scripts/bcv-scraper.js"
-Cohesion: 0.20
-Nodes (13): ref_https, extractRates(), FALLBACK_SOURCES, getHistoricalFallback(), http, httpGet(), https, RATE_PATTERNS (+5 more)
+Cohesion: 0.22
+Nodes (12): extractRates(), FALLBACK_SOURCES, getHistoricalFallback(), http, httpGet(), https, RATE_PATTERNS, scrapeAllSources() (+4 more)
 
 ### Community 164 - "7 Mandatory Compliance Checks"
 Cohesion: 0.20
@@ -874,17 +868,17 @@ Nodes (41): Add Stable Identifiers to Qt Widgets, Anti-Patterns, Artifact Manage
 Cohesion: 0.22
 Nodes (8): CLÁUSULA CUARTA: RESPONSABILIDAD TRIBUTARIA Y FISCAL (SENIAT), CLÁUSULA PRIMERA: CONCESIÓN DE LA LICENCIA, CLÁUSULA QUINTA: CONTINUIDAD OPERATIVA Y CASO FORTUITO, CLÁUSULA SEGUNDA: PROPIEDAD INTELECTUAL Y PROHIBICIONES, CLÁUSULA SEXTA: JURISDICCIÓN Y RESOLUCIÓN DE CONFLICTOS, CLÁUSULA TERCERA: VINCULACIÓN DE HARDWARE (HWID) Y MIGRACIONES, CONTRATO DE LICENCIA DE USO DE SOFTWARE DE USUARIO FINAL (EULA), PREÁMBULO Y DECLARACIÓN DE DERECHOS
 
-### Community 169 - "ref_qrcode"
-Cohesion: 0.29
-Nodes (5): ref_qrcode, CameraScannerModal(), CameraScannerModalProps, CameraScannerModal(), CameraScannerModalProps
+### Community 169 - "FeatureGate.tsx"
+Cohesion: 0.20
+Nodes (11): FeatureGate(), FeatureGateProps, CustomerCreditRecord, financialDB, OperationalExpense, SupplierInvoiceRecord, SupplierRecord, FeatureFlag (+3 more)
 
 ### Community 171 - "venematic-desktop/src/context/AuthContext.tsx"
-Cohesion: 0.13
-Nodes (28): AuthContext, AuthContextType, AuthProvider(), AuthUser, CashierAccount, DEFAULT_CASHIERS, DEFAULT_USER, UserRole (+20 more)
+Cohesion: 0.11
+Nodes (30): metadata, AuthContext, AuthContextType, AuthProvider(), AuthUser, CashierAccount, DEFAULT_CASHIERS, DEFAULT_USER (+22 more)
 
-### Community 173 - "isFirebaseConfigured"
-Cohesion: 0.31
-Nodes (12): CloudSyncSettingsCard(), CloudSyncWidget(), CloudSyncStatus, SyncState, clearCustomFirebaseConfig(), config, db, FirebaseClientConfig (+4 more)
+### Community 173 - "venematic-desktop/src/lib/firebase/config.ts"
+Cohesion: 0.19
+Nodes (14): CloudSyncSettingsCard(), CloudSyncWidget(), authService, CloudSyncStatus, auth, clearCustomFirebaseConfig(), config, db (+6 more)
 
 ### Community 174 - "sync-version.js"
 Cohesion: 0.15
@@ -895,8 +889,8 @@ Cohesion: 0.24
 Nodes (8): androidx.test.ext.junit.runners.AndroidJUnit4, assert, context, instrumentationregistry, org.junit.runner.RunWith, org.junit.Test, ExampleInstrumentedTest, ExampleUnitTest
 
 ### Community 176 - "feature-flags.ts"
-Cohesion: 0.09
-Nodes (26): MasterDeveloperDashboardPage(), serverCrashLogs, DeliveryDashboardPage(), LicensingInformationPage(), FeatureGate(), FeatureGateProps, applyLicenseUpdate(), EDITION_DEFINITIONS (+18 more)
+Cohesion: 0.10
+Nodes (23): MasterDeveloperDashboardPage(), serverCrashLogs, DeliveryDashboardPage(), LicensingInformationPage(), CameraScannerModal(), CameraScannerModalProps, applyLicenseUpdate(), canUseFeature() (+15 more)
 
 ### Community 177 - "venematic-desktop/src/types/next-pwa.d.ts"
 Cohesion: 0.50
@@ -919,12 +913,12 @@ Cohesion: 0.29
 Nodes (6): 1. ACEPTACIÓN DE LOS TÉRMINOS, 2. NATURALEZA DEL SOFTWARE Y ALCANCE FUNCIONAL, 3. DESCARGO DE RESPONSABILIDAD FISCAL Y TRIBUTARIA (SENIAT), 4. SUMINISTRO ELÉCTRICO Y RESPALDOS OBLIGATORIOS (VENEZUELA), 5. SOPORTE TÉCNICO Y ACTUALIZACIONES, TÉRMINOS Y CONDICIONES DE SERVICIO Y USO (T&C)
 
 ### Community 183 - "venematic-desktop/src/app/scanner/page.tsx"
-Cohesion: 0.38
-Nodes (6): getMobileCardToneClasses(), getMobileProductIcon(), MobileCartItem, MobileCatalogItem, MobileScannerPage(), ScannedHistoryItem
+Cohesion: 0.33
+Nodes (7): getMobileCardToneClasses(), getMobileProductIcon(), MobileCartItem, MobileCatalogItem, MobileScannerPage(), ScannedHistoryItem, removeBackgroundToWhiteCanvas()
 
-### Community 185 - "cloudBackupService"
-Cohesion: 0.18
-Nodes (4): cloudBackupService, CloudBackupSnapshot, DEFAULT_LICENSE, StoreLicense
+### Community 185 - "licenseManager"
+Cohesion: 0.09
+Nodes (6): cloudBackupService, CloudBackupSnapshot, DEFAULT_LICENSE, licenseManager, StoreLicense, CrashReporterService
 
 ### Community 186 - "AVISO DE PRIVACIDAD Y ENCARGO DE TRATAMIENTO DE DATOS (DPA)"
 Cohesion: 0.40
@@ -934,13 +928,17 @@ Nodes (4): 1. POLÍTICA DE SOBERANÍA Y CONFIDENCIALIDAD DE DATOS, 2. ENCARGO DE
 Cohesion: 0.40
 Nodes (4): 1. POLÍTICA DE SOBERANÍA Y CONFIDENCIALIDAD DE DATOS, 2. ENCARGO DE TRATAMIENTO DE DATOS DE TERCEROS (CLIENTES DEL COMERCIO), 3. SEGURIDAD Y MEDIDAS DE CONTROL, AVISO DE PRIVACIDAD Y ENCARGO DE TRATAMIENTO DE DATOS (DPA)
 
+### Community 195 - "soundEffects"
+Cohesion: 0.20
+Nodes (7): MasterCatalogModal(), MasterCatalogModalProps, RUBRO_FILTERS, MASTER_CATALOG_PRODUCTS, MasterCatalogProduct, playErrorBeep(), soundEffects
+
 ### Community 196 - "seed-master-catalog.js"
 Cohesion: 0.20
 Nodes (11): args, CATALOG_PATH, fs, https, isDryRun, main(), path, products (+3 more)
 
 ### Community 197 - "venematic-desktop/src/lib/db.ts"
-Cohesion: 0.11
-Nodes (24): ref_dexie, DesktopReportsPage(), ProductSoldAudit, CashShiftModalProps, DEFAULT_USD_DENOMS, SYSTEM_DEFAULTS, CashDenominationBreakdown, CashMovement (+16 more)
+Cohesion: 0.13
+Nodes (22): ref_dexie, DesktopReportsPage(), ProductSoldAudit, CashShiftModalProps, DEFAULT_USD_DENOMS, CashDenominationBreakdown, CashMovement, db (+14 more)
 
 ### Community 198 - "Cloud Security Checklist"
 Cohesion: 0.06
@@ -963,8 +961,8 @@ Cohesion: 0.25
 Nodes (7): 1. Prohibición Absoluta de Selectores CSS Destructivos (Tailwind Safe), 2. Contraste Visual Obligatorio (WCAG AAA >= 7:1), 3. Ergonomía de Pantalla POS (Máximo 4 Columnas), 4. Compilación Completa Pre-Empaquetado (No Builds Obsoletos), 5. Sincronización Continua con GitHub y Actualización Obligatoria de Instaladores, 6. Carpeta Oficial Obligatoria de Distribución (DISTRIBUCION_KLIKPOS), KlikPOS Strict Engineering & Zero-Regression Standards
 
 ### Community 204 - "ref_react"
-Cohesion: 0.12
-Nodes (19): ref_lucide_react, ref_react, NAV_ITEMS, NavItem, CartItem, DEFAULT_MENU_ITEMS, MenuItem, AdminPinModal() (+11 more)
+Cohesion: 0.10
+Nodes (24): ref_lucide_react, ref_react, dynamic, NAV_ITEMS, NavItem, CartItem, DEFAULT_MENU_ITEMS, MenuItem (+16 more)
 
 ### Community 205 - "scripts"
 Cohesion: 0.18
@@ -974,17 +972,13 @@ Nodes (11): scripts, build, build:installer, dev, lint, release, release:publish
 Cohesion: 0.07
 Nodes (28): 1. Current State Analysis, 1. Modularity & Separation of Concerns, 2. Requirements Gathering, 2. Scalability, 3. Design Proposal, 3. Maintainability, 4. Security, 4. Trade-Off Analysis (+20 more)
 
-### Community 207 - "src/app/api/products/search-images/route.ts"
-Cohesion: 0.53
-Nodes (5): GET(), ImageResult, searchDuckDuckGo(), searchOpenFoodFacts(), searchWikimedia()
-
 ### Community 208 - "src/lib/delivery/marketplace-engine.ts"
 Cohesion: 0.30
 Nodes (8): GET(), GET(), calculateDistanceKm(), DEFAULT_DEMO_PRODUCTS, INITIAL_MARKETPLACE_STORES, POPULAR_ZONES, searchMarketplaceProducts(), STORE_INVENTORIES
 
 ### Community 209 - "src/lib/indexeddb/db.ts"
-Cohesion: 0.25
-Nodes (6): ref_idb, SAMPLE_CUSTOMERS, IDBBcvRate, IDBCustomer, INDEX_CONFIG, STORES
+Cohesion: 0.18
+Nodes (8): ref_html5_qrcode, SAMPLE_CUSTOMERS, IDBBcvRate, IDBCustomer, INDEX_CONFIG, STORES, ScannerState, ScanResult
 
 ### Community 210 - "capture_all_scanner_tabs.js"
 Cohesion: 0.11
@@ -1012,7 +1006,7 @@ Nodes (23): Build System Detection, Bundler-Independent Runtime Failures, Bundle
 
 ### Community 216 - "playBeep"
 Cohesion: 0.23
-Nodes (7): MasterCloudLicensePage(), DeliveryDashboardPage(), CloudBackupSnapshot, DEFAULT_LICENSE, StoreLicense, playBeep(), playSuccessChime()
+Nodes (8): MasterCloudLicensePage(), DeliveryDashboardPage(), CameraScannerModal(), CameraScannerModalProps, DEFAULT_LICENSE, StoreLicense, playBeep(), playSuccessChime()
 
 ### Community 217 - "Frontend Accessibility Patterns"
 Cohesion: 0.09
@@ -1039,8 +1033,8 @@ Cohesion: 0.10
 Nodes (20): 1. Identify Performance Issues, 2. Algorithmic Analysis, 3. React Performance Optimization, 4. Bundle Size Optimization, 5. Database & Query Optimization, 6. Network & API Optimization, 7. Memory Leak Detection, Analysis Commands (+12 more)
 
 ### Community 223 - "venematic-desktop/src/app/dashboard/layout.tsx"
-Cohesion: 0.27
-Nodes (9): NAV_ITEMS, NavItem, AdminPinModal(), LockScreenModal(), LockScreenModalProps, LoginModal(), LoginModalProps, useAuth() (+1 more)
+Cohesion: 0.21
+Nodes (11): NAV_ITEMS, NavItem, CashiersManagementSection(), AdminPinModal(), LockScreenModal(), LockScreenModalProps, LoginModal(), LoginModalProps (+3 more)
 
 ### Community 226 - "Review Priorities (Vue-specific only)"
 Cohesion: 0.10
@@ -1151,8 +1145,8 @@ Cohesion: 0.12
 Nodes (15): 1.1. Mensaje de Bienvenida Automático (Saludo Inicial), 1.2. Respuesta Informativa de Planes y Precios, 1.3. ¿Cómo Funciona? (Explicación para Clientes), 1.4. Envío de Licencia / Activación al Cliente, 3.1. Post de Instagram / Facebook (Enfocado en Solución al Comercio), 3.2. Copy Corto para Estados de WhatsApp / Historias de Instagram, 3.3. Guion / Copy para Reels y TikTok (15 - 30 Segundos), 🟢 BLOQUE 1: WHATSAPP BUSINESS & ATENCIÓN DIRECTA (+7 more)
 
 ### Community 257 - "venematic-desktop/src/scripts/bcv-scraper.js"
-Cohesion: 0.13
-Nodes (18): ref_tweetnacl, ref_url, __dirname, __filename, PRIVATE_KEY_PATH, PUBLIC_KEY_PATH, extractRates(), FALLBACK_SOURCES (+10 more)
+Cohesion: 0.22
+Nodes (12): extractRates(), FALLBACK_SOURCES, getHistoricalFallback(), http, httpGet(), https, RATE_PATTERNS, scrapeAllSources() (+4 more)
 
 ### Community 258 - "Review Priorities"
 Cohesion: 0.13
@@ -1238,9 +1232,9 @@ Nodes (13): 4. Client-Side Data Fetching (MEDIUM-HIGH), 7. JavaScript Performanc
 Cohesion: 0.15
 Nodes (12): Continuous Mode, Integration with Hooks, Output Format, Phase 1: Build Verification, Phase 2: Type Check, Phase 3: Lint Check, Phase 4: Test Suite, Phase 5: Security Scan (+4 more)
 
-### Community 280 - "src/app/dashboard/inventory/page.tsx"
-Cohesion: 0.07
-Nodes (34): ref_iconify_react, DEFAULT_CATEGORIES, DesktopInventoryPage(), getMobileCardToneClasses(), getMobileProductIcon(), MobileCartItem, MobileCatalogItem, MobileScannerPage() (+26 more)
+### Community 280 - "src/app/scanner/page.tsx"
+Cohesion: 0.32
+Nodes (7): ref_iconify_react, getMobileCardToneClasses(), getMobileProductIcon(), MobileCartItem, MobileCatalogItem, MobileScannerPage(), ScannedHistoryItem
 
 ### Community 281 - "Workflow"
 Cohesion: 0.17
@@ -1302,9 +1296,9 @@ Nodes (10): Browser QA — Automated Visual Testing & Interaction, How It Works,
 Cohesion: 0.18
 Nodes (10): 1. Resumen Ejecutivo, 2. Matriz de Vulnerabilidades & Parches de Seguridad, 3.1. VULN-001: Ejecución Remota de Código (RCE) en Endpoint de Actualización, 3.2. VULN-002: Server-Side Request Forgery (SSRF) en Descarga de Imágenes, 3.3. VULN-003: Inyección de Pagos Falsos en Webhook de Pago Móvil, 3.4. VULN-004: Integridad Aritmética en Billetera Digital & Tokens USD, 3. Detalle Técnico de Vulnerabilidades y Parches Aplicados, 4. Directrices de Hardening Continuo (Zero-Regression) (+2 more)
 
-### Community 296 - "ref_fs"
-Cohesion: 0.11
-Nodes (15): ref_fs, files, fs, fs, puppeteer, agentsDir, fs, path (+7 more)
+### Community 296 - "integrate-ecc.js"
+Cohesion: 0.18
+Nodes (10): agentsDir, fs, path, rulesDir, skillsDir, skillsToCopy, srcAgents, srcBase (+2 more)
 
 ### Community 297 - "Analysis Process"
 Cohesion: 0.20
@@ -1382,9 +1376,9 @@ Nodes (7): 1. Eliminating Waterfalls (CRITICAL), Cheap conditions before await, 
 Cohesion: 0.29
 Nodes (7): 2. Bundle Size Optimization (CRITICAL), Conditional module loading, Defer third-party scripts, Direct imports, not barrels, Dynamic imports for heavy components, Preload on hover/focus, Statically analyzable paths
 
-### Community 316 - "next.config.js"
-Cohesion: 0.40
-Nodes (3): nextConfig, path, withPWA
+### Community 316 - "venematic-desktop/src/lib/indexeddb/db.ts"
+Cohesion: 0.25
+Nodes (6): ref_idb, SAMPLE_CUSTOMERS, IDBBcvRate, IDBCustomer, INDEX_CONFIG, STORES
 
 ### Community 317 - "homelab-architect.md"
 Cohesion: 0.33
@@ -1410,53 +1404,49 @@ Nodes (4): I18nContext, I18nContextType, I18nProvider(), translations
 Cohesion: 0.50
 Nodes (3): Available Subagents in .agents/agents/, ECC (Everything Claude Code) Testing & Quality Assurance Integration, Standard Verification Workflow
 
-### Community 324 - "src/app/api/system/network-ip/route.ts"
-Cohesion: 0.67
-Nodes (3): dynamic, GET(), getLocalNetworkIp()
+### Community 324 - "src/lib/utils/payment-service.ts"
+Cohesion: 0.20
+Nodes (9): BcvQrData, ChangeBreakdown, CreditVoucher, MobilePayment, PaymentDetails, SalePayment, VENEZUELAN_BANKS, VerificationData (+1 more)
 
 ### Community 326 - "🤖 CONFIGURACIÓN Y PROMPT PARA HEYGEN / AVATAR IA: KLIKPOS v3.0.0"
 Cohesion: 0.40
 Nodes (4): 👤 1. Configuración del Avatar en HeyGen, 🎙️ 2. Texto de Locución para Pegar en HeyGen (Script Completo), 🖼️ 3. Fondos y Elementos Gráficos para la Pista de HeyGen, 🤖 CONFIGURACIÓN Y PROMPT PARA HEYGEN / AVATAR IA: KLIKPOS v3.0.0
 
-### Community 327 - "venematic-desktop/src/app/api/system/network-ip/route.ts"
-Cohesion: 0.67
-Nodes (3): dynamic, GET(), getLocalNetworkIp()
+### Community 327 - "src/lib/importers.ts"
+Cohesion: 0.52
+Nodes (6): cleanText(), detectDelimiter(), parseInventoryFile(), parseNumber(), ParseResult, splitCSVLine()
 
 ### Community 329 - "venematic-desktop/src/app/dashboard/inventory/import/page.tsx"
 Cohesion: 0.12
-Nodes (15): ImportPage(), ImportStep, ParsedRow, I18nContext, I18nContextType, I18nProvider(), translations, useTranslation() (+7 more)
+Nodes (17): ref_xlsx, ImportPage(), ImportPage(), ImportStep, ParsedRow, I18nContext, I18nContextType, I18nProvider() (+9 more)
 
-### Community 330 - "KlikPOS Enterprise - Terminal Comercial y Facturación"
-Cohesion: 0.50
-Nodes (3): Brand Summary, KlikPOS Enterprise - Terminal Comercial y Facturación, What's in This Capture
+### Community 331 - "src/lib/sync/firestore-editions-sync.ts"
+Cohesion: 0.14
+Nodes (10): EditionMetadata, KLIKPOS_EDITIONS_REGISTRY, KlikposEditionType, KlikposMovilFullPCSync, syncCatalogToMarketplaceMesh(), SyncCompanyConfig, SyncProductItem, SyncRateBCV (+2 more)
 
-### Community 331 - "KlikPOS Enterprise - Terminal Comercial y Facturación"
-Cohesion: 0.50
-Nodes (3): Brand Summary, KlikPOS Enterprise - Terminal Comercial y Facturación, What's in This Capture
-
-### Community 340 - "venematic-desktop/src/components/ProductLabelModal.tsx"
-Cohesion: 0.23
-Nodes (12): ref_jsbarcode, LabelFormat, ProductLabelModal(), ProductLabelModalProps, QueueItem, LocalProduct, cleanText(), detectDelimiter() (+4 more)
+### Community 340 - "venematic-desktop/src/app/dashboard/inventory/page.tsx"
+Cohesion: 0.17
+Nodes (17): ref_jsbarcode, ref_qrcode, DEFAULT_CATEGORIES, ImageResult, ProductImageSearchModal(), ProductImageSearchModalProps, LabelFormat, ProductLabelModal() (+9 more)
 
 ## Knowledge Gaps
-- **2811 isolated node(s):** `root`, `next/core-web-vitals`, `plugin:jsx-a11y/recommended`, `jsx-a11y/label-has-associated-control`, `jsx-a11y/no-autofocus` (+2806 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 3306 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **61 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **2794 isolated node(s):** `CreditVoucher`, `FirestoreActivityLog`, `FirestoreBcvRate`, `FirestoreCategory`, `FirestoreCustomer` (+2789 more)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 3284 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **62 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `venematicDB` connect `VenematicDB` to `BaseCurrencyAdapter`, `src/lib/utils/store-manager.ts`, `src/types/index.ts`, `src/app/dashboard/inventory/import/page.tsx`, `src/lib/indexeddb/db.ts`, `src/app/dashboard/analytics/page.tsx`, `src/app/marketplace/page.tsx`?**
-  _High betweenness centrality (0.008) - this node is a cross-community bridge._
-- **Why does `venematicDB` connect `venematicDB` to `venematic-desktop/src/lib/utils/store-manager.ts`, `venematic-desktop/src/lib/indexeddb/db.ts`, `venematic-desktop/src/app/dashboard/inventory/import/page.tsx`, `venematic-desktop/src/types/index.ts`, `venematic-desktop/src/app/dashboard/analytics/page.tsx`, `playBeep`, `BaseCurrencyAdapter`?**
-  _High betweenness centrality (0.007) - this node is a cross-community bridge._
-- **Why does `isFirebaseConfigured()` connect `isFirebaseConfigured` to `src/lib/firebase/cloud-sync-service.ts`?**
-  _High betweenness centrality (0.006) - this node is a cross-community bridge._
-- **What connects `root`, `next/core-web-vitals`, `plugin:jsx-a11y/recommended` to the rest of the system?**
-  _2811 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **Why does `venematicDB` connect `venematicDB` to `venematic-desktop/src/lib/utils/store-manager.ts`, `ImportService`, `venematic-desktop/src/app/dashboard/inventory/import/page.tsx`, `venematic-desktop/src/types/index.ts`, `venematic-desktop/src/app/dashboard/analytics/page.tsx`, `playBeep`, `venematic-desktop/src/lib/indexeddb/db.ts`, `BaseCurrencyAdapter`?**
+  _High betweenness centrality (0.015) - this node is a cross-community bridge._
+- **Why does `syncManager` connect `syncManager` to `src/app/dashboard/inventory/import/page.tsx`, `src/types/index.ts`?**
+  _High betweenness centrality (0.009) - this node is a cross-community bridge._
+- **Why does `venematicDB` connect `VenematicDB` to `BaseCurrencyAdapter`, `src/lib/utils/store-manager.ts`, `src/types/index.ts`, `src/app/dashboard/inventory/import/page.tsx`, `feature-flags.ts`, `src/lib/indexeddb/db.ts`, `src/app/dashboard/analytics/page.tsx`?**
+  _High betweenness centrality (0.005) - this node is a cross-community bridge._
+- **What connects `CreditVoucher`, `FirestoreActivityLog`, `FirestoreBcvRate` to the rest of the system?**
+  _2794 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `public/workbox-00a24876.js` be split into smaller, more focused modules?**
   _Cohesion score 0.05586741512964448 - nodes in this community are weakly interconnected._
 - **Should `venematic-desktop/src/lib/firebase/firestore-schema.ts` be split into smaller, more focused modules?**
-  _Cohesion score 0.07692307692307693 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.08 - nodes in this community are weakly interconnected._
 - **Should `ref_c` be split into smaller, more focused modules?**
   _Cohesion score 0.06896551724137931 - nodes in this community are weakly interconnected._

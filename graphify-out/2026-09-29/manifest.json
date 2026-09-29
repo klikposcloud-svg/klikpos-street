@@ -48,14 +48,14 @@
     "semantic_hash": ""
   },
   "public/sw.js": {
-    "mtime": 1790705348.9161277,
-    "seen": 1790705981.2932425,
-    "ast_hash": "f1806507f4b3cfc06f3142ba139ffec3",
+    "mtime": 1790680469.070779,
+    "seen": 1790680875.4787254,
+    "ast_hash": "079a9d9e3511cbcc0b3b02448227cf20",
     "semantic_hash": ""
   },
   "public/workbox-00a24876.js": {
-    "mtime": 1790705348.9161277,
-    "seen": 1790705981.2932482,
+    "mtime": 1790680469.070779,
+    "seen": 1790680875.4787316,
     "ast_hash": "2f569fb030b2a09996588b309a8d636e",
     "semantic_hash": "2f569fb030b2a09996588b309a8d636e"
   },
@@ -162,10 +162,10 @@
     "semantic_hash": "9da1b3b5d30dddd71f25de7394205d09"
   },
   "src/app/api/scanner/inventory/route.ts": {
-    "mtime": 1790704591.5184994,
-    "seen": 1790705981.2934248,
-    "ast_hash": "0a7eeec939c6a651fe03da711c0f0738",
-    "semantic_hash": ""
+    "mtime": 1790099378.6678467,
+    "seen": 1790363920.7984014,
+    "ast_hash": "822fd835fc6f30f9a256b6568a8b96b5",
+    "semantic_hash": "822fd835fc6f30f9a256b6568a8b96b5"
   },
   "src/app/api/scanner/sale/route.ts": {
     "mtime": 1790099418.1521626,
@@ -348,9 +348,9 @@
     "semantic_hash": "dff31a89a0d04b3fe8a9f83520bac746"
   },
   "src/app/scanner/page.tsx": {
-    "mtime": 1790705315.0232635,
-    "seen": 1790705981.2935069,
-    "ast_hash": "3f248732d502bc11739374f6d5433212",
+    "mtime": 1790628181.1948533,
+    "seen": 1790628458.7661664,
+    "ast_hash": "eed6f11796302e38eab64f0e19467adf",
     "semantic_hash": ""
   },
   "src/app/sw.ts": {
@@ -840,8 +840,8 @@
     "semantic_hash": "0f54c4f82cffc8c86bb3fbe3e98739d5"
   },
   "venematic-desktop/android/app/build.gradle": {
-    "mtime": 1790705930.8314214,
-    "seen": 1790705981.293712,
+    "mtime": 1790643774.941569,
+    "seen": 1790644184.5513594,
     "ast_hash": "1b6d7585867593fe9d7b06b973fd4537",
     "semantic_hash": ""
   },
@@ -2886,9 +2886,9 @@
     "semantic_hash": ""
   },
   "scripts/sync-distribution-packages.ps1": {
-    "mtime": 1790704980.2959323,
-    "seen": 1790705981.2933784,
-    "ast_hash": "ac8ee4db78463d1d1802047cbf4d9100",
+    "mtime": 1790556951.9516022,
+    "seen": 1790557064.3331418,
+    "ast_hash": "90b3d28b9007b7805a1e91d92df24d41",
     "semantic_hash": ""
   },
   "scripts/test-enterprise-security.js": {
@@ -3126,38 +3126,38 @@
     "semantic_hash": ""
   },
   "DISTRIBUCION_KLIKPOS/00_GUIA_OFICIAL_EDICIONES_KLIKPOS.txt": {
-    "mtime": 1790705939.5570538,
-    "seen": 1790705981.2943192,
+    "mtime": 1790680839.6489842,
+    "seen": 1790680875.4798708,
     "ast_hash": "df3b9497fb91c5dda79264f573d6a5f8",
     "semantic_hash": ""
   },
   "DISTRIBUCION_KLIKPOS/01_KlikPOS_Satelite_PC_Contingencia/LEEME_SATELITE_PC.txt": {
-    "mtime": 1790705939.3446555,
-    "seen": 1790705981.2943232,
+    "mtime": 1790680839.462732,
+    "seen": 1790680875.4798756,
     "ast_hash": "44dbd2b42b412de250054b628c9ff452",
     "semantic_hash": ""
   },
   "DISTRIBUCION_KLIKPOS/02_Combo_Empresarial_Full/LEEME_DESKTOP_EMPRESARIAL.txt": {
-    "mtime": 1790705939.431973,
-    "seen": 1790705981.2943256,
+    "mtime": 1790680839.562477,
+    "seen": 1790680875.479878,
     "ast_hash": "04c50cced870a37ac2114a554f60ab92",
     "semantic_hash": ""
   },
   "DISTRIBUCION_KLIKPOS/03_KlikPOS_Tablet_Standalone_Mesas/LEEME_TABLET_STANDALONE.txt": {
-    "mtime": 1790705939.4834576,
-    "seen": 1790705981.2943273,
+    "mtime": 1790680839.588269,
+    "seen": 1790680875.4798796,
     "ast_hash": "a3c41ad3b9cd7520c3fe5ce2d9dce0f7",
     "semantic_hash": ""
   },
   "DISTRIBUCION_KLIKPOS/04_KlikPOS_Movil_Full_Autonomo_Nube/LEEME_MOVIL_AUTONOMO.txt": {
-    "mtime": 1790705939.524436,
-    "seen": 1790705981.2943292,
+    "mtime": 1790680839.6152165,
+    "seen": 1790680875.4798818,
     "ast_hash": "1cfef33f874ccd4c0b16f1b375d186ac",
     "semantic_hash": ""
   },
   "DISTRIBUCION_KLIKPOS/05_KlikPOS_Movil_Full_Para_PC/LEEME_MOVIL_FULL_PC.txt": {
-    "mtime": 1790705939.5520554,
-    "seen": 1790705981.2943308,
+    "mtime": 1790680839.6469786,
+    "seen": 1790680875.4798837,
     "ast_hash": "cc3bc49110750e053e24974817669aa3",
     "semantic_hash": ""
   },
@@ -3216,9 +3216,9 @@
     "semantic_hash": ""
   },
   "scripts/sign-and-release-all-apks.js": {
-    "mtime": 1790704964.330629,
-    "seen": 1790705981.2933717,
-    "ast_hash": "c224bfe3cad9783af5d9fca1f77ccf88",
+    "mtime": 1790637506.2658787,
+    "seen": 1790639385.0754764,
+    "ast_hash": "909a8c62ccd84d2bd29b31774893260b",
     "semantic_hash": ""
   },
   "scripts/verify_all_mobile_views.js": {

@@ -57,10 +57,18 @@ import {
   MessageCircle,
   Percent,
   Edit3,
+  Laptop,
+  Radio,
+  QrCode,
+  Monitor,
+  Server,
+  Link2,
+  Unlink,
 } from 'lucide-react';
 import { removeBackgroundToWhiteCanvas } from '@/lib/background-remover';
 import { Icon } from '@iconify/react';
 import { db } from '@/lib/db';
+import masterCatalogData from '@/lib/data/master-catalog.json';
 
 interface ScannedHistoryItem {
   barcode: string;
@@ -394,6 +402,106 @@ export default function MobileScannerPage() {
   const [isSending, setIsSending] = useState(false);
   const [manualCode, setManualCode] = useState('');
 
+  // Sincronización Inalámbrica con PC / Caja de Escritorio
+  const [pcServerUrl, setPcServerUrl] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const paramServer = params.get('server') || params.get('pc');
+      if (paramServer) {
+        const full = paramServer.startsWith('http') ? paramServer : `http://${paramServer}`;
+        try { localStorage.setItem('klikpos_server_url', full); } catch {}
+        return full;
+      }
+      try {
+        const saved = localStorage.getItem('klikpos_server_url');
+        if (saved && saved.trim()) return saved.trim();
+      } catch {}
+      if (window.location.protocol.startsWith('http') && !window.location.hostname.includes('capacitor') && window.location.hostname !== 'localhost') {
+        return window.location.origin;
+      }
+    }
+    return '';
+  });
+  const [pcConnectionStatus, setPcConnectionStatus] = useState<'connected' | 'disconnected' | 'checking'>('checking');
+  const [isSatelliteMode, setIsSatelliteMode] = useState<boolean>(true);
+  const [showPcSyncModal, setShowPcSyncModal] = useState(false);
+  const [tempPcIp, setTempPcIp] = useState('');
+  const [pcTestMessage, setPcTestMessage] = useState<string | null>(null);
+  const [isTestingPc, setIsTestingPc] = useState(false);
+
+  // Helper para fetch que prepende automáticamente la IP de la PC
+  const safeApiFetch = async (path: string, options?: RequestInit): Promise<Response> => {
+    let base = (pcServerUrl || '').trim();
+    if (!base && typeof window !== 'undefined' && window.location.protocol.startsWith('http') && !window.location.hostname.includes('capacitor')) {
+      base = window.location.origin;
+    }
+    if (base) {
+      base = base.replace(/\/+$/, '');
+    }
+    const cleanPath = path.startsWith('/') ? path : `/${path}`;
+    const fullUrl = base ? `${base}${cleanPath}` : cleanPath;
+    return fetch(fullUrl, options);
+  };
+
+  // Cargar Catálogo Maestro (+130 productos) en memoria e IndexedDB
+  const handleSeedMasterCatalog = async () => {
+    if (Array.isArray(masterCatalogData) && masterCatalogData.length > 0) {
+      setInventoryList(masterCatalogData as MobileCatalogItem[]);
+      try {
+        localStorage.setItem('venematic_offline_inventory', JSON.stringify(masterCatalogData));
+        if (db.products?.bulkPut) {
+          const mapped = masterCatalogData.map((p) => ({
+            ...p,
+            updatedAt: Date.now(),
+            syncStatus: 'synced' as const,
+          }));
+          await db.products.bulkPut(mapped as any);
+        }
+      } catch {}
+      playMobileBeep();
+      safeVibrate([50, 50]);
+      alert(`✓ ¡Catálogo Maestro Inicial cargado con éxito! (${masterCatalogData.length} productos con fotos, códigos y precios)`);
+    }
+  };
+
+  // Probar enlace con la PC
+  const handleTestPcConnection = async (targetUrl?: string) => {
+    const urlToTest = (targetUrl || tempPcIp || pcServerUrl || '').trim();
+    if (!urlToTest) {
+      setPcTestMessage('Por favor escribe la IP o URL de la PC (Ej: 192.168.1.100:3000)');
+      return;
+    }
+    const formatted = urlToTest.startsWith('http') ? urlToTest : `http://${urlToTest}`;
+    setIsTestingPc(true);
+    setPcTestMessage(null);
+    try {
+      const cleanBase = formatted.replace(/\/+$/, '');
+      const t0 = performance.now();
+      const res = await fetch(`${cleanBase}/api/scanner/status`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ session, connected: true, deviceName: 'KlikPOS Móvil Tester' }),
+      });
+      const t1 = performance.now();
+      if (res.ok) {
+        setPcServerUrl(cleanBase);
+        setPcConnectionStatus('connected');
+        try { localStorage.setItem('klikpos_server_url', cleanBase); } catch {}
+        setPcTestMessage(`✓ ¡Conexión Exitosa con la PC! (${Math.round(t1 - t0)}ms) • Caja: ${session}`);
+        playMobileBeep();
+        safeVibrate([80, 80]);
+      } else {
+        setPcConnectionStatus('disconnected');
+        setPcTestMessage(`⚠️ El servidor respondió con código: ${res.status}`);
+      }
+    } catch (err: any) {
+      setPcConnectionStatus('disconnected');
+      setPcTestMessage(`❌ No se pudo conectar a ${formatted}. Verifica que la PC esté encendida en la misma red.`);
+    } finally {
+      setIsTestingPc(false);
+    }
+  };
+
   // Carrito de Venta Móvil (POS Autónomo en Celular)
   const [mobileCart, setMobileCart] = useState<MobileCartItem[]>([]);
   const [posSearch, setPosSearch] = useState('');
@@ -636,12 +744,19 @@ export default function MobileScannerPage() {
 
       // Notificar conexión inmediata al abrir
       const sendStatus = (connected: boolean) => {
-        fetch('/api/scanner/status', {
+        safeApiFetch('/api/scanner/status', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ session: s, connected, deviceName }),
           keepalive: true,
-        }).catch(() => {});
+        })
+          .then((res) => {
+            if (res.ok) setPcConnectionStatus('connected');
+            else setPcConnectionStatus('disconnected');
+          })
+          .catch(() => {
+            setPcConnectionStatus('disconnected');
+          });
       };
 
       sendStatus(true);
@@ -724,7 +839,7 @@ export default function MobileScannerPage() {
         sendStatus(false);
       };
     }
-  }, []);
+  }, [pcServerUrl]);
 
   // Función para instalar la PWA
   const handleInstallApp = async () => {
@@ -745,24 +860,50 @@ export default function MobileScannerPage() {
   const fetchInventory = async () => {
     setIsLoadingInventory(true);
     try {
-      // Primero, cargar caché local como respaldo instantáneo mientras llega la respuesta
+      // 1. Cargar caché local como respaldo instantáneo
       try {
         const cached = localStorage.getItem('venematic_offline_inventory');
         if (cached) {
           const parsed = JSON.parse(cached);
-          if (parsed.length > 0) setInventoryList(parsed);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setInventoryList(parsed);
+          }
         }
         const cachedBcv = localStorage.getItem('venematic_offline_bcv');
         if (cachedBcv) setInventoryBcvRate(parseFloat(cachedBcv));
       } catch {}
 
-      const res = await fetch('/api/scanner/inventory');
+      // 2. Si aún no hay inventario en memoria, pre-poblar de inmediato con el Catálogo Maestro (+130 productos)
+      setInventoryList((current) => {
+        if (current.length === 0 && Array.isArray(masterCatalogData) && masterCatalogData.length > 0) {
+          try {
+            localStorage.setItem('venematic_offline_inventory', JSON.stringify(masterCatalogData));
+            if (db.products?.bulkPut) {
+              const mapped = masterCatalogData.map((p) => ({
+                ...p,
+                updatedAt: Date.now(),
+                syncStatus: 'synced' as const,
+              }));
+              db.products.bulkPut(mapped as any).catch(() => {});
+            }
+          } catch {}
+          return masterCatalogData as MobileCatalogItem[];
+        }
+        return current;
+      });
+
+      // 3. Consultar a la PC
+      const res = await safeApiFetch('/api/scanner/inventory');
       if (res.ok) {
+        setPcConnectionStatus('connected');
         const data = await res.json();
         if (Array.isArray(data.products) && data.products.length > 0) {
           setInventoryList(data.products);
           try {
             localStorage.setItem('venematic_offline_inventory', JSON.stringify(data.products));
+            if (db.products?.bulkPut) {
+              db.products.bulkPut(data.products).catch(() => {});
+            }
           } catch {}
         }
         if (typeof data.bcvRate === 'number') {
@@ -771,11 +912,20 @@ export default function MobileScannerPage() {
             localStorage.setItem('venematic_offline_bcv', String(data.bcvRate));
           } catch {}
         }
-        // Si el servidor dice que necesita sync, retornar false para reintento
         return !data.needsSync;
+      } else {
+        setPcConnectionStatus('disconnected');
       }
     } catch (e) {
       console.warn('Error cargando inventario en móvil:', e);
+      setPcConnectionStatus('disconnected');
+      // Asegurar que el catálogo maestro siempre esté activo
+      setInventoryList((current) => {
+        if (current.length === 0 && Array.isArray(masterCatalogData) && masterCatalogData.length > 0) {
+          return masterCatalogData as MobileCatalogItem[];
+        }
+        return current;
+      });
     } finally {
       setIsLoadingInventory(false);
     }
@@ -790,7 +940,13 @@ export default function MobileScannerPage() {
     let sseSource: EventSource | null = null;
     let retryInterval: NodeJS.Timeout | null = null;
     try {
-      sseSource = new EventSource('/api/scanner/events?session=caja-1');
+      let base = (pcServerUrl || '').trim();
+      if (!base && typeof window !== 'undefined' && window.location.protocol.startsWith('http') && !window.location.hostname.includes('capacitor')) {
+        base = window.location.origin;
+      }
+      base = base.replace(/\/+$/, '');
+      const sseUrl = base ? `${base}/api/scanner/events?session=${session || 'caja-1'}` : `/api/scanner/events?session=${session || 'caja-1'}`;
+      sseSource = new EventSource(sseUrl);
       sseSource.addEventListener('inventory_updated', (e: any) => {
         try {
           if (e.data) {
@@ -833,7 +989,7 @@ export default function MobileScannerPage() {
       if (retryInterval) clearInterval(retryInterval);
       clearTimeout(stopRetry);
     };
-  }, []);
+  }, [pcServerUrl]);
 
   useEffect(() => {
     if (activeTab === 'inventory' || activeTab === 'pos') {
@@ -1404,31 +1560,37 @@ export default function MobileScannerPage() {
     }
 
     setLastScanned(cleanCode);
-    setStatusMessage(`Enviando ${cleanCode} a la PC...`);
+    setStatusMessage(`Enviando ${cleanCode} a la PC (${session})...`);
     setIsSending(true);
 
     try {
-      const res = await fetch('/api/scanner/scan', {
+      const res = await safeApiFetch('/api/scanner/scan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ session, barcode: cleanCode }),
       });
 
       if (res.ok) {
-        setStatusMessage(`✓ ¡Enviado a caja! (${cleanCode})`);
+        setPcConnectionStatus('connected');
+        setStatusMessage(`✓ ¡Enviado a Caja PC (${session})! Código: ${cleanCode}`);
         setHistory((prev) => [
           { barcode: cleanCode, timestamp: new Date().toLocaleTimeString(), status: 'sent' },
           ...prev.slice(0, 19),
         ]);
       } else {
-        setStatusMessage(`Error enviando código`);
+        setStatusMessage(`⚠️ Código ${cleanCode} procesado`);
         setHistory((prev) => [
           { barcode: cleanCode, timestamp: new Date().toLocaleTimeString(), status: 'error' },
           ...prev.slice(0, 19),
         ]);
       }
     } catch {
-      setStatusMessage(`Sin conexión con la PC`);
+      setPcConnectionStatus('disconnected');
+      setStatusMessage(`⚠️ Sin conexión con la PC (Toca "Vincular PC" para configurar IP)`);
+      setHistory((prev) => [
+        { barcode: cleanCode, timestamp: new Date().toLocaleTimeString(), status: 'error' },
+        ...prev.slice(0, 19),
+      ]);
     } finally {
       setIsSending(false);
     }
@@ -1495,7 +1657,7 @@ export default function MobileScannerPage() {
           const bitmap = await createImageBitmap(downscaledBlob);
           const detected = await barcodeDetector.detect(bitmap);
           if (detected && detected.length > 0 && detected[0].rawValue) {
-            sendBarcodeToPC(detected[0].rawValue);
+            processDetectedBarcode(detected[0].rawValue);
             setStatusMessage(`✓ ¡Código detectado: ${detected[0].rawValue}!`);
             setIsScanningPhoto(false);
             e.target.value = '';
@@ -1514,7 +1676,7 @@ export default function MobileScannerPage() {
       }
       const decoded = await qrScanner.scanFile(downscaledFile, false);
       if (decoded) {
-        sendBarcodeToPC(decoded);
+        processDetectedBarcode(decoded);
         setStatusMessage(`✓ ¡Código detectado: ${decoded}!`);
         setIsScanningPhoto(false);
         e.target.value = '';
@@ -1536,6 +1698,28 @@ export default function MobileScannerPage() {
   const processDetectedBarcode = (code: string) => {
     const cleanCode = code.trim();
     if (!cleanCode) return;
+
+    // Detectar si es un código QR de emparejamiento desde la pantalla de la PC
+    if (cleanCode.startsWith('http://') || cleanCode.startsWith('https://')) {
+      try {
+        const urlObj = new URL(cleanCode);
+        const origin = urlObj.origin;
+        const sessionParam = urlObj.searchParams.get('session');
+        setPcServerUrl(origin);
+        if (sessionParam) setSession(sessionParam);
+        try {
+          localStorage.setItem('klikpos_server_url', origin);
+          if (sessionParam) localStorage.setItem('klikpos_session', sessionParam);
+        } catch {}
+        setPcConnectionStatus('connected');
+        setStatusMessage(`✓ ¡Vinculado exitosamente con PC (${origin})!`);
+        playMobileBeep();
+        safeVibrate([100, 50, 100]);
+        alert(`✓ ¡Vinculado exitosamente con la PC!\n\nServidor: ${origin}\nCaja: ${sessionParam || session}`);
+        return;
+      } catch {}
+    }
+
     const now = Date.now();
     if (cleanCode === lastScanned && now - lastScannedTimeRef.current < 2000) {
       return;
@@ -1554,7 +1738,7 @@ export default function MobileScannerPage() {
     if (matched) {
       setScannedProductToast(matched);
       setStatusMessage(`✓ ¡Detectado: ${matched.name}!`);
-      if (autoAddOnScan) {
+      if (autoAddOnScan && !isSatelliteMode) {
         addToMobileCart(matched);
       }
     } else {
@@ -1562,8 +1746,10 @@ export default function MobileScannerPage() {
       setStatusMessage(`✓ Código detectado: ${cleanCode}`);
     }
 
-    // Enviar a la PC
-    sendBarcodeToPC(cleanCode);
+    // Enviar a la PC si está en Modo Satélite
+    if (isSatelliteMode) {
+      sendBarcodeToPC(cleanCode);
+    }
   };
 
   // Detener cámara y limpiar recursos
@@ -1887,7 +2073,7 @@ export default function MobileScannerPage() {
     if (!prodPhoto) return;
     setIsSendingPhoto(true);
     try {
-      const res = await fetch('/api/scanner/upload-photo', {
+      const res = await safeApiFetch('/api/scanner/upload-photo', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -1954,10 +2140,25 @@ export default function MobileScannerPage() {
             </div>
           </button>
 
-          <div className="px-2 py-1 bg-emerald-50 border border-emerald-300 text-emerald-800 rounded-xl text-[11px] font-bold flex items-center gap-1">
-            <Wifi className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Online</span>
-          </div>
+          {/* Botón Interactivo de Enlace y Sincronización con la PC */}
+          <button
+            type="button"
+            onClick={() => {
+              setTempPcIp(pcServerUrl || '');
+              setPcTestMessage(null);
+              setShowPcSyncModal(true);
+            }}
+            className={`px-2.5 py-1 border rounded-xl text-[11px] font-black flex items-center gap-1.5 shadow-2xs active:scale-95 transition-all ${
+              pcConnectionStatus === 'connected'
+                ? 'bg-emerald-50 border-emerald-300 text-emerald-800 hover:bg-emerald-100'
+                : 'bg-amber-50 border-amber-300 text-amber-800 hover:bg-amber-100'
+            }`}
+            title="Configuración de Enlace Inalámbrico con PC"
+          >
+            <span className={`w-2 h-2 rounded-full ${pcConnectionStatus === 'connected' ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
+            <Laptop className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">{pcConnectionStatus === 'connected' ? 'PC Enlazada' : 'Vincular PC'}</span>
+          </button>
         </div>
       </header>
 
@@ -3489,6 +3690,80 @@ export default function MobileScannerPage() {
             onChange={handleScanFromPhoto}
             className="hidden"
           />
+
+          {/* Selector de Modo: Satélite PC vs Autónomo */}
+          <div className="bg-slate-900 p-1.5 rounded-2xl border border-slate-800 flex items-center gap-1 shadow-md">
+            <button
+              type="button"
+              onClick={() => {
+                safeVibrate(20);
+                setIsSatelliteMode(true);
+              }}
+              className={`flex-1 py-2 px-2.5 rounded-xl font-black text-xs flex items-center justify-center gap-1.5 transition-all ${
+                isSatelliteMode
+                  ? 'bg-gradient-to-r from-sky-600 to-cyan-600 text-white shadow-md'
+                  : 'text-slate-400 hover:text-white hover:bg-slate-800'
+              }`}
+            >
+              <Radio className={`w-3.5 h-3.5 ${isSatelliteMode ? 'animate-pulse text-cyan-300' : ''}`} />
+              <span>📡 Modo Satélite (Enviar a PC)</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                safeVibrate(20);
+                setIsSatelliteMode(false);
+              }}
+              className={`flex-1 py-2 px-2.5 rounded-xl font-black text-xs flex items-center justify-center gap-1.5 transition-all ${
+                !isSatelliteMode
+                  ? 'bg-emerald-600 text-white shadow-md'
+                  : 'text-slate-400 hover:text-white hover:bg-slate-800'
+              }`}
+            >
+              <ShoppingCart className="w-3.5 h-3.5 text-emerald-300" />
+              <span>🛒 Autónomo (Celular)</span>
+            </button>
+          </div>
+
+          {/* Barra de Estado de Enlace y Catálogo */}
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setTempPcIp(pcServerUrl || '');
+                setPcTestMessage(null);
+                setShowPcSyncModal(true);
+              }}
+              className={`flex-1 py-2 px-3 rounded-xl border font-bold text-xs flex items-center justify-between transition-all active:scale-[0.99] ${
+                pcConnectionStatus === 'connected'
+                  ? 'bg-emerald-50/90 border-emerald-300 text-emerald-900 shadow-2xs'
+                  : 'bg-amber-50/90 border-amber-300 text-amber-900 shadow-2xs'
+              }`}
+            >
+              <div className="flex items-center gap-2 min-w-0">
+                <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${pcConnectionStatus === 'connected' ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
+                <span className="truncate text-[11px] font-black">
+                  {pcConnectionStatus === 'connected'
+                    ? `Enlazado: ${pcServerUrl || 'PC Local'} (${session})`
+                    : 'Sin Enlace PC (Toca para vincular)'}
+                </span>
+              </div>
+              <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-md bg-white border border-slate-200 shrink-0 ml-1">
+                Ajustar IP
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={handleSeedMasterCatalog}
+              className="py-2 px-3 bg-slate-900 hover:bg-slate-800 active:scale-95 text-cyan-300 border border-slate-700 rounded-xl font-black text-[11px] flex items-center gap-1.5 shrink-0 shadow-xs"
+              title="Cargar Catálogo Maestro con +130 productos venezolanos"
+            >
+              <PackagePlus className="w-3.5 h-3.5 text-cyan-400" />
+              <span>+130 Catálogo</span>
+            </button>
+          </div>
 
           {/* Barra de Acciones Rápidas del Escáner */}
           <div className="flex items-center gap-2">
@@ -5361,6 +5636,134 @@ export default function MobileScannerPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: VINCULACIÓN Y SINCRONIZACIÓN INALÁMBRICA CON LA PC */}
+      {showPcSyncModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 bg-black/70 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="bg-white rounded-3xl p-5 max-w-sm w-full space-y-4 shadow-2xl border border-slate-200">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+              <div className="flex items-center gap-2">
+                <div className="p-2 rounded-xl bg-sky-50 text-sky-700">
+                  <Laptop className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-black text-sm text-slate-900">Enlace con Computadora</h3>
+                  <p className="text-[10px] text-slate-500 font-medium">Sincronización PC, Escáner & Caja</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowPcSyncModal(false)}
+                className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-bold text-xs"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Estado Actual */}
+            <div className={`p-3 rounded-2xl border flex items-center gap-2.5 ${
+              pcConnectionStatus === 'connected'
+                ? 'bg-emerald-50 border-emerald-300 text-emerald-950'
+                : 'bg-amber-50 border-amber-300 text-amber-950'
+            }`}>
+              <div className={`w-3 h-3 rounded-full shrink-0 ${
+                pcConnectionStatus === 'connected' ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'
+              }`} />
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-black">
+                  {pcConnectionStatus === 'connected' ? '✓ Enlazado con Éxito a PC' : 'Sin Enlace Directo (Modo Autónomo)'}
+                </p>
+                <p className="text-[10px] text-slate-600 font-mono truncate">
+                  {pcServerUrl || 'Servidor no configurado'} • Caja: {session}
+                </p>
+              </div>
+            </div>
+
+            {/* Input de Dirección IP / URL del Servidor PC */}
+            <div className="space-y-1.5">
+              <label className="block text-[11px] font-bold text-slate-700">
+                Dirección IP o Nombre de la PC:
+              </label>
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Ej: 192.168.1.100:3000 o 192.168.5.49:3002"
+                  value={tempPcIp}
+                  onChange={(e) => setTempPcIp(e.target.value)}
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-mono font-bold text-slate-900 outline-none focus:ring-2 focus:ring-sky-500"
+                />
+              </div>
+              <p className="text-[10px] text-slate-500">
+                Tip: En la PC, abre KlikPOS y mira la IP en la parte superior o en "Vincular Celular".
+              </p>
+            </div>
+
+            {/* Mensaje de Prueba */}
+            {pcTestMessage && (
+              <div className={`p-2.5 rounded-xl text-[11px] font-bold ${
+                pcTestMessage.startsWith('✓')
+                  ? 'bg-emerald-100 text-emerald-900 border border-emerald-300'
+                  : 'bg-rose-100 text-rose-900 border border-rose-300'
+              }`}>
+                {pcTestMessage}
+              </div>
+            )}
+
+            {/* Botones de Acción */}
+            <div className="space-y-2 pt-1">
+              <button
+                type="button"
+                onClick={() => handleTestPcConnection(tempPcIp)}
+                disabled={isTestingPc}
+                className="w-full py-2.5 bg-sky-600 hover:bg-sky-700 active:scale-98 text-white font-black text-xs rounded-xl shadow-md flex items-center justify-center gap-2 transition-all disabled:opacity-50"
+              >
+                <RefreshCw className={`w-4 h-4 ${isTestingPc ? 'animate-spin' : ''}`} />
+                <span>{isTestingPc ? 'Probando Conexión...' : '⚡ Probar Conexión con PC'}</span>
+              </button>
+
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowPcSyncModal(false);
+                    setActiveTab('gun');
+                    if (!scannerActive) startScanner();
+                  }}
+                  className="py-2 px-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-[11px] rounded-xl flex items-center justify-center gap-1.5 active:scale-95"
+                >
+                  <QrCode className="w-3.5 h-3.5 text-cyan-400" />
+                  <span>Escanear QR de PC</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleSeedMasterCatalog}
+                  className="py-2 px-2 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 text-emerald-800 font-bold text-[11px] rounded-xl flex items-center justify-center gap-1.5 active:scale-95"
+                >
+                  <PackagePlus className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>+130 Catálogo</span>
+                </button>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  const formatted = tempPcIp.trim() ? (tempPcIp.startsWith('http') ? tempPcIp.trim() : `http://${tempPcIp.trim()}`) : '';
+                  setPcServerUrl(formatted);
+                  try {
+                    localStorage.setItem('klikpos_server_url', formatted);
+                  } catch {}
+                  setShowPcSyncModal(false);
+                  fetchInventory();
+                }}
+                className="w-full py-2.5 bg-slate-800 hover:bg-slate-900 text-white font-black text-xs rounded-xl shadow-xs"
+              >
+                Guardar y Cerrar
+              </button>
+            </div>
           </div>
         </div>
       )}

@@ -197,12 +197,12 @@ function buildMovilFullApk() {
 </resources>`;
     fs.writeFileSync(stringsXml, movilStrings, 'utf8');
 
-    const tabletHtmlSrc = path.join(publicDir, 'tablet-pos.html');
-    if (fs.existsSync(tabletHtmlSrc)) {
-      fs.copyFileSync(tabletHtmlSrc, publicIndex);
+    const scannerHtmlSrc = path.join(publicDir, 'scanner.html');
+    if (fs.existsSync(scannerHtmlSrc)) {
+      fs.copyFileSync(scannerHtmlSrc, publicIndex);
     }
 
-    console.log('Ejecutando Gradle assembleRelease para KlikPOS Móvil Full...');
+    console.log('Ejecutando Gradle assembleRelease para KlikPOS Móvil Full (Retail Scanner + Balanza + Firestore)...');
     execSync('cmd.exe /c ".\\gradlew.bat assembleRelease --no-daemon"', {
       cwd: androidDir,
       stdio: 'inherit',
@@ -217,19 +217,21 @@ function buildMovilFullApk() {
 
     const targets = [
       path.join(releaseMobile, 'KlikPOS_Movil.apk'),
+      path.join(releaseMobile, 'KlikPOS_Movil_Full_Autonomo.apk'),
       path.join(distDir, 'KlikPOS_Movil_Full.apk'),
-      path.join(combo2Folder, 'KlikPOS_Movil_Administrador.apk'),
-      path.join(combo3Folder, 'KlikPOS_Movil_Full.apk'),
-      path.join(combo3Mesas, 'KlikPOS_Tablet_Standalone.apk'),
+      path.join(combo4Folder, 'KlikPOS_Movil_Full_Autonomo.apk'),
       path.join(combo4Folder, 'KlikPOS_Movil_Full.apk'),
-      path.join(distFolder, 'KlikPOS_Movil_Full.apk')
+      path.join(combo5Folder, 'KlikPOS_Movil_Full_PC.apk'),
+      path.join(combo5Folder, 'KlikPOS_Movil_Full.apk'),
+      path.join(distFolder, 'KlikPOS_Movil_Full.apk'),
+      path.join(distFolder, 'KlikPOS_Movil_Full_Autonomo.apk')
     ];
     for (const t of targets) {
       fs.copyFileSync(signedMovilApk, t);
       console.log('  [✓] Copiado a: ' + t);
     }
 
-    console.log('>>> ¡KLIKPOS MÓVIL RELEASE GENERADA CON ÉXITO!');
+    console.log('>>> ¡KLIKPOS MÓVIL FULL AUTÓNOMO RELEASE GENERADA CON ÉXITO!');
 
   } finally {
     fs.writeFileSync(appGradle, bakGradle, 'utf8');
@@ -291,9 +293,11 @@ function buildMovilSateliteApk() {
 
     const targets = [
       path.join(releaseMobile, 'KlikPOS_Satelite.apk'),
+      path.join(releaseMobile, 'KlikPOS_Movil_Satelite.apk'),
       path.join(distDir, 'KlikPOS_Movil_Satelite.apk'),
       path.join(combo1Folder, 'KlikPOS_Movil_Satelite.apk'),
       path.join(combo1Contingencia, 'KlikPOS_Movil_Satelite.apk'),
+      path.join(combo2Folder, 'KlikPOS_Movil_Satelite.apk'),
       path.join(distFolder, 'KlikPOS_Movil_Satelite.apk')
     ];
     for (const t of targets) {
@@ -312,7 +316,7 @@ function buildMovilSateliteApk() {
 }
 
 // =============================================================================
-// FASE 4: KLIKPOS STREET (com.klikpos.street) - Comida Rápida, Ambulante, Mesas & Bluetooth
+// FASE 4: KLIKPOS STREET / TABLET STANDALONE (com.klikpos.street)
 // =============================================================================
 function buildStreetApk() {
   console.log('\n===============================================================');
@@ -363,7 +367,12 @@ function buildStreetApk() {
 
     const targets = [
       path.join(releaseMobile, 'KlikPOS_Street.apk'),
-      path.join(combo3Mesas, 'KlikPOS_Tablet_Standalone_Mesas.apk')
+      path.join(releaseMobile, 'KlikPOS_Tablet_Standalone.apk'),
+      path.join(distDir, 'KlikPOS_Tablet_Standalone.apk'),
+      path.join(combo3Folder, 'KlikPOS_Tablet_Standalone.apk'),
+      path.join(combo3Mesas, 'KlikPOS_Tablet_Standalone.apk'),
+      path.join(combo3Mesas, 'KlikPOS_Tablet_Standalone_Mesas.apk'),
+      path.join(distFolder, 'KlikPOS_Tablet_Standalone.apk')
     ];
     for (const t of targets) {
       fs.copyFileSync(signedStreetApk, t);
@@ -432,7 +441,10 @@ function buildAdminApk() {
 
     const targets = [
       path.join(releaseMobile, 'KlikAdmin.apk'),
-      path.join(distFolder, 'KlikAdmin.apk')
+      path.join(releaseMobile, 'KlikPOS_Movil_Administrador.apk'),
+      path.join(combo2Folder, 'KlikPOS_Movil_Administrador.apk'),
+      path.join(distFolder, 'KlikAdmin.apk'),
+      path.join(distFolder, 'KlikPOS_Movil_Administrador.apk')
     ];
     for (const t of targets) {
       fs.copyFileSync(signedAdminApk, t);
