@@ -19,7 +19,7 @@ export interface EditionCapabilities {
   hasTablesAndKitchen: boolean;
   hasDeliveryModule: boolean;
   hasSmsBankMonitor: boolean;
-  hasSeniatFiscal: boolean;
+  hasFiscalBook: boolean;
   hasCustomBranding: boolean;
   maxProducts: number;
 }
@@ -37,7 +37,7 @@ export const EDITION_DEFINITIONS: Record<KlikEdition, EditionCapabilities> = {
     hasTablesAndKitchen: false,
     hasDeliveryModule: false,
     hasSmsBankMonitor: false,
-    hasSeniatFiscal: false,
+    hasFiscalBook: false,
     hasCustomBranding: false,
     maxProducts: 500,
   },
@@ -53,7 +53,7 @@ export const EDITION_DEFINITIONS: Record<KlikEdition, EditionCapabilities> = {
     hasTablesAndKitchen: false,
     hasDeliveryModule: true,
     hasSmsBankMonitor: true,
-    hasSeniatFiscal: true,
+    hasFiscalBook: true,
     hasCustomBranding: false,
     maxProducts: 999999,
   },
@@ -69,7 +69,7 @@ export const EDITION_DEFINITIONS: Record<KlikEdition, EditionCapabilities> = {
     hasTablesAndKitchen: true,
     hasDeliveryModule: true,
     hasSmsBankMonitor: true,
-    hasSeniatFiscal: true,
+    hasFiscalBook: true,
     hasCustomBranding: true,
     maxProducts: 999999,
   },
@@ -151,7 +151,7 @@ export type FeatureFlag =
   | 'credit_management'
   | 'payables_suppliers'
   | 'firestore_cloud_sync'
-  | 'seniat_fiscal_api'
+  | 'fiscal_book_export'
   | 'digital_menu_qr'
   | 'sms_bank_monitor'
   | 'unlimited_products'
@@ -183,7 +183,7 @@ export const PLAN_DEFINITIONS: Record<LicenseTier, PlanDefinition> = {
       credit_management: false,
       payables_suppliers: false,
       firestore_cloud_sync: false,
-      seniat_fiscal_api: false,
+      fiscal_book_export: false,
       digital_menu_qr: false,
       sms_bank_monitor: false,
       unlimited_products: false,
@@ -204,7 +204,7 @@ export const PLAN_DEFINITIONS: Record<LicenseTier, PlanDefinition> = {
       credit_management: true,
       payables_suppliers: true,
       firestore_cloud_sync: true,
-      seniat_fiscal_api: true,
+      fiscal_book_export: true,
       digital_menu_qr: false,
       sms_bank_monitor: true,
       unlimited_products: true,
@@ -225,7 +225,7 @@ export const PLAN_DEFINITIONS: Record<LicenseTier, PlanDefinition> = {
       credit_management: true,
       payables_suppliers: true,
       firestore_cloud_sync: true,
-      seniat_fiscal_api: true,
+      fiscal_book_export: true,
       digital_menu_qr: true,
       sms_bank_monitor: true,
       unlimited_products: true,
@@ -246,7 +246,7 @@ export const PLAN_DEFINITIONS: Record<LicenseTier, PlanDefinition> = {
       credit_management: true,
       payables_suppliers: true,
       firestore_cloud_sync: true,
-      seniat_fiscal_api: true,
+      fiscal_book_export: true,
       digital_menu_qr: true,
       sms_bank_monitor: true,
       unlimited_products: true,
@@ -267,7 +267,7 @@ export const PLAN_DEFINITIONS: Record<LicenseTier, PlanDefinition> = {
       credit_management: false,
       payables_suppliers: false,
       firestore_cloud_sync: true,
-      seniat_fiscal_api: false,
+      fiscal_book_export: false,
       digital_menu_qr: false,
       sms_bank_monitor: true,
       unlimited_products: true,

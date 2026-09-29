@@ -4,36 +4,39 @@ import React, { useState, useEffect } from 'react';
 import {
   ShieldCheck,
   Check,
-  X,
   Zap,
   Sparkles,
   Lock,
   Crown,
   Smartphone,
   Layers,
-  FileText,
   KeyRound,
   ExternalLink,
   MessageCircle,
   Laptop,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  Copy,
+  Utensils,
+  Store,
+  Building2,
+  Send
 } from 'lucide-react';
 import {
   KlikEdition,
   EDITION_DEFINITIONS,
   getActiveEdition,
-  setActiveEdition,
-  getActiveCapabilities,
   applyLicenseUpdate,
   LicensePayload
 } from '@/lib/licensing/feature-flags';
+import { playSuccessChime, playBeep } from '@/lib/utils/sound';
 
 export default function LicensingInformationPage() {
   const [activeEdition, setActiveEditionState] = useState<KlikEdition>('KLIKPOS_LITE');
   const [terminalHwid, setTerminalHwid] = useState('HWID-DESKTOP-POS');
   const [inputActivationKey, setInputActivationKey] = useState('');
   const [activationFeedback, setActivationFeedback] = useState<{ success: boolean; msg: string } | null>(null);
+  const [copiedHwid, setCopiedHwid] = useState(false);
 
   useEffect(() => {
     const current = getActiveEdition();
@@ -48,6 +51,13 @@ export default function LicensingInformationPage() {
     setTerminalHwid(hwid);
   }, []);
 
+  const handleCopyHwid = () => {
+    navigator.clipboard.writeText(terminalHwid);
+    setCopiedHwid(true);
+    playSuccessChime();
+    setTimeout(() => setCopiedHwid(false), 2500);
+  };
+
   const handleApplyActivationKey = (e: React.FormEvent) => {
     e.preventDefault();
     setActivationFeedback(null);
@@ -55,6 +65,7 @@ export default function LicensingInformationPage() {
     const cleanKey = inputActivationKey.trim();
     if (!cleanKey.startsWith('KLIK-')) {
       setActivationFeedback({ success: false, msg: 'Formato inválido. La clave debe comenzar con "KLIK-".' });
+      playBeep(400, 0.2, 'sawtooth');
       return;
     }
 
@@ -65,6 +76,7 @@ export default function LicensingInformationPage() {
         applyLicenseUpdate(decoded);
         const newEdition = getActiveEdition();
         setActiveEditionState(newEdition);
+        playSuccessChime();
         setActivationFeedback({
           success: true,
           msg: `¡Licencia activada con éxito! Su terminal ha sido actualizado a ${EDITION_DEFINITIONS[newEdition]?.name || newEdition}.`
@@ -74,85 +86,76 @@ export default function LicensingInformationPage() {
         throw new Error('Payload inválido');
       }
     } catch {
+      playBeep(400, 0.2, 'sawtooth');
       setActivationFeedback({ success: false, msg: 'Clave de licencia no válida o corrupta. Verifique con su asesor comercial.' });
     }
   };
 
-  const getWhatsAppUpgradeUrl = (targetEdition: string) => {
+  const getWhatsAppUpgradeUrl = () => {
+    const currentName = EDITION_DEFINITIONS[activeEdition]?.name || activeEdition;
     const message = encodeURIComponent(
-      `Hola! Deseo solicitar la actualización de mi software KlikPOS al plan *${targetEdition}* para mi terminal.\n\n*ID de Terminal (HWID):* ${terminalHwid}\n*Plan Actual:* ${EDITION_DEFINITIONS[activeEdition]?.name || activeEdition}\n*Versión:* v3.0.0`
+      `¡Hola! Deseo consultar información o solicitar la actualización de mi software KlikPOS.\n\n` +
+      `*ID de Terminal (HWID):* ${terminalHwid}\n` +
+      `*Plan Instalado:* ${currentName}\n` +
+      `*Versión:* v3.0.0 Oficial`
     );
     return `https://wa.me/584248298026?text=${message}`;
   };
 
   const currentCaps = EDITION_DEFINITIONS[activeEdition] || EDITION_DEFINITIONS.KLIKPOS_LITE;
 
+  // EXACTAMENTE 3 PLANES OFICIALES (LITE, PRO, ELITE/ENTERPRISE)
   const PLANS_COMPARISON = [
     {
       id: 'KLIKPOS_LITE',
       name: 'KlikPOS Lite',
-      subtitle: 'Para pequeños comercios y bodegas',
+      subtitle: 'Comercio esencial, bodegas y ventas de mostrador',
       badge: 'LITE',
       badgeColor: 'bg-slate-700 text-white',
       price: '$40',
-      period: 'pago único / anual',
+      period: 'pago único',
       highlight: false,
       features: [
-        { title: 'Ventas Rápidas en Mostrador', included: true },
-        { title: 'Cortes de Caja (Cierre X y Z)', included: true },
-        { title: 'Balanza Digital & Tickera Térmica', included: true },
-        { title: 'Catálogo Vista Cuadrícula (4 cols)', included: true },
-        { title: 'Modo Offline 100% Autónomo', included: true },
-        { title: 'Escáner Celular Inalámbrico QR', included: false },
-        { title: 'Múltiples Vistas (Lista & Mini)', included: false },
-        { title: 'Gestión de Mesas y Comandas', included: false },
-        { title: 'App de Delivery WhatsApp', included: false },
-        { title: 'Temas & Colores Personalizados', included: false },
-        { title: 'Dashboard Financiero P&L', included: false },
+        'Punto de Venta ultra rápido 100% Offline',
+        'Cortes de Caja (Cierre X y Cierre Z)',
+        'Soporte de Balanzas y Tiqueteras Térmicas',
+        'Catálogo Visual Cuadrícula optimizado',
+        'Cálculo dual automático $ / Bs. (Tasa BCV)'
       ]
     },
     {
       id: 'KLIKPOS_PRO',
       name: 'KlikPOS Pro',
-      subtitle: 'Para abastos, minimarkets y tiendas',
+      subtitle: 'Minimarkets, tiendas y comercios en crecimiento',
       badge: 'MÁS POPULAR',
       badgeColor: 'bg-indigo-600 text-white',
       price: '$80',
-      period: 'pago único / anual',
+      period: 'pago único',
       highlight: true,
       features: [
-        { title: 'Ventas Rápidas en Mostrador', included: true },
-        { title: 'Cortes de Caja (Cierre X y Z)', included: true },
-        { title: 'Balanza Digital & Tickera Térmica', included: true },
-        { title: 'Catálogo Vista Cuadrícula (4 cols)', included: true },
-        { title: 'Modo Offline 100% Autónomo', included: true },
-        { title: 'Escáner Celular Inalámbrico QR', included: true },
-        { title: 'Múltiples Vistas (Lista & Mini)', included: true },
-        { title: 'Cuentas por Cobrar (Fiados) & Pagar', included: true },
-        { title: 'Reportes Profesionales de Ganancias', included: true },
-        { title: 'Gestión de Mesas y Comandas', included: false },
-        { title: 'Temas & Colores Personalizados', included: false },
+        'Todo lo incluido en el Plan Lite',
+        'Escáner Inalámbrico por Celular (QR)',
+        'Múltiples Vistas de Catálogo (Lista, Mini y Grid)',
+        'Cuentas por Cobrar (Fiados) y Control de Deudas',
+        'Reportes de Ganancias y Métricas Comerciales'
       ]
     },
     {
       id: 'KLIKPOS_ELITE',
       name: 'KlikPOS Elite',
-      subtitle: 'Restaurantes, gastronomía y franquicias',
+      subtitle: 'Restaurantes, gastronomía, franquicias y cadenas',
       badge: 'TODO DESBLOQUEADO',
       badgeColor: 'bg-gradient-to-r from-amber-500 to-orange-600 text-white',
       price: '$150',
-      period: 'pago único / anual',
+      period: 'pago único',
       highlight: false,
       features: [
-        { title: 'Todas las funciones del Plan Pro', included: true },
-        { title: '4 Vistas: Gourmet (2 cols), Lista, Mini, Grid', included: true },
-        { title: 'Gestión de Mesas y Salón en Vivo', included: true },
-        { title: 'Comandas de Cocina & Pantalla KDS', included: true },
-        { title: 'Control de Motorizados & Delivery WhatsApp', included: true },
-        { title: 'Personalización Total de Colores y Marca', included: true },
-        { title: 'Dashboard Financiero P&L y Rentabilidad', included: true },
-        { title: 'Lector Automático SMS Bancario Anti-Fraude', included: true },
-        { title: 'Integración Nube con App Móvil KlikAdmin', included: true },
+        'Todo lo incluido en el Plan Pro',
+        'Modo Restaurante Gourmet en 2 Columnas',
+        'Salón, Mapa de Mesas y Comandas de Cocina',
+        'Menú Digital QR & Pedidos por WhatsApp',
+        'Personalización Total de Marca y Colores',
+        'Conexión Móvil con la App KlikAdmin'
       ]
     }
   ];
@@ -161,23 +164,21 @@ export default function LicensingInformationPage() {
     <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-8 font-sans">
       {/* Header Informativo */}
       <div className="bg-white dark:bg-slate-800 p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-        <div>
-          <div className="flex items-center gap-3">
-            <span className="p-3 bg-gradient-to-br from-indigo-600 to-blue-700 text-white rounded-2xl shadow-md shadow-indigo-100 dark:shadow-none">
-              <ShieldCheck className="w-8 h-8" />
-            </span>
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">
-                Planes & Ediciones KlikPOS
-              </h1>
-              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-medium mt-0.5">
-                Conoce las características de tu software y solicita una ampliación de funciones para tu negocio.
-              </p>
-            </div>
+        <div className="flex items-center gap-3.5">
+          <span className="p-3.5 bg-gradient-to-br from-indigo-600 to-blue-700 text-white rounded-2xl shadow-md shadow-indigo-100 dark:shadow-none shrink-0">
+            <ShieldCheck className="w-8 h-8" />
+          </span>
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">
+              Planes & Ediciones KlikPOS
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-medium mt-0.5">
+              Conoce nuestras ediciones disponibles y potencia tu comercio con la versión ideal.
+            </p>
           </div>
         </div>
 
-        {/* Tarjeta de Plan Actual */}
+        {/* Tarjeta de Plan Actual en esta PC */}
         <div className="flex items-center gap-4 bg-slate-50 dark:bg-slate-900/80 px-5 py-3.5 rounded-2xl border border-slate-200 dark:border-slate-700 shrink-0">
           <div className="text-right">
             <span className="text-[10px] font-black uppercase tracking-wider text-slate-500">Plan Instalado en esta PC</span>
@@ -198,14 +199,14 @@ export default function LicensingInformationPage() {
         </div>
       </div>
 
-      {/* Cuadrícula Comparativa de Planes Oficiales */}
+      {/* Cuadrícula Comparativa de los 3 Planes Oficiales (Sin Botones en las Cards) */}
       <div>
         <div className="text-center max-w-2xl mx-auto mb-8">
           <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">
-            Compara las Ediciones de KlikPOS
+            Nuestros 3 Planes Comerciales
           </h2>
           <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-            Escoge la versión adecuada para el tamaño y tipo de tu comercio. Puedes actualizar en cualquier momento sin perder tus datos de ventas e inventario.
+            Diseñados para adaptarse a la evolución de tu negocio con máxima velocidad y estabilidad.
           </p>
         </div>
 
@@ -245,52 +246,19 @@ export default function LicensingInformationPage() {
                     <span className="text-xs text-slate-500 ml-1.5">{plan.period}</span>
                   </div>
 
-                  {/* Lista de Características */}
-                  <ul className="space-y-2.5 text-xs text-slate-700 dark:text-slate-300 mb-6">
+                  {/* Lista de Características Curadas */}
+                  <ul className="space-y-3 text-xs text-slate-700 dark:text-slate-300">
                     {plan.features.map((feat, idx) => (
                       <li key={idx} className="flex items-start gap-2.5">
-                        {feat.included ? (
-                          <span className="p-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5">
-                            <Check className="w-3 h-3" />
-                          </span>
-                        ) : (
-                          <span className="p-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 shrink-0 mt-0.5">
-                            <Lock className="w-3 h-3" />
-                          </span>
-                        )}
-                        <span className={feat.included ? 'font-medium' : 'text-slate-400 line-through'}>
-                          {feat.title}
+                        <span className="p-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5">
+                          <Check className="w-3 h-3" />
+                        </span>
+                        <span className="font-semibold leading-snug text-slate-800 dark:text-slate-200">
+                          {feat}
                         </span>
                       </li>
                     ))}
                   </ul>
-                </div>
-
-                {/* Botón de Acción */}
-                <div className="pt-2">
-                  {isCurrent ? (
-                    <button
-                      disabled
-                      className="w-full py-3 px-4 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 font-black text-xs rounded-xl border border-emerald-300 dark:border-emerald-700 flex items-center justify-center gap-2 cursor-default"
-                    >
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                      <span>Instalado y Activo</span>
-                    </button>
-                  ) : (
-                    <a
-                      href={getWhatsAppUpgradeUrl(plan.name)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={`w-full py-3 px-4 rounded-xl font-black text-xs flex items-center justify-center gap-2 transition-all active:scale-95 shadow-sm cursor-pointer ${
-                        plan.id === 'KLIKPOS_ELITE'
-                          ? 'bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white shadow-orange-500/20'
-                          : 'bg-indigo-600 hover:bg-indigo-700 text-white'
-                      }`}
-                    >
-                      <MessageCircle className="w-4 h-4" />
-                      <span>Solicitar Upgrade a {plan.name}</span>
-                    </a>
-                  )}
                 </div>
               </div>
             );
@@ -298,60 +266,122 @@ export default function LicensingInformationPage() {
         </div>
       </div>
 
-      {/* Sección Inferior: Ingresar Clave de Activación Pro/Elite provista por el Distribuidor */}
-      <div className="bg-white dark:bg-slate-800 rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-700 shadow-sm max-w-3xl mx-auto space-y-4">
-        <div className="flex items-center gap-3 border-b border-slate-100 dark:border-slate-700 pb-3">
-          <span className="p-2 bg-indigo-50 dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 rounded-xl">
-            <KeyRound className="w-5 h-5" />
-          </span>
-          <div>
-            <h3 className="font-black text-slate-900 dark:text-white text-base">
-              ¿Ya compraste tu Clave de Licencia?
-            </h3>
-            <p className="text-xs text-slate-500">
-              Ingresa el código alfanumérico provisto por tu distribuidor para desbloquear las funciones de inmediato en esta PC.
-            </p>
+      {/* Módulo Doble: Contacto WhatsApp + Formulario de Activación de Licencia */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Tarjeta 1: Contacto WhatsApp Oficial */}
+        <div className="bg-gradient-to-br from-emerald-600 to-teal-700 text-white rounded-3xl p-6 sm:p-8 shadow-xl flex flex-col justify-between space-y-6">
+          <div className="space-y-3">
+            <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-white shadow-inner">
+              <MessageCircle className="w-6 h-6" />
+            </div>
+            <div>
+              <span className="text-[10px] font-black uppercase tracking-widest text-emerald-200">
+                Atención Comercial & Asesoría
+              </span>
+              <h3 className="text-2xl font-black text-white mt-0.5">
+                ¿Deseas Cambiar de Plan o Comprar una Licencia?
+              </h3>
+              <p className="text-xs text-emerald-100 font-medium leading-relaxed mt-1">
+                Escríbenos directamente por WhatsApp. Nuestro equipo te asesorará para activar el plan que tu comercio necesita y te enviará tu clave de activación de forma inmediata.
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-3 pt-2">
+            <div className="bg-black/20 backdrop-blur-md rounded-2xl p-3.5 border border-white/10 flex items-center justify-between gap-3 text-xs">
+              <div>
+                <span className="text-[10px] uppercase font-bold text-emerald-200 block">WhatsApp Oficial</span>
+                <span className="font-mono font-black text-white text-sm">+58 424-8298026</span>
+              </div>
+              <span className="px-2.5 py-1 rounded-full bg-emerald-400/20 text-emerald-200 text-[10px] font-bold border border-emerald-300/30">
+                Respuesta Rápida
+              </span>
+            </div>
+
+            <a
+              href={getWhatsAppUpgradeUrl()}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full py-3.5 px-6 rounded-2xl bg-white hover:bg-emerald-50 text-emerald-900 font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2.5 shadow-lg shadow-black/10 transition-all active:scale-95 cursor-pointer"
+            >
+              <Send className="w-4 h-4 text-emerald-700" />
+              <span>Contactar Asesor por WhatsApp</span>
+            </a>
           </div>
         </div>
 
-        <form onSubmit={handleApplyActivationKey} className="space-y-3 pt-2">
-          <div className="space-y-1.5">
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-              Clave de Licencia (Token Criptográfico)
-            </label>
-            <input
-              type="text"
-              placeholder="KLIK-eyJhbGciOi..."
-              value={inputActivationKey}
-              onChange={(e) => setInputActivationKey(e.target.value)}
-              className="w-full h-11 px-4 border border-slate-300 dark:border-slate-600 rounded-xl text-xs font-mono text-slate-900 dark:text-white bg-slate-50 dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 select-all"
-            />
+        {/* Tarjeta 2: Formulario de Activación de Licencia en esta PC */}
+        <div className="bg-white dark:bg-slate-800 rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col justify-between space-y-6">
+          <div className="space-y-3">
+            <div className="flex items-center justify-between gap-3">
+              <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+                <KeyRound className="w-6 h-6" />
+              </div>
+              {/* ID de Terminal con botón de copia */}
+              <button
+                type="button"
+                onClick={handleCopyHwid}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-700 dark:text-slate-200 text-[11px] font-mono font-bold transition-all cursor-pointer"
+                title="Copiar ID de Terminal"
+              >
+                <Copy className="w-3.5 h-3.5" />
+                <span>{copiedHwid ? '¡Copiado!' : terminalHwid}</span>
+              </button>
+            </div>
+
+            <div>
+              <span className="text-[10px] font-black uppercase tracking-widest text-indigo-600 dark:text-indigo-400">
+                Desbloqueo Inmediato
+              </span>
+              <h3 className="text-xl font-black text-slate-900 dark:text-white mt-0.5">
+                Activar Clave de Licencia
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Si ya dispones de una clave alfanumérica emitida por tu asesor comercial, ingrésala abajo para desbloquear las funciones de inmediato en esta PC.
+              </p>
+            </div>
           </div>
 
-          <button
-            type="submit"
-            className="w-full py-3 bg-slate-900 hover:bg-slate-800 dark:bg-indigo-600 dark:hover:bg-indigo-700 text-white font-black rounded-xl text-xs transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer"
-          >
-            <Zap className="w-4 h-4 text-amber-400" />
-            <span>Validar y Aplicar Licencia en esta PC</span>
-          </button>
-        </form>
+          <form onSubmit={handleApplyActivationKey} className="space-y-3.5">
+            <div className="space-y-1.5">
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                Clave de Licencia (Token Criptográfico)
+              </label>
+              <input
+                type="text"
+                placeholder="KLIK-eyJhbGciOi..."
+                value={inputActivationKey}
+                onChange={(e) => setInputActivationKey(e.target.value)}
+                className="w-full h-11 px-4 border border-slate-300 dark:border-slate-600 rounded-xl text-xs font-mono text-slate-900 dark:text-white bg-slate-50 dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 select-all"
+              />
+            </div>
 
-        {activationFeedback && (
-          <div className={`p-3.5 rounded-xl text-xs font-bold flex items-center gap-2.5 ${
-            activationFeedback.success
-              ? 'bg-emerald-50 text-emerald-800 border border-emerald-300'
-              : 'bg-rose-50 text-rose-800 border border-rose-300'
-          }`}>
-            {activationFeedback.success ? (
-              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-            ) : (
-              <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+            <button
+              type="submit"
+              className="w-full py-3.5 bg-slate-900 hover:bg-slate-800 dark:bg-indigo-600 dark:hover:bg-indigo-700 text-white font-black rounded-xl text-xs transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer active:scale-95"
+            >
+              <Zap className="w-4 h-4 text-amber-400" />
+              <span>Validar y Activar Plan en esta PC</span>
+            </button>
+
+            {activationFeedback && (
+              <div className={`p-3.5 rounded-xl text-xs font-bold flex items-center gap-2.5 ${
+                activationFeedback.success
+                  ? 'bg-emerald-50 text-emerald-800 border border-emerald-300'
+                  : 'bg-rose-50 text-rose-800 border border-rose-300'
+              }`}>
+                {activationFeedback.success ? (
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                ) : (
+                  <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                )}
+                <span>{activationFeedback.msg}</span>
+              </div>
             )}
-            <span>{activationFeedback.msg}</span>
-          </div>
-        )}
+          </form>
+        </div>
       </div>
     </div>
   );
 }
+

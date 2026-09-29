@@ -2685,7 +2685,7 @@ export default function DesktopPosPage() {
                   <div
                     key={p.id}
                     onClick={() => addToCart(p, 1)}
-                    className="pos-white-card bg-white rounded-2xl border-2 border-slate-200/90 dark:border-sky-500/20 p-3 shadow-sm hover:shadow-lg hover:border-sky-500 transition-all active:scale-[0.98] cursor-pointer flex flex-col justify-between group select-none"
+                    className="pos-white-card bg-white rounded-2xl border-2 border-slate-300 dark:border-slate-700/80 shadow-[0_2px_8px_rgba(0,0,0,0.06)] hover:shadow-md hover:border-slate-400 dark:hover:border-slate-500 transition-all active:scale-[0.98] cursor-pointer flex flex-col justify-between group select-none p-3"
                   >
                     <div className="flex items-center justify-between gap-1.5 w-full mb-1.5">
                       <span className="font-mono text-[10px] font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200 truncate">
@@ -2889,9 +2889,9 @@ export default function DesktopPosPage() {
             </div>
           )}
 
-          {/* MODO 4: COMIDA RÁPIDA / RESTAURANTE & FAST FOOD (QUIOSCO TÁCTIL GASTRONÓMICO) */}
+          {/* MODO 4: COMIDA RÁPIDA / RESTAURANTE & FAST FOOD (2 COLUMNAS HOLGADAS & FONDO TRASLÚCIDO BLANCO) */}
           {posViewMode === 'fastfood' && (
-            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-3 gap-3.5 content-start">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-2 gap-4 content-start">
               {filteredProducts.map((p) => {
                 const isLowStock = p.stock <= p.minStock;
                 const isFixed = p.isFixedPriceVES && p.fixedPriceVES;
@@ -2901,7 +2901,7 @@ export default function DesktopPosPage() {
                   <div
                     key={p.id}
                     onClick={() => addToCart(p, 1)}
-                    className="relative h-[250px] sm:h-[275px] rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-200 active:scale-[0.98] cursor-pointer group select-none border border-slate-300/40 dark:border-white/10 bg-slate-900 flex flex-col justify-end"
+                    className="relative h-[255px] sm:h-[280px] rounded-3xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-200 active:scale-[0.98] cursor-pointer group select-none border-2 border-slate-300 dark:border-white/20 bg-slate-900 flex flex-col justify-end"
                   >
                     {/* Foto de Fondo a Pantalla Completa */}
                     {p.image && showImages ? (
@@ -2918,7 +2918,7 @@ export default function DesktopPosPage() {
                     )}
 
                     {/* Degradado suave para garantizar contraste de textos */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent pointer-events-none" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
 
                     {/* Badge superior si es Precio Fijo en Bs. o Stock bajo */}
                     <div className="absolute top-2.5 right-2.5 flex items-center gap-1.5 z-10">
@@ -2927,30 +2927,30 @@ export default function DesktopPosPage() {
                           🔒 Fijo Bs.
                         </span>
                       )}
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-sm text-white border border-white/20">
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-black/70 backdrop-blur-sm text-white border border-white/20">
                         {p.stock} {p.unit === 'kg' ? 'kg' : 'uds'}
                       </span>
                     </div>
 
-                    {/* Caja Inferior Flotante (Overlay tipo Card Interna Blanco Traslúcido con Texto Oscuro de Alto Contraste) */}
-                    <div className="relative m-2.5 p-3.5 rounded-2xl bg-white/90 dark:bg-white/95 backdrop-blur-md border border-white/60 text-slate-900 flex flex-col gap-1 z-10 shadow-lg">
+                    {/* Caja Inferior Flotante (Blanco Traslúcido con Texto Oscuro de Máximo Contraste) */}
+                    <div className="relative m-2.5 p-3.5 rounded-2xl bg-white/95 dark:bg-white/95 backdrop-blur-md border border-white/90 text-slate-950 flex flex-col gap-1 z-10 shadow-lg">
                       {/* Título del Plato / Producto */}
-                      <h4 className="font-black text-[15px] sm:text-[16px] text-slate-900 leading-tight truncate" title={p.name}>
+                      <h4 className="font-black text-[15px] sm:text-[16px] leading-tight truncate" title={p.name} style={{ color: '#0f172a' }}>
                         {p.name}
                       </h4>
 
                       {/* Precio en Bolívares Gigante */}
-                      <div className="font-black text-[19px] sm:text-[21px] font-sans text-slate-950 tabular-numbers leading-tight">
+                      <div className="font-black text-[19px] sm:text-[21px] font-sans tabular-numbers leading-tight" style={{ color: '#020617' }}>
                         {formatVES(displayVES)}
                       </div>
 
                       {/* Fila Inferior: Precio en Dólares + Pill de Categoría */}
-                      <div className="flex items-center justify-between gap-2 pt-1.5 border-t border-slate-900/15 mt-0.5">
-                        <span className="text-xs text-slate-700 font-bold tracking-wide">
+                      <div className="flex items-center justify-between gap-2 pt-1.5 border-t border-slate-200 mt-0.5">
+                        <span className="text-xs font-black tracking-wide" style={{ color: '#1e293b' }}>
                           ${displayUSD.toFixed(2)} USD
                         </span>
 
-                        <span className="text-[9.5px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-slate-900/10 text-slate-800 border border-slate-900/15 truncate max-w-[125px]">
+                        <span className="text-[9.5px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-slate-100 border border-slate-300 truncate max-w-[125px]" style={{ color: '#0f172a' }}>
                           {p.category}
                         </span>
                       </div>

@@ -30,8 +30,8 @@
     "semantic_hash": ""
   },
   "package.json": {
-    "mtime": 1790642034.2047615,
-    "seen": 1790642407.4508972,
+    "mtime": 1790643776.7665038,
+    "seen": 1790644184.5476882,
     "ast_hash": "f9d2b6629521a5d87743a7138f3a4160",
     "semantic_hash": ""
   },
@@ -48,14 +48,14 @@
     "semantic_hash": ""
   },
   "public/sw.js": {
-    "mtime": 1790641284.1207058,
-    "seen": 1790642407.4509077,
-    "ast_hash": "aaf531abb729b6b519ad7a898a4c3620",
+    "mtime": 1790643126.3199022,
+    "seen": 1790644184.5476997,
+    "ast_hash": "1734c8cb0831320b108e017f8953df72",
     "semantic_hash": ""
   },
   "public/workbox-00a24876.js": {
-    "mtime": 1790641284.1207058,
-    "seen": 1790642407.4509144,
+    "mtime": 1790643126.3143737,
+    "seen": 1790644184.5477073,
     "ast_hash": "2f569fb030b2a09996588b309a8d636e",
     "semantic_hash": "2f569fb030b2a09996588b309a8d636e"
   },
@@ -84,10 +84,10 @@
     "semantic_hash": "335f5059c0e8658e5edce708b7eeb766"
   },
   "src/app/admin/cloud-license/page.tsx": {
-    "mtime": 1789790550.9369025,
-    "seen": 1790363920.7983818,
-    "ast_hash": "85c48f7aa33df7609ffc4738fa081bb0",
-    "semantic_hash": "85c48f7aa33df7609ffc4738fa081bb0"
+    "mtime": 1790643562.4553387,
+    "seen": 1790644184.5504513,
+    "ast_hash": "3b9c2c6d719ff7e0e9508a957f81bd7d",
+    "semantic_hash": ""
   },
   "src/app/api/backup/sync/route.ts": {
     "mtime": 1789789354.2754402,
@@ -288,9 +288,9 @@
     "semantic_hash": ""
   },
   "src/app/dashboard/pos/page.tsx": {
-    "mtime": 1790637404.0286584,
-    "seen": 1790639385.0756228,
-    "ast_hash": "67921c26b3dbe6db53e6fc129c3e5b53",
+    "mtime": 1790643033.5227168,
+    "seen": 1790644184.550611,
+    "ast_hash": "31d74faa8580ffeddbe270000ee0359f",
     "semantic_hash": ""
   },
   "src/app/dashboard/reports/page.tsx": {
@@ -840,8 +840,8 @@
     "semantic_hash": "0f54c4f82cffc8c86bb3fbe3e98739d5"
   },
   "venematic-desktop/android/app/build.gradle": {
-    "mtime": 1790642032.6126566,
-    "seen": 1790642407.4515555,
+    "mtime": 1790643774.941569,
+    "seen": 1790644184.5513594,
     "ast_hash": "1b6d7585867593fe9d7b06b973fd4537",
     "semantic_hash": ""
   },
@@ -912,8 +912,8 @@
     "semantic_hash": "9e1d55fd6ac912e918c345bd5590f839"
   },
   "venematic-desktop/package.json": {
-    "mtime": 1790642034.666117,
-    "seen": 1790642407.451602,
+    "mtime": 1790643777.1003897,
+    "seen": 1790644184.551436,
     "ast_hash": "f9d2b6629521a5d87743a7138f3a4160",
     "semantic_hash": ""
   },
@@ -1596,9 +1596,9 @@
     "semantic_hash": ""
   },
   "dist-installer/VERIFICACION_HASHES.txt": {
-    "mtime": 1790642258.4170952,
-    "seen": 1790642407.4524179,
-    "ast_hash": "454f13772acf73f0e03e166607e218bf",
+    "mtime": 1790644042.14386,
+    "seen": 1790644184.5567136,
+    "ast_hash": "8268fe3011200ba0c4efabaec4843285",
     "semantic_hash": ""
   },
   "docs/INFORME_CLIENTES_VENEMATIC_POS.md": {
@@ -2832,14 +2832,14 @@
     "semantic_hash": ""
   },
   "dist-installer/version.json": {
-    "mtime": 1790642034.2159963,
-    "seen": 1790642407.4508748,
+    "mtime": 1790643776.771753,
+    "seen": 1790644184.5476632,
     "ast_hash": "d9b3847753f225ffe5a6be8f749d23b0",
     "semantic_hash": ""
   },
   "klikpos-releases/version.json": {
-    "mtime": 1790642034.217999,
-    "seen": 1790642407.4508898,
+    "mtime": 1790643776.774953,
+    "seen": 1790644184.5476797,
     "ast_hash": "d9b3847753f225ffe5a6be8f749d23b0",
     "semantic_hash": ""
   },
@@ -2922,8 +2922,8 @@
     "semantic_hash": ""
   },
   "public/version.json": {
-    "mtime": 1790642034.2077174,
-    "seen": 1790642407.450911,
+    "mtime": 1790643776.768751,
+    "seen": 1790644184.547703,
     "ast_hash": "d9b3847753f225ffe5a6be8f749d23b0",
     "semantic_hash": ""
   },
@@ -2934,8 +2934,8 @@
     "semantic_hash": ""
   },
   "version.json": {
-    "mtime": 1790642034.2016492,
-    "seen": 1790642407.4520216,
+    "mtime": 1790643776.7638092,
+    "seen": 1790644184.553444,
     "ast_hash": "d9b3847753f225ffe5a6be8f749d23b0",
     "semantic_hash": ""
   },
@@ -3078,9 +3078,9 @@
     "semantic_hash": ""
   },
   "src/app/tablet-pos/page.tsx": {
-    "mtime": 1790641178.2014062,
-    "seen": 1790642407.451268,
-    "ast_hash": "f8fce423a15af69f938d4f1ff0b11c58",
+    "mtime": 1790643058.7182722,
+    "seen": 1790644184.5506835,
+    "ast_hash": "10728e0e27a59d7ec3a842ddc44a820e",
     "semantic_hash": ""
   },
   "venematic-desktop/src/app/tablet-pos/page.tsx": {
@@ -3090,8 +3090,8 @@
     "semantic_hash": ""
   },
   "venematic-desktop/version.json": {
-    "mtime": 1790642034.6607842,
-    "seen": 1790642407.452018,
+    "mtime": 1790643777.0953672,
+    "seen": 1790644184.5534368,
     "ast_hash": "d9b3847753f225ffe5a6be8f749d23b0",
     "semantic_hash": ""
   },
@@ -3858,9 +3858,9 @@
     "semantic_hash": ""
   },
   "src/app/dashboard/licensing/page.tsx": {
-    "mtime": 1790625243.4100606,
-    "seen": 1790626117.885987,
-    "ast_hash": "bbf189e0e3bcebfded4549841e54a1c6",
+    "mtime": 1790643530.0112357,
+    "seen": 1790644184.550607,
+    "ast_hash": "55b467fd095b38024b2d20b2c38461d6",
     "semantic_hash": ""
   },
   "src/app/dashboard/suppliers/page.tsx": {
@@ -4002,27 +4002,39 @@
     "semantic_hash": ""
   },
   "KlikPOS Release/01_KlikPOS_Lite_Desktop/LEEME_KLIKPOS_LITE.txt": {
-    "mtime": 1790642118.1902816,
-    "seen": 1790642407.4523895,
+    "mtime": 1790643875.349584,
+    "seen": 1790644184.5566807,
     "ast_hash": "c4f89197cb2557cf409350542af7b61b",
     "semantic_hash": ""
   },
   "KlikPOS Release/02_KlikPOS_Pro_Desktop/LEEME_KLIKPOS_PRO.txt": {
-    "mtime": 1790642189.6816404,
-    "seen": 1790642407.4523928,
+    "mtime": 1790643959.9698694,
+    "seen": 1790644184.5566866,
     "ast_hash": "5d1624474f8f68769eac8743fae7b856",
     "semantic_hash": ""
   },
   "KlikPOS Release/03_KlikPOS_Elite_Desktop/LEEME_KLIKPOS_ELITE.txt": {
-    "mtime": 1790642257.3970635,
-    "seen": 1790642407.4523964,
+    "mtime": 1790644039.4936144,
+    "seen": 1790644184.55669,
     "ast_hash": "58856473f0aeaa9cdcbdc2efe3c89d34",
     "semantic_hash": ""
   },
   "KlikPOS Release/VERIFICACION_HASHES.txt": {
-    "mtime": 1790642258.4138696,
-    "seen": 1790642407.4523988,
-    "ast_hash": "454f13772acf73f0e03e166607e218bf",
+    "mtime": 1790644042.1338136,
+    "seen": 1790644184.5566933,
+    "ast_hash": "8268fe3011200ba0c4efabaec4843285",
+    "semantic_hash": ""
+  },
+  "src/app/api/telemetry/errors/route.ts": {
+    "mtime": 1790643450.342527,
+    "seen": 1790644184.5505369,
+    "ast_hash": "da8361bc60102686d39a2cbe14084cee",
+    "semantic_hash": ""
+  },
+  "src/lib/telemetry/crash-reporter.ts": {
+    "mtime": 1790643428.6936035,
+    "seen": 1790644184.5509589,
+    "ast_hash": "b2cea100af28b98ce38a445b29d3d920",
     "semantic_hash": ""
   }
 }
