@@ -151,59 +151,17 @@ export default function CloudSyncSettingsCard() {
         </div>
       )}
 
-      <div className="flex flex-wrap gap-2 pt-1">
+      <div className="pt-1">
         <button
           type="button"
           onClick={handleSyncNow}
           disabled={isSyncing || !isFirebaseConfigured()}
-          className="flex-1 py-2 px-3 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50 shadow-xs"
+          className="w-full py-2.5 px-4 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center justify-center gap-2 transition-all disabled:opacity-50 shadow-xs cursor-pointer"
         >
           <UploadCloud className={`w-4 h-4 ${isSyncing ? 'animate-bounce' : ''}`} />
-          <span>{isSyncing ? 'Sincronizando...' : 'Sincronizar con la Nube Ahora'}</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setShowConfigBox(!showConfigBox)}
-          className="py-2 px-3 rounded-lg bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-700 font-bold text-xs transition-colors"
-        >
-          {showConfigBox ? 'Ocultar Credenciales' : 'Configurar Firebase'}
+          <span>{isSyncing ? 'Sincronizando ventas y catálogo...' : 'Sincronizar con la Nube Ahora'}</span>
         </button>
       </div>
-
-      {showConfigBox && (
-        <form onSubmit={handleSaveConfig} className="space-y-3 pt-2 border-t border-slate-200">
-          <label className="block text-xs font-semibold text-slate-700">
-            Pega aquí el objeto JSON de tu app web en Firebase Console:
-          </label>
-          <textarea
-            rows={5}
-            value={jsonConfig}
-            onChange={(e) => setJsonConfig(e.target.value)}
-            placeholder={`{\n  "apiKey": "AIzaSy...",\n  "authDomain": "tu-tienda.firebaseapp.com",\n  "projectId": "tu-proyecto-id",\n  "storageBucket": "tu-tienda.appspot.com",\n  "messagingSenderId": "1234567890",\n  "appId": "1:1234567890:web:abcdef"\n}`}
-            className="w-full text-xs font-mono p-2.5 bg-slate-900 text-emerald-400 rounded-lg border border-slate-700 focus:ring-2 focus:ring-indigo-500 outline-hidden placeholder-slate-600"
-          />
-          <div className="flex justify-between items-center">
-            <button
-              type="button"
-              onClick={() => {
-                clearCustomFirebaseConfig();
-                setJsonConfig('');
-                alert('Credenciales restablecidas.');
-              }}
-              className="text-xs text-rose-600 hover:underline font-semibold"
-            >
-              Restablecer
-            </button>
-            <button
-              type="submit"
-              className="py-2 px-4 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-lg shadow-sm"
-            >
-              Guardar Credenciales Cloud
-            </button>
-          </div>
-        </form>
-      )}
     </div>
   );
 }

@@ -1523,7 +1523,7 @@ export default function TabletMobilePosPage() {
 
             {/* PRODUCTOS RENDERIZADOS SEGÚN MODO DE VISTA */}
             {cardViewMode === 'food' && (
-              <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 {filteredProducts.map((prod) => {
                   const qtyInCart = getCartQty(prod.id);
                   return (
@@ -1536,19 +1536,19 @@ export default function TabletMobilePosPage() {
                           : 'bg-slate-900/90 border-slate-800 hover:border-slate-700'
                       }`}
                     >
-                      <div className="relative h-28 w-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
+                      <div className="relative h-36 sm:h-40 w-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
                         <img
                           src={prod.image}
                           alt={prod.name}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                           loading="lazy"
                         />
-                        <span className="absolute top-2 left-2 text-[9px] font-black bg-slate-900/80 text-white px-2 py-0.5 rounded-full backdrop-blur-xs">
+                        <span className="absolute top-2.5 left-2.5 text-[10px] font-black bg-slate-900/80 text-white px-2.5 py-0.5 rounded-full backdrop-blur-xs shadow-xs">
                           {prod.tag}
                         </span>
                         {qtyInCart > 0 && (
                           <span
-                            className="absolute top-2 right-2 text-white font-black font-mono text-xs w-6 h-6 rounded-full flex items-center justify-center shadow-md anim-badge-spring"
+                            className="absolute top-2.5 right-2.5 text-white font-black font-mono text-xs w-6 h-6 rounded-full flex items-center justify-center shadow-md anim-badge-spring"
                             style={{ backgroundColor: currentPal.primary }}
                           >
                             {qtyInCart}
@@ -1556,22 +1556,22 @@ export default function TabletMobilePosPage() {
                         )}
                       </div>
 
-                      <div className="p-3 flex-1 flex flex-col justify-between space-y-2">
+                      <div className="p-3.5 flex-1 flex flex-col justify-between space-y-2.5">
                         <div>
                           <h3
-                            className="text-xs font-black line-clamp-2 min-h-[32px] leading-tight"
+                            className="text-xs sm:text-sm font-black line-clamp-2 min-h-[32px] leading-tight"
                             style={{ color: isLight ? '#0f172a' : '#ffffff' }}
                           >
                             {prod.name}
                           </h3>
-                          <p className="text-[10px] text-slate-500 line-clamp-1 mt-0.5">
+                          <p className="text-[11px] text-slate-500 line-clamp-1 mt-0.5">
                             {prod.description}
                           </p>
                         </div>
 
-                        <div className="flex items-baseline justify-between pt-1 border-t border-slate-100 dark:border-slate-800">
+                        <div className="flex items-baseline justify-between pt-2 border-t border-slate-100 dark:border-slate-800">
                           <div>
-                            <span className="text-sm font-black font-mono" style={{ color: currentPal.primary }}>
+                            <span className="text-sm sm:text-base font-black font-mono" style={{ color: currentPal.primary }}>
                               ${prod.priceUSD.toFixed(2)}
                             </span>
                             <span className="text-[10px] font-mono text-slate-500 block">
@@ -1583,7 +1583,7 @@ export default function TabletMobilePosPage() {
                               e.stopPropagation();
                               addToCart(prod);
                             }}
-                            className="w-7 h-7 rounded-xl text-white flex items-center justify-center active:scale-90 transition-transform shadow-xs"
+                            className="w-8 h-8 rounded-xl text-white flex items-center justify-center active:scale-90 transition-transform shadow-xs"
                             style={{ backgroundColor: currentPal.primary }}
                           >
                             <Plus className="w-4 h-4" />
