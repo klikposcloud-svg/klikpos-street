@@ -43,9 +43,14 @@ const withPWA = require('next-pwa')({
   maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
 })
 
+const path = require('path');
+
 const nextConfig = {
   reactStrictMode: true,
   output: 'standalone',
+  experimental: {
+    outputFileTracingRoot: path.join(__dirname),
+  },
   images: {
     unoptimized: true,
   },

@@ -286,6 +286,7 @@ export interface LicensePayload {
   tier: LicenseTier;
   edition?: KlikEdition;
   companyRif?: string;
+  companyName?: string;
   issuedAt: string;
   expiresAt?: string;
   customFlags?: Partial<Record<FeatureFlag, boolean>>;

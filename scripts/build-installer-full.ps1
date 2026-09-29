@@ -18,6 +18,16 @@ $version = $manifest.version
 
 Write-Host "Versión identificada: v$version" -ForegroundColor Green
 
+# 1.1 Compilación fresca de Next.js Standalone (Estricto Zero-Regresiones)
+Write-Host "`n>>> [COMPILANDO NEXT.JS STANDALONE FRESCO] npm run build..." -ForegroundColor Magenta
+Push-Location $rootDir
+& cmd /c "npm run build"
+Pop-Location
+if ($LASTEXITCODE -ne 0) {
+    throw "Error fatal durante npm run build. Abortando empaquetado."
+}
+
+
 $outputExeDesktop = Join-Path $desktopDir "dist-installer\KlikPOS-Enterprise-Setup-v$version.exe"
 $outputExeRoot = Join-Path $rootDir "dist-installer\KlikPOS-Enterprise-Setup-v$version.exe"
 $hashDesktop = Join-Path $desktopDir "dist-installer\VERIFICACION_HASHES.txt"
