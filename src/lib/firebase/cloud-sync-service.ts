@@ -317,11 +317,72 @@ class CloudSyncService {
   }
 
   /**
-   * Ejecuta una sincronización bidireccional completa
+   * Sube los turnos y arqueos de caja a Firestore (para que el dueño los vea en KlikAdmin.apk en tiempo real)
    */
-  public async syncAll(): Promise<{ sales: number; productsUploaded: number; productsPulled: number }> {
+  public async pushShiftsToCloud(): Promise<number> {
+    if (!isFirebaseConfigured() || (typeof navigator !== 'undefined' && !navigator.onLine)) {
+      return 0;
+    }
+
+    try {
+      const localShifts = await localDb.cashShifts.toArray();
+      if (localShifts.length === 0) return 0;
+
+      const batchSize = 50;
+      let uploaded = 0;
+
+      for (let i = 0; i < localShifts.length; i += batchSize) {
+        const chunk = localShifts.slice(i, i + batchSize);
+        const batch = writeBatch(firestoreDb);
+
+        for (const shift of chunk) {
+          const docId = `SHIFT-${shift.id || shift.openedAt}`;
+          const shiftRef = doc(firestoreDb, `stores/${this.currentStoreId}/shifts`, docId);
+
+          batch.set(
+            shiftRef,
+            {
+              id: docId,
+              storeId: this.currentStoreId,
+              openedAt: shift.openedAt,
+              closedAt: shift.closedAt || null,
+              cashierName: shift.cashierName,
+              initialCashUSD: shift.initialCashUSD || 0,
+              initialCashVES: shift.initialCashVES || 0,
+              totalSalesUSD: shift.totalSalesUSD || 0,
+              totalCashUSD: shift.totalCashUSD || 0,
+              totalCashVES: shift.totalCashVES || 0,
+              totalPagoMovilVES: shift.totalPagoMovilVES || 0,
+              totalCardVES: shift.totalCardVES || 0,
+              totalZelleUSD: shift.totalZelleUSD || 0,
+              actualCashUSD: shift.actualCashUSD || 0,
+              actualCashVES: shift.actualCashVES || 0,
+              differenceUSD: shift.differenceUSD || 0,
+              differenceVES: shift.differenceVES || 0,
+              status: shift.status || 'open',
+              updatedAt: new Date().toISOString(),
+            },
+            { merge: true }
+          );
+        }
+
+        await batch.commit();
+        uploaded += chunk.length;
+      }
+
+      return uploaded;
+    } catch (error) {
+      console.error('[CloudSync] Error subiendo turnos a Firestore:', error);
+      return 0;
+    }
+  }
+
+  /**
+   * Ejecuta una sincronización bidireccional completa en segundo plano
+   */
+  public async syncAll(): Promise<{ sales: number; productsUploaded: number; productsPulled: number; shiftsUploaded: number }> {
     if (this.isSyncing) {
-      return { sales: 0, productsUploaded: 0, productsPulled: 0 };
+      return { sales: 0, productsUploaded: 0, productsPulled: 0, shiftsUploaded: 0 };
     }
 
     this.isSyncing = true;
@@ -329,11 +390,13 @@ class CloudSyncService {
       const salesResult = await this.syncPendingSales();
       const productsUploaded = await this.pushProductsToCloud();
       const productsPulled = await this.pullProductsFromCloud();
+      const shiftsUploaded = await this.pushShiftsToCloud();
 
       return {
         sales: salesResult.syncedCount,
         productsUploaded,
         productsPulled,
+        shiftsUploaded,
       };
     } finally {
       this.isSyncing = false;
@@ -341,16 +404,28 @@ class CloudSyncService {
   }
 
   /**
-   * Inicia el ciclo periódico de sincronización automática en segundo plano
+   * Disparo no bloqueante inmediato en segundo plano tras una venta o cambio
    */
-  public startAutoSync(intervalSeconds: number = 45) {
+  public triggerFastSync() {
+    if (typeof window === 'undefined') return;
+    setTimeout(() => {
+      this.syncPendingSales().catch(() => {});
+      this.pushProductsToCloud().catch(() => {});
+      this.pushShiftsToCloud().catch(() => {});
+    }, 150);
+  }
+
+  /**
+   * Inicia el ciclo periódico de sincronización automática en segundo plano (Heartbeat)
+   */
+  public startAutoSync(intervalSeconds: number = 30) {
     if (this.autoSyncTimer) return;
 
     // Ejecutar sincronización inicial inmediata
-    this.syncAll();
+    this.syncAll().catch(() => {});
 
     this.autoSyncTimer = setInterval(() => {
-      this.syncAll();
+      this.syncAll().catch(() => {});
     }, intervalSeconds * 1000);
   }
 

@@ -14,6 +14,7 @@ import { LogOut, ShieldCheck, User, UtensilsCrossed, Lock, RefreshCw, CheckCircl
 import { STANDARD_RUBROS, StandardRubroId } from '@/lib/utils/business-rubros';
 import { applyBrandingToDOM, applyTheme, getCurrentTheme, ThemeMode } from '@/lib/theme';
 import CloudSyncWidget from '@/components/CloudSyncWidget';
+import { cloudSyncService } from '@/lib/firebase/cloud-sync-service';
 import QRCode from 'qrcode';
 import { SYSTEM_DEFAULTS } from '@/lib/constants/defaults';
 
@@ -218,6 +219,14 @@ export default function DesktopDashboardLayout({
     updateClock();
     const timer = setInterval(updateClock, 1000);
     return () => clearInterval(timer);
+  }, []);
+
+  // Motor Autónomo de Sincronización en Segundo Plano (Silent Background Sync a Firebase)
+  useEffect(() => {
+    cloudSyncService.startAutoSync(30);
+    return () => {
+      cloudSyncService.stopAutoSync();
+    };
   }, []);
 
   // Modal Global de Vinculación de Celular / Escáner Móvil

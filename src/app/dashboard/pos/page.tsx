@@ -11,6 +11,7 @@ import { SYSTEM_DEFAULTS } from '@/lib/constants/defaults';
 import { usePosCart } from '@/hooks/usePosCart';
 import { usePosHardware } from '@/hooks/usePosHardware';
 import { usePosHotkeys } from '@/hooks/usePosHotkeys';
+import { cloudSyncService } from '@/lib/firebase/cloud-sync-service';
 
 // Subcomponentes modulares de caja POS
 import PosActionButtonsBar from '@/components/pos/PosActionButtonsBar';
@@ -427,6 +428,7 @@ export default function DesktopPosPage() {
     setShowReceiptModal(true);
     soundEffects.success();
     showToast(`✓ Venta #${receiptNum} registrada con éxito`, 'success');
+    cloudSyncService.triggerFastSync();
   };
 
   // 3. Hook de Hotkeys Industriales (F1-F12)
