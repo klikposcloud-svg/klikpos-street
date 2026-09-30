@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Venematic Master Hub | Panel del Desarrollador</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .font-mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    /* Estilos personalizados para scrollbar */
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.6);
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(51, 65, 85, 0.8);
+      border-radius: 99px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: rgba(99, 102, 241, 0.8);
+    }
+    /* Modo Claro */
+    body.light-mode {
+      background-color: #f8fafc !important;
+      color: #0f172a !important;
+    }
+    body.light-mode .card-bg {
+      background-color: #ffffff !important;
+      border-color: #e2e8f0 !important;
+      color: #0f172a !important;
+    }
+    body.light-mode .inner-bg {
+      background-color: #f1f5f9 !important;
+      border-color: #cbd5e1 !important;
+      color: #0f172a !important;
+    }
+    body.light-mode input, body.light-mode select {
+      background-color: #ffffff !important;
+      border-color: #cbd5e1 !important;
+      color: #0f172a !important;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col selection:bg-indigo-500 selection:text-white">
+
+  <!-- ========================================================================= -->
+  <!-- HEADER PRINCIPAL DEL DESARROLLADOR                                       -->
+  <!-- ========================================================================= -->
+  <header class="bg-slate-900/90 border-b border-slate-800 sticky top-0 z-40 backdrop-blur-md px-4 py-3 sm:px-6">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-600 via-sky-500 to-emerald-400 p-0.5 shadow-lg shadow-indigo-500/20 flex items-center justify-center font-black text-slate-950 text-lg">
+          V
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="font-extrabold text-base sm:text-lg tracking-tight text-white">VENEMATIC MASTER HUB</h1>
+            <span class="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/40">DEV SUITE</span>
+          </div>
+          <p class="text-xs text-slate-400">Control Central de Licencias, CRM de Clientes, Respaldo Cloud y Red de Delivery</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button onclick="exportDatabaseJSON()" class="px-3 py-1.5 rounded-xl border border-slate-700 bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 flex items-center gap-1.5 transition-all shadow-xs" title="Descargar Respaldo JSON">
+          <span>💾</span> <span class="hidden sm:inline">Exportar BD</span>
+        </button>
+        <button onclick="document.getElementById('import-file-input').click()" class="px-3 py-1.5 rounded-xl border border-slate-700 bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 flex items-center gap-1.5 transition-all shadow-xs" title="Restaurar Base de Datos">
+          <span>📥</span> <span class="hidden sm:inline">Importar</span>
+        </button>
+        <input type="file" id="import-file-input" class="hidden" accept=".json" onchange="importDatabaseJSON(event)">
+
+        <button onclick="openReleaseModal()" class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white font-black text-xs flex items-center gap-1.5 shadow-md active:scale-95 transition-all" title="Lanzar actualización de software en línea">
+          <span>🚀</span> <span>Lanzar Actualización</span>
+        </button>
+
+        <button onclick="openClientModal()" class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 text-slate-950 font-black text-xs flex items-center gap-1.5 shadow-md active:scale-95 transition-all">
+          <span>➕</span> <span>Nuevo Cliente</span>
+        </button>
+
+        <button onclick="toggleTheme()" id="theme-btn" class="w-8 h-8 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-xs hover:bg-slate-700 transition-all" title="Alternar Modo Oscuro/Claro">
+          ☀️
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ========================================================================= -->
+  <!-- MÉTRICAS CLAVE (KPIS DE NEGOCIO Y REVENUE)                                -->
+  <!-- ========================================================================= -->
+  <section class="max-w-7xl mx-auto w-full px-4 pt-4 sm:px-6">
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+      
+      <!-- Total Comercios -->
+      <div class="card-bg bg-slate-900 border border-slate-800 rounded-3xl p-4 shadow-md flex flex-col justify-between">
+        <div class="flex items-center justify-between text-slate-400">
+          <span class="text-xs font-bold uppercase tracking-wider">Comercios Afiliados</span>
+          <span class="text-lg">🏪</span>
+        </div>
+        <div class="mt-2 flex items-baseline gap-2">
+          <span id="metric-total-clients" class="text-3xl font-black text-white font-mono">0</span>
+          <span class="text-xs text-emerald-400 font-bold" id="metric-active-clients">0 activos</span>
+        </div>
+        <span class="text-[11px] text-slate-500 mt-1">Base instalada de Venematic</span>
+      </div>
+
+      <!-- Licencias Permanentes vs Pruebas -->
+      <div class="card-bg bg-slate-900 border border-slate-800 rounded-3xl p-4 shadow-md flex flex-col justify-between">
+        <div class="flex items-center justify-between text-slate-400">
+          <span class="text-xs font-bold uppercase tracking-wider">Licencias Emitidas</span>
+          <span class="text-lg">🔑</span>
+        </div>
+        <div class="mt-2 flex items-baseline gap-2">
+          <span id="metric-total-licenses" class="text-3xl font-black text-sky-400 font-mono">0</span>
+          <span class="text-xs text-amber-300 font-bold" id="metric-pending-cuota2">0 por cobrar</span>
+        </div>
+        <span class="text-[11px] text-slate-500 mt-1">Permanentes y cuotas activas</span>
+      </div>
+
+      <!-- Respaldo Cloud ($5/mes MRR) -->
+      <div class="card-bg bg-slate-900 border border-slate-800 rounded-3xl p-4 shadow-md flex flex-col justify-between">
+        <div class="flex items-center justify-between text-slate-400">
+          <span class="text-xs font-bold uppercase tracking-wider">Suscripción Nube ($5)</span>
+          <span class="text-lg">☁️</span>
+        </div>
+        <div class="mt-2 flex items-baseline gap-2">
+          <span id="metric-cloud-subscribers" class="text-3xl font-black text-indigo-400 font-mono">0</span>
+          <span class="text-xs text-indigo-300 font-bold font-mono" id="metric-cloud-mrr">$0/mes</span>
+        </div>
+        <span class="text-[11px] text-slate-500 mt-1">Ingreso pasivo mensual (99% ganancia)</span>
+      </div>
+
+      <!-- Red de Delivery Próxima -->
+      <div class="card-bg bg-slate-900 border border-slate-800 rounded-3xl p-4 shadow-md flex flex-col justify-between">
+        <div class="flex items-center justify-between text-slate-400">
+          <span class="text-xs font-bold uppercase tracking-wider">Red de Delivery</span>
+          <span class="text-lg">🛵</span>
+        </div>
+        <div class="mt-2 flex items-baseline gap-2">
+          <span id="metric-delivery-ready" class="text-3xl font-black text-amber-400 font-mono">0</span>
+          <span class="text-xs text-amber-400/80 font-bold">Listos en zona</span>
+        </div>
+        <span class="text-[11px] text-slate-500 mt-1">Locales para lanzamiento futuro</span>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ========================================================================= -->
+  <!-- BARRA DE ACCIONES, BÚSQUEDA Y FILTROS                                     -->
+  <!-- ========================================================================= -->
+  <section class="max-w-7xl mx-auto w-full px-4 pt-4 sm:px-6">
+    <div class="card-bg bg-slate-900 border border-slate-800 rounded-3xl p-3.5 flex flex-wrap items-center justify-between gap-3 shadow-sm">
+      <div class="flex-1 min-w-[240px] relative">
+        <span class="absolute inset-y-0 left-3 flex items-center text-slate-500 text-xs">🔍</span>
+        <input type="text" id="search-input" oninput="renderClientsTable()" placeholder="Buscar por comercio, contacto, WhatsApp, ciudad o HWID..." class="w-full bg-slate-950 border border-slate-700 text-white rounded-2xl pl-8 pr-3 py-2 text-xs focus:outline-none focus:border-indigo-500 font-medium">
+      </div>
+
+      <div class="flex items-center gap-2 overflow-x-auto custom-scrollbar shrink-0">
+        <button onclick="setFilter('all')" id="filter-all" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-indigo-600 text-white transition-all shadow-xs">Todos</button>
+        <button onclick="setFilter('cuota_pendiente')" id="filter-cuota_pendiente" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-800 text-slate-300 hover:bg-slate-700 transition-all">Cobro Cuota 2 ⚠️</button>
+        <button onclick="setFilter('cloud_active')" id="filter-cloud_active" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-800 text-slate-300 hover:bg-slate-700 transition-all">Nube $5 Activa ☁️</button>
+        <button onclick="setFilter('delivery_ready')" id="filter-delivery_ready" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-800 text-slate-300 hover:bg-slate-700 transition-all">Delivery Ready 🛵</button>
+        <button onclick="setFilter('tiktok_promo')" id="filter-tiktok_promo" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-800 text-slate-300 hover:bg-slate-700 transition-all">Promo TikTok $15 ⚡</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================= -->
+  <!-- TABLA PRINCIPAL DE CLIENTES Y LICENCIAS                                   -->
+  <!-- ========================================================================= -->
+  <main class="max-w-7xl mx-auto w-full px-4 py-4 sm:px-6 flex-1">
+    <div class="card-bg bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-xl">
+      <div class="overflow-x-auto custom-scrollbar">
+        <table class="w-full text-left text-xs text-slate-300">
+          <thead class="bg-slate-950 border-b border-slate-800 text-[10px] font-black uppercase tracking-wider text-slate-400">
+            <tr>
+              <th class="px-4 py-3">Comercio / Contacto</th>
+              <th class="px-4 py-3">Ubicación / Rubro</th>
+              <th class="px-4 py-3">Licencia & Plan</th>
+              <th class="px-4 py-3">Estado de Pago</th>
+              <th class="px-4 py-3">Nube ($5) / Delivery</th>
+              <th class="px-4 py-3 text-right">Acciones WhatsApp</th>
+            </tr>
+          </thead>
+          <tbody id="clients-table-body" class="divide-y divide-slate-800/60 font-medium">
+            <!-- Renderizado dinámico -->
+          </tbody>
+        </table>
+      </div>
+      <div id="empty-state" class="py-12 text-center text-slate-500 text-xs hidden">
+        No se encontraron comercios registrados con ese criterio. Haz clic en <strong>+ Nuevo Cliente</strong> para comenzar.
+      </div>
+    </div>
+  </main>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: CREAR O EDITAR CLIENTE Y GENERAR LICENCIA                         -->
+  <!-- ========================================================================= -->
+  <div id="client-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="card-bg bg-slate-900 border border-slate-800 rounded-3xl p-5 w-full max-w-lg space-y-4 shadow-2xl max-h-[92vh] overflow-y-auto custom-scrollbar">
+      <div class="flex justify-between items-center pb-2 border-b border-slate-800">
+        <div class="flex items-center gap-2">
+          <span class="text-lg">🏪</span>
+          <h3 id="client-modal-title" class="text-sm font-black text-white uppercase tracking-wider">Registrar Nuevo Comercio</h3>
+        </div>
+        <button onclick="closeClientModal()" class="text-slate-400 hover:text-white font-bold text-xl leading-none">&times;</button>
+      </div>
+
+      <form id="client-form" onsubmit="saveClientForm(event)" class="space-y-3">
+        <input type="hidden" id="form-client-id">
+
+        <!-- Datos Básicos -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Nombre Comercial:</label>
+            <input type="text" id="form-business-name" required placeholder="Ej. Bodegón El Éxito" class="w-full bg-slate-950 border border-slate-700 text-white rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-indigo-500">
+          </div>
+          <div>
+            <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Nombre del Dueño/Contacto:</label>
+            <input type="text" id="form-contact-name" required placeholder="Ej. Carlos Mendoza" class="w-full bg-slate-950 border border-slate-700 text-white rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-indigo-500">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Teléfono WhatsApp:</label>
+            <input type="text" id="form-phone" required placeholder="Ej. +584141234567 o 0414..." class="w-full bg-slate-950 border border-slate-700 text-white rounded-xl px-3 py-2 text-xs font-mono focus:outline-none focus:border-indigo-500">
+          </div>
+          <div>
+            <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">RIF / Cédula:</label>
+            <input type="text" id="form-rif" placeholder="Ej. J-50123456-7" class="w-full bg-slate-950 border border-slate-700 text-white rounded-xl px-3 py-2 text-xs font-mono uppercase focus:outline-none focus:border-indigo-500">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Ciudad / Zona:</label>
+            <input type="text" id="form-city" placeholder="Ej. Caracas - Chacao" class="w-full bg-slate-950 border border-slate-700 text-white rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-indigo-500">
+          </div>
+          <div>
+            <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Rubro del Comercio:</label>
+            <select id="form-rubro" class="w-full bg-slate-950 border border-slate-700 text-white rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-indigo-500">
+              <option value="Bodega / Víveres">Bodega / Víveres</option>
+              <option value="Minimarket / Supermercado">Minimarket / Supermercado</option>
+              <option value="Panadería / Pastelería">Panadería / Pastelería</option>
+              <option value="Farmacia">Farmacia</option>
+              <option value="Restaurante / Comida Rápida">Restaurante / Comida Rápida</option>
+              <option value="Ferretería / Repuestos">Ferretería / Repuestos</option>
+              <option value="Licorería">Licorería</option>
+              <option value="Ropa / Calzado">Ropa / Calzado</option>
+              <option value="Otro">Otro Comercio</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Licenciamiento y HWID -->
+        <div class="inner-bg bg-slate-950 p-3.5 rounded-2xl border border-slate-800 space-y-2.5">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-black uppercase text-indigo-400 flex items-center gap-1.5">
+              <span>🔑</span> <span>Configuración de Licencia</span>
+            </span>
+            <button type="button" onclick="autoGenerateLicenseForForm()" class="text-[10px] font-bold text-emerald-400 hover:underline">
+              ⚡ Generar Clave Ahora
+            </button>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <div>
+              <label class="text-[9px] text-slate-400 uppercase block mb-0.5">Hardware ID (HWID):</label>
+              <input type="text" id="form-hwid" placeholder="HWID de la PC o Teléfono" class="w-full bg-slate-900 border border-slate-700 text-indigo-300 font-mono text-xs rounded-xl px-3 py-1.5 uppercase focus:outline-none focus:border-indigo-500">
+            </div>
+            <div>
+              <label class="text-[9px] text-slate-400 uppercase block mb-0.5">Plan / Esquema:</label>
+              <select id="form-plan" onchange="autoGenerateLicenseForForm()" class="w-full bg-slate-900 border border-slate-700 text-white text-xs rounded-xl px-2 py-1.5 focus:outline-none focus:border-indigo-500">
+                <option value="starter_full">Starter Completo ($50) - Permanente</option>
+                <option value="starter_trial">Starter 1ra Cuota ($25) - 30 Días</option>
+                <option value="pro_full">Pro Master ($75) - Permanente</option>
+                <option value="pro_trial">Pro 1ra Cuota ($37.50) - 30 Días</option>
+                <option value="tiktok_promo">Promo TikTok ($15) - Permanente</option>
+                <option value="demo">Demo Gratuita - 15 Días</option>
+                <option value="trial_15m">Prueba Flash - 15 Minutos</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label class="text-[9px] text-slate-400 uppercase block mb-0.5">Clave de Licencia Generada:</label>
+            <input type="text" id="form-license-key" placeholder="VNK-..." readonly class="w-full bg-slate-900 border border-slate-700 text-emerald-400 font-mono font-bold text-xs rounded-xl px-3 py-1.5 focus:outline-none">
+          </div>
+        </div>
+
+        <!-- Estado de Cobranza y Servicios Adicionales -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+          <div>
+            <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Estado de Pago del Sistema:</label>
+            <select id="form-payment-status" class="w-full bg-slate-950 border border-slate-700 text-white rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-indigo-500">
+              <option value="paid_full">✅ Pagado Totalmente</option>
+              <option value="pending_cuota2">⚠️ Pendiente 2da Cuota ($25 / $37.50)</option>
+              <option value="free_trial">🎁 En Período de Prueba Gratis</option>
+              <option value="unpaid">❌ Pago Pendiente / Por Cobrar</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Respaldo Nube ($5 USD/mes):</label>
+            <select id="form-cloud-backup" class="w-full bg-slate-950 border border-slate-700 text-white rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-indigo-500">
+              <option value="inactive">Inactivo</option>
+              <option value="active">☁️ Activo (Suscrito a $5/mes)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Red de Delivery Futura -->
+        <div class="inner-bg bg-slate-950 p-3 rounded-2xl border border-slate-800 flex items-center justify-between">
+          <div>
+            <span class="text-xs font-bold text-slate-200 block">🛵 Afiliación Red de Delivery (Futuro):</span>
+            <span class="text-[10px] text-slate-400">Pre-activar tienda para el lanzamiento de la App de Delivery.</span>
+          </div>
+          <input type="checkbox" id="form-delivery-ready" class="w-5 h-5 accent-amber-500 rounded cursor-pointer">
+        </div>
+
+        <div class="flex gap-2 pt-2 border-t border-slate-800">
+          <button type="button" onclick="closeClientModal()" class="flex-1 py-2.5 rounded-xl border border-slate-700 text-slate-300 text-xs font-bold hover:bg-slate-800 transition-colors">
+            Cancelar
+          </button>
+          <button type="submit" class="flex-1 bg-gradient-to-r from-indigo-600 to-sky-600 hover:from-indigo-500 text-white font-black text-xs py-2.5 rounded-xl shadow-md active:scale-95 transition-all">
+            Guardar Comercio
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: MENSAJES DE WHATSAPP DIRECTOS EN 1 CLIC                            -->
+  <!-- ========================================================================= -->
+  <div id="whatsapp-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="card-bg bg-slate-900 border border-slate-800 rounded-3xl p-5 w-full max-w-md space-y-3.5 shadow-2xl modal-enter">
+      <div class="flex justify-between items-center pb-2 border-b border-slate-800">
+        <div class="flex items-center gap-2">
+          <span class="text-emerald-400 text-lg">💬</span>
+          <h3 class="text-xs font-black text-white uppercase tracking-wider">Centro de Envío WhatsApp</h3>
+        </div>
+        <button onclick="closeWhatsAppModal()" class="text-slate-400 hover:text-white font-bold text-xl leading-none">&times;</button>
+      </div>
+
+      <div>
+        <span id="wa-target-name" class="text-xs font-bold text-white block">Destinatario: ---</span>
+        <span id="wa-target-phone" class="text-[10px] text-slate-400 font-mono block">Tel: ---</span>
+      </div>
+
+      <!-- Selector de Plantilla -->
+      <div>
+        <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Selecciona Plantilla:</label>
+        <select id="wa-template-select" onchange="applyWhatsAppTemplate()" class="w-full bg-slate-950 border border-slate-700 text-white rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-emerald-500 font-medium">
+          <option value="license_delivery">🚀 Entrega de Licencia Oficial (Activación)</option>
+          <option value="cuota2_reminder">⚠️ Recordatorio Cobro 2da Cuota ($25 / $37.50)</option>
+          <option value="cloud_renewal">☁️ Recordatorio Respaldo en la Nube ($5/mes)</option>
+          <option value="tiktok_promo">⚡ Oferta Especial Promo TikTok ($15)</option>
+          <option value="free_trial">🎁 Entrega de Día de Prueba Gratis</option>
+          <option value="custom">✏️ Mensaje Personalizado</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Vista Previa del Mensaje:</label>
+        <textarea id="wa-message-preview" rows="6" class="w-full bg-slate-950 border border-slate-700 text-slate-100 rounded-xl p-3 text-xs font-mono focus:outline-none focus:border-emerald-500 custom-scrollbar leading-relaxed"></textarea>
+      </div>
+
+      <div class="flex gap-2 pt-1">
+        <button onclick="closeWhatsAppModal()" class="flex-1 py-2.5 rounded-xl border border-slate-700 text-slate-300 text-xs font-bold hover:bg-slate-800 transition-colors">
+          Cerrar
+        </button>
+        <button onclick="sendWhatsAppNow()" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs py-2.5 rounded-xl shadow-md active:scale-95 transition-all flex items-center justify-center gap-2">
+          <span>🚀</span> <span>Abrir WhatsApp</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: LANZADOR Y GESTOR DE ACTUALIZACIONES EN LÍNEA (RELEASE MANAGER)   -->
+  <!-- ========================================================================= -->
+  <div id="release-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="card-bg bg-slate-900 border border-slate-800 rounded-3xl p-5 w-full max-w-lg space-y-4 shadow-2xl max-h-[92vh] overflow-y-auto custom-scrollbar">
+      <div class="flex justify-between items-center pb-2 border-b border-slate-800">
+        <div class="flex items-center gap-2">
+          <span class="text-xl">🚀</span>
+          <div>
+            <h3 class="text-sm font-black text-white uppercase tracking-wider">Lanzar Actualización en Línea</h3>
+            <p class="text-[11px] text-slate-400">Genera el manifiesto de versión (version.json) para actualizar los POS en línea</p>
+          </div>
+        </div>
+        <button onclick="closeReleaseModal()" class="text-slate-400 hover:text-white font-bold text-xl leading-none">&times;</button>
+      </div>
+
+      <div class="space-y-3">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Nueva Versión:</label>
+            <input type="text" id="rel-version" value="2.1.0" class="w-full bg-slate-950 border border-slate-700 text-white rounded-xl px-3 py-2 text-xs font-mono font-bold focus:outline-none focus:border-indigo-500">
+          </div>
+          <div>
+            <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Fecha de Publicación:</label>
+            <input type="date" id="rel-date" class="w-full bg-slate-950 border border-slate-700 text-white rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-indigo-500">
+          </div>
+        </div>
+
+        <div>
+          <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Título del Lanzamiento:</label>
+          <input type="text" id="rel-title" value="Venematic POS v2.1.0 · Actualización Mayor" class="w-full bg-slate-950 border border-slate-700 text-white rounded-xl px-3 py-2 text-xs font-semibold focus:outline-none focus:border-indigo-500">
+        </div>
+
+        <div>
+          <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Notas de la Versión / Novedades (Una por línea):</label>
+          <textarea id="rel-notes" rows="4" class="w-full bg-slate-950 border border-slate-700 text-slate-100 rounded-xl p-2.5 text-xs font-sans leading-relaxed focus:outline-none focus:border-indigo-500 custom-scrollbar">Balanza digital con apertura obligatoria en productos pesables
+Inicio de sesión seguro con roles estrictos de Cajero y Administrador
+Nuevo módulo de Auto-Actualizaciones en Línea con detección automática
+Optimizaciones de rendimiento y velocidad en punto de venta</textarea>
+        </div>
+
+        <div>
+          <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">URL de Descarga Instalador Windows (.exe):</label>
+          <input type="text" id="rel-win-url" value="https://github.com/aivyntrax-cpu/venematic-releases/releases/download/v2.1.0/Venematic-POS-Setup-v2.1.0.exe" class="w-full bg-slate-950 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-xs font-mono focus:outline-none focus:border-indigo-500">
+        </div>
+
+        <div>
+          <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">URL de Descarga APK Android (.apk):</label>
+          <input type="text" id="rel-apk-url" value="https://github.com/aivyntrax-cpu/venematic-releases/releases/download/v2.1.0/venematic-pos.apk" class="w-full bg-slate-950 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-xs font-mono focus:outline-none focus:border-indigo-500">
+        </div>
+
+        <div class="flex items-center gap-2 pt-1">
+          <input type="checkbox" id="rel-mandatory" class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500">
+          <label for="rel-mandatory" class="text-xs font-bold text-amber-300">Marcar como actualización crítica / obligatoria</label>
+        </div>
+
+        <div class="p-3 bg-slate-950/60 rounded-xl border border-slate-800 text-[11px] text-slate-400 leading-relaxed">
+          💡 <b>¿Cómo funciona?</b> Al pulsar <i>"Descargar version.json"</i>, obtienes el archivo de manifiesto. Solo debes subirlo a tu repositorio o servidor web. En cuanto los clientes abran su POS con internet, el sistema detectará la nueva versión y se actualizará automáticamente.
+        </div>
+
+        <div class="flex gap-2 pt-2">
+          <button type="button" onclick="copyVersionJSON()" class="flex-1 py-2.5 rounded-xl border border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors">
+            <span>📋</span> <span>Copiar JSON</span>
+          </button>
+          <button type="button" onclick="downloadVersionJSON()" class="flex-1 bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white font-black text-xs py-2.5 rounded-xl shadow-md active:scale-95 transition-all flex items-center justify-center gap-1.5">
+            <span>💾</span> <span>Descargar version.json</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICACIÓN -->
+  <div id="toast" class="fixed top-5 right-5 z-50 pointer-events-none transition-all duration-300 opacity-0 transform -translate-y-2">
+    <div id="toast-content" class="bg-indigo-600 text-white font-bold text-xs px-4 py-2.5 rounded-2xl shadow-2xl border border-indigo-400/40 flex items-center gap-2">
+      <span id="toast-icon">⚡</span>
+      <span id="toast-msg">Mensaje</span>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- LÓGICA DE GESTIÓN Y CRIPTO EN JAVASCRIPT                                 -->
+  <!-- ========================================================================= -->
+  <script>
+    const MASTER_SIGNING_SALT = 'VENEMATIC_SEC_SALT_2026_AIVYNTRAX_PRO_POS_V2';
+    const DB_STORAGE_KEY = 'venematic_master_hub_clients_v1';
+
+    const PLAN_CONFIG = {
+      starter_trial: { prefix: 'STT', label: 'Starter - 1ra Cuota ($25)', days: 30 },
+      starter_full:  { prefix: 'STR', label: 'Starter - Completo ($50)',   days: null },
+      pro_trial:     { prefix: 'PTT', label: 'Pro - 1ra Cuota ($37.50)',   days: 30 },
+      pro_full:      { prefix: 'PRO', label: 'Pro - Completo ($75)',       days: null },
+      tiktok_promo:  { prefix: 'TTK', label: 'Promo TikTok ($15)',         days: null },
+      demo:          { prefix: 'DMO', label: 'Demo Gratuita (15 días)',    days: 15 },
+      trial_15m:     { prefix: 'T15', label: 'Prueba Flash (15 min)',      days: '15m' }
+    };
+
+    let clients = [];
+    let currentFilter = 'all';
+    let currentWaClient = null;
+
+    // Cargar base de datos local
+    function loadDatabase() {
+      try {
+        const raw = localStorage.getItem(DB_STORAGE_KEY);
+        if (raw) {
+          clients = JSON.parse(raw);
+        } else {
+          // Clientes de demostración iniciales
+          clients = [
+            {
+              id: 'cli_1',
+              businessName: 'Bodegón El Éxito C.A.',
+              contactName: 'Alejandro Morales',
+              phone: '+584141234567',
+              rif: 'J-50123456-7',
+              city: 'Caracas - Chacao',
+              rubro: 'Bodega / Víveres',
+              hwid: 'DESKTOP-VN8921A',
+              plan: 'starter_trial',
+              licenseKey: 'VNK-STT-1025-A8F2-B91C-3D4E-90FA',
+              paymentStatus: 'pending_cuota2',
+              cloudBackup: 'active',
+              deliveryReady: true,
+              createdAt: new Date().toISOString()
+            },
+            {
+              id: 'cli_2',
+              businessName: 'Panadería La Francesa',
+              contactName: 'María Eugenia Rossi',
+              phone: '+584129876543',
+              rif: 'J-40987654-1',
+              city: 'Caracas - Las Mercedes',
+              rubro: 'Panadería / Pastelería',
+              hwid: 'VN-MOBI-SAM-S21',
+              plan: 'tiktok_promo',
+              licenseKey: 'VNK-TTK-PERP-F4C1-28EA-9B10-1122',
+              paymentStatus: 'paid_full',
+              cloudBackup: 'inactive',
+              deliveryReady: true,
+              createdAt: new Date().toISOString()
+            }
+          ];
+          saveDatabase();
+        }
+      } catch (err) {
+        console.error('Error cargando BD:', err);
+        clients = [];
+      }
+      updateMetrics();
+      renderClientsTable();
+    }
+
+    function saveDatabase() {
+      localStorage.setItem(DB_STORAGE_KEY, JSON.stringify(clients));
+      updateMetrics();
+    }
+
+    // Hash criptográfico compatible con Venematic
+    async function sha256Hex(str) {
+      const encoder = new TextEncoder();
+      const data = encoder.encode(str);
+      const hashBuffer = await window.crypto.subtle.digest('SHA-256', data);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
+    }
+
+    async function generateLicenseKey(hwid, rif, plan) {
+      const cfg = PLAN_CONFIG[plan] || PLAN_CONFIG['demo'];
+      let expires;
+      let expCode;
+
+      if (cfg.days === null) {
+        expires = 'NEVER';
+        expCode = 'PERP';
+      } else if (cfg.days === '15m') {
+        expires = '15MIN';
+        expCode = '15MN';
+      } else {
+        const d = new Date(Date.now() + cfg.days * 86400000);
+        expires = d.toISOString().split('T')[0];
+        expCode = expires.replace(/-/g, '').slice(2, 6);
+      }
+
+      const cleanHwid = (hwid || 'DEFAULT_HWID').trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+      const cleanRif = (rif || 'J000000000').trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+      const payloadStr = `${cleanHwid}#${cleanRif}#${plan}#${expires}#${MASTER_SIGNING_SALT}`;
+      const fullHash = await sha256Hex(payloadStr);
+      const sig = `${fullHash.slice(0,4)}-${fullHash.slice(4,8)}-${fullHash.slice(8,12)}-${fullHash.slice(12,16)}`;
+
+      return `VNK-${cfg.prefix}-${expCode}-${sig}`;
+    }
+
+    // Actualización de Métricas del Dashboard
+    function updateMetrics() {
+      const total = clients.length;
+      const active = clients.filter(c => c.paymentStatus === 'paid_full' || c.paymentStatus === 'pending_cuota2').length;
+      const pendingCuota2 = clients.filter(c => c.paymentStatus === 'pending_cuota2').length;
+      const cloudSubs = clients.filter(c => c.cloudBackup === 'active').length;
+      const deliveryReady = clients.filter(c => c.deliveryReady).length;
+
+      document.getElementById('metric-total-clients').innerText = total;
+      document.getElementById('metric-active-clients').innerText = `${active} activos`;
+      document.getElementById('metric-total-licenses').innerText = total;
+      document.getElementById('metric-pending-cuota2').innerText = `${pendingCuota2} por cobrar 2da cuota`;
+      document.getElementById('metric-cloud-subscribers').innerText = cloudSubs;
+      document.getElementById('metric-cloud-mrr').innerText = `$${cloudSubs * 5}/mes`;
+      document.getElementById('metric-delivery-ready').innerText = deliveryReady;
+    }
+
+    // Render de la Tabla
+    function renderClientsTable() {
+      const tbody = document.getElementById('clients-table-body');
+      const emptyState = document.getElementById('empty-state');
+      const query = (document.getElementById('search-input')?.value || '').toLowerCase();
+
+      let filtered = clients.filter(c => {
+        const matchesQuery = 
+          c.businessName.toLowerCase().includes(query) ||
+          c.contactName.toLowerCase().includes(query) ||
+          c.phone.toLowerCase().includes(query) ||
+          (c.rif && c.rif.toLowerCase().includes(query)) ||
+          (c.city && c.city.toLowerCase().includes(query)) ||
+          (c.hwid && c.hwid.toLowerCase().includes(query));
+
+        if (!matchesQuery) return false;
+
+        if (currentFilter === 'cuota_pendiente') return c.paymentStatus === 'pending_cuota2';
+        if (currentFilter === 'cloud_active') return c.cloudBackup === 'active';
+        if (currentFilter === 'delivery_ready') return c.deliveryReady;
+        if (currentFilter === 'tiktok_promo') return c.plan === 'tiktok_promo';
+        return true;
+      });
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = '';
+        emptyState.classList.remove('hidden');
+        return;
+      }
+
+      emptyState.classList.add('hidden');
+      tbody.innerHTML = filtered.map(c => {
+        let paymentBadge = '';
+        if (c.paymentStatus === 'paid_full') {
+          paymentBadge = '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">Pagado 100%</span>';
+        } else if (c.paymentStatus === 'pending_cuota2') {
+          paymentBadge = '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40">Pend. 2da Cuota</span>';
+        } else if (c.paymentStatus === 'free_trial') {
+          paymentBadge = '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-500/20 text-sky-300 border border-sky-500/40">Prueba Gratis</span>';
+        } else {
+          paymentBadge = '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40">Por Cobrar</span>';
+        }
+
+        const isCloudActive = c.cloudBackup === 'active';
+        const isDeliveryReady = Boolean(c.deliveryReady);
+
+        return `
+          <tr class="hover:bg-slate-800/40 transition-colors">
+            <td class="px-4 py-3">
+              <div class="flex items-center gap-2">
+                <span class="w-8 h-8 rounded-xl bg-slate-800 flex items-center justify-center text-sm font-bold text-indigo-400">
+                  ${c.businessName.charAt(0).toUpperCase()}
+                </span>
+                <div>
+                  <h4 class="font-bold text-white text-xs">${c.businessName}</h4>
+                  <p class="text-[11px] text-slate-400">${c.contactName} • <span class="font-mono text-emerald-400">${c.phone}</span></p>
+                  <p class="text-[9px] text-slate-500 font-mono">RIF: ${c.rif || 'N/A'}</p>
+                </div>
+              </div>
+            </td>
+
+            <td class="px-4 py-3">
+              <span class="text-xs text-slate-200 block">${c.city || 'Venezuela'}</span>
+              <span class="text-[10px] text-slate-400 block">${c.rubro || 'General'}</span>
+            </td>
+
+            <td class="px-4 py-3">
+              <span class="font-mono font-bold text-indigo-300 text-[11px] block truncate max-w-[160px]" title="${c.licenseKey || ''}">${c.licenseKey || 'Sin clave'}</span>
+              <span class="text-[10px] text-slate-400">${PLAN_CONFIG[c.plan]?.label || c.plan}</span>
+              <span class="text-[9px] text-slate-500 font-mono block">HWID: ${c.hwid ? c.hwid.slice(0, 10) + '...' : 'Auto'}</span>
+            </td>
+
+            <td class="px-4 py-3">
+              ${paymentBadge}
+            </td>
+
+            <td class="px-4 py-3">
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <span class="text-[9px] font-bold px-1.5 py-0.2 rounded ${isCloudActive ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/40' : 'bg-slate-800 text-slate-500'}">
+                  ${isCloudActive ? '☁️ Cloud $5' : 'Local'}
+                </span>
+                <span class="text-[9px] font-bold px-1.5 py-0.2 rounded ${isDeliveryReady ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40' : 'bg-slate-800 text-slate-500'}">
+                  ${isDeliveryReady ? '🛵 Delivery' : 'Mostrador'}
+                </span>
+              </div>
+            </td>
+
+            <td class="px-4 py-3 text-right">
+              <div class="flex items-center justify-end gap-1.5">
+                <button onclick="openWhatsAppModal('${c.id}')" class="p-1.5 bg-emerald-600/30 hover:bg-emerald-600 text-emerald-300 hover:text-white border border-emerald-500/40 rounded-xl text-xs transition-all shadow-xs" title="Enviar WhatsApp">
+                  💬
+                </button>
+                <button onclick="editClient('${c.id}')" class="p-1.5 bg-sky-600/30 hover:bg-sky-600 text-sky-300 hover:text-white border border-sky-500/40 rounded-xl text-xs transition-all shadow-xs" title="Editar">
+                  ✏️
+                </button>
+                <button onclick="deleteClient('${c.id}')" class="p-1.5 bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-500/40 rounded-xl text-xs transition-all shadow-xs" title="Eliminar">
+                  🗑️
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function setFilter(filter) {
+      currentFilter = filter;
+      ['all', 'cuota_pendiente', 'cloud_active', 'delivery_ready', 'tiktok_promo'].forEach(f => {
+        const btn = document.getElementById('filter-' + f);
+        if (btn) {
+          if (f === filter) {
+            btn.className = "px-3 py-1.5 rounded-xl text-xs font-bold bg-indigo-600 text-white transition-all shadow-xs";
+          } else {
+            btn.className = "px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-800 text-slate-300 hover:bg-slate-700 transition-all";
+          }
+        }
+      });
+      renderClientsTable();
+    }
+
+    // Modal Cliente
+    function openClientModal(clientId = null) {
+      const modal = document.getElementById('client-modal');
+      const title = document.getElementById('client-modal-title');
+      const form = document.getElementById('client-form');
+      form.reset();
+
+      if (clientId) {
+        const c = clients.find(x => x.id === clientId);
+        if (!c) return;
+        title.innerText = "Editar Comercio";
+        document.getElementById('form-client-id').value = c.id;
+        document.getElementById('form-business-name').value = c.businessName;
+        document.getElementById('form-contact-name').value = c.contactName;
+        document.getElementById('form-phone').value = c.phone;
+        document.getElementById('form-rif').value = c.rif || '';
+        document.getElementById('form-city').value = c.city || '';
+        document.getElementById('form-rubro').value = c.rubro || 'Bodega / Víveres';
+        document.getElementById('form-hwid').value = c.hwid || '';
+        document.getElementById('form-plan').value = c.plan || 'starter_full';
+        document.getElementById('form-license-key').value = c.licenseKey || '';
+        document.getElementById('form-payment-status').value = c.paymentStatus || 'paid_full';
+        document.getElementById('form-cloud-backup').value = c.cloudBackup || 'inactive';
+        document.getElementById('form-delivery-ready').checked = Boolean(c.deliveryReady);
+      } else {
+        title.innerText = "Registrar Nuevo Comercio";
+        document.getElementById('form-client-id').value = '';
+        document.getElementById('form-plan').value = 'tiktok_promo';
+        autoGenerateLicenseForForm();
+      }
+
+      modal.classList.remove('hidden');
+    }
+
+    function closeClientModal() {
+      document.getElementById('client-modal').classList.add('hidden');
+    }
+
+    async function autoGenerateLicenseForForm() {
+      const hwid = document.getElementById('form-hwid').value || 'VN-POS-' + Math.floor(1000 + Math.random() * 9000);
+      const rif = document.getElementById('form-rif').value || 'J500000000';
+      const plan = document.getElementById('form-plan').value;
+      const key = await generateLicenseKey(hwid, rif, plan);
+      document.getElementById('form-license-key').value = key;
+    }
+
+    async function saveClientForm(e) {
+      e.preventDefault();
+      const id = document.getElementById('form-client-id').value || 'cli_' + Date.now();
+      const businessName = document.getElementById('form-business-name').value.trim();
+      const contactName = document.getElementById('form-contact-name').value.trim();
+      const phone = document.getElementById('form-phone').value.trim();
+      const rif = document.getElementById('form-rif').value.trim();
+      const city = document.getElementById('form-city').value.trim();
+      const rubro = document.getElementById('form-rubro').value;
+      const hwid = document.getElementById('form-hwid').value.trim();
+      const plan = document.getElementById('form-plan').value;
+      let licenseKey = document.getElementById('form-license-key').value.trim();
+      const paymentStatus = document.getElementById('form-payment-status').value;
+      const cloudBackup = document.getElementById('form-cloud-backup').value;
+      const deliveryReady = document.getElementById('form-delivery-ready').checked;
+
+      if (!licenseKey) {
+        licenseKey = await generateLicenseKey(hwid, rif, plan);
+      }
+
+      const clientData = {
+        id,
+        businessName,
+        contactName,
+        phone,
+        rif,
+        city,
+        rubro,
+        hwid,
+        plan,
+        licenseKey,
+        paymentStatus,
+        cloudBackup,
+        deliveryReady,
+        updatedAt: new Date().toISOString()
+      };
+
+      const existingIndex = clients.findIndex(x => x.id === id);
+      if (existingIndex >= 0) {
+        clients[existingIndex] = { ...clients[existingIndex], ...clientData };
+        showToast(`Comercio "${businessName}" actualizado`);
+      } else {
+        clientData.createdAt = new Date().toISOString();
+        clients.unshift(clientData);
+        showToast(`Comercio "${businessName}" registrado con éxito`);
+      }
+
+      saveDatabase();
+      renderClientsTable();
+      closeClientModal();
+    }
+
+    function editClient(id) {
+      openClientModal(id);
+    }
+
+    function deleteClient(id) {
+      const c = clients.find(x => x.id === id);
+      if (!c) return;
+      if (confirm(`¿Estás seguro de eliminar el registro de "${c.businessName}"?`)) {
+        clients = clients.filter(x => x.id !== id);
+        saveDatabase();
+        renderClientsTable();
+        showToast('Registro eliminado');
+      }
+    }
+
+    // Modal WhatsApp y Plantillas Inteligentes
+    function openWhatsAppModal(id) {
+      currentWaClient = clients.find(x => x.id === id);
+      if (!currentWaClient) return;
+
+      document.getElementById('wa-target-name').innerText = `Destinatario: ${currentWaClient.businessName} (${currentWaClient.contactName})`;
+      document.getElementById('wa-target-phone').innerText = `WhatsApp: ${currentWaClient.phone}`;
+      
+      // Seleccionar plantilla automática según estado
+      if (currentWaClient.paymentStatus === 'pending_cuota2') {
+        document.getElementById('wa-template-select').value = 'cuota2_reminder';
+      } else if (currentWaClient.plan === 'tiktok_promo') {
+        document.getElementById('wa-template-select').value = 'tiktok_promo';
+      } else {
+        document.getElementById('wa-template-select').value = 'license_delivery';
+      }
+
+      applyWhatsAppTemplate();
+      document.getElementById('whatsapp-modal').classList.remove('hidden');
+    }
+
+    function closeWhatsAppModal() {
+      document.getElementById('whatsapp-modal').classList.add('hidden');
+    }
+
+    function applyWhatsAppTemplate() {
+      if (!currentWaClient) return;
+      const type = document.getElementById('wa-template-select').value;
+      const c = currentWaClient;
+      let msg = '';
+
+      if (type === 'license_delivery') {
+        msg = 
+`¡Hola, ${c.contactName}! 👋 Le saluda el equipo de *Venematic POS*.
+
+Aquí tiene los datos oficiales de activación para su negocio *${c.businessName}*:
+
+🔑 *CLAVE DE LICENCIA:*
+\`${c.licenseKey}\`
+
+📋 *INSTRUCCIONES DE ACTIVACIÓN:*
+1. Abra KlikPOS en su computadora o celular.
+2. Vaya al menú de Activación de Licencia.
+3. Copie y pegue la clave exacta de arriba y presione "Activar".
+
+✅ *Plan:* ${PLAN_CONFIG[c.plan]?.label || c.plan}
+🏛️ *Tasa BCV y Multimoneda:* 100% sincronizado.
+
+¡Mucho éxito en sus ventas hoy! Cualquier duda estamos a su orden por aquí. 🚀`;
+      } else if (type === 'cuota2_reminder') {
+        msg = 
+`¡Hola, estimado(a) ${c.contactName}! 👋 Saludos de *KlikPOS Enterprise*.
+
+Le escribimos para recordarle que su primera cuota de 30 días para *${c.businessName}* está próxima a vencer.
+
+Para liberar su **Licencia Permanente Definitiva (sin vencimiento ni mensualidades)**:
+💰 *Monto de 2da Cuota Final:* ${c.plan.includes('pro') ? '$37.50 USD' : '$25.00 USD'}
+💳 Puede cancelar por Pago Móvil (a tasa BCV) o Binance USDT.
+
+Al confirmar el pago, le enviamos de inmediato su clave de por vida. ¡Gracias por confiar en nosotros! 🚀`;
+      } else if (type === 'cloud_renewal') {
+        msg = 
+`¡Hola, ${c.contactName}! ☁️ Saludos de *KlikPOS Enterprise*.
+
+Le recordamos la mensualidad de su servicio de **Respaldo en la Nube (Google Cloud)** para su negocio *${c.businessName}*.
+
+🛡️ *Costo mensual:* $5.00 USD (o en Bs. a tasa BCV).
+Garantiza que todo su inventario y ventas estén protegidos ante cualquier daño de su equipo.
+
+Por favor avísenos para registrar su comprobante y mantener su sincronización activa. ¡Feliz día!`;
+      } else if (type === 'tiktok_promo') {
+        msg = 
+`¡Hola, ${c.contactName}! 👋 Le escribo con respecto a la consulta sobre *KlikPOS Enterprise*.
+
+Le tenemos apartado el **Bono Especial de Lanzamiento de $15** (Licencia Permanente de por vida para ${c.businessName}).
+
+🎁 Además, le activamos hoy 1 día de prueba completa 100% gratis para que lo pruebe en su propio teléfono o PC.
+
+¿Tiene su equipo a la mano para pasarle el instalador ahorita mismo? 🚀`;
+      } else if (type === 'free_trial') {
+        msg = 
+`¡Hola, ${c.contactName}! 👋 Aquí tiene su acceso de prueba gratuita para *${c.businessName}*:
+
+🔑 *Clave Demo de Evaluación:*
+\`${c.licenseKey}\`
+
+Instálelo con confianza y empiece a cobrar con tasa BCV automática. Estamos atentos a cualquier duda que tenga. 👍`;
+      }
+
+      document.getElementById('wa-message-preview').value = msg;
+    }
+
+    function sendWhatsAppNow() {
+      if (!currentWaClient) return;
+      const rawPhone = currentWaClient.phone.replace(/[^0-9]/g, '');
+      let phone = rawPhone;
+      // Normalizar número venezolano si empieza con 04
+      if (phone.startsWith('04')) {
+        phone = '58' + phone.slice(1);
+      } else if (phone.length === 10 && phone.startsWith('4')) {
+        phone = '58' + phone;
+      }
+      const text = encodeURIComponent(document.getElementById('wa-message-preview').value);
+      window.open(`https://api.whatsapp.com/send?phone=${phone}&text=${text}`, '_blank');
+      showToast('Abriendo WhatsApp con el cliente...');
+      closeWhatsAppModal();
+    }
+
+    // Exportación e Importación de Base de Datos
+    function exportDatabaseJSON() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(clients, null, 2));
+      const dlAnchor = document.createElement('a');
+      dlAnchor.setAttribute("href", dataStr);
+      dlAnchor.setAttribute("download", `KLIKPOS_MASTER_CRM_${new Date().toISOString().split('T')[0]}.json`);
+      document.body.appendChild(dlAnchor);
+      dlAnchor.click();
+      dlAnchor.remove();
+      showToast('Base de datos exportada con éxito');
+    }
+
+    function importDatabaseJSON(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const parsed = JSON.parse(e.target.result);
+          if (Array.isArray(parsed)) {
+            clients = parsed;
+            saveDatabase();
+            renderClientsTable();
+            showToast(`✓ ${clients.length} comercios importados`);
+          } else {
+            alert('Formato de archivo inválido.');
+          }
+        } catch (err) {
+          alert('Error al leer el archivo JSON.');
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    // Toast interactivo
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      const msgEl = document.getElementById('toast-msg');
+      msgEl.innerText = msg;
+      toast.classList.remove('opacity-0', '-translate-y-2');
+      setTimeout(() => {
+        toast.classList.add('opacity-0', '-translate-y-2');
+      }, 3500);
+    }
+
+    // Gestor de Actualizaciones en Línea (Release Manager)
+    function openReleaseModal() {
+      document.getElementById('rel-date').value = new Date().toISOString().split('T')[0];
+      document.getElementById('release-modal').classList.remove('hidden');
+    }
+
+    function closeReleaseModal() {
+      document.getElementById('release-modal').classList.add('hidden');
+    }
+
+    function buildManifestObject() {
+      const version = document.getElementById('rel-version').value.trim() || '2.1.0';
+      const releaseDate = document.getElementById('rel-date').value || new Date().toISOString().split('T')[0];
+      const title = document.getElementById('rel-title').value.trim() || `Venematic POS v${version}`;
+      const notesRaw = document.getElementById('rel-notes').value.trim();
+      const notes = notesRaw.split('\n').map(n => n.trim()).filter(Boolean);
+      const windowsUrl = document.getElementById('rel-win-url').value.trim();
+      const androidUrl = document.getElementById('rel-apk-url').value.trim();
+      const mandatory = document.getElementById('rel-mandatory').checked;
+
+      return {
+        version,
+        releaseDate,
+        title,
+        notes,
+        windowsUrl,
+        androidUrl,
+        mandatory
+      };
+    }
+
+    function copyVersionJSON() {
+      const manifest = buildManifestObject();
+      const jsonStr = JSON.stringify(manifest, null, 2);
+      navigator.clipboard.writeText(jsonStr).then(() => {
+        showToast('✓ Manifiesto version.json copiado al portapapeles');
+      }).catch(() => {
+        alert('No se pudo copiar automáticamente. Puedes descargar el archivo.');
+      });
+    }
+
+    function downloadVersionJSON() {
+      const manifest = buildManifestObject();
+      const jsonStr = JSON.stringify(manifest, null, 2);
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(jsonStr);
+      const dlAnchor = document.createElement('a');
+      dlAnchor.setAttribute("href", dataStr);
+      dlAnchor.setAttribute("download", "version.json");
+      document.body.appendChild(dlAnchor);
+      dlAnchor.click();
+      dlAnchor.remove();
+      showToast('✓ version.json generado y descargado');
+    }
+
+    // Modo Claro / Oscuro
+    function toggleTheme() {
+      const isLight = document.body.classList.toggle('light-mode');
+      document.getElementById('theme-btn').innerText = isLight ? '🌙' : '☀️';
+      localStorage.setItem('venematic_dev_hub_theme', isLight ? 'light' : 'dark');
+    }
+
+    // Carga inicial
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedTheme = localStorage.getItem('venematic_dev_hub_theme');
+      if (savedTheme === 'light') {
+        document.body.classList.add('light-mode');
+        document.getElementById('theme-btn').innerText = '🌙';
+      }
+      loadDatabase();
+    });
+  </script>
+</body>
+</html>

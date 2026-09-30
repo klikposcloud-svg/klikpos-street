@@ -4,6 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { licenseManager, StoreLicense } from '@/lib/licensing/license-manager';
 import { cloudBackupService, CloudBackupSnapshot } from '@/lib/backup/cloud-backup-service';
 
+import { db } from '@/lib/db';
+
 export default function CloudBackupDashboardPage() {
   const [license, setLicense] = useState<StoreLicense>(licenseManager.getLicense());
   const [backups, setBackups] = useState<CloudBackupSnapshot[]>([]);
@@ -25,13 +27,17 @@ export default function CloudBackupDashboardPage() {
     return () => unsubscribe();
   }, []);
 
-  const handleManualSync = () => {
+  const handleManualSync = async () => {
     setLoadingSync(true);
-    setTimeout(() => {
+    try {
+      const productsCount = await db.products.count();
+      const salesCount = await db.sales.count();
+      const customersCount = await db.customers.count();
+
       const result = cloudBackupService.executeCloudSync({
-        productsCount: 164,
-        salesCount: 382,
-        customersCount: 56,
+        productsCount,
+        salesCount,
+        customersCount,
       });
 
       setLoadingSync(false);
@@ -41,7 +47,10 @@ export default function CloudBackupDashboardPage() {
       } else {
         setStatusMessage({ type: 'error', text: result.message });
       }
-    }, 1200);
+    } catch {
+      setLoadingSync(false);
+      setStatusMessage({ type: 'error', text: 'Error al consultar la base de datos local para la sincronización.' });
+    }
   };
 
   const handleRedeemLicense = (e: React.FormEvent) => {

@@ -65,10 +65,12 @@ export default function FinancialDashboardPage() {
 
   useEffect(() => {
     // 1. Cargar Tasa BCV
-    fetch('/api/bcv')
+    fetch('/api/bcv/rate')
       .then(res => res.json())
       .then(d => { if (d?.rate) setBcvRate(d.rate); })
-      .catch(() => {});
+      .catch(() => {
+        db.settings.get('bcv_rate').then(s => { if (s?.value) setBcvRate(s.value); });
+      });
 
     // 2. Cargar Gastos
     setExpenses(financialDB.getExpenses());

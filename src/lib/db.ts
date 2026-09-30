@@ -37,6 +37,7 @@ export interface SaleItem {
 }
 
 export interface SalePayment {
+  id?: string;
   method: 'cash_usd' | 'cash_ves' | 'pago_movil' | 'card_debit' | 'card_credit' | 'zelle' | 'binance' | 'credit';
   amountUSD: number;
   amountVES: number;
@@ -59,6 +60,7 @@ export interface LocalSale {
   cashierName: string;
   customerDoc?: string;
   customerName?: string;
+  shiftId?: number;
   status: 'completed' | 'cancelled' | 'voided';
   source?: 'desktop' | 'mobile' | string;
   voidedAt?: string;
@@ -214,6 +216,16 @@ export class VenematicDesktopDB extends Dexie {
     this.version(4).stores({
       products: '++id, &barcode, name, category, stock, updatedAt',
       sales: '++id, &receiptNumber, timestamp, status, cashierName, customerDoc, [status+timestamp]',
+      customers: '++id, &docId, name, phone',
+      cashShifts: '++id, openedAt, status, cashierName',
+      settings: '&key',
+      inventoryMovements: '++id, productId, barcode, type, reason, timestamp',
+      customerCreditPayments: '++id, customerDoc, timestamp, method',
+      cashMovements: '++id, shiftId, type, timestamp',
+    });
+    this.version(5).stores({
+      products: '++id, &barcode, name, category, stock, updatedAt',
+      sales: '++id, &receiptNumber, timestamp, status, cashierName, customerDoc, shiftId, [status+timestamp], [shiftId+status]',
       customers: '++id, &docId, name, phone',
       cashShifts: '++id, openedAt, status, cashierName',
       settings: '&key',
