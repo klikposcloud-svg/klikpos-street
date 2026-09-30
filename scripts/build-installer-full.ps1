@@ -88,9 +88,10 @@ foreach ($ed in $editions) {
     }
     Unblock-File -Path $targetExe -ErrorAction SilentlyContinue
     
-    # d. Crear BAT de instalación directa y LEEME
-    $batContent = "@echo off`r`ntitle Instalador $($ed.Name) v$version`r`necho ===============================================================`r`necho   INSTALADOR OFICIAL: $($ed.Name) v$version`r`necho ===============================================================`r`nstart `"`" `"%~dp0$($ed.ExeName)`"`r`nexit`r`n"
+    # d. Crear BAT de instalación directa con desbloqueo automático de SmartScreen
+    $batContent = "@echo off`r`ntitle Instalador $($ed.Name) v$version`r`necho ===============================================================`r`necho   INSTALADOR OFICIAL: $($ed.Name) v$version`r`necho   Desbloqueando archivo de seguridad SmartScreen de Windows...`r`necho ===============================================================`r`npowershell -NoProfile -ExecutionPolicy Bypass -Command `"Get-ChildItem -Path '%~dp0' -Filter '*.exe' | Unblock-File`" 2>nul`r`necho Iniciando asistente de instalacion...`r`nstart `"`" `"%~dp0$($ed.ExeName)`"`r`nexit`r`n"
     Set-Content -Path (Join-Path $ed.TargetDir "INSTALAR_$($ed.Edition).bat") -Value $batContent -Encoding ASCII
+    Set-Content -Path (Join-Path $ed.TargetDir "DESBLOQUEAR_Y_EJECUTAR.bat") -Value $batContent -Encoding ASCII
     
     $readmeLines = @(
         "================================================================================",
@@ -100,11 +101,12 @@ foreach ($ed in $editions) {
         "",
         "ARCHIVO DE INSTALACION:",
         "- $($ed.ExeName)",
+        "- INSTALAR_$($ed.Edition).bat (Ejecutable directo anti-bloqueo SmartScreen)",
         "",
-        "INSTRUCCIONES:",
-        "1. Haga doble clic en $($ed.ExeName) o ejecute INSTALAR_$($ed.Edition).bat.",
-        "2. Siga los pasos del asistente de instalacion.",
-        "3. El sistema creara los accesos directos oficiales en su Escritorio.",
+        "SI WINDOWS DEFENDER / SMARTSCREEN MUESTRA ADVERTENCIA AZUL:",
+        "1. Haga clic en el enlace subrayado: 'Más información'",
+        "2. Haga clic en el botón inferior: 'Ejecutar de todas formas'",
+        "O simplemente ejecute 'INSTALAR_$($ed.Edition).bat' como Administrador.",
         "================================================================================"
     )
     $readmeContent = $readmeLines -join "`r`n"
