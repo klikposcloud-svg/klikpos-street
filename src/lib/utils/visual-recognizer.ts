@@ -99,19 +99,23 @@ export class VisualRecognizer {
 
   async recognizeFromImage(imageFile: File): Promise<VisualRecognitionResult[]> {
     return new Promise((resolve, reject) => {
-      const img = new Image()
+      const img = new Image();
       img.onload = async () => {
         try {
-          const results = await this.recognize(img)
-          resolve(results)
+          const results = await this.recognize(img);
+          resolve(results);
         } catch (error) {
-          reject(error)
+          reject(error);
+        } finally {
+          URL.revokeObjectURL(img.src);
         }
-        URL.revokeObjectURL(img.src)
-      }
-      img.onerror = () => reject(new Error('Failed to load image'))
-      img.src = URL.createObjectURL(imageFile)
-    })
+      };
+      img.onerror = () => {
+        URL.revokeObjectURL(img.src);
+        reject(new Error('Failed to load image'));
+      };
+      img.src = URL.createObjectURL(imageFile);
+    });
   }
 
   static getCategoryDisplayName(category: string): string {

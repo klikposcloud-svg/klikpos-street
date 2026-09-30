@@ -13,7 +13,8 @@
     "release:publish": "node scripts/publish-release-to-github.js",
     "release": "powershell -ExecutionPolicy Bypass -File scripts/build-installer-full.ps1",
     "build:installer": "powershell -ExecutionPolicy Bypass -File scripts/build-installer-full.ps1",
-    "scraper": "node src/scripts/bcv-scraper.js"
+    "scraper": "node src/scripts/bcv-scraper.js",
+    "doctor": "react-doctor"
   },
   "dependencies": {
     "@google/genai": "^2.23.0",

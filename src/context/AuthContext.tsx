@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import {
   checkLockout,
   recordAuthFailure,
@@ -379,33 +379,51 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return true;
   };
 
+  const authContextValue = useMemo(
+    () => ({
+      user,
+      login,
+      logout,
+      isAdmin: user?.role === 'admin',
+      isCajero: user?.role === 'cajero',
+      requireAdminAuth,
+      showAdminAuthModal,
+      setShowAdminAuthModal: (show: boolean) => {
+        setShowAdminAuthModal(show);
+        if (!show && adminAuthResolver) {
+          adminAuthResolver(false);
+          setAdminAuthResolver(null);
+        }
+      },
+      handleAdminAuthConfirm,
+      cashiers,
+      addCashier,
+      updateCashier,
+      deleteCashier,
+      adminPassword,
+      updateAdminPassword,
+      switchToRole,
+    }),
+    [
+      user,
+      login,
+      logout,
+      requireAdminAuth,
+      showAdminAuthModal,
+      adminAuthResolver,
+      handleAdminAuthConfirm,
+      cashiers,
+      addCashier,
+      updateCashier,
+      deleteCashier,
+      adminPassword,
+      updateAdminPassword,
+      switchToRole,
+    ]
+  );
+
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        login,
-        logout,
-        isAdmin: user?.role === 'admin',
-        isCajero: user?.role === 'cajero',
-        requireAdminAuth,
-        showAdminAuthModal,
-        setShowAdminAuthModal: (show: boolean) => {
-          setShowAdminAuthModal(show);
-          if (!show && adminAuthResolver) {
-            adminAuthResolver(false);
-            setAdminAuthResolver(null);
-          }
-        },
-        handleAdminAuthConfirm,
-        cashiers,
-        addCashier,
-        updateCashier,
-        deleteCashier,
-        adminPassword,
-        updateAdminPassword,
-        switchToRole,
-      }}
-    >
+    <AuthContext.Provider value={authContextValue}>
       {children}
     </AuthContext.Provider>
   );

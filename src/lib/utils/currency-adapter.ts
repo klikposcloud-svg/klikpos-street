@@ -111,20 +111,34 @@ export abstract class BaseCurrencyAdapter {
     return Math.round(local * Math.pow(10, this.config.decimalPlaces)) / Math.pow(10, this.config.decimalPlaces)
   }
 
+  private formattersCache: Map<string, Intl.NumberFormat> = new Map();
+
   formatLocal(amount: number): string {
-    return new Intl.NumberFormat(this.config.locale, {
-      style: 'currency',
-      currency: this.config.localCurrency,
-      minimumFractionDigits: this.config.decimalPlaces,
-    }).format(amount)
+    const key = `local_${this.config.locale}_${this.config.localCurrency}_${this.config.decimalPlaces}`;
+    let fmt = this.formattersCache.get(key);
+    if (!fmt) {
+      fmt = new Intl.NumberFormat(this.config.locale, {
+        style: 'currency',
+        currency: this.config.localCurrency,
+        minimumFractionDigits: this.config.decimalPlaces,
+      });
+      this.formattersCache.set(key, fmt);
+    }
+    return fmt.format(amount);
   }
 
   formatForeign(amount: number): string {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: this.config.code,
-      minimumFractionDigits: 2,
-    }).format(amount)
+    const key = `foreign_en-US_${this.config.code}_2`;
+    let fmt = this.formattersCache.get(key);
+    if (!fmt) {
+      fmt = new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: this.config.code,
+        minimumFractionDigits: 2,
+      });
+      this.formattersCache.set(key, fmt);
+    }
+    return fmt.format(amount);
   }
 
   getConfig(): CurrencyConfig {
