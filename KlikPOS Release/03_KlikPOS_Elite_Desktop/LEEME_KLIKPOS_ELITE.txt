@@ -1,5 +1,5 @@
 ﻿================================================================================
-                    GUIA OFICIAL: KlikPOS Elite v3.0.0
+                    GUIA OFICIAL: KlikPOS Elite v3.0.1
 ================================================================================
 EdiciÃ³n total con Vistas Gourmet, Mesas, Delivery, Temas Personalizables y Finanzas
 

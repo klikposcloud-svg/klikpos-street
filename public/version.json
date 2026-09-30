@@ -1,16 +1,15 @@
 {
-  "version": "3.0.0",
-  "releaseDate": "2026-09-28",
-  "title": "KlikPOS Suite v3.0.0 - Ediciones Lite, Pro & Elite, Línea Móvil (Móvil, Satélite, Street, Admin) y Entrega Unificada",
+  "version": "3.0.1",
+  "releaseDate": "2026-09-30",
+  "title": "KlikPOS Suite v3.0.1 - Personalización Integral de Colores (Header, Sidebar, Canvas, Botones y Texto), Control KlikMenu Plan Elite y Mejoras de Scroll",
   "notes": [
-    "Nueva estructura de distribución unificada 'KlikPOS Release' con 3 ediciones Desktop (Lite, Pro, Elite) y 5 APKs móviles.",
-    "KlikPOS Lite Desktop: Edición esencial para bodegas y pequeños comercios con solo vista cuadrícula y funciones de caja básicas.",
-    "KlikPOS Pro Desktop: Edición comercial con Escáner Celular Satélite, vistas cuadrícula/lista/minimalista y métricas profesionales.",
-    "KlikPOS Elite Desktop: Edición completa con todas las vistas (Gourmet Warm Cream), personalización total de temas/colores, mesas, delivery y finanzas.",
-    "Línea de Apps Android: KlikPOS Móvil (POS Full), KlikPOS Satélite (Escáner/Balanza), KlikPOS Street (Comida Rápida/Delivery/Bluetooth) y KlikAdmin (Vigía del Dueño/SMS Pago Móvil).",
-    "Generador Maestro de Licencias (KlikPOS Keygen) para desarrollador con firma criptográfica Ed25519."
+    "Personalización integral de colores extendida: personaliza el fondo del Canvas, la barra superior (Header), barra lateral (Sidebar), zona activa de botones, color de texto de botones y texto general con guardado persistente.",
+    "Control de activación manual del Menú Interactivo y Mesas KlikMenu desde Configuración (exclusivo para Plan Elite).",
+    "Corrección de scroll vertical completo en ventanas de licenciamiento/activación y módulo de mesas en vivo.",
+    "Optimización de cards en POS: Comida Rápida en 3 columnas y Gourmet en 2 columnas.",
+    "Buscador de imágenes Google/Web y sincronización en vivo de ventas/tasa BCV en escáner satélite móvil."
   ],
-  "windowsUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.0/KlikPOS_Desktop_Full_Setup.exe",
-  "androidUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.0/KlikPOS_Movil_Full.apk",
-  "mandatory": true
+  "windowsUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.1/KlikPOS_Desktop_Full_Setup.exe",
+  "androidUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.1/KlikPOS_Movil_Full.apk",
+  "mandatory": false
 }

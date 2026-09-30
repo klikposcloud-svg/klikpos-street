@@ -1,5 +1,5 @@
 ﻿================================================================================
-                    GUIA OFICIAL: KlikPOS Lite v3.0.0
+                    GUIA OFICIAL: KlikPOS Lite v3.0.1
 ================================================================================
 EdiciÃ³n esencial para bodegas y comercios pequeÃ±os (Ventas, Corte Z/X e ImpresiÃ³n)
 

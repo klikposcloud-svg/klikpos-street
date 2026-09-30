@@ -317,6 +317,14 @@ export interface BrandingConfig {
   customBgColor?: string;
   darkBg?: DarkBgPreset;
   customDarkBgColor?: string;
+  // Personalización integral avanzada (Header, Sidebar, Botones y Texto)
+  headerBgColor?: string;
+  headerTextColor?: string;
+  sidebarBgColor?: string;
+  sidebarTextColor?: string;
+  buttonAccentColor?: string;
+  buttonTextColor?: string;
+  generalTextColor?: string;
 }
 
 export const DEFAULT_BRANDING: BrandingConfig = {
@@ -326,6 +334,13 @@ export const DEFAULT_BRANDING: BrandingConfig = {
   customBgColor: '#eef2f5',
   darkBg: 'midnight',
   customDarkBgColor: '#0a192f',
+  headerBgColor: '',
+  headerTextColor: '',
+  sidebarBgColor: '',
+  sidebarTextColor: '',
+  buttonAccentColor: '',
+  buttonTextColor: '',
+  generalTextColor: '',
 };
 
 /**
@@ -708,15 +723,45 @@ export function applyBrandingToDOM(config: BrandingConfig, forceTheme?: 'light' 
     root.style.setProperty('--color-bg-app', darkThemeVars.bgColor);
     root.style.setProperty('--color-bg-surface', darkThemeVars.cardColor);
   }
-  root.style.setProperty('--btn-primary-bg', themeVars.primaryBg);
-  root.style.setProperty('--btn-primary-hover', themeVars.primaryHover);
-  root.style.setProperty('--btn-primary-text', themeVars.primaryText);
+  // 4. Variables de Personalización Integral Avanzada (Header, Sidebar, Botones, Textos)
+  const headerBg = config.headerBgColor || (isLight ? '#ffffff' : (isGlass ? 'rgba(11, 26, 48, 0.75)' : '#0b1a30'));
+  const headerText = config.headerTextColor || (isLight ? '#0f172a' : '#ffffff');
+  const sidebarBg = config.sidebarBgColor || (isLight ? '#ffffff' : (isGlass ? 'rgba(11, 26, 48, 0.75)' : '#0b1a30'));
+  const sidebarText = config.sidebarTextColor || (isLight ? '#0f172a' : '#f8fafc');
+  const btnAccent = config.buttonAccentColor || palette.primary;
+  const btnAccentText = config.buttonTextColor || themeVars.primaryText;
+  const generalText = config.generalTextColor || (isLight ? themeVars.textColor : darkThemeVars.textColor);
+
+  root.style.setProperty('--header-bg', headerBg);
+  root.style.setProperty('--header-text', headerText);
+  root.style.setProperty('--sidebar-bg', sidebarBg);
+  root.style.setProperty('--sidebar-text', sidebarText);
+  root.style.setProperty('--btn-accent-active', btnAccent);
+  root.style.setProperty('--btn-accent-text', btnAccentText);
+  root.style.setProperty('--general-text', generalText);
+
+  // Sobrescribir primary con botón de acento personalizado si existe
+  if (config.buttonAccentColor) {
+    root.style.setProperty('--btn-primary-bg', config.buttonAccentColor);
+    root.style.setProperty('--btn-primary-hover', config.buttonAccentColor);
+    root.style.setProperty('--brand-primary', config.buttonAccentColor);
+  } else {
+    root.style.setProperty('--btn-primary-bg', themeVars.primaryBg);
+    root.style.setProperty('--btn-primary-hover', themeVars.primaryHover);
+    root.style.setProperty('--brand-primary', palette.primary);
+  }
+
+  if (config.buttonTextColor) {
+    root.style.setProperty('--btn-primary-text', config.buttonTextColor);
+  } else {
+    root.style.setProperty('--btn-primary-text', themeVars.primaryText);
+  }
+
   root.style.setProperty('--btn-secondary-bg', themeVars.secondaryBg);
   root.style.setProperty('--btn-secondary-border', themeVars.secondaryBorder);
   root.style.setProperty('--btn-secondary-text', themeVars.secondaryText);
 
   // Set CSS Variables de Marca
-  root.style.setProperty('--brand-primary', palette.primary);
   root.style.setProperty('--brand-hover', palette.primaryHover);
   root.style.setProperty('--brand-contrast-text', themeVars.primaryText);
   root.style.setProperty('--brand-light', palette.primaryLight);
@@ -724,7 +769,7 @@ export function applyBrandingToDOM(config: BrandingConfig, forceTheme?: 'light' 
   root.style.setProperty('--brand-accent', palette.accent);
   root.style.setProperty('--brand-glow', palette.glow);
   root.style.setProperty('--brand-glass-border', palette.glassBorder);
-  root.style.setProperty('--color-brand-600', palette.primary);
+  root.style.setProperty('--color-brand-600', config.buttonAccentColor || palette.primary);
   root.style.setProperty('--color-brand-700', palette.primaryHover);
 
   if (isLight) {
@@ -734,14 +779,14 @@ export function applyBrandingToDOM(config: BrandingConfig, forceTheme?: 'light' 
     root.classList.remove('theme-glass');
     root.style.backgroundColor = themeVars.bgColor;
     root.style.backgroundImage = 'none';
-    root.style.color = themeVars.textColor;
+    root.style.color = generalText;
     (root.style as any).colorScheme = 'light';
     if (document.body) {
       document.body.classList.remove('dark');
       document.body.classList.remove('theme-glass');
       document.body.style.backgroundColor = themeVars.bgColor;
       document.body.style.backgroundImage = 'none';
-      document.body.style.color = themeVars.textColor;
+      document.body.style.color = generalText;
       (document.body.style as any).colorScheme = 'light';
     }
   } else if (isGlass) {
@@ -794,6 +839,13 @@ export function applyBrandingToDOM(config: BrandingConfig, forceTheme?: 'light' 
     if (config.customDarkBgColor) {
       localStorage.setItem('venematic_custom_dark_bg', config.customDarkBgColor);
     }
+    if (config.headerBgColor) localStorage.setItem('venematic_header_bg', config.headerBgColor);
+    if (config.headerTextColor) localStorage.setItem('venematic_header_text', config.headerTextColor);
+    if (config.sidebarBgColor) localStorage.setItem('venematic_sidebar_bg', config.sidebarBgColor);
+    if (config.sidebarTextColor) localStorage.setItem('venematic_sidebar_text', config.sidebarTextColor);
+    if (config.buttonAccentColor) localStorage.setItem('venematic_button_accent', config.buttonAccentColor);
+    if (config.buttonTextColor) localStorage.setItem('venematic_button_text', config.buttonTextColor);
+    if (config.generalTextColor) localStorage.setItem('venematic_general_text', config.generalTextColor);
   } catch {}
 
   // Trigger event for listeners

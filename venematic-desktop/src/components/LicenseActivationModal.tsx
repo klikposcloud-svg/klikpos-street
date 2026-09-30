@@ -179,8 +179,8 @@ export default function LicenseActivationModal({ isOpen, onClose, onSuccess, isT
   };
 
   return (
-    <div className="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center p-4 select-none">
-      <div className="bg-white rounded-3xl shadow-2xl border border-slate-300 w-full max-w-xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 flex flex-col max-h-[92vh]">
+    <div className="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center p-2 sm:p-4 select-none overflow-y-auto">
+      <div className="bg-white rounded-3xl shadow-2xl border border-slate-300 w-full max-w-xl my-auto overflow-hidden animate-in fade-in zoom-in-95 duration-200 flex flex-col max-h-[92vh]">
         {/* Cabecera */}
         <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 p-5 text-white flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
@@ -244,7 +244,7 @@ export default function LicenseActivationModal({ isOpen, onClose, onSuccess, isT
         )}
 
         {/* Cuerpo con Scroll */}
-        <div className="p-6 overflow-y-auto flex-1 space-y-5">
+        <div className="p-4 sm:p-6 overflow-y-auto overscroll-contain flex-1 space-y-5 scrollbar-thin scrollbar-thumb-slate-300">
           {!showKeygenTab ? (
             /* ================= PESTAÑA 1: ACTIVACIÓN DE TERMINAL ================= */
             <div className="space-y-4">

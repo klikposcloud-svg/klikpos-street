@@ -156,6 +156,26 @@ export default function DesktopDashboardLayout({
   const [currentTheme, setCurrentTheme] = useState<ThemeMode>('light');
   const [currentUIStyle, setCurrentUIStyle] = useState<'industrial' | 'glassmorphism'>('industrial');
   const [currentPalette, setCurrentPalette] = useState<string>('petrol');
+  const [isKlikMenuEnabled, setIsKlikMenuEnabled] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('venematic_klikmenu_enabled');
+      if (saved !== null) return saved === 'true';
+    }
+    return true;
+  });
+
+  useEffect(() => {
+    const handleKlikMenuToggle = (e: any) => {
+      if (typeof e.detail === 'boolean') {
+        setIsKlikMenuEnabled(e.detail);
+      }
+    };
+    window.addEventListener('venematic:klikmenu_toggled' as any, handleKlikMenuToggle);
+    return () => {
+      window.removeEventListener('venematic:klikmenu_toggled' as any, handleKlikMenuToggle);
+    };
+  }, []);
+
   const [isSidebarCompact, setIsSidebarCompact] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('klikpos_sidebar_compact');
@@ -600,9 +620,15 @@ export default function DesktopDashboardLayout({
   };
 
   return (
-    <div className="h-screen w-screen flex flex-col bg-white dark:bg-[#0a192f] text-slate-900 dark:text-slate-100 font-sans overflow-hidden select-none">
+    <div className="h-screen w-screen flex flex-col overflow-hidden select-none bg-slate-100 dark:bg-[#071321]">
       {/* Barra de Estado Superior Profesional (30% más alta, imponente y sobria) */}
-      <header className="h-[72px] sm:h-[74px] bg-white dark:bg-[#0b1a30] border-b-2 border-slate-200/90 dark:border-[#1e3a5f] text-slate-900 dark:text-white px-5 sm:px-6 flex items-center justify-between shrink-0 z-20 shadow-sm layer-shell transition-all">
+      <header
+        className="h-[72px] sm:h-[74px] border-b-2 border-slate-200/90 dark:border-[#1e3a5f] px-5 sm:px-6 flex items-center justify-between shrink-0 z-20 shadow-sm layer-shell transition-all"
+        style={{
+          backgroundColor: 'var(--header-bg, ' + (currentTheme === 'dark' ? '#0b1a30' : '#ffffff') + ')',
+          color: 'var(--header-text, ' + (currentTheme === 'dark' ? '#ffffff' : '#0f172a') + ')',
+        }}
+      >
         {/* Identidad del Terminal */}
         <div className="flex items-center gap-3.5 min-w-0">
           <div className="flex items-center gap-2 shrink-0">

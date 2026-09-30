@@ -10,7 +10,7 @@ import LoginModal from '@/components/LoginModal';
 import AdminPinModal from '@/components/AdminPinModal';
 import LockScreenModal from '@/components/LockScreenModal';
 import AutoUpdateModal from '@/components/AutoUpdateModal';
-import { LogOut, ShieldCheck, User, Lock, RefreshCw, CheckCircle2, Sun, Moon, Sparkles, Clock, Cloud, Smartphone, Users, X, QrCode, ShoppingCart, Package, Receipt, BarChart3, Settings, PanelLeftClose, PanelLeft } from 'lucide-react';
+import { LogOut, ShieldCheck, User, UtensilsCrossed, Lock, RefreshCw, CheckCircle2, Sun, Moon, Sparkles, Clock, Cloud, Smartphone, Users, X, QrCode, ShoppingCart, Package, Receipt, BarChart3, Settings, PanelLeftClose, PanelLeft, DollarSign, CreditCard, Truck, Sliders } from 'lucide-react';
 import { STANDARD_RUBROS, StandardRubroId } from '@/lib/utils/business-rubros';
 import { applyBrandingToDOM, applyTheme, getCurrentTheme, ThemeMode } from '@/lib/theme';
 import CloudSyncWidget from '@/components/CloudSyncWidget';
@@ -35,6 +35,13 @@ const NAV_ITEMS: NavItem[] = [
     icon: <ShoppingCart className="w-5 h-5" />,
   },
   {
+    key: 'mesas',
+    label: 'KlikMenu Mesas',
+    href: '/dashboard/mesas',
+    shortcut: 'F11',
+    icon: <UtensilsCrossed className="w-5 h-5" />,
+  },
+  {
     key: 'inventory',
     label: 'Inventario',
     href: '/dashboard/inventory',
@@ -56,11 +63,42 @@ const NAV_ITEMS: NavItem[] = [
     icon: <Users className="w-5 h-5" />,
   },
   {
+    key: 'financial',
+    label: 'Finanzas & P&L',
+    href: '/dashboard/financial',
+    shortcut: 'F6',
+    adminOnly: true,
+    icon: <DollarSign className="w-5 h-5" />,
+  },
+  {
+    key: 'credits',
+    label: 'Créditos & Fiados',
+    href: '/dashboard/credits',
+    shortcut: 'F7',
+    icon: <CreditCard className="w-5 h-5" />,
+  },
+  {
+    key: 'suppliers',
+    label: 'Proveedores',
+    href: '/dashboard/suppliers',
+    shortcut: 'F9',
+    adminOnly: true,
+    icon: <Truck className="w-5 h-5" />,
+  },
+  {
     key: 'reports',
     label: 'Cierres',
     href: '/dashboard/reports',
     shortcut: 'F5',
     icon: <BarChart3 className="w-5 h-5" />,
+  },
+  {
+    key: 'licensing',
+    label: 'Licencias & Planes',
+    href: '/dashboard/licensing',
+    shortcut: 'F10',
+    adminOnly: true,
+    icon: <ShieldCheck className="w-5 h-5" />,
   },
   {
     key: 'settings',
@@ -118,6 +156,26 @@ export default function DesktopDashboardLayout({
   const [currentTheme, setCurrentTheme] = useState<ThemeMode>('light');
   const [currentUIStyle, setCurrentUIStyle] = useState<'industrial' | 'glassmorphism'>('industrial');
   const [currentPalette, setCurrentPalette] = useState<string>('petrol');
+  const [isKlikMenuEnabled, setIsKlikMenuEnabled] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('venematic_klikmenu_enabled');
+      if (saved !== null) return saved === 'true';
+    }
+    return true;
+  });
+
+  useEffect(() => {
+    const handleKlikMenuToggle = (e: any) => {
+      if (typeof e.detail === 'boolean') {
+        setIsKlikMenuEnabled(e.detail);
+      }
+    };
+    window.addEventListener('venematic:klikmenu_toggled' as any, handleKlikMenuToggle);
+    return () => {
+      window.removeEventListener('venematic:klikmenu_toggled' as any, handleKlikMenuToggle);
+    };
+  }, []);
+
   const [isSidebarCompact, setIsSidebarCompact] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('klikpos_sidebar_compact');
@@ -562,9 +620,15 @@ export default function DesktopDashboardLayout({
   };
 
   return (
-    <div className="h-screen w-screen flex flex-col bg-white dark:bg-[#0a192f] text-slate-900 dark:text-slate-100 font-sans overflow-hidden select-none">
+    <div className="h-screen w-screen flex flex-col overflow-hidden select-none bg-slate-100 dark:bg-[#071321]">
       {/* Barra de Estado Superior Profesional (30% más alta, imponente y sobria) */}
-      <header className="h-[72px] sm:h-[74px] bg-white dark:bg-[#0b1a30] border-b-2 border-slate-200/90 dark:border-[#1e3a5f] text-slate-900 dark:text-white px-5 sm:px-6 flex items-center justify-between shrink-0 z-20 shadow-sm layer-shell transition-all">
+      <header
+        className="h-[72px] sm:h-[74px] border-b-2 border-slate-200/90 dark:border-[#1e3a5f] px-5 sm:px-6 flex items-center justify-between shrink-0 z-20 shadow-sm layer-shell transition-all"
+        style={{
+          backgroundColor: 'var(--header-bg, ' + (currentTheme === 'dark' ? '#0b1a30' : '#ffffff') + ')',
+          color: 'var(--header-text, ' + (currentTheme === 'dark' ? '#ffffff' : '#0f172a') + ')',
+        }}
+      >
         {/* Identidad del Terminal */}
         <div className="flex items-center gap-3.5 min-w-0">
           <div className="flex items-center gap-2 shrink-0">

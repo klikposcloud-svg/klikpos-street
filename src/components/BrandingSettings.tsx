@@ -31,6 +31,8 @@ import {
   ArrowRight,
   RefreshCw,
   ShoppingBag,
+  Save,
+  RotateCcw,
 } from 'lucide-react';
 import {
   STANDARD_RUBROS,
@@ -47,6 +49,15 @@ export default function BrandingSettings() {
   const [selectedDarkBg, setSelectedDarkBg] = useState<DarkBgPreset>(DEFAULT_BRANDING.darkBg || 'midnight');
   const [customDarkBgColor, setCustomDarkBgColor] = useState<string>(DEFAULT_BRANDING.customDarkBgColor || '#0a192f');
   const [savedFeedback, setSavedFeedback] = useState(false);
+
+  // Estados avanzados de zonas de color (Header, Sidebar, Botones y Textos)
+  const [headerBgColor, setHeaderBgColor] = useState<string>('');
+  const [headerTextColor, setHeaderTextColor] = useState<string>('');
+  const [sidebarBgColor, setSidebarBgColor] = useState<string>('');
+  const [sidebarTextColor, setSidebarTextColor] = useState<string>('');
+  const [buttonAccentColor, setButtonAccentColor] = useState<string>('');
+  const [buttonTextColor, setButtonTextColor] = useState<string>('');
+  const [generalTextColor, setGeneralTextColor] = useState<string>('');
 
   // Estados de Rubro Comercial Estándar
   const [activeRubroId, setActiveRubroId] = useState<StandardRubroId | null>(null);
@@ -68,11 +79,27 @@ export default function BrandingSettings() {
         const cBg = setting.value.customBgColor || localStorage.getItem('venematic_custom_bg_color') || '#f8fafc';
         const dBg = setting.value.darkBg || (localStorage.getItem('venematic_dark_bg') as DarkBgPreset) || 'midnight';
         const cdBg = setting.value.customDarkBgColor || localStorage.getItem('venematic_custom_dark_bg') || '#0a192f';
+        const hBg = setting.value.headerBgColor || localStorage.getItem('venematic_header_bg') || '';
+        const hText = setting.value.headerTextColor || localStorage.getItem('venematic_header_text') || '';
+        const sBg = setting.value.sidebarBgColor || localStorage.getItem('venematic_sidebar_bg') || '';
+        const sText = setting.value.sidebarTextColor || localStorage.getItem('venematic_sidebar_text') || '';
+        const bAccent = setting.value.buttonAccentColor || localStorage.getItem('venematic_button_accent') || '';
+        const bText = setting.value.buttonTextColor || localStorage.getItem('venematic_button_text') || '';
+        const gText = setting.value.generalTextColor || localStorage.getItem('venematic_general_text') || '';
+
         setSelectedUIStyle(style);
         setSelectedIndustrialBg(bg);
         setCustomBgColor(cBg);
         setSelectedDarkBg(dBg);
         setCustomDarkBgColor(cdBg);
+        setHeaderBgColor(hBg);
+        setHeaderTextColor(hText);
+        setSidebarBgColor(sBg);
+        setSidebarTextColor(sText);
+        setButtonAccentColor(bAccent);
+        setButtonTextColor(bText);
+        setGeneralTextColor(gText);
+
         applyBrandingToDOM({
           ...setting.value,
           paletteId: setting.value.paletteId || 'petrol',
@@ -81,6 +108,13 @@ export default function BrandingSettings() {
           customBgColor: cBg,
           darkBg: dBg,
           customDarkBgColor: cdBg,
+          headerBgColor: hBg,
+          headerTextColor: hText,
+          sidebarBgColor: sBg,
+          sidebarTextColor: sText,
+          buttonAccentColor: bAccent,
+          buttonTextColor: bText,
+          generalTextColor: gText,
         });
       } else {
         try {
@@ -90,13 +124,43 @@ export default function BrandingSettings() {
           const cBg = localStorage.getItem('venematic_custom_bg_color') || '#f8fafc';
           const dBg = (localStorage.getItem('venematic_dark_bg') as DarkBgPreset) || 'midnight';
           const cdBg = localStorage.getItem('venematic_custom_dark_bg') || '#0a192f';
+          const hBg = localStorage.getItem('venematic_header_bg') || '';
+          const hText = localStorage.getItem('venematic_header_text') || '';
+          const sBg = localStorage.getItem('venematic_sidebar_bg') || '';
+          const sText = localStorage.getItem('venematic_sidebar_text') || '';
+          const bAccent = localStorage.getItem('venematic_button_accent') || '';
+          const bText = localStorage.getItem('venematic_button_text') || '';
+          const gText = localStorage.getItem('venematic_general_text') || '';
+
           setSelectedPaletteId(p);
           setSelectedUIStyle(s);
           setSelectedIndustrialBg(bg);
           setCustomBgColor(cBg);
           setSelectedDarkBg(dBg);
           setCustomDarkBgColor(cdBg);
-          applyBrandingToDOM({ paletteId: p, uiStyle: s, industrialBg: bg, customBgColor: cBg, darkBg: dBg, customDarkBgColor: cdBg });
+          setHeaderBgColor(hBg);
+          setHeaderTextColor(hText);
+          setSidebarBgColor(sBg);
+          setSidebarTextColor(sText);
+          setButtonAccentColor(bAccent);
+          setButtonTextColor(bText);
+          setGeneralTextColor(gText);
+
+          applyBrandingToDOM({
+            paletteId: p,
+            uiStyle: s,
+            industrialBg: bg,
+            customBgColor: cBg,
+            darkBg: dBg,
+            customDarkBgColor: cdBg,
+            headerBgColor: hBg,
+            headerTextColor: hText,
+            sidebarBgColor: sBg,
+            sidebarTextColor: sText,
+            buttonAccentColor: bAccent,
+            buttonTextColor: bText,
+            generalTextColor: gText,
+          });
         } catch {}
       }
     });
@@ -279,9 +343,18 @@ export default function BrandingSettings() {
       if (config.customBgColor) localStorage.setItem('venematic_custom_bg_color', config.customBgColor);
       if (config.darkBg) localStorage.setItem('venematic_dark_bg', config.darkBg);
       if (config.customDarkBgColor) localStorage.setItem('venematic_custom_dark_bg', config.customDarkBgColor);
+      if (config.headerBgColor !== undefined) localStorage.setItem('venematic_header_bg', config.headerBgColor);
+      if (config.headerTextColor !== undefined) localStorage.setItem('venematic_header_text', config.headerTextColor);
+      if (config.sidebarBgColor !== undefined) localStorage.setItem('venematic_sidebar_bg', config.sidebarBgColor);
+      if (config.sidebarTextColor !== undefined) localStorage.setItem('venematic_sidebar_text', config.sidebarTextColor);
+      if (config.buttonAccentColor !== undefined) localStorage.setItem('venematic_button_accent', config.buttonAccentColor);
+      if (config.buttonTextColor !== undefined) localStorage.setItem('venematic_button_text', config.buttonTextColor);
+      if (config.generalTextColor !== undefined) localStorage.setItem('venematic_general_text', config.generalTextColor);
+
       window.dispatchEvent(new CustomEvent('venematic:branding_changed', { detail: config }));
       setSavedFeedback(true);
-      setTimeout(() => setSavedFeedback(false), 2000);
+      setTimeout(() => setSavedFeedback(false), 2500);
+
       // Guardar en Dexie de forma asíncrona desacoplada
       db.settings.put({
         key: 'branding_config',
@@ -294,6 +367,91 @@ export default function BrandingSettings() {
     } catch (e) {
       console.warn('Error saving branding config:', e);
     }
+  };
+
+  const handleAdvancedColorChange = (key: keyof BrandingConfig, val: string) => {
+    let newHbg = headerBgColor;
+    let newHtext = headerTextColor;
+    let newSbg = sidebarBgColor;
+    let newStext = sidebarTextColor;
+    let newBaccent = buttonAccentColor;
+    let newBtext = buttonTextColor;
+    let newGtext = generalTextColor;
+
+    if (key === 'headerBgColor') { newHbg = val; setHeaderBgColor(val); }
+    if (key === 'headerTextColor') { newHtext = val; setHeaderTextColor(val); }
+    if (key === 'sidebarBgColor') { newSbg = val; setSidebarBgColor(val); }
+    if (key === 'sidebarTextColor') { newStext = val; setSidebarTextColor(val); }
+    if (key === 'buttonAccentColor') { newBaccent = val; setButtonAccentColor(val); }
+    if (key === 'buttonTextColor') { newBtext = val; setButtonTextColor(val); }
+    if (key === 'generalTextColor') { newGtext = val; setGeneralTextColor(val); }
+
+    const config: BrandingConfig = {
+      paletteId: selectedPaletteId,
+      uiStyle: selectedUIStyle,
+      industrialBg: selectedIndustrialBg,
+      customBgColor,
+      darkBg: selectedDarkBg,
+      customDarkBgColor,
+      headerBgColor: newHbg,
+      headerTextColor: newHtext,
+      sidebarBgColor: newSbg,
+      sidebarTextColor: newStext,
+      buttonAccentColor: newBaccent,
+      buttonTextColor: newBtext,
+      generalTextColor: newGtext,
+    };
+    saveConfig(config);
+    applyBrandingToDOM(config, selectedUIStyle === 'industrial' ? 'light' : 'dark');
+  };
+
+  const handleSaveAllColors = () => {
+    const config: BrandingConfig = {
+      paletteId: selectedPaletteId,
+      uiStyle: selectedUIStyle,
+      industrialBg: selectedIndustrialBg,
+      customBgColor,
+      darkBg: selectedDarkBg,
+      customDarkBgColor,
+      headerBgColor,
+      headerTextColor,
+      sidebarBgColor,
+      sidebarTextColor,
+      buttonAccentColor,
+      buttonTextColor,
+      generalTextColor,
+    };
+    saveConfig(config);
+    applyBrandingToDOM(config, selectedUIStyle === 'industrial' ? 'light' : 'dark');
+    soundEffects.success();
+  };
+
+  const handleResetAllColors = () => {
+    setHeaderBgColor('');
+    setHeaderTextColor('');
+    setSidebarBgColor('');
+    setSidebarTextColor('');
+    setButtonAccentColor('');
+    setButtonTextColor('');
+    setGeneralTextColor('');
+    const config: BrandingConfig = {
+      paletteId: selectedPaletteId,
+      uiStyle: selectedUIStyle,
+      industrialBg: selectedIndustrialBg,
+      customBgColor,
+      darkBg: selectedDarkBg,
+      customDarkBgColor,
+      headerBgColor: '',
+      headerTextColor: '',
+      sidebarBgColor: '',
+      sidebarTextColor: '',
+      buttonAccentColor: '',
+      buttonTextColor: '',
+      generalTextColor: '',
+    };
+    saveConfig(config);
+    applyBrandingToDOM(config, selectedUIStyle === 'industrial' ? 'light' : 'dark');
+    soundEffects.playBeep();
   };
 
   const activePalette = THEME_PALETTES.find((p) => p.id === selectedPaletteId) || THEME_PALETTES[0];
@@ -1101,6 +1259,236 @@ export default function BrandingSettings() {
           </div>
         );
       })()}
+
+      {/* ========================================================================= */}
+      {/* 4. PERSONALIZACIÓN INTEGRAL DE ZONAS DE COLOR (Header, Sidebar, Botones y Texto) */}
+      {/* ========================================================================= */}
+      <div className="space-y-4 pt-4 border-t border-slate-200">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center shadow-xs">
+              <Sliders className="w-4 h-4" />
+            </div>
+            <div>
+              <h4 className="text-xs font-black text-slate-900 uppercase tracking-wide">
+                Personalización Integral de Estructura Visual (Header, Sidebar, Botones y Texto)
+              </h4>
+              <p className="text-[11px] text-slate-500">
+                Ajusta los colores independientes de la barra superior, menú lateral, botones de acción y tipografía
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handleResetAllColors}
+              className="px-3 py-1.5 text-xs font-bold text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              <span>Restablecer</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={handleSaveAllColors}
+              className="px-4 py-1.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow-sm hover:shadow-md transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
+            >
+              <Save className="w-3.5 h-3.5" />
+              <span>Guardar Personalización de Colores</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Cuadrícula de Controles de Color */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+          {/* Header Background */}
+          <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-bold text-slate-800">
+                Fondo del Header (Superior)
+              </label>
+              <div
+                className="w-5 h-5 rounded-md border border-slate-300 shadow-2xs"
+                style={{ backgroundColor: headerBgColor || '#ffffff' }}
+              />
+            </div>
+            <p className="text-[10px] text-slate-500">
+              Color de fondo de la barra de navegación superior
+            </p>
+            <div className="flex items-center gap-2">
+              <input
+                type="color"
+                value={headerBgColor || '#ffffff'}
+                onChange={(e) => handleAdvancedColorChange('headerBgColor', e.target.value)}
+                className="w-9 h-8 p-0.5 border border-slate-300 rounded cursor-pointer shrink-0"
+              />
+              <input
+                type="text"
+                value={headerBgColor}
+                placeholder="Por defecto (#ffffff)"
+                onChange={(e) => handleAdvancedColorChange('headerBgColor', e.target.value)}
+                className="flex-1 font-mono text-xs px-2 py-1.5 border border-slate-300 rounded-md bg-white text-slate-900 focus:outline-sky-500"
+              />
+            </div>
+          </div>
+
+          {/* Header Text Color */}
+          <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-bold text-slate-800">
+                Texto e Íconos del Header
+              </label>
+              <div
+                className="w-5 h-5 rounded-md border border-slate-300 shadow-2xs"
+                style={{ backgroundColor: headerTextColor || '#0f172a' }}
+              />
+            </div>
+            <p className="text-[10px] text-slate-500">
+              Color de texto, títulos y botones de la barra superior
+            </p>
+            <div className="flex items-center gap-2">
+              <input
+                type="color"
+                value={headerTextColor || '#0f172a'}
+                onChange={(e) => handleAdvancedColorChange('headerTextColor', e.target.value)}
+                className="w-9 h-8 p-0.5 border border-slate-300 rounded cursor-pointer shrink-0"
+              />
+              <input
+                type="text"
+                value={headerTextColor}
+                placeholder="Por defecto (#0f172a)"
+                onChange={(e) => handleAdvancedColorChange('headerTextColor', e.target.value)}
+                className="flex-1 font-mono text-xs px-2 py-1.5 border border-slate-300 rounded-md bg-white text-slate-900 focus:outline-sky-500"
+              />
+            </div>
+          </div>
+
+          {/* Sidebar Background */}
+          <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-bold text-slate-800">
+                Fondo del Sidebar (Menú Lateral)
+              </label>
+              <div
+                className="w-5 h-5 rounded-md border border-slate-300 shadow-2xs"
+                style={{ backgroundColor: sidebarBgColor || '#0a2336' }}
+              />
+            </div>
+            <p className="text-[10px] text-slate-500">
+              Color de fondo de la barra de navegación lateral izquierda
+            </p>
+            <div className="flex items-center gap-2">
+              <input
+                type="color"
+                value={sidebarBgColor || '#0a2336'}
+                onChange={(e) => handleAdvancedColorChange('sidebarBgColor', e.target.value)}
+                className="w-9 h-8 p-0.5 border border-slate-300 rounded cursor-pointer shrink-0"
+              />
+              <input
+                type="text"
+                value={sidebarBgColor}
+                placeholder="Por defecto (#0a2336)"
+                onChange={(e) => handleAdvancedColorChange('sidebarBgColor', e.target.value)}
+                className="flex-1 font-mono text-xs px-2 py-1.5 border border-slate-300 rounded-md bg-white text-slate-900 focus:outline-sky-500"
+              />
+            </div>
+          </div>
+
+          {/* Sidebar Text Color */}
+          <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-bold text-slate-800">
+                Texto del Sidebar
+              </label>
+              <div
+                className="w-5 h-5 rounded-md border border-slate-300 shadow-2xs"
+                style={{ backgroundColor: sidebarTextColor || '#f8fafc' }}
+              />
+            </div>
+            <p className="text-[10px] text-slate-500">
+              Color de texto y etiquetas de los módulos en el menú lateral
+            </p>
+            <div className="flex items-center gap-2">
+              <input
+                type="color"
+                value={sidebarTextColor || '#f8fafc'}
+                onChange={(e) => handleAdvancedColorChange('sidebarTextColor', e.target.value)}
+                className="w-9 h-8 p-0.5 border border-slate-300 rounded cursor-pointer shrink-0"
+              />
+              <input
+                type="text"
+                value={sidebarTextColor}
+                placeholder="Por defecto (#f8fafc)"
+                onChange={(e) => handleAdvancedColorChange('sidebarTextColor', e.target.value)}
+                className="flex-1 font-mono text-xs px-2 py-1.5 border border-slate-300 rounded-md bg-white text-slate-900 focus:outline-sky-500"
+              />
+            </div>
+          </div>
+
+          {/* Button Accent / Active Zone */}
+          <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-bold text-slate-800">
+                Zona Activa de Botones / Acento
+              </label>
+              <div
+                className="w-5 h-5 rounded-md border border-slate-300 shadow-2xs"
+                style={{ backgroundColor: buttonAccentColor || activePalette.primary }}
+              />
+            </div>
+            <p className="text-[10px] text-slate-500">
+              Color de fondo de los botones principales y enlaces activos
+            </p>
+            <div className="flex items-center gap-2">
+              <input
+                type="color"
+                value={buttonAccentColor || activePalette.primary}
+                onChange={(e) => handleAdvancedColorChange('buttonAccentColor', e.target.value)}
+                className="w-9 h-8 p-0.5 border border-slate-300 rounded cursor-pointer shrink-0"
+              />
+              <input
+                type="text"
+                value={buttonAccentColor}
+                placeholder={`Por defecto (${activePalette.primary})`}
+                onChange={(e) => handleAdvancedColorChange('buttonAccentColor', e.target.value)}
+                className="flex-1 font-mono text-xs px-2 py-1.5 border border-slate-300 rounded-md bg-white text-slate-900 focus:outline-sky-500"
+              />
+            </div>
+          </div>
+
+          {/* Button Text Color & General Text */}
+          <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-bold text-slate-800">
+                Texto de Botones de Acción
+              </label>
+              <div
+                className="w-5 h-5 rounded-md border border-slate-300 shadow-2xs"
+                style={{ backgroundColor: buttonTextColor || '#ffffff' }}
+              />
+            </div>
+            <p className="text-[10px] text-slate-500">
+              Color del texto y los iconos dentro de botones activos
+            </p>
+            <div className="flex items-center gap-2">
+              <input
+                type="color"
+                value={buttonTextColor || '#ffffff'}
+                onChange={(e) => handleAdvancedColorChange('buttonTextColor', e.target.value)}
+                className="w-9 h-8 p-0.5 border border-slate-300 rounded cursor-pointer shrink-0"
+              />
+              <input
+                type="text"
+                value={buttonTextColor}
+                placeholder="Por defecto (#ffffff)"
+                onChange={(e) => handleAdvancedColorChange('buttonTextColor', e.target.value)}
+                className="flex-1 font-mono text-xs px-2 py-1.5 border border-slate-300 rounded-md bg-white text-slate-900 focus:outline-sky-500"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
