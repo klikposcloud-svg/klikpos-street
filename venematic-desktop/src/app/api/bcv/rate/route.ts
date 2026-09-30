@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { fetchLiveBcvRate } from '@/lib/services/bcv-service';
+import { scannerEmitter } from '@/lib/scanner-events';
 
 // In-memory cache for server lifecycle
 let latestBcvData: {
@@ -16,6 +17,16 @@ let latestBcvData: {
   isManual: false,
 };
 
+const CORS_HEADERS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+};
+
+export async function OPTIONS() {
+  return new Response(null, { status: 204, headers: CORS_HEADERS });
+}
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const forceLive = searchParams.get('refresh') === 'true';
@@ -24,7 +35,7 @@ export async function GET(request: Request) {
   const todayStr = new Date().toISOString().split('T')[0];
   const needsSync = forceLive || latestBcvData.date !== todayStr || latestBcvData.source === 'Predeterminada' || !latestBcvData.lastUpdated;
 
-  if (needsSync && !latestBcvData.isManual) {
+  if (forceLive || (needsSync && !latestBcvData.isManual)) {
     try {
       const live = await fetchLiveBcvRate();
       if (live.success && live.rate > 0) {
@@ -35,6 +46,10 @@ export async function GET(request: Request) {
           lastUpdated: live.lastUpdated,
           isManual: false,
         };
+        scannerEmitter.emit('inventory_updated', {
+          bcvRate: latestBcvData.rate,
+          timestamp: Date.now(),
+        });
       }
     } catch (e) {
       console.warn('Error fetching live BCV in API route:', e);
@@ -44,7 +59,7 @@ export async function GET(request: Request) {
   return NextResponse.json({
     success: true,
     ...latestBcvData,
-  });
+  }, { headers: CORS_HEADERS });
 }
 
 export async function POST(request: Request) {
@@ -62,7 +77,11 @@ export async function POST(request: Request) {
           lastUpdated: live.lastUpdated,
           isManual: false,
         };
-        return NextResponse.json({ success: true, ...latestBcvData });
+        scannerEmitter.emit('inventory_updated', {
+          bcvRate: latestBcvData.rate,
+          timestamp: Date.now(),
+        });
+        return NextResponse.json({ success: true, ...latestBcvData }, { headers: CORS_HEADERS });
       }
     }
 
@@ -70,15 +89,19 @@ export async function POST(request: Request) {
       latestBcvData = {
         rate: Math.round(rate * 100) / 100,
         date: new Date().toISOString().split('T')[0],
-        source: 'Ajuste Manual en Terminal',
+        source: body.source || 'Ajuste Manual en Terminal',
         lastUpdated: new Date().toISOString(),
         isManual: true,
       };
-      return NextResponse.json({ success: true, ...latestBcvData });
+      scannerEmitter.emit('inventory_updated', {
+        bcvRate: latestBcvData.rate,
+        timestamp: Date.now(),
+      });
+      return NextResponse.json({ success: true, ...latestBcvData }, { headers: CORS_HEADERS });
     }
 
-    return NextResponse.json({ success: false, message: 'Tasa inválida' }, { status: 400 });
+    return NextResponse.json({ success: false, message: 'Tasa inválida' }, { status: 400, headers: CORS_HEADERS });
   } catch (err: any) {
-    return NextResponse.json({ success: false, message: err.message }, { status: 500 });
+    return NextResponse.json({ success: false, message: err.message }, { status: 500, headers: CORS_HEADERS });
   }
 }

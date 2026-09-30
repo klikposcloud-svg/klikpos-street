@@ -1,4 +1,4 @@
-/**
+﻿/**
  * =====================================================================
  * VENEMATIC POS - Sistema de Planes y Features por Licencia
  * =====================================================================
@@ -34,6 +34,8 @@ export interface PlanFeatures {
   digitalScale: boolean;
   advancedReports: boolean;
   creditCustomers: boolean;
+  interactiveMenuSync?: boolean;
+  multiDeviceTabletSync?: boolean;
 }
 
 export const PLAN_FEATURES: Record<LicensePlan, PlanFeatures> = {
@@ -42,77 +44,77 @@ export const PLAN_FEATURES: Record<LicensePlan, PlanFeatures> = {
     multiPaymentMethods: true, customBranding: true,
     maxCashiers: 99, labelsBarcode: true,
     cloudBackup: false, gmailPagoMovil: true,
-    digitalScale: true, advancedReports: true, creditCustomers: true,
+    digitalScale: true, advancedReports: true, creditCustomers: true, interactiveMenuSync: true, multiDeviceTabletSync: true,
   },
   promo_6m: {
     posOffline: true, inventory: true, thermalPrint: true,
     multiPaymentMethods: true, customBranding: true,
     maxCashiers: 99, labelsBarcode: true,
     cloudBackup: true, gmailPagoMovil: true,
-    digitalScale: true, advancedReports: true, creditCustomers: true,
+    digitalScale: true, advancedReports: true, creditCustomers: true, interactiveMenuSync: true, multiDeviceTabletSync: true,
   },
   basico_local: {
     posOffline: true, inventory: true, thermalPrint: true,
     multiPaymentMethods: true, customBranding: true,
     maxCashiers: 2, labelsBarcode: true,
     cloudBackup: false, gmailPagoMovil: false,
-    digitalScale: false, advancedReports: false, creditCustomers: false,
+    digitalScale: false, advancedReports: false, creditCustomers: false, interactiveMenuSync: false, multiDeviceTabletSync: false,
   },
   cloud_monthly: {
     posOffline: true, inventory: true, thermalPrint: true,
     multiPaymentMethods: true, customBranding: true,
     maxCashiers: 99, labelsBarcode: true,
     cloudBackup: true, gmailPagoMovil: true,
-    digitalScale: true, advancedReports: true, creditCustomers: true,
+    digitalScale: true, advancedReports: true, creditCustomers: true, interactiveMenuSync: true, multiDeviceTabletSync: true,
   },
   demo: {
     posOffline: true, inventory: true, thermalPrint: true,
     multiPaymentMethods: true, customBranding: false,
     maxCashiers: 1, labelsBarcode: false,
     cloudBackup: false, gmailPagoMovil: false,
-    digitalScale: false, advancedReports: false, creditCustomers: false,
+    digitalScale: false, advancedReports: false, creditCustomers: false, interactiveMenuSync: false, multiDeviceTabletSync: false,
   },
   starter_trial: {
     posOffline: true, inventory: true, thermalPrint: true,
     multiPaymentMethods: true, customBranding: true,
     maxCashiers: 2, labelsBarcode: true,
     cloudBackup: false, gmailPagoMovil: false,
-    digitalScale: false, advancedReports: false, creditCustomers: false,
+    digitalScale: false, advancedReports: false, creditCustomers: false, interactiveMenuSync: false, multiDeviceTabletSync: false,
   },
   starter_full: {
     posOffline: true, inventory: true, thermalPrint: true,
     multiPaymentMethods: true, customBranding: true,
     maxCashiers: 2, labelsBarcode: true,
     cloudBackup: false, gmailPagoMovil: false,
-    digitalScale: false, advancedReports: false, creditCustomers: false,
+    digitalScale: false, advancedReports: false, creditCustomers: false, interactiveMenuSync: false, multiDeviceTabletSync: false,
   },
   pro_trial: {
     posOffline: true, inventory: true, thermalPrint: true,
     multiPaymentMethods: true, customBranding: true,
     maxCashiers: 99, labelsBarcode: true,
     cloudBackup: true, gmailPagoMovil: true,
-    digitalScale: true, advancedReports: true, creditCustomers: true,
+    digitalScale: true, advancedReports: true, creditCustomers: true, interactiveMenuSync: true, multiDeviceTabletSync: true,
   },
   pro_full: {
     posOffline: true, inventory: true, thermalPrint: true,
     multiPaymentMethods: true, customBranding: true,
     maxCashiers: 99, labelsBarcode: true,
     cloudBackup: true, gmailPagoMovil: true,
-    digitalScale: true, advancedReports: true, creditCustomers: true,
+    digitalScale: true, advancedReports: true, creditCustomers: true, interactiveMenuSync: true, multiDeviceTabletSync: true,
   },
   vitalicia: {
     posOffline: true, inventory: true, thermalPrint: true,
     multiPaymentMethods: true, customBranding: true,
     maxCashiers: 99, labelsBarcode: true,
     cloudBackup: true, gmailPagoMovil: true,
-    digitalScale: true, advancedReports: true, creditCustomers: true,
+    digitalScale: true, advancedReports: true, creditCustomers: true, interactiveMenuSync: true, multiDeviceTabletSync: true,
   },
   anual: {
     posOffline: true, inventory: true, thermalPrint: true,
     multiPaymentMethods: true, customBranding: true,
     maxCashiers: 2, labelsBarcode: true,
     cloudBackup: false, gmailPagoMovil: false,
-    digitalScale: false, advancedReports: false, creditCustomers: false,
+    digitalScale: false, advancedReports: false, creditCustomers: false, interactiveMenuSync: false, multiDeviceTabletSync: false,
   },
 };
 

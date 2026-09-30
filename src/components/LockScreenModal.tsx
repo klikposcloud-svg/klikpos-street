@@ -25,23 +25,31 @@ export default function LockScreenModal({ isOpen, onUnlock }: LockScreenModalPro
 
   if (!isOpen) return null;
 
-  const handleUnlockAttempt = (enteredPin?: string) => {
+    const handleUnlockAttempt = (enteredPin?: string) => {
     const code = enteredPin !== undefined ? enteredPin : pin;
     if (!code) {
       setError('Por favor ingresa tu PIN');
       return;
     }
 
-    // Permitir desbloqueo con el usuario actual o con PIN maestro de supervisor (9999)
+    // Validación estricta sin claves maestras ni fallbacks hardcodeados
     const currentUsername = user?.username || (isAdmin ? 'admin' : 'caja');
-    const res = login(currentUsername as any, code);
+    let res = login(currentUsername as any, code);
 
-    if (res.success || code === '9999' || code === '1234' || (isAdmin && code === 'admin123')) {
+    // Si falló con el cajero activo, permitir que un administrador desbloquee con su PIN/contraseña
+    if (!res.success && currentUsername !== 'admin') {
+      const adminRes = login('admin', code);
+      if (adminRes.success) {
+        res = adminRes;
+      }
+    }
+
+    if (res.success) {
       setError(null);
       setPin('');
       onUnlock();
     } else {
-      setError('PIN incorrecto. Intenta de nuevo.');
+      setError(res.error || 'PIN incorrecto. Intenta de nuevo.');
       setPin('');
     }
   };
@@ -173,7 +181,7 @@ export default function LockScreenModal({ isOpen, onUnlock }: LockScreenModalPro
             <LogOut className="w-3.5 h-3.5" />
             <span>Cerrar Sesión</span>
           </button>
-          <span className="text-[10px] text-slate-400 font-mono">PIN defecto: 1234</span>
+          <span className="text-[10px] text-slate-400 font-medium flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block"></span>Bloqueo Seguro KlikPOS</span>
         </div>
       </div>
     </div>

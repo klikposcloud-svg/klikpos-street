@@ -28,7 +28,7 @@ function getLocalNetworkIp(): string {
 export async function GET(req: NextRequest) {
   const session = req.nextUrl.searchParams.get('session') || 'caja-1';
   const data = scannerSessions.get(session);
-  const isOnline = Boolean(data && data.connected && Date.now() - data.lastSeen < 15000);
+  const isOnline = Boolean(data && data.connected && Date.now() - data.lastSeen < 35000);
   const localIp = getLocalNetworkIp();
   const port = process.env.PORT || '3000';
   const serverUrl = `http://${localIp}:${port}`;

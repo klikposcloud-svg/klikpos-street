@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useEffect } from 'react';
 import { db } from '@/lib/db';
@@ -8,15 +8,16 @@ import PosQuickAccessSettings from '@/components/PosQuickAccessSettings';
 import LegalSettingsTab from '@/components/LegalSettingsTab';
 import LicenseActivationModal from '@/components/LicenseActivationModal';
 import CloudSyncSettingsCard from '@/components/CloudSyncSettingsCard';
+import InteractiveMenuSyncCard from '@/components/InteractiveMenuSyncCard';
 import { useAuth } from '@/context/AuthContext';
-import { ShieldAlert, ShieldCheck, ArrowLeft, Scale, CheckCircle2, AlertCircle, RefreshCw, Zap, Banknote, Upload, Image as ImageIcon, Trash2, Printer, Palette, Store, Users, Download, Sparkles, FileText } from 'lucide-react';
+import { ShieldAlert, Utensils, ShieldCheck, ArrowLeft, Scale, CheckCircle2, AlertCircle, RefreshCw, Zap, Banknote, Upload, Image as ImageIcon, Trash2, Printer, Palette, Store, Users, Download, Sparkles, FileText } from 'lucide-react';
 import Link from 'next/link';
 import { scaleService, ScaleProtocol, WeightReading, PriceMultiplierBasis } from '@/lib/hardware/scale';
 import { getScaleBarcodeConfig, saveScaleBarcodeConfig, ScaleBarcodeConfig } from '@/lib/hardware/scale-barcode';
 import { pagoMovilMonitor, initiateGmailOAuth, extractOAuthTokenFromUrl, verifyGmailToken } from '@/lib/payments/pago-movil-gmail-monitor';
 import { updateService, CURRENT_VERSION } from '@/lib/services/update-service';
 
-export type SettingsTabId = 'branding' | 'pos_quick' | 'legal' | 'business' | 'printer' | 'scale' | 'cashiers' | 'cloud_backup' | 'payments' | 'updates';
+export type SettingsTabId = 'branding' | 'pos_quick' | 'legal' | 'business' | 'printer' | 'scale' | 'cashiers' | 'cloud_backup' | 'payments' | 'updates' | 'menu_sync';
 
 export default function DesktopSettingsPage() {
   const { isAdmin, switchToRole } = useAuth();
@@ -343,6 +344,7 @@ export default function DesktopSettingsPage() {
     { id: 'cloud_backup', label: 'Nube y Respaldos', icon: RefreshCw },
     { id: 'payments', label: 'Pagos y Gmail', icon: Zap },
     { id: 'updates', label: 'Actualizaciones', icon: Download },
+    { id: 'menu_sync', label: 'Menú Interactivo & Tablets', icon: Utensils },
   ];
 
   return (
@@ -1024,6 +1026,13 @@ export default function DesktopSettingsPage() {
 
       {/* 8. PESTAÑA: ACTUALIZACIONES DE SOFTWARE */}
       {activeTab === 'updates' && <SoftwareUpdatesSection />}
+
+      {/* 9. PESTAÑA: MENÚ INTERACTIVO Y TABLETS */}
+      {activeTab === 'menu_sync' && (
+        <div className="animate-in fade-in duration-150">
+          <InteractiveMenuSyncCard />
+        </div>
+      )}
 
       {/* Modal de Licenciamiento y HWID */}
       <LicenseActivationModal

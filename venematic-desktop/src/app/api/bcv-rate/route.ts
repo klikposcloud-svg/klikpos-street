@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { fetchLiveBcvRate } from '@/lib/services/bcv-service';
+import { scannerEmitter } from '@/lib/scanner-events';
 
 interface BcvRateResponse {
   rate: number;
@@ -18,13 +19,23 @@ let memoryCache: {
 
 const CACHE_TTL_MS = 30 * 60 * 1000; // 30 minutos
 
+const CORS_HEADERS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+};
+
+export async function OPTIONS() {
+  return new Response(null, { status: 204, headers: CORS_HEADERS });
+}
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const forceRefresh = searchParams.get('refresh') === 'true';
   const now = Date.now();
 
   if (!forceRefresh && memoryCache.data && now - memoryCache.timestamp < CACHE_TTL_MS) {
-    return NextResponse.json(memoryCache.data);
+    return NextResponse.json(memoryCache.data, { headers: CORS_HEADERS });
   }
 
   try {
@@ -40,14 +51,14 @@ export async function GET(request: Request) {
         data,
         timestamp: now,
       };
-      return NextResponse.json(data);
+      return NextResponse.json(data, { headers: CORS_HEADERS });
     }
   } catch (err) {
     console.warn('[bcv-rate API] Error fetching live BCV:', err);
   }
 
   if (memoryCache.data) {
-    return NextResponse.json(memoryCache.data);
+    return NextResponse.json(memoryCache.data, { headers: CORS_HEADERS });
   }
 
   const today = new Date().toISOString().split('T')[0];
@@ -56,7 +67,7 @@ export async function GET(request: Request) {
     date: today,
     source: 'Tasa BCV Referencial',
     updatedAt: new Date().toISOString(),
-  });
+  }, { headers: CORS_HEADERS });
 }
 
 export async function POST(request: Request) {
@@ -65,14 +76,14 @@ export async function POST(request: Request) {
     const { rate, updatedBy } = body;
 
     if (!rate || typeof rate !== 'number' || rate <= 0) {
-      return NextResponse.json({ error: 'Tasa inválida' }, { status: 400 });
+      return NextResponse.json({ error: 'Tasa inválida' }, { status: 400, headers: CORS_HEADERS });
     }
 
     const today = new Date().toISOString().split('T')[0];
     const manualRate: BcvRateResponse = {
       rate: Number(rate.toFixed(2)),
       date: today,
-      source: `Manual (${updatedBy || 'Cajero'})`,
+      source: `Manual (${updatedBy || body.source || 'Cajero'})`,
       updatedAt: new Date().toISOString(),
     };
 
@@ -81,9 +92,14 @@ export async function POST(request: Request) {
       timestamp: Date.now(),
     };
 
-    return NextResponse.json(manualRate);
+    scannerEmitter.emit('inventory_updated', {
+      bcvRate: manualRate.rate,
+      timestamp: Date.now(),
+    });
+
+    return NextResponse.json(manualRate, { headers: CORS_HEADERS });
   } catch (error) {
     console.error('Error al actualizar tasa manual:', error);
-    return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 });
+    return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500, headers: CORS_HEADERS });
   }
 }

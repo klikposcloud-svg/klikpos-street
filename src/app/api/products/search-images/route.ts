@@ -148,13 +148,23 @@ async function searchWikimedia(query: string): Promise<ImageResult[]> {
   }
 }
 
+const CORS_HEADERS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+};
+
+export async function OPTIONS() {
+  return new Response(null, { status: 204, headers: CORS_HEADERS });
+}
+
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const query = searchParams.get('q')?.trim();
   const barcode = searchParams.get('barcode')?.trim();
 
   if (!query && !barcode) {
-    return NextResponse.json({ error: 'Debes proporcionar un término de búsqueda o código de barras' }, { status: 400 });
+    return NextResponse.json({ error: 'Debes proporcionar un término de búsqueda o código de barras' }, { status: 400, headers: CORS_HEADERS });
   }
 
   const cleanQuery = query || barcode || '';
@@ -189,8 +199,10 @@ export async function GET(req: NextRequest) {
   }
 
   return NextResponse.json({
+    success: true,
     query: cleanQuery,
     count: combined.length,
     results: combined,
-  });
+    images: combined,
+  }, { headers: CORS_HEADERS });
 }

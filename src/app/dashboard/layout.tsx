@@ -10,7 +10,7 @@ import LoginModal from '@/components/LoginModal';
 import AdminPinModal from '@/components/AdminPinModal';
 import LockScreenModal from '@/components/LockScreenModal';
 import AutoUpdateModal from '@/components/AutoUpdateModal';
-import { LogOut, ShieldCheck, User, Lock, RefreshCw, CheckCircle2, Sun, Moon, Sparkles, Clock, Cloud, Smartphone, Users, X, QrCode, ShoppingCart, Package, Receipt, BarChart3, Settings, PanelLeftClose, PanelLeft, DollarSign, CreditCard, Truck, Sliders } from 'lucide-react';
+import { LogOut, ShieldCheck, User, UtensilsCrossed, Lock, RefreshCw, CheckCircle2, Sun, Moon, Sparkles, Clock, Cloud, Smartphone, Users, X, QrCode, ShoppingCart, Package, Receipt, BarChart3, Settings, PanelLeftClose, PanelLeft, DollarSign, CreditCard, Truck, Sliders } from 'lucide-react';
 import { STANDARD_RUBROS, StandardRubroId } from '@/lib/utils/business-rubros';
 import { applyBrandingToDOM, applyTheme, getCurrentTheme, ThemeMode } from '@/lib/theme';
 import CloudSyncWidget from '@/components/CloudSyncWidget';
@@ -33,6 +33,13 @@ const NAV_ITEMS: NavItem[] = [
     href: '/dashboard/pos',
     shortcut: 'F1',
     icon: <ShoppingCart className="w-5 h-5" />,
+  },
+  {
+    key: 'mesas',
+    label: 'KlikMenu Mesas',
+    href: '/dashboard/mesas',
+    shortcut: 'F11',
+    icon: <UtensilsCrossed className="w-5 h-5" />,
   },
   {
     key: 'inventory',

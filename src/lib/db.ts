@@ -1,4 +1,5 @@
 import Dexie, { Table } from 'dexie';
+import { InputGuard } from './security/input-guard';
 
 export interface LocalProduct {
   id?: number;
@@ -219,6 +220,66 @@ export class VenematicDesktopDB extends Dexie {
       inventoryMovements: '++id, productId, barcode, type, reason, timestamp',
       customerCreditPayments: '++id, customerDoc, timestamp, method',
       cashMovements: '++id, shiftId, type, timestamp',
+    });
+
+    // ========================================================================
+    // HOOKS DE SEGURIDAD AUTOMÁTICOS (INPUTGUARD SHIELD)
+    // Sanitiza automáticamente cualquier entidad antes de persistir en BD
+    // ========================================================================
+
+    // 1. Productos
+    this.products.hook('creating', (_primKey, obj) => {
+      if (obj.name) obj.name = InputGuard.sanitizeName(obj.name, 100);
+      if (obj.barcode) obj.barcode = InputGuard.sanitizeReference(obj.barcode, 50);
+      if (obj.category) obj.category = InputGuard.sanitizeName(obj.category, 60);
+      if (obj.priceUSD !== undefined) obj.priceUSD = InputGuard.sanitizeNumber(obj.priceUSD, 0);
+      if (obj.costUSD !== undefined) obj.costUSD = InputGuard.sanitizeNumber(obj.costUSD, 0);
+      if (obj.stock !== undefined) obj.stock = Math.round(InputGuard.sanitizeNumber(obj.stock, 0));
+    });
+
+    this.products.hook('updating', (mods: any) => {
+      if (mods.name !== undefined) mods.name = InputGuard.sanitizeName(mods.name, 100);
+      if (mods.barcode !== undefined) mods.barcode = InputGuard.sanitizeReference(mods.barcode, 50);
+      if (mods.category !== undefined) mods.category = InputGuard.sanitizeName(mods.category, 60);
+      if (mods.priceUSD !== undefined) mods.priceUSD = InputGuard.sanitizeNumber(mods.priceUSD, 0);
+      if (mods.costUSD !== undefined) mods.costUSD = InputGuard.sanitizeNumber(mods.costUSD, 0);
+      if (mods.stock !== undefined) mods.stock = Math.round(InputGuard.sanitizeNumber(mods.stock, 0));
+      return mods;
+    });
+
+    // 2. Ventas & Comandas
+    this.sales.hook('creating', (_primKey, obj) => {
+      if (obj.receiptNumber) obj.receiptNumber = InputGuard.sanitizeReference(obj.receiptNumber, 40);
+      if (obj.cashierName) obj.cashierName = InputGuard.sanitizeName(obj.cashierName, 60);
+      if (obj.customerName) obj.customerName = InputGuard.sanitizeName(obj.customerName, 80);
+      if (obj.customerDoc) obj.customerDoc = InputGuard.sanitizeDocument(obj.customerDoc, 20);
+      if (Array.isArray(obj.payments)) {
+        obj.payments.forEach(p => {
+          if (p.reference) p.reference = InputGuard.sanitizeReference(p.reference, 40);
+        });
+      }
+    });
+
+    // 3. Clientes
+    this.customers.hook('creating', (_primKey, obj) => {
+      if (obj.name) obj.name = InputGuard.sanitizeName(obj.name, 80);
+      if (obj.docId) obj.docId = InputGuard.sanitizeDocument(obj.docId, 20);
+      if (obj.phone) obj.phone = InputGuard.sanitizeDocument(obj.phone, 25);
+      if (obj.address) obj.address = InputGuard.sanitize(obj.address, 150);
+    });
+
+    this.customers.hook('updating', (mods: any) => {
+      if (mods.name !== undefined) mods.name = InputGuard.sanitizeName(mods.name, 80);
+      if (mods.docId !== undefined) mods.docId = InputGuard.sanitizeDocument(mods.docId, 20);
+      if (mods.phone !== undefined) mods.phone = InputGuard.sanitizeDocument(mods.phone, 25);
+      if (mods.address !== undefined) mods.address = InputGuard.sanitize(mods.address, 150);
+      return mods;
+    });
+
+    // 4. Turnos de Caja
+    this.cashShifts.hook('creating', (_primKey, obj) => {
+      if (obj.cashierName) obj.cashierName = InputGuard.sanitizeName(obj.cashierName, 60);
+      if (obj.notes) obj.notes = InputGuard.sanitize(obj.notes, 300);
     });
   }
 }

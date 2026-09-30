@@ -58,7 +58,7 @@ export default function AdminPinModal() {
               <input
                 type="password"
                 autoFocus
-                placeholder="PIN o Clave de Admin (*2026)"
+                placeholder="PIN o Clave de Administrador"
                 value={pin}
                 onChange={(e) => {
                   setPin(e.target.value);

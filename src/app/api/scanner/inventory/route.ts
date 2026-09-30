@@ -12,12 +12,13 @@ export async function OPTIONS() {
 }
 
 import masterCatalog from '@/lib/data/master-catalog.json';
+import { fetchLiveBcvRate } from '@/lib/services/bcv-service';
 
 // Caché en memoria de productos compartidos por la caja para consulta rápida del celular
 // Inicializado con el Catálogo Maestro (+130 productos) para disponibilidad inmediata
 let cachedProducts: any[] = Array.isArray(masterCatalog) && masterCatalog.length > 0 ? masterCatalog : [];
 let lastCacheUpdate = Date.now();
-let cachedBcvRate = 848.55;
+let cachedBcvRate = 857.01;
 
 export async function GET(req: NextRequest) {
   try {
@@ -25,6 +26,16 @@ export async function GET(req: NextRequest) {
     if (cachedProducts.length === 0) {
       cachedProducts = Array.isArray(masterCatalog) ? masterCatalog : [];
       scannerEmitter.emit('request_inventory', { timestamp: Date.now() });
+    }
+
+    // Asegurar que la tasa BCV esté actualizada en vivo
+    if (Date.now() - lastCacheUpdate > 15 * 60 * 1000) {
+      try {
+        const live = await fetchLiveBcvRate();
+        if (live.success && live.rate > 0) {
+          cachedBcvRate = live.rate;
+        }
+      } catch {}
     }
 
     return NextResponse.json({

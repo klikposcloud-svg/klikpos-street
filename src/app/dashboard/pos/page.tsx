@@ -2889,9 +2889,9 @@ export default function DesktopPosPage() {
             </div>
           )}
 
-          {/* MODO 4: COMIDA RÁPIDA / RESTAURANTE & FAST FOOD (2 COLUMNAS HOLGADAS & FONDO TRASLÚCIDO BLANCO) */}
+          {/* MODO 4: COMIDA RÁPIDA / RESTAURANTE & FAST FOOD (3 COLUMNAS - TARJETA BLANCA CON BORDE TEAL, BADGE CIRCULAR Y BOTÓN ADD TO CART) */}
           {posViewMode === 'fastfood' && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-2 gap-4 content-start">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-3 gap-4 xl:gap-5 content-start pt-2">
               {filteredProducts.map((p) => {
                 const isLowStock = p.stock <= p.minStock;
                 const isFixed = p.isFixedPriceVES && p.fixedPriceVES;
@@ -2901,69 +2901,77 @@ export default function DesktopPosPage() {
                   <div
                     key={p.id}
                     onClick={() => addToCart(p, 1)}
-                    className="relative h-[255px] sm:h-[280px] rounded-3xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-200 active:scale-[0.98] cursor-pointer group select-none border-2 border-slate-300 dark:border-white/20 bg-slate-900 flex flex-col justify-end"
+                    className="relative bg-white dark:bg-slate-900 border-2 border-[#008080] dark:border-teal-500 rounded-[24px] p-3.5 sm:p-4 shadow-sm hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 cursor-pointer flex flex-col justify-between items-center text-center group select-none"
                   >
-                    {/* Foto de Fondo a Pantalla Completa */}
-                    {p.image && showImages ? (
-                      <img
-                        src={p.image}
-                        alt={p.name}
-                        className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        loading="lazy"
-                      />
-                    ) : (
-                      <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-slate-800 to-slate-950 flex flex-col items-center justify-center text-slate-500">
-                        <UtensilsCrossed className="w-16 h-16 stroke-1 text-slate-600" />
+                    {/* Badge Circular de Stock en Esquina Superior Izquierda (Estilo de Referencia) */}
+                    <div className="absolute -top-2.5 -left-2.5 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#008080] text-white font-black text-xs sm:text-sm flex items-center justify-center shadow-md z-10">
+                      {p.stock}
+                    </div>
+
+                    {/* Badge Opcional Superior Derecho (Precio Fijo en Bs.) */}
+                    {isFixed && (
+                      <div className="absolute top-2 right-2 z-10">
+                        <span className="text-[9px] font-black px-1.5 py-0.5 rounded-md bg-amber-500 text-white shadow-xs">
+                          🔒 Fijo Bs.
+                        </span>
                       </div>
                     )}
 
-                    {/* Degradado suave para garantizar contraste de textos */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
-
-                    {/* Badge superior si es Precio Fijo en Bs. o Stock bajo */}
-                    <div className="absolute top-2.5 right-2.5 flex items-center gap-1.5 z-10">
-                      {isFixed && (
-                        <span className="text-[10px] font-black px-2 py-0.5 rounded-lg bg-amber-500 text-white shadow-md">
-                          🔒 Fijo Bs.
-                        </span>
+                    {/* Imagen Centrada del Producto */}
+                    <div className="w-full h-28 sm:h-32 flex items-center justify-center my-1 overflow-hidden">
+                      {p.image && showImages ? (
+                        <img
+                          src={p.image}
+                          alt={p.name}
+                          className="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-200"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-slate-300 dark:text-slate-600">
+                          <Package className="w-12 h-12 stroke-1" />
+                        </div>
                       )}
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-black/70 backdrop-blur-sm text-white border border-white/20">
-                        {p.stock} {p.unit === 'kg' ? 'kg' : 'uds'}
+                    </div>
+
+                    {/* Título / Nombre del Producto */}
+                    <h4
+                      className="font-bold text-[14px] sm:text-[15px] text-slate-900 dark:text-white leading-tight line-clamp-2 min-h-[36px] flex items-center justify-center text-center px-1"
+                      title={p.name}
+                    >
+                      {p.name}
+                    </h4>
+
+                    {/* Precio en Bolívares (VES) Prominente */}
+                    <div className="font-black text-[18px] sm:text-[20px] font-sans text-slate-950 dark:text-white tabular-numbers leading-tight text-center mt-1">
+                      {formatVES(displayVES)}
+                    </div>
+
+                    {/* Fila Secundaria: Precio en Dólares + Pill de Categoría */}
+                    <div className="flex items-center justify-center gap-1.5 mt-1 flex-wrap">
+                      <span className="text-[12px] sm:text-[13px] font-bold text-slate-700 dark:text-slate-300">
+                        ${displayUSD.toFixed(2)} USD
+                      </span>
+                      <span className="text-[10px] sm:text-[10.5px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-[#cffafe] dark:bg-teal-950/70 text-[#0f766e] dark:text-teal-300 border border-[#99f6e4] dark:border-teal-800/60 truncate max-w-[130px]">
+                        {p.category}
                       </span>
                     </div>
 
-                    {/* Caja Inferior Flotante (Blanco Traslúcido con Texto Oscuro de Máximo Contraste) */}
-                    <div className="relative m-2.5 p-3.5 rounded-2xl bg-white/95 dark:bg-white/95 backdrop-blur-md border border-white/90 text-slate-950 flex flex-col gap-1 z-10 shadow-lg">
-                      {/* Título del Plato / Producto */}
-                      <h4 className="font-black text-[15px] sm:text-[16px] leading-tight truncate" title={p.name} style={{ color: '#0f172a' }}>
-                        {p.name}
-                      </h4>
-
-                      {/* Precio en Bolívares Gigante */}
-                      <div className="font-black text-[19px] sm:text-[21px] font-sans tabular-numbers leading-tight" style={{ color: '#020617' }}>
-                        {formatVES(displayVES)}
-                      </div>
-
-                      {/* Fila Inferior: Precio en Dólares + Pill de Categoría */}
-                      <div className="flex items-center justify-between gap-2 pt-1.5 border-t border-slate-200 mt-0.5">
-                        <span className="text-xs font-black tracking-wide" style={{ color: '#1e293b' }}>
-                          ${displayUSD.toFixed(2)} USD
-                        </span>
-
-                        <span className="text-[9.5px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-slate-100 border border-slate-300 truncate max-w-[125px]" style={{ color: '#0f172a' }}>
-                          {p.category}
-                        </span>
-                      </div>
-                    </div>
+                    {/* Botón Inferior: Add to Cart */}
+                    <button
+                      type="button"
+                      className="w-full mt-3 py-2 sm:py-2.5 px-3 rounded-xl sm:rounded-2xl bg-[#008080] hover:bg-[#006666] active:bg-[#004d4d] text-white font-bold text-xs sm:text-[13px] flex items-center justify-center gap-1.5 shadow-xs hover:shadow-sm transition-all"
+                    >
+                      Add to Cart
+                    </button>
                   </div>
                 );
               })}
             </div>
           )}
 
-          {/* MODO 5: CÁPSULAS HORIZONTALES GOURMET UNIFORMES (ESTILO BODEGÓN GOURMET - IMAGEN DE REFERENCIA) */}
+          {/* MODO 5: CÁPSULAS HORIZONTALES GOURMET UNIFORMES (ESTILO BODEGÓN GOURMET EN 2 COLUMNAS HOLGADAS) */}
           {posViewMode === 'capsule' && (
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3 gap-4 content-start">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-2 gap-4 xl:gap-5 content-start pt-1">
               {filteredProducts.map((p) => {
                 const isLowStock = p.stock <= p.minStock;
                 const isFixed = p.isFixedPriceVES && p.fixedPriceVES;

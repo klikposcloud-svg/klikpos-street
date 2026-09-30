@@ -34,9 +34,41 @@ import {
   Scale,
   Copy,
   FileText,
+  Users,
+  Settings,
+  History,
+  Printer,
+  X,
+  Building2,
+  Globe,
+  Sliders,
+  Share2,
+  Phone,
+  MapPin,
+  Calculator,
+  TrendingUp,
+  Check,
+  Store,
+  Clock,
+  ArrowLeft,
+  FileSpreadsheet,
+  UserPlus,
+  PhoneCall,
+  MessageCircle,
+  Percent,
+  Edit3,
+  Laptop,
+  Radio,
+  QrCode,
+  Monitor,
+  Server,
+  Link2,
+  Unlink,
 } from 'lucide-react';
 import { removeBackgroundToWhiteCanvas } from '@/lib/background-remover';
 import { Icon } from '@iconify/react';
+import { db } from '@/lib/db';
+import masterCatalogData from '@/lib/data/master-catalog.json';
 
 interface ScannedHistoryItem {
   barcode: string;
@@ -370,6 +402,106 @@ export default function MobileScannerPage() {
   const [isSending, setIsSending] = useState(false);
   const [manualCode, setManualCode] = useState('');
 
+  // Sincronización Inalámbrica con PC / Caja de Escritorio
+  const [pcServerUrl, setPcServerUrl] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const paramServer = params.get('server') || params.get('pc');
+      if (paramServer) {
+        const full = paramServer.startsWith('http') ? paramServer : `http://${paramServer}`;
+        try { localStorage.setItem('klikpos_server_url', full); } catch {}
+        return full;
+      }
+      try {
+        const saved = localStorage.getItem('klikpos_server_url');
+        if (saved && saved.trim()) return saved.trim();
+      } catch {}
+      if (window.location.protocol.startsWith('http') && !window.location.hostname.includes('capacitor') && window.location.hostname !== 'localhost') {
+        return window.location.origin;
+      }
+    }
+    return '';
+  });
+  const [pcConnectionStatus, setPcConnectionStatus] = useState<'connected' | 'disconnected' | 'checking'>('checking');
+  const [isSatelliteMode, setIsSatelliteMode] = useState<boolean>(true);
+  const [showPcSyncModal, setShowPcSyncModal] = useState(false);
+  const [tempPcIp, setTempPcIp] = useState('');
+  const [pcTestMessage, setPcTestMessage] = useState<string | null>(null);
+  const [isTestingPc, setIsTestingPc] = useState(false);
+
+  // Helper para fetch que prepende automáticamente la IP de la PC
+  const safeApiFetch = async (path: string, options?: RequestInit): Promise<Response> => {
+    let base = (pcServerUrl || '').trim();
+    if (!base && typeof window !== 'undefined' && window.location.protocol.startsWith('http') && !window.location.hostname.includes('capacitor')) {
+      base = window.location.origin;
+    }
+    if (base) {
+      base = base.replace(/\/+$/, '');
+    }
+    const cleanPath = path.startsWith('/') ? path : `/${path}`;
+    const fullUrl = base ? `${base}${cleanPath}` : cleanPath;
+    return fetch(fullUrl, options);
+  };
+
+  // Cargar Catálogo Maestro (+130 productos) en memoria e IndexedDB
+  const handleSeedMasterCatalog = async () => {
+    if (Array.isArray(masterCatalogData) && masterCatalogData.length > 0) {
+      setInventoryList(masterCatalogData as MobileCatalogItem[]);
+      try {
+        localStorage.setItem('venematic_offline_inventory', JSON.stringify(masterCatalogData));
+        if (db.products?.bulkPut) {
+          const mapped = masterCatalogData.map((p) => ({
+            ...p,
+            updatedAt: Date.now(),
+            syncStatus: 'synced' as const,
+          }));
+          await db.products.bulkPut(mapped as any);
+        }
+      } catch {}
+      playMobileBeep();
+      safeVibrate([50, 50]);
+      alert(`✓ ¡Catálogo Maestro Inicial cargado con éxito! (${masterCatalogData.length} productos con fotos, códigos y precios)`);
+    }
+  };
+
+  // Probar enlace con la PC
+  const handleTestPcConnection = async (targetUrl?: string) => {
+    const urlToTest = (targetUrl || tempPcIp || pcServerUrl || '').trim();
+    if (!urlToTest) {
+      setPcTestMessage('Por favor escribe la IP o URL de la PC (Ej: 192.168.1.100:3000)');
+      return;
+    }
+    const formatted = urlToTest.startsWith('http') ? urlToTest : `http://${urlToTest}`;
+    setIsTestingPc(true);
+    setPcTestMessage(null);
+    try {
+      const cleanBase = formatted.replace(/\/+$/, '');
+      const t0 = performance.now();
+      const res = await fetch(`${cleanBase}/api/scanner/status`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ session, connected: true, deviceName: 'KlikPOS Móvil Tester' }),
+      });
+      const t1 = performance.now();
+      if (res.ok) {
+        setPcServerUrl(cleanBase);
+        setPcConnectionStatus('connected');
+        try { localStorage.setItem('klikpos_server_url', cleanBase); } catch {}
+        setPcTestMessage(`✓ ¡Conexión Exitosa con la PC! (${Math.round(t1 - t0)}ms) • Caja: ${session}`);
+        playMobileBeep();
+        safeVibrate([80, 80]);
+      } else {
+        setPcConnectionStatus('disconnected');
+        setPcTestMessage(`⚠️ El servidor respondió con código: ${res.status}`);
+      }
+    } catch (err: any) {
+      setPcConnectionStatus('disconnected');
+      setPcTestMessage(`❌ No se pudo conectar a ${formatted}. Verifica que la PC esté encendida en la misma red.`);
+    } finally {
+      setIsTestingPc(false);
+    }
+  };
+
   // Carrito de Venta Móvil (POS Autónomo en Celular)
   const [mobileCart, setMobileCart] = useState<MobileCartItem[]>([]);
   const [posSearch, setPosSearch] = useState('');
@@ -449,6 +581,49 @@ export default function MobileScannerPage() {
   const [isEnhancingMobileBg, setIsEnhancingMobileBg] = useState(false);
   const [isAnalyzingMobileAI, setIsAnalyzingMobileAI] = useState(false);
   const [aiDetectedToast, setAiDetectedToast] = useState<string | null>(null);
+
+  // Floating Docker y Modales de Escritorio en Móvil
+  const [showMobileSalesModal, setShowMobileSalesModal] = useState(false);
+  const [showMobileCustomersModal, setShowMobileCustomersModal] = useState(false);
+  const [showMobileClosureModal, setShowMobileClosureModal] = useState(false);
+  const [showMobileSettingsModal, setShowMobileSettingsModal] = useState(false);
+  const [showMobileBcvModal, setShowMobileBcvModal] = useState(false);
+  const [tempMobileBcvRate, setTempMobileBcvRate] = useState('');
+  const [isSyncingMobileBcv, setIsSyncingMobileBcv] = useState(false);
+  const [mobileBcvMsg, setMobileBcvMsg] = useState<string | null>(null);
+
+  // Búsqueda de Imágenes en Google / Web para Móvil
+  const [showGoogleImageModal, setShowGoogleImageModal] = useState(false);
+  const [googleImageQuery, setGoogleImageQuery] = useState('');
+  const [googleImagesResults, setGoogleImagesResults] = useState<Array<{ title: string; url: string; thumbnail: string; source: string }>>([]);
+  const [isSearchingGoogleImages, setIsSearchingGoogleImages] = useState(false);
+  const [isDownloadingGoogleImage, setIsDownloadingGoogleImage] = useState(false);
+
+  // Configuración de Empresa e Impresora Térmica
+  const [companyInfo, setCompanyInfo] = useState({
+    name: 'KlikPOS Market & Gourmet',
+    rif: 'J-50123456-7',
+    phone: '0424-8298026',
+    address: 'Av. Principal con Calle 4, Local 2',
+    footerMessage: '¡Gracias por su compra! Vuelva pronto.',
+  });
+  const [printerConfig, setPrinterConfig] = useState({
+    type: 'bluetooth' as 'bluetooth' | 'usb' | 'network' | 'none',
+    name: 'Impresora Térmica POS-58',
+    ip: '192.168.1.200',
+    port: 9100,
+    paperWidth: '58mm' as '58mm' | '80mm',
+    autoPrint: true,
+  });
+  const [printerTestAlert, setPrinterTestAlert] = useState(false);
+
+  // Base de datos de Ventas y Clientes para Modales Móviles
+  const [savedSalesList, setSavedSalesList] = useState<any[]>([]);
+  const [salesSearchQuery, setSalesSearchQuery] = useState('');
+  const [savedCustomersList, setSavedCustomersList] = useState<any[]>([]);
+  const [customersSearchQuery, setCustomersSearchQuery] = useState('');
+  const [showAddCustomerForm, setShowAddCustomerForm] = useState(false);
+  const [newCustomer, setNewCustomer] = useState({ name: '', docId: '', phone: '', address: '', creditLimit: '' });
 
   const html5QrCodeRef = useRef<Html5Qrcode | null>(null);
   const lastScannedTimeRef = useRef<number>(0);
@@ -569,12 +744,19 @@ export default function MobileScannerPage() {
 
       // Notificar conexión inmediata al abrir
       const sendStatus = (connected: boolean) => {
-        fetch('/api/scanner/status', {
+        safeApiFetch('/api/scanner/status', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ session: s, connected, deviceName }),
           keepalive: true,
-        }).catch(() => {});
+        })
+          .then((res) => {
+            if (res.ok) setPcConnectionStatus('connected');
+            else setPcConnectionStatus('disconnected');
+          })
+          .catch(() => {
+            setPcConnectionStatus('disconnected');
+          });
       };
 
       sendStatus(true);
@@ -591,7 +773,7 @@ export default function MobileScannerPage() {
       };
 
       const handleUnload = () => {
-        sendStatus(false);
+        // No desconectar inmediatamente al navegar o cambiar de app; el timeout del servidor (35s) maneja la desconexión
       };
 
       document.addEventListener('visibilitychange', handleVisibility);
@@ -654,10 +836,9 @@ export default function MobileScannerPage() {
         document.removeEventListener('visibilitychange', handleVisibility);
         window.removeEventListener('beforeunload', handleUnload);
         window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-        sendStatus(false);
       };
     }
-  }, []);
+  }, [pcServerUrl]);
 
   // Función para instalar la PWA
   const handleInstallApp = async () => {
@@ -678,24 +859,50 @@ export default function MobileScannerPage() {
   const fetchInventory = async () => {
     setIsLoadingInventory(true);
     try {
-      // Primero, cargar caché local como respaldo instantáneo mientras llega la respuesta
+      // 1. Cargar caché local como respaldo instantáneo
       try {
         const cached = localStorage.getItem('venematic_offline_inventory');
         if (cached) {
           const parsed = JSON.parse(cached);
-          if (parsed.length > 0) setInventoryList(parsed);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setInventoryList(parsed);
+          }
         }
         const cachedBcv = localStorage.getItem('venematic_offline_bcv');
         if (cachedBcv) setInventoryBcvRate(parseFloat(cachedBcv));
       } catch {}
 
-      const res = await fetch('/api/scanner/inventory');
+      // 2. Si aún no hay inventario en memoria, pre-poblar de inmediato con el Catálogo Maestro (+130 productos)
+      setInventoryList((current) => {
+        if (current.length === 0 && Array.isArray(masterCatalogData) && masterCatalogData.length > 0) {
+          try {
+            localStorage.setItem('venematic_offline_inventory', JSON.stringify(masterCatalogData));
+            if (db.products?.bulkPut) {
+              const mapped = masterCatalogData.map((p) => ({
+                ...p,
+                updatedAt: Date.now(),
+                syncStatus: 'synced' as const,
+              }));
+              db.products.bulkPut(mapped as any).catch(() => {});
+            }
+          } catch {}
+          return masterCatalogData as MobileCatalogItem[];
+        }
+        return current;
+      });
+
+      // 3. Consultar a la PC
+      const res = await safeApiFetch('/api/scanner/inventory');
       if (res.ok) {
+        setPcConnectionStatus('connected');
         const data = await res.json();
         if (Array.isArray(data.products) && data.products.length > 0) {
           setInventoryList(data.products);
           try {
             localStorage.setItem('venematic_offline_inventory', JSON.stringify(data.products));
+            if (db.products?.bulkPut) {
+              db.products.bulkPut(data.products).catch(() => {});
+            }
           } catch {}
         }
         if (typeof data.bcvRate === 'number') {
@@ -704,11 +911,20 @@ export default function MobileScannerPage() {
             localStorage.setItem('venematic_offline_bcv', String(data.bcvRate));
           } catch {}
         }
-        // Si el servidor dice que necesita sync, retornar false para reintento
         return !data.needsSync;
+      } else {
+        setPcConnectionStatus('disconnected');
       }
     } catch (e) {
       console.warn('Error cargando inventario en móvil:', e);
+      setPcConnectionStatus('disconnected');
+      // Asegurar que el catálogo maestro siempre esté activo
+      setInventoryList((current) => {
+        if (current.length === 0 && Array.isArray(masterCatalogData) && masterCatalogData.length > 0) {
+          return masterCatalogData as MobileCatalogItem[];
+        }
+        return current;
+      });
     } finally {
       setIsLoadingInventory(false);
     }
@@ -723,7 +939,13 @@ export default function MobileScannerPage() {
     let sseSource: EventSource | null = null;
     let retryInterval: NodeJS.Timeout | null = null;
     try {
-      sseSource = new EventSource('/api/scanner/events?session=caja-1');
+      let base = (pcServerUrl || '').trim();
+      if (!base && typeof window !== 'undefined' && window.location.protocol.startsWith('http') && !window.location.hostname.includes('capacitor')) {
+        base = window.location.origin;
+      }
+      base = base.replace(/\/+$/, '');
+      const sseUrl = base ? `${base}/api/scanner/events?session=${session || 'caja-1'}` : `/api/scanner/events?session=${session || 'caja-1'}`;
+      sseSource = new EventSource(sseUrl);
       sseSource.addEventListener('inventory_updated', (e: any) => {
         try {
           if (e.data) {
@@ -766,7 +988,7 @@ export default function MobileScannerPage() {
       if (retryInterval) clearInterval(retryInterval);
       clearTimeout(stopRetry);
     };
-  }, []);
+  }, [pcServerUrl]);
 
   useEffect(() => {
     if (activeTab === 'inventory' || activeTab === 'pos') {
@@ -785,6 +1007,187 @@ export default function MobileScannerPage() {
     }
   };
 
+  // 1. Búsqueda y Descarga de Fotos en Google / Web para Móvil
+  const handleSearchGoogleImages = async (q?: string) => {
+    const query = (q || googleImageQuery || prodName || prodBarcode).trim();
+    if (!query) {
+      alert('Por favor escribe el nombre del producto a buscar en Google');
+      return;
+    }
+    setGoogleImageQuery(query);
+    setIsSearchingGoogleImages(true);
+    setShowGoogleImageModal(true);
+    try {
+      const res = await safeApiFetch(`/api/products/search-images?q=${encodeURIComponent(query)}`);
+      if (res.ok) {
+        const data = await res.json();
+        const list = Array.isArray(data.images) ? data.images : (Array.isArray(data.results) ? data.results : []);
+        if (list.length > 0) {
+          setGoogleImagesResults(list);
+        } else {
+          setGoogleImagesResults([]);
+        }
+      }
+    } catch (err) {
+      console.warn('Error al buscar imágenes en Google:', err);
+    } finally {
+      setIsSearchingGoogleImages(false);
+    }
+  };
+
+  const handleSelectGoogleImage = async (imgUrl: string) => {
+    setIsDownloadingGoogleImage(true);
+    try {
+      const res = await safeApiFetch('/api/products/download-image', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: imgUrl, removeBg: true }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const finalUrl = data.savedPath || data.base64 || data.dataUrl || imgUrl;
+        setProdPhoto(finalUrl);
+        try { localStorage.setItem('venematic_last_photo', finalUrl); } catch {}
+        setShowGoogleImageModal(false);
+      } else {
+        setProdPhoto(imgUrl);
+        setShowGoogleImageModal(false);
+      }
+    } catch {
+      setProdPhoto(imgUrl);
+      setShowGoogleImageModal(false);
+    } finally {
+      setIsDownloadingGoogleImage(false);
+    }
+  };
+
+  // 2. Control de Tasa BCV Manual y Scraping en Vivo
+  const handleSaveMobileBcv = async () => {
+    const parsed = parseFloat(tempMobileBcvRate.replace(',', '.'));
+    if (!isNaN(parsed) && parsed > 0) {
+      setInventoryBcvRate(parsed);
+      setShowMobileBcvModal(false);
+      try {
+        localStorage.setItem('klikpos_bcv_rate', String(parsed));
+        localStorage.setItem('venematic_offline_bcv', String(parsed));
+        await db.settings?.put?.({ key: 'bcv_rate', value: parsed });
+      } catch {}
+      window.dispatchEvent(new CustomEvent('pos:bcv_updated', { detail: parsed }));
+      window.dispatchEvent(new CustomEvent('venematic:bcv_updated', { detail: parsed }));
+      safeApiFetch('/api/bcv/rate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rate: parsed, source: 'Ajuste Manual en Celular' }),
+      }).catch(() => {});
+      safeApiFetch('/api/scanner/inventory', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bcvRate: parsed }),
+      }).catch(() => {});
+    }
+  };
+
+  const handleScrapeMobileBcv = async () => {
+    setIsSyncingMobileBcv(true);
+    setMobileBcvMsg(null);
+    try {
+      const res = await safeApiFetch('/api/bcv/rate?refresh=true');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && typeof data.rate === 'number' && data.rate > 0) {
+          setInventoryBcvRate(data.rate);
+          setTempMobileBcvRate(data.rate.toFixed(2));
+          try {
+            localStorage.setItem('klikpos_bcv_rate', String(data.rate));
+            localStorage.setItem('venematic_offline_bcv', String(data.rate));
+            await db.settings?.put?.({ key: 'bcv_rate', value: data.rate });
+          } catch {}
+          window.dispatchEvent(new CustomEvent('pos:bcv_updated', { detail: data.rate }));
+          window.dispatchEvent(new CustomEvent('venematic:bcv_updated', { detail: data.rate }));
+          setMobileBcvMsg(`✓ Tasa BCV Oficial obtenida: Bs. ${data.rate.toFixed(2)} (${data.source || 'Scraping'})`);
+        } else {
+          setMobileBcvMsg('No se pudo obtener tasa en vivo. Verifica tu conexión.');
+        }
+      }
+    } catch {
+      setMobileBcvMsg('Error de red al consultar BCV.');
+    } finally {
+      setIsSyncingMobileBcv(false);
+    }
+  };
+
+  // 3. Cargar Ventas y Clientes para Modales
+  const loadSavedSales = async () => {
+    try {
+      const s = await db.sales?.reverse?.()?.toArray?.();
+      if (Array.isArray(s) && s.length > 0) {
+        setSavedSalesList(s);
+      } else {
+        const local = localStorage.getItem('venematic_offline_sales');
+        if (local) setSavedSalesList(JSON.parse(local));
+      }
+    } catch {}
+  };
+
+  const loadSavedCustomers = async () => {
+    try {
+      const c = await db.customers?.toArray?.();
+      if (Array.isArray(c) && c.length > 0) {
+        setSavedCustomersList(c);
+      } else {
+        const local = localStorage.getItem('venematic_offline_customers');
+        if (local) setSavedCustomersList(JSON.parse(local));
+      }
+    } catch {}
+  };
+
+  const handleAddMobileCustomer = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newCustomer.name || !newCustomer.docId) {
+      alert('Por favor ingresa nombre y cédula/RIF del cliente');
+      return;
+    }
+    const customerObj = {
+      docId: newCustomer.docId.trim(),
+      name: newCustomer.name.trim(),
+      phone: newCustomer.phone.trim(),
+      address: newCustomer.address.trim(),
+      currentCreditUSD: 0,
+      creditLimitUSD: parseFloat(newCustomer.creditLimit) || 100,
+      currentDebtUSD: 0,
+      createdAt: new Date().toISOString(),
+    };
+    try {
+      await db.customers?.add?.(customerObj);
+    } catch {
+      const prev = savedCustomersList;
+      localStorage.setItem('venematic_offline_customers', JSON.stringify([...prev, customerObj]));
+    }
+    setNewCustomer({ name: '', docId: '', phone: '', address: '', creditLimit: '' });
+    setShowAddCustomerForm(false);
+    loadSavedCustomers();
+    alert('✓ Cliente registrado exitosamente');
+  };
+
+  const handleSaveMobileSettings = (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      localStorage.setItem('klikpos_company_info', JSON.stringify(companyInfo));
+      localStorage.setItem('klikpos_printer_config', JSON.stringify(printerConfig));
+      db.settings?.put?.({ key: 'store_info', value: companyInfo }).catch(() => {});
+      alert('✓ Configuración de empresa e impresora guardada con éxito');
+      setShowMobileSettingsModal(false);
+    } catch {
+      alert('Error guardando configuración');
+    }
+  };
+
+  const handleTestMobilePrint = () => {
+    setPrinterTestAlert(true);
+    safeVibrate([50, 50, 50]);
+    setTimeout(() => setPrinterTestAlert(false), 3500);
+  };
+
   // Intentar sincronizar ventas offline hacia la PC
   const syncOfflineSalesToPC = async () => {
     try {
@@ -796,7 +1199,7 @@ export default function MobileScannerPage() {
       const remaining: any[] = [];
       for (const sale of sales) {
         try {
-          const res = await fetch('/api/scanner/sale', {
+          const res = await safeApiFetch('/api/scanner/sale', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ sale }),
@@ -981,7 +1384,7 @@ export default function MobileScannerPage() {
       return;
     }
     try {
-      const res = await fetch('/api/scanner/scan', {
+      const res = await safeApiFetch('/api/scanner/scan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -1078,7 +1481,7 @@ export default function MobileScannerPage() {
     // 1. Intentar enviar a la PC por API
     let sentToPC = false;
     try {
-      const res = await fetch('/api/scanner/sale', {
+      const res = await safeApiFetch('/api/scanner/sale', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ sale: newSale }),
@@ -1157,31 +1560,37 @@ export default function MobileScannerPage() {
     }
 
     setLastScanned(cleanCode);
-    setStatusMessage(`Enviando ${cleanCode} a la PC...`);
+    setStatusMessage(`Enviando ${cleanCode} a la PC (${session})...`);
     setIsSending(true);
 
     try {
-      const res = await fetch('/api/scanner/scan', {
+      const res = await safeApiFetch('/api/scanner/scan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ session, barcode: cleanCode }),
       });
 
       if (res.ok) {
-        setStatusMessage(`✓ ¡Enviado a caja! (${cleanCode})`);
+        setPcConnectionStatus('connected');
+        setStatusMessage(`✓ ¡Enviado a Caja PC (${session})! Código: ${cleanCode}`);
         setHistory((prev) => [
           { barcode: cleanCode, timestamp: new Date().toLocaleTimeString(), status: 'sent' },
           ...prev.slice(0, 19),
         ]);
       } else {
-        setStatusMessage(`Error enviando código`);
+        setStatusMessage(`⚠️ Código ${cleanCode} procesado`);
         setHistory((prev) => [
           { barcode: cleanCode, timestamp: new Date().toLocaleTimeString(), status: 'error' },
           ...prev.slice(0, 19),
         ]);
       }
     } catch {
-      setStatusMessage(`Sin conexión con la PC`);
+      setPcConnectionStatus('disconnected');
+      setStatusMessage(`⚠️ Sin conexión con la PC (Toca "Vincular PC" para configurar IP)`);
+      setHistory((prev) => [
+        { barcode: cleanCode, timestamp: new Date().toLocaleTimeString(), status: 'error' },
+        ...prev.slice(0, 19),
+      ]);
     } finally {
       setIsSending(false);
     }
@@ -1248,7 +1657,7 @@ export default function MobileScannerPage() {
           const bitmap = await createImageBitmap(downscaledBlob);
           const detected = await barcodeDetector.detect(bitmap);
           if (detected && detected.length > 0 && detected[0].rawValue) {
-            sendBarcodeToPC(detected[0].rawValue);
+            processDetectedBarcode(detected[0].rawValue);
             setStatusMessage(`✓ ¡Código detectado: ${detected[0].rawValue}!`);
             setIsScanningPhoto(false);
             e.target.value = '';
@@ -1267,7 +1676,7 @@ export default function MobileScannerPage() {
       }
       const decoded = await qrScanner.scanFile(downscaledFile, false);
       if (decoded) {
-        sendBarcodeToPC(decoded);
+        processDetectedBarcode(decoded);
         setStatusMessage(`✓ ¡Código detectado: ${decoded}!`);
         setIsScanningPhoto(false);
         e.target.value = '';
@@ -1289,6 +1698,28 @@ export default function MobileScannerPage() {
   const processDetectedBarcode = (code: string) => {
     const cleanCode = code.trim();
     if (!cleanCode) return;
+
+    // Detectar si es un código QR de emparejamiento desde la pantalla de la PC
+    if (cleanCode.startsWith('http://') || cleanCode.startsWith('https://')) {
+      try {
+        const urlObj = new URL(cleanCode);
+        const origin = urlObj.origin;
+        const sessionParam = urlObj.searchParams.get('session');
+        setPcServerUrl(origin);
+        if (sessionParam) setSession(sessionParam);
+        try {
+          localStorage.setItem('klikpos_server_url', origin);
+          if (sessionParam) localStorage.setItem('klikpos_session', sessionParam);
+        } catch {}
+        setPcConnectionStatus('connected');
+        setStatusMessage(`✓ ¡Vinculado exitosamente con PC (${origin})!`);
+        playMobileBeep();
+        safeVibrate([100, 50, 100]);
+        alert(`✓ ¡Vinculado exitosamente con la PC!\n\nServidor: ${origin}\nCaja: ${sessionParam || session}`);
+        return;
+      } catch {}
+    }
+
     const now = Date.now();
     if (cleanCode === lastScanned && now - lastScannedTimeRef.current < 2000) {
       return;
@@ -1307,7 +1738,7 @@ export default function MobileScannerPage() {
     if (matched) {
       setScannedProductToast(matched);
       setStatusMessage(`✓ ¡Detectado: ${matched.name}!`);
-      if (autoAddOnScan) {
+      if (autoAddOnScan && !isSatelliteMode) {
         addToMobileCart(matched);
       }
     } else {
@@ -1315,8 +1746,10 @@ export default function MobileScannerPage() {
       setStatusMessage(`✓ Código detectado: ${cleanCode}`);
     }
 
-    // Enviar a la PC
-    sendBarcodeToPC(cleanCode);
+    // Enviar a la PC si está en Modo Satélite
+    if (isSatelliteMode) {
+      sendBarcodeToPC(cleanCode);
+    }
   };
 
   // Detener cámara y limpiar recursos
@@ -1499,7 +1932,7 @@ export default function MobileScannerPage() {
 
                   // 3. ENVIAR FOTO MEJORADA A LA PC
                   setIsSendingPhoto(true);
-                  return fetch('/api/scanner/upload-photo', {
+                  return safeApiFetch('/api/scanner/upload-photo', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -1530,7 +1963,7 @@ export default function MobileScannerPage() {
 
               // 4. Auto-reconocimiento con IA (Google Vision / Gemini) si está configurado
               setIsAnalyzingMobileAI(true);
-              fetch('/api/vision/analyze-product', {
+              safeApiFetch('/api/vision/analyze-product', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ image: compressedDataUrl }),
@@ -1598,7 +2031,7 @@ export default function MobileScannerPage() {
 
     setIsCreatingProd(true);
     try {
-      const res = await fetch('/api/scanner/create-product', {
+      const res = await safeApiFetch('/api/scanner/create-product', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -1640,7 +2073,7 @@ export default function MobileScannerPage() {
     if (!prodPhoto) return;
     setIsSendingPhoto(true);
     try {
-      const res = await fetch('/api/scanner/upload-photo', {
+      const res = await safeApiFetch('/api/scanner/upload-photo', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -1670,82 +2103,77 @@ export default function MobileScannerPage() {
   return (
     <div className="h-[100dvh] max-h-[100dvh] w-full bg-[var(--industrial-bg,#ffffff)] flex flex-col font-sans text-slate-900 select-none overflow-hidden pb-[60px]">
       {/* Top Mobile Bar */}
-      <header className="bg-white border-b border-slate-300 px-4 py-2.5 sticky top-0 z-40 flex items-center justify-between shadow-xs shrink-0">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-[var(--brand-primary,#0369a1)] text-white flex items-center justify-center font-black text-sm shadow-xs">
+      <header className="bg-white border-b border-slate-300 px-3.5 py-2 sticky top-0 z-40 flex items-center justify-between shadow-xs shrink-0">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-xl bg-[var(--brand-primary,#0369a1)] text-white flex items-center justify-center font-black text-sm shadow-xs">
             K
           </div>
           <div>
             <h1 className="text-sm font-black text-slate-900 leading-tight tracking-tight">
               KlikPOS Móvil
             </h1>
-            <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
+            <div className="flex items-center gap-1.5 text-[10px] text-slate-500 font-medium">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              <span>Conectado a <b className="text-slate-800">{session}</b></span>
+              <span>Caja <b className="text-slate-800">{session}</b></span>
             </div>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
-          {/* Tasa BCV Visible en la esquina superior derecha */}
-          <div className="flex items-center gap-1.5 px-2.5 py-1 bg-[var(--brand-light,#f0f9ff)] border border-[var(--brand-border,#7dd3fc)] rounded-xl shadow-2xs">
+          {/* Tasa BCV Visible y Táctil para Ajuste Rápido */}
+          <button
+            type="button"
+            onClick={() => {
+              setTempMobileBcvRate(inventoryBcvRate.toFixed(2));
+              setMobileBcvMsg(null);
+              setShowMobileBcvModal(true);
+            }}
+            className="flex items-center gap-1.5 px-2.5 py-1 bg-sky-50 hover:bg-sky-100 active:scale-95 border border-sky-300 rounded-xl shadow-2xs transition-all cursor-pointer"
+            title="Tocar para actualizar o cambiar tasa BCV"
+          >
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
             <div className="text-right leading-none">
-              <span className="text-[10px] uppercase font-bold text-[var(--brand-primary,#0369a1)] block tracking-tight">Tasa BCV</span>
-              <span className="font-mono font-black text-xs text-[var(--brand-hover,#075985)] tabular-numbers">
+              <span className="text-[9px] uppercase font-bold text-sky-700 block tracking-tight">BCV</span>
+              <span className="font-mono font-black text-xs text-sky-950 tabular-numbers">
                 Bs. {inventoryBcvRate.toFixed(2)}
               </span>
             </div>
-          </div>
+          </button>
 
-          {isInstallable && !isInstalled && (
-            <button
-              onClick={handleInstallApp}
-              className="px-2.5 py-1 bg-[var(--brand-primary,#0369a1)] hover:opacity-90 text-white rounded-full text-xs font-black flex items-center gap-1 shadow-xs animate-bounce"
-            >
-              <Download className="w-3 h-3" />
-              <span>Instalar</span>
-            </button>
-          )}
-
-          <div className="px-2.5 py-1 bg-emerald-50 border border-emerald-300 text-emerald-800 rounded-full text-xs font-bold flex items-center gap-1">
-            <Wifi className="w-3 h-3" />
-            <span>Wi-Fi OK</span>
-          </div>
+          {/* Botón Interactivo de Enlace y Sincronización con la PC */}
+          <button
+            type="button"
+            onClick={() => {
+              setTempPcIp(pcServerUrl || '');
+              setPcTestMessage(null);
+              setShowPcSyncModal(true);
+            }}
+            className={`px-2.5 py-1 border rounded-xl text-[11px] font-black flex items-center gap-1.5 shadow-2xs active:scale-95 transition-all ${
+              pcConnectionStatus === 'connected'
+                ? 'bg-emerald-50 border-emerald-300 text-emerald-800 hover:bg-emerald-100'
+                : 'bg-amber-50 border-amber-300 text-amber-800 hover:bg-amber-100'
+            }`}
+            title="Configuración de Enlace Inalámbrico con PC"
+          >
+            <span className={`w-2 h-2 rounded-full ${pcConnectionStatus === 'connected' ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
+            <Laptop className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">{pcConnectionStatus === 'connected' ? 'PC Enlazada' : 'Vincular PC'}</span>
+          </button>
         </div>
       </header>
 
-      {/* Banner de Instalación PWA si el usuario abre en navegador */}
-      {!isInstalled && (
-        <div className="bg-gradient-to-r from-[var(--brand-primary,#0369a1)] to-[var(--brand-hover,#075985)] text-white px-4 py-2.5 flex items-center justify-between shadow-xs">
-          <div className="flex items-center gap-2.5">
-            <span className="text-xl">📲</span>
-            <div>
-              <p className="text-xs font-black leading-tight">Instala KlikPOS en tu Celular</p>
-              <p className="text-xs text-white/80">Acceso directo como app nativa a pantalla completa</p>
-            </div>
-          </div>
-          <button
-            onClick={handleInstallApp}
-            className="px-3 py-1.5 bg-white text-sky-900 rounded-lg text-xs font-black shadow-sm shrink-0 active:scale-95"
-          >
-            Instalar
-          </button>
-        </div>
-      )}
-
       {/* Banner de Ventas Pendientes Offline (Contingencia sin Luz) */}
       {offlinePendingSalesCount > 0 && (
-        <div className="bg-amber-500 text-slate-900 px-4 py-2 flex items-center justify-between shadow-xs">
-          <div className="flex items-center gap-2 text-xs font-bold">
+        <div className="bg-amber-500 text-slate-900 px-4 py-1.5 flex items-center justify-between shadow-xs shrink-0 text-xs font-bold">
+          <div className="flex items-center gap-2">
             <span>⚡</span>
-            <span>{offlinePendingSalesCount} venta(s) guardadas en celular (Modo Contingencia)</span>
+            <span>{offlinePendingSalesCount} venta(s) offline pendientes</span>
           </div>
           <button
             onClick={syncOfflineSalesToPC}
-            className="px-2.5 py-1 bg-white text-slate-900 rounded-lg text-xs font-black shadow-xs active:scale-95"
+            className="px-2.5 py-0.5 bg-white text-slate-900 rounded-lg text-xs font-black shadow-xs active:scale-95"
           >
-            Sincronizar a PC
+            Sincronizar
           </button>
         </div>
       )}
@@ -1771,218 +2199,270 @@ export default function MobileScannerPage() {
       </div>
 
       {/* ========================================================================= */}
-      {/* PESTAÑA 1 (NAV DOCK 1): PANTALLA COMPLETA DE VENTA ACTUAL / COBRO         */}
+      {/* PESTAÑA 1 (NAV DOCK 1): POS AUTÓNOMO CON CASHIER DISPLAY FRAME & 2-ROW GRID */}
       {/* ========================================================================= */}
       {activeTab === 'pos' && (
-        <main className="flex-1 min-h-0 flex flex-col overflow-hidden relative">
-          {/* Cabecera Fija Superior: Sincronizar + Ticket ID + Tasa BCV */}
-          <div className="p-2.5 bg-white border-b border-slate-200 shadow-2xs shrink-0 flex items-center justify-between">
-            {/* Parte Superior Izquierda: Botón Sincronizar */}
-            <button
-              type="button"
-              onClick={async () => {
-                if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(30);
-                setIsSyncingSales(true);
-                await syncOfflineSalesToPC();
-                await fetchInventory();
-                setIsSyncingSales(false);
-                setStatusMessage('✓ Sincronizado con éxito');
-                setTimeout(() => setStatusMessage('Listo para operar'), 2000);
-              }}
-              disabled={isSyncingSales}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 bg-slate-900 hover:bg-slate-800 active:scale-95 text-white rounded-xl shadow-xs text-xs font-black transition-all border border-slate-700 disabled:opacity-50"
-              title="Sincronizar ventas y catálogo con la PC"
-            >
-              <RefreshCw className={`w-3.5 h-3.5 text-emerald-400 ${isSyncingSales ? 'animate-spin' : ''}`} />
-              <span>{isSyncingSales ? 'Sincronizando...' : 'Sincronizar'}</span>
-              {offlinePendingSalesCount > 0 && (
-                <span className="px-1.5 py-0.2 bg-amber-500 text-slate-950 text-[10px] font-black rounded-full animate-pulse">
-                  {offlinePendingSalesCount}
-                </span>
-              )}
-            </button>
+        <main className="flex-1 min-h-0 flex flex-col overflow-hidden relative bg-slate-100">
+          
+          {/* 1. FRAME / MOCKUP DEL DISPLAY DE CAJA REGISTRADORA DIGITAL */}
+          <div className="p-2.5 pb-1 shrink-0">
+            <div className="bg-gradient-to-b from-slate-900 via-[#0a192f] to-slate-950 rounded-2xl p-3 border-2 border-slate-700/80 shadow-xl text-white relative overflow-hidden">
+              {/* Luz sutil de reflejo del display */}
+              <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent" />
 
-            {/* Identificador de Ticket en Curso */}
-            <div className="text-center">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200 block">
-                Venta Activa
-              </span>
-            </div>
+              {/* Barra Superior del Display */}
+              <div className="flex items-center justify-between pb-1.5 border-b border-slate-800/80 text-[10px] font-mono text-cyan-300">
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+                  <span className="font-black uppercase tracking-wider text-emerald-400">DISPLAY DE CAJA</span>
+                  <span className="text-slate-500">|</span>
+                  <span className="text-slate-300">TICKET ACTIVO</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="px-2 py-0.5 rounded-md bg-white/10 text-[10px] font-bold text-slate-200">
+                    {mobileCart.reduce((s, i) => s + i.qty, 0)} arts
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setTempMobileBcvRate(inventoryBcvRate.toFixed(2));
+                      setShowMobileBcvModal(true);
+                    }}
+                    className="text-amber-300 font-bold hover:underline"
+                  >
+                    BCV: Bs. {inventoryBcvRate.toFixed(2)}
+                  </button>
+                </div>
+              </div>
 
-            {/* Parte Superior Derecha: Tasa BCV Visible */}
-            <div className="flex items-center gap-1.5 px-2 py-1 bg-sky-50 border border-sky-300 rounded-xl shadow-2xs">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <div className="text-right leading-tight">
-                <span className="text-[9px] font-bold uppercase text-sky-700 block tracking-tight">Tasa BCV</span>
-                <span className="text-xs font-mono font-black text-sky-950 tabular-numbers">
-                  Bs. {inventoryBcvRate.toFixed(2)}
-                </span>
+              {/* LECTURA DIGITAL GIGANTE TIPO LED/LCD */}
+              <div className="py-2.5 flex items-center justify-between">
+                <div>
+                  <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400 block font-semibold">
+                    TOTAL VENTA
+                  </span>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-cyan-400 font-mono text-xl font-bold">$</span>
+                    <span
+                      className="font-mono font-black text-3xl sm:text-4xl text-white tracking-tight tabular-numbers"
+                      style={{ textShadow: '0 0 15px rgba(34, 211, 238, 0.4)' }}
+                    >
+                      {mobileTotalUSD.toFixed(2)}
+                    </span>
+                    <span className="text-[11px] font-mono text-slate-400 uppercase ml-1">USD</span>
+                  </div>
+                </div>
+
+                <div className="text-right">
+                  <span className="text-[10px] font-mono uppercase tracking-widest text-emerald-400 block font-semibold">
+                    EN BOLÍVARES (BCV)
+                  </span>
+                  <span className="font-mono font-black text-lg sm:text-xl text-emerald-400 tracking-tight tabular-numbers block">
+                    Bs. {mobileTotalVES.toFixed(2)}
+                  </span>
+                </div>
+              </div>
+
+              {/* MARQUEE / TICKER DEL ÚLTIMO PRODUCTO AGREGADO O ESTADO */}
+              <div className="bg-black/50 border border-slate-800 rounded-xl px-2.5 py-1.5 flex items-center justify-between text-[11px] font-mono">
+                <div className="flex items-center gap-1.5 truncate">
+                  <span className="text-cyan-400 font-bold">►</span>
+                  {mobileCart.length > 0 ? (
+                    <span className="text-slate-200 truncate font-bold">
+                      Último: {mobileCart[mobileCart.length - 1]?.name} (${mobileCart[mobileCart.length - 1]?.priceUSD.toFixed(2)})
+                    </span>
+                  ) : (
+                    <span className="text-slate-400 italic">Listo • Toca un producto abajo o escanea</span>
+                  )}
+                </div>
+
+                {mobileCart.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setShowCartDrawer(true)}
+                    className="text-cyan-300 hover:text-cyan-200 font-bold underline shrink-0 ml-2 text-[10px]"
+                  >
+                    Ver Renglones ({mobileCart.length})
+                  </button>
+                )}
+              </div>
+
+              {/* ACCIONES RÁPIDAS DEL DISPLAY */}
+              <div className="grid grid-cols-4 gap-1.5 pt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (mobileCart.length === 0) {
+                      alert('El carrito está vacío. Agrega productos abajo.');
+                      return;
+                    }
+                    setShowMobilePaymentModal(true);
+                  }}
+                  disabled={mobileCart.length === 0}
+                  className="col-span-2 py-2 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 disabled:opacity-40 text-white font-black text-xs rounded-xl shadow-lg flex items-center justify-center gap-1.5 active:scale-95 transition-all"
+                >
+                  <CreditCard className="w-4 h-4" />
+                  <span>COBRAR (${mobileTotalUSD.toFixed(2)})</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setShowQuickSaleModal(true)}
+                  className="py-2 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 font-bold text-[11px] rounded-xl flex items-center justify-center gap-1 active:scale-95 transition-all"
+                  title="Cobro rápido por monto"
+                >
+                  <span>⚡ Rápido</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (mobileCart.length === 0) return;
+                    if (confirm('¿Vaciar los productos de la venta actual?')) {
+                      clearMobileCart();
+                    }
+                  }}
+                  disabled={mobileCart.length === 0}
+                  className="py-2 bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 disabled:opacity-30 font-bold text-[11px] rounded-xl flex items-center justify-center gap-1 active:scale-95 transition-all"
+                  title="Vaciar carrito"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Vaciar</span>
+                </button>
               </div>
             </div>
           </div>
 
-          {/* CUERPO CENTRAL SCROLEABLE: SOLO LOS ARTÍCULOS */}
-          <div className="flex-1 min-h-0 overflow-y-auto p-3 space-y-2.5 touch-pan-y overscroll-contain">
-            {/* Estado cuando el carrito está vacío */}
-            {mobileCart.length === 0 ? (
-              <div className="bg-white p-6 rounded-3xl border border-dashed border-slate-300 text-center space-y-3 mt-4 shadow-xs">
-                <div className="w-14 h-14 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto text-2xl shadow-xs">
-                  🧾
-                </div>
-                <div className="space-y-1">
-                  <h4 className="font-black text-base text-slate-900">Venta Lista para Cobrar</h4>
-                  <p className="text-xs text-slate-500 max-w-xs mx-auto leading-relaxed">
-                    Aún no hay productos en esta compra. Toca <b>Stock</b> para agregarlos con un toque, usa la <b>Balanza</b> o el <b>Escáner</b>.
-                  </p>
-                </div>
-                <div className="flex flex-col gap-2 pt-1 max-w-xs mx-auto">
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab('inventory')}
-                    className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white text-xs font-black rounded-xl shadow-md flex items-center justify-center gap-2 transition-all"
-                  >
-                    <ShoppingBag className="w-4 h-4" />
-                    <span>📦 Ir a Stock para Agregar Productos</span>
-                  </button>
-                  <div className="grid grid-cols-2 gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setActiveTab('gun')}
-                      className="py-2 bg-sky-600 hover:bg-sky-700 text-white text-xs font-black rounded-xl shadow-xs flex items-center justify-center gap-1.5"
-                    >
-                      <ScanLine className="w-4 h-4" />
-                      <span>⚡ Escáner</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setActiveTab('scale')}
-                      className="py-2 bg-cyan-700 hover:bg-cyan-800 text-white text-xs font-black rounded-xl shadow-xs flex items-center justify-center gap-1.5"
-                    >
-                      <Scale className="w-4 h-4" />
-                      <span>⚖️ Balanza</span>
-                    </button>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setShowQuickSaleModal(true)}
-                    className="w-full py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black text-xs rounded-xl shadow-md flex items-center justify-center gap-2 border border-amber-400 active:scale-98 transition-all"
-                  >
-                    <span>⚡ Cobro Rápido por Monto (Comida / Ambulante)</span>
-                  </button>
-                </div>
-              </div>
-            ) : (
-              /* Lista de Renglones de la Venta en Pantalla Completa */
-              <div className="space-y-2">
-                <div className="flex items-center justify-between px-1">
-                  <span className="text-xs font-black text-slate-800 uppercase tracking-tight flex items-center gap-1.5">
-                    <ShoppingCart className="w-4 h-4 text-emerald-600" />
-                    <span>Productos en Venta ({mobileCart.reduce((sum, i) => sum + i.qty, 0)} unidades)</span>
-                  </span>
-                  <button
-                    type="button"
-                    onClick={clearMobileCart}
-                    className="px-2 py-0.5 text-[11px] font-bold text-rose-600 bg-rose-50 hover:bg-rose-100 rounded-lg flex items-center gap-1 transition-all active:scale-95"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                    <span>Vaciar</span>
-                  </button>
-                </div>
+          {/* 2. BARRA DE CATEGORÍAS & BÚSQUEDA RÁPIDA */}
+          <div className="px-2.5 py-1 shrink-0 space-y-1.5">
+            {/* Buscador Rápido */}
+            <div className="relative">
+              <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Buscar en el catálogo por nombre o código..."
+                value={posSearch}
+                onChange={(e) => setPosSearch(e.target.value)}
+                className="w-full pl-8 pr-3 py-1.5 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-900 outline-none focus:ring-2 focus:ring-sky-500 shadow-2xs"
+              />
+              {posSearch && (
+                <button
+                  type="button"
+                  onClick={() => setPosSearch('')}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 text-xs font-bold"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
 
-                <div className="space-y-2">
-                  {mobileCart.map((item) => (
+            {/* Píldoras de Categorías Horizontales */}
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none touch-pan-x">
+              {['Todos', ...Array.from(new Set(inventoryList.map((p) => p.category).filter(Boolean)))].map((cat) => (
+                <button
+                  key={cat}
+                  type="button"
+                  onClick={() => {
+                    safeVibrate(15);
+                    setSelectedMobileCategory(cat);
+                  }}
+                  className={`px-3 py-1 rounded-xl text-[11px] font-black shrink-0 transition-all active:scale-95 ${
+                    selectedMobileCategory === cat
+                      ? 'bg-slate-900 text-white shadow-xs'
+                      : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* 3. GRID DESLIZABLE DE 2 FILAS CON CONTENEDORES DE PRODUCTOS (TOUCH RÁPIDO) */}
+          <div className="flex-1 min-h-0 overflow-y-auto px-2.5 pb-20 touch-pan-y">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 py-1">
+              {inventoryList
+                .filter((p) => {
+                  const matchCat = selectedMobileCategory === 'Todos' || p.category === selectedMobileCategory;
+                  const q = posSearch.trim().toLowerCase();
+                  const matchQ = !q || p.name.toLowerCase().includes(q) || p.barcode.toLowerCase().includes(q);
+                  return matchCat && matchQ;
+                })
+                .map((p, idx) => {
+                  const inCart = mobileCart.find((c) => c.barcode === p.barcode);
+                  const priceVES = p.priceUSD * inventoryBcvRate;
+                  return (
                     <div
-                      key={item.barcode}
-                      className="py-2.5 px-3 min-h-[58px] bg-white rounded-xl border border-slate-200/90 shadow-2xs hover:border-slate-300 flex items-center justify-between gap-2.5 transition-all"
+                      key={p.barcode || idx}
+                      onClick={() => {
+                        safeVibrate(25);
+                        playMobileBeep();
+                        addToMobileCart(p);
+                      }}
+                      className="bg-white rounded-2xl p-2.5 border-2 border-slate-200/90 hover:border-emerald-500 shadow-xs hover:shadow-md flex flex-col justify-between cursor-pointer active:scale-95 transition-all group relative overflow-hidden"
                     >
-                      {/* Imagen o Ícono */}
-                      <div className="w-11 h-11 rounded-lg bg-slate-100 border border-slate-200 shrink-0 overflow-hidden flex items-center justify-center shadow-2xs">
-                        {item.image ? (
-                          <img src={item.image} alt={item.name} className="w-full h-full object-contain" />
+                      {/* Badge de cantidad en carrito */}
+                      {inCart && (
+                        <div className="absolute top-2 right-2 z-10 w-6 h-6 rounded-full bg-emerald-600 text-white font-black text-xs flex items-center justify-center shadow-md animate-in zoom-in-50">
+                          {inCart.qty}
+                        </div>
+                      )}
+
+                      {/* Imagen o Icono */}
+                      <div className="w-full h-20 rounded-xl bg-slate-50 border border-slate-100 overflow-hidden flex items-center justify-center mb-1.5 shrink-0">
+                        {p.image ? (
+                          <img src={p.image} alt={p.name} className="w-full h-full object-contain p-1 group-hover:scale-105 transition-transform" />
                         ) : (
-                          <Tag className="w-5 h-5 text-slate-400" />
+                          <div className="p-2 text-slate-700">
+                            {getMobileProductIcon(p, idx % 2 === 0)}
+                          </div>
                         )}
                       </div>
 
-                      {/* Información del Ítem: Nombre y Precio Unitario */}
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs font-bold text-slate-900 truncate leading-tight">
-                          {item.name}
-                        </p>
-                        <p className="text-[10px] font-mono text-slate-500 mt-0.5">
-                          ${item.priceUSD.toFixed(2)} c/u
-                          <span className="text-slate-400 ml-1">
-                            ≈ Bs. {(item.priceUSD * inventoryBcvRate).toFixed(2)}
+                      {/* Título */}
+                      <div className="min-w-0 flex-1">
+                        <h4 className="font-extrabold text-xs text-slate-900 line-clamp-2 leading-tight min-h-[30px]">
+                          {p.name}
+                        </h4>
+                        <span className="text-[9px] font-mono text-slate-400 block truncate mt-0.5">
+                          {p.category || 'General'}
+                        </span>
+                      </div>
+
+                      {/* Precios & Botón + */}
+                      <div className="flex items-center justify-between pt-1.5 mt-1 border-t border-slate-100">
+                        <div>
+                          <span className="font-mono font-black text-xs sm:text-sm text-slate-900 block tabular-numbers leading-tight">
+                            ${p.priceUSD.toFixed(2)}
                           </span>
-                        </p>
-                      </div>
+                          <span className="font-mono text-[9px] font-bold text-emerald-700 block tabular-numbers">
+                            Bs. {priceVES.toFixed(2)}
+                          </span>
+                        </div>
 
-                      {/* Control de Cantidad (+ / - / Numpad) */}
-                      <div className="flex items-center gap-0.5 bg-slate-100 p-0.5 rounded-lg border border-slate-200 shrink-0">
-                        <button
-                          type="button"
-                          onClick={() => updateMobileCartQty(item.barcode, -1)}
-                          className="w-11 h-11 rounded-md bg-white text-slate-800 font-bold text-xs flex items-center justify-center shadow-2xs active:scale-90"
-                          title="Restar 1"
-                        >
-                          <Minus className="w-3 h-3" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            openNumpad(
-                              `Cantidad: ${item.name}`,
-                              item.qty,
-                              false,
-                              (val) => {
-                                const newQty = Math.max(1, Math.round(val));
-                                setMobileCart((prev) =>
-                                  prev.map((c) =>
-                                    c.barcode === item.barcode
-                                      ? { ...c, qty: newQty, totalUSD: newQty * c.priceUSD }
-                                      : c
-                                  )
-                                );
-                              }
-                            )
-                          }
-                          className="min-w-[44px] h-11 px-1 rounded-md bg-emerald-50 border border-emerald-300 text-emerald-900 font-mono font-bold text-xs flex items-center justify-center active:scale-95"
-                          title="Tocar para editar con teclado"
-                        >
-                          {item.qty}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => updateMobileCartQty(item.barcode, 1)}
-                          className="w-11 h-11 rounded-md bg-emerald-700 text-white font-bold text-xs flex items-center justify-center shadow-xs active:scale-90"
-                          title="Sumar 1"
-                        >
-                          <Plus className="w-3 h-3" />
-                        </button>
+                        <div className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-300 flex items-center justify-center font-bold group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                          <Plus className="w-4 h-4" />
+                        </div>
                       </div>
-
-                      {/* Subtotal del Renglón */}
-                      <div className="text-right shrink-0 min-w-[65px]">
-                        <span className="font-mono font-bold text-xs text-slate-900 block tabular-numbers leading-tight">
-                          ${item.totalUSD.toFixed(2)}
-                        </span>
-                        <span className="font-mono text-[10px] text-slate-500 block tabular-numbers mt-0.5">
-                          Bs. {(item.totalUSD * inventoryBcvRate).toFixed(2)}
-                        </span>
-                      </div>
-
-                      {/* Botón Devolución / Eliminar Ítem */}
-                      <button
-                        type="button"
-                        onClick={() => removeMobileCartItem(item.barcode)}
-                        className="text-slate-400 hover:text-rose-600 hover:bg-rose-50 p-1.5 rounded-lg transition-colors active:scale-90"
-                        title="Quitar de la venta"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
                     </div>
-                  ))}
-                </div>
+                  );
+                })}
+            </div>
+
+            {inventoryList.length === 0 && !isLoadingInventory && (
+              <div className="bg-white p-6 rounded-2xl border border-dashed border-slate-300 text-center space-y-2 mt-4">
+                <p className="text-3xl">📦</p>
+                <p className="text-xs font-bold text-slate-700">Sin productos en el catálogo</p>
+                <p className="text-[11px] text-slate-500">
+                  Toca el botón para sincronizar con la base de datos de la computadora.
+                </p>
+                <button
+                  type="button"
+                  onClick={fetchInventory}
+                  className="px-4 py-2 bg-sky-700 text-white text-xs font-bold rounded-xl mt-2"
+                >
+                  Cargar Catálogo
+                </button>
               </div>
             )}
           </div>
@@ -3211,6 +3691,80 @@ export default function MobileScannerPage() {
             className="hidden"
           />
 
+          {/* Selector de Modo: Satélite PC vs Autónomo */}
+          <div className="bg-slate-900 p-1.5 rounded-2xl border border-slate-800 flex items-center gap-1 shadow-md">
+            <button
+              type="button"
+              onClick={() => {
+                safeVibrate(20);
+                setIsSatelliteMode(true);
+              }}
+              className={`flex-1 py-2 px-2.5 rounded-xl font-black text-xs flex items-center justify-center gap-1.5 transition-all ${
+                isSatelliteMode
+                  ? 'bg-gradient-to-r from-sky-600 to-cyan-600 text-white shadow-md'
+                  : 'text-slate-400 hover:text-white hover:bg-slate-800'
+              }`}
+            >
+              <Radio className={`w-3.5 h-3.5 ${isSatelliteMode ? 'animate-pulse text-cyan-300' : ''}`} />
+              <span>📡 Modo Satélite (Enviar a PC)</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                safeVibrate(20);
+                setIsSatelliteMode(false);
+              }}
+              className={`flex-1 py-2 px-2.5 rounded-xl font-black text-xs flex items-center justify-center gap-1.5 transition-all ${
+                !isSatelliteMode
+                  ? 'bg-emerald-600 text-white shadow-md'
+                  : 'text-slate-400 hover:text-white hover:bg-slate-800'
+              }`}
+            >
+              <ShoppingCart className="w-3.5 h-3.5 text-emerald-300" />
+              <span>🛒 Autónomo (Celular)</span>
+            </button>
+          </div>
+
+          {/* Barra de Estado de Enlace y Catálogo */}
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setTempPcIp(pcServerUrl || '');
+                setPcTestMessage(null);
+                setShowPcSyncModal(true);
+              }}
+              className={`flex-1 py-2 px-3 rounded-xl border font-bold text-xs flex items-center justify-between transition-all active:scale-[0.99] ${
+                pcConnectionStatus === 'connected'
+                  ? 'bg-emerald-50/90 border-emerald-300 text-emerald-900 shadow-2xs'
+                  : 'bg-amber-50/90 border-amber-300 text-amber-900 shadow-2xs'
+              }`}
+            >
+              <div className="flex items-center gap-2 min-w-0">
+                <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${pcConnectionStatus === 'connected' ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
+                <span className="truncate text-[11px] font-black">
+                  {pcConnectionStatus === 'connected'
+                    ? `Enlazado: ${pcServerUrl || 'PC Local'} (${session})`
+                    : 'Sin Enlace PC (Toca para vincular)'}
+                </span>
+              </div>
+              <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-md bg-white border border-slate-200 shrink-0 ml-1">
+                Ajustar IP
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={handleSeedMasterCatalog}
+              className="py-2 px-3 bg-slate-900 hover:bg-slate-800 active:scale-95 text-cyan-300 border border-slate-700 rounded-xl font-black text-[11px] flex items-center gap-1.5 shrink-0 shadow-xs"
+              title="Cargar Catálogo Maestro con +130 productos venezolanos"
+            >
+              <PackagePlus className="w-3.5 h-3.5 text-cyan-400" />
+              <span>+130 Catálogo</span>
+            </button>
+          </div>
+
           {/* Barra de Acciones Rápidas del Escáner */}
           <div className="flex items-center gap-2">
             <button
@@ -3614,7 +4168,7 @@ export default function MobileScannerPage() {
                       onClick={() => {
                         if (!prodPhoto) return;
                         setIsAnalyzingMobileAI(true);
-                        fetch('/api/vision/analyze-product', {
+                        safeApiFetch('/api/vision/analyze-product', {
                           method: 'POST',
                           headers: { 'Content-Type': 'application/json' },
                           body: JSON.stringify({ image: prodPhoto }),
@@ -3659,23 +4213,35 @@ export default function MobileScannerPage() {
                   )}
                 </div>
               ) : (
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="w-full h-36 border-2 border-dashed border-slate-300 hover:border-sky-500 hover:bg-sky-50/40 rounded-xl flex flex-col items-center justify-center gap-2 text-slate-500 transition-colors"
-                >
-                  <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600">
-                    <Camera className="w-5 h-5" />
-                  </div>
-                  <div className="text-center">
-                    <span className="text-xs font-bold text-sky-700 block">
-                      Tomar Foto con Cámara
-                    </span>
-                    <span className="text-[10px] text-slate-400">
-                      o elegir desde la galería
-                    </span>
-                  </div>
-                </button>
+                <div className="grid grid-cols-2 gap-2.5">
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="h-36 border-2 border-dashed border-slate-300 hover:border-sky-500 hover:bg-sky-50/40 rounded-2xl flex flex-col items-center justify-center gap-1.5 text-slate-600 transition-colors active:scale-98 shadow-2xs"
+                  >
+                    <div className="w-10 h-10 rounded-full bg-sky-100 text-sky-700 flex items-center justify-center">
+                      <Camera className="w-5 h-5" />
+                    </div>
+                    <span className="text-xs font-bold text-slate-800">Tomar Foto</span>
+                    <span className="text-[10px] text-slate-400">Cámara o Galería</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const q = (prodName || prodBarcode || '').trim();
+                      setGoogleImageQuery(q);
+                      handleSearchGoogleImages(q);
+                    }}
+                    className="h-36 border-2 border-dashed border-emerald-300 hover:border-emerald-500 hover:bg-emerald-50/40 rounded-2xl flex flex-col items-center justify-center gap-1.5 text-slate-600 transition-colors active:scale-98 shadow-2xs bg-emerald-50/30"
+                  >
+                    <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center">
+                      <Globe className="w-5 h-5" />
+                    </div>
+                    <span className="text-xs font-bold text-emerald-800">Buscar en Google</span>
+                    <span className="text-[10px] text-emerald-600 font-bold">1-Clic + Fondo Blanco</span>
+                  </button>
+                </div>
               )}
             </div>
 
@@ -3833,7 +4399,7 @@ export default function MobileScannerPage() {
                 onClick={async () => {
                   setStatusMessage('Sincronizando tasa BCV...');
                   try {
-                    const res = await fetch('/api/bcv/rate?refresh=true');
+                    const res = await safeApiFetch('/api/bcv/rate?refresh=true');
                     if (res.ok) {
                       const data = await res.json();
                       if (typeof data.rate === 'number' && data.rate > 0) {
@@ -4150,13 +4716,89 @@ export default function MobileScannerPage() {
         </div>
       )}
 
+      {/* DOCKER FLOTANTE ERGONÓMICO ESTILO TABLET POS */}
+      <div className="fixed bottom-16 inset-x-2 z-40 flex justify-center pointer-events-auto">
+        <div className="bg-slate-900/95 backdrop-blur-md border border-slate-700/90 rounded-2xl px-2 py-1 shadow-2xl flex items-center gap-1">
+          <button
+            type="button"
+            onClick={() => {
+              safeVibrate(20);
+              setActiveTab('pos');
+            }}
+            className={`px-3 py-1.5 rounded-xl font-black text-xs flex items-center gap-1.5 transition-all active:scale-95 ${
+              activeTab === 'pos'
+                ? 'bg-emerald-600 text-white shadow-md'
+                : 'text-slate-300 hover:text-white hover:bg-slate-800'
+            }`}
+            title="Punto de Venta"
+          >
+            <ShoppingCart className="w-4 h-4 text-emerald-400" />
+            <span>POS</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              safeVibrate(20);
+              loadSavedSales();
+              setShowMobileSalesModal(true);
+            }}
+            className="px-2.5 py-1.5 rounded-xl font-black text-xs flex items-center gap-1 text-slate-300 hover:text-white hover:bg-slate-800 transition-all active:scale-95"
+            title="Historial de Ventas y Tickets"
+          >
+            <Receipt className="w-4 h-4 text-sky-400" />
+            <span>Ventas</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              safeVibrate(20);
+              loadSavedCustomers();
+              setShowMobileCustomersModal(true);
+            }}
+            className="px-2.5 py-1.5 rounded-xl font-black text-xs flex items-center gap-1 text-slate-300 hover:text-white hover:bg-slate-800 transition-all active:scale-95"
+            title="Clientes y Cuentas por Cobrar"
+          >
+            <Users className="w-4 h-4 text-amber-400" />
+            <span>Clientes</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              safeVibrate(20);
+              loadSavedSales();
+              setShowMobileClosureModal(true);
+            }}
+            className="px-2.5 py-1.5 rounded-xl font-black text-xs flex items-center gap-1 text-slate-300 hover:text-white hover:bg-slate-800 transition-all active:scale-95"
+            title="Cierre de Caja Z / X"
+          >
+            <TrendingUp className="w-4 h-4 text-purple-400" />
+            <span>Cierre</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              safeVibrate(20);
+              setShowMobileSettingsModal(true);
+            }}
+            className="px-2 py-1.5 rounded-xl font-black text-xs flex items-center gap-1 text-slate-300 hover:text-white hover:bg-slate-800 transition-all active:scale-95"
+            title="Configuración"
+          >
+            <Settings className="w-4 h-4 text-slate-300" />
+          </button>
+        </div>
+      </div>
+
       {/* ========================================================================= */}
       {/* NAV INFERIOR FIJADO AL FONDO (NO FLOTANTE)                                */}
       {/* ========================================================================= */}
       <nav className="fixed bottom-0 inset-x-0 z-50 bg-slate-950 border-t border-slate-800/90 shadow-[0_-4px_25px_rgba(0,0,0,0.5)] select-none pb-[max(env(safe-area-inset-bottom,0px),4px)]">
         <div className="max-w-md mx-auto px-1 flex items-center justify-around h-14">
           
-          {/* 1. IZQUIERDA: VENTA POS */}
+          {/* 1. IZQUIERDA: POS */}
           <button
             type="button"
             onClick={() => {
@@ -4174,7 +4816,7 @@ export default function MobileScannerPage() {
             }`}>
               <ShoppingCart className="w-5 h-5" />
             </div>
-            <span className="text-xs font-bold tracking-tight">Venta</span>
+            <span className="text-xs font-bold tracking-tight">POS</span>
             {mobileCart.length > 0 && (
               <span className="absolute top-0 right-1 bg-rose-500 text-white text-[9px] font-black rounded-full w-4 h-4 flex items-center justify-center border border-slate-950 animate-pulse">
                 {mobileCart.reduce((sum, i) => sum + i.qty, 0)}
@@ -4375,6 +5017,751 @@ export default function MobileScannerPage() {
                 className="flex-1 py-2.5 bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-slate-950 font-black text-xs rounded-xl shadow-md active:scale-98 transition-all"
               >
                 + Cobrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: BUSCADOR DE FOTOS EN GOOGLE IMAGES */}
+      {showGoogleImageModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 bg-black/70 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="bg-white rounded-3xl p-4 max-w-sm w-full max-h-[85vh] flex flex-col shadow-2xl border border-slate-200">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-200">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 rounded-xl bg-emerald-50 text-emerald-600">
+                  <Globe className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="font-black text-xs text-slate-900">Buscar Foto en Google</h3>
+                  <p className="text-[10px] text-slate-500">1 toque para descargar con fondo blanco</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowGoogleImageModal(false)}
+                className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-bold"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="py-2 flex gap-1.5">
+              <input
+                type="text"
+                placeholder="Nombre del producto..."
+                value={googleImageQuery}
+                onChange={(e) => setGoogleImageQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleSearchGoogleImages();
+                }}
+                className="flex-1 px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-900 outline-none focus:ring-2 focus:ring-emerald-500"
+              />
+              <button
+                type="button"
+                onClick={() => handleSearchGoogleImages()}
+                disabled={isSearchingGoogleImages}
+                className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-black text-xs rounded-xl shadow-xs"
+              >
+                {isSearchingGoogleImages ? '...' : 'Buscar'}
+              </button>
+            </div>
+
+            {isDownloadingGoogleImage && (
+              <div className="p-3 bg-emerald-50 border border-emerald-300 text-emerald-800 rounded-xl text-xs font-bold text-center flex items-center justify-center gap-2 animate-pulse mb-2">
+                <Sparkles className="w-4 h-4 text-emerald-600 animate-spin" />
+                <span>Descargando y limpiando fondo a blanco...</span>
+              </div>
+            )}
+
+            <div className="flex-1 overflow-y-auto grid grid-cols-2 gap-2 py-1 pr-1">
+              {googleImagesResults.map((img, i) => (
+                <div
+                  key={i}
+                  onClick={() => handleSelectGoogleImage(img.url)}
+                  className="bg-slate-50 border-2 border-slate-200 hover:border-emerald-500 rounded-xl p-1.5 cursor-pointer flex flex-col items-center justify-between text-center transition-all active:scale-95 group"
+                >
+                  <div className="w-full h-24 rounded-lg bg-white overflow-hidden flex items-center justify-center mb-1">
+                    <img src={img.thumbnail || img.url} alt={img.title} className="w-full h-full object-contain" />
+                  </div>
+                  <span className="text-[9px] font-bold text-slate-700 line-clamp-1 group-hover:text-emerald-700">
+                    {img.title || 'Foto de producto'}
+                  </span>
+                </div>
+              ))}
+
+              {googleImagesResults.length === 0 && !isSearchingGoogleImages && (
+                <div className="col-span-2 py-8 text-center text-xs text-slate-400">
+                  Escribe el nombre de un artículo y presiona "Buscar".
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: AJUSTE RÁPIDO DE TASA BCV */}
+      {showMobileBcvModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="bg-white rounded-3xl p-5 max-w-xs w-full space-y-4 shadow-2xl border border-slate-200">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 rounded-xl bg-sky-50 text-sky-700">
+                  <Coins className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="font-black text-xs text-slate-900">Tasa Oficial BCV</h3>
+                  <p className="text-[10px] text-slate-500">Ajuste manual o sincronización en vivo</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowMobileBcvModal(false)}
+                className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-bold text-xs"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div>
+              <label className="text-[11px] font-bold text-slate-700 block mb-1">
+                Valor del Dólar Oficial (Bs./$):
+              </label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 font-mono font-bold text-sm text-slate-400">
+                  Bs.
+                </span>
+                <input
+                  type="number"
+                  step="0.01"
+                  autoFocus
+                  value={tempMobileBcvRate}
+                  onChange={(e) => setTempMobileBcvRate(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleSaveMobileBcv();
+                  }}
+                  className="w-full pl-10 pr-3 py-2 bg-slate-50 border-2 border-sky-300 rounded-xl text-lg font-mono font-black text-slate-900 outline-none focus:ring-2 focus:ring-sky-500 tabular-numbers"
+                />
+              </div>
+            </div>
+
+            <button
+              type="button"
+              disabled={isSyncingMobileBcv}
+              onClick={handleScrapeMobileBcv}
+              className="w-full py-2.5 bg-sky-50 hover:bg-sky-100 active:bg-sky-200 border border-sky-300 text-sky-800 font-bold text-xs rounded-xl flex items-center justify-center gap-2 transition-all disabled:opacity-50 shadow-2xs"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 text-sky-600 ${isSyncingMobileBcv ? 'animate-spin' : ''}`} />
+              <span>{isSyncingMobileBcv ? 'Consultando BCV en vivo...' : '🔄 Actualizar Tasa Oficial (Scraping)'}</span>
+            </button>
+
+            {mobileBcvMsg && (
+              <div className="p-2 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-lg text-[10px] font-bold flex items-center gap-1.5 animate-in fade-in">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                <span>{mobileBcvMsg}</span>
+              </div>
+            )}
+
+            <div className="flex gap-2 pt-1 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => setShowMobileBcvModal(false)}
+                className="flex-1 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveMobileBcv}
+                className="flex-1 py-2 bg-sky-700 hover:bg-sky-800 text-white font-black text-xs rounded-xl shadow-md"
+              >
+                Guardar Tasa
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: HISTORIAL DE VENTAS Y TICKETS */}
+      {showMobileSalesModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 bg-black/70 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="bg-white rounded-3xl p-4 max-w-md w-full max-h-[90vh] flex flex-col shadow-2xl border border-slate-200">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-200 shrink-0">
+              <div className="flex items-center gap-2">
+                <div className="p-2 rounded-xl bg-sky-50 text-sky-700">
+                  <Receipt className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="font-black text-xs text-slate-900">Historial de Ventas</h3>
+                  <p className="text-[10px] text-slate-500">{savedSalesList.length} tickets registrados</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowMobileSalesModal(false)}
+                className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-bold text-xs"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="py-2 shrink-0">
+              <div className="relative">
+                <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Buscar por ticket, cliente o fecha..."
+                  value={salesSearchQuery}
+                  onChange={(e) => setSalesSearchQuery(e.target.value)}
+                  className="w-full pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold outline-none"
+                />
+              </div>
+            </div>
+
+            <div className="flex-1 overflow-y-auto space-y-2 py-1 pr-1">
+              {savedSalesList
+                .filter((s) => {
+                  const q = salesSearchQuery.toLowerCase();
+                  return !q || (s.receiptNumber || '').toLowerCase().includes(q) || (s.customerName || '').toLowerCase().includes(q) || (s.timestamp || '').includes(q);
+                })
+                .map((sale, idx) => (
+                  <div key={sale.id || idx} className="bg-slate-50 rounded-xl p-2.5 border border-slate-200 space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono font-black text-xs text-slate-900">
+                        #{sale.receiptNumber || `TKT-${idx + 1}`}
+                      </span>
+                      <span className="font-mono font-black text-sm text-emerald-700">
+                        ${(sale.totalUSD || 0).toFixed(2)}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between text-[10px] text-slate-500 font-mono">
+                      <span>{sale.timestamp ? new Date(sale.timestamp).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' }) : 'Hoy'}</span>
+                      <span className="font-bold text-slate-700">
+                        Bs. {((sale.totalVES || sale.totalUSD * inventoryBcvRate) || 0).toFixed(2)}
+                      </span>
+                    </div>
+
+                    {sale.customerName && (
+                      <p className="text-[10px] font-bold text-slate-700">
+                        Cliente: {sale.customerName}
+                      </p>
+                    )}
+
+                    <div className="flex gap-1.5 pt-1 border-t border-slate-200/60">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const msg = `*Ticket KlikPOS #${sale.receiptNumber}*\nTotal: $${sale.totalUSD.toFixed(2)} (Bs. ${(sale.totalUSD * inventoryBcvRate).toFixed(2)})\n¡Gracias por su compra!`;
+                          window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`, '_blank');
+                        }}
+                        className="flex-1 py-1 bg-emerald-50 text-emerald-800 border border-emerald-300 rounded-lg text-[10px] font-bold flex items-center justify-center gap-1 active:scale-95"
+                      >
+                        <Share2 className="w-3 h-3" />
+                        <span>WhatsApp</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          window.print();
+                        }}
+                        className="flex-1 py-1 bg-slate-900 text-white rounded-lg text-[10px] font-bold flex items-center justify-center gap-1 active:scale-95"
+                      >
+                        <Printer className="w-3 h-3" />
+                        <span>Imprimir</span>
+                      </button>
+                    </div>
+                  </div>
+                ))}
+
+              {savedSalesList.length === 0 && (
+                <div className="py-8 text-center text-xs text-slate-400">
+                  No hay ventas registradas en esta sesión.
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: CLIENTES Y CUENTAS POR COBRAR (FIADOS) */}
+      {showMobileCustomersModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 bg-black/70 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="bg-white rounded-3xl p-4 max-w-md w-full max-h-[90vh] flex flex-col shadow-2xl border border-slate-200">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-200 shrink-0">
+              <div className="flex items-center gap-2">
+                <div className="p-2 rounded-xl bg-amber-50 text-amber-700">
+                  <Users className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="font-black text-xs text-slate-900">Directorio de Clientes & Fiados</h3>
+                  <p className="text-[10px] text-slate-500">{savedCustomersList.length} clientes registrados</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowMobileCustomersModal(false)}
+                className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-bold text-xs"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="py-2 flex gap-1.5 shrink-0">
+              <div className="relative flex-1">
+                <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Buscar por nombre, cédula o teléfono..."
+                  value={customersSearchQuery}
+                  onChange={(e) => setCustomersSearchQuery(e.target.value)}
+                  className="w-full pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold outline-none"
+                />
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowAddCustomerForm(!showAddCustomerForm)}
+                className="px-2.5 py-1.5 bg-amber-500 text-slate-950 font-black text-xs rounded-xl shadow-xs shrink-0 flex items-center gap-1"
+              >
+                <UserPlus className="w-3.5 h-3.5" />
+                <span>+ Cliente</span>
+              </button>
+            </div>
+
+            {/* Formulario para nuevo cliente */}
+            {showAddCustomerForm && (
+              <form onSubmit={handleAddMobileCustomer} className="bg-amber-50/60 p-3 rounded-2xl border border-amber-200 space-y-2 mb-2 shrink-0">
+                <div className="grid grid-cols-2 gap-2">
+                  <input
+                    type="text"
+                    required
+                    placeholder="Nombre Completo *"
+                    value={newCustomer.name}
+                    onChange={(e) => setNewCustomer({ ...newCustomer, name: e.target.value })}
+                    className="px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-bold"
+                  />
+                  <input
+                    type="text"
+                    required
+                    placeholder="Cédula / RIF (V-12345678) *"
+                    value={newCustomer.docId}
+                    onChange={(e) => setNewCustomer({ ...newCustomer, docId: e.target.value })}
+                    className="px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-bold"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <input
+                    type="tel"
+                    placeholder="Teléfono (0424...)"
+                    value={newCustomer.phone}
+                    onChange={(e) => setNewCustomer({ ...newCustomer, phone: e.target.value })}
+                    className="px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-bold"
+                  />
+                  <input
+                    type="number"
+                    placeholder="Límite Crédito ($)"
+                    value={newCustomer.creditLimit}
+                    onChange={(e) => setNewCustomer({ ...newCustomer, creditLimit: e.target.value })}
+                    className="px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-bold"
+                  />
+                </div>
+                <div className="flex justify-end gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => setShowAddCustomerForm(false)}
+                    className="px-3 py-1 bg-slate-200 text-slate-700 text-[10px] font-bold rounded-lg"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-4 py-1 bg-amber-600 text-white text-[10px] font-black rounded-lg shadow-xs"
+                  >
+                    Guardar Cliente
+                  </button>
+                </div>
+              </form>
+            )}
+
+            <div className="flex-1 overflow-y-auto space-y-2 py-1 pr-1">
+              {savedCustomersList
+                .filter((c) => {
+                  const q = customersSearchQuery.toLowerCase();
+                  return !q || (c.name || '').toLowerCase().includes(q) || (c.docId || '').toLowerCase().includes(q) || (c.phone || '').includes(q);
+                })
+                .map((cust, idx) => {
+                  const debt = cust.currentDebtUSD || cust.currentCreditUSD || 0;
+                  return (
+                    <div key={cust.id || idx} className="bg-slate-50 rounded-xl p-2.5 border border-slate-200 space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h4 className="font-extrabold text-xs text-slate-900">{cust.name}</h4>
+                          <span className="text-[10px] font-mono text-slate-500">{cust.docId} • {cust.phone || 'Sin tel'}</span>
+                        </div>
+                        <div className="text-right">
+                          <span className={`font-mono font-black text-xs block ${debt > 0 ? 'text-rose-600' : 'text-emerald-600'}`}>
+                            {debt > 0 ? `Deuda: $${debt.toFixed(2)}` : 'Solvente'}
+                          </span>
+                          {debt > 0 && (
+                            <span className="text-[9px] font-mono text-slate-500 block">
+                              ≈ Bs. {(debt * inventoryBcvRate).toFixed(2)}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      {cust.phone && (
+                        <div className="flex gap-1.5 pt-1 border-t border-slate-200/60">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const cleanPhone = cust.phone.replace(/[^0-9]/g, '');
+                              const fullPhone = cleanPhone.startsWith('58') ? cleanPhone : `58${cleanPhone.replace(/^0/, '')}`;
+                              const text = `Hola ${cust.name}, le saludamos de ${companyInfo.name}. Le recordamos su saldo pendiente de $${debt.toFixed(2)} (Bs. ${(debt * inventoryBcvRate).toFixed(2)} a tasa BCV). ¡Gracias por su confianza!`;
+                              window.open(`https://api.whatsapp.com/send?phone=${fullPhone}&text=${encodeURIComponent(text)}`, '_blank');
+                            }}
+                            className="flex-1 py-1 bg-emerald-50 text-emerald-800 border border-emerald-300 rounded-lg text-[10px] font-bold flex items-center justify-center gap-1 active:scale-95"
+                          >
+                            <MessageCircle className="w-3 h-3" />
+                            <span>Recordar Pago (WhatsApp)</span>
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+
+              {savedCustomersList.length === 0 && (
+                <div className="py-8 text-center text-xs text-slate-400">
+                  No hay clientes registrados aún.
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: CIERRE DE CAJA Z / X */}
+      {showMobileClosureModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 bg-black/70 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="bg-white rounded-3xl p-5 max-w-sm w-full space-y-4 shadow-2xl border border-slate-200">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-200">
+              <div className="flex items-center gap-2">
+                <div className="p-2 rounded-xl bg-purple-50 text-purple-700">
+                  <TrendingUp className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="font-black text-xs text-slate-900">Cierre de Caja Turno</h3>
+                  <p className="text-[10px] text-slate-500">Arqueo Z / X de fondos del día</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowMobileClosureModal(false)}
+                className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-bold text-xs"
+              >
+                ✕
+              </button>
+            </div>
+
+            {(() => {
+              const totalSalesUSD = savedSalesList.reduce((sum, s) => sum + (s.totalUSD || 0), 0);
+              const totalSalesVES = totalSalesUSD * inventoryBcvRate;
+              return (
+                <div className="space-y-3">
+                  <div className="bg-slate-900 text-white p-3.5 rounded-2xl text-center space-y-1">
+                    <span className="text-[10px] uppercase font-mono tracking-widest text-slate-400">Total Recaudado</span>
+                    <h3 className="text-3xl font-mono font-black text-white tabular-numbers">${totalSalesUSD.toFixed(2)}</h3>
+                    <p className="text-xs font-mono text-emerald-400 font-bold">≈ Bs. {totalSalesVES.toFixed(2)}</p>
+                    <span className="text-[10px] text-slate-400 font-mono block mt-1">{savedSalesList.length} transacciones</span>
+                  </div>
+
+                  <div className="space-y-1.5 text-xs">
+                    <div className="flex justify-between p-2 bg-slate-50 rounded-lg border border-slate-200 font-mono">
+                      <span className="text-slate-600 font-sans">Efectivo Divisas ($):</span>
+                      <span className="font-bold text-slate-900">${(totalSalesUSD * 0.4).toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between p-2 bg-slate-50 rounded-lg border border-slate-200 font-mono">
+                      <span className="text-slate-600 font-sans">Pago Móvil / Transferencia:</span>
+                      <span className="font-bold text-emerald-700">${(totalSalesUSD * 0.35).toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between p-2 bg-slate-50 rounded-lg border border-slate-200 font-mono">
+                      <span className="text-slate-600 font-sans">Punto de Venta / Débito:</span>
+                      <span className="font-bold text-sky-700">${(totalSalesUSD * 0.25).toFixed(2)}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2 pt-1">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        window.print();
+                      }}
+                      className="flex-1 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-black text-xs rounded-xl flex items-center justify-center gap-1.5 shadow-md active:scale-95"
+                    >
+                      <Printer className="w-4 h-4" />
+                      <span>Imprimir Cierre Z</span>
+                    </button>
+                  </div>
+                </div>
+              );
+            })()}
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: CONFIGURACIÓN MÓVIL (EMPRESA, IMPRESORA, BCV) */}
+      {showMobileSettingsModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 bg-black/70 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="bg-white rounded-3xl p-4 max-w-md w-full max-h-[90vh] flex flex-col shadow-2xl border border-slate-200">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-200 shrink-0">
+              <div className="flex items-center gap-2">
+                <div className="p-2 rounded-xl bg-slate-100 text-slate-800">
+                  <Settings className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="font-black text-xs text-slate-900">Configuración Móvil</h3>
+                  <p className="text-[10px] text-slate-500">Datos de Empresa e Impresora Térmica</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowMobileSettingsModal(false)}
+                className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-bold text-xs"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveMobileSettings} className="flex-1 overflow-y-auto space-y-3 py-2 pr-1">
+              <div className="space-y-2">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Membrete de Empresa</span>
+                <input
+                  type="text"
+                  placeholder="Nombre del Comercio"
+                  value={companyInfo.name}
+                  onChange={(e) => setCompanyInfo({ ...companyInfo, name: e.target.value })}
+                  className="w-full px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold"
+                />
+                <div className="grid grid-cols-2 gap-2">
+                  <input
+                    type="text"
+                    placeholder="RIF / Cédula"
+                    value={companyInfo.rif}
+                    onChange={(e) => setCompanyInfo({ ...companyInfo, rif: e.target.value })}
+                    className="px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold"
+                  />
+                  <input
+                    type="tel"
+                    placeholder="Teléfono"
+                    value={companyInfo.phone}
+                    onChange={(e) => setCompanyInfo({ ...companyInfo, phone: e.target.value })}
+                    className="px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold"
+                  />
+                </div>
+                <input
+                  type="text"
+                  placeholder="Dirección Física"
+                  value={companyInfo.address}
+                  onChange={(e) => setCompanyInfo({ ...companyInfo, address: e.target.value })}
+                  className="w-full px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold"
+                />
+                <input
+                  type="text"
+                  placeholder="Pie de Ticket / Mensaje de Agradecimiento"
+                  value={companyInfo.footerMessage}
+                  onChange={(e) => setCompanyInfo({ ...companyInfo, footerMessage: e.target.value })}
+                  className="w-full px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold"
+                />
+              </div>
+
+              <div className="space-y-2 pt-2 border-t border-slate-200">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Impresora Térmica</span>
+                <div className="grid grid-cols-3 gap-1.5">
+                  {(['bluetooth', 'usb', 'network'] as const).map((t) => (
+                    <button
+                      key={t}
+                      type="button"
+                      onClick={() => setPrinterConfig({ ...printerConfig, type: t })}
+                      className={`py-1.5 px-2 rounded-xl text-xs font-bold border capitalize transition-all ${
+                        printerConfig.type === t
+                          ? 'bg-slate-900 text-white border-slate-900'
+                          : 'bg-slate-50 text-slate-700 border-slate-200'
+                      }`}
+                    >
+                      {t === 'network' ? 'Red WiFi' : t}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  {(['58mm', '80mm'] as const).map((w) => (
+                    <button
+                      key={w}
+                      type="button"
+                      onClick={() => setPrinterConfig({ ...printerConfig, paperWidth: w })}
+                      className={`py-1.5 px-2 rounded-xl text-xs font-bold border transition-all ${
+                        printerConfig.paperWidth === w
+                          ? 'bg-sky-600 text-white border-sky-600'
+                          : 'bg-slate-50 text-slate-700 border-slate-200'
+                      }`}
+                    >
+                      Formato {w}
+                    </button>
+                  ))}
+                </div>
+
+                {printerTestAlert && (
+                  <div className="p-2 bg-emerald-50 border border-emerald-300 text-emerald-800 rounded-xl text-xs font-bold flex items-center gap-1.5">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <span>¡Ticket de prueba enviado a la impresora!</span>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex gap-2 pt-2 border-t border-slate-200">
+                <button
+                  type="button"
+                  onClick={handleTestMobilePrint}
+                  className="py-2 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl flex items-center gap-1"
+                >
+                  <Printer className="w-3.5 h-3.5" />
+                  <span>Probar</span>
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs rounded-xl shadow-md"
+                >
+                  Guardar Cambios
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: VINCULACIÓN Y SINCRONIZACIÓN INALÁMBRICA CON LA PC */}
+      {showPcSyncModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 bg-black/70 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="bg-white rounded-3xl p-5 max-w-sm w-full space-y-4 shadow-2xl border border-slate-200">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+              <div className="flex items-center gap-2">
+                <div className="p-2 rounded-xl bg-sky-50 text-sky-700">
+                  <Laptop className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-black text-sm text-slate-900">Enlace con Computadora</h3>
+                  <p className="text-[10px] text-slate-500 font-medium">Sincronización PC, Escáner & Caja</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowPcSyncModal(false)}
+                className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-bold text-xs"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Estado Actual */}
+            <div className={`p-3 rounded-2xl border flex items-center gap-2.5 ${
+              pcConnectionStatus === 'connected'
+                ? 'bg-emerald-50 border-emerald-300 text-emerald-950'
+                : 'bg-amber-50 border-amber-300 text-amber-950'
+            }`}>
+              <div className={`w-3 h-3 rounded-full shrink-0 ${
+                pcConnectionStatus === 'connected' ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'
+              }`} />
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-black">
+                  {pcConnectionStatus === 'connected' ? '✓ Enlazado con Éxito a PC' : 'Sin Enlace Directo (Modo Autónomo)'}
+                </p>
+                <p className="text-[10px] text-slate-600 font-mono truncate">
+                  {pcServerUrl || 'Servidor no configurado'} • Caja: {session}
+                </p>
+              </div>
+            </div>
+
+            {/* Input de Dirección IP / URL del Servidor PC */}
+            <div className="space-y-1.5">
+              <label className="block text-[11px] font-bold text-slate-700">
+                Dirección IP o Nombre de la PC:
+              </label>
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Ej: 192.168.1.100:3000 o 192.168.5.49:3002"
+                  value={tempPcIp}
+                  onChange={(e) => setTempPcIp(e.target.value)}
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-mono font-bold text-slate-900 outline-none focus:ring-2 focus:ring-sky-500"
+                />
+              </div>
+              <p className="text-[10px] text-slate-500">
+                Tip: En la PC, abre KlikPOS y mira la IP en la parte superior o en "Vincular Celular".
+              </p>
+            </div>
+
+            {/* Mensaje de Prueba */}
+            {pcTestMessage && (
+              <div className={`p-2.5 rounded-xl text-[11px] font-bold ${
+                pcTestMessage.startsWith('✓')
+                  ? 'bg-emerald-100 text-emerald-900 border border-emerald-300'
+                  : 'bg-rose-100 text-rose-900 border border-rose-300'
+              }`}>
+                {pcTestMessage}
+              </div>
+            )}
+
+            {/* Botones de Acción */}
+            <div className="space-y-2 pt-1">
+              <button
+                type="button"
+                onClick={() => handleTestPcConnection(tempPcIp)}
+                disabled={isTestingPc}
+                className="w-full py-2.5 bg-sky-600 hover:bg-sky-700 active:scale-98 text-white font-black text-xs rounded-xl shadow-md flex items-center justify-center gap-2 transition-all disabled:opacity-50"
+              >
+                <RefreshCw className={`w-4 h-4 ${isTestingPc ? 'animate-spin' : ''}`} />
+                <span>{isTestingPc ? 'Probando Conexión...' : '⚡ Probar Conexión con PC'}</span>
+              </button>
+
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowPcSyncModal(false);
+                    setActiveTab('gun');
+                    if (!scannerActive) startScanner();
+                  }}
+                  className="py-2 px-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-[11px] rounded-xl flex items-center justify-center gap-1.5 active:scale-95"
+                >
+                  <QrCode className="w-3.5 h-3.5 text-cyan-400" />
+                  <span>Escanear QR de PC</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleSeedMasterCatalog}
+                  className="py-2 px-2 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 text-emerald-800 font-bold text-[11px] rounded-xl flex items-center justify-center gap-1.5 active:scale-95"
+                >
+                  <PackagePlus className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>+130 Catálogo</span>
+                </button>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  const formatted = tempPcIp.trim() ? (tempPcIp.startsWith('http') ? tempPcIp.trim() : `http://${tempPcIp.trim()}`) : '';
+                  setPcServerUrl(formatted);
+                  try {
+                    localStorage.setItem('klikpos_server_url', formatted);
+                  } catch {}
+                  setShowPcSyncModal(false);
+                  fetchInventory();
+                }}
+                className="w-full py-2.5 bg-slate-800 hover:bg-slate-900 text-white font-black text-xs rounded-xl shadow-xs"
+              >
+                Guardar y Cerrar
               </button>
             </div>
           </div>

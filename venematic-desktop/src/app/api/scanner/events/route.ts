@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
 
   // Enviar estado actual del celular de inmediato
   const currentPhone = scannerSessions.get(session);
-  const isOnline = Boolean(currentPhone && currentPhone.connected && Date.now() - currentPhone.lastSeen < 12000);
+  const isOnline = Boolean(currentPhone && currentPhone.connected && Date.now() - currentPhone.lastSeen < 35000);
   sendEvent('phone_status', {
     session,
     connected: isOnline,

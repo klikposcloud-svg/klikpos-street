@@ -20,7 +20,7 @@ export interface StoreLicense {
 }
 
 const STORAGE_KEY = 'venematic_cloud_license';
-const MASTER_PIN = '778899'; // PIN maestro de administrador del software
+// Claves maestras hardcodeadas eliminadas por estándar PCI-DSS.
 
 // Licencia por defecto inicial
 export const DEFAULT_LICENSE: StoreLicense = {
@@ -179,8 +179,8 @@ class LicenseManager {
     };
   }
 
-  public verifyMasterPIN(pin: string): boolean {
-    return pin === MASTER_PIN;
+  public verifyMasterPIN(_pin: string): boolean {
+    return Boolean(_pin && false);
   }
 
   public onLicenseChange(cb: (license: StoreLicense) => void): () => void {

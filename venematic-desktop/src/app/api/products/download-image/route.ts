@@ -5,6 +5,16 @@ if (dns.setDefaultResultOrder) {
   dns.setDefaultResultOrder('ipv4first');
 }
 
+const CORS_HEADERS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+};
+
+export async function OPTIONS() {
+  return new Response(null, { status: 204, headers: CORS_HEADERS });
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
@@ -13,7 +23,7 @@ export async function POST(req: NextRequest) {
     if (!imageUrl || !imageUrl.startsWith('http')) {
       return NextResponse.json(
         { error: 'URL de imagen no válida' },
-        { status: 400 }
+        { status: 400, headers: CORS_HEADERS }
       );
     }
 
@@ -28,7 +38,7 @@ export async function POST(req: NextRequest) {
     if (!res.ok) {
       return NextResponse.json(
         { error: `No se pudo descargar la imagen (código HTTP ${res.status})` },
-        { status: 502 }
+        { status: 502, headers: CORS_HEADERS }
       );
     }
 
@@ -36,7 +46,7 @@ export async function POST(req: NextRequest) {
     if (!contentType.startsWith('image/')) {
       return NextResponse.json(
         { error: 'El archivo recibido no es una imagen válida' },
-        { status: 415 }
+        { status: 415, headers: CORS_HEADERS }
       );
     }
 
@@ -47,7 +57,7 @@ export async function POST(req: NextRequest) {
     if (buffer.length > 4 * 1024 * 1024) {
       return NextResponse.json(
         { error: 'La imagen seleccionada es demasiado pesada (>4MB). Por favor selecciona otra.' },
-        { status: 413 }
+        { status: 413, headers: CORS_HEADERS }
       );
     }
 
@@ -57,14 +67,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       success: true,
       dataUrl,
+      base64: dataUrl,
+      savedPath: dataUrl,
       contentType,
       sizeBytes: buffer.length,
-    });
+    }, { headers: CORS_HEADERS });
   } catch (error: any) {
     console.error('Error al descargar imagen de producto:', error);
     return NextResponse.json(
       { error: error?.message || 'Error interno al procesar la descarga de imagen' },
-      { status: 500 }
+      { status: 500, headers: CORS_HEADERS }
     );
   }
 }

@@ -773,7 +773,7 @@ export default function MobileScannerPage() {
       };
 
       const handleUnload = () => {
-        sendStatus(false);
+        // No desconectar inmediatamente al navegar o cambiar de app; el timeout del servidor (35s) maneja la desconexión
       };
 
       document.addEventListener('visibilitychange', handleVisibility);
@@ -836,7 +836,6 @@ export default function MobileScannerPage() {
         document.removeEventListener('visibilitychange', handleVisibility);
         window.removeEventListener('beforeunload', handleUnload);
         window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-        sendStatus(false);
       };
     }
   }, [pcServerUrl]);
@@ -1019,11 +1018,12 @@ export default function MobileScannerPage() {
     setIsSearchingGoogleImages(true);
     setShowGoogleImageModal(true);
     try {
-      const res = await fetch(`/api/products/search-images?q=${encodeURIComponent(query)}`);
+      const res = await safeApiFetch(`/api/products/search-images?q=${encodeURIComponent(query)}`);
       if (res.ok) {
         const data = await res.json();
-        if (Array.isArray(data.images) && data.images.length > 0) {
-          setGoogleImagesResults(data.images);
+        const list = Array.isArray(data.images) ? data.images : (Array.isArray(data.results) ? data.results : []);
+        if (list.length > 0) {
+          setGoogleImagesResults(list);
         } else {
           setGoogleImagesResults([]);
         }
@@ -1038,14 +1038,14 @@ export default function MobileScannerPage() {
   const handleSelectGoogleImage = async (imgUrl: string) => {
     setIsDownloadingGoogleImage(true);
     try {
-      const res = await fetch('/api/products/download-image', {
+      const res = await safeApiFetch('/api/products/download-image', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url: imgUrl, removeBg: true }),
       });
       if (res.ok) {
         const data = await res.json();
-        const finalUrl = data.savedPath || data.base64 || imgUrl;
+        const finalUrl = data.savedPath || data.base64 || data.dataUrl || imgUrl;
         setProdPhoto(finalUrl);
         try { localStorage.setItem('venematic_last_photo', finalUrl); } catch {}
         setShowGoogleImageModal(false);
@@ -1074,12 +1074,12 @@ export default function MobileScannerPage() {
       } catch {}
       window.dispatchEvent(new CustomEvent('pos:bcv_updated', { detail: parsed }));
       window.dispatchEvent(new CustomEvent('venematic:bcv_updated', { detail: parsed }));
-      fetch('/api/bcv/rate', {
+      safeApiFetch('/api/bcv/rate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ rate: parsed, source: 'Ajuste Manual en Celular' }),
       }).catch(() => {});
-      fetch('/api/scanner/inventory', {
+      safeApiFetch('/api/scanner/inventory', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ bcvRate: parsed }),
@@ -1091,7 +1091,7 @@ export default function MobileScannerPage() {
     setIsSyncingMobileBcv(true);
     setMobileBcvMsg(null);
     try {
-      const res = await fetch('/api/bcv/rate?refresh=true');
+      const res = await safeApiFetch('/api/bcv/rate?refresh=true');
       if (res.ok) {
         const data = await res.json();
         if (data.success && typeof data.rate === 'number' && data.rate > 0) {
@@ -1199,7 +1199,7 @@ export default function MobileScannerPage() {
       const remaining: any[] = [];
       for (const sale of sales) {
         try {
-          const res = await fetch('/api/scanner/sale', {
+          const res = await safeApiFetch('/api/scanner/sale', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ sale }),
@@ -1384,7 +1384,7 @@ export default function MobileScannerPage() {
       return;
     }
     try {
-      const res = await fetch('/api/scanner/scan', {
+      const res = await safeApiFetch('/api/scanner/scan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -1481,7 +1481,7 @@ export default function MobileScannerPage() {
     // 1. Intentar enviar a la PC por API
     let sentToPC = false;
     try {
-      const res = await fetch('/api/scanner/sale', {
+      const res = await safeApiFetch('/api/scanner/sale', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ sale: newSale }),
@@ -1932,7 +1932,7 @@ export default function MobileScannerPage() {
 
                   // 3. ENVIAR FOTO MEJORADA A LA PC
                   setIsSendingPhoto(true);
-                  return fetch('/api/scanner/upload-photo', {
+                  return safeApiFetch('/api/scanner/upload-photo', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -1963,7 +1963,7 @@ export default function MobileScannerPage() {
 
               // 4. Auto-reconocimiento con IA (Google Vision / Gemini) si está configurado
               setIsAnalyzingMobileAI(true);
-              fetch('/api/vision/analyze-product', {
+              safeApiFetch('/api/vision/analyze-product', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ image: compressedDataUrl }),
@@ -2031,7 +2031,7 @@ export default function MobileScannerPage() {
 
     setIsCreatingProd(true);
     try {
-      const res = await fetch('/api/scanner/create-product', {
+      const res = await safeApiFetch('/api/scanner/create-product', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -4168,7 +4168,7 @@ export default function MobileScannerPage() {
                       onClick={() => {
                         if (!prodPhoto) return;
                         setIsAnalyzingMobileAI(true);
-                        fetch('/api/vision/analyze-product', {
+                        safeApiFetch('/api/vision/analyze-product', {
                           method: 'POST',
                           headers: { 'Content-Type': 'application/json' },
                           body: JSON.stringify({ image: prodPhoto }),
@@ -4399,7 +4399,7 @@ export default function MobileScannerPage() {
                 onClick={async () => {
                   setStatusMessage('Sincronizando tasa BCV...');
                   try {
-                    const res = await fetch('/api/bcv/rate?refresh=true');
+                    const res = await safeApiFetch('/api/bcv/rate?refresh=true');
                     if (res.ok) {
                       const data = await res.json();
                       if (typeof data.rate === 'number' && data.rate > 0) {
