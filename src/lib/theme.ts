@@ -141,6 +141,62 @@ export const THEME_PALETTES: ThemePalette[] = [
     swatchGradient: 'from-teal-500 to-teal-700',
   },
   {
+    id: 'clinic_cyan',
+    name: 'Cyan Clínico & Hospitalario',
+    tagline: 'Clínicas, Hospitales, Consultorios Médicos y Laboratorios',
+    primary: '#0284c7',
+    primaryHover: '#0369a1',
+    primaryLight: '#f0f9ff',
+    primaryBorder: '#7dd3fc',
+    accent: '#0ea5e9',
+    glow: 'rgba(2, 132, 199, 0.35)',
+    glassBorder: 'rgba(56, 189, 248, 0.30)',
+    colorName: 'sky',
+    swatchGradient: 'from-cyan-600 to-sky-700',
+  },
+  {
+    id: 'clinic_mint',
+    name: 'Verde Quirúrgico / Menta Salud',
+    tagline: 'Quirófanos, Odontología, Pediatría y Fisioterapia',
+    primary: '#0d9488',
+    primaryHover: '#0f766e',
+    primaryLight: '#f0fdfa',
+    primaryBorder: '#5eead4',
+    accent: '#14b8a6',
+    glow: 'rgba(13, 148, 136, 0.35)',
+    glassBorder: 'rgba(45, 212, 191, 0.30)',
+    colorName: 'teal',
+    swatchGradient: 'from-teal-600 to-emerald-700',
+  },
+  {
+    id: 'clinic_lavender',
+    name: 'Lavanda Terapéutica & Relax',
+    tagline: 'Centros Médicos, Salud Mental, Dermatología y Estética',
+    primary: '#7c3aed',
+    primaryHover: '#6d28d9',
+    primaryLight: '#f5f3ff',
+    primaryBorder: '#c4b5fd',
+    accent: '#8b5cf6',
+    glow: 'rgba(124, 58, 237, 0.35)',
+    glassBorder: 'rgba(167, 139, 250, 0.30)',
+    colorName: 'purple',
+    swatchGradient: 'from-violet-600 to-purple-700',
+  },
+  {
+    id: 'clinic_rose',
+    name: 'Rosa Maternidad & Pediatría',
+    tagline: 'Ginecología, Maternidad, Cuidados de Salud y Spa',
+    primary: '#db2777',
+    primaryHover: '#be185d',
+    primaryLight: '#fdf2f8',
+    primaryBorder: '#f9a8d4',
+    accent: '#ec4899',
+    glow: 'rgba(219, 39, 119, 0.35)',
+    glassBorder: 'rgba(244, 114, 182, 0.30)',
+    colorName: 'pink',
+    swatchGradient: 'from-pink-600 to-rose-700',
+  },
+  {
     id: 'coral',
     name: 'Coral Sunset',
     tagline: 'Pizzerías, Fast Food, Snacks y Juguerías',
@@ -172,7 +228,7 @@ export const THEME_PALETTES: ThemePalette[] = [
 
 export type UIStyleMode = 'industrial' | 'glassmorphism' | 'dark';
 
-export type IndustrialBgPreset = 'white' | 'cream' | 'teal' | 'blue' | 'gray' | 'custom';
+export type IndustrialBgPreset = 'white' | 'cream' | 'teal' | 'clinic_cyan_bg' | 'clinic_mint_bg' | 'clinic_lavender_bg' | 'blue' | 'gray' | 'custom';
 
 export interface IndustrialBgOption {
   id: IndustrialBgPreset;
@@ -207,6 +263,30 @@ export const INDUSTRIAL_BG_PRESETS: IndustrialBgOption[] = [
     bgColor: '#e6f7f5',
     previewColor: '#14b8a6',
     borderPreview: '#99f6e4',
+  },
+  {
+    id: 'clinic_cyan_bg',
+    name: 'Cian Sanitario Clínico',
+    tagline: 'Azul glaciar sanitario esterilizado para clínicas y laboratorios (#edf8fd)',
+    bgColor: '#edf8fd',
+    previewColor: '#0ea5e9',
+    borderPreview: '#7dd3fc',
+  },
+  {
+    id: 'clinic_mint_bg',
+    name: 'Menta Quirúrgico Relajante',
+    tagline: 'Tono menta médico que calma y armoniza consultorios y clínicas (#edfcf7)',
+    bgColor: '#edfcf7',
+    previewColor: '#10b981',
+    borderPreview: '#6ee7b7',
+  },
+  {
+    id: 'clinic_lavender_bg',
+    name: 'Lavanda Terapéutica',
+    tagline: 'Fondo lila suave y armónico para salud, estética y psicología (#f6f4fd)',
+    bgColor: '#f6f4fd',
+    previewColor: '#8b5cf6',
+    borderPreview: '#c4b5fd',
   },
   {
     id: 'blue',
@@ -484,6 +564,60 @@ export function computeIndustrialThemeVariables(
     };
   }
 
+  // 3.1 Cian Sanitario Clínico (#edf8fd)
+  if (preset === 'clinic_cyan_bg') {
+    const secBg = '#e0f2fe';
+    return {
+      bgColor: '#edf8fd',
+      cardColor: '#ffffff',
+      textColor: '#082f49',
+      textMuted: '#0284c7',
+      borderColor: '#bae6fd',
+      primaryBg: brandPrimary,
+      primaryHover: brandHover,
+      primaryText,
+      secondaryBg: secBg,
+      secondaryBorder: '#7dd3fc',
+      secondaryText: getHighContrastTextColor(secBg),
+    };
+  }
+
+  // 3.2 Menta Quirúrgico Relajante (#edfcf7)
+  if (preset === 'clinic_mint_bg') {
+    const secBg = '#ccfbf1';
+    return {
+      bgColor: '#edfcf7',
+      cardColor: '#ffffff',
+      textColor: '#042f2e',
+      textMuted: '#0d9488',
+      borderColor: '#99f6e4',
+      primaryBg: brandPrimary,
+      primaryHover: brandHover,
+      primaryText,
+      secondaryBg: secBg,
+      secondaryBorder: '#5eead4',
+      secondaryText: getHighContrastTextColor(secBg),
+    };
+  }
+
+  // 3.3 Lavanda Terapéutica Suave (#f6f4fd)
+  if (preset === 'clinic_lavender_bg') {
+    const secBg = '#ede9fe';
+    return {
+      bgColor: '#f6f4fd',
+      cardColor: '#ffffff',
+      textColor: '#2e1065',
+      textMuted: '#6d28d9',
+      borderColor: '#ddd6fe',
+      primaryBg: brandPrimary,
+      primaryHover: brandHover,
+      primaryText,
+      secondaryBg: secBg,
+      secondaryBorder: '#c4b5fd',
+      secondaryText: getHighContrastTextColor(secBg),
+    };
+  }
+
   // 4. Azul Hielo Ejecutivo (#e8f3fc)
   if (preset === 'blue') {
     const secBg = '#e0f2fe';
@@ -724,13 +858,16 @@ export function applyBrandingToDOM(config: BrandingConfig, forceTheme?: 'light' 
     root.style.setProperty('--color-bg-surface', darkThemeVars.cardColor);
   }
   // 4. Variables de Personalización Integral Avanzada (Header, Sidebar, Botones, Textos)
-  const headerBg = config.headerBgColor || (isLight ? '#ffffff' : (isGlass ? 'rgba(11, 26, 48, 0.75)' : '#0b1a30'));
-  const headerText = config.headerTextColor || (isLight ? '#0f172a' : '#ffffff');
-  const sidebarBg = config.sidebarBgColor || (isLight ? '#ffffff' : (isGlass ? 'rgba(11, 26, 48, 0.75)' : '#0b1a30'));
-  const sidebarText = config.sidebarTextColor || (isLight ? '#0f172a' : '#f8fafc');
+  const currentBaseBg = isLight ? themeVars.bgColor : (isGlass ? 'rgba(11, 26, 48, 0.85)' : darkThemeVars.bgColor);
+  const currentBaseText = isLight ? themeVars.textColor : (isGlass ? '#f8fafc' : darkThemeVars.textColor);
+
+  const headerBg = config.headerBgColor || currentBaseBg;
+  const headerText = config.headerTextColor || currentBaseText;
+  const sidebarBg = config.sidebarBgColor || currentBaseBg;
+  const sidebarText = config.sidebarTextColor || currentBaseText;
   const btnAccent = config.buttonAccentColor || palette.primary;
   const btnAccentText = config.buttonTextColor || themeVars.primaryText;
-  const generalText = config.generalTextColor || (isLight ? themeVars.textColor : darkThemeVars.textColor);
+  const generalText = config.generalTextColor || currentBaseText;
 
   root.style.setProperty('--header-bg', headerBg);
   root.style.setProperty('--header-text', headerText);
@@ -840,12 +977,25 @@ export function applyBrandingToDOM(config: BrandingConfig, forceTheme?: 'light' 
       localStorage.setItem('venematic_custom_dark_bg', config.customDarkBgColor);
     }
     if (config.headerBgColor) localStorage.setItem('venematic_header_bg', config.headerBgColor);
+    else localStorage.removeItem('venematic_header_bg');
+
     if (config.headerTextColor) localStorage.setItem('venematic_header_text', config.headerTextColor);
+    else localStorage.removeItem('venematic_header_text');
+
     if (config.sidebarBgColor) localStorage.setItem('venematic_sidebar_bg', config.sidebarBgColor);
+    else localStorage.removeItem('venematic_sidebar_bg');
+
     if (config.sidebarTextColor) localStorage.setItem('venematic_sidebar_text', config.sidebarTextColor);
+    else localStorage.removeItem('venematic_sidebar_text');
+
     if (config.buttonAccentColor) localStorage.setItem('venematic_button_accent', config.buttonAccentColor);
+    else localStorage.removeItem('venematic_button_accent');
+
     if (config.buttonTextColor) localStorage.setItem('venematic_button_text', config.buttonTextColor);
+    else localStorage.removeItem('venematic_button_text');
+
     if (config.generalTextColor) localStorage.setItem('venematic_general_text', config.generalTextColor);
+    else localStorage.removeItem('venematic_general_text');
   } catch {}
 
   // Trigger event for listeners

@@ -202,27 +202,47 @@ export default function BrandingSettings() {
     };
   }, []);
 
+  const getCurrentConfig = (overrides?: Partial<BrandingConfig>): BrandingConfig => {
+    return {
+      paletteId: selectedPaletteId,
+      uiStyle: selectedUIStyle,
+      industrialBg: selectedIndustrialBg,
+      customBgColor,
+      darkBg: selectedDarkBg,
+      customDarkBgColor,
+      headerBgColor,
+      headerTextColor,
+      sidebarBgColor,
+      sidebarTextColor,
+      buttonAccentColor,
+      buttonTextColor,
+      generalTextColor,
+      ...overrides,
+    };
+  };
+
   const handleSelectIndustrialWhite = () => {
     setSelectedIndustrialBg('white');
     setSelectedUIStyle('industrial');
-    const config: BrandingConfig = {
-      paletteId: selectedPaletteId,
+    setHeaderBgColor('');
+    setSidebarBgColor('');
+    try {
+      localStorage.removeItem('venematic_header_bg');
+      localStorage.removeItem('venematic_sidebar_bg');
+    } catch {}
+    const config = getCurrentConfig({
       uiStyle: 'industrial',
       industrialBg: 'white',
-      customBgColor,
-    };
+      headerBgColor: '',
+      sidebarBgColor: '',
+    });
     saveConfig(config);
     applyBrandingToDOM(config, 'light');
   };
 
   const handlePaletteSelect = (paletteId: string) => {
     setSelectedPaletteId(paletteId);
-    const config: BrandingConfig = {
-      paletteId,
-      uiStyle: selectedUIStyle,
-      industrialBg: selectedIndustrialBg,
-      customBgColor,
-    };
+    const config = getCurrentConfig({ paletteId });
     saveConfig(config);
     const currentThemeMode = getCurrentTheme();
     applyBrandingToDOM(config, currentThemeMode === 'light' ? 'light' : 'dark');
@@ -230,12 +250,7 @@ export default function BrandingSettings() {
 
   const handleUIStyleSelect = (uiStyle: UIStyleMode) => {
     setSelectedUIStyle(uiStyle);
-    const config: BrandingConfig = {
-      paletteId: selectedPaletteId,
-      uiStyle,
-      industrialBg: selectedIndustrialBg,
-      customBgColor,
-    };
+    const config = getCurrentConfig({ uiStyle });
     saveConfig(config);
     if (uiStyle === 'industrial') {
       applyTheme('light');
@@ -249,30 +264,42 @@ export default function BrandingSettings() {
   const handleIndustrialBgSelect = (industrialBg: IndustrialBgPreset) => {
     setSelectedIndustrialBg(industrialBg);
     setSelectedUIStyle('industrial');
-    const config: BrandingConfig = {
-      paletteId: selectedPaletteId,
+    // Al seleccionar preset de fondo en entorno profesional, limpiar overrides específicos
+    // para que el fondo se propague inmediatamente al canvas, Header y Sidebar al unísono
+    setHeaderBgColor('');
+    setSidebarBgColor('');
+    try {
+      localStorage.removeItem('venematic_header_bg');
+      localStorage.removeItem('venematic_sidebar_bg');
+    } catch {}
+    const config = getCurrentConfig({
       uiStyle: 'industrial',
       industrialBg,
-      customBgColor,
-      darkBg: selectedDarkBg,
-      customDarkBgColor,
-    };
+      headerBgColor: '',
+      sidebarBgColor: '',
+    });
     saveConfig(config);
     applyBrandingToDOM(config, 'light');
+    soundEffects.playBeep();
   };
 
   const handleCustomColorChange = (color: string) => {
     setCustomBgColor(color);
     setSelectedIndustrialBg('custom');
     setSelectedUIStyle('industrial');
-    const config: BrandingConfig = {
-      paletteId: selectedPaletteId,
+    setHeaderBgColor('');
+    setSidebarBgColor('');
+    try {
+      localStorage.removeItem('venematic_header_bg');
+      localStorage.removeItem('venematic_sidebar_bg');
+    } catch {}
+    const config = getCurrentConfig({
       uiStyle: 'industrial',
       industrialBg: 'custom',
       customBgColor: color,
-      darkBg: selectedDarkBg,
-      customDarkBgColor,
-    };
+      headerBgColor: '',
+      sidebarBgColor: '',
+    });
     saveConfig(config);
     applyBrandingToDOM(config, 'light');
   };
@@ -280,14 +307,18 @@ export default function BrandingSettings() {
   const handleDarkBgSelect = (darkBg: DarkBgPreset) => {
     setSelectedDarkBg(darkBg);
     setSelectedUIStyle('dark' as any);
-    const config: BrandingConfig = {
-      paletteId: selectedPaletteId,
+    setHeaderBgColor('');
+    setSidebarBgColor('');
+    try {
+      localStorage.removeItem('venematic_header_bg');
+      localStorage.removeItem('venematic_sidebar_bg');
+    } catch {}
+    const config = getCurrentConfig({
       uiStyle: 'dark' as any,
-      industrialBg: selectedIndustrialBg,
-      customBgColor,
       darkBg,
-      customDarkBgColor,
-    };
+      headerBgColor: '',
+      sidebarBgColor: '',
+    });
     saveConfig(config);
     applyBrandingToDOM(config, 'dark');
     soundEffects.playBeep();
@@ -297,14 +328,19 @@ export default function BrandingSettings() {
     setCustomDarkBgColor(color);
     setSelectedDarkBg('custom');
     setSelectedUIStyle('dark' as any);
-    const config: BrandingConfig = {
-      paletteId: selectedPaletteId,
+    setHeaderBgColor('');
+    setSidebarBgColor('');
+    try {
+      localStorage.removeItem('venematic_header_bg');
+      localStorage.removeItem('venematic_sidebar_bg');
+    } catch {}
+    const config = getCurrentConfig({
       uiStyle: 'dark' as any,
-      industrialBg: selectedIndustrialBg,
-      customBgColor,
       darkBg: 'custom',
       customDarkBgColor: color,
-    };
+      headerBgColor: '',
+      sidebarBgColor: '',
+    });
     saveConfig(config);
     applyBrandingToDOM(config, 'dark');
   };
@@ -323,7 +359,23 @@ export default function BrandingSettings() {
       setSelectedPaletteId(def.recommendedPaletteId);
       setSelectedIndustrialBg(def.recommendedBgPreset);
       setSelectedUIStyle('industrial');
+      setHeaderBgColor('');
+      setSidebarBgColor('');
+      try {
+        localStorage.removeItem('venematic_header_bg');
+        localStorage.removeItem('venematic_sidebar_bg');
+      } catch {}
+
+      const config = getCurrentConfig({
+        paletteId: def.recommendedPaletteId,
+        industrialBg: def.recommendedBgPreset,
+        uiStyle: 'industrial',
+        headerBgColor: '',
+        sidebarBgColor: '',
+      });
+      saveConfig(config);
       applyTheme('light');
+      applyBrandingToDOM(config, 'light');
 
       setRubroFeedback(res.message);
       setTimeout(() => setRubroFeedback(null), 4000);
@@ -370,57 +422,22 @@ export default function BrandingSettings() {
   };
 
   const handleAdvancedColorChange = (key: keyof BrandingConfig, val: string) => {
-    let newHbg = headerBgColor;
-    let newHtext = headerTextColor;
-    let newSbg = sidebarBgColor;
-    let newStext = sidebarTextColor;
-    let newBaccent = buttonAccentColor;
-    let newBtext = buttonTextColor;
-    let newGtext = generalTextColor;
+    const updated = { [key]: val };
+    if (key === 'headerBgColor') setHeaderBgColor(val);
+    if (key === 'headerTextColor') setHeaderTextColor(val);
+    if (key === 'sidebarBgColor') setSidebarBgColor(val);
+    if (key === 'sidebarTextColor') setSidebarTextColor(val);
+    if (key === 'buttonAccentColor') setButtonAccentColor(val);
+    if (key === 'buttonTextColor') setButtonTextColor(val);
+    if (key === 'generalTextColor') setGeneralTextColor(val);
 
-    if (key === 'headerBgColor') { newHbg = val; setHeaderBgColor(val); }
-    if (key === 'headerTextColor') { newHtext = val; setHeaderTextColor(val); }
-    if (key === 'sidebarBgColor') { newSbg = val; setSidebarBgColor(val); }
-    if (key === 'sidebarTextColor') { newStext = val; setSidebarTextColor(val); }
-    if (key === 'buttonAccentColor') { newBaccent = val; setButtonAccentColor(val); }
-    if (key === 'buttonTextColor') { newBtext = val; setButtonTextColor(val); }
-    if (key === 'generalTextColor') { newGtext = val; setGeneralTextColor(val); }
-
-    const config: BrandingConfig = {
-      paletteId: selectedPaletteId,
-      uiStyle: selectedUIStyle,
-      industrialBg: selectedIndustrialBg,
-      customBgColor,
-      darkBg: selectedDarkBg,
-      customDarkBgColor,
-      headerBgColor: newHbg,
-      headerTextColor: newHtext,
-      sidebarBgColor: newSbg,
-      sidebarTextColor: newStext,
-      buttonAccentColor: newBaccent,
-      buttonTextColor: newBtext,
-      generalTextColor: newGtext,
-    };
+    const config = getCurrentConfig(updated);
     saveConfig(config);
     applyBrandingToDOM(config, selectedUIStyle === 'industrial' ? 'light' : 'dark');
   };
 
   const handleSaveAllColors = () => {
-    const config: BrandingConfig = {
-      paletteId: selectedPaletteId,
-      uiStyle: selectedUIStyle,
-      industrialBg: selectedIndustrialBg,
-      customBgColor,
-      darkBg: selectedDarkBg,
-      customDarkBgColor,
-      headerBgColor,
-      headerTextColor,
-      sidebarBgColor,
-      sidebarTextColor,
-      buttonAccentColor,
-      buttonTextColor,
-      generalTextColor,
-    };
+    const config = getCurrentConfig();
     saveConfig(config);
     applyBrandingToDOM(config, selectedUIStyle === 'industrial' ? 'light' : 'dark');
     soundEffects.success();
@@ -434,13 +451,16 @@ export default function BrandingSettings() {
     setButtonAccentColor('');
     setButtonTextColor('');
     setGeneralTextColor('');
-    const config: BrandingConfig = {
-      paletteId: selectedPaletteId,
-      uiStyle: selectedUIStyle,
-      industrialBg: selectedIndustrialBg,
-      customBgColor,
-      darkBg: selectedDarkBg,
-      customDarkBgColor,
+    try {
+      localStorage.removeItem('venematic_header_bg');
+      localStorage.removeItem('venematic_header_text');
+      localStorage.removeItem('venematic_sidebar_bg');
+      localStorage.removeItem('venematic_sidebar_text');
+      localStorage.removeItem('venematic_button_accent');
+      localStorage.removeItem('venematic_button_text');
+      localStorage.removeItem('venematic_general_text');
+    } catch {}
+    const config = getCurrentConfig({
       headerBgColor: '',
       headerTextColor: '',
       sidebarBgColor: '',
@@ -448,7 +468,7 @@ export default function BrandingSettings() {
       buttonAccentColor: '',
       buttonTextColor: '',
       generalTextColor: '',
-    };
+    });
     saveConfig(config);
     applyBrandingToDOM(config, selectedUIStyle === 'industrial' ? 'light' : 'dark');
     soundEffects.playBeep();
@@ -888,8 +908,8 @@ export default function BrandingSettings() {
               </span>
             </div>
 
-            {/* Grid de 6 opciones de Fondo */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-2.5 pt-1">
+            {/* Grid de opciones de Fondo (9 Opciones Incluyendo Clínicas y Personalizado) */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-2.5 pt-1">
               {INDUSTRIAL_BG_PRESETS.map((opt) => {
                 const isSelected = selectedIndustrialBg === opt.id;
                 const isCustom = opt.id === 'custom';
@@ -1082,19 +1102,19 @@ export default function BrandingSettings() {
       </div>
 
       {/* ========================================================================= */}
-      {/* 2. CATÁLOGO DE 10 PALETAS PRE-ESTABLECIDAS                                */}
+      {/* 2. CATÁLOGO DE PALETAS PRE-ESTABLECIDAS (14 OPCIONES POR RUBRO)         */}
       {/* ========================================================================= */}
       <div className="space-y-2.5">
         <div className="flex items-center justify-between">
           <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
-            Paleta de Color de la Marca (10 Opciones por Rubro)
+            Paleta de Color de la Marca (14 Opciones por Rubro y Clínicas)
           </label>
           <span className="text-[11px] font-bold text-slate-500">
             Activa: <b style={{ color: activePalette.primary }}>{activePalette.name}</b>
           </span>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2.5">
           {THEME_PALETTES.map((pal) => {
             const isSelected = selectedPaletteId === pal.id;
             return (

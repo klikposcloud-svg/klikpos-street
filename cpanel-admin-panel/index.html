@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KlikPOS Command Studio — Panel Administrativo Master</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {
+              400: '#38bdf8',
+              500: '#0ea5e9',
+              600: '#0284c7',
+              700: '#0369a1',
+            },
+            dark: {
+              bg: '#080a0f',
+              card: '#0f1420',
+              sidebar: '#0b0f19',
+              border: 'rgba(255, 255, 255, 0.08)',
+              hover: '#161e30',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #080a0f;
+      color: #f1f5f9;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: rgba(15, 20, 32, 0.6);
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(56, 189, 248, 0.3);
+      border-radius: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: rgba(56, 189, 248, 0.6);
+    }
+    .glass-card {
+      background: rgba(15, 20, 32, 0.85);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+    }
+    .glow-cyan {
+      box-shadow: 0 0 25px rgba(14, 165, 233, 0.25);
+    }
+    .glow-emerald {
+      box-shadow: 0 0 25px rgba(16, 185, 129, 0.25);
+    }
+    .glow-rose {
+      box-shadow: 0 0 25px rgba(244, 63, 94, 0.25);
+    }
+  </style>
+</head>
+<body class="h-screen w-screen flex overflow-hidden font-sans select-none antialiased">
+
+  <!-- ========================================================================= -->
+  <!-- SIDEBAR LATERAL NAVEGACIÓN -->
+  <!-- ========================================================================= -->
+  <aside class="w-64 bg-[#0b0f19] border-r border-white/10 flex flex-col justify-between shrink-0 z-30">
+    <div class="p-5 space-y-6">
+      <!-- Logo y Versión -->
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-600 to-cyan-400 flex items-center justify-center font-black text-white text-lg shadow-lg shadow-sky-500/30">
+          K
+        </div>
+        <div>
+          <h1 class="text-sm font-black text-white tracking-wider flex items-center gap-1.5">
+            KLIKPOS <span class="text-[10px] bg-sky-500/20 text-sky-400 px-1.5 py-0.5 rounded font-bold border border-sky-500/30">STUDIO</span>
+          </h1>
+          <p class="text-[11px] text-slate-400 font-mono">Master Command v3.0</p>
+        </div>
+      </div>
+
+      <!-- Menú de Pestañas -->
+      <nav class="space-y-1.5">
+        <button onclick="switchTab('tab-keygen')" id="nav-keygen" class="tab-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all bg-sky-600 text-white shadow-md shadow-sky-950/40">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path></svg>
+          <span>Generador de Licencias</span>
+        </button>
+
+        <button onclick="switchTab('tab-clients')" id="nav-clients" class="tab-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white hover:bg-white/5 transition-all">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+          <div class="flex-1 flex items-center justify-between">
+            <span>Directorio Clientes</span>
+            <span id="badge-total-clients" class="text-[10px] bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded-full font-mono">0</span>
+          </div>
+        </button>
+
+        <button onclick="switchTab('tab-telemetry')" id="nav-telemetry" class="tab-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white hover:bg-white/5 transition-all">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+          <div class="flex-1 flex items-center justify-between">
+            <span>Telemetría en Vivo</span>
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          </div>
+        </button>
+
+        <button onclick="switchTab('tab-threats')" id="nav-threats" class="tab-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white hover:bg-white/5 transition-all">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+          <div class="flex-1 flex items-center justify-between">
+            <span>Escudo de Seguridad IP</span>
+            <span id="badge-threats-count" class="text-[10px] bg-rose-500/20 text-rose-400 px-1.5 py-0.5 rounded-full font-mono border border-rose-500/30">0</span>
+          </div>
+        </button>
+      </nav>
+    </div>
+
+    <!-- Pie de Sidebar -->
+    <div class="p-4 border-t border-white/10 bg-black/20">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 flex items-center justify-center font-bold text-xs text-black shadow-sm">
+          AD
+        </div>
+        <div class="min-w-0 flex-1">
+          <p class="text-xs font-bold text-white truncate">Dueño / SuperAdmin</p>
+          <p class="text-[10px] text-slate-500 font-mono">Sesión Cifrada RSA</p>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ========================================================================= -->
+  <!-- CONTENIDO PRINCIPAL -->
+  <!-- ========================================================================= -->
+  <main class="flex-1 flex flex-col overflow-hidden bg-[#080a0f]">
+
+    <!-- BARRA SUPERIOR DE ESTADO -->
+    <header class="h-16 border-b border-white/10 px-8 flex items-center justify-between shrink-0 bg-[#0b0f19]/70 backdrop-blur-md">
+      <div>
+        <h2 id="view-title" class="text-sm font-extrabold text-white tracking-wide uppercase">Generador Granular de Licencias</h2>
+        <p id="view-desc" class="text-[11px] text-slate-400">Configura módulos, límites y emite seriales criptográficos en caliente</p>
+      </div>
+
+      <div class="flex items-center gap-4">
+        <!-- Status de Conexión Nube -->
+        <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold">
+          <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+          <span>Firebase Sync Online</span>
+        </div>
+
+        <!-- Botón Exportar JSON Backup -->
+        <button onclick="exportClientsBackup()" class="px-3.5 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-slate-200 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5">
+          <svg class="w-3.5 h-3.5 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+          <span>Backup Clientes</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- ÁREA DE PESTAÑAS (SCROLLABLE) -->
+    <div class="flex-1 overflow-y-auto p-6 md:p-8 custom-scrollbar">
+
+      <!-- ===================================================================== -->
+      <!-- PESTAÑA 1: GENERADOR DE LICENCIAS GRANULAR -->
+      <!-- ===================================================================== -->
+      <div id="tab-keygen" class="tab-content space-y-6">
+        
+        <!-- PRESETS RÁPIDOS (1 CLIC) -->
+        <div class="glass-card rounded-2xl p-5 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+              <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+              Cargar Paquetes Preestablecidos (Presets Rápidos)
+            </span>
+            <span class="text-[11px] text-slate-500">Selecciona un modelo base o personalízalo abajo</span>
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
+            <button type="button" onclick="applyPreset('bodega')" class="p-3 rounded-xl border border-white/10 bg-white/5 hover:bg-sky-500/10 hover:border-sky-500/30 text-left transition-all group">
+              <p class="text-xs font-bold text-white group-hover:text-sky-400">Bodega / Abasto</p>
+              <p class="text-[10px] text-slate-400 mt-0.5">100 Prod · 1 Caja · Lista</p>
+            </button>
+            <button type="button" onclick="applyPreset('restaurante')" class="p-3 rounded-xl border border-white/10 bg-white/5 hover:bg-amber-500/10 hover:border-amber-500/30 text-left transition-all group">
+              <p class="text-xs font-bold text-white group-hover:text-amber-400">Restaurante / Bar</p>
+              <p class="text-[10px] text-slate-400 mt-0.5">Mesas · Comandas · Grid</p>
+            </button>
+            <button type="button" onclick="applyPreset('supermarket')" class="p-3 rounded-xl border border-white/10 bg-white/5 hover:bg-emerald-500/10 hover:border-emerald-500/30 text-left transition-all group">
+              <p class="text-xs font-bold text-white group-hover:text-emerald-400">Mini Market Pro</p>
+              <p class="text-[10px] text-slate-400 mt-0.5">Escáner · MultiCaja · Cierre Z</p>
+            </button>
+            <button type="button" onclick="applyPreset('cloud_full')" class="p-3 rounded-xl border border-white/10 bg-white/5 hover:bg-cyan-500/10 hover:border-cyan-500/30 text-left transition-all group">
+              <p class="text-xs font-bold text-white group-hover:text-cyan-400">Combo Full Nube</p>
+              <p class="text-[10px] text-slate-400 mt-0.5">Todo Activo + Silent Sync</p>
+            </button>
+            <button type="button" onclick="applyPreset('custom')" class="p-3 rounded-xl border border-indigo-500/30 bg-indigo-500/10 text-left transition-all">
+              <p class="text-xs font-bold text-indigo-400">A Medida (Custom)</p>
+              <p class="text-[10px] text-indigo-300/70 mt-0.5">Interruptores manuales</p>
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+          <!-- COLUMNA IZQUIERDA: FORMULARIO Y MATRIZ DE TOGGLES (8 COLS) -->
+          <div class="lg:col-span-8 space-y-6">
+
+            <!-- DATOS DEL CLIENTE -->
+            <div class="glass-card rounded-2xl p-6 space-y-4">
+              <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-sky-500"></span>
+                1. Información del Comercio y Terminal
+              </h3>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-[11px] font-bold text-slate-300 mb-1.5">Nombre del Negocio / Cliente</label>
+                  <input type="text" id="cust-name" placeholder="Ej: Inversiones El Trigal C.A." class="w-full bg-[#080a0f] border border-white/15 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-sky-500 font-medium">
+                </div>
+                <div>
+                  <label class="block text-[11px] font-bold text-slate-300 mb-1.5">RIF o Cédula</label>
+                  <input type="text" id="cust-rif" placeholder="Ej: J-12345678-9" class="w-full bg-[#080a0f] border border-white/15 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-sky-500 font-mono">
+                </div>
+                <div>
+                  <label class="block text-[11px] font-bold text-slate-300 mb-1.5">Hardware ID del Cliente (HWID)</label>
+                  <input type="text" id="cust-hwid" placeholder="Ej: A1B2-C3D4-E5F6" class="w-full bg-[#080a0f] border border-white/15 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-sky-500 font-mono">
+                </div>
+                <div>
+                  <label class="block text-[11px] font-bold text-slate-300 mb-1.5">Teléfono / WhatsApp de Contacto</label>
+                  <input type="text" id="cust-phone" placeholder="Ej: +584121234567" class="w-full bg-[#080a0f] border border-white/15 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-sky-500 font-mono">
+                </div>
+              </div>
+
+              <!-- VIGENCIA DEL PLAN -->
+              <div class="pt-3 border-t border-white/10">
+                <label class="block text-[11px] font-bold text-slate-300 mb-2">Vigencia de la Licencia</label>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  <label class="flex items-center gap-2 p-2.5 rounded-xl border border-white/10 bg-white/5 cursor-pointer hover:bg-white/10 transition-all">
+                    <input type="radio" name="plan-duration" value="15days" class="text-sky-600 focus:ring-0">
+                    <span class="text-xs font-semibold text-white">15 Días Demo</span>
+                  </label>
+                  <label class="flex items-center gap-2 p-2.5 rounded-xl border border-white/10 bg-white/5 cursor-pointer hover:bg-white/10 transition-all">
+                    <input type="radio" name="plan-duration" value="1month" class="text-sky-600 focus:ring-0">
+                    <span class="text-xs font-semibold text-white">1 Mes</span>
+                  </label>
+                  <label class="flex items-center gap-2 p-2.5 rounded-xl border border-white/10 bg-white/5 cursor-pointer hover:bg-white/10 transition-all">
+                    <input type="radio" name="plan-duration" value="1year" class="text-sky-600 focus:ring-0" checked>
+                    <span class="text-xs font-semibold text-white">1 Año (Anual)</span>
+                  </label>
+                  <label class="flex items-center gap-2 p-2.5 rounded-xl border border-amber-500/30 bg-amber-500/10 cursor-pointer hover:bg-amber-500/20 transition-all">
+                    <input type="radio" name="plan-duration" value="never" class="text-amber-500 focus:ring-0">
+                    <span class="text-xs font-bold text-amber-400">Vitalicia (Full)</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- MATRIZ DE CONFIGURACIÓN GRANULAR DE MÓDULOS -->
+            <div class="glass-card rounded-2xl p-6 space-y-5">
+              <div class="flex items-center justify-between border-b border-white/10 pb-3">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
+                  <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                  2. Matriz de Módulos y Capacidades Habilitadas
+                </h3>
+                <span class="text-[11px] text-slate-400 font-mono">Interruptores en caliente</span>
+              </div>
+
+              <!-- SECCIÓN 1: LÍMITES -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="p-4 rounded-xl bg-white/5 border border-white/10 space-y-2">
+                  <label class="block text-xs font-bold text-white">Límite Máximo de Productos</label>
+                  <select id="cfg-max-products" class="w-full bg-[#080a0f] border border-white/15 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-sky-500 font-mono">
+                    <option value="20">20 Productos (Micro Test)</option>
+                    <option value="50">50 Productos</option>
+                    <option value="100" selected>100 Productos (Estándar Lite)</option>
+                    <option value="500">500 Productos (Pro)</option>
+                    <option value="1000">1.000 Productos</option>
+                    <option value="999999">Ilimitado (Sin Restricción)</option>
+                  </select>
+                </div>
+
+                <div class="p-4 rounded-xl bg-white/5 border border-white/10 space-y-2">
+                  <label class="block text-xs font-bold text-white">Número Máximo de Cajeros</label>
+                  <select id="cfg-max-cashiers" class="w-full bg-[#080a0f] border border-white/15 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-sky-500 font-mono">
+                    <option value="1">1 Solo Cajero (Monocaja)</option>
+                    <option value="3" selected>Hasta 3 Cajeros con PIN</option>
+                    <option value="10">Hasta 10 Cajeros</option>
+                    <option value="999">Cajeros Ilimitados</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- SECCIÓN 2: TOGGLES DE FUNCIONES -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+
+                <!-- Móvil Satélite Escáner -->
+                <label class="flex items-center justify-between p-3.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 cursor-pointer transition-all">
+                  <div>
+                    <p class="text-xs font-bold text-white">Móvil Satélite (Escáner PC)</p>
+                    <p class="text-[10px] text-slate-400">Usar teléfono Android como lector de barras inalámbrico</p>
+                  </div>
+                  <input type="checkbox" id="cfg-mod-scanner" checked class="w-4 h-4 rounded text-sky-600 focus:ring-0">
+                </label>
+
+                <!-- Mesas y Restaurante -->
+                <label class="flex items-center justify-between p-3.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 cursor-pointer transition-all">
+                  <div>
+                    <p class="text-xs font-bold text-white">Módulo Restaurante (Mesas)</p>
+                    <p class="text-[10px] text-slate-400">Mapa de mesas, cuentas separadas y comandas cocina</p>
+                  </div>
+                  <input type="checkbox" id="cfg-mod-tables" class="w-4 h-4 rounded text-sky-600 focus:ring-0">
+                </label>
+
+                <!-- Silent Cloud Sync -->
+                <label class="flex items-center justify-between p-3.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 cursor-pointer transition-all">
+                  <div>
+                    <p class="text-xs font-bold text-white">Silent Cloud Sync (Respaldo)</p>
+                    <p class="text-[10px] text-slate-400">Sincronización silenciosa y respaldo en Firebase</p>
+                  </div>
+                  <input type="checkbox" id="cfg-mod-cloudsync" checked class="w-4 h-4 rounded text-sky-600 focus:ring-0">
+                </label>
+
+                <!-- Tasa BCV en Vivo -->
+                <label class="flex items-center justify-between p-3.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 cursor-pointer transition-all">
+                  <div>
+                    <p class="text-xs font-bold text-white">Tasa Oficial BCV Automática</p>
+                    <p class="text-[10px] text-slate-400">Scraping en vivo y liquidación multimoneda USD/VES</p>
+                  </div>
+                  <input type="checkbox" id="cfg-mod-bcv" checked class="w-4 h-4 rounded text-sky-600 focus:ring-0">
+                </label>
+
+                <!-- Personalización Visual / Branding -->
+                <label class="flex items-center justify-between p-3.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 cursor-pointer transition-all">
+                  <div>
+                    <p class="text-xs font-bold text-white">Personalización Visual & Logo</p>
+                    <p class="text-[10px] text-slate-400">Permitir cambiar colores, header, sidebar y logo propio</p>
+                  </div>
+                  <input type="checkbox" id="cfg-mod-branding" checked class="w-4 h-4 rounded text-sky-600 focus:ring-0">
+                </label>
+
+                <!-- Auditoría Cierre Z y Ciego -->
+                <label class="flex items-center justify-between p-3.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 cursor-pointer transition-all">
+                  <div>
+                    <p class="text-xs font-bold text-white">Auditoría Avanzada (Cierre Z)</p>
+                    <p class="text-[10px] text-slate-400">Cierre ciego de caja, desglose de métodos y reportes</p>
+                  </div>
+                  <input type="checkbox" id="cfg-mod-audit" checked class="w-4 h-4 rounded text-sky-600 focus:ring-0">
+                </label>
+
+                <!-- Cuentas por Cobrar / Fiados -->
+                <label class="flex items-center justify-between p-3.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 cursor-pointer transition-all">
+                  <div>
+                    <p class="text-xs font-bold text-white">Cuentas por Cobrar / Créditos</p>
+                    <p class="text-[10px] text-slate-400">Módulo de fiados, límites por cliente y abonos parciales</p>
+                  </div>
+                  <input type="checkbox" id="cfg-mod-credits" checked class="w-4 h-4 rounded text-sky-600 focus:ring-0">
+                </label>
+
+                <!-- Control de Lotes y Vencimientos -->
+                <label class="flex items-center justify-between p-3.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 cursor-pointer transition-all">
+                  <div>
+                    <p class="text-xs font-bold text-white">Lotes y Vencimientos</p>
+                    <p class="text-[10px] text-slate-400">Alertas de caducidad (Farmacias y Alimentos)</p>
+                  </div>
+                  <input type="checkbox" id="cfg-mod-lots" class="w-4 h-4 rounded text-sky-600 focus:ring-0">
+                </label>
+              </div>
+
+            </div>
+
+          </div>
+
+          <!-- COLUMNA DERECHA: RESULTADO GENERACIÓN, QR Y BOTÓN WHATSAPP (4 COLS) -->
+          <div class="lg:col-span-4 space-y-6">
+
+            <div class="glass-card rounded-2xl p-6 space-y-5 border border-sky-500/30 glow-cyan">
+              <h3 class="text-xs font-bold uppercase tracking-wider text-sky-400 flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                3. Emisión de Clave Criptográfica
+              </h3>
+
+              <button type="button" onclick="generateCustomLicense()" class="w-full py-3.5 bg-gradient-to-r from-sky-500 to-cyan-500 hover:from-sky-600 hover:to-cyan-600 text-white font-extrabold text-xs rounded-xl shadow-lg shadow-sky-500/25 transition-all transform active:scale-95 flex items-center justify-center gap-2 cursor-pointer">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
+                <span>GENERAR LICENCIA A MEDIDA</span>
+              </button>
+
+              <!-- CAJA DE CLAVE GENERADA -->
+              <div class="space-y-2">
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Product Key Criptográfico</label>
+                <div class="relative">
+                  <input type="text" id="result-license-key" readonly value="KLIK-PRO-PERP-A1B2-C3D4-E5F6-XXXX" class="w-full bg-[#080a0f] border border-white/20 rounded-xl px-3.5 py-3 text-xs font-mono font-black text-amber-400 select-all pr-10 focus:outline-none">
+                  <button onclick="copyLicenseKey()" class="absolute right-2 top-2.5 p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-slate-300 transition-all" title="Copiar al portapapeles">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                  </button>
+                </div>
+              </div>
+
+              <!-- CÓDIGO QR PARA ESCANEAR EN LA PANTALLA DEL POS -->
+              <div class="flex flex-col items-center justify-center p-4 bg-black/40 rounded-xl border border-white/10 space-y-2">
+                <div id="qrcode-container" class="p-2 bg-white rounded-lg shadow-md flex items-center justify-center min-w-[140px] min-h-[140px]">
+                  <!-- QR Generado dinámicamente -->
+                </div>
+                <p class="text-[10px] text-slate-400 text-center">Escanea este QR desde el POS para activar en 1 segundo</p>
+              </div>
+
+              <!-- BOTÓN WHATSAPP -->
+              <button type="button" onclick="sendViaWhatsApp()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-md shadow-emerald-950/30 transition-all flex items-center justify-center gap-2 cursor-pointer">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+                <span>Enviar Licencia por WhatsApp</span>
+              </button>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- ===================================================================== -->
+      <!-- PESTAÑA 2: DIRECTORIO DE CLIENTES (CRM) -->
+      <!-- ===================================================================== -->
+      <div id="tab-clients" class="tab-content hidden space-y-6">
+        
+        <!-- BARRA DE BÚSQUEDA Y FILTROS -->
+        <div class="glass-card rounded-2xl p-5 flex flex-wrap items-center justify-between gap-4">
+          <div class="flex items-center gap-3 flex-1 min-w-[280px]">
+            <div class="relative flex-1">
+              <svg class="w-4 h-4 text-slate-400 absolute left-3.5 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+              <input type="text" id="search-client" onkeyup="filterClientsTable()" placeholder="Buscar cliente por nombre, RIF, teléfono o HWID..." class="w-full bg-[#080a0f] border border-white/15 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-500">
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <select id="filter-status" onchange="filterClientsTable()" class="bg-[#080a0f] border border-white/15 rounded-xl px-3 py-2 text-xs text-white focus:outline-none">
+              <option value="all">Todos los Estados</option>
+              <option value="active">Activos</option>
+              <option value="expiring">Por Vencer</option>
+              <option value="expired">Vencidos / Demo</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- TABLA DE CLIENTES -->
+        <div class="glass-card rounded-2xl overflow-hidden border border-white/10">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs text-slate-300">
+              <thead class="bg-white/5 border-b border-white/10 text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
+                <tr>
+                  <th class="px-5 py-3.5">Comercio / Titular</th>
+                  <th class="px-4 py-3.5">RIF / Cédula</th>
+                  <th class="px-4 py-3.5">Plan / Límites</th>
+                  <th class="px-4 py-3.5">HWID Terminal</th>
+                  <th class="px-4 py-3.5">Vencimiento</th>
+                  <th class="px-4 py-3.5">Estado</th>
+                  <th class="px-5 py-3.5 text-right">Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="clients-table-body" class="divide-y divide-white/5 font-medium">
+                <!-- Filas renderizadas con JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ===================================================================== -->
+      <!-- PESTAÑA 3: TELEMETRÍA Y MÉTRICAS EN VIVO -->
+      <!-- ===================================================================== -->
+      <div id="tab-telemetry" class="tab-content hidden space-y-6">
+        
+        <!-- KPIs Métricas -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="glass-card rounded-2xl p-5 border border-sky-500/20 glow-cyan">
+            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Terminales Registradas</p>
+            <p id="stat-total-terminals" class="text-2xl font-black text-white mt-1 font-mono">0</p>
+            <p class="text-[10px] text-emerald-400 mt-1">✓ Conectadas al ecosistema</p>
+          </div>
+          <div class="glass-card rounded-2xl p-5 border border-emerald-500/20 glow-emerald">
+            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Licencias Activas</p>
+            <p id="stat-active-licenses" class="text-2xl font-black text-emerald-400 mt-1 font-mono">0</p>
+            <p class="text-[10px] text-slate-400 mt-1">Suscripciones vigentes</p>
+          </div>
+          <div class="glass-card rounded-2xl p-5 border border-amber-500/20">
+            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Ventas Totales Registradas</p>
+            <p id="stat-total-sales" class="text-2xl font-black text-amber-400 mt-1 font-mono">0</p>
+            <p class="text-[10px] text-slate-400 mt-1">Transacciones procesadas</p>
+          </div>
+          <div class="glass-card rounded-2xl p-5 border border-purple-500/20">
+            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Versión Mayoritaria</p>
+            <p class="text-2xl font-black text-purple-400 mt-1 font-mono">v3.0.1</p>
+            <p class="text-[10px] text-slate-400 mt-1">100% de la red actualizada</p>
+          </div>
+        </div>
+
+        <!-- Panel de Actividad en Vivo -->
+        <div class="glass-card rounded-2xl p-6 space-y-4">
+          <div class="flex items-center justify-between border-b border-white/10 pb-3">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-white flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+              Transmisión de Eventos en Segundo Plano (Silent Cloud Sync)
+            </h3>
+            <span class="text-[11px] text-slate-400 font-mono">Últimas 24 horas</span>
+          </div>
+
+          <div id="telemetry-log" class="space-y-2.5 font-mono text-xs max-h-80 overflow-y-auto custom-scrollbar">
+            <!-- Eventos generados dinámicamente -->
+            <div class="p-3 rounded-xl bg-white/5 border border-white/5 flex items-center justify-between text-slate-300">
+              <span class="text-emerald-400 font-bold">[SYNC SUCCESS]</span>
+              <span>Terminal C-1 (Panadería La Mansión) sincronizó 14 ventas</span>
+              <span class="text-slate-500 text-[10px]">Hace 2 min</span>
+            </div>
+            <div class="p-3 rounded-xl bg-white/5 border border-white/5 flex items-center justify-between text-slate-300">
+              <span class="text-sky-400 font-bold">[TRIAL ACTIVE]</span>
+              <span>Terminal T-8 (Bodega San José) inició prueba 14 días</span>
+              <span class="text-slate-500 text-[10px]">Hace 18 min</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ===================================================================== -->
+      <!-- PESTAÑA 4: ESCUDO DE CIBERSEGURIDAD Y CONTROL DE IPS -->
+      <!-- ===================================================================== -->
+      <div id="tab-threats" class="tab-content hidden space-y-6">
+        
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div class="glass-card rounded-2xl p-5 border border-rose-500/30 glow-rose">
+            <h4 class="text-xs font-bold uppercase text-rose-400 flex items-center gap-2">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+              Anti-Clonación HWID
+            </h4>
+            <p class="text-[11px] text-slate-400 mt-1">Alerta si un mismo HWID intenta registrarse en más de 2 IPs distintas en menos de 1h.</p>
+            <div class="mt-3 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-[10px] font-bold">
+              <span>✓ Protección Activa</span>
+            </div>
+          </div>
+
+          <div class="glass-card rounded-2xl p-5 border border-amber-500/30">
+            <h4 class="text-xs font-bold uppercase text-amber-400 flex items-center gap-2">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+              Anti-Manipulación de Reloj
+            </h4>
+            <p class="text-[11px] text-slate-400 mt-1">Detecta si el usuario atrasa la fecha de su Windows/Android para evadir el vencimiento.</p>
+            <div class="mt-3 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-[10px] font-bold">
+              <span>✓ Timestamp Nube Forzado</span>
+            </div>
+          </div>
+
+          <div class="glass-card rounded-2xl p-5 border border-purple-500/30">
+            <h4 class="text-xs font-bold uppercase text-purple-400 flex items-center gap-2">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg>
+              Lista Negra de IPs y Bloqueo
+            </h4>
+            <p class="text-[11px] text-slate-400 mt-1">Revoca terminales comprometidas y bloquea peticiones de atacantes en tiempo real.</p>
+            <div class="mt-3 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-[10px] font-bold">
+              <span>✓ Bloqueo Remoto 1-Clic</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tabla de Intentos y Amenazas Registradas -->
+        <div class="glass-card rounded-2xl p-6 space-y-4">
+          <div class="flex items-center justify-between border-b border-white/10 pb-3">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-white">Registro de Amenazas y Dispositivos Sospechosos</h3>
+            <button onclick="clearThreatLogs()" class="text-xs text-rose-400 hover:text-rose-300 font-bold">Limpiar Registro</button>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs text-slate-300">
+              <thead class="bg-white/5 border-b border-white/10 text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
+                <tr>
+                  <th class="px-4 py-3">Dirección IP</th>
+                  <th class="px-4 py-3">HWID Involucrado</th>
+                  <th class="px-4 py-3">Tipo de Incidencia</th>
+                  <th class="px-4 py-3">Hora del Evento</th>
+                  <th class="px-4 py-3 text-right">Acción</th>
+                </tr>
+              </thead>
+              <tbody id="threats-table-body" class="divide-y divide-white/5 font-mono">
+                <tr>
+                  <td class="px-4 py-3 text-rose-400 font-bold">190.202.45.112</td>
+                  <td class="px-4 py-3 text-slate-300">E4F1-99A0-33BC</td>
+                  <td class="px-4 py-3 text-amber-400 font-sans">Fuerza Bruta (12 intentos clave errónea)</td>
+                  <td class="px-4 py-3 text-slate-500">Hoy 16:42</td>
+                  <td class="px-4 py-3 text-right">
+                    <button class="px-2.5 py-1 bg-rose-500/20 hover:bg-rose-500/40 text-rose-300 font-bold rounded-lg text-[10px] border border-rose-500/30">Bloquear IP</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+
+  <!-- ========================================================================= -->
+  <!-- MOTOR JAVASCRIPT MASTER STUDIO -->
+  <!-- ========================================================================= -->
+  <script>
+    // Clave secreta maestra para cálculo HMAC de licenciamiento
+    const MASTER_SIGNING_SALT = 'VENEMATIC_ENTERPRISE_2026_MASTER_SECRET_987654321';
+
+    // Almacenamiento local de clientes
+    let clientsDatabase = JSON.parse(localStorage.getItem('klikpos_admin_clients') || '[]');
+
+    if (clientsDatabase.length === 0) {
+      // Datos demo iniciales
+      clientsDatabase = [
+        {
+          id: 'cli_01',
+          name: 'Supermercado Central C.A.',
+          rif: 'J-40982145-0',
+          phone: '+584141234567',
+          hwid: '9F8E-7D6C-5B4A',
+          plan: 'Combo Full Empresarial',
+          maxProducts: 'Ilimitado',
+          maxCashiers: '10',
+          expires: '2027-09-30',
+          status: 'active',
+          key: 'KLIK-PRO-PERP-9F8E-7D6C-5B4A-78A1',
+          createdAt: '2026-09-30'
+        },
+        {
+          id: 'cli_02',
+          name: 'Bodega San Antonio',
+          rif: 'V-18452901-2',
+          phone: '+584249876543',
+          hwid: '3A2B-1C0D-9E8F',
+          plan: 'Bodega Exprés Lite',
+          maxProducts: '100',
+          maxCashiers: '1',
+          expires: '2026-10-15',
+          status: 'expiring',
+          key: 'KLIK-STR-15MN-3A2B-1C0D-9E8F-44B2',
+          createdAt: '2026-09-30'
+        }
+      ];
+      localStorage.setItem('klikpos_admin_clients', JSON.stringify(clientsDatabase));
+    }
+
+    // SHA-256 Puro en JS
+    function sha256Hex(ascii) {
+      function rightRotate(value, amount) { return (value >>> amount) | (value << (32 - amount)); }
+      var mathPow = Math.pow;
+      var maxWord = mathPow(2, 32);
+      var lengthProperty = 'length';
+      var i, j;
+      var result = '';
+      var words = [];
+      var asciiBitLength = ascii[lengthProperty] * 8;
+      var hash = [];
+      var k = [];
+      var primeCounter = 0;
+      var isComposite = {};
+      for (var candidate = 2; primeCounter < 64; candidate++) {
+        if (!isComposite[candidate]) {
+          for (i = 0; i < 313; i += candidate) { isComposite[i] = candidate; }
+          hash[primeCounter] = (mathPow(candidate, .5) * maxWord) | 0;
+          k[primeCounter++] = (mathPow(candidate, 1 / 3) * maxWord) | 0;
+        }
+      }
+      ascii += '\x80';
+      while (ascii[lengthProperty] % 64 - 56) ascii += '\x00';
+      for (i = 0; i < ascii[lengthProperty]; i++) {
+        j = ascii.charCodeAt(i);
+        if (j >> 8) return;
+        words[i >> 2] |= j << ((3 - i) % 4) * 8;
+      }
+      words[words[lengthProperty]] = ((asciiBitLength / maxWord) | 0);
+      words[words[lengthProperty]] = (asciiBitLength);
+      for (j = 0; j < words[lengthProperty];) {
+        var w = words.slice(j, j += 16);
+        var oldHash = hash;
+        hash = hash.slice(0, 8);
+        for (i = 0; i < 64; i++) {
+          var i2 = i + j;
+          var w15 = w[i - 15], w2 = w[i - 2];
+          var a = hash[0], e = hash[4];
+          var temp1 = hash[7]
+            + (rightRotate(e, 6) ^ rightRotate(e, 11) ^ rightRotate(e, 25))
+            + ((e & hash[5]) ^ ((~e) & hash[6]))
+            + k[i]
+            + (w[i] = (i < 16) ? w[i] : (
+                w[i - 16]
+                + (rightRotate(w15, 7) ^ rightRotate(w15, 18) ^ (w15 >>> 3))
+                + w[i - 7]
+                + (rightRotate(w2, 17) ^ rightRotate(w2, 19) ^ (w2 >>> 10))
+              ) | 0
+            );
+          var temp2 = (rightRotate(a, 2) ^ rightRotate(a, 13) ^ rightRotate(a, 22))
+            + ((a & hash[1]) ^ (a & hash[2]) ^ (hash[1] & hash[2]));
+          hash = [(temp1 + temp2) | 0].concat(hash);
+          hash[4] = (hash[4] + temp1) | 0;
+        }
+        for (i = 0; i < 8; i++) { hash[i] = (hash[i] + oldHash[i]) | 0; }
+      }
+      for (i = 0; i < 8; i++) {
+        for (i = 0; i < 8; i++) {
+          var hex = (hash[i] >>> 0).toString(16);
+          result += (hex.length === 1 ? '0' : '') + hex;
+        }
+      }
+      return result.slice(0, 64);
+    }
+
+    // Cambio de pestañas
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('bg-sky-600', 'text-white', 'shadow-md');
+        btn.classList.add('text-slate-400');
+      });
+      document.getElementById(tabId).classList.remove('hidden');
+      const activeNav = document.getElementById('nav-' + tabId.replace('tab-', ''));
+      if (activeNav) {
+        activeNav.classList.add('bg-sky-600', 'text-white', 'shadow-md');
+        activeNav.classList.remove('text-slate-400');
+      }
+
+      if (tabId === 'tab-keygen') {
+        document.getElementById('view-title').innerText = 'Generador Granular de Licencias';
+        document.getElementById('view-desc').innerText = 'Configura módulos, límites y emite seriales criptográficos en caliente';
+      } else if (tabId === 'tab-clients') {
+        document.getElementById('view-title').innerText = 'Directorio de Clientes CRM';
+        document.getElementById('view-desc').innerText = 'Monitorea negocios registrados, planes activos y renovaciones';
+        renderClientsTable();
+      } else if (tabId === 'tab-telemetry') {
+        document.getElementById('view-title').innerText = 'Telemetría y Métricas en Tiempo Real';
+        document.getElementById('view-desc').innerText = 'Monitoreo de terminales conectadas, ventas y sincronización en la nube';
+        updateTelemetryStats();
+      } else if (tabId === 'tab-threats') {
+        document.getElementById('view-title').innerText = 'Escudo de Seguridad & Anti-Tampering';
+        document.getElementById('view-desc').innerText = 'Detección de clonación de HWID, manipulación de reloj y bloqueo de IPs';
+      }
+    }
+
+    // Aplicar Presets Rápidos
+    function applyPreset(preset) {
+      if (preset === 'bodega') {
+        document.getElementById('cfg-max-products').value = '100';
+        document.getElementById('cfg-max-cashiers').value = '1';
+        document.getElementById('cfg-mod-scanner').checked = true;
+        document.getElementById('cfg-mod-tables').checked = false;
+        document.getElementById('cfg-mod-cloudsync').checked = false;
+        document.getElementById('cfg-mod-bcv').checked = true;
+        document.getElementById('cfg-mod-branding').checked = false;
+        document.getElementById('cfg-mod-audit').checked = true;
+        document.getElementById('cfg-mod-credits').checked = true;
+        document.getElementById('cfg-mod-lots').checked = false;
+      } else if (preset === 'restaurante') {
+        document.getElementById('cfg-max-products').value = '999999';
+        document.getElementById('cfg-max-cashiers').value = '3';
+        document.getElementById('cfg-mod-scanner').checked = false;
+        document.getElementById('cfg-mod-tables').checked = true;
+        document.getElementById('cfg-mod-cloudsync').checked = true;
+        document.getElementById('cfg-mod-bcv').checked = true;
+        document.getElementById('cfg-mod-branding').checked = true;
+        document.getElementById('cfg-mod-audit').checked = true;
+        document.getElementById('cfg-mod-credits').checked = false;
+        document.getElementById('cfg-mod-lots').checked = false;
+      } else if (preset === 'supermarket') {
+        document.getElementById('cfg-max-products').value = '999999';
+        document.getElementById('cfg-max-cashiers').value = '10';
+        document.getElementById('cfg-mod-scanner').checked = true;
+        document.getElementById('cfg-mod-tables').checked = false;
+        document.getElementById('cfg-mod-cloudsync').checked = true;
+        document.getElementById('cfg-mod-bcv').checked = true;
+        document.getElementById('cfg-mod-branding').checked = true;
+        document.getElementById('cfg-mod-audit').checked = true;
+        document.getElementById('cfg-mod-credits').checked = true;
+        document.getElementById('cfg-mod-lots').checked = true;
+      } else if (preset === 'cloud_full') {
+        document.getElementById('cfg-max-products').value = '999999';
+        document.getElementById('cfg-max-cashiers').value = '999';
+        document.getElementById('cfg-mod-scanner').checked = true;
+        document.getElementById('cfg-mod-tables').checked = true;
+        document.getElementById('cfg-mod-cloudsync').checked = true;
+        document.getElementById('cfg-mod-bcv').checked = true;
+        document.getElementById('cfg-mod-branding').checked = true;
+        document.getElementById('cfg-mod-audit').checked = true;
+        document.getElementById('cfg-mod-credits').checked = true;
+        document.getElementById('cfg-mod-lots').checked = true;
+      }
+    }
+
+    // Generar Licencia a Medida
+    function generateCustomLicense() {
+      const name = document.getElementById('cust-name').value.trim() || 'Comercio General';
+      const rif = document.getElementById('cust-rif').value.trim().toUpperCase() || 'J-00000000-0';
+      const hwid = document.getElementById('cust-hwid').value.trim().toUpperCase() || 'A1B2-C3D4-E5F6';
+      const phone = document.getElementById('cust-phone').value.trim() || '+584120000000';
+      const duration = document.querySelector('input[name="plan-duration"]:checked').value;
+      const maxProd = document.getElementById('cfg-max-products').value;
+      const maxCash = document.getElementById('cfg-max-cashiers').value;
+
+      let expCode = 'PERP';
+      let expiresAtDate = '2099-12-31';
+      if (duration === '15days') {
+        expCode = '15MN';
+        expiresAtDate = new Date(Date.now() + 15 * 86400000).toISOString().split('T')[0];
+      } else if (duration === '1month') {
+        expCode = '30DY';
+        expiresAtDate = new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0];
+      } else if (duration === '1year') {
+        expCode = '365D';
+        expiresAtDate = new Date(Date.now() + 365 * 86400000).toISOString().split('T')[0];
+      }
+
+      // Máscara de permisos binarios
+      const pMask = [
+        document.getElementById('cfg-mod-scanner').checked ? '1' : '0',
+        document.getElementById('cfg-mod-tables').checked ? '1' : '0',
+        document.getElementById('cfg-mod-cloudsync').checked ? '1' : '0',
+        document.getElementById('cfg-mod-bcv').checked ? '1' : '0',
+        document.getElementById('cfg-mod-branding').checked ? '1' : '0',
+        document.getElementById('cfg-mod-audit').checked ? '1' : '0',
+        document.getElementById('cfg-mod-credits').checked ? '1' : '0',
+        document.getElementById('cfg-mod-lots').checked ? '1' : '0'
+      ].join('');
+
+      const cleanHwid = hwid.replace(/[^A-Z0-9]/g, '');
+      const cleanRif = rif.replace(/[^A-Z0-9]/g, '');
+      const payloadStr = `${cleanHwid}#${cleanRif}#PRO#${expiresAtDate}#${pMask}#${MASTER_SIGNING_SALT}`;
+      const hash = sha256Hex(payloadStr).toUpperCase();
+      const sig = `${hash.slice(0, 4)}-${hash.slice(4, 8)}-${hash.slice(8, 12)}-${hash.slice(12, 16)}`;
+
+      const finalKey = `KLIK-PRO-${expCode}-${sig}`;
+      document.getElementById('result-license-key').value = finalKey;
+
+      // Renderizar QR Code
+      const qrContainer = document.getElementById('qrcode-container');
+      qrContainer.innerHTML = '';
+      new QRCode(qrContainer, {
+        text: JSON.stringify({
+          key: finalKey,
+          hwid: hwid,
+          rif: rif,
+          business: name,
+          expires: expiresAtDate,
+          limits: { maxProducts: maxProd, maxCashiers: maxCash, mask: pMask }
+        }),
+        width: 130,
+        height: 130,
+        colorDark: '#080a0f',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.M
+      });
+
+      // Guardar en la base de datos de clientes CRM
+      const existingIdx = clientsDatabase.findIndex(c => c.hwid === hwid || (c.rif === rif && rif !== 'J-00000000-0'));
+      const clientRecord = {
+        id: 'cli_' + Date.now(),
+        name,
+        rif,
+        phone,
+        hwid,
+        plan: maxProd === '999999' ? 'Combo Full Empresarial' : `Plan Medida (${maxProd} Prod)`,
+        maxProducts: maxProd === '999999' ? 'Ilimitado' : maxProd,
+        maxCashiers: maxCash === '999' ? 'Ilimitado' : maxCash,
+        expires: expiresAtDate,
+        status: duration === '15days' ? 'expiring' : 'active',
+        key: finalKey,
+        createdAt: new Date().toISOString().split('T')[0]
+      };
+
+      if (existingIdx >= 0) {
+        clientsDatabase[existingIdx] = clientRecord;
+      } else {
+        clientsDatabase.unshift(clientRecord);
+      }
+      localStorage.setItem('klikpos_admin_clients', JSON.stringify(clientsDatabase));
+      renderClientsTable();
+      updateTelemetryStats();
+    }
+
+    // Copiar Clave
+    function copyLicenseKey() {
+      const input = document.getElementById('result-license-key');
+      input.select();
+      document.execCommand('copy');
+      alert('✓ Clave copiada al portapapeles: ' + input.value);
+    }
+
+    // Enviar por WhatsApp
+    function sendViaWhatsApp() {
+      const name = document.getElementById('cust-name').value.trim() || 'Estimado Cliente';
+      const key = document.getElementById('result-license-key').value;
+      const phone = document.getElementById('cust-phone').value.replace(/[^0-9]/g, '');
+
+      const msg = `👋 ¡Hola ${name}!%0A%0AGracias por adquirir *KlikPOS Cloud v3.0*. Aquí tienes tu clave de activación oficial:%0A%0A🔑 *CLAVE DE LICENCIA:*%0A\`${key}\`%0A%0A📌 *Pasos de activación:*%0A1. Abre KlikPOS en tu computadora.%0A2. Ve a *Ajustes > Licencia*.%0A3. Pega esta clave y presiona *Activar Sistema*.%0A%0A¡Tu punto de venta quedará 100% operativo al instante!`;
+
+      const url = phone ? `https://wa.me/${phone}?text=${msg}` : `https://wa.me/?text=${msg}`;
+      window.open(url, '_blank');
+    }
+
+    // Renderizar Tabla de Clientes CRM
+    function renderClientsTable() {
+      const tbody = document.getElementById('clients-table-body');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      document.getElementById('badge-total-clients').innerText = clientsDatabase.length;
+
+      clientsDatabase.forEach((cli) => {
+        const isExpired = cli.expires !== '2099-12-31' && new Date(cli.expires) < new Date();
+        const badgeClass = isExpired ? 'bg-rose-500/20 text-rose-400 border-rose-500/30' : (cli.status === 'expiring' ? 'bg-amber-500/20 text-amber-400 border-amber-500/30' : 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30');
+        const badgeText = isExpired ? 'Vencido' : (cli.status === 'expiring' ? 'Por Vencer' : 'Activo');
+
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-white/5 transition-colors';
+        tr.innerHTML = `
+          <td class="px-5 py-3.5">
+            <p class="font-bold text-white text-xs">${cli.name}</p>
+            <p class="text-[10px] text-slate-400 font-mono">${cli.phone || 'Sin teléfono'}</p>
+          </td>
+          <td class="px-4 py-3.5 font-mono text-slate-300">${cli.rif}</td>
+          <td class="px-4 py-3.5">
+            <span class="text-xs text-sky-400 font-semibold">${cli.plan}</span>
+            <p class="text-[10px] text-slate-500">${cli.maxProducts} prod · ${cli.maxCashiers} cajas</p>
+          </td>
+          <td class="px-4 py-3.5 font-mono text-slate-400 text-[11px]">${cli.hwid}</td>
+          <td class="px-4 py-3.5 font-mono text-slate-300 text-xs">${cli.expires === '2099-12-31' ? 'Vitalicia' : cli.expires}</td>
+          <td class="px-4 py-3.5">
+            <span class="text-[10px] px-2 py-0.5 rounded-full border font-bold ${badgeClass}">${badgeText}</span>
+          </td>
+          <td class="px-5 py-3.5 text-right space-x-1.5">
+            <button onclick="renewClient('${cli.id}')" class="px-2.5 py-1 bg-sky-500/20 hover:bg-sky-500/40 text-sky-300 font-bold rounded-lg text-[10px] border border-sky-500/30 transition-all">Renovar</button>
+            <button onclick="deleteClient('${cli.id}')" class="px-2 py-1 bg-rose-500/10 hover:bg-rose-500/30 text-rose-400 font-bold rounded-lg text-[10px] transition-all">✕</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Filtrar clientes
+    function filterClientsTable() {
+      const q = document.getElementById('search-client').value.toLowerCase();
+      const statusFilter = document.getElementById('filter-status').value;
+      const rows = document.querySelectorAll('#clients-table-body tr');
+
+      rows.forEach(r => {
+        const text = r.innerText.toLowerCase();
+        const matchesQuery = text.includes(q);
+        const matchesStatus = statusFilter === 'all' || text.includes(statusFilter);
+        r.style.display = (matchesQuery && matchesStatus) ? '' : 'none';
+      });
+    }
+
+    // Renovar cliente 1 año
+    function renewClient(id) {
+      const client = clientsDatabase.find(c => c.id === id);
+      if (!client) return;
+      client.expires = new Date(Date.now() + 365 * 86400000).toISOString().split('T')[0];
+      client.status = 'active';
+      localStorage.setItem('klikpos_admin_clients', JSON.stringify(clientsDatabase));
+      renderClientsTable();
+      alert(`✓ Licencia de "${client.name}" renovada por 1 Año (Vence: ${client.expires})`);
+    }
+
+    // Eliminar cliente
+    function deleteClient(id) {
+      if (confirm('¿Deseas eliminar este registro de cliente?')) {
+        clientsDatabase = clientsDatabase.filter(c => c.id !== id);
+        localStorage.setItem('klikpos_admin_clients', JSON.stringify(clientsDatabase));
+        renderClientsTable();
+        updateTelemetryStats();
+      }
+    }
+
+    // Actualizar Estadísticas
+    function updateTelemetryStats() {
+      document.getElementById('stat-total-terminals').innerText = clientsDatabase.length;
+      document.getElementById('stat-active-licenses').innerText = clientsDatabase.filter(c => c.status === 'active').length;
+      document.getElementById('stat-total-sales').innerText = (clientsDatabase.length * 482).toLocaleString();
+    }
+
+    // Exportar Backup JSON
+    function exportClientsBackup() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(clientsDatabase, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `klikpos_clients_backup_${new Date().toISOString().split('T')[0]}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    }
+
+    // Limpiar Logs Amenazas
+    function clearThreatLogs() {
+      document.getElementById('threats-table-body').innerHTML = '<tr><td colspan="5" class="p-4 text-center text-slate-500">Sin amenazas registradas. Todo en orden.</td></tr>';
+    }
+
+    // Inicializar al cargar
+    window.addEventListener('DOMContentLoaded', () => {
+      renderClientsTable();
+      updateTelemetryStats();
+      generateCustomLicense();
+    });
+  </script>
+</body>
+</html>

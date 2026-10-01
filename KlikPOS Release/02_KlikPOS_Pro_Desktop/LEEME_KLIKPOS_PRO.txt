@@ -5,9 +5,10 @@ EdiciÃ³n comercial con EscÃ¡ner Celular SatÃ©lite y MÃ©tricas Profesiona
 
 ARCHIVO DE INSTALACION:
 - KlikPOS_Pro_Setup.exe
+- INSTALAR_KLIKPOS_PRO.bat (Ejecutable directo anti-bloqueo SmartScreen)
 
-INSTRUCCIONES:
-1. Haga doble clic en KlikPOS_Pro_Setup.exe o ejecute INSTALAR_KLIKPOS_PRO.bat.
-2. Siga los pasos del asistente de instalacion.
-3. El sistema creara los accesos directos oficiales en su Escritorio.
+SI WINDOWS DEFENDER / SMARTSCREEN MUESTRA ADVERTENCIA AZUL:
+1. Haga clic en el enlace subrayado: 'MÃ¡s informaciÃ³n'
+2. Haga clic en el botÃ³n inferior: 'Ejecutar de todas formas'
+O simplemente ejecute 'INSTALAR_KLIKPOS_PRO.bat' como Administrador.
 ================================================================================

@@ -167,31 +167,31 @@ html:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]) body {
   color: #0f172a !important;
 }
 
-/* Header blanco inmaculado */
+/* Header dinámico adaptativo */
 html[data-theme="light"]:not(.dark) header,
 html[data-ui-style="industrial"]:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]) header,
 html:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]) header,
 html[data-theme="light"]:not(.dark) header.layer-shell,
 html[data-ui-style="industrial"]:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]) header.layer-shell,
 html:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]) header.layer-shell {
-  background-color: #ffffff !important;
+  background-color: var(--header-bg, var(--industrial-bg, #ffffff)) !important;
   background-image: none !important;
-  border-color: #e2e8f0 !important;
-  color: #0f172a !important;
+  border-color: var(--industrial-border, #e2e8f0) !important;
+  color: var(--header-text, var(--industrial-text, #0f172a)) !important;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
 }
 
-/* Sidebar blanco puro */
+/* Sidebar dinámico adaptativo */
 html[data-theme="light"]:not(.dark) aside,
 html[data-ui-style="industrial"]:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]) aside,
 html:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]) aside,
 html[data-theme="light"]:not(.dark) aside.layer-shell,
 html[data-ui-style="industrial"]:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]) aside.layer-shell,
 html:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]) aside.layer-shell {
-  background-color: #ffffff !important;
+  background-color: var(--sidebar-bg, var(--industrial-bg, #ffffff)) !important;
   background-image: none !important;
-  border-color: #e2e8f0 !important;
-  color: #1e293b !important;
+  border-color: var(--industrial-border, #e2e8f0) !important;
+  color: var(--sidebar-text, var(--industrial-text, #1e293b)) !important;
 }
 
 /* Contenido Principal y Paneles DinÃ¡micos */
@@ -367,20 +367,20 @@ html.dark:not([data-theme="glass"]):not(.theme-glass) header,
 html[data-theme="dark"]:not([data-theme="glass"]):not(.theme-glass) header,
 html.dark:not([data-theme="glass"]):not(.theme-glass) header.layer-shell,
 html[data-theme="dark"]:not([data-theme="glass"]):not(.theme-glass) header.layer-shell {
-  background-color: var(--industrial-card, #121c29) !important;
+  background-color: var(--header-bg, var(--industrial-bg, #121c29)) !important;
   background-image: none !important;
   border-color: var(--industrial-border, #22303f) !important;
-  color: var(--industrial-text, #f8fafc) !important;
+  color: var(--header-text, var(--industrial-text, #f8fafc)) !important;
 }
 
 html.dark:not([data-theme="glass"]):not(.theme-glass) aside,
 html[data-theme="dark"]:not([data-theme="glass"]):not(.theme-glass) aside,
 html.dark:not([data-theme="glass"]):not(.theme-glass) aside.layer-shell,
 html[data-theme="dark"]:not([data-theme="glass"]):not(.theme-glass) aside.layer-shell {
-  background-color: var(--industrial-card, #0e1826) !important;
+  background-color: var(--sidebar-bg, var(--industrial-bg, #0e1826)) !important;
   background-image: none !important;
   border-color: var(--industrial-border, #22303f) !important;
-  color: var(--industrial-text, #f8fafc) !important;
+  color: var(--sidebar-text, var(--industrial-text, #f8fafc)) !important;
 }
 
 html.dark:not([data-theme="glass"]):not(.theme-glass) main,
@@ -548,8 +548,10 @@ body {
 
   #thermal-receipt, #thermal-receipt *,
   #seniat-receipt, #seniat-receipt *,
+  #corte-receipt, #corte-receipt *,
+  .print-corte, .print-corte *,
   .print-area, .print-area * {
-    visibility: visible;
+    visibility: visible !important;
     color: #000000 !important;
     text-shadow: none !important;
     -webkit-font-smoothing: none !important;
@@ -557,12 +559,12 @@ body {
     text-rendering: geometricPrecision !important;
   }
 
-  #thermal-receipt, #seniat-receipt, .print-area {
+  #thermal-receipt, #seniat-receipt, #corte-receipt, .print-corte, .print-area {
     position: absolute;
     left: 0;
     top: 0;
-    width: var(--receipt-width, 48mm) !important;
-    max-width: var(--receipt-width, 48mm) !important;
+    width: var(--receipt-width, 72mm) !important;
+    max-width: var(--receipt-width, 72mm) !important;
     height: auto !important;
     max-height: max-content !important;
     margin: 0 !important;
@@ -583,9 +585,11 @@ body {
     break-inside: avoid;
   }
 
-  /* Soporte especÃ­fico para rollo angosto 58mm (Cabezal tÃ©rmico real: 48mm / 384 dots) */
+  /* Soporte específico para rollo angosto 58mm (Cabezal térmico real: 48mm / 384 dots) */
   html[data-paper-width="58mm"] #thermal-receipt,
   html[data-paper-width="58mm"] #seniat-receipt,
+  html[data-paper-width="58mm"] #corte-receipt,
+  html[data-paper-width="58mm"] .print-corte,
   html[data-paper-width="58mm"] .print-area {
     width: 48mm !important;
     max-width: 48mm !important;
@@ -595,9 +599,11 @@ body {
     box-sizing: border-box !important;
   }
 
-  /* Para rollos de 80mm (Cabezal tÃ©rmico real: 72mm / 576 dots) */
+  /* Para rollos de 80mm (Cabezal térmico real: 72mm / 576 dots) */
   html[data-paper-width="80mm"] #thermal-receipt,
   html[data-paper-width="80mm"] #seniat-receipt,
+  html[data-paper-width="80mm"] #corte-receipt,
+  html[data-paper-width="80mm"] .print-corte,
   html[data-paper-width="80mm"] .print-area {
     width: 72mm !important;
     max-width: 72mm !important;
@@ -607,28 +613,28 @@ body {
   }
 
   /* Forzar negro puro (#000000) en todos los bordes para eliminar tramas grises borrosas */
-  #thermal-receipt hr, #seniat-receipt hr,
-  #thermal-receipt .border-dashed, #seniat-receipt .border-dashed,
-  #thermal-receipt .border-b, #seniat-receipt .border-b,
-  #thermal-receipt .border-t, #seniat-receipt .border-t,
-  #thermal-receipt .border, #seniat-receipt .border,
-  #thermal-receipt div, #seniat-receipt div {
+  #thermal-receipt hr, #seniat-receipt hr, #corte-receipt hr, .print-corte hr,
+  #thermal-receipt .border-dashed, #seniat-receipt .border-dashed, #corte-receipt .border-dashed, .print-corte .border-dashed,
+  #thermal-receipt .border-b, #seniat-receipt .border-b, #corte-receipt .border-b, .print-corte .border-b,
+  #thermal-receipt .border-t, #seniat-receipt .border-t, #corte-receipt .border-t, .print-corte .border-t,
+  #thermal-receipt .border, #seniat-receipt .border, #corte-receipt .border, .print-corte .border,
+  #thermal-receipt div, #seniat-receipt div, #corte-receipt div, .print-corte div {
     border-color: #000000 !important;
   }
 
-  /* Eliminar fondos coloreados que la impresora tÃ©rmica traduce en puntos grises tramados */
-  #thermal-receipt .bg-slate-50, #seniat-receipt .bg-slate-50,
-  #thermal-receipt .bg-sky-100, #seniat-receipt .bg-sky-100,
-  #thermal-receipt .bg-emerald-50, #seniat-receipt .bg-emerald-50,
-  #thermal-receipt .bg-indigo-50, #seniat-receipt .bg-indigo-50,
-  #thermal-receipt .bg-slate-100, #seniat-receipt .bg-slate-100,
-  #thermal-receipt .bg-slate-900, #seniat-receipt .bg-slate-900 {
+  /* Eliminar fondos coloreados que la impresora térmica traduce en puntos grises tramados */
+  #thermal-receipt .bg-slate-50, #seniat-receipt .bg-slate-50, #corte-receipt .bg-slate-50, .print-corte .bg-slate-50,
+  #thermal-receipt .bg-sky-100, #seniat-receipt .bg-sky-100, #corte-receipt .bg-sky-100, .print-corte .bg-sky-100,
+  #thermal-receipt .bg-emerald-50, #seniat-receipt .bg-emerald-50, #corte-receipt .bg-emerald-50, .print-corte .bg-emerald-50,
+  #thermal-receipt .bg-indigo-50, #seniat-receipt .bg-indigo-50, #corte-receipt .bg-indigo-50, .print-corte .bg-indigo-50,
+  #thermal-receipt .bg-slate-100, #seniat-receipt .bg-slate-100, #corte-receipt .bg-slate-100, .print-corte .bg-slate-100,
+  #thermal-receipt .bg-slate-900, #seniat-receipt .bg-slate-900, #corte-receipt .bg-slate-900, .print-corte .bg-slate-900 {
     background-color: transparent !important;
     color: #000000 !important;
   }
 
-  /* Logotipo nÃ­tido de alto contraste monocromÃ¡tico */
-  #thermal-receipt img, #seniat-receipt img {
+  /* Logotipo nítido de alto contraste monocromático */
+  #thermal-receipt img, #seniat-receipt img, #corte-receipt img, .print-corte img {
     image-rendering: pixelated !important;
     filter: grayscale(100%) contrast(250%) !important;
     max-width: 100% !important;
@@ -968,15 +974,27 @@ html[data-theme="dark"] textarea::placeholder {
   -webkit-text-fill-color: #94a3b8 !important;
 }
 
-/* Inputs en Modo Claro (Máximo contraste #0f172a) */
-html[data-theme="light"] input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="range"]):not([type="color"]),
-html:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]) input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="range"]):not([type="color"]),
-html[data-theme="light"] select,
-html:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]) select,
-html[data-theme="light"] textarea,
-html:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]) textarea {
+/* Inputs en Modo Claro (Máximo contraste #0f172a, excluyendo inputs oscuros explícitos) */
+html[data-theme="light"] input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="range"]):not([type="color"]):not(.dark-input):not(.keep-dark):not([data-theme="dark"]),
+html:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]) input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="range"]):not([type="color"]):not(.dark-input):not(.keep-dark):not([data-theme="dark"]),
+html[data-theme="light"] select:not(.dark-input):not(.keep-dark),
+html:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]) select:not(.dark-input):not(.keep-dark),
+html[data-theme="light"] textarea:not(.dark-input):not(.keep-dark),
+html:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]) textarea:not(.dark-input):not(.keep-dark) {
   color: #0f172a !important;
   -webkit-text-fill-color: #0f172a !important;
+}
+
+/* Forzar blanco nítido y cursor visible para inputs oscuros garantizados */
+.dark-input,
+input.dark-input,
+input.keep-dark,
+.keep-dark input,
+.bg-slate-900 input,
+.bg-slate-950 input {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  caret-color: #38bdf8 !important;
 }
 
 html[data-theme="light"] input::placeholder,
@@ -1918,24 +1936,26 @@ aside button:not(.nav-item-active) span,
 aside button:not(.nav-item-active) div,
 aside a:not(.nav-item-active),
 aside a:not(.nav-item-active) span {
-  color: #1e293b !important;
+  color: var(--sidebar-text, #1e293b) !important;
 }
 aside button:not(.nav-item-active) svg,
 aside a:not(.nav-item-active) svg {
-  color: #475569 !important;
+  color: var(--sidebar-text, #475569) !important;
+  stroke: var(--sidebar-text, #475569) !important;
 }
 aside button:not(.nav-item-active):hover,
 aside a:not(.nav-item-active):hover {
-  background-color: #f1f5f9 !important;
-  color: #0f172a !important;
+  background-color: var(--industrial-card, #f1f5f9) !important;
+  color: var(--sidebar-text, #0f172a) !important;
 }
 aside button:not(.nav-item-active):hover > span,
 aside a:not(.nav-item-active):hover > span {
-  color: #0f172a !important;
+  color: var(--sidebar-text, #0f172a) !important;
 }
 aside button:not(.nav-item-active):hover svg,
 aside a:not(.nav-item-active):hover svg {
-  color: #0f172a !important;
+  color: var(--sidebar-text, #0f172a) !important;
+  stroke: var(--sidebar-text, #0f172a) !important;
 }
 
 /* Tooltip flotante de la barra lateral compacta */
@@ -2067,13 +2087,14 @@ html[data-theme="dark"] aside button:not(.nav-item-active),
 html[data-theme="dark"] aside button:not(.nav-item-active) span,
 html[data-theme="glass"] aside button:not(.nav-item-active),
 html[data-theme="glass"] aside button:not(.nav-item-active) span {
-  color: #f1f5f9 !important;
+  color: var(--sidebar-text, #f1f5f9) !important;
 }
 html.dark aside button:not(.nav-item-active) svg,
 html.dark aside a:not(.nav-item-active) svg,
 html[data-theme="dark"] aside button:not(.nav-item-active) svg,
 html[data-theme="glass"] aside button:not(.nav-item-active) svg {
-  color: #cbd5e1 !important;
+  color: var(--sidebar-text, #cbd5e1) !important;
+  stroke: var(--sidebar-text, #cbd5e1) !important;
 }
 html.dark aside button:not(.nav-item-active):hover,
 html.dark aside button:not(.nav-item-active):hover span,
@@ -2442,6 +2463,78 @@ html[data-theme="dark"] .pos-white-card .text-slate-950 {
 .pos-minimal-card:active {
   transform: scale(0.97);
 }
+
+/* ==========================================================================
+   MÓDULO NATIVO MÓVIL & ERGONOMÍA TÁCTIL (KLIKPOS MOBILE & PWA)
+   ========================================================================== */
+/* 1. Supresión de destellos grises en toques en Android/iOS */
+button, 
+a, 
+input, 
+select, 
+textarea, 
+[role="button"],
+.touch-pressable {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+/* 2. Supresión de selección de texto accidental en teclados numéricos y botones POS */
+.pos-keypad-btn,
+.pos-action-btn,
+.pos-tab-nav,
+.mobile-nav-btn {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* 3. Soporte para Notch y Home Bar de iPhones / Pantallas modernas */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 16px);
+}
+.pt-safe {
+  padding-top: env(safe-area-inset-top, 16px);
+}
+.pl-safe {
+  padding-left: env(safe-area-inset-left, 16px);
+}
+.pr-safe {
+  padding-right: env(safe-area-inset-right, 16px);
+}
+
+/* 4. Altura real dinámica para móviles (100dvh) */
+.h-dvh {
+  height: 100dvh;
+}
+.min-h-dvh {
+  min-height: 100dvh;
+}
+
+/* 5. Desplazamiento táctil con inercia nativa */
+.scroll-touch-native {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+}
+
+/* 7. Animaciones Elásticas Pro-Level para Barra de Navegación */
+.nav-elastic-pill {
+  transition: all 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.nav-item-spring {
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.2s ease, opacity 0.2s ease;
+}
+.nav-hero-button {
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+}
+.nav-hero-button:hover {
+  transform: translateY(-4px) scale(1.06);
+}
+.nav-hero-button:active {
+  transform: scale(0.92);
+}
+
+
 
 
 

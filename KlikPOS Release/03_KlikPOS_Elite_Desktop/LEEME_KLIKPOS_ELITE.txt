@@ -5,9 +5,10 @@ EdiciÃ³n total con Vistas Gourmet, Mesas, Delivery, Temas Personalizables y Fi
 
 ARCHIVO DE INSTALACION:
 - KlikPOS_Elite_Setup.exe
+- INSTALAR_KLIKPOS_ELITE.bat (Ejecutable directo anti-bloqueo SmartScreen)
 
-INSTRUCCIONES:
-1. Haga doble clic en KlikPOS_Elite_Setup.exe o ejecute INSTALAR_KLIKPOS_ELITE.bat.
-2. Siga los pasos del asistente de instalacion.
-3. El sistema creara los accesos directos oficiales en su Escritorio.
+SI WINDOWS DEFENDER / SMARTSCREEN MUESTRA ADVERTENCIA AZUL:
+1. Haga clic en el enlace subrayado: 'MÃ¡s informaciÃ³n'
+2. Haga clic en el botÃ³n inferior: 'Ejecutar de todas formas'
+O simplemente ejecute 'INSTALAR_KLIKPOS_ELITE.bat' como Administrador.
 ================================================================================

@@ -282,11 +282,30 @@ export default function DesktopDashboardLayout({
       setCurrentPalette(palette);
       const industrialBg = (localStorage.getItem('venematic_industrial_bg') as any) || 'white';
       const customBg = localStorage.getItem('venematic_custom_bg_color') || '#f8fafc';
+      const darkBg = (localStorage.getItem('venematic_dark_bg') as any) || 'midnight';
+      const customDarkBg = localStorage.getItem('venematic_custom_dark_bg') || '#0a192f';
+      const hBg = localStorage.getItem('venematic_header_bg') || '';
+      const hText = localStorage.getItem('venematic_header_text') || '';
+      const sBg = localStorage.getItem('venematic_sidebar_bg') || '';
+      const sText = localStorage.getItem('venematic_sidebar_text') || '';
+      const bAccent = localStorage.getItem('venematic_button_accent') || '';
+      const bText = localStorage.getItem('venematic_button_text') || '';
+      const gText = localStorage.getItem('venematic_general_text') || '';
+
       applyBrandingToDOM({
         paletteId: palette,
         uiStyle: s,
         industrialBg: industrialBg,
         customBgColor: customBg,
+        darkBg: darkBg,
+        customDarkBgColor: customDarkBg,
+        headerBgColor: hBg,
+        headerTextColor: hText,
+        sidebarBgColor: sBg,
+        sidebarTextColor: sText,
+        buttonAccentColor: bAccent,
+        buttonTextColor: bText,
+        generalTextColor: gText,
       }, t === 'light' ? 'light' : 'dark');
     } catch {}
 
@@ -301,8 +320,11 @@ export default function DesktopDashboardLayout({
       }
     };
     const handleBrandingChanged = (e: any) => {
-      if (e.detail?.paletteId) {
-        setCurrentPalette(e.detail.paletteId);
+      if (e.detail) {
+        if (e.detail.paletteId) {
+          setCurrentPalette(e.detail.paletteId);
+        }
+        applyBrandingToDOM(e.detail);
       }
     };
     const handleOpenScannerModalEvent = () => {
@@ -629,12 +651,19 @@ export default function DesktopDashboardLayout({
   };
 
   return (
-    <div className="h-screen w-screen flex flex-col overflow-hidden select-none bg-slate-100 dark:bg-[#071321]">
-      {/* Barra de Estado Superior Profesional (30% más alta, imponente y sobria) */}
+    <div
+      className="h-screen w-screen flex flex-col overflow-hidden select-none transition-colors duration-200"
+      style={{
+        backgroundColor: 'var(--color-bg-app, var(--industrial-bg, #f1f5f9))',
+        color: 'var(--general-text, inherit)',
+      }}
+    >
+      {/* Barra de Estado Superior Profesional */}
       <header
-        className="h-[72px] sm:h-[74px] border-b-2 border-slate-200/90 dark:border-[#1e3a5f] px-5 sm:px-6 flex items-center justify-between shrink-0 z-20 shadow-sm layer-shell transition-all"
+        className="h-[72px] sm:h-[74px] border-b-2 px-5 sm:px-6 flex items-center justify-between shrink-0 z-20 shadow-sm layer-shell transition-all duration-200"
         style={{
           backgroundColor: 'var(--header-bg, ' + (currentTheme === 'dark' ? '#0b1a30' : '#ffffff') + ')',
+          borderColor: currentTheme === 'dark' ? '#1e3a5f' : 'var(--industrial-border, #cbd5e1)',
           color: 'var(--header-text, ' + (currentTheme === 'dark' ? '#ffffff' : '#0f172a') + ')',
         }}
       >
@@ -866,9 +895,9 @@ export default function DesktopDashboardLayout({
             isSidebarCompact ? 'w-[72px] px-2 py-3' : 'w-56 p-3'
           } border-r flex flex-col justify-between shrink-0 z-20 layer-shell transition-all duration-200 select-none`}
           style={{
-            backgroundColor: currentTheme === 'dark' ? '#0b1a30' : '#ffffff',
-            borderColor: currentTheme === 'dark' ? '#1e3a5f' : '#e2e8f0',
-            color: currentTheme === 'dark' ? '#f8fafc' : '#0f172a',
+            backgroundColor: 'var(--sidebar-bg, ' + (currentTheme === 'dark' ? '#0b1a30' : '#ffffff') + ')',
+            borderColor: currentTheme === 'dark' ? '#1e3a5f' : 'var(--industrial-border, #cbd5e1)',
+            color: 'var(--sidebar-text, ' + (currentTheme === 'dark' ? '#f8fafc' : '#0f172a') + ')',
           }}
         >
           <div className="space-y-1">
@@ -877,7 +906,7 @@ export default function DesktopDashboardLayout({
               {!isSidebarCompact && (
                 <span
                   className="text-[10px] font-black uppercase tracking-wider select-none truncate"
-                  style={{ color: currentTheme === 'dark' ? '#94a3b8' : '#0f172a' }}
+                  style={{ color: 'var(--sidebar-text, ' + (currentTheme === 'dark' ? '#94a3b8' : '#0f172a') + ')' }}
                 >
                   Operaciones
                 </span>
@@ -914,22 +943,21 @@ export default function DesktopDashboardLayout({
                       }}
                       className={`w-12 h-12 mx-auto rounded-2xl flex items-center justify-center transition-all select-none cursor-pointer relative group ${
                         isActive
-                          ? 'nav-item-active bg-[var(--brand-primary,#0369a1)] text-white shadow-md shadow-sky-950/20 scale-105'
+                          ? 'nav-item-active text-white shadow-md scale-105'
                           : (currentTheme === 'dark'
                               ? 'text-slate-300 hover:text-white hover:bg-slate-800/80 active:scale-95'
-                              : 'text-slate-700 hover:text-slate-950 hover:bg-slate-100 active:scale-95')
+                              : 'hover:opacity-80 active:scale-95')
                       }`}
-                      style={isActive ? { backgroundColor: 'var(--brand-primary, #4338ca)', color: '#ffffff' } : undefined}
+                      style={isActive ? { backgroundColor: 'var(--btn-accent-active, var(--brand-primary, #4338ca))', color: 'var(--btn-accent-text, #ffffff)' } : { color: 'var(--sidebar-text, inherit)' }}
                       title={`${item.label} (${item.shortcut})`}
                     >
-                      <div className="relative flex items-center justify-center" style={isActive ? { color: '#ffffff' } : undefined}>
+                      <div className="relative flex items-center justify-center" style={isActive ? { color: 'var(--btn-accent-text, #ffffff)' } : undefined}>
                         <span
-                          className={isActive ? 'text-white' : undefined}
-                          style={isActive ? { color: '#ffffff' } : undefined}
+                          style={isActive ? { color: 'var(--btn-accent-text, #ffffff)' } : undefined}
                         >
                           {React.cloneElement(item.icon as React.ReactElement, {
                             className: 'w-5 h-5',
-                            style: isActive ? { color: '#ffffff', stroke: '#ffffff' } : undefined,
+                            style: isActive ? { color: 'var(--btn-accent-text, #ffffff)', stroke: 'var(--btn-accent-text, #ffffff)' } : undefined,
                           })}
                         </span>
                         {isLocked && (
@@ -963,24 +991,22 @@ export default function DesktopDashboardLayout({
                     }}
                     className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs transition-colors select-none cursor-pointer text-left ${
                       isActive
-                        ? 'nav-item-active bg-[var(--brand-primary,#0369a1)] text-white font-black border border-transparent shadow-xs'
-                        : (currentTheme === 'dark'
-                            ? 'text-slate-100 hover:text-white hover:bg-slate-800 font-bold'
-                            : 'text-slate-900 hover:text-slate-950 hover:bg-slate-100 font-black')
+                        ? 'nav-item-active font-black border border-transparent shadow-xs'
+                        : 'hover:opacity-80 font-bold'
                     }`}
                     style={{
-                      backgroundColor: isActive ? 'var(--brand-primary, #4338ca)' : undefined,
-                      color: isActive ? '#ffffff' : (currentTheme === 'dark' ? '#f1f5f9' : '#0f172a'),
+                      backgroundColor: isActive ? 'var(--btn-accent-active, var(--brand-primary, #4338ca))' : undefined,
+                      color: isActive ? 'var(--btn-accent-text, #ffffff)' : 'var(--sidebar-text, ' + (currentTheme === 'dark' ? '#f1f5f9' : '#0f172a') + ')',
                     }}
                   >
                     <div className="flex items-center gap-3">
-                      <span style={{ color: isActive ? '#ffffff' : (currentTheme === 'dark' ? '#94a3b8' : '#0f172a') }}>
+                      <span style={{ color: isActive ? 'var(--btn-accent-text, #ffffff)' : 'var(--sidebar-text, ' + (currentTheme === 'dark' ? '#94a3b8' : '#0f172a') + ')' }}>
                         {React.cloneElement(item.icon as React.ReactElement, {
                           className: 'w-5 h-5',
-                          style: isActive ? { color: '#ffffff', stroke: '#ffffff' } : undefined,
+                          style: isActive ? { color: 'var(--btn-accent-text, #ffffff)', stroke: 'var(--btn-accent-text, #ffffff)' } : undefined,
                         })}
                       </span>
-                      <span style={isActive ? { color: '#ffffff' } : undefined}>{item.label}</span>
+                      <span style={isActive ? { color: 'var(--btn-accent-text, #ffffff)' } : undefined}>{item.label}</span>
                     </div>
                     {isLocked && (
                       <Lock className="w-3.5 h-3.5 text-slate-400 dark:text-slate-400 shrink-0" />
@@ -1063,7 +1089,13 @@ export default function DesktopDashboardLayout({
         </aside>
 
         {/* Área de Trabajo */}
-        <main className="flex-1 bg-slate-100 dark:bg-[#0a192f] overflow-hidden flex flex-col">
+        <main
+          className="flex-1 overflow-hidden flex flex-col transition-colors duration-200"
+          style={{
+            backgroundColor: 'var(--color-bg-app, var(--industrial-bg, #f1f5f9))',
+            color: 'var(--general-text, inherit)',
+          }}
+        >
           {children}
         </main>
       </div>

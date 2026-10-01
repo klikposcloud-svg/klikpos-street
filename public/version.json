@@ -1,13 +1,13 @@
 {
   "version": "3.0.1",
   "releaseDate": "2026-09-30",
-  "title": "KlikPOS Suite v3.0.1 - Personalización Integral de Colores (Header, Sidebar, Canvas, Botones y Texto), Control KlikMenu Plan Elite y Mejoras de Scroll",
+  "title": "KlikPOS Suite v3.0.1 - Paletas Clínicas, Edición de Colores en Vivo Unificada y Scroll de Licencia",
   "notes": [
-    "Personalización integral de colores extendida: personaliza el fondo del Canvas, la barra superior (Header), barra lateral (Sidebar), zona activa de botones, color de texto de botones y texto general con guardado persistente.",
-    "Control de activación manual del Menú Interactivo y Mesas KlikMenu desde Configuración (exclusivo para Plan Elite).",
-    "Corrección de scroll vertical completo en ventanas de licenciamiento/activación y módulo de mesas en vivo.",
-    "Optimización de cards en POS: Comida Rápida en 3 columnas y Gourmet en 2 columnas.",
-    "Buscador de imágenes Google/Web y sincronización en vivo de ventas/tasa BCV en escáner satélite móvil."
+    "Edición de colores en vivo con propagación unificada: las opciones de fondo se aplican predeterminadamente al Canvas, Header y Sidebar simultáneamente.",
+    "Nuevas paletas especializadas para Clínicas y Salud: Cyan Clínico Hospitalario, Verde Quirúrgico Menta, Lavanda Terapéutica y Rosa Maternidad, junto con 3 fondos clínicos.",
+    "Corrección y activación de scroll vertical completo en la página de Licencias (/dashboard/licensing) para acceso total a planes y activación.",
+    "Personalización integral de Header, Sidebar, Botones de Acento y Tipografía con persistencia local.",
+    "Control de activación manual del Menú Interactivo y Mesas KlikMenu exclusivo para Plan Elite."
   ],
   "windowsUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.1/KlikPOS_Desktop_Full_Setup.exe",
   "androidUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.1/KlikPOS_Movil_Full.apk",

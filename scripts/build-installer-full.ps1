@@ -21,6 +21,9 @@ Write-Host "Versión identificada: v$version" -ForegroundColor Green
 # 1.1 Compilación fresca de Next.js Standalone (Estricto Zero-Regresiones)
 Write-Host "`n>>> [COMPILANDO NEXT.JS STANDALONE FRESCO] npm run build..." -ForegroundColor Magenta
 Push-Location $rootDir
+if (Test-Path ".next") {
+    Remove-Item -Recurse -Force ".next"
+}
 & cmd /c "npm run build"
 Pop-Location
 if ($LASTEXITCODE -ne 0) {
