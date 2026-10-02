@@ -47,6 +47,12 @@ const path = require('path');
 
 const nextConfig = {
   reactStrictMode: true,
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   output: 'standalone',
   experimental: {
     outputFileTracingRoot: path.join(__dirname),

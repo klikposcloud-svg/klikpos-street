@@ -8,15 +8,16 @@ import PosQuickAccessSettings from '@/components/PosQuickAccessSettings';
 import LegalSettingsTab from '@/components/LegalSettingsTab';
 import LicenseActivationModal from '@/components/LicenseActivationModal';
 import CloudSyncSettingsCard from '@/components/CloudSyncSettingsCard';
+import InteractiveMenuSyncCard from '@/components/InteractiveMenuSyncCard';
 import { useAuth } from '@/context/AuthContext';
-import { ShieldAlert, ShieldCheck, ArrowLeft, Scale, CheckCircle2, AlertCircle, RefreshCw, Zap, Banknote, Upload, Image as ImageIcon, Trash2, Printer, Palette, Store, Users, Download, Sparkles, FileText } from 'lucide-react';
+import { ShieldAlert, Utensils, ShieldCheck, ArrowLeft, Scale, CheckCircle2, AlertCircle, RefreshCw, Zap, Banknote, Upload, Image as ImageIcon, Trash2, Printer, Palette, Store, Users, Download, Sparkles, FileText, Package } from 'lucide-react';
 import Link from 'next/link';
 import { scaleService, ScaleProtocol, WeightReading, PriceMultiplierBasis } from '@/lib/hardware/scale';
 import { getScaleBarcodeConfig, saveScaleBarcodeConfig, ScaleBarcodeConfig } from '@/lib/hardware/scale-barcode';
 import { pagoMovilMonitor, initiateGmailOAuth, extractOAuthTokenFromUrl, verifyGmailToken } from '@/lib/payments/pago-movil-gmail-monitor';
 import { updateService, CURRENT_VERSION } from '@/lib/services/update-service';
 
-export type SettingsTabId = 'branding' | 'pos_quick' | 'legal' | 'business' | 'printer' | 'scale' | 'cashiers' | 'cloud_backup' | 'payments' | 'updates';
+export type SettingsTabId = 'branding' | 'pos_quick' | 'legal' | 'business' | 'printer' | 'scale' | 'cashiers' | 'cloud_backup' | 'payments' | 'updates' | 'menu_sync' | 'visual_packs';
 
 export default function DesktopSettingsPage() {
   const { isAdmin, switchToRole } = useAuth();
@@ -343,6 +344,8 @@ export default function DesktopSettingsPage() {
     { id: 'cloud_backup', label: 'Nube y Respaldos', icon: RefreshCw },
     { id: 'payments', label: 'Pagos y Gmail', icon: Zap },
     { id: 'updates', label: 'Actualizaciones', icon: Download },
+    { id: 'menu_sync', label: 'Menú Interactivo & Tablets', icon: Utensils },
+    { id: 'visual_packs', label: 'Paquetes Visuales & Catálogos', icon: Package },
   ];
 
   return (
@@ -862,16 +865,16 @@ export default function DesktopSettingsPage() {
           <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-300 dark:border-slate-700 shadow-xs p-5 space-y-5">
             <div className="flex items-start gap-3">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shrink-0">
-                <span className="text-xl">&#x1F4E7;</span>
+                <span className="text-xl">📧</span>
               </div>
               <div>
-                <h3 className="font-black text-sm text-slate-900 dark:text-white">Confirmaci&oacute;n Autom&aacute;tica de Pago M&oacute;vil por Gmail</h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Conecta el Gmail del negocio que recibe las notificaciones bancarias. Venematic detectar&aacute; el pago autom&aacute;ticamente.</p>
+                <h3 className="font-black text-sm text-slate-900 dark:text-white">Confirmación Automática de Pago Móvil por Gmail</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Conecta el Gmail del negocio que recibe las notificaciones bancarias. Venematic detectará el pago automáticamente.</p>
               </div>
             </div>
             <div className={`rounded-xl p-4 border-2 ${gmailConnected ? 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-300 dark:border-emerald-700' : 'bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-700'}`}>
               {gmailVerifying ? (
-                <div className="flex items-center gap-3"><div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" /><span className="text-xs font-semibold text-slate-600 dark:text-slate-300">Verificando conexi&oacute;n Gmail...</span></div>
+                <div className="flex items-center gap-3"><div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" /><span className="text-xs font-semibold text-slate-600 dark:text-slate-300">Verificando conexión Gmail...</span></div>
               ) : gmailConnected ? (
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-3"><div className="w-8 h-8 bg-emerald-100 dark:bg-emerald-900/50 rounded-full flex items-center justify-center"><CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400" /></div><div><p className="text-xs font-black text-emerald-800 dark:text-emerald-300">Gmail Conectado</p><p className="text-[11px] font-mono text-emerald-600 dark:text-emerald-500">{gmailEmail}</p></div></div>
@@ -879,21 +882,21 @@ export default function DesktopSettingsPage() {
                 </div>
               ) : (
                 <div className="flex items-center justify-between gap-3 flex-wrap">
-                  <div className="flex items-center gap-3"><div className="w-8 h-8 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center"><AlertCircle className="w-5 h-5 text-slate-400" /></div><div><p className="text-xs font-bold text-slate-700 dark:text-slate-300">No conectado</p><p className="text-[11px] text-slate-500">Conecta tu Gmail para habilitar la detecci&oacute;n autom&aacute;tica</p></div></div>
-                  <button onClick={() => { if (!gmailClientId) { alert('Primero ingresa el Google Client ID.'); return; } pagoMovilMonitor.saveConfig({ accessToken: '', monitoredEmail: '', pollingIntervalMs: gmailPollMs, tolerancePct: gmailTolerance }); initiateGmailOAuth(gmailClientId); }} className="px-4 py-2 text-xs font-black text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 rounded-xl shadow-sm transition-all cursor-pointer flex items-center gap-2 shrink-0"><span>&#x1F517;</span><span>Conectar Gmail</span></button>
+                  <div className="flex items-center gap-3"><div className="w-8 h-8 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center"><AlertCircle className="w-5 h-5 text-slate-400" /></div><div><p className="text-xs font-bold text-slate-700 dark:text-slate-300">No conectado</p><p className="text-[11px] text-slate-500">Conecta tu Gmail para habilitar la detección automática</p></div></div>
+                  <button onClick={() => { if (!gmailClientId) { alert('Primero ingresa el Google Client ID.'); return; } pagoMovilMonitor.saveConfig({ accessToken: '', monitoredEmail: '', pollingIntervalMs: gmailPollMs, tolerancePct: gmailTolerance }); initiateGmailOAuth(gmailClientId); }} className="px-4 py-2 text-xs font-black text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 rounded-xl shadow-sm transition-all cursor-pointer flex items-center gap-2 shrink-0"><span>🔗</span><span>Conectar Gmail</span></button>
                 </div>
               )}
             </div>
             <div className="space-y-4 pt-2 border-t border-slate-100 dark:border-slate-700">
-              <h4 className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">Configuraci&oacute;n Avanzada</h4>
+              <h4 className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">Configuración Avanzada</h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-1.5"><label className="block text-xs font-bold text-slate-700 dark:text-slate-300">Google Client ID (OAuth)</label><input type="text" value={gmailClientId} onChange={(e) => setGmailClientId(e.target.value)} placeholder="XXXXXXXXX.apps.googleusercontent.com" className="w-full h-10 px-3 border border-slate-300 dark:border-slate-600 rounded-lg text-xs font-mono text-slate-900 dark:text-white bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500" /><p className="text-[11px] text-slate-400">Obtenido en Google Cloud Console &rarr; Credenciales OAuth</p></div>
-                <div className="space-y-1.5"><label className="block text-xs font-bold text-slate-700 dark:text-slate-300">Tolerancia de monto (%)</label><div className="flex items-center gap-2"><input type="number" min={0} max={10} step={0.5} value={gmailTolerance} onChange={(e) => setGmailTolerance(parseFloat(e.target.value))} className="w-24 h-10 px-3 border border-slate-300 dark:border-slate-600 rounded-lg text-xs font-mono text-slate-900 dark:text-white bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500" /><span className="text-xs text-slate-500">Ej: 2 = acepta &plusmn;2%</span></div></div>
-                <div className="space-y-1.5"><label className="block text-xs font-bold text-slate-700 dark:text-slate-300">Frecuencia de verificaci&oacute;n</label><select value={gmailPollMs} onChange={(e) => setGmailPollMs(parseInt(e.target.value))} className="w-full h-10 px-3 border border-slate-300 dark:border-slate-600 rounded-lg text-xs text-slate-900 dark:text-white bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"><option value={5000}>Cada 5 segundos</option><option value={8000}>Cada 8 segundos (recomendado)</option><option value={15000}>Cada 15 segundos</option><option value={30000}>Cada 30 segundos</option></select></div>
+                <div className="space-y-1.5"><label className="block text-xs font-bold text-slate-700 dark:text-slate-300">Google Client ID (OAuth)</label><input type="text" value={gmailClientId} onChange={(e) => setGmailClientId(e.target.value)} placeholder="XXXXXXXXX.apps.googleusercontent.com" className="w-full h-10 px-3 border border-slate-300 dark:border-slate-600 rounded-lg text-xs font-mono text-slate-900 dark:text-white bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500" /><p className="text-[11px] text-slate-400">Obtenido en Google Cloud Console → Credenciales OAuth</p></div>
+                <div className="space-y-1.5"><label className="block text-xs font-bold text-slate-700 dark:text-slate-300">Tolerancia de monto (%)</label><div className="flex items-center gap-2"><input type="number" min={0} max={10} step={0.5} value={gmailTolerance} onChange={(e) => setGmailTolerance(parseFloat(e.target.value))} className="w-24 h-10 px-3 border border-slate-300 dark:border-slate-600 rounded-lg text-xs font-mono text-slate-900 dark:text-white bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500" /><span className="text-xs text-slate-500">Ej: 2 = acepta ±2%</span></div></div>
+                <div className="space-y-1.5"><label className="block text-xs font-bold text-slate-700 dark:text-slate-300">Frecuencia de verificación</label><select value={gmailPollMs} onChange={(e) => setGmailPollMs(parseInt(e.target.value))} className="w-full h-10 px-3 border border-slate-300 dark:border-slate-600 rounded-lg text-xs text-slate-900 dark:text-white bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"><option value={5000}>Cada 5 segundos</option><option value={8000}>Cada 8 segundos (recomendado)</option><option value={15000}>Cada 15 segundos</option><option value={30000}>Cada 30 segundos</option></select></div>
               </div>
-              <button onClick={() => { const e = pagoMovilMonitor.getConfig(); if (e) pagoMovilMonitor.saveConfig({ ...e, pollingIntervalMs: gmailPollMs, tolerancePct: gmailTolerance }); setSavedSuccess(true); setTimeout(() => setSavedSuccess(false), 2000); }} className="px-4 py-2 bg-slate-800 dark:bg-slate-700 text-white text-xs font-bold rounded-lg hover:bg-slate-700 transition-colors cursor-pointer">{savedSuccess ? '&#x2705; Guardado' : 'Guardar configuraci&oacute;n'}</button>
+              <button onClick={() => { const e = pagoMovilMonitor.getConfig(); if (e) pagoMovilMonitor.saveConfig({ ...e, pollingIntervalMs: gmailPollMs, tolerancePct: gmailTolerance }); setSavedSuccess(true); setTimeout(() => setSavedSuccess(false), 2000); }} className="px-4 py-2 bg-slate-800 dark:bg-slate-700 text-white text-xs font-bold rounded-lg hover:bg-slate-700 transition-colors cursor-pointer">{savedSuccess ? '✅ Guardado' : 'Guardar configuración'}</button>
             </div>
-            <div className="flex items-start gap-3 p-3 bg-blue-50 dark:bg-blue-950/30 rounded-xl border border-blue-200 dark:border-blue-800 text-[11px] text-blue-800 dark:text-blue-300"><span className="text-base">&#x1F512;</span><p><strong>Privacidad:</strong> Solo se leen emails de notificaci&oacute;n bancaria. Ning&uacute;n correo personal es accedido. El token se guarda &uacute;nicamente en este dispositivo.</p></div>
+            <div className="flex items-start gap-3 p-3 bg-blue-50 dark:bg-blue-950/30 rounded-xl border border-blue-200 dark:border-blue-800 text-[11px] text-blue-800 dark:text-blue-300"><span className="text-base">🔒</span><p><strong>Privacidad:</strong> Solo se leen emails de notificación bancaria. Ningún correo personal es accedido. El token se guarda únicamente en este dispositivo.</p></div>
           </div>
 
           {/* TARJETA: WEBHOOK DE PAGO MÓVIL (MODO DUEÑO REMOTO) */}
@@ -905,11 +908,11 @@ export default function DesktopSettingsPage() {
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <h3 className="font-black text-sm text-slate-900 dark:text-white">Webhook de Pago M&oacute;vil (Due&ntilde;o fuera del local)</h3>
+                    <h3 className="font-black text-sm text-slate-900 dark:text-white">Webhook de Pago Móvil (Dueño fuera del local)</h3>
                     <span className="bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 text-[10px] font-black px-2 py-0.5 rounded-full border border-emerald-300 dark:border-emerald-700">En Vivo</span>
                   </div>
                   <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                    Permite a las cajas recibir confirmaciones al instante cuando el due&ntilde;o recibe SMS o notificaciones push bancarias en su tel&eacute;fono m&oacute;vil sin estar presente en la tienda.
+                    Permite a las cajas recibir confirmaciones al instante cuando el dueño recibe SMS o notificaciones push bancarias en su teléfono móvil sin estar presente en la tienda.
                   </p>
                 </div>
               </div>
@@ -919,7 +922,7 @@ export default function DesktopSettingsPage() {
               <div className="space-y-1.5">
                 <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center justify-between">
                   <span>URL del Webhook de este Servidor POS</span>
-                  <span className="text-[10px] font-normal text-slate-500">Apunta el reenv&iacute;o de SMS a esta direcci&oacute;n</span>
+                  <span className="text-[10px] font-normal text-slate-500">Apunta el reenvío de SMS a esta dirección</span>
                 </label>
                 <div className="flex gap-2">
                   <input
@@ -997,38 +1000,24 @@ export default function DesktopSettingsPage() {
                 </div>
               )}
             </div>
-
-            {/* Guía Rápida para el Celular con APK Oficial Nativo Venematic (Sin Google Play) */}
-            <div className="p-4 bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-sky-500/10 rounded-xl border border-emerald-300 dark:border-emerald-700/60 space-y-3 text-xs text-slate-700 dark:text-slate-200">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-emerald-200 dark:border-emerald-800 pb-2">
-                <h5 className="font-black text-slate-900 dark:text-white uppercase tracking-wider text-[11px] flex items-center gap-1.5">
-                  <span className="p-1 bg-emerald-500 text-white rounded text-[10px]">APK</span>
-                  <span>Configuración con App Nativa Venematic SMS Bridge (Sin Google Play)</span>
-                </h5>
-                <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-950/60 px-2 py-0.5 rounded-full self-start sm:self-auto">
-                  100% Autónomo y Seguro
-                </span>
-              </div>
-              <ol className="list-decimal pl-4 space-y-2 text-[11px] leading-relaxed">
-                <li>
-                  <strong>Instalación directa:</strong> Transfiere e instala el instalador <code>Venematic-SMS-Bridge.apk</code> en el teléfono Android (mediante cable USB, WhatsApp o Bluetooth). No necesitas cuenta de Google ni entrar a Google Play Store; solo activa <em>&quot;Permitir instalar aplicaciones de fuentes desconocidas&quot;</em>.
-                </li>
-                <li>
-                  <strong>Vinculación con el Servidor POS:</strong> Abre la aplicación e ingresa la <strong>URL del Webhook</strong> copiada arriba y el <strong>Token Secreto de Seguridad</strong>.
-                </li>
-                <li>
-                  <strong>Activación:</strong> Otorga el permiso de lectura de SMS. La aplicación se mantendrá activa en segundo plano, capturará automáticamente los SMS de los bancos (Banco de Venezuela 2661/2662, Banesco, Mercantil, Bancamiga, Provincial, BNC) y liberará los cobros en pantalla con sonido al instante.
-                </li>
-              </ol>
-            </div>
           </div>
 
           <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-300 dark:border-slate-700 shadow-xs p-5">
-            <h3 className="font-black text-xs uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-3 border-b border-slate-200 dark:border-slate-700 pb-2">M&eacute;todos de Pago Activos en el POS</h3>
+            <h3 className="font-black text-xs uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-3 border-b border-slate-200 dark:border-slate-700 pb-2">Métodos de Pago Activos en el POS</h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              {[{icon:'&#x1F4B5;',label:'Efectivo USD'},{icon:'&#x1F1FB;&#x1F1EA;',label:'Efectivo Bs.'},{icon:'&#x1F4F2;',label:'Pago M&oacute;vil'},{icon:'&#x1F4B3;',label:'Punto D&eacute;bito'},{icon:'&#x1F7E1;',label:'Binance Pay'},{icon:'&#x1F91D;',label:'Cr&eacute;dito / Fiado'},{icon:'&#x1F504;',label:'Pago Mixto'}].map((m) => (
+              {[
+                { icon: '💵', label: 'Efectivo USD' },
+                { icon: '🇻🇪', label: 'Efectivo Bs.' },
+                { icon: '📲', label: 'Pago Móvil' },
+                { icon: '💳', label: 'Punto Débito' },
+                { icon: '🟡', label: 'Binance Pay' },
+                { icon: '🤝', label: 'Crédito / Fiado' },
+                { icon: '🔄', label: 'Pago Mixto' }
+              ].map((m) => (
                 <div key={m.label} className="flex items-center gap-2 px-3 py-2 bg-slate-50 dark:bg-slate-900/50 rounded-lg border border-slate-200 dark:border-slate-700">
-                  <span dangerouslySetInnerHTML={{__html: m.icon}} /><span className="text-xs font-semibold text-slate-700 dark:text-slate-300" dangerouslySetInnerHTML={{__html: m.label}} /><CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 ml-auto" />
+                  <span className="text-base">{m.icon}</span>
+                  <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">{m.label}</span>
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 ml-auto" />
                 </div>
               ))}
             </div>
@@ -1038,6 +1027,13 @@ export default function DesktopSettingsPage() {
 
       {/* 8. PESTAÑA: ACTUALIZACIONES DE SOFTWARE */}
       {activeTab === 'updates' && <SoftwareUpdatesSection />}
+
+      {/* 9. PESTAÑA: MENÚ INTERACTIVO Y TABLETS */}
+      {activeTab === 'menu_sync' && (
+        <div className="animate-in fade-in duration-150">
+          <InteractiveMenuSyncCard />
+        </div>
+      )}
 
       {/* Modal de Licenciamiento y HWID */}
       <LicenseActivationModal
@@ -2179,6 +2175,76 @@ function SoftwareUpdatesSection() {
           </p>
         </div>
       </div>
+
+      {/* PESTAÑA: PAQUETES VISUALES & CATÁLOGOS */}
+      {activeTab === 'visual_packs' && (
+        <div className="space-y-4 animate-in fade-in duration-150">
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-sm space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-slate-800">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-sky-600 to-indigo-600 text-white flex items-center justify-center font-black shadow-md">
+                  <Sparkles className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="text-base font-black text-slate-900 dark:text-white">
+                    Librería Cloud de Paquetes Visuales & Catálogos
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    Administra y descarga catálogos con fotografías HD de productos por rubro para tu negocio.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Link
+                  href="/admin/visual-packs"
+                  className="px-4 py-2 rounded-xl bg-sky-700 hover:bg-sky-800 text-white text-xs font-black flex items-center gap-2 shadow-xs transition-all"
+                >
+                  <Upload className="w-4 h-4" />
+                  <span>Publicador Cloud (Admin Panel)</span>
+                </Link>
+                <Link
+                  href="/tablet-pos"
+                  className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-black flex items-center gap-2 shadow-xs transition-all"
+                >
+                  <Store className="w-4 h-4" />
+                  <span>Ver en KlikPOS Street</span>
+                </Link>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+              <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 space-y-2">
+                <div className="text-xs font-black text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                  <span>🏪</span> Rubros Disponibles
+                </div>
+                <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed">
+                  Catálogos listos para Bodegón & Licores, Comida Rápida, Supermercado & Víveres, Farmacia y Panadería.
+                </p>
+              </div>
+
+              <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 space-y-2">
+                <div className="text-xs font-black text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                  <span>🔐</span> Paquetes Privados
+                </div>
+                <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed">
+                  Genera códigos de acceso exclusivos para clientes que adquieran paquetes de branding o paquetes personalizados.
+                </p>
+              </div>
+
+              <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 space-y-2">
+                <div className="text-xs font-black text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                  <span>⚡</span> Offline-Ready
+                </div>
+                <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed">
+                  Una vez descargado el paquete, los productos e imágenes quedan almacenados localmente sin requerir internet.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

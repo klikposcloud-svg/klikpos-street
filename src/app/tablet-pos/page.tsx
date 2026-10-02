@@ -53,11 +53,18 @@ import {
   Users,
   ArrowLeftRight,
   Boxes,
-  Truck
+  Truck,
+  Image as ImageIcon,
+  Camera,
+  Upload,
+  Smartphone
 } from 'lucide-react';
 import LicenseActivationModal from '@/components/LicenseActivationModal';
+import VisualPacksModal from '@/components/marketplace/VisualPacksModal';
+import StreetAmbassadorLicenseModal from '@/components/licensing/StreetAmbassadorLicenseModal';
 import { evaluateTrialState, TrialState } from '@/lib/licensing/trial-manager';
 import { db } from '@/lib/db';
+import { TabletPosBottomNav } from '@/components/tablet-pos/TabletPosBottomNav';
 
 interface CartItem {
   id: string;
@@ -417,6 +424,64 @@ const DEFAULT_CUSTOMERS: Customer[] = [
   { id: '4', name: 'Inversiones Gourmet C.A.', docId: 'J-40987123-5', phone: '0212-9988776', address: 'Zona Industrial' }
 ];
 
+// Sonido hiperrealista de caja registradora con Web Audio API (Cero latencia, 100% offline)
+const playCashRegisterSound = () => {
+  try {
+    if (typeof window === 'undefined') return;
+    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+    if (!AudioContextClass) return;
+    const ctx = new AudioContextClass();
+    if (ctx.state === 'suspended') {
+      ctx.resume().catch(() => {});
+    }
+
+    const t = ctx.currentTime;
+
+    // 1. Golpe mecánico inicial de apertura de gaveta (Drawer Thud)
+    const thud = ctx.createOscillator();
+    const thudGain = ctx.createGain();
+    thud.type = 'triangle';
+    thud.frequency.setValueAtTime(140, t);
+    thud.frequency.exponentialRampToValueAtTime(35, t + 0.07);
+    thudGain.gain.setValueAtTime(0.22, t);
+    thudGain.gain.exponentialRampToValueAtTime(0.001, t + 0.08);
+    thud.connect(thudGain);
+    thudGain.connect(ctx.destination);
+    thud.start(t);
+    thud.stop(t + 0.08);
+
+    // 2. Primera campana metálica brillante (Chime Ting 1)
+    const bell1 = ctx.createOscillator();
+    const bellGain1 = ctx.createGain();
+    bell1.type = 'sine';
+    bell1.frequency.setValueAtTime(1760, t + 0.02); // A6
+    bell1.frequency.exponentialRampToValueAtTime(2093, t + 0.08); // C7
+    bellGain1.gain.setValueAtTime(0, t);
+    bellGain1.gain.setValueAtTime(0.35, t + 0.02);
+    bellGain1.gain.exponentialRampToValueAtTime(0.001, t + 0.40);
+    bell1.connect(bellGain1);
+    bellGain1.connect(ctx.destination);
+    bell1.start(t + 0.02);
+    bell1.stop(t + 0.40);
+
+    // 3. Segunda campana metálica ("Ka-Ching!" armónico resonante)
+    const bell2 = ctx.createOscillator();
+    const bellGain2 = ctx.createGain();
+    bell2.type = 'sine';
+    bell2.frequency.setValueAtTime(2793.83, t + 0.07); // F7
+    bell2.frequency.exponentialRampToValueAtTime(3322.44, t + 0.16); // G#7
+    bellGain2.gain.setValueAtTime(0, t);
+    bellGain2.gain.setValueAtTime(0.38, t + 0.07);
+    bellGain2.gain.exponentialRampToValueAtTime(0.0001, t + 0.65);
+    bell2.connect(bellGain2);
+    bellGain2.connect(ctx.destination);
+    bell2.start(t + 0.07);
+    bell2.stop(t + 0.65);
+  } catch {
+    // Si el navegador bloquea audio por políticas de interacción, continúa sin interrumpir
+  }
+};
+
 export default function TabletMobilePosPage() {
   // 1. Tasa BCV y Modo de Consulta
   const [bcvRate, setBcvRate] = useState(848.55);
@@ -430,15 +495,18 @@ export default function TabletMobilePosPage() {
   const [selectedCategory, setSelectedCategory] = useState('Todos');
   const [searchQuery, setSearchQuery] = useState('');
   
-  // 3. Modos de Vista y Tema (Contraste Estándar WCAG AAA)
-  const [cardViewMode, setCardViewMode] = useState<'food' | 'cuadricula' | 'lista' | 'minimalista'>('food');
-  const [themeMode, setThemeMode] = useState<'light' | 'dark'>('light');
-  const [activePalette, setActivePalette] = useState('slate');
+  // 3. Modos de Vista (Solo 2: Visual 2-Columnas Casino y Lista Ergonómica) y Tema
+  const [cardViewMode, setCardViewMode] = useState<'food' | 'lista'>('food');
+  const [themeMode, setThemeMode] = useState<'light' | 'dark'>('dark');
+  const [activePalette, setActivePalette] = useState('amber');
+  const [stylePreset, setStylePreset] = useState<'street_pro' | 'gourmet_clean'>('street_pro');
 
   // 4. Drawers y Modales de Configuración
   const [isLeftDrawerOpen, setIsLeftDrawerOpen] = useState(false);
   const [isRightDrawerOpen, setIsRightDrawerOpen] = useState(false);
   const [showQrModal, setShowQrModal] = useState(false);
+  const [showVisualPacksModal, setShowVisualPacksModal] = useState(false);
+  const [showStreetAmbassadorModal, setShowStreetAmbassadorModal] = useState(false);
   const [menuQrUrl, setMenuQrUrl] = useState('');
   const [editingItemNotes, setEditingItemNotes] = useState<CartItem | null>(null);
   const [activeTable, setActiveTable] = useState<number | null>(null);
@@ -476,7 +544,8 @@ export default function TabletMobilePosPage() {
     category: 'Hamburguesas',
     priceUSD: '',
     sku: '',
-    tag: '⭐ Nuevo'
+    tag: '⭐ Nuevo',
+    image: ''
   });
   const [editingPriceId, setEditingPriceId] = useState<string | null>(null);
   const [editingPriceValue, setEditingPriceValue] = useState<string>('');
@@ -689,11 +758,14 @@ export default function TabletMobilePosPage() {
 
       // 4. Modos y Temas
       const savedMode = localStorage.getItem('klikpos_card_view_mode') as any;
-      if (savedMode && ['food', 'cuadricula', 'lista', 'minimalista'].includes(savedMode)) {
+      if (savedMode === 'lista' || savedMode === 'food') {
         setCardViewMode(savedMode);
+      } else {
+        setCardViewMode('food');
       }
-      const savedTheme = localStorage.getItem('venematic_theme') as any;
-      if (savedTheme === 'light' || savedTheme === 'dark') setThemeMode(savedTheme);
+      localStorage.setItem('klikpos_street_theme', 'dark');
+      localStorage.setItem('venematic_theme', 'dark');
+      setThemeMode('dark');
 
       const savedPalette = localStorage.getItem('venematic_branding_palette');
       if (savedPalette && BRAND_PALETTES.some(p => p.id === savedPalette)) {
@@ -777,17 +849,15 @@ export default function TabletMobilePosPage() {
     }
   }, []);
 
-  // Sincronización radical del Modo Claro y Oscuro con el DOM
+  // Sincronización radical del Modo Oscuro con el DOM (Full Dark Monolítico)
   useEffect(() => {
     if (typeof document !== 'undefined') {
-      if (themeMode === 'light') {
-        document.documentElement.classList.remove('dark');
-        document.documentElement.setAttribute('data-theme', 'light');
-        document.documentElement.setAttribute('data-ui-style', 'industrial');
-      } else {
-        document.documentElement.classList.add('dark');
-        document.documentElement.setAttribute('data-theme', 'dark');
-      }
+      document.documentElement.classList.add('dark');
+      document.documentElement.classList.remove('light');
+      document.documentElement.setAttribute('data-theme', 'dark');
+      document.documentElement.removeAttribute('data-ui-style');
+      document.body.style.backgroundColor = '#090d16';
+      document.documentElement.style.backgroundColor = '#090d16';
     }
   }, [themeMode]);
 
@@ -805,16 +875,26 @@ export default function TabletMobilePosPage() {
     return () => clearInterval(timer);
   }, []);
 
-  // Guardar Cambios de Carrito y Vistas
+  // Guardar Cambios de Carrito, Vistas y Tema con Sincronización de Body/HTML
   useEffect(() => {
     try {
       localStorage.setItem('klikpos_card_view_mode', cardViewMode);
       localStorage.setItem('klikpos_tablet_cart', JSON.stringify(cart));
+      localStorage.setItem('klikpos_street_theme', 'dark');
+      localStorage.setItem('venematic_theme', 'dark');
+      localStorage.setItem('venematic_branding_palette', activePalette);
+
+      document.documentElement.classList.add('dark');
+      document.documentElement.classList.remove('light');
+      document.documentElement.setAttribute('data-theme', 'dark');
+      document.documentElement.removeAttribute('data-ui-style');
+      document.body.style.backgroundColor = '#090d16';
+      document.documentElement.style.backgroundColor = '#090d16';
     } catch {}
-  }, [cardViewMode, cart]);
+  }, [cardViewMode, cart, themeMode, activePalette]);
 
   const currentPal = BRAND_PALETTES.find(p => p.id === activePalette) || BRAND_PALETTES[0];
-  const isLight = themeMode === 'light';
+  const isLight = false;
 
   // Cálculos Financieros
   const totalUSD = cart.reduce((acc, item) => acc + (item.priceUSD * item.qty), 0);
@@ -827,6 +907,7 @@ export default function TabletMobilePosPage() {
   const vueltoVESfromVES = Math.max(0, cashVESReceived - totalVES);
 
   const addToCart = (prod: Product) => {
+    playCashRegisterSound();
     setCart((prev) => {
       const exists = prev.find((item) => item.id === prod.id);
       if (exists) {
@@ -903,13 +984,13 @@ export default function TabletMobilePosPage() {
       sku: newProductForm.sku.trim() || `SKU-${Date.now().toString().slice(-4)}`,
       tag: newProductForm.tag.trim() || '⭐ Nuevo',
       prepTime: 'Inmediato',
-      image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&q=80',
+      image: newProductForm.image.trim() || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&q=80',
       description: `${newProductForm.name} - Calidad garantizada.`
     };
     const updated = [newProd, ...products];
     setProducts(updated);
     try { localStorage.setItem('klikpos_tablet_products', JSON.stringify(updated)); } catch {}
-    setNewProductForm({ name: '', category: categoriesList[1] || 'General', priceUSD: '', sku: '', tag: '⭐ Nuevo' });
+    setNewProductForm({ name: '', category: categoriesList[1] || 'General', priceUSD: '', sku: '', tag: '⭐ Nuevo', image: '' });
   };
 
   const handleDeleteProduct = (id: string) => {
@@ -1171,10 +1252,9 @@ export default function TabletMobilePosPage() {
 
   return (
     <div
-      className={`h-screen flex flex-col font-sans select-none overflow-hidden relative transition-colors duration-300 ${
-        isLight ? 'bg-slate-50 text-slate-900' : 'bg-slate-950 text-slate-100'
-      }`}
+      className="h-screen flex flex-col font-sans select-none overflow-hidden relative bg-[#090d16] text-slate-100"
       style={{
+        backgroundColor: '#090d16',
         '--brand-color': currentPal.primary,
         '--brand-hover': currentPal.hover,
         '--brand-accent': currentPal.accent,
@@ -1217,38 +1297,18 @@ export default function TabletMobilePosPage() {
         .anim-drawer-right {
           animation: drawerSlideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
+        /* Ocultar barras de desplazamiento visibles en toda la app manteniendo scroll fluido */
+        ::-webkit-scrollbar {
+          display: none !important;
+          width: 0px !important;
+          height: 0px !important;
+          background: transparent !important;
+        }
+        * {
+          -ms-overflow-style: none !important;
+          scrollbar-width: none !important;
+        }
       `}</style>
-
-      {/* ========================================================================= */}
-      {/* 1. DOCKER FLOTANTE MINIMALISTA: PILL VERTICAL PURO DIRECTO                */}
-      {/* ========================================================================= */}
-      {/* Botón Píldora Colapsado cuando el Docker está cerrado */}
-      {!isDockerOpen && (
-        <button
-          type="button"
-          onClick={() => setIsDockerOpen(true)}
-          className={`fixed top-1/2 -translate-y-1/2 z-40 shadow-2xl flex flex-col items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 border border-white/20 backdrop-blur-md group cursor-pointer ${
-            dockSide === 'left' ? 'left-0 rounded-r-2xl border-l-0' : 'right-0 rounded-l-2xl border-r-0'
-          }`}
-          style={{
-            width: '38px',
-            height: '64px',
-            backgroundColor: `${currentPal.primary}e6`,
-            boxShadow: `0 8px 24px ${currentPal.glow || 'rgba(0,0,0,0.3)'}`
-          }}
-          title={`Abrir Docker Rápido (${dockSide === 'left' ? 'Izquierda' : 'Derecha'})`}
-        >
-          <div className="flex flex-col items-center gap-1">
-            <Sparkles className="w-4 h-4 text-amber-300 drop-shadow-xs group-hover:rotate-12 transition-transform" />
-            <span className="text-[9px] font-black text-white tracking-tighter uppercase font-mono">DOCK</span>
-          </div>
-          {totalItems > 0 && (
-            <span className="absolute -top-1.5 -right-1 bg-amber-400 text-slate-950 text-[10px] font-black w-4.5 h-4.5 rounded-full flex items-center justify-center shadow-md anim-badge-spring">
-              {totalItems}
-            </span>
-          )}
-        </button>
-      )}
 
       {/* Docker Flotante Abierto: EXCLUSIVAMENTE Pill Vertical con Íconos Directos */}
       {isDockerOpen && (
@@ -1257,69 +1317,92 @@ export default function TabletMobilePosPage() {
             dockSide === 'left' ? 'left-2.5' : 'right-2.5'
           }`}
         >
-          {/* Cápsula Vertical Oscura con Íconos de Herramientas Directas */}
-          <aside className="w-13 bg-slate-950/92 dark:bg-slate-900/95 backdrop-blur-2xl rounded-[32px] py-3.5 px-1.5 flex flex-col items-center justify-between shadow-2xl border border-slate-700/70 text-white select-none shrink-0 min-h-[390px]">
+          {/* Cápsula Vertical Grafito Profundo con Micro-Tarjetas de Alto Contraste AAA */}
+          <aside
+            className="w-14 rounded-[30px] py-3.5 px-1.5 flex flex-col items-center justify-between shadow-2xl border select-none shrink-0 min-h-[410px] z-50"
+            style={{
+              backgroundColor: '#090d16',
+              borderColor: 'rgba(255, 255, 255, 0.16)',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.12)'
+            }}
+          >
             {/* Top: Sparkles Icon / Brand Pill */}
-            <div className="w-9 h-9 rounded-2xl bg-gradient-to-tr from-amber-500 to-amber-300 flex items-center justify-center shadow-lg shadow-amber-500/20 shrink-0">
-              <Sparkles className="w-4.5 h-4.5 text-slate-950" />
+            <div
+              className="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 shadow-lg cursor-pointer"
+              style={{
+                background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+                boxShadow: '0 4px 14px rgba(245, 158, 11, 0.35)'
+              }}
+              title="KlikPOS Tools"
+            >
+              <Sparkles className="w-5 h-5 text-slate-950 font-black" />
             </div>
 
-            {/* Íconos Centrales de Acceso Directo a Ventanas y Modales */}
+            {/* Íconos Centrales de Acceso Directo con Contraste AAA y Micro-Fondos */}
             <div className="flex flex-col items-center gap-2.5 my-auto">
               {/* 1. Inventario & Stock */}
               <button
                 onClick={() => setShowInventoryModal(true)}
-                className="p-2.5 rounded-2xl text-slate-300 hover:text-emerald-400 hover:bg-slate-800/80 active:scale-90 transition-all group relative cursor-pointer"
+                className="w-10 h-10 rounded-xl flex items-center justify-center text-emerald-400 bg-emerald-500/18 border border-emerald-500/35 hover:bg-emerald-500/30 hover:scale-110 active:scale-95 transition-all shadow-xs cursor-pointer group"
                 title="Gestión de Inventario & Stock"
               >
-                <Package className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                <Package className="w-5 h-5" />
+              </button>
+
+              {/* 1b. Paquetes Visuales & Catálogos Cloud con Fotos HD */}
+              <button
+                onClick={() => setShowVisualPacksModal(true)}
+                className="w-10 h-10 rounded-xl flex items-center justify-center text-cyan-300 bg-cyan-500/18 border border-cyan-500/35 hover:bg-cyan-500/30 hover:scale-110 active:scale-95 transition-all shadow-xs cursor-pointer group"
+                title="Librería Cloud de Paquetes Visuales & Fotos HD"
+              >
+                <ImageIcon className="w-5 h-5" />
               </button>
 
               {/* 2. Motorizados / Despacho */}
               <button
                 onClick={() => setShowDriversModal(true)}
-                className="p-2.5 rounded-2xl text-slate-300 hover:text-amber-400 hover:bg-slate-800/80 active:scale-90 transition-all group relative cursor-pointer"
+                className="w-10 h-10 rounded-xl flex items-center justify-center text-amber-400 bg-amber-500/18 border border-amber-500/35 hover:bg-amber-500/30 hover:scale-110 active:scale-95 transition-all shadow-xs cursor-pointer group"
                 title="Motorizados & Despacho Delivery"
               >
-                <Truck className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                <Truck className="w-5 h-5" />
               </button>
 
               {/* 3. Impresora Térmica POS */}
               <button
                 onClick={() => setShowPrinterModal(true)}
-                className="p-2.5 rounded-2xl text-slate-300 hover:text-indigo-400 hover:bg-slate-800/80 active:scale-90 transition-all group relative cursor-pointer"
+                className="w-10 h-10 rounded-xl flex items-center justify-center text-indigo-300 bg-indigo-500/18 border border-indigo-500/35 hover:bg-indigo-500/30 hover:scale-110 active:scale-95 transition-all shadow-xs cursor-pointer group"
                 title="Configuración de Impresora POS"
               >
-                <Printer className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                <Printer className="w-5 h-5" />
               </button>
 
               {/* 4. Cambiar Rubro Comercial */}
               <button
                 onClick={() => setShowRubroModal(true)}
-                className="p-2.5 rounded-2xl text-slate-300 hover:text-purple-400 hover:bg-slate-800/80 active:scale-90 transition-all group relative cursor-pointer"
+                className="w-10 h-10 rounded-xl flex items-center justify-center text-purple-300 bg-purple-500/18 border border-purple-500/35 hover:bg-purple-500/30 hover:scale-110 active:scale-95 transition-all shadow-xs cursor-pointer group"
                 title="Cambiar Rubro Comercial (Comida, Farmacia, Bodega, etc.)"
               >
-                <Boxes className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                <Boxes className="w-5 h-5" />
               </button>
 
               {/* 5. Menú QR Dinámico para Clientes */}
               <button
                 onClick={() => setShowQrModal(true)}
-                className="p-2.5 rounded-2xl text-slate-300 hover:text-sky-400 hover:bg-slate-800/80 active:scale-90 transition-all group relative cursor-pointer"
+                className="w-10 h-10 rounded-xl flex items-center justify-center text-sky-300 bg-sky-500/18 border border-sky-500/35 hover:bg-sky-500/30 hover:scale-110 active:scale-95 transition-all shadow-xs cursor-pointer group"
                 title="Generar Menú QR Digital para Clientes"
               >
-                <QrCode className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                <QrCode className="w-5 h-5" />
               </button>
 
               {/* 6. Comanda / Ticket Activo */}
               <button
                 onClick={() => setIsRightDrawerOpen(true)}
-                className="p-2.5 rounded-2xl text-slate-300 hover:text-emerald-400 hover:bg-slate-800/80 active:scale-90 transition-all relative group cursor-pointer"
+                className="w-10 h-10 rounded-xl flex items-center justify-center text-emerald-300 bg-emerald-500/18 border border-emerald-500/35 hover:bg-emerald-500/30 hover:scale-110 active:scale-95 transition-all shadow-xs relative cursor-pointer group"
                 title="Ver Comanda Activa"
               >
-                <ShoppingCart className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                <ShoppingCart className="w-5 h-5" />
                 {totalItems > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-amber-400 text-slate-950 text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center shadow-xs">
+                  <span className="absolute -top-1 -right-1 bg-amber-400 text-slate-950 text-[9px] font-black w-4.5 h-4.5 rounded-full flex items-center justify-center shadow-md font-mono">
                     {totalItems}
                   </span>
                 )}
@@ -1328,25 +1411,25 @@ export default function TabletMobilePosPage() {
               {/* 7. Ajustes & Configuración */}
               <button
                 onClick={() => setIsLeftDrawerOpen(true)}
-                className="p-2.5 rounded-2xl text-slate-300 hover:text-cyan-400 hover:bg-slate-800/80 active:scale-90 transition-all group relative cursor-pointer"
+                className="w-10 h-10 rounded-xl flex items-center justify-center text-slate-100 bg-slate-800/80 border border-slate-700 hover:bg-slate-700 hover:scale-110 active:scale-95 transition-all shadow-xs cursor-pointer group"
                 title="Ajustes de Empresa & RIF"
               >
-                <Settings className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                <Settings className="w-5 h-5" />
               </button>
             </div>
 
             {/* Bottom: Alternar Lado (Izq/Der) y Colapsar */}
-            <div className="flex flex-col items-center gap-1.5 pt-2 border-t border-slate-800/80 shrink-0">
+            <div className="flex flex-col items-center gap-2 pt-2 border-t border-slate-800 shrink-0 w-full">
               <button
                 onClick={handleToggleDockSide}
-                className="p-2 rounded-xl text-slate-400 hover:text-amber-300 hover:bg-slate-800/80 active:scale-90 transition-all cursor-pointer"
+                className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-300 hover:text-amber-300 hover:bg-slate-800/80 active:scale-90 transition-all cursor-pointer"
                 title={dockSide === 'left' ? 'Mover Docker a la Derecha' : 'Mover Docker a la Izquierda'}
               >
                 <ArrowLeftRight className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setIsDockerOpen(false)}
-                className="p-1.5 rounded-xl text-slate-500 hover:text-rose-400 hover:bg-slate-800/80 active:scale-90 transition-all cursor-pointer"
+                className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-rose-400 hover:bg-rose-500/15 active:scale-90 transition-all cursor-pointer"
                 title="Minimizar Docker"
               >
                 <X className="w-4 h-4" />
@@ -1359,219 +1442,247 @@ export default function TabletMobilePosPage() {
       {/* ========================================================================= */}
       {/* 2. HEADER SUPERIOR CON TASA BCV INTERACTIVA Y CONTRASTE WCAG AAA          */}
       {/* ========================================================================= */}
+      {/* ========================================================================= */}
+      {/* 2. HEADER SUPERIOR ELEGANTE Y PERFECTAMENTE ORGANIZADO                     */}
+      {/* ========================================================================= */}
       <header
-        className={`h-14 px-3 flex items-center justify-between border-b shrink-0 z-20 shadow-xs transition-colors duration-300 ${
-          isLight ? 'bg-white border-slate-200' : 'bg-slate-900 border-slate-800'
-        }`}
+        className="h-14 px-3 flex items-center justify-between border-b shrink-0 z-20 shadow-xs bg-[#090d16] border-slate-800/90"
+        style={{ backgroundColor: '#090d16' }}
       >
-        {/* Izquierda: Drawer y Nombre del Negocio */}
+        {/* LADO IZQUIERDO: Logo KlikPOS Street + Acciones Principales */}
         <div className="flex items-center gap-2">
-          <button
+          {/* Logo KlikPOS Street Vector & Clean Branding */}
+          <div 
             onClick={() => setIsLeftDrawerOpen(true)}
-            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border transition-all active:scale-95 ${
-              isLight
-                ? 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-900'
-                : 'bg-slate-800 hover:bg-slate-700 border-slate-700 text-white'
-            }`}
+            className="flex flex-col leading-none select-none cursor-pointer group pr-0.5"
+            title="KlikPOS Street"
           >
-            <Menu className="w-4 h-4 text-slate-800 dark:text-slate-200" />
-            <span className="text-xs font-black hidden sm:inline" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
-              Menú
+            <div className="flex items-baseline tracking-tight font-black text-lg">
+              <span className="text-white">Klik</span>
+              <span className="text-amber-500 group-hover:text-amber-400 transition-colors">POS</span>
+            </div>
+            <span className="text-[9px] font-extrabold text-amber-500/95 tracking-widest text-right -mt-0.5">
+              Street
             </span>
-          </button>
+          </div>
 
-          <div className="flex flex-col">
-            <span className="text-xs font-black tracking-tight uppercase line-clamp-1 max-w-[130px] sm:max-w-[200px]" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
-              {companyInfo.name}
-            </span>
-            <span className="text-[9px] font-mono text-slate-500 font-bold">
-              {companyInfo.rif}
-            </span>
+          <div className="h-5 w-px bg-slate-300 dark:bg-slate-800 hidden xs:block" />
+
+          {/* Botón de Menú & Ajustes */}
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setIsLeftDrawerOpen(true)}
+              className={`p-2 rounded-xl border transition-all active:scale-95 cursor-pointer ${
+                isLight
+                  ? 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-900'
+                  : 'bg-slate-900 hover:bg-slate-800 border-slate-800 text-slate-200 hover:text-white'
+              }`}
+              title="Menú & Ajustes"
+            >
+              <Menu className="w-4 h-4" />
+            </button>
           </div>
         </div>
 
-        {/* Centro: Badge Tasa BCV Oficial con Edición Manual/Auto */}
-        <div className="flex items-center gap-1.5">
+        {/* CENTRO: Badge Tasa BCV Oficial (Una Sola Línea, Sin Romper Texto) */}
+        <div className="flex items-center justify-center mx-1">
           {isBcvEditing ? (
-            <div className="flex items-center gap-1 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 px-2 py-0.5 rounded-xl shadow-xs">
-              <span className="text-[10px] font-mono font-bold text-slate-500">Bs.</span>
+            <div className="flex items-center gap-1 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 px-2.5 py-1 rounded-xl shadow-xs">
+              <span className="text-[11px] font-mono font-bold text-slate-400">Bs.</span>
               <input
                 type="number"
                 step="0.01"
                 value={customBcvInput}
                 onChange={(e) => setCustomBcvInput(e.target.value)}
-                className="w-18 text-xs font-mono font-black text-slate-900 dark:text-white bg-transparent outline-none"
+                className="w-16 text-xs font-mono font-black text-slate-900 dark:text-white bg-transparent outline-none"
               />
               <button
                 onClick={handleSaveManualBcv}
-                className="px-1.5 py-0.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-[10px] font-black"
+                className="px-1.5 py-0.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-[10px] font-black cursor-pointer"
               >
                 ✓
               </button>
               <button
                 onClick={() => setIsBcvEditing(false)}
-                className="px-1 py-0.5 text-slate-400 text-[10px]"
+                className="px-1 py-0.5 text-slate-400 text-[10px] cursor-pointer"
               >
                 ✕
               </button>
             </div>
           ) : (
-            <button
+            <div
               onClick={() => setIsBcvEditing(true)}
-              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl border transition-all text-xs font-mono font-bold shadow-2xs ${
-                isLight ? 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-900' : 'bg-slate-800/90 border-slate-700 text-slate-100'
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border transition-all text-xs font-mono font-bold shadow-xs whitespace-nowrap cursor-pointer select-none ${
+                isLight
+                  ? 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-900'
+                  : 'bg-slate-900/90 hover:bg-slate-850 border-slate-800 text-slate-100'
               }`}
               title="Toca para editar tasa BCV manualmente"
             >
-              <span className="text-[10px] font-black text-sky-600 dark:text-sky-400">BCV:</span>
-              <span className="font-black" style={{ color: isLight ? '#0f172a' : '#38bdf8' }}>
+              <span className="text-[10px] font-black text-sky-500 tracking-wider">BCV:</span>
+              <span className="font-black text-xs" style={{ color: isLight ? '#0f172a' : '#38bdf8' }}>
                 Bs. {bcvRate.toFixed(2)}
               </span>
               <button
+                type="button"
                 onClick={(e) => {
                   e.stopPropagation();
                   fetchBcvRateAuto();
                 }}
                 disabled={isFetchingBcv}
-                className="p-0.5 hover:text-sky-500"
+                className="p-0.5 hover:text-sky-400 text-slate-400 transition-colors cursor-pointer"
                 title="Actualizar tasa desde DolarAPI"
               >
-                <RefreshCw className={`w-3 h-3 ${isFetchingBcv ? 'animate-spin text-sky-500' : 'text-slate-400'}`} />
+                <RefreshCw className={`w-3 h-3 ${isFetchingBcv ? 'animate-spin text-sky-400' : ''}`} />
               </button>
-            </button>
+            </div>
           )}
+        </div>
 
-          {/* Badge de Prueba de 15 Minutos */}
+        {/* LADO DERECHO: Carrito / Comanda Activa */}
+        <div className="flex items-center gap-1.5">
           {trialState?.isTrial && (
             <button
               onClick={() => setShowLicenseModal(true)}
-              className="hidden md:flex items-center gap-1 px-2 py-0.5 bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-400 rounded-lg text-[10px] font-mono font-bold"
+              className="hidden md:flex items-center gap-1 px-2 py-1 bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-400 rounded-lg text-[10px] font-mono font-bold"
             >
               <span>⏱️ {trialState.remainingMinutes}m</span>
             </button>
           )}
-        </div>
 
-        {/* Derecha: Botón Carrito y Totalizador */}
-        <button
-          onClick={() => setIsRightDrawerOpen(true)}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-xl shadow-md text-white transition-all duration-200 relative active:scale-95"
-          style={{ backgroundColor: currentPal.primary }}
-          title="Ver Comanda Activa"
-        >
-          <ShoppingCart className="w-4 h-4 text-white" />
-          <span className="text-xs font-black text-white">${totalUSD.toFixed(2)}</span>
-          {totalItems > 0 && (
-            <span className="absolute -top-1 -right-1 bg-amber-400 text-slate-950 text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center shadow-xs anim-badge-spring">
-              {totalItems}
-            </span>
-          )}
-        </button>
+          <button
+            onClick={() => setIsRightDrawerOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-slate-950 font-black text-xs transition-all duration-200 relative active:scale-95 shadow-md cursor-pointer"
+            style={{ backgroundColor: currentPal.primary }}
+            title="Ver Comanda Activa"
+          >
+            <ShoppingCart className="w-3.5 h-3.5 text-slate-950" />
+            <span className="font-mono text-xs font-black">${totalUSD.toFixed(2)}</span>
+            {totalItems > 0 && (
+              <span className="bg-slate-950 text-amber-400 text-[10px] font-mono font-black px-1.5 py-0.2 rounded-full shadow-xs anim-badge-spring">
+                {totalItems}
+              </span>
+            )}
+          </button>
+        </div>
       </header>
 
       {/* ========================================================================= */}
       {/* 3. LIENZO PRINCIPAL CON SCROLL 100% FLUIDO Y DESBLOQUEADO                 */}
       {/* ========================================================================= */}
-      <main className="flex-1 overflow-y-auto overscroll-contain touch-pan-y p-3 pb-28 max-w-6xl mx-auto w-full">
+      <main className="flex-1 min-h-0 overflow-hidden flex flex-col p-2 sm:p-3 pb-20 max-w-6xl mx-auto w-full">
         {/* ======================================================================= */}
-        {/* VISTA 1: MENÚ Y CATÁLOGO TÁCTIL (4 MODOS DE VISTA)                      */}
+        {/* VISTA 1: MENÚ Y CATÁLOGO TÁCTIL (SOLO 2 MODOS: VISUAL 2-COLS Y LISTA)    */}
         {/* ======================================================================= */}
         {activeTab === 'menu' && (
-          <div className="space-y-3">
-            {/* Buscador + Selector de Modo de Vista */}
-            <div className="space-y-2">
-              <div className="flex gap-2">
-                <div className="relative flex-1">
-                  <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+          <div className="flex-1 min-h-0 flex flex-col space-y-2">
+            {/* 1. Barra de Búsqueda + Selector de Vista (Visual / Lista) + Selector de Tema (Street Pro / Gourmet) */}
+            <div className="space-y-1.5 shrink-0">
+              <div className="flex flex-wrap items-center justify-between gap-1.5">
+                {/* Buscador */}
+                <div className="relative flex-1 min-w-[140px]">
+                  <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" />
                   <input
                     type="text"
-                    placeholder="Buscar hamburguesas, perros, bebidas, combos o SKU..."
+                    placeholder="Buscar producto..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className={`w-full pl-9 pr-3 py-2 rounded-xl text-xs border transition-colors outline-none font-semibold ${
+                    className={`w-full pl-8 pr-7 py-1.5 rounded-xl text-xs border transition-colors outline-none font-semibold ${
                       isLight
                         ? 'bg-white border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-slate-800'
-                        : 'bg-slate-900 border-slate-700 text-white placeholder:text-slate-500 focus:border-sky-500'
+                        : 'bg-slate-900 border-slate-700 text-white placeholder:text-slate-500 focus:border-amber-500'
                     }`}
                   />
                   {searchQuery && (
                     <button
                       onClick={() => setSearchQuery('')}
-                      className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600"
+                      className="absolute right-2 top-2 text-slate-400 hover:text-slate-200"
                     >
-                      <X className="w-3.5 h-3.5" />
+                      <X className="w-3 h-3" />
                     </button>
                   )}
                 </div>
 
-                {/* 4 Modos de Vista */}
+                {/* Selector de Solo 2 Modos: Visual (Casino 2 Cols) y Lista */}
                 <div className={`flex items-center p-0.5 rounded-xl border shrink-0 ${
                   isLight ? 'bg-slate-100 border-slate-300' : 'bg-slate-900 border-slate-800'
                 }`}>
                   <button
                     onClick={() => setCardViewMode('food')}
-                    className={`px-2 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                    className={`px-2.5 py-1 rounded-lg text-[11px] font-black transition-all cursor-pointer flex items-center gap-1 ${
                       cardViewMode === 'food'
-                        ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-xs'
-                        : 'text-slate-500 hover:text-slate-800 dark:hover:text-white'
+                        ? 'bg-amber-500 text-slate-950 shadow-xs'
+                        : 'text-slate-400 hover:text-white'
                     }`}
-                    title="Vista Visual Food"
+                    title="Vista Visual 2 Columnas Independientes (Modo Casino)"
                   >
-                    Visual
-                  </button>
-                  <button
-                    onClick={() => setCardViewMode('cuadricula')}
-                    className={`px-2 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                      cardViewMode === 'cuadricula'
-                        ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-xs'
-                        : 'text-slate-500 hover:text-slate-800 dark:hover:text-white'
-                    }`}
-                    title="Cuadrícula 4 Columnas"
-                  >
-                    4 Cols
+                    <span>🎰 2 Columnas</span>
                   </button>
                   <button
                     onClick={() => setCardViewMode('lista')}
-                    className={`px-2 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                    className={`px-2.5 py-1 rounded-lg text-[11px] font-black transition-all cursor-pointer flex items-center gap-1 ${
                       cardViewMode === 'lista'
-                        ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-xs'
-                        : 'text-slate-500 hover:text-slate-800 dark:hover:text-white'
+                        ? 'bg-amber-500 text-slate-950 shadow-xs'
+                        : 'text-slate-400 hover:text-white'
                     }`}
-                    title="Lista Ergonómica"
+                    title="Vista Lista Ergonómica"
                   >
-                    Lista
+                    <span>📋 Lista</span>
+                  </button>
+                </div>
+
+                {/* Selector de Estilo: Street Food Pro (Dark) vs Gourmet Clean (Light) */}
+                <div className="flex items-center gap-1 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setStylePreset('street_pro');
+                      setThemeMode('dark');
+                      setActivePalette('amber');
+                    }}
+                    className={`px-2 py-1 rounded-xl text-[11px] font-black transition-all cursor-pointer ${
+                      stylePreset === 'street_pro'
+                        ? 'bg-amber-500 text-slate-950 shadow-xs scale-102'
+                        : 'bg-slate-800/80 text-slate-400 hover:text-white'
+                    }`}
+                    title="Estilo Street Food Pro (Modo Oscuro & Acentos Ámbar)"
+                  >
+                    🍔 Street Pro
                   </button>
                   <button
-                    onClick={() => setCardViewMode('minimalista')}
-                    className={`px-2 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                      cardViewMode === 'minimalista'
-                        ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-xs'
-                        : 'text-slate-500 hover:text-slate-800 dark:hover:text-white'
+                    type="button"
+                    onClick={() => {
+                      setStylePreset('gourmet_clean');
+                      setThemeMode('dark');
+                      setActivePalette('emerald');
+                    }}
+                    className={`px-2 py-1 rounded-xl text-[11px] font-black transition-all cursor-pointer ${
+                      stylePreset === 'gourmet_clean'
+                        ? 'bg-emerald-600 text-white shadow-xs scale-102'
+                        : 'bg-slate-800/80 text-slate-400 hover:text-white'
                     }`}
-                    title="Alta Densidad"
+                    title="Estilo Gourmet (Acentos Esmeralda Neón)"
                   >
-                    Mini
+                    🌭 Gourmet
                   </button>
                 </div>
               </div>
 
               {/* Píldoras de Categorías */}
-              <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+              <div className="flex gap-1 overflow-x-auto pb-0.5 scrollbar-none">
                 {CATEGORIES.map((cat) => (
                   <button
                     key={cat}
                     onClick={() => setSelectedCategory(cat)}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all duration-200 border active:scale-95 ${
+                    className={`px-2.5 py-1 rounded-xl text-[11px] font-bold whitespace-nowrap transition-all duration-200 border active:scale-95 cursor-pointer ${
                       selectedCategory === cat
-                        ? 'text-white shadow-xs'
+                        ? isLight
+                          ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs font-black'
+                          : 'bg-amber-500/20 border-amber-500 text-amber-400 shadow-sm shadow-amber-500/10 font-black'
                         : isLight
                         ? 'bg-white border-slate-300 text-slate-700 hover:bg-slate-100'
                         : 'bg-slate-900 border-slate-800 text-slate-300 hover:bg-slate-850'
                     }`}
-                    style={{
-                      backgroundColor: selectedCategory === cat ? currentPal.primary : undefined,
-                      borderColor: selectedCategory === cat ? currentPal.primary : undefined
-                    }}
                   >
                     {cat}
                   </button>
@@ -1579,179 +1690,230 @@ export default function TabletMobilePosPage() {
               </div>
             </div>
 
-            {/* PRODUCTOS RENDERIZADOS SEGÚN MODO DE VISTA */}
+            {/* ================================================================= */}
+            {/* MODO 1: VISUAL CASINO (2 COLUMNAS INDEPENDIENTES SIEMPRE ACTIVAS) */}
+            {/* ================================================================= */}
             {cardViewMode === 'food' && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                {filteredProducts.map((prod) => {
-                  const qtyInCart = getCartQty(prod.id);
-                  return (
-                    <div
-                      key={prod.id}
-                      onClick={() => addToCart(prod)}
-                      className={`group border rounded-2xl overflow-hidden transition-all duration-200 cursor-pointer flex flex-col justify-between active:scale-98 shadow-xs ${
-                        isLight
-                          ? 'bg-white border-slate-200 hover:border-slate-300'
-                          : 'bg-slate-900/90 border-slate-800 hover:border-slate-700'
-                      }`}
-                    >
-                      <div className="relative h-36 sm:h-40 w-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
-                        <img
-                          src={prod.image}
-                          alt={prod.name}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                          loading="lazy"
-                        />
-                        <span className="absolute top-2.5 left-2.5 text-[10px] font-black bg-slate-900/80 text-white px-2.5 py-0.5 rounded-full backdrop-blur-xs shadow-xs">
-                          {prod.tag}
-                        </span>
-                        {qtyInCart > 0 && (
-                          <span
-                            className="absolute top-2.5 right-2.5 text-white font-black font-mono text-xs w-6 h-6 rounded-full flex items-center justify-center shadow-md anim-badge-spring"
-                            style={{ backgroundColor: currentPal.primary }}
+              <div className="grid grid-cols-2 gap-2 flex-1 min-h-0 overflow-hidden">
+                {/* REEL IZQUIERDO: COMIDA PRINCIPAL */}
+                <div className={`flex flex-col h-full min-h-0 overflow-hidden border rounded-2xl shadow-md ${
+                  isLight ? 'bg-slate-100 border-slate-200' : 'bg-[#090d16] border-slate-800'
+                }`}>
+                  <div className={`px-2 py-1.5 border-b flex items-center justify-between shrink-0 ${
+                    isLight ? 'bg-white border-slate-200 text-slate-800' : 'bg-[#0f172a] border-slate-800 text-amber-400'
+                  }`}>
+                    <span className="text-[10px] font-black uppercase tracking-wider flex items-center gap-1">
+                      🍔 Comida Principal
+                    </span>
+                    <span className="text-[9px] font-mono text-slate-400 font-bold">
+                      {filteredProducts.filter((_, idx) => idx % 2 === 0).length} ítems
+                    </span>
+                  </div>
+                  <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain touch-pan-y p-1.5 space-y-2 pb-24 scrollbar-none">
+                    {filteredProducts
+                      .filter((_, idx) => idx % 2 === 0)
+                      .map((prod) => {
+                        const qtyInCart = getCartQty(prod.id);
+                        return (
+                          <div
+                            key={prod.id}
+                            onClick={() => addToCart(prod)}
+                            className={`group border rounded-2xl overflow-hidden transition-all duration-150 cursor-pointer flex flex-col justify-between active:scale-[0.95] active:brightness-110 active:border-amber-400 select-none shadow-md ${
+                              isLight
+                                ? 'bg-white border-slate-200 hover:border-slate-300'
+                                : 'bg-[#0e1726] border-slate-800 hover:border-amber-500/50'
+                            }`}
                           >
-                            {qtyInCart}
-                          </span>
-                        )}
-                      </div>
+                            <div className="relative h-24 sm:h-28 w-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
+                              <img
+                                src={prod.image}
+                                alt={prod.name}
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                loading="lazy"
+                              />
+                              <span className="absolute top-1.5 left-1.5 text-[8.5px] font-black bg-slate-950 text-white px-2 py-0.5 rounded-full shadow-xs">
+                                {prod.tag}
+                              </span>
+                              {qtyInCart > 0 && (
+                                <span
+                                  className="absolute top-1.5 right-1.5 text-slate-950 font-black font-mono text-[10.5px] w-5 h-5 rounded-full flex items-center justify-center shadow-md bg-amber-400 anim-badge-spring"
+                                >
+                                  {qtyInCart}
+                                </span>
+                              )}
+                            </div>
 
-                      <div className="p-3.5 flex-1 flex flex-col justify-between space-y-2.5">
-                        <div>
-                          <h3
-                            className="text-xs sm:text-sm font-black line-clamp-2 min-h-[32px] leading-tight"
-                            style={{ color: isLight ? '#0f172a' : '#ffffff' }}
-                          >
-                            {prod.name}
-                          </h3>
-                          <p className="text-[11px] text-slate-500 line-clamp-1 mt-0.5">
-                            {prod.description}
-                          </p>
-                        </div>
+                            <div className="p-2 flex-1 flex flex-col justify-between space-y-1.5">
+                              <div>
+                                <h3
+                                  className="text-[11.5px] font-black line-clamp-1 leading-tight"
+                                  style={{ color: isLight ? '#0f172a' : '#ffffff' }}
+                                >
+                                  {prod.name}
+                                </h3>
+                                <p className="text-[9.5px] text-slate-400 line-clamp-1 mt-0.5">
+                                  {prod.description}
+                                </p>
+                              </div>
 
-                        <div className="flex items-baseline justify-between pt-2 border-t border-slate-100 dark:border-slate-800">
-                          <div>
-                            <span className="text-sm sm:text-base font-black font-mono" style={{ color: currentPal.primary }}>
-                              ${prod.priceUSD.toFixed(2)}
-                            </span>
-                            <span className="text-[10px] font-mono text-slate-500 block">
-                              Bs. {(prod.priceUSD * bcvRate).toFixed(2)}
-                            </span>
+                              <div className="flex items-center justify-between pt-1 border-t border-slate-100 dark:border-slate-800/80">
+                                <div>
+                                  <span className="text-xs font-black font-mono block text-amber-400">
+                                    ${prod.priceUSD.toFixed(2)}
+                                  </span>
+                                  <span className="text-[8.5px] font-mono text-slate-400 font-bold block">
+                                    Bs. {(prod.priceUSD * bcvRate).toFixed(0)}
+                                  </span>
+                                </div>
+
+                                <div className="flex items-center gap-1">
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      addToCart(prod);
+                                    }}
+                                    className="w-7 h-7 rounded-xl bg-amber-500 hover:bg-amber-400 active:scale-90 active:bg-amber-300 text-slate-950 flex items-center justify-center transition-all shadow-sm font-black cursor-pointer"
+                                    title="Añadir a la comanda"
+                                  >
+                                    <Plus className="w-4 h-4 stroke-[2.8]" />
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
                           </div>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              addToCart(prod);
-                            }}
-                            className="w-8 h-8 rounded-xl text-white flex items-center justify-center active:scale-90 transition-transform shadow-xs"
-                            style={{ backgroundColor: currentPal.primary }}
+                        );
+                      })}
+                  </div>
+                </div>
+
+                {/* REEL DERECHO: BEBIDAS & EXTRAS */}
+                <div className={`flex flex-col h-full min-h-0 overflow-hidden border rounded-2xl shadow-md ${
+                  isLight ? 'bg-slate-100 border-slate-200' : 'bg-[#090d16] border-slate-800'
+                }`}>
+                  <div className={`px-2 py-1.5 border-b flex items-center justify-between shrink-0 ${
+                    isLight ? 'bg-white border-slate-200 text-slate-800' : 'bg-[#0f172a] border-slate-800 text-amber-400'
+                  }`}>
+                    <span className="text-[10px] font-black uppercase tracking-wider flex items-center gap-1">
+                      🥤 Bebidas & Extras
+                    </span>
+                    <span className="text-[9px] font-mono text-slate-400 font-bold">
+                      {filteredProducts.filter((_, idx) => idx % 2 !== 0).length} ítems
+                    </span>
+                  </div>
+                  <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain touch-pan-y p-1.5 space-y-2 pb-24 scrollbar-none">
+                    {filteredProducts
+                      .filter((_, idx) => idx % 2 !== 0)
+                      .map((prod) => {
+                        const qtyInCart = getCartQty(prod.id);
+                        return (
+                          <div
+                            key={prod.id}
+                            onClick={() => addToCart(prod)}
+                            className={`group border rounded-2xl overflow-hidden transition-all duration-150 cursor-pointer flex flex-col justify-between active:scale-[0.95] active:brightness-110 active:border-amber-400 select-none shadow-md ${
+                              isLight
+                                ? 'bg-white border-slate-200 hover:border-slate-300'
+                                : 'bg-[#0e1726] border-slate-800 hover:border-amber-500/50'
+                            }`}
                           >
-                            <Plus className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
+                            <div className="relative h-24 sm:h-28 w-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
+                              <img
+                                src={prod.image}
+                                alt={prod.name}
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                loading="lazy"
+                              />
+                              <span className="absolute top-1.5 left-1.5 text-[8.5px] font-black bg-slate-950 text-white px-2 py-0.5 rounded-full shadow-xs">
+                                {prod.tag}
+                              </span>
+                              {qtyInCart > 0 && (
+                                <span
+                                  className="absolute top-1.5 right-1.5 text-slate-950 font-black font-mono text-[10.5px] w-5 h-5 rounded-full flex items-center justify-center shadow-md bg-amber-400 anim-badge-spring"
+                                >
+                                  {qtyInCart}
+                                </span>
+                              )}
+                            </div>
+
+                            <div className="p-2 flex-1 flex flex-col justify-between space-y-1.5">
+                              <div>
+                                <h3
+                                  className="text-[11.5px] font-black line-clamp-1 leading-tight"
+                                  style={{ color: isLight ? '#0f172a' : '#ffffff' }}
+                                >
+                                  {prod.name}
+                                </h3>
+                                <p className="text-[9.5px] text-slate-400 line-clamp-1 mt-0.5">
+                                  {prod.description}
+                                </p>
+                              </div>
+
+                              <div className="flex items-center justify-between pt-1 border-t border-slate-100 dark:border-slate-800/80">
+                                <div>
+                                  <span className="text-xs font-black font-mono block text-amber-400">
+                                    ${prod.priceUSD.toFixed(2)}
+                                  </span>
+                                  <span className="text-[8.5px] font-mono text-slate-400 font-bold block">
+                                    Bs. {(prod.priceUSD * bcvRate).toFixed(0)}
+                                  </span>
+                                </div>
+
+                                <div className="flex items-center gap-1">
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      addToCart(prod);
+                                    }}
+                                    className="w-7 h-7 rounded-xl bg-amber-500 hover:bg-amber-400 active:scale-90 active:bg-amber-300 text-slate-950 flex items-center justify-center transition-all shadow-sm font-black cursor-pointer"
+                                    title="Añadir a la comanda"
+                                  >
+                                    <Plus className="w-4 h-4 stroke-[2.8]" />
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                  </div>
+                </div>
               </div>
             )}
 
-            {cardViewMode === 'cuadricula' && (
-              <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-2.5">
-                {filteredProducts.map((prod) => {
-                  const qtyInCart = getCartQty(prod.id);
-                  return (
-                    <div
-                      key={prod.id}
-                      onClick={() => addToCart(prod)}
-                      className={`p-3 border rounded-2xl flex flex-col justify-between transition-all duration-200 cursor-pointer active:scale-98 shadow-xs ${
-                        isLight
-                          ? 'bg-white border-slate-200 hover:border-slate-300'
-                          : 'bg-slate-900/90 border-slate-800 hover:border-slate-700'
-                      }`}
-                    >
-                      <div className="space-y-1">
-                        <div className="flex items-start justify-between gap-1">
-                          <h3
-                            className="text-xs font-black line-clamp-2 min-h-[32px]"
-                            style={{ color: isLight ? '#0f172a' : '#ffffff' }}
-                          >
-                            {prod.name}
-                          </h3>
-                          {qtyInCart > 0 && (
-                            <span
-                              className="text-white text-[10px] font-black px-1.5 py-0.2 rounded-md shrink-0"
-                              style={{ backgroundColor: currentPal.primary }}
-                            >
-                              x{qtyInCart}
-                            </span>
-                          )}
-                        </div>
-                        <span className="text-[9px] font-mono font-bold text-slate-400">
-                          {prod.sku}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800 mt-2">
-                        <div>
-                          <span className="text-sm font-black font-mono" style={{ color: currentPal.primary }}>
-                            ${prod.priceUSD.toFixed(2)}
-                          </span>
-                          <span className="text-[10px] font-mono text-slate-500 block">
-                            Bs. {(prod.priceUSD * bcvRate).toFixed(2)}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          {qtyInCart > 0 && (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                updateQty(prod.id, -1);
-                              }}
-                              className="w-6 h-6 rounded-lg bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-white flex items-center justify-center text-xs font-black active:scale-90"
-                            >
-                              -
-                            </button>
-                          )}
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              addToCart(prod);
-                            }}
-                            className="w-6 h-6 rounded-lg text-white flex items-center justify-center text-xs font-black active:scale-90 shadow-xs"
-                            style={{ backgroundColor: currentPal.primary }}
-                          >
-                            +
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-
+            {/* ================================================================= */}
+            {/* MODO 2: LISTA ERGONÓMICA CON FILAS DIRECTAS                       */}
+            {/* ================================================================= */}
             {cardViewMode === 'lista' && (
-              <div className="space-y-2">
+              <div className="space-y-2 overflow-y-auto max-h-[calc(100vh-215px)] pb-28 p-1 scrollbar-none no-scrollbar">
                 {filteredProducts.map((prod) => {
                   const qtyInCart = getCartQty(prod.id);
                   return (
                     <div
                       key={prod.id}
                       onClick={() => addToCart(prod)}
-                      className={`p-2.5 border rounded-xl flex items-center justify-between gap-3 transition-all cursor-pointer active:scale-99 shadow-2xs ${
-                        isLight ? 'bg-white border-slate-200 hover:border-slate-300' : 'bg-slate-900 border-slate-800 hover:border-slate-700'
+                      className={`p-2.5 border rounded-2xl flex items-center justify-between gap-3 transition-all cursor-pointer active:scale-[0.97] active:brightness-105 active:border-amber-400 select-none shadow-xs ${
+                        isLight ? 'bg-white border-slate-200 hover:border-slate-300' : 'bg-slate-900 border-slate-800 hover:border-amber-500/40'
                       }`}
                     >
                       <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                        <img
-                          src={prod.image}
-                          alt={prod.name}
-                          className="w-12 h-12 rounded-lg object-cover shrink-0"
-                        />
+                        <div className="relative shrink-0">
+                          <img
+                            src={prod.image}
+                            alt={prod.name}
+                            className="w-12 h-12 rounded-xl object-cover"
+                          />
+                          {qtyInCart > 0 && (
+                            <span className="absolute -top-1.5 -right-1.5 text-slate-950 font-black font-mono text-[9px] w-4.5 h-4.5 rounded-full flex items-center justify-center shadow-md bg-amber-400 anim-badge-spring">
+                              {qtyInCart}
+                            </span>
+                          )}
+                        </div>
                         <div className="min-w-0">
                           <h4 className="text-xs font-black truncate" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
                             {prod.name}
                           </h4>
-                          <span className="text-[10px] text-slate-500 block truncate">
+                          <span className="text-[10px] text-slate-400 block truncate">
                             {prod.description}
                           </span>
                         </div>
@@ -1759,92 +1921,27 @@ export default function TabletMobilePosPage() {
 
                       <div className="flex items-center gap-3 shrink-0">
                         <div className="text-right">
-                          <span className="text-xs font-black font-mono block" style={{ color: currentPal.primary }}>
+                          <span className="text-xs font-black font-mono block text-amber-400">
                             ${prod.priceUSD.toFixed(2)}
                           </span>
-                          <span className="text-[9px] font-mono text-slate-500">
+                          <span className="text-[9px] font-mono text-slate-400">
                             Bs. {(prod.priceUSD * bcvRate).toFixed(2)}
                           </span>
                         </div>
 
-                        {qtyInCart > 0 ? (
-                          <div className="flex items-center gap-1">
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                updateQty(prod.id, -1);
-                              }}
-                              className="w-6 h-6 rounded-lg bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-white flex items-center justify-center text-xs font-black"
-                            >
-                              -
-                            </button>
-                            <span className="text-xs font-black font-mono w-4 text-center">
-                              {qtyInCart}
-                            </span>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                addToCart(prod);
-                              }}
-                              className="w-6 h-6 rounded-lg text-white flex items-center justify-center text-xs font-black"
-                              style={{ backgroundColor: currentPal.primary }}
-                            >
-                              +
-                            </button>
-                          </div>
-                        ) : (
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              addToCart(prod);
-                            }}
-                            className="px-2.5 py-1 text-white rounded-lg text-xs font-bold shadow-xs"
-                            style={{ backgroundColor: currentPal.primary }}
-                          >
-                            Agregar
-                          </button>
-                        )}
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            addToCart(prod);
+                          }}
+                          className="w-8 h-8 rounded-xl bg-amber-500 hover:bg-amber-400 active:scale-90 active:bg-amber-300 text-slate-950 flex items-center justify-center transition-all shadow-md font-black cursor-pointer"
+                          title="Añadir a la comanda"
+                        >
+                          <Plus className="w-4 h-4 stroke-[2.8]" />
+                        </button>
                       </div>
                     </div>
-                  );
-                })}
-              </div>
-            )}
-
-            {cardViewMode === 'minimalista' && (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6 gap-2">
-                {filteredProducts.map((prod) => {
-                  const qtyInCart = getCartQty(prod.id);
-                  return (
-                    <button
-                      key={prod.id}
-                      onClick={() => addToCart(prod)}
-                      className={`p-2 rounded-xl border text-left flex flex-col justify-between h-20 transition-all active:scale-95 shadow-2xs ${
-                        isLight ? 'bg-white border-slate-200 hover:border-slate-300' : 'bg-slate-900 border-slate-800'
-                      }`}
-                    >
-                      <div className="flex items-start justify-between gap-1">
-                        <span className="text-[11px] font-black line-clamp-1" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
-                          {prod.name}
-                        </span>
-                        {qtyInCart > 0 && (
-                          <span
-                            className="text-white text-[9px] font-black px-1 rounded"
-                            style={{ backgroundColor: currentPal.primary }}
-                          >
-                            {qtyInCart}
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex justify-between items-baseline pt-1 border-t border-slate-100 dark:border-slate-800">
-                        <span className="text-xs font-black font-mono" style={{ color: currentPal.primary }}>
-                          ${prod.priceUSD.toFixed(2)}
-                        </span>
-                        <span className="text-[8px] font-mono text-slate-400">
-                          Bs.{(prod.priceUSD * bcvRate).toFixed(0)}
-                        </span>
-                      </div>
-                    </button>
                   );
                 })}
               </div>
@@ -2428,137 +2525,22 @@ export default function TabletMobilePosPage() {
       </main>
 
       {/* ========================================================================= */}
-      {/* 4. NAV BAR INFERIOR FIJA CON ANIMACIÓN ELÁSTICA PRO & HERO COBRO           */}
+      {/* 4. NAV BAR INFERIOR FIJA CON SILUETA LÍQUIDA SVG & HERO COBRO (DEF)      */}
       {/* ========================================================================= */}
-      <nav
-        className={`fixed bottom-0 inset-x-0 w-full h-17 z-40 border-t flex items-center justify-around px-3 pb-safe shadow-2xl transition-colors duration-300 ${
-          isLight ? 'bg-white/95 border-slate-200' : 'bg-slate-900/95 border-slate-800'
-        } backdrop-blur-xl`}
-      >
-        <div className="max-w-xl w-full mx-auto flex items-center justify-between relative">
-          {/* 1. Menú / Catálogo */}
-          <button
-            onClick={() => setActiveTab('menu')}
-            className={`flex-1 flex flex-col items-center justify-center py-1.5 px-2 rounded-2xl nav-item-spring active:scale-90 relative cursor-pointer ${
-              activeTab === 'menu' ? 'font-black scale-105' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'
-            }`}
-            style={{ color: activeTab === 'menu' ? currentPal.primary : undefined }}
-          >
-            {activeTab === 'menu' && (
-              <span
-                className="absolute inset-0 rounded-2xl -z-10 shadow-sm opacity-15 nav-elastic-pill border border-current"
-                style={{ backgroundColor: currentPal.primary }}
-              />
-            )}
-            <UtensilsCrossed className={`w-5.5 h-5.5 stroke-[2.2] transition-transform duration-300 ${activeTab === 'menu' ? '-translate-y-0.5 scale-110' : ''}`} />
-            <span className="text-[10.5px] mt-0.5 font-bold tracking-tight">Menú</span>
-            {activeTab === 'menu' && (
-              <span
-                className="w-1.5 h-1.5 rounded-full mt-0.5 anim-badge-spring shadow-xs"
-                style={{ backgroundColor: currentPal.primary }}
-              />
-            )}
-          </button>
-
-          {/* 2. Mesas */}
-          <button
-            onClick={() => setActiveTab('mesas')}
-            className={`flex-1 flex flex-col items-center justify-center py-1.5 px-2 rounded-2xl nav-item-spring active:scale-90 relative cursor-pointer ${
-              activeTab === 'mesas' ? 'font-black scale-105' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'
-            }`}
-            style={{ color: activeTab === 'mesas' ? currentPal.primary : undefined }}
-          >
-            {activeTab === 'mesas' && (
-              <span
-                className="absolute inset-0 rounded-2xl -z-10 shadow-sm opacity-15 nav-elastic-pill border border-current"
-                style={{ backgroundColor: currentPal.primary }}
-              />
-            )}
-            <LayoutGrid className={`w-5.5 h-5.5 stroke-[2.2] transition-transform duration-300 ${activeTab === 'mesas' ? '-translate-y-0.5 scale-110' : ''}`} />
-            <span className="text-[10.5px] mt-0.5 font-bold tracking-tight">Mesas</span>
-            {activeTab === 'mesas' && (
-              <span
-                className="w-1.5 h-1.5 rounded-full mt-0.5 anim-badge-spring shadow-xs"
-                style={{ backgroundColor: currentPal.primary }}
-              />
-            )}
-          </button>
-
-          {/* 3. BOTÓN CENTRAL DESTACADO HERO "COBRAR" (20% MÁS GRANDE) */}
-          <div className="flex-1 flex flex-col items-center -mt-7 shrink-0 z-10">
-            <button
-              onClick={() => setActiveTab('cobro')}
-              className="w-16 h-16 rounded-full flex items-center justify-center nav-hero-button cursor-pointer anim-breathe text-white shadow-2xl relative border-4 border-white dark:border-slate-900 group"
-              style={{
-                backgroundColor: currentPal.primary,
-                boxShadow: `0 10px 28px -4px ${currentPal.primary}66, 0 4px 12px rgba(0,0,0,0.15)`,
-              }}
-              title="Cobrar Cuenta / Abrir Caja Registradora"
-            >
-              <CircleDollarSign className="w-8.5 h-8.5 stroke-[2.4] text-white group-hover:rotate-12 transition-transform duration-300" />
-              {totalItems > 0 && (
-                <span className="absolute -top-1 -right-1 bg-amber-400 text-slate-950 text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center shadow-md border-2 border-white dark:border-slate-900 anim-badge-spring">
-                  {totalItems}
-                </span>
-              )}
-            </button>
-            <span
-              className="text-[9.5px] font-black uppercase tracking-wider mt-1 text-center"
-              style={{ color: currentPal.primary }}
-            >
-              Cobrar
-            </span>
-          </div>
-
-          {/* 4. Pedidos */}
-          <button
-            onClick={() => setActiveTab('pedidos')}
-            className={`flex-1 flex flex-col items-center justify-center py-1.5 px-2 rounded-2xl nav-item-spring active:scale-90 relative cursor-pointer ${
-              activeTab === 'pedidos' ? 'font-black scale-105' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'
-            }`}
-            style={{ color: activeTab === 'pedidos' ? currentPal.primary : undefined }}
-          >
-            {activeTab === 'pedidos' && (
-              <span
-                className="absolute inset-0 rounded-2xl -z-10 shadow-sm opacity-15 nav-elastic-pill border border-current"
-                style={{ backgroundColor: currentPal.primary }}
-              />
-            )}
-            <ClipboardList className={`w-5.5 h-5.5 stroke-[2.2] transition-transform duration-300 ${activeTab === 'pedidos' ? '-translate-y-0.5 scale-110' : ''}`} />
-            <span className="text-[10.5px] mt-0.5 font-bold tracking-tight">Pedidos</span>
-            {activeTab === 'pedidos' && (
-              <span
-                className="w-1.5 h-1.5 rounded-full mt-0.5 anim-badge-spring shadow-xs"
-                style={{ backgroundColor: currentPal.primary }}
-              />
-            )}
-          </button>
-
-          {/* 5. Delivery */}
-          <button
-            onClick={() => setActiveTab('delivery')}
-            className={`flex-1 flex flex-col items-center justify-center py-1.5 px-2 rounded-2xl nav-item-spring active:scale-90 relative cursor-pointer ${
-              activeTab === 'delivery' ? 'font-black scale-105' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'
-            }`}
-            style={{ color: activeTab === 'delivery' ? currentPal.primary : undefined }}
-          >
-            {activeTab === 'delivery' && (
-              <span
-                className="absolute inset-0 rounded-2xl -z-10 shadow-sm opacity-15 nav-elastic-pill border border-current"
-                style={{ backgroundColor: currentPal.primary }}
-              />
-            )}
-            <Bike className={`w-5.5 h-5.5 stroke-[2.2] transition-transform duration-300 ${activeTab === 'delivery' ? '-translate-y-0.5 scale-110' : ''}`} />
-            <span className="text-[10.5px] mt-0.5 font-bold tracking-tight">Delivery</span>
-            {activeTab === 'delivery' && (
-              <span
-                className="w-1.5 h-1.5 rounded-full mt-0.5 anim-badge-spring shadow-xs"
-                style={{ backgroundColor: currentPal.primary }}
-              />
-            )}
-          </button>
-        </div>
-      </nav>
+      <TabletPosBottomNav
+        activeTab={activeTab}
+        isLight={isLight}
+        totalItems={totalItems}
+        totalUSD={totalUSD}
+        primaryColor={currentPal.primary}
+        onSelectTab={(tab) => setActiveTab(tab)}
+        onOpenCobro={() => setActiveTab('cobro')}
+        onOpenQrModal={() => setShowQrModal(true)}
+        onToggleOrderDrawer={() => setIsRightDrawerOpen((prev) => !prev)}
+        isOrderDrawerOpen={isRightDrawerOpen}
+        onToggleDocker={() => setIsDockerOpen((prev) => !prev)}
+        isDockerOpen={isDockerOpen}
+      />
 
       {/* ========================================================================= */}
       {/* 5. DRAWER IZQUIERDO: AJUSTES, EMPRESA, PAGO MÓVIL Y BRANDING              */}
@@ -2666,6 +2648,35 @@ export default function TabletMobilePosPage() {
                 <ChevronRight className="w-4 h-4 text-slate-400" />
               </button>
 
+              {/* SECCIÓN 3B: LIBRERÍA CLOUD DE PAQUETES VISUALES & CATÁLOGOS */}
+              <button
+                onClick={() => {
+                  setIsLeftDrawerOpen(false);
+                  setShowVisualPacksModal(true);
+                }}
+                className={`w-full p-3 rounded-2xl border flex items-center justify-between text-left transition-all active:scale-96 shadow-2xs ${
+                  isLight ? 'bg-sky-50/70 hover:bg-sky-100/90 border-sky-200' : 'bg-sky-950/40 hover:bg-sky-900/60 border-sky-800/60'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl text-white flex items-center justify-center font-black shrink-0 shadow-xs bg-gradient-to-tr from-sky-600 to-indigo-600">
+                    <Sparkles className="w-5 h-5 animate-pulse" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-1.5">
+                      <h4 className="text-xs font-black" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
+                        Paquetes Visuales & Catálogos
+                      </h4>
+                      <span className="px-1.5 py-0.2 rounded text-[8px] font-black uppercase bg-sky-500/20 text-sky-500">
+                        Cloud
+                      </span>
+                    </div>
+                    <p className="text-[10px] text-slate-500 dark:text-slate-400">Descargar fotos HD, rubros y códigos</p>
+                  </div>
+                </div>
+                <ChevronRight className="w-4 h-4 text-sky-500" />
+              </button>
+
               {/* SECCIÓN 4: BRANDING Y COLORES */}
               <div className={`p-3 rounded-2xl border space-y-2 ${
                 isLight ? 'bg-slate-50 border-slate-200' : 'bg-slate-950 border-slate-800'
@@ -2744,6 +2755,39 @@ export default function TabletMobilePosPage() {
                 <span>Mostrar Menú Digital QR</span>
               </button>
 
+              {/* Planes & Financiación Embajadores */}
+              <button
+                onClick={() => {
+                  setIsLeftDrawerOpen(false);
+                  setShowStreetAmbassadorModal(true);
+                }}
+                className={`w-full p-2.5 rounded-xl border flex items-center justify-between text-xs font-bold transition-all ${
+                  isLight ? 'bg-emerald-50 border-emerald-200 text-emerald-900' : 'bg-emerald-950/40 border-emerald-800 text-emerald-200'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-emerald-500 animate-pulse" />
+                  <span>Planes Comerciales ($15 / $25)</span>
+                </div>
+                <span className="text-[10px] text-emerald-600 font-mono font-bold">Oferta</span>
+              </button>
+
+              {/* Presentación Comercial para Clientes */}
+              <a
+                href="/presentacion"
+                target="_blank"
+                rel="noreferrer"
+                className={`w-full p-2.5 rounded-xl border flex items-center justify-between text-xs font-bold transition-all ${
+                  isLight ? 'bg-sky-50 border-sky-200 text-sky-900' : 'bg-sky-950/40 border-sky-800 text-sky-200'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <Smartphone className="w-4 h-4 text-sky-500" />
+                  <span>Presentación para Clientes</span>
+                </div>
+                <span className="text-[10px] text-sky-600 font-mono font-bold">Sliders →</span>
+              </a>
+
               {/* Licencia Oficial */}
               <button
                 onClick={() => {
@@ -2756,7 +2800,7 @@ export default function TabletMobilePosPage() {
               >
                 <div className="flex items-center gap-2">
                   <ShieldCheck className="w-4 h-4 text-emerald-500" />
-                  <span>Activar / Estado de Licencia</span>
+                  <span>Activar Clave de Licencia</span>
                 </div>
                 <span className="text-[10px] text-emerald-600 font-mono font-bold">Oficial</span>
               </button>
@@ -3644,12 +3688,26 @@ export default function TabletMobilePosPage() {
                   </p>
                 </div>
               </div>
-              <button
-                onClick={() => setShowInventoryModal(false)}
-                className="p-1.5 rounded-xl text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowInventoryModal(false);
+                    setShowVisualPacksModal(true);
+                  }}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white text-[11px] font-black shadow-md transition-all active:scale-95 cursor-pointer"
+                  title="Descargar paquetes de productos completos con fotos HD"
+                >
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>Paquetes con Fotos HD</span>
+                </button>
+                <button
+                  onClick={() => setShowInventoryModal(false)}
+                  className="p-1.5 rounded-xl text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
             </div>
 
             {/* Contenido scrolleable */}
@@ -3735,6 +3793,87 @@ export default function TabletMobilePosPage() {
                         isLight ? 'bg-white border-slate-300 text-slate-900' : 'bg-slate-900 border-slate-700 text-white'
                       }`}
                     />
+                  </div>
+
+                  {/* Foto / Imagen del Producto (URL o Cargar Archivo / Cámara) */}
+                  <div className="sm:col-span-2 md:col-span-3 border-t border-slate-200 dark:border-slate-800 pt-2 mt-1">
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="text-[10px] font-bold text-slate-500 flex items-center gap-1">
+                        <ImageIcon className="w-3.5 h-3.5 text-amber-500" />
+                        <span>Foto / Imagen del Producto (URL o Archivo/Cámara)</span>
+                      </label>
+                      {newProductForm.image && (
+                        <button
+                          type="button"
+                          onClick={() => setNewProductForm({ ...newProductForm, image: '' })}
+                          className="text-[9.5px] text-rose-400 hover:underline cursor-pointer"
+                        >
+                          Quitar foto
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row items-center gap-2.5">
+                      {/* Vista previa de la foto */}
+                      <div className="w-16 h-16 rounded-xl overflow-hidden border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 shrink-0 flex items-center justify-center relative shadow-xs">
+                        {newProductForm.image ? (
+                          <img
+                            src={newProductForm.image}
+                            alt="Preview"
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              (e.target as HTMLElement).style.display = 'none';
+                            }}
+                          />
+                        ) : (
+                          <div className="flex flex-col items-center justify-center text-slate-400 p-1 text-center">
+                            <Camera className="w-5 h-5 text-slate-400 mb-0.5" />
+                            <span className="text-[8px] font-bold">Sin foto</span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Inputs: URL directa y botón de subir archivo / foto */}
+                      <div className="flex-1 w-full space-y-1.5">
+                        <input
+                          type="url"
+                          placeholder="Pegar enlace de imagen https://... (opcional)"
+                          value={newProductForm.image}
+                          onChange={(e) => setNewProductForm({ ...newProductForm, image: e.target.value })}
+                          className={`w-full px-3 py-1.5 rounded-xl text-xs border outline-none font-medium ${
+                            isLight ? 'bg-white border-slate-300 text-slate-900 focus:border-emerald-500' : 'bg-slate-900 border-slate-700 text-white'
+                          }`}
+                        />
+
+                        <div className="flex items-center gap-2">
+                          <label className="flex items-center gap-1.5 px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 text-[10px] font-black rounded-lg cursor-pointer transition-all border border-slate-700 active:scale-95">
+                            <Upload className="w-3 h-3 text-amber-400" />
+                            <span>Subir Archivo / Tomar Foto</span>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  const reader = new FileReader();
+                                  reader.onload = (evt) => {
+                                    if (typeof evt.target?.result === 'string') {
+                                      setNewProductForm({ ...newProductForm, image: evt.target.result });
+                                    }
+                                  };
+                                  reader.readAsDataURL(file);
+                                }
+                              }}
+                            />
+                          </label>
+
+                          <span className="text-[9.5px] text-slate-500">
+                            {newProductForm.image ? '✓ Foto lista' : 'Si no eliges foto, se asignará una automáticamente'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
@@ -4266,6 +4405,56 @@ export default function TabletMobilePosPage() {
         isOpen={showLicenseModal}
         onClose={() => setShowLicenseModal(false)}
         isTrialNotice={trialState?.isTrial}
+      />
+
+      {/* ========================================================================= */}
+      {/* 14B. MODAL DE PLANES COMERCIALES & EMBAJADORES ($15 / $25 / $50)          */}
+      {/* ========================================================================= */}
+      <StreetAmbassadorLicenseModal
+        isOpen={showStreetAmbassadorModal}
+        onClose={() => setShowStreetAmbassadorModal(false)}
+        isLight={isLight}
+        primaryColor={currentPal.primary}
+        storeName="KlikPOS Street Negocio"
+      />
+
+      {/* ========================================================================= */}
+      {/* 15. MODAL DE LIBRERÍA DE PAQUETES VISUALES & CATÁLOGOS CLOUD              */}
+      {/* ========================================================================= */}
+      <VisualPacksModal
+        isOpen={showVisualPacksModal}
+        onClose={() => setShowVisualPacksModal(false)}
+        isLight={isLight}
+        primaryColor={currentPal.primary}
+        onPackImported={async () => {
+          try {
+            const dbProds = await db.products.toArray();
+            if (dbProds && dbProds.length > 0) {
+              const mapped: Product[] = dbProds.map(p => ({
+                id: p.id || String(Math.random()),
+                name: p.name,
+                category: p.category,
+                priceUsd: Number(p.priceUsd) || 0,
+                image: p.imageUrl || p.image || 'https://images.unsplash.com/photo-1527061011665-3652c757a4d4?w=400&auto=format&fit=crop&q=80',
+                badge: p.badge || undefined,
+                stock: p.stock !== undefined ? p.stock : 50,
+                isStockManaged: p.isStockManaged !== undefined ? p.isStockManaged : true,
+                costUsd: p.costUsd || 0,
+                barcode: p.barcode || ''
+              }));
+              setProducts(mapped);
+              localStorage.setItem('klikpos_tablet_products', JSON.stringify(mapped));
+            }
+
+            const dbCats = await db.categories.toArray();
+            if (dbCats && dbCats.length > 0) {
+              const catNames = Array.from(new Set(dbCats.map(c => c.name)));
+              setCategoriesList(prev => Array.from(new Set([...prev, ...catNames])));
+            }
+          } catch (err) {
+            console.warn('Error refrescando productos importados:', err);
+          }
+        }}
       />
     </div>
   );

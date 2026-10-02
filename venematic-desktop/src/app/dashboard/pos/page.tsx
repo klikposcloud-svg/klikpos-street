@@ -37,7 +37,10 @@ import {
   Smartphone,
   SlidersHorizontal,
   X,
+  Cloud,
+  RefreshCw,
 } from 'lucide-react';
+import { CloudSyncStatus } from '@/lib/firebase/cloud-sync-service';
 
 export default function DesktopPosPage() {
   // Estado de catálogo y filtrado
@@ -107,6 +110,41 @@ export default function DesktopPosPage() {
     setToastMessage({ text, type });
     setTimeout(() => setToastMessage(null), 3000);
   }, []);
+
+  // Estado de Sincronización en la Nube y App Dueño (KlikAdmin)
+  const [cloudStatus, setCloudStatus] = useState<CloudSyncStatus>(() => cloudSyncService.getCurrentStatus());
+  const [isManualSyncing, setIsManualSyncing] = useState<boolean>(false);
+  const [terminalHwid, setTerminalHwid] = useState<string>('KLIK-PC-POS');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      let hwid = localStorage.getItem('klikpos_terminal_hwid') || localStorage.getItem('venematic_terminal_hwid');
+      if (!hwid) {
+        hwid = 'KLIK-PC-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+        localStorage.setItem('klikpos_terminal_hwid', hwid);
+      }
+      setTerminalHwid(hwid);
+      cloudSyncService.setStoreId(hwid);
+    }
+
+    const unsub = cloudSyncService.onStatusChange((status) => {
+      setCloudStatus(status);
+    });
+    return () => unsub();
+  }, []);
+
+  const handleManualCloudSync = async () => {
+    setIsManualSyncing(true);
+    showToast('☁️ Sincronizando con Google Cloud Firestore...', 'info');
+    try {
+      const res = await cloudSyncService.syncAll();
+      showToast(`✓ Nube actualizada: ${res.sales} ventas y tasa BCV Bs. ${bcvRate.toFixed(2)} sincronizadas`, 'success');
+    } catch {
+      showToast('Aviso: Verifique conexión a internet para sincronizar con la nube', 'error');
+    } finally {
+      setIsManualSyncing(false);
+    }
+  };
 
   // Modal de peso manual
   const [showManualWeightModal, setShowManualWeightModal] = useState<boolean>(false);
@@ -495,6 +533,32 @@ export default function DesktopPosPage() {
           </div>
 
           <div className="flex items-center gap-1.5 ml-2 pl-2 border-l border-slate-200 shrink-0">
+            {/* BOTÓN VISUAL: ESTADO DE SINCRONIZACIÓN NUBE & APP DUEÑO */}
+            <button
+              type="button"
+              onClick={handleManualCloudSync}
+              title={`Sincronización en Tiempo Real con App Móvil / Firestore (${cloudStatus.storeId || terminalHwid}). Clic para forzar actualización ahora.`}
+              className={`px-2.5 py-1 rounded-lg text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer border shadow-2xs ${
+                cloudStatus.state === 'syncing' || isManualSyncing
+                  ? 'bg-sky-50 text-sky-800 border-sky-300 animate-pulse dark:bg-sky-950 dark:text-sky-300 dark:border-sky-700'
+                  : cloudStatus.state === 'synced'
+                  ? 'bg-indigo-50 hover:bg-indigo-100 text-indigo-900 border-indigo-200 dark:bg-indigo-950/60 dark:text-indigo-300 dark:border-indigo-700'
+                  : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700'
+              }`}
+            >
+              <Cloud className={`w-3.5 h-3.5 ${cloudStatus.state === 'syncing' || isManualSyncing ? 'text-sky-600 animate-spin' : 'text-indigo-600'}`} />
+              <span className="hidden md:inline font-mono text-[11px]">
+                {cloudStatus.state === 'syncing' || isManualSyncing
+                  ? 'Sincronizando...'
+                  : `Nube: ${(cloudStatus.storeId || terminalHwid).slice(0, 14)}`}
+              </span>
+              <span
+                className={`w-2 h-2 rounded-full shrink-0 ${
+                  cloudStatus.state === 'synced' ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'
+                }`}
+              />
+            </button>
+
             <button
               type="button"
               onClick={() => {

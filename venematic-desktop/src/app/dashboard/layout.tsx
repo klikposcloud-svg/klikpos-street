@@ -518,6 +518,7 @@ export default function DesktopDashboardLayout({
             if (data.source) setBcvRateSource(data.source);
             window.dispatchEvent(new CustomEvent('pos:bcv_updated', { detail: data.rate }));
             window.dispatchEvent(new CustomEvent('venematic:bcv_updated', { detail: data.rate }));
+            cloudSyncService.pushSummaryToCloud(data.rate).catch(() => {});
             // Sincronizar catálogo celular
             fetch('/api/scanner/inventory', {
               method: 'POST',
@@ -534,7 +535,10 @@ export default function DesktopDashboardLayout({
     // Inicializar DB y auto-sincronizar tasa BCV oficial del día al abrir el programa
     initializeDatabaseIfNeeded().then(async () => {
       const bcv = await db.settings.get('bcv_rate');
-      if (bcv) setBcvRate(bcv.value);
+      if (bcv) {
+        setBcvRate(bcv.value);
+        cloudSyncService.pushSummaryToCloud(bcv.value).catch(() => {});
+      }
       autoSyncBcv();
 
       const store = await db.settings.get('store_info');
@@ -611,6 +615,7 @@ export default function DesktopDashboardLayout({
           setBcvRateSource(data.source || 'BCV Oficial');
           await db.settings.put({ key: 'bcv_rate', value: data.rate });
           window.dispatchEvent(new CustomEvent('pos:bcv_updated', { detail: data.rate }));
+          cloudSyncService.pushSummaryToCloud(data.rate).catch(() => {});
           // Actualizar inventario móvil
           fetch('/api/scanner/inventory', {
             method: 'POST',
@@ -637,6 +642,7 @@ export default function DesktopDashboardLayout({
       setBcvRateSource('Ajuste Manual');
       setShowBcvModal(false);
       window.dispatchEvent(new CustomEvent('pos:bcv_updated', { detail: parsed }));
+      cloudSyncService.pushSummaryToCloud(parsed).catch(() => {});
       fetch('/api/bcv/rate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

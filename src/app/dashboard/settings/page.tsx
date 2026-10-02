@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { useState, useEffect } from 'react';
 import { db } from '@/lib/db';
@@ -10,14 +10,14 @@ import LicenseActivationModal from '@/components/LicenseActivationModal';
 import CloudSyncSettingsCard from '@/components/CloudSyncSettingsCard';
 import InteractiveMenuSyncCard from '@/components/InteractiveMenuSyncCard';
 import { useAuth } from '@/context/AuthContext';
-import { ShieldAlert, Utensils, ShieldCheck, ArrowLeft, Scale, CheckCircle2, AlertCircle, RefreshCw, Zap, Banknote, Upload, Image as ImageIcon, Trash2, Printer, Palette, Store, Users, Download, Sparkles, FileText } from 'lucide-react';
+import { ShieldAlert, Utensils, ShieldCheck, ArrowLeft, Scale, CheckCircle2, AlertCircle, RefreshCw, Zap, Banknote, Upload, Image as ImageIcon, Trash2, Printer, Palette, Store, Users, Download, Sparkles, FileText, Package } from 'lucide-react';
 import Link from 'next/link';
 import { scaleService, ScaleProtocol, WeightReading, PriceMultiplierBasis } from '@/lib/hardware/scale';
 import { getScaleBarcodeConfig, saveScaleBarcodeConfig, ScaleBarcodeConfig } from '@/lib/hardware/scale-barcode';
 import { pagoMovilMonitor, initiateGmailOAuth, extractOAuthTokenFromUrl, verifyGmailToken } from '@/lib/payments/pago-movil-gmail-monitor';
 import { updateService, CURRENT_VERSION } from '@/lib/services/update-service';
 
-export type SettingsTabId = 'branding' | 'pos_quick' | 'legal' | 'business' | 'printer' | 'scale' | 'cashiers' | 'cloud_backup' | 'payments' | 'updates' | 'menu_sync';
+export type SettingsTabId = 'branding' | 'pos_quick' | 'legal' | 'business' | 'printer' | 'scale' | 'cashiers' | 'cloud_backup' | 'payments' | 'updates' | 'menu_sync' | 'visual_packs';
 
 export default function DesktopSettingsPage() {
   const { isAdmin, switchToRole } = useAuth();
@@ -345,6 +345,7 @@ export default function DesktopSettingsPage() {
     { id: 'payments', label: 'Pagos y Gmail', icon: Zap },
     { id: 'updates', label: 'Actualizaciones', icon: Download },
     { id: 'menu_sync', label: 'Menú Interactivo & Tablets', icon: Utensils },
+    { id: 'visual_packs', label: 'Paquetes Visuales & Catálogos', icon: Package },
   ];
 
   return (
@@ -2174,6 +2175,76 @@ function SoftwareUpdatesSection() {
           </p>
         </div>
       </div>
+
+      {/* PESTAÑA: PAQUETES VISUALES & CATÁLOGOS */}
+      {activeTab === 'visual_packs' && (
+        <div className="space-y-4 animate-in fade-in duration-150">
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-sm space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-slate-800">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-sky-600 to-indigo-600 text-white flex items-center justify-center font-black shadow-md">
+                  <Sparkles className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="text-base font-black text-slate-900 dark:text-white">
+                    Librería Cloud de Paquetes Visuales & Catálogos
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    Administra y descarga catálogos con fotografías HD de productos por rubro para tu negocio.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Link
+                  href="/admin/visual-packs"
+                  className="px-4 py-2 rounded-xl bg-sky-700 hover:bg-sky-800 text-white text-xs font-black flex items-center gap-2 shadow-xs transition-all"
+                >
+                  <Upload className="w-4 h-4" />
+                  <span>Publicador Cloud (Admin Panel)</span>
+                </Link>
+                <Link
+                  href="/tablet-pos"
+                  className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-black flex items-center gap-2 shadow-xs transition-all"
+                >
+                  <Store className="w-4 h-4" />
+                  <span>Ver en KlikPOS Street</span>
+                </Link>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+              <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 space-y-2">
+                <div className="text-xs font-black text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                  <span>🏪</span> Rubros Disponibles
+                </div>
+                <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed">
+                  Catálogos listos para Bodegón & Licores, Comida Rápida, Supermercado & Víveres, Farmacia y Panadería.
+                </p>
+              </div>
+
+              <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 space-y-2">
+                <div className="text-xs font-black text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                  <span>🔐</span> Paquetes Privados
+                </div>
+                <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed">
+                  Genera códigos de acceso exclusivos para clientes que adquieran paquetes de branding o paquetes personalizados.
+                </p>
+              </div>
+
+              <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 space-y-2">
+                <div className="text-xs font-black text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                  <span>⚡</span> Offline-Ready
+                </div>
+                <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed">
+                  Una vez descargado el paquete, los productos e imágenes quedan almacenados localmente sin requerir internet.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
