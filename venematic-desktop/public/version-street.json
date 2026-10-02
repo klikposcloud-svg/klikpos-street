@@ -1,0 +1,16 @@
+{
+  "version": "1.0.0",
+  "buildNumber": 1,
+  "releaseDate": "2026-10-02",
+  "title": "KlikPOS Street v1.0.0 - Full Dark Monolítico & Auto-Update Móvil",
+  "notes": [
+    "Diseño Full Dark Monolítico (#090d16) unificado en Header, Canvas, Dock y Barra Inferior.",
+    "Botón Central de Acciones en color Ámbar Neón (#f59e0b) de alto contraste.",
+    "Cards con feedback táctil (efecto botón presionado) y sonido de caja registradora al agregar.",
+    "Motor de Auto-Actualización en Vivo integrado para sincronizar cambios automáticamente.",
+    "Almacenamiento local 100% autónomo y fuera de línea con IndexedDB/Dexie ultra-rápido."
+  ],
+  "apkUrl": "https://github.com/klikposcloud-svg/klikpos-street/releases/download/v1.0.0/KlikPOS_Street_v1.0.apk",
+  "fallbackApkUrl": "https://raw.githubusercontent.com/klikposcloud-svg/klikpos-street/main/dist/KlikPOS_Street_v1.0.apk",
+  "mandatory": false
+}

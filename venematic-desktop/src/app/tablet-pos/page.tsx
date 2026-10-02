@@ -65,6 +65,7 @@ import StreetAmbassadorLicenseModal from '@/components/licensing/StreetAmbassado
 import { evaluateTrialState, TrialState } from '@/lib/licensing/trial-manager';
 import { db } from '@/lib/db';
 import { TabletPosBottomNav } from '@/components/tablet-pos/TabletPosBottomNav';
+import { StreetAutoUpdater } from '@/components/tablet-pos/StreetAutoUpdater';
 
 interface CartItem {
   id: string;
@@ -2525,7 +2526,12 @@ export default function TabletMobilePosPage() {
       </main>
 
       {/* ========================================================================= */}
-      {/* 4. NAV BAR INFERIOR FIJA CON SILUETA LÍQUIDA SVG & HERO COBRO (DEF)      */}
+      {/* 4. AUTO-ACTUALIZADOR SILENCIOSO Y EN VIVO PARA KLIKPOS STREET             */}
+      {/* ========================================================================= */}
+      <StreetAutoUpdater />
+
+      {/* ========================================================================= */}
+      {/* 5. NAV BAR INFERIOR FIJA CON SILUETA LÍQUIDA SVG & HERO COBRO (DEF)      */}
       {/* ========================================================================= */}
       <TabletPosBottomNav
         activeTab={activeTab}
