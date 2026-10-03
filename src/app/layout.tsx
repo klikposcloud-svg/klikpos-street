@@ -27,12 +27,22 @@ export default function RootLayout({
             __html: `
               (function() {
                 try {
-                  var isTabletPos = typeof window !== 'undefined' && (window.location.pathname.indexOf('/tablet-pos') !== -1 || window.location.hash.indexOf('tablet-pos') !== -1);
+                  var path = window.location.pathname || '';
+                  var href = window.location.href || '';
+                  var isTabletPos = typeof window !== 'undefined' && (
+                    path.indexOf('/tablet-pos') !== -1 ||
+                    href.indexOf('tablet-pos') !== -1 ||
+                    path.indexOf('index.html') !== -1 ||
+                    href.indexOf('android_asset') !== -1 ||
+                    window.location.protocol === 'file:' ||
+                    localStorage.getItem('klikpos_street_mode') === 'true' ||
+                    !!localStorage.getItem('klikpos_canvas_theme')
+                  );
                   var t = isTabletPos ? 'dark' : localStorage.getItem('venematic_theme');
-                  // Preestablecido: SIEMPRE entrar en Modo Blanco Profesional por defecto
-                  if (!t || t !== 'dark' && t !== 'glass') {
-                    t = 'light';
-                    try { localStorage.setItem('venematic_theme', 'light'); } catch(e) {}
+                  // Preestablecido: Solo entrar en Modo Blanco si NO es Tablet/Street POS
+                  if (!t || (t !== 'dark' && t !== 'glass')) {
+                    t = isTabletPos ? 'dark' : 'light';
+                    try { localStorage.setItem('venematic_theme', t); } catch(e) {}
                   }
                   var p = localStorage.getItem('venematic_branding_palette') || 'petrol';
                   var s = t === 'light' ? 'industrial' : (localStorage.getItem('venematic_ui_style') || 'industrial');

@@ -1067,10 +1067,57 @@ export default function TabletMobilePosPage() {
       root.style.setProperty('--pos-surface-card', currentCanvas.card);
       root.style.setProperty('--pos-border-subtle', currentCanvas.border);
 
+      localStorage.setItem('klikpos_street_mode', 'true');
       document.body.style.backgroundColor = currentCanvas.bg;
       root.style.backgroundColor = currentCanvas.bg;
     } catch {}
   }, [cardViewMode, cart, canvasTheme, activePalette, isLight, currentPal, currentCanvas]);
+
+  // Blindaje Anti-Reinicio de Cámara: Persistir y recuperar estado de modal y borradores de inventario
+  useEffect(() => {
+    try {
+      const activeModal = sessionStorage.getItem('klikpos_active_modal');
+      if (activeModal === 'inventory') {
+        setShowInventoryModal(true);
+      }
+      const draft = sessionStorage.getItem('klikpos_new_product_draft');
+      if (draft) {
+        setNewProductForm(JSON.parse(draft));
+      }
+      const editingDraft = sessionStorage.getItem('klikpos_editing_product_draft');
+      if (editingDraft) {
+        setEditingProduct(JSON.parse(editingDraft));
+      }
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    try {
+      if (showInventoryModal) {
+        sessionStorage.setItem('klikpos_active_modal', 'inventory');
+      } else {
+        sessionStorage.removeItem('klikpos_active_modal');
+      }
+    } catch {}
+  }, [showInventoryModal]);
+
+  useEffect(() => {
+    try {
+      if (newProductForm.name || newProductForm.priceUSD || newProductForm.image) {
+        sessionStorage.setItem('klikpos_new_product_draft', JSON.stringify(newProductForm));
+      }
+    } catch {}
+  }, [newProductForm]);
+
+  useEffect(() => {
+    try {
+      if (editingProduct) {
+        sessionStorage.setItem('klikpos_editing_product_draft', JSON.stringify(editingProduct));
+      } else {
+        sessionStorage.removeItem('klikpos_editing_product_draft');
+      }
+    } catch {}
+  }, [editingProduct]);
 
   // Cálculos Financieros
   const totalUSD = cart.reduce((acc, item) => acc + (item.priceUSD * item.qty), 0);
@@ -1217,8 +1264,8 @@ export default function TabletMobilePosPage() {
   };
 
   // Gestión de Productos e Inventario
-  const handleAddProduct = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleAddProduct = (e?: React.FormEvent | React.SyntheticEvent) => {
+    if (e && e.preventDefault) e.preventDefault();
     const priceNum = parseFloat(newProductForm.priceUSD);
     if (isNaN(priceNum) || priceNum <= 0) return;
     const newProd: Product = {
@@ -1234,7 +1281,10 @@ export default function TabletMobilePosPage() {
     };
     const updated = [newProd, ...products];
     setProducts(updated);
-    try { localStorage.setItem('klikpos_tablet_products', JSON.stringify(updated)); } catch {}
+    try {
+      localStorage.setItem('klikpos_tablet_products', JSON.stringify(updated));
+      sessionStorage.removeItem('klikpos_new_product_draft');
+    } catch {}
     setNewProductForm({ name: '', category: categoriesList[1] || 'General', priceUSD: '', sku: '', tag: '⭐ Nuevo', image: '' });
   };
 
@@ -1256,13 +1306,14 @@ export default function TabletMobilePosPage() {
   };
 
   // Guardar Edición Completa de Producto (Foto, Nombre, Categoría, SKU, Descripción)
-  const handleSaveFullProductEdit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSaveFullProductEdit = (e?: React.FormEvent | React.SyntheticEvent) => {
+    if (e && e.preventDefault) e.preventDefault();
     if (!editingProduct) return;
     const updated = products.map(p => p.id === editingProduct.id ? editingProduct : p);
     setProducts(updated);
     try {
       localStorage.setItem('klikpos_tablet_products', JSON.stringify(updated));
+      sessionStorage.removeItem('klikpos_editing_product_draft');
       db.products.put({
         id: Number(editingProduct.id) || undefined,
         name: editingProduct.name,
@@ -1694,7 +1745,7 @@ export default function TabletMobilePosPage() {
         >
           {/* Cápsula Vertical Obsidian Dark Blue con Cristal Translúcido y Micro-Tarjetas de Alto Contraste AAA */}
           <aside
-            className="w-14 rounded-[32px] py-4 px-1.5 flex flex-col items-center justify-between shadow-2xl border select-none shrink-0 min-h-[380px] z-50 backdrop-blur-xl transition-all"
+            className="street-floating-docker w-14 rounded-[32px] py-4 px-1.5 flex flex-col items-center justify-between shadow-2xl border select-none shrink-0 min-h-[380px] z-50 backdrop-blur-xl transition-all"
             style={{
               backgroundColor: '#090d16',
               borderColor: 'rgba(255, 255, 255, 0.16)',
@@ -1828,6 +1879,7 @@ export default function TabletMobilePosPage() {
       {/* 2. HEADER SUPERIOR ELEGANTE Y PERFECTAMENTE ORGANIZADO                     */}
       {/* ========================================================================= */}
       <header
+        id="klikpos-street-header"
         className={`h-14 px-3 flex items-center justify-between border-b shrink-0 z-20 shadow-xs transition-colors duration-200 ${
           isLight ? 'border-slate-200 text-slate-900' : 'border-slate-800/90 text-white'
         }`}
@@ -1970,7 +2022,11 @@ export default function TabletMobilePosPage() {
       {/* ========================================================================= */}
       {/* 3. LIENZO PRINCIPAL CON SCROLL 100% FLUIDO Y DESBLOQUEADO                 */}
       {/* ========================================================================= */}
-      <main className={`flex-1 min-h-0 overflow-hidden flex flex-col p-2 sm:p-3 max-w-6xl mx-auto w-full transition-colors duration-200 ${isLight ? 'bg-slate-100' : ''}`} style={{ backgroundColor: currentCanvas.bg }}>
+      <main
+        id="klikpos-street-main"
+        className={`flex-1 min-h-0 overflow-hidden flex flex-col p-2 sm:p-3 max-w-6xl mx-auto w-full transition-colors duration-200 ${isLight ? 'bg-slate-100' : ''}`}
+        style={{ backgroundColor: currentCanvas.bg }}
+      >
         {/* ======================================================================= */}
         {/* VISTA 1: MENÚ Y CATÁLOGO TÁCTIL (GRID ADAPTATIVO TABLET & MODO LISTA)   */}
         {/* ======================================================================= */}
@@ -4528,8 +4584,8 @@ export default function TabletMobilePosPage() {
 
             {/* Contenido scrolleable */}
             <div className="flex-1 overflow-y-auto space-y-4 py-3 pr-1">
-              {/* Formulario de Alta Rápida de Producto */}
-              <form onSubmit={handleAddProduct} className={`p-3.5 rounded-2xl border space-y-3 ${
+              {/* Formulario de Alta Rápida de Producto (Envoltorio seguro sin <form> para evitar recarga por cámara) */}
+              <div className={`p-3.5 rounded-2xl border space-y-3 ${
                 isLight ? 'bg-slate-50 border-slate-200' : 'bg-slate-950/60 border-slate-800'
               }`}>
                 <div className="flex items-center justify-between">
@@ -4641,14 +4697,15 @@ export default function TabletMobilePosPage() {
 
                 <div className="flex justify-end pt-1">
                   <button
-                    type="submit"
+                    type="button"
+                    onClick={handleAddProduct}
                     className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg shadow-xs transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer"
                   >
                     <Plus className="w-4 h-4" />
                     <span>Guardar en Inventario</span>
                   </button>
                 </div>
-              </form>
+              </div>
 
               {/* Lista de Productos con Edición Inline de Precios */}
               <div className="space-y-2">
@@ -4799,7 +4856,8 @@ export default function TabletMobilePosPage() {
               </button>
             </div>
 
-            <form onSubmit={handleSaveFullProductEdit} className="flex-1 overflow-y-auto space-y-3.5 py-3 pr-1">
+            {/* Formulario de Edición (Envoltorio seguro sin <form> para evitar recarga por cámara) */}
+            <div className="flex-1 overflow-y-auto space-y-3.5 py-3 pr-1">
               {/* Foto del Producto */}
               <div>
                 <label className="text-[10px] font-bold text-slate-400 flex items-center gap-1 mb-1">
@@ -4899,14 +4957,15 @@ export default function TabletMobilePosPage() {
                   Cancelar
                 </button>
                 <button
-                  type="submit"
-                  className="px-5 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-black rounded-xl shadow-md transition-all active:scale-95 flex items-center gap-1.5"
+                  type="button"
+                  onClick={handleSaveFullProductEdit}
+                  className="px-5 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-black rounded-xl shadow-md transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer"
                 >
                   <Check className="w-4 h-4" />
                   <span>Guardar Cambios</span>
                 </button>
               </div>
-            </form>
+            </div>
           </div>
         </div>
       )}

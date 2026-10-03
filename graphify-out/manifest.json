@@ -30,8 +30,8 @@
     "semantic_hash": ""
   },
   "package.json": {
-    "mtime": 1791050048.0920167,
-    "seen": 1791060696.685067,
+    "mtime": 1791062756.7019634,
+    "seen": 1791063869.3493488,
     "ast_hash": "b1b6870cee3fa62cee110e10761becf5",
     "semantic_hash": ""
   },
@@ -48,14 +48,14 @@
     "semantic_hash": ""
   },
   "public/sw.js": {
-    "mtime": 1791058132.8594933,
-    "seen": 1791060696.6850748,
-    "ast_hash": "5b448fb58c345d6207f561d4b9f2f9e4",
+    "mtime": 1791063621.1940155,
+    "seen": 1791063869.3493552,
+    "ast_hash": "b7962c147cc77b0ee704a07eed22d687",
     "semantic_hash": ""
   },
   "public/workbox-00a24876.js": {
-    "mtime": 1791058132.8594933,
-    "seen": 1791060696.6850858,
+    "mtime": 1791063621.2080574,
+    "seen": 1791063869.3493617,
     "ast_hash": "2f569fb030b2a09996588b309a8d636e",
     "semantic_hash": "2f569fb030b2a09996588b309a8d636e"
   },
@@ -420,9 +420,9 @@
     "semantic_hash": "6dbd90ba8a73abd65027e5324287fed4"
   },
   "src/components/ProductImageSearchModal.tsx": {
-    "mtime": 1790634213.4581785,
-    "seen": 1790635789.5310135,
-    "ast_hash": "f856df765dd53d00c8d79f3b28449d24",
+    "mtime": 1791062663.7799125,
+    "seen": 1791063869.3496895,
+    "ast_hash": "85013a3020681a7eba11b54d89f3e78d",
     "semantic_hash": ""
   },
   "src/components/ProductLabelModal.tsx": {
@@ -840,8 +840,8 @@
     "semantic_hash": "0f54c4f82cffc8c86bb3fbe3e98739d5"
   },
   "venematic-desktop/android/app/build.gradle": {
-    "mtime": 1791059685.998546,
-    "seen": 1791060696.6857176,
+    "mtime": 1791063765.5775266,
+    "seen": 1791063869.3499157,
     "ast_hash": "1b6d7585867593fe9d7b06b973fd4537",
     "semantic_hash": ""
   },
@@ -912,8 +912,8 @@
     "semantic_hash": ""
   },
   "venematic-desktop/package.json": {
-    "mtime": 1791050048.977677,
-    "seen": 1791060696.6857512,
+    "mtime": 1791062757.0826368,
+    "seen": 1791063869.3499463,
     "ast_hash": "2b33860ec85c4c6e8b61d909db740fd9",
     "semantic_hash": ""
   },
@@ -1200,10 +1200,10 @@
     "semantic_hash": "6dbd90ba8a73abd65027e5324287fed4"
   },
   "venematic-desktop/src/components/ProductImageSearchModal.tsx": {
-    "mtime": 1790109038.321339,
-    "seen": 1790363920.7986467,
-    "ast_hash": "8f1b111f2e2ca8e03dfb979c4cf87076",
-    "semantic_hash": "8f1b111f2e2ca8e03dfb979c4cf87076"
+    "mtime": 1791062680.295527,
+    "seen": 1791063869.3501155,
+    "ast_hash": "85013a3020681a7eba11b54d89f3e78d",
+    "semantic_hash": ""
   },
   "venematic-desktop/src/components/ProductLabelModal.tsx": {
     "mtime": 1790111337.117512,
@@ -2790,15 +2790,15 @@
     "semantic_hash": ""
   },
   "dist-installer/version.json": {
-    "mtime": 1791050048.0970664,
-    "seen": 1791060696.6850023,
-    "ast_hash": "bb2c79b50c89945d9be89b5bd1da84ac",
+    "mtime": 1791062756.7074077,
+    "seen": 1791063869.349281,
+    "ast_hash": "d76d85a3197466e2b4b4c654266c37a6",
     "semantic_hash": ""
   },
   "klikpos-releases/version.json": {
-    "mtime": 1791050048.099285,
-    "seen": 1791060696.685063,
-    "ast_hash": "bb2c79b50c89945d9be89b5bd1da84ac",
+    "mtime": 1791062756.700704,
+    "seen": 1791063869.3493447,
+    "ast_hash": "d76d85a3197466e2b4b4c654266c37a6",
     "semantic_hash": ""
   },
   "src/lib/data/master-catalog.json": {
@@ -2826,9 +2826,9 @@
     "semantic_hash": ""
   },
   "scripts/enhance-and-rebrand-mobile.js": {
-    "mtime": 1790966696.4064987,
-    "seen": 1791060696.6851776,
-    "ast_hash": "bb0762bc70906e79998da677ed616a5f",
+    "mtime": 1791062213.512362,
+    "seen": 1791063869.3494349,
+    "ast_hash": "28cbb0aee059cefeb450b07bd98f9e47",
     "semantic_hash": ""
   },
   "scripts/repair-mobile-html.js": {
@@ -2874,9 +2874,9 @@
     "semantic_hash": ""
   },
   "public/version.json": {
-    "mtime": 1791050048.0948522,
-    "seen": 1791060696.6850822,
-    "ast_hash": "bb2c79b50c89945d9be89b5bd1da84ac",
+    "mtime": 1791062756.7042048,
+    "seen": 1791063869.34936,
+    "ast_hash": "d76d85a3197466e2b4b4c654266c37a6",
     "semantic_hash": ""
   },
   "scripts/fix-css.js": {
@@ -2886,8 +2886,8 @@
     "semantic_hash": ""
   },
   "version.json": {
-    "mtime": 1791051405.9321907,
-    "seen": 1791060696.6861625,
+    "mtime": 1791062756.700704,
+    "seen": 1791063869.3503087,
     "ast_hash": "d76d85a3197466e2b4b4c654266c37a6",
     "semantic_hash": ""
   },
@@ -3030,9 +3030,9 @@
     "semantic_hash": ""
   },
   "src/app/tablet-pos/page.tsx": {
-    "mtime": 1791057900.2994244,
-    "seen": 1791060696.6854224,
-    "ast_hash": "b5826a194799644ff48d930291d4260a",
+    "mtime": 1791062722.001448,
+    "seen": 1791063869.3496556,
+    "ast_hash": "7aec6bef71cfbfc7f8d95356fefc0fda",
     "semantic_hash": ""
   },
   "venematic-desktop/src/app/tablet-pos/page.tsx": {
@@ -3042,8 +3042,8 @@
     "semantic_hash": ""
   },
   "venematic-desktop/version.json": {
-    "mtime": 1791051411.668825,
-    "seen": 1791060696.6861584,
+    "mtime": 1791062757.0791993,
+    "seen": 1791063869.350305,
     "ast_hash": "d76d85a3197466e2b4b4c654266c37a6",
     "semantic_hash": ""
   },
@@ -4524,9 +4524,9 @@
     "semantic_hash": ""
   },
   "scripts/build-klikpos-street-release.js": {
-    "mtime": 1790967100.6882064,
-    "seen": 1791060696.6851153,
-    "ast_hash": "c129fd078d3b69e52ce0962107eee22d",
+    "mtime": 1791063617.5502014,
+    "seen": 1791063869.3493855,
+    "ast_hash": "ab7570821fdf41515a2640f274b5454f",
     "semantic_hash": ""
   },
   "scripts/capture-street-catalog.js": {
@@ -4740,9 +4740,9 @@
     "semantic_hash": ""
   },
   "src/components/tablet-pos/TabletPosBottomNav.tsx": {
-    "mtime": 1791045087.3430624,
-    "seen": 1791060696.6855128,
-    "ast_hash": "192311ff6bd33825a49b8bc02d8aaaf1",
+    "mtime": 1791062363.0422757,
+    "seen": 1791063869.3497324,
+    "ast_hash": "281c8cf78472acff9be33da607974faf",
     "semantic_hash": ""
   },
   "src/components/tablet-pos/TabletPosHeader.tsx": {
@@ -5328,62 +5328,62 @@
     "semantic_hash": ""
   },
   "klikpos-releases/packs/comida-street/cachapa-con-cochino.png": {
-    "mtime": 1790974263.7258115,
-    "seen": 1791060696.6868217,
+    "mtime": 1791063053.040066,
+    "seen": 1791063869.3509276,
     "ast_hash": "edcfd7add74aa49b4ade3a6368c6cb72",
     "semantic_hash": ""
   },
   "klikpos-releases/packs/comida-street/cachapa-con-queso.png": {
-    "mtime": 1790974263.6016822,
-    "seen": 1791060696.6868231,
+    "mtime": 1791063053.0471075,
+    "seen": 1791063869.3509295,
     "ast_hash": "9caec6e1a5750d098bd862cdc2889f02",
     "semantic_hash": ""
   },
   "klikpos-releases/packs/comida-street/combo-4-perros-refresco.png": {
-    "mtime": 1790974263.218614,
-    "seen": 1791060696.6868258,
+    "mtime": 1791063053.053103,
+    "seen": 1791063869.3509314,
     "ast_hash": "d5a0df3323dbe4bc8c7b5a813871cf18",
     "semantic_hash": ""
   },
   "klikpos-releases/packs/comida-street/combo-5-perros.png": {
-    "mtime": 1790974264.1713173,
-    "seen": 1791060696.6868272,
+    "mtime": 1791063053.059256,
+    "seen": 1791063869.3509333,
     "ast_hash": "3b462a8de425607279054cb4fc4ae5c2",
     "semantic_hash": ""
   },
   "klikpos-releases/packs/comida-street/combo-shawarma.png": {
-    "mtime": 1790974263.9951909,
-    "seen": 1791060696.6868289,
+    "mtime": 1791063053.0697882,
+    "seen": 1791063869.350935,
     "ast_hash": "0617ca6957c08a6d48ecec2ad1bb2d04",
     "semantic_hash": ""
   },
   "klikpos-releases/packs/comida-street/hamburguesa.png": {
-    "mtime": 1790974263.47679,
-    "seen": 1791060696.6868305,
+    "mtime": 1791063053.0748956,
+    "seen": 1791063869.3509371,
     "ast_hash": "2b935f5504f10e04cfc7fabffbc2d966",
     "semantic_hash": ""
   },
   "klikpos-releases/packs/comida-street/pepito.png": {
-    "mtime": 1790974263.3716507,
-    "seen": 1791060696.686833,
+    "mtime": 1791063053.0808866,
+    "seen": 1791063869.350939,
     "ast_hash": "6090a0348624630305e8795c0c3ff176",
     "semantic_hash": ""
   },
   "klikpos-releases/packs/comida-street/perro-caliente.png": {
-    "mtime": 1790974263.069947,
-    "seen": 1791060696.686835,
+    "mtime": 1791063053.0858948,
+    "seen": 1791063869.3509412,
     "ast_hash": "ae2fdf38d45e40f7123d25f96e49876f",
     "semantic_hash": ""
   },
   "klikpos-releases/packs/comida-street/refresco.png": {
-    "mtime": 1790974264.2526205,
-    "seen": 1791060696.6868365,
+    "mtime": 1791063053.08889,
+    "seen": 1791063869.3509426,
     "ast_hash": "19cc2b44477628fbeb90d3158c597393",
     "semantic_hash": ""
   },
   "klikpos-releases/packs/comida-street/shawarma.png": {
-    "mtime": 1790974263.8444886,
-    "seen": 1791060696.6868377,
+    "mtime": 1791063053.0944152,
+    "seen": 1791063869.3509443,
     "ast_hash": "53fecddf431a9b18234eb61dbcc7c978",
     "semantic_hash": ""
   },

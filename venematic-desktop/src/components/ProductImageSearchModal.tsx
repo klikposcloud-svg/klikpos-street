@@ -124,7 +124,7 @@ export default function ProductImageSearchModal({
                 }
               }
               const offRes = await fetch(
-                `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(cleanTerm)}&search_simple=1&action=process&json=1&page_size=16`
+                `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(cleanTerm)}&search_simple=1&action=process&json=1&page_size=25`
               );
               if (offRes.ok) {
                 const data = await offRes.json();
@@ -144,12 +144,12 @@ export default function ProductImageSearchModal({
           })()
         );
 
-        // 2. Wikimedia Commons (Acceso CORS libre a envases, marcas comerciales y bebidas)
+        // 2. Wikimedia Commons (Acceso CORS libre a envases, marcas comerciales y comidas con límite ampliado)
         searchPromises.push(
           (async () => {
             try {
               const wikiRes = await fetch(
-                `https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(cleanTerm)}&gsrnamespace=6&prop=imageinfo&iiprop=url|thumburl&iiurlwidth=400&format=json&origin=*`
+                `https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(cleanTerm)}&gsrlimit=30&gsrnamespace=6&prop=imageinfo&iiprop=url|thumburl&iiurlwidth=400&format=json&origin=*`
               );
               if (wikiRes.ok) {
                 const data = await wikiRes.json();
@@ -164,6 +164,33 @@ export default function ProductImageSearchModal({
                       url: info.url || info.thumburl,
                       thumbnail: info.thumburl || info.url,
                       source: 'Web'
+                    };
+                  })
+                  .filter(Boolean) as ImageResult[];
+              }
+            } catch {}
+            return [];
+          })()
+        );
+
+        // 3. Wikipedia Artículos & Fotos de Productos
+        searchPromises.push(
+          (async () => {
+            try {
+              const wpRes = await fetch(
+                `https://es.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(cleanTerm)}&gsrlimit=12&prop=pageimages&pithumbsize=400&format=json&origin=*`
+              );
+              if (wpRes.ok) {
+                const wpData = await wpRes.json();
+                const wpPages = Object.values(wpData.query?.pages || {});
+                return wpPages
+                  .map((page: any) => {
+                    if (!page.thumbnail?.source) return null;
+                    return {
+                      title: page.title || cleanTerm,
+                      url: page.thumbnail.source,
+                      thumbnail: page.thumbnail.source,
+                      source: 'Enciclopedia / Marcas'
                     };
                   })
                   .filter(Boolean) as ImageResult[];

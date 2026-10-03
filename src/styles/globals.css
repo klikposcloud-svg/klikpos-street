@@ -238,10 +238,10 @@ html:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]) body {
   color: #0f172a !important;
 }
 
-/* Header dinámico adaptativo */
-html[data-theme="light"]:not(.dark) header,
-html[data-ui-style="industrial"]:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]) header,
-html:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]) header,
+/* Header dinámico adaptativo (Excluye KlikPOS Street) */
+html[data-theme="light"]:not(.dark) header:not(#klikpos-street-header):not(#klikpos-street-root *),
+html[data-ui-style="industrial"]:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]) header:not(#klikpos-street-header):not(#klikpos-street-root *),
+html:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]) header:not(#klikpos-street-header):not(#klikpos-street-root *),
 html[data-theme="light"]:not(.dark) header.layer-shell,
 html[data-ui-style="industrial"]:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]) header.layer-shell,
 html:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]) header.layer-shell {
@@ -252,10 +252,10 @@ html:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]) header.layer-
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
 }
 
-/* Sidebar dinámico adaptativo */
-html[data-theme="light"]:not(.dark) aside,
-html[data-ui-style="industrial"]:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]) aside,
-html:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]) aside,
+/* Sidebar dinámico adaptativo (Excluye KlikPOS Street y Docker Flotante) */
+html[data-theme="light"]:not(.dark) aside:not(.street-floating-docker):not(#klikpos-street-root *),
+html[data-ui-style="industrial"]:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]) aside:not(.street-floating-docker):not(#klikpos-street-root *),
+html:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]) aside:not(.street-floating-docker):not(#klikpos-street-root *),
 html[data-theme="light"]:not(.dark) aside.layer-shell,
 html[data-ui-style="industrial"]:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]) aside.layer-shell,
 html:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]) aside.layer-shell {
@@ -265,13 +265,13 @@ html:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]) aside.layer-s
   color: var(--sidebar-text, var(--industrial-text, #1e293b)) !important;
 }
 
-/* Contenido Principal y Paneles DinÃ¡micos */
-html[data-theme="light"]:not(.dark) main,
-html[data-ui-style="industrial"]:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]) main,
-html:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]) main,
-html[data-theme="light"]:not(.dark) main > div.flex-1,
-html[data-ui-style="industrial"]:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]) main > div.flex-1,
-html:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]) main > div.flex-1,
+/* Contenido Principal y Paneles Dinámicos (Excluye KlikPOS Street) */
+html[data-theme="light"]:not(.dark) main:not(#klikpos-street-main):not(#klikpos-street-root *),
+html[data-ui-style="industrial"]:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]) main:not(#klikpos-street-main):not(#klikpos-street-root *),
+html:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]) main:not(#klikpos-street-main):not(#klikpos-street-root *),
+html[data-theme="light"]:not(.dark) main > div.flex-1:not(#klikpos-street-root *),
+html[data-ui-style="industrial"]:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]) main > div.flex-1:not(#klikpos-street-root *),
+html:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]) main > div.flex-1:not(#klikpos-street-root *),
 html[data-theme="light"]:not(.dark) .dashboard-canvas,
 html[data-ui-style="industrial"]:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]) .dashboard-canvas,
 html:not(.dark):not([data-theme="dark"]):not([data-theme="glass"]) .dashboard-canvas {
@@ -2603,4 +2603,29 @@ textarea,
 }
 .nav-hero-button:active {
   transform: scale(0.92);
+}
+
+/* =========================================================================
+   BLINDAJE QUIRÚRGICO KLIKPOS STREET & DOCKER FLOTANTE
+   Evita al 100% el modo box, fondos blancos espurios o sobreescrituras
+========================================================================= */
+#klikpos-street-root {
+  min-height: 100dvh;
+  width: 100%;
+}
+
+/* El Docker flotante es permanentemente Obsidian Dark Blue */
+aside.street-floating-docker,
+.street-floating-docker,
+#klikpos-street-root aside.street-floating-docker {
+  background-color: #090d16 !important;
+  background-image: none !important;
+  border: 1px solid rgba(255, 255, 255, 0.16) !important;
+  color: #f8fafc !important;
+  box-shadow: 0 25px 60px -10px rgba(0, 0, 0, 0.95), inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.8) !important;
+}
+
+aside.street-floating-docker button,
+.street-floating-docker button {
+  color: inherit;
 }

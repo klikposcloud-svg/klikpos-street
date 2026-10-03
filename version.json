@@ -1,5 +1,5 @@
 {
-  "version": "3.0.2",
+  "version": "3.0.3",
   "releaseDate": "2026-10-03",
   "title": "KlikPOS Street Suite v3.0.2 - Atmósferas de Lienzo, Trial 30m Firestore y Modal de Planes",
   "notes": [
@@ -10,7 +10,7 @@
     "Rediseño sobrio de botones en gestor de inventario y cabeceras POS sin gradientes saturados.",
     "Actualización del mensaje de invitación por WhatsApp para promotores y embajadores ('¡Hola estimado colega!')."
   ],
-  "windowsUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.2/KlikPOS_Desktop_Full_Setup.exe",
-  "androidUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.2/KlikPOS_Movil_Full.apk",
+  "windowsUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.3/KlikPOS_Desktop_Full_Setup.exe",
+  "androidUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.3/KlikPOS_Movil_Full.apk",
   "mandatory": false
 }
