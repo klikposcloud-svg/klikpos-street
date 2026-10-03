@@ -160,10 +160,38 @@ async function main() {
   ];
 
   if (releaseId) {
+    // Obtener lista actual de assets de la release
+    let currentAssets = [];
+    try {
+      const aRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_RELEASES}/releases/${releaseId}/assets`, {
+        headers: {
+          'Authorization': `token ${TOKEN}`,
+          'User-Agent': 'KlikPOS-Pipeline'
+        }
+      });
+      if (aRes.ok) {
+        currentAssets = await aRes.json();
+      }
+    } catch (e) {}
+
     for (const item of assetsToUpload) {
       if (fs.existsSync(item.filePath)) {
         try {
-          console.log(`  -> Subiendo ${item.fileName}...`);
+          // Si el asset ya existe, eliminarlo para reemplazarlo con la versión fresca
+          const existing = currentAssets.find(a => a.name === item.fileName);
+          if (existing) {
+            console.log(`  -> Reemplazando asset previo ${item.fileName} (ID: ${existing.id})...`);
+            await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_RELEASES}/releases/assets/${existing.id}`, {
+              method: 'DELETE',
+              headers: {
+                'Authorization': `token ${TOKEN}`,
+                'User-Agent': 'KlikPOS-Pipeline'
+              }
+            });
+            console.log(`     ✓ Asset anterior eliminado.`);
+          }
+
+          console.log(`  -> Subiendo ${item.fileName} (${(fs.statSync(item.filePath).size / (1024*1024)).toFixed(2)} MB)...`);
           const fileData = fs.readFileSync(item.filePath);
           const uploadUrl = `https://uploads.github.com/repos/${REPO_OWNER}/${REPO_RELEASES}/releases/${releaseId}/assets?name=${item.fileName}`;
 
@@ -181,12 +209,8 @@ async function main() {
           if (upRes.ok) {
             console.log(`     ✓ ${item.fileName} adjuntado con éxito.`);
           } else {
-            const errJson = await upRes.json();
-            if (errJson.errors && errJson.errors[0]?.code === 'already_exists') {
-              console.log(`     ✓ ${item.fileName} ya estaba adjunto en la release.`);
-            } else {
-              console.warn(`     Aviso al subir ${item.fileName}:`, errJson.message);
-            }
+            const errJson = await upRes.json().catch(() => ({}));
+            console.warn(`     Aviso al subir ${item.fileName}:`, errJson.message || upRes.status);
           }
         } catch (upErr) {
           console.warn(`     Error subiendo ${item.fileName}:`, upErr.message);
