@@ -22,15 +22,44 @@ interface GithubReleaseInfo {
   }>;
 }
 
+import { CURRENT_VERSION } from '@/lib/services/update-service';
+
 export const SoftwareUpdateModal: React.FC<SoftwareUpdateModalProps> = ({
   isOpen,
   onClose,
-  currentVersion = 'v1.0.0'
+  currentVersion: propVersion
 }) => {
+  const currentVersion = propVersion || (typeof window !== 'undefined' ? localStorage.getItem('klikpos_applied_pwa_version') : null) || `v${CURRENT_VERSION}`;
   const [isLoading, setIsLoading] = useState(true);
   const [releaseInfo, setReleaseInfo] = useState<GithubReleaseInfo | null>(null);
   const [hasUpdate, setHasUpdate] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [isHotReloading, setIsHotReloading] = useState(false);
+
+  const handleHotReload = async () => {
+    setIsHotReloading(true);
+    try {
+      if (typeof window !== 'undefined' && 'caches' in window) {
+        const keys = await caches.keys();
+        await Promise.all(keys.map(k => caches.delete(k)));
+      }
+      if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator) {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        for (const reg of registrations) {
+          if (reg.waiting) reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+          await reg.unregister();
+        }
+      }
+      if (releaseInfo?.tag_name) {
+        localStorage.setItem('klikpos_applied_pwa_version', releaseInfo.tag_name.replace(/^v/i, ''));
+      }
+      setTimeout(() => {
+        window.location.href = window.location.pathname + '?_t=' + Date.now();
+      }, 300);
+    } catch {
+      window.location.reload();
+    }
+  };
 
   useEffect(() => {
     if (isOpen) {
@@ -227,16 +256,13 @@ export const SoftwareUpdateModal: React.FC<SoftwareUpdateModalProps> = ({
         {/* FOOTER */}
         <footer className="px-6 py-3.5 border-t border-slate-800 bg-slate-900/60 flex items-center justify-between">
           <button
-            onClick={() => {
-              if (typeof window !== 'undefined') {
-                window.location.reload();
-              }
-            }}
-            className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition-all flex items-center gap-2 active:scale-95"
+            onClick={handleHotReload}
+            disabled={isHotReloading}
+            className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition-all flex items-center gap-2 active:scale-95 disabled:opacity-50"
             title="Recargar memoria caché y código local"
           >
-            <RefreshCw className="w-3.5 h-3.5 text-amber-400" />
-            <span>Recargar App en Caliente</span>
+            <RefreshCw className={`w-3.5 h-3.5 text-amber-400 ${isHotReloading ? 'animate-spin' : ''}`} />
+            <span>{isHotReloading ? 'Purgando Caché...' : 'Recargar App en Caliente'}</span>
           </button>
 
           <button

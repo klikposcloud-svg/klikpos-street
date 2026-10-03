@@ -48,15 +48,21 @@ Ejecutar `node scripts/sync-version.js [nueva_versión]` para propagar la versi�
 - Ejecutar `npx tsc --noEmit` y verificar `exit code 0`.
 - Prohibido hacer push o crear releases con errores de tipado o módulos rotos.
 
-### Paso 3: Publicación en Repositorios de Código
+### Paso 3: Recompilación Obligatoria y Frescura de Binarios (PROHIBIDO SUBIR BINARIOS VIEJOS)
+- **Compilación Web de Producción:** Ejecutar `npm run build` para generar los bundles y páginas estáticas actualizadas.
+- **Sincronización a Android:** Ejecutar `node scripts/enhance-and-rebrand-mobile.js` para inyectar el HTML/JS fresco en `assets/public/`.
+- **Compilación Nativa de APK con Gradle:** Ejecutar Gradle (`gradlew assembleRelease` o `node scripts/build-klikpos-street-release.js`).
+- **Verificación Quirúrgica de Frescura:** El archivo `.apk` a subir a GitHub Releases debe tener un timestamp de modificación de hace menos de 10 minutos respecto a la ejecución actual. Si el APK en disco tiene fecha anterior, **el release debe ser abortado de inmediato** por considerarse un binario estancado.
+
+### Paso 4: Publicación en Repositorios de Código
 - Commit atómico: `git commit -m "release: bump to vX.Y.Z"`
 - Push doble: `git push origin main` y `git push street main`.
 
-### Paso 4: Publicación en `klikpos-releases` (Manifiesto Nube)
+### Paso 5: Publicación en `klikpos-releases` (Manifiesto Nube)
 - El archivo `version.json` debe sincronizarse y commitearse en la rama `main` de `klikposcloud-svg/klikpos-releases`.
 - El tag `vX.Y.Z` debe apuntar al commit que contiene el `version.json` actualizado.
 
-### Paso 5: Creación del Objeto Oficial "GitHub Release"
+### Paso 6: Creación del Objeto Oficial "GitHub Release"
 - Se debe invocar la API de GitHub (`POST /repos/klikposcloud-svg/klikpos-releases/releases`) con el token de despliegue:
   ```json
   {
@@ -69,13 +75,12 @@ Ejecutar `node scripts/sync-version.js [nueva_versión]` para propagar la versi�
   }
   ```
 
-### Paso 6: Subida de Binarios Oficiales (Assets)
-Toda Release debe tener adjuntos como mínimo los siguientes binarios:
-- `KlikPOS_Street.apk` (Instalador Android Street)
-- `KlikPOS_Movil_Full.apk` (Instalador Android Autónomo)
+### Paso 7: Subida de Binarios Oficiales (Assets Frescos)
+Toda Release debe tener adjuntos como mínimo los siguientes binarios compilados y verificados:
+- `KlikPOS_Street.apk` (Instalador Android Street POS)
 - `KlikPOS_Desktop_Full_Setup.exe` (Instalador Windows)
 
-### Paso 7: Prueba de Humo en Vivo (Verificación Automática)
+### Paso 8: Prueba de Humo en Vivo (Verificación Automática)
 El agente debe ejecutar una prueba HTTP real contra la API de GitHub:
 ```javascript
 const res = await fetch('https://api.github.com/repos/klikposcloud-svg/klikpos-releases/releases/latest');
@@ -86,9 +91,10 @@ Si la respuesta no coincide o los assets faltan, **la tarea NO se considera term
 
 ---
 
-## 4. Política de Prohibición
+## 4. Política de Prohibición y Arquitectura de Actualización
 
+- ❌ **PROHIBIDO** subir archivos `.apk` o `.exe` a GitHub Releases sin haber ejecutado la recompilación limpia previa. Subir binarios viejos con versión nueva es una violación crítica de protocolo.
 - ❌ **PROHIBIDO** responder "ya está actualizada en release" basándose solo en un `git commit` local.
+- ❌ **PROHIBIDO** asumir que "Recargar en Caliente" actualiza una app Android instalada. En Android nativo, los assets web están congelados dentro de `/data/app/.../base.apk` y el WebView jamás puede sobreescribir el binario nativo; en Android siempre se debe descargar e instalar el archivo `.apk` nuevo.
 - ❌ **PROHIBIDO** asumir que `raw.githubusercontent.com` se actualiza al instante (tiene TTL de 5 minutos; la fuente en tiempo real es la GitHub API).
-- ❌ **PROHIBIDO** omitir la subida de los archivos `.apk` y `.exe` correspondientes a la nueva versión.
 - ❌ **PROHIBIDO** usar saludos o textos informales no acordados (ej. "pana") en las notas de versión ni en los mensajes de WhatsApp generados por el sistema.

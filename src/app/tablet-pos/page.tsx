@@ -123,6 +123,16 @@ interface PagoMovilInfo {
   ownerName: string;
 }
 
+export interface MixedPaymentEntry {
+  id: string;
+  method: 'pago_movil' | 'cash_usd' | 'cash_ves' | 'card_debit' | 'zelle';
+  currency: 'USD' | 'VES';
+  amount: number;
+  amountUSD: number;
+  amountVES: number;
+  reference?: string;
+}
+
 interface CompletedSaleTicket {
   ticketNumber: string;
   timestamp: string;
@@ -138,6 +148,7 @@ interface CompletedSaleTicket {
   changeVES?: number;
   customer: Customer;
   table?: string;
+  mixedPayments?: MixedPaymentEntry[];
 }
 
 interface Motorizado {
@@ -653,7 +664,7 @@ export default function TabletMobilePosPage() {
   const [customerSearch, setCustomerSearch] = useState('');
 
   // 8. Pasarela de Cobro y Métodos
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<'pago_movil' | 'cash_usd' | 'cash_ves' | 'card_debit' | 'zelle'>('pago_movil');
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<'pago_movil' | 'cash_usd' | 'cash_ves' | 'card_debit' | 'zelle' | 'mixed'>('pago_movil');
   const [pagoMovilRefInput, setPagoMovilRefInput] = useState('');
   const [cashUSDReceived, setCashUSDReceived] = useState<number>(0);
   const [cashVESReceived, setCashVESReceived] = useState<number>(0);
@@ -661,6 +672,13 @@ export default function TabletMobilePosPage() {
   const [zelleConfirmation, setZelleConfirmation] = useState('');
   const [completedSaleTicket, setCompletedSaleTicket] = useState<CompletedSaleTicket | null>(null);
   const [copiedPmAlert, setCopiedPmAlert] = useState(false);
+
+  // Estados de Pago Mixto / Combinado
+  const [mixedPayments, setMixedPayments] = useState<MixedPaymentEntry[]>([]);
+  const [mixedInputMethod, setMixedInputMethod] = useState<'pago_movil' | 'cash_usd' | 'cash_ves' | 'card_debit' | 'zelle'>('cash_usd');
+  const [mixedInputCurrency, setMixedInputCurrency] = useState<'USD' | 'VES'>('USD');
+  const [mixedInputAmount, setMixedInputAmount] = useState<string>('');
+  const [mixedInputRef, setMixedInputRef] = useState<string>('');
 
   // 9. Mesas y Cuentas de Barra
   const [diningSpots, setDiningSpots] = useState([
@@ -1064,6 +1082,74 @@ export default function TabletMobilePosPage() {
   const vueltoVESfromUSD = vueltoUSD * bcvRate;
   const vueltoVESfromVES = Math.max(0, cashVESReceived - totalVES);
 
+  // Cálculos de Pago Mixto / Combinado
+  const mixedPaidUSD = mixedPayments.reduce((acc, p) => acc + p.amountUSD, 0);
+  const mixedPaidVES = mixedPayments.reduce((acc, p) => acc + p.amountVES, 0);
+  const mixedPendingUSD = Math.max(0, totalUSD - mixedPaidUSD);
+  const mixedPendingVES = Math.max(0, totalVES - mixedPaidVES);
+  const mixedChangeUSD = Math.max(0, mixedPaidUSD - totalUSD);
+  const mixedChangeVES = Math.max(0, mixedPaidVES - totalVES);
+  const isMixedComplete = totalUSD > 0 && (mixedPaidUSD >= totalUSD - 0.01 || (bcvRate > 0 && mixedPaidVES >= totalVES - 0.05));
+
+  // Validación Global de Cobro (Evita cobrar si falta dinero para completar la cuenta)
+  let isPaymentComplete = false;
+  let missingAmountUSD = 0;
+  let missingAmountVES = 0;
+
+  if (fulfillmentMode === 'delivery_cod') {
+    isPaymentComplete = true; // Se cobra al entregar en destino
+  } else if (selectedPaymentMethod === 'mixed') {
+    isPaymentComplete = isMixedComplete;
+    missingAmountUSD = mixedPendingUSD;
+    missingAmountVES = mixedPendingVES;
+  } else if (selectedPaymentMethod === 'cash_usd') {
+    isPaymentComplete = cashUSDReceived >= totalUSD - 0.01;
+    missingAmountUSD = Math.max(0, totalUSD - cashUSDReceived);
+    missingAmountVES = missingAmountUSD * bcvRate;
+  } else if (selectedPaymentMethod === 'cash_ves') {
+    isPaymentComplete = cashVESReceived >= totalVES - 0.05;
+    missingAmountVES = Math.max(0, totalVES - cashVESReceived);
+    missingAmountUSD = bcvRate > 0 ? missingAmountVES / bcvRate : 0;
+  } else {
+    // Para Pago Móvil, Punto / Tarjeta o Zelle: se asume pago completo si se confirma
+    isPaymentComplete = true;
+  }
+
+  const handleAddMixedPayment = () => {
+    playDigitalTapSound();
+    const val = parseFloat(mixedInputAmount);
+    if (isNaN(val) || val <= 0) return;
+
+    let valUSD = 0;
+    let valVES = 0;
+    if (mixedInputCurrency === 'USD') {
+      valUSD = val;
+      valVES = val * bcvRate;
+    } else {
+      valVES = val;
+      valUSD = bcvRate > 0 ? val / bcvRate : 0;
+    }
+
+    const newEntry: MixedPaymentEntry = {
+      id: 'mix_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+      method: mixedInputMethod,
+      currency: mixedInputCurrency,
+      amount: val,
+      amountUSD: valUSD,
+      amountVES: valVES,
+      reference: mixedInputRef.trim() || undefined
+    };
+
+    setMixedPayments(prev => [...prev, newEntry]);
+    setMixedInputAmount('');
+    setMixedInputRef('');
+  };
+
+  const handleRemoveMixedPayment = (id: string) => {
+    playDigitalTapSound();
+    setMixedPayments(prev => prev.filter(p => p.id !== id));
+  };
+
   const addToCart = (prod: Product) => {
     playDigitalTapSound();
     setCart((prev) => {
@@ -1354,14 +1440,42 @@ export default function TabletMobilePosPage() {
       return;
     }
 
+    if (!isPaymentComplete) {
+      alert(`No se puede completar el cobro: Aún faltan $${missingAmountUSD.toFixed(2)} USD (Bs. ${missingAmountVES.toFixed(2)}) para cubrir el total de la cuenta.`);
+      return;
+    }
+
     const ticketNo = `TK-${Math.floor(100000 + Math.random() * 900000)}`;
     const orderNo = `PED-${Math.floor(100 + Math.random() * 900)}`;
     const now = new Date().toLocaleString('es-VE', { dateStyle: 'short', timeStyle: 'short' });
 
     let refNumber = '';
-    if (selectedPaymentMethod === 'pago_movil') refNumber = pagoMovilRefInput || 'S/R';
-    else if (selectedPaymentMethod === 'card_debit') refNumber = cardVoucherRef || 'Lote-POS';
-    else if (selectedPaymentMethod === 'zelle') refNumber = zelleConfirmation || 'Zelle-OK';
+    let ticketPaymentMethod = selectedPaymentMethod as string;
+    let finalAmountReceivedUSD = undefined;
+    let finalChangeUSD = undefined;
+    let finalChangeVES = undefined;
+
+    if (fulfillmentMode === 'delivery_cod') {
+      ticketPaymentMethod = 'Cobro en Destino (Delivery)';
+    } else if (selectedPaymentMethod === 'mixed') {
+      ticketPaymentMethod = 'Pago Mixto / Combinado';
+      refNumber = mixedPayments.map(p => `${p.method === 'cash_usd' ? '$' : p.method === 'cash_ves' ? 'Bs' : p.method}: ${p.currency === 'USD' ? '$' + p.amount.toFixed(2) : 'Bs.' + p.amount.toFixed(2)}${p.reference ? ` (Ref: ${p.reference})` : ''}`).join(' | ');
+      finalAmountReceivedUSD = mixedPaidUSD;
+      finalChangeUSD = mixedChangeUSD;
+      finalChangeVES = mixedChangeVES;
+    } else if (selectedPaymentMethod === 'cash_usd') {
+      finalAmountReceivedUSD = cashUSDReceived;
+      finalChangeUSD = vueltoUSD;
+      finalChangeVES = vueltoVESfromUSD;
+    } else if (selectedPaymentMethod === 'cash_ves') {
+      finalChangeVES = vueltoVESfromVES;
+    } else if (selectedPaymentMethod === 'pago_movil') {
+      refNumber = pagoMovilRefInput || 'S/R';
+    } else if (selectedPaymentMethod === 'card_debit') {
+      refNumber = cardVoucherRef || 'Lote-POS';
+    } else if (selectedPaymentMethod === 'zelle') {
+      refNumber = zelleConfirmation || 'Zelle-OK';
+    }
 
     const chosenDriver = drivers.find(d => d.id === selectedDriverId);
 
@@ -1373,13 +1487,14 @@ export default function TabletMobilePosPage() {
       totalUSD: totalUSD,
       totalVES: totalVES,
       bcvRate: bcvRate,
-      paymentMethod: fulfillmentMode === 'delivery_cod' ? 'Cobro en Destino (Delivery)' : selectedPaymentMethod,
+      paymentMethod: ticketPaymentMethod,
       reference: refNumber,
-      amountReceivedUSD: selectedPaymentMethod === 'cash_usd' ? cashUSDReceived : undefined,
-      changeUSD: selectedPaymentMethod === 'cash_usd' ? vueltoUSD : undefined,
-      changeVES: selectedPaymentMethod === 'cash_usd' ? vueltoVESfromUSD : (selectedPaymentMethod === 'cash_ves' ? vueltoVESfromVES : undefined),
+      amountReceivedUSD: finalAmountReceivedUSD,
+      changeUSD: finalChangeUSD,
+      changeVES: finalChangeVES,
       customer: selectedCustomer,
-      table: fulfillmentMode === 'local' ? (activeTable ? `Mesa #${activeTable}` : 'Barra / Mostrador') : `Delivery (${chosenDriver?.name || 'Motorizado'})`
+      table: fulfillmentMode === 'local' ? (activeTable ? `Mesa #${activeTable}` : 'Barra / Mostrador') : `Delivery (${chosenDriver?.name || 'Motorizado'})`,
+      mixedPayments: selectedPaymentMethod === 'mixed' ? [...mixedPayments] : undefined
     };
 
     // Crear registro de Pedido en Cola
@@ -1389,7 +1504,7 @@ export default function TabletMobilePosPage() {
       type: fulfillmentMode === 'local' ? 'local' : 'delivery',
       status: 'en_cola',
       paymentStatus: fulfillmentMode === 'delivery_cod' ? 'por_cobrar' : 'pagado',
-      paymentMethod: fulfillmentMode === 'delivery_cod' ? 'Cobro en Destino' : selectedPaymentMethod,
+      paymentMethod: ticketPaymentMethod,
       items: [...cart],
       totalUSD: totalUSD,
       totalVES: totalVES,
@@ -1425,14 +1540,21 @@ export default function TabletMobilePosPage() {
         totalUSD: totalUSD,
         totalVES: totalVES,
         bcvRate: bcvRate,
-        payments: [{
-          method: (fulfillmentMode === 'delivery_cod' ? 'cash_usd' : selectedPaymentMethod) as any,
-          amountUSD: totalUSD,
-          amountVES: totalVES,
-          reference: refNumber
-        }],
-        changeUSD: vueltoUSD,
-        changeVES: vueltoVESfromUSD,
+        payments: selectedPaymentMethod === 'mixed'
+          ? mixedPayments.map(p => ({
+              method: p.method as any,
+              amountUSD: p.amountUSD,
+              amountVES: p.amountVES,
+              reference: p.reference
+            }))
+          : [{
+              method: (fulfillmentMode === 'delivery_cod' ? 'cash_usd' : selectedPaymentMethod) as any,
+              amountUSD: totalUSD,
+              amountVES: totalVES,
+              reference: refNumber
+            }],
+        changeUSD: finalChangeUSD || 0,
+        changeVES: finalChangeVES || 0,
         cashierName: 'Cajero Tablet',
         customerName: selectedCustomer.name,
         customerDoc: selectedCustomer.docId,
@@ -1447,6 +1569,7 @@ export default function TabletMobilePosPage() {
     setCashUSDReceived(0);
     setCashVESReceived(0);
     setDeliveryAddressInput('');
+    setMixedPayments([]);
   };
 
   // Crear Mesa / Barra Dinámica
@@ -2678,6 +2801,7 @@ export default function TabletMobilePosPage() {
                   { id: 'cash_ves', label: 'Efectivo Bs', icon: Wallet, color: 'text-sky-500' },
                   { id: 'card_debit', label: 'Punto / Débito', icon: CreditCard, color: 'text-purple-500' },
                   { id: 'zelle', label: 'Zelle', icon: Store, color: 'text-indigo-500' },
+                  { id: 'mixed', label: 'Pago Mixto', icon: ArrowLeftRight, color: 'text-teal-400' },
                 ].map((m) => {
                   const Icon = m.icon;
                   const isSelected = selectedPaymentMethod === m.id;
@@ -2772,6 +2896,14 @@ export default function TabletMobilePosPage() {
                     />
                   </div>
 
+                  {/* Alerta en Vivo si Falta Dinero */}
+                  {cashUSDReceived > 0 && cashUSDReceived < totalUSD - 0.01 && (
+                    <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-center gap-2">
+                      <AlertCircle className="w-4 h-4 text-amber-400 shrink-0" />
+                      <span>Falta por recibir: <b>${(totalUSD - cashUSDReceived).toFixed(2)} USD</b> (Bs. {((totalUSD - cashUSDReceived) * bcvRate).toFixed(2)})</span>
+                    </div>
+                  )}
+
                   {/* Botones de Efectivo Rápido */}
                   <div className="flex flex-wrap gap-1.5">
                     <button
@@ -2833,6 +2965,14 @@ export default function TabletMobilePosPage() {
                     />
                   </div>
 
+                  {/* Alerta en Vivo si Falta Dinero */}
+                  {cashVESReceived > 0 && cashVESReceived < totalVES - 0.05 && (
+                    <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-center gap-2">
+                      <AlertCircle className="w-4 h-4 text-amber-400 shrink-0" />
+                      <span>Falta por recibir: <b>Bs. {(totalVES - cashVESReceived).toFixed(2)}</b> ($ {bcvRate > 0 ? ((totalVES - cashVESReceived) / bcvRate).toFixed(2) : '0.00'})</span>
+                    </div>
+                  )}
+
                   <div className={`p-3 rounded-xl border flex items-center justify-between ${
                     vueltoVESfromVES > 0 ? 'bg-emerald-500/10 border-emerald-500/30' : 'bg-slate-200/50 dark:bg-slate-900 border-slate-200 dark:border-slate-800'
                   }`}>
@@ -2885,18 +3025,276 @@ export default function TabletMobilePosPage() {
                   />
                 </div>
               )}
+
+              {/* 6. PAGO MIXTO / MULTIMONEDA (COMBINADO CON CÁLCULO EN VIVO Y VALIDACIÓN ESTRICTA) */}
+              {selectedPaymentMethod === 'mixed' && (
+                <div className="p-4 rounded-2xl border bg-slate-950/80 border-slate-800 space-y-4">
+                  {/* Balance en Vivo de Pago Mixto */}
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="p-3 rounded-xl bg-slate-900 border border-slate-800">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                        Total a Cubrir
+                      </span>
+                      <div className="text-base font-black font-mono text-white">
+                        ${totalUSD.toFixed(2)} USD
+                      </div>
+                      <span className="text-[10px] font-mono text-slate-400">
+                        Bs. {totalVES.toFixed(2)}
+                      </span>
+                    </div>
+
+                    <div className="p-3 rounded-xl bg-slate-900 border border-slate-800">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                        Total Recibido
+                      </span>
+                      <div className="text-base font-black font-mono text-emerald-400">
+                        ${mixedPaidUSD.toFixed(2)} USD
+                      </div>
+                      <span className="text-[10px] font-mono text-emerald-300">
+                        Bs. {mixedPaidVES.toFixed(2)}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Estado en Vivo: Faltante o Vuelto */}
+                  {!isMixedComplete ? (
+                    <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-between text-amber-300">
+                      <div className="flex items-center gap-2">
+                        <AlertCircle className="w-5 h-5 text-amber-400 shrink-0" />
+                        <div>
+                          <strong className="text-xs font-black block">Falta por Completar:</strong>
+                          <span className="text-[11px] text-amber-200">El botón de cobro se habilitará al cubrir el monto</span>
+                        </div>
+                      </div>
+                      <div className="text-right font-mono">
+                        <div className="text-sm font-black text-amber-400">
+                          ${mixedPendingUSD.toFixed(2)} USD
+                        </div>
+                        <div className="text-[10px] text-amber-300">
+                          Bs. {mixedPendingVES.toFixed(2)}
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-between text-emerald-300">
+                      <div className="flex items-center gap-2">
+                        <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+                        <div>
+                          <strong className="text-xs font-black block">¡Monto Total Cubierto!</strong>
+                          <span className="text-[11px] text-emerald-200">
+                            {mixedChangeUSD > 0.01 ? 'Vuelto / Cambio a Entregar:' : 'Pago exacto completado'}
+                          </span>
+                        </div>
+                      </div>
+                      {mixedChangeUSD > 0.01 && (
+                        <div className="text-right font-mono">
+                          <div className="text-sm font-black text-emerald-400">
+                            ${mixedChangeUSD.toFixed(2)} USD
+                          </div>
+                          <div className="text-[10px] text-emerald-300">
+                            Bs. {mixedChangeVES.toFixed(2)}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Formulario para Agregar Abono / Pago Parcial */}
+                  <div className="p-3.5 rounded-xl border border-slate-800 bg-slate-900/90 space-y-3">
+                    <span className="text-xs font-black uppercase tracking-wider text-slate-300 block">
+                      + Agregar Abono a esta Cuenta:
+                    </span>
+
+                    {/* Selector de Método para el Abono */}
+                    <div className="grid grid-cols-3 sm:grid-cols-5 gap-1.5">
+                      {[
+                        { id: 'cash_usd', label: 'Efectivo $', cur: 'USD' as const },
+                        { id: 'cash_ves', label: 'Efectivo Bs', cur: 'VES' as const },
+                        { id: 'pago_movil', label: 'Pago Móvil', cur: 'VES' as const },
+                        { id: 'card_debit', label: 'Punto POS', cur: 'VES' as const },
+                        { id: 'zelle', label: 'Zelle', cur: 'USD' as const },
+                      ].map((item) => (
+                        <button
+                          key={item.id}
+                          type="button"
+                          onClick={() => {
+                            setMixedInputMethod(item.id as any);
+                            setMixedInputCurrency(item.cur);
+                          }}
+                          className={`p-2 rounded-lg text-[10px] font-black border transition-all text-center ${
+                            mixedInputMethod === item.id
+                              ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-md font-bold'
+                              : 'bg-slate-950 text-slate-300 border-slate-800 hover:bg-slate-850'
+                          }`}
+                        >
+                          {item.label}
+                        </button>
+                      ))}
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                      {/* Moneda */}
+                      <div>
+                        <label className="text-[10px] font-bold text-slate-400 block mb-1">
+                          Moneda:
+                        </label>
+                        <select
+                          value={mixedInputCurrency}
+                          onChange={(e) => setMixedInputCurrency(e.target.value as any)}
+                          className="w-full px-3 py-2 rounded-xl text-xs font-mono font-bold border outline-none bg-slate-950 border-slate-700 text-white"
+                        >
+                          <option value="USD">Dólares ($ USD)</option>
+                          <option value="VES">Bolívares (Bs. VES)</option>
+                        </select>
+                      </div>
+
+                      {/* Monto con botón Sugerir Faltante */}
+                      <div className="sm:col-span-2">
+                        <div className="flex items-center justify-between mb-1">
+                          <label className="text-[10px] font-bold text-slate-400">
+                            Monto Recibido ({mixedInputCurrency}):
+                          </label>
+                          {mixedPendingUSD > 0 && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (mixedInputCurrency === 'USD') {
+                                  setMixedInputAmount(mixedPendingUSD.toFixed(2));
+                                } else {
+                                  setMixedInputAmount(mixedPendingVES.toFixed(2));
+                                }
+                              }}
+                              className="text-[10px] font-black text-amber-400 hover:underline active:scale-95"
+                            >
+                              Sugerir Faltante ({mixedInputCurrency === 'USD' ? `$${mixedPendingUSD.toFixed(2)}` : `Bs. ${mixedPendingVES.toFixed(2)}`})
+                            </button>
+                          )}
+                        </div>
+                        <input
+                          type="number"
+                          step="any"
+                          value={mixedInputAmount}
+                          onChange={(e) => setMixedInputAmount(e.target.value)}
+                          placeholder="0.00"
+                          className="w-full px-3 py-2 rounded-xl text-sm font-mono font-black border outline-none bg-slate-950 border-slate-700 text-white focus:border-amber-400"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Referencia opcional si aplica */}
+                    {(mixedInputMethod === 'pago_movil' || mixedInputMethod === 'card_debit' || mixedInputMethod === 'zelle') && (
+                      <div>
+                        <label className="text-[10px] font-bold text-slate-400 block mb-1">
+                          Referencia / Titular (Opcional):
+                        </label>
+                        <input
+                          type="text"
+                          value={mixedInputRef}
+                          onChange={(e) => setMixedInputRef(e.target.value)}
+                          placeholder="Ej: 4 últimos dígitos o titular"
+                          className="w-full px-3 py-1.5 rounded-xl text-xs font-mono border outline-none bg-slate-950 border-slate-700 text-white"
+                        />
+                      </div>
+                    )}
+
+                    <button
+                      type="button"
+                      onClick={handleAddMixedPayment}
+                      disabled={!mixedInputAmount || parseFloat(mixedInputAmount) <= 0}
+                      className="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs flex items-center justify-center gap-2 active:scale-98 transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-md"
+                    >
+                      <Plus className="w-4 h-4" />
+                      <span>Registrar Abono a la Cuenta</span>
+                    </button>
+                  </div>
+
+                  {/* Lista de Abonos Registrados */}
+                  <div className="space-y-1.5">
+                    <span className="text-[11px] font-black uppercase tracking-wider text-slate-400 block">
+                      Abonos Registrados ({mixedPayments.length}):
+                    </span>
+                    {mixedPayments.length === 0 ? (
+                      <div className="p-3 rounded-xl border border-dashed border-slate-800 text-center text-xs text-slate-500">
+                        No hay abonos agregados. Utiliza el formulario superior para registrar pagos parciales.
+                      </div>
+                    ) : (
+                      <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
+                        {mixedPayments.map((p) => {
+                          const methodNames: Record<string, string> = {
+                            cash_usd: 'Efectivo $',
+                            cash_ves: 'Efectivo Bs',
+                            pago_movil: 'Pago Móvil',
+                            card_debit: 'Punto Débito',
+                            zelle: 'Zelle'
+                          };
+                          return (
+                            <div
+                              key={p.id}
+                              className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between"
+                            >
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs font-bold text-slate-200">
+                                  {methodNames[p.method] || p.method}
+                                </span>
+                                {p.reference && (
+                                  <span className="text-[10px] font-mono text-slate-400 bg-slate-950 px-1.5 py-0.5 rounded border border-slate-800">
+                                    Ref: {p.reference}
+                                  </span>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-3">
+                                <div className="text-right font-mono">
+                                  <span className="text-xs font-black text-emerald-400 block">
+                                    {p.currency === 'USD' ? `$${p.amount.toFixed(2)} USD` : `Bs. ${p.amount.toFixed(2)}`}
+                                  </span>
+                                  <span className="text-[9px] text-slate-500">
+                                    {p.currency === 'USD' ? `≈ Bs. ${p.amountVES.toFixed(2)}` : `≈ $${p.amountUSD.toFixed(2)} USD`}
+                                  </span>
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveMixedPayment(p.id)}
+                                  className="p-1 rounded-lg text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 active:scale-90 transition-all cursor-pointer"
+                                  title="Eliminar este abono"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
 
-            {/* BOTÓN FINAL DE LIQUIDACIÓN Y GENERACIÓN DE TICKET */}
+            {/* BOTÓN FINAL DE LIQUIDACIÓN Y GENERACIÓN DE TICKET (BLOQUEADO SI FALTA DINERO) */}
             <button
               type="button"
               onClick={handleFinalizeSale}
-              disabled={cart.length === 0}
-              className="w-full py-4 text-white font-black text-sm rounded-2xl shadow-xl active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
-              style={{ backgroundColor: currentPal.primary }}
+              disabled={cart.length === 0 || !isPaymentComplete}
+              className={`w-full py-4 text-white font-black text-sm rounded-2xl shadow-xl transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                cart.length === 0 || !isPaymentComplete
+                  ? 'opacity-60 cursor-not-allowed bg-slate-800 border border-slate-700'
+                  : 'active:scale-98 shadow-emerald-500/20'
+              }`}
+              style={{ backgroundColor: (cart.length > 0 && isPaymentComplete) ? currentPal.primary : undefined }}
             >
-              <CheckCircle2 className="w-5 h-5 text-white" />
-              <span>Confirmar Venta y Generar Ticket</span>
+              {cart.length === 0 ? (
+                <span>Comanda Vacía</span>
+              ) : !isPaymentComplete ? (
+                <div className="flex items-center gap-2 text-amber-300">
+                  <AlertCircle className="w-5 h-5 text-amber-400 shrink-0" />
+                  <span>Falta Completar: ${missingAmountUSD.toFixed(2)} USD (Bs. {missingAmountVES.toFixed(2)})</span>
+                </div>
+              ) : (
+                <>
+                  <CheckCircle2 className="w-5 h-5 text-white" />
+                  <span>Confirmar Venta y Generar Ticket</span>
+                </>
+              )}
             </button>
           </div>
         )}
@@ -3769,6 +4167,26 @@ export default function TabletMobilePosPage() {
                 <div className="flex justify-between text-slate-500 text-[10px]">
                   <span>Referencia:</span>
                   <span className="font-bold">{completedSaleTicket.reference}</span>
+                </div>
+              )}
+              {completedSaleTicket.mixedPayments && completedSaleTicket.mixedPayments.length > 0 && (
+                <div className="py-1.5 border-t border-dashed border-slate-300 dark:border-slate-700 space-y-1 my-1">
+                  <span className="text-[10px] font-black uppercase text-slate-500 block">Desglose Pago Mixto:</span>
+                  {completedSaleTicket.mixedPayments.map((p, idx) => {
+                    const methodNames: Record<string, string> = {
+                      cash_usd: 'Efectivo $',
+                      cash_ves: 'Efectivo Bs',
+                      pago_movil: 'Pago Móvil',
+                      card_debit: 'Punto Débito',
+                      zelle: 'Zelle'
+                    };
+                    return (
+                      <div key={idx} className="flex justify-between text-[10px] font-mono text-slate-600 dark:text-slate-300">
+                        <span>{methodNames[p.method] || p.method}{p.reference ? ` (${p.reference})` : ''}:</span>
+                        <span className="font-bold">{p.currency === 'USD' ? `$${p.amount.toFixed(2)}` : `Bs. ${p.amount.toFixed(2)}`}</span>
+                      </div>
+                    );
+                  })}
                 </div>
               )}
               {completedSaleTicket.changeUSD !== undefined && completedSaleTicket.changeUSD > 0 && (
@@ -4980,7 +5398,6 @@ export default function TabletMobilePosPage() {
       <SoftwareUpdateModal
         isOpen={showUpdateModal}
         onClose={() => setShowUpdateModal(false)}
-        currentVersion="v1.0.0"
       />
 
       {/* ========================================================================= */}
