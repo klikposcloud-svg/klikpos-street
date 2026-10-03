@@ -509,6 +509,26 @@ export default function StreetAmbassadorLicenseModal({
             />
           </div>
 
+          {/* BANNER DE PROTECCIÓN DE DATOS Y ESCASEZ SUTIL */}
+          <div className="p-3.5 rounded-2xl border border-amber-500/30 bg-amber-500/10 flex items-start gap-3 shadow-xs">
+            <div className="p-2 rounded-xl bg-amber-500/20 text-amber-400 shrink-0 mt-0.5">
+              <ShieldCheck className="w-5 h-5" />
+            </div>
+            <div className="space-y-1 text-xs">
+              <div className="flex items-center justify-between gap-2">
+                <span className="font-black text-amber-300 uppercase tracking-wide">
+                  Tus Datos Están 100% Seguros y Respaldados
+                </span>
+                <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 shrink-0">
+                  ⚡ Cupos Limitados
+                </span>
+              </div>
+              <p className="text-slate-300 text-[11px] leading-relaxed">
+                Tus productos cargados, precios configurados y ventas de la prueba se encuentran intactos en este equipo. Quedan <strong className="text-white">3 cupos de activación con tasa BCV congelada</strong> y soporte prioritario para tu zona hoy. Selecciona el plan que mejor se adapte a tu flujo de caja:
+              </p>
+            </div>
+          </div>
+
           {/* MODALIDADES DE PAGO */}
           <div className="space-y-2">
             <span className="text-xs font-black uppercase tracking-wider text-white block">
@@ -566,11 +586,11 @@ export default function StreetAmbassadorLicenseModal({
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-xs font-black text-white">VIP Blindado</span>
                   <span className="px-1.5 py-0.5 rounded text-[9px] font-black bg-purple-500/20 text-purple-400 border border-purple-500/30">
-                    Cloud 1 Año
+                    Vitalicio Pro
                   </span>
                 </div>
                 <div className="text-base font-black font-mono text-purple-400">$50 USD</div>
-                <p className="text-[10px] text-slate-200 font-medium mt-1">$25 quincenal con respaldo Cloud.</p>
+                <p className="text-[10px] text-slate-200 font-medium mt-1">En 2 cuotas de $25 (quincenal) con respaldo Cloud 1 Año.</p>
               </button>
             </div>
           </div>

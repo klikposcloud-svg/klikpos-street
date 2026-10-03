@@ -65,7 +65,7 @@ import LicenseActivationModal from '@/components/LicenseActivationModal';
 import VisualPacksModal from '@/components/marketplace/VisualPacksModal';
 import StreetAmbassadorLicenseModal from '@/components/licensing/StreetAmbassadorLicenseModal';
 import StreetSalesBackupModal from '@/components/tablet-pos/StreetSalesBackupModal';
-import { evaluateTrialState, TrialState } from '@/lib/licensing/trial-manager';
+import { evaluateTrialState, TrialState, registerTrialInstallation } from '@/lib/licensing/trial-manager';
 import { db } from '@/lib/db';
 import { TabletPosBottomNav } from '@/components/tablet-pos/TabletPosBottomNav';
 import { StreetAutoUpdater } from '@/components/tablet-pos/StreetAutoUpdater';
@@ -992,13 +992,18 @@ export default function TabletMobilePosPage() {
     }
   }, []);
 
-  // Monitor del Período de Prueba de 15 Minutos
+  // Monitor del Período de Prueba de 30 Minutos y Registro en Firestore
   useEffect(() => {
+    // Registrar instalación en Firestore en segundo plano (idempotente)
+    try {
+      registerTrialInstallation().catch(() => {});
+    } catch {}
+
     const checkTrial = () => {
       const state = evaluateTrialState();
       setTrialState(state);
       if (state.isTrial && state.isExpired) {
-        setShowLicenseModal(true);
+        setShowStreetAmbassadorModal(true);
       }
     };
     checkTrial();
@@ -1815,10 +1820,13 @@ export default function TabletMobilePosPage() {
         <div className="flex items-center gap-1.5 shrink-0 ml-1">
           {trialState?.isTrial && (
             <button
-              onClick={() => setShowLicenseModal(true)}
-              className="hidden md:flex items-center gap-1 px-2 py-1 bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-400 rounded-lg text-[10px] font-mono font-bold"
+              type="button"
+              onClick={() => setShowStreetAmbassadorModal(true)}
+              className="hidden md:flex items-center gap-1.5 px-2.5 py-1 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-500 dark:text-amber-400 rounded-lg text-[10px] font-mono font-bold transition-all cursor-pointer"
+              title="Prueba Comercial de 30 Minutos Activa. Toca para ver los 3 planes de activación comercial ($15 / $25 / $50)."
             >
-              <span>⏱️ {trialState.remainingMinutes}m</span>
+              <Clock className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
+              <span>Prueba: {trialState.formattedRemaining}</span>
             </button>
           )}
 
