@@ -1692,17 +1692,15 @@ export default function TabletMobilePosPage() {
             dockSide === 'left' ? 'left-2.5' : 'right-2.5'
           }`}
         >
-          {/* Cápsula Vertical Grafito Profundo con Cristal Translúcido y Micro-Tarjetas de Alto Contraste AAA */}
+          {/* Cápsula Vertical Obsidian Dark Blue con Cristal Translúcido y Micro-Tarjetas de Alto Contraste AAA */}
           <aside
             className="w-14 rounded-[32px] py-4 px-1.5 flex flex-col items-center justify-between shadow-2xl border select-none shrink-0 min-h-[380px] z-50 backdrop-blur-xl transition-all"
             style={{
-              backgroundColor: isLight ? '#ffffff' : currentCanvas.bg,
-              borderColor: isLight ? '#cbd5e1' : 'rgba(255, 255, 255, 0.12)',
+              backgroundColor: '#090d16',
+              borderColor: 'rgba(255, 255, 255, 0.16)',
               backdropFilter: 'blur(20px) saturate(180%)',
               WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-              boxShadow: isLight
-                ? '0 20px 40px -10px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.05)'
-                : '0 25px 60px -10px rgba(0, 0, 0, 0.98), inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.8)'
+              boxShadow: '0 25px 60px -10px rgba(0, 0, 0, 0.95), inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.8)'
             }}
           >
             {/* Íconos Centrales de Acceso Directo con Contraste AAA y Micro-Fondos */}
@@ -1854,23 +1852,6 @@ export default function TabletMobilePosPage() {
               Street
             </span>
           </div>
-
-          <div className="h-5 w-px bg-slate-300 dark:bg-slate-800 hidden xs:block" />
-
-          {/* Botón de Menú & Ajustes */}
-          <div className="flex items-center gap-1">
-            <button
-              onClick={() => setIsLeftDrawerOpen(true)}
-              className={`p-2 rounded-xl border transition-all active:scale-95 cursor-pointer ${
-                isLight
-                  ? 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-900'
-                  : 'bg-slate-900 hover:bg-slate-800 border-slate-800 text-slate-200 hover:text-white'
-              }`}
-              title="Menú & Ajustes"
-            >
-              <Menu className="w-4 h-4" />
-            </button>
-          </div>
         </div>
 
         {/* CENTRO: Badge Tasa BCV Oficial (Una Sola Línea, Sin Romper Texto) */}
@@ -1989,12 +1970,12 @@ export default function TabletMobilePosPage() {
       {/* ========================================================================= */}
       {/* 3. LIENZO PRINCIPAL CON SCROLL 100% FLUIDO Y DESBLOQUEADO                 */}
       {/* ========================================================================= */}
-      <main className="flex-1 min-h-0 overflow-hidden flex flex-col p-2 sm:p-3 max-w-6xl mx-auto w-full street-pos-dark-canvas" style={{ backgroundColor: "#070a12" }}>
+      <main className={`flex-1 min-h-0 overflow-hidden flex flex-col p-2 sm:p-3 max-w-6xl mx-auto w-full transition-colors duration-200 ${isLight ? 'bg-slate-100' : ''}`} style={{ backgroundColor: currentCanvas.bg }}>
         {/* ======================================================================= */}
         {/* VISTA 1: MENÚ Y CATÁLOGO TÁCTIL (GRID ADAPTATIVO TABLET & MODO LISTA)   */}
         {/* ======================================================================= */}
         {activeTab === 'menu' && (
-          <div className="flex-1 min-h-0 flex flex-col space-y-2 street-pos-dark-canvas" style={{ backgroundColor: '#070a12' }}>
+          <div className={`flex-1 min-h-0 flex flex-col space-y-2 transition-colors duration-200 ${isLight ? 'bg-slate-100' : ''}`} style={{ backgroundColor: currentCanvas.bg }}>
             {/* 1. Barra de Búsqueda + Selector de Vista (Cuadrícula / Lista) + Selector de Tema */}
             <div className="space-y-1.5 shrink-0">
               <div className="flex flex-wrap items-center justify-between gap-1.5">
@@ -2069,7 +2050,7 @@ export default function TabletMobilePosPage() {
             {/* MODO 1: CUADRÍCULA ADAPTATIVA (2 COLS MÓVIL, 3-5 COLS EN TABLET)  */}
             {/* ================================================================= */}
             {cardViewMode === 'food' && (
-              <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain touch-pan-y p-1 pb-24 scrollbar-none catalog-scroll-area bg-[#070a12]" style={{ backgroundColor: "#070a12" }}>
+              <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain touch-pan-y p-1 pb-24 scrollbar-none catalog-scroll-area transition-colors duration-200" style={{ backgroundColor: currentCanvas.bg }}>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2.5 sm:gap-3">
                   {filteredProducts.map((prod) => {
                     const qtyInCart = getCartQty(prod.id);
@@ -2077,9 +2058,11 @@ export default function TabletMobilePosPage() {
                       <div
                         key={prod.id}
                         onClick={() => addToCart(prod)}
-                        className="group border rounded-2xl overflow-hidden transition-all duration-150 cursor-pointer flex flex-col justify-between active:scale-[0.96] active:brightness-110 active:border-amber-400 select-none shadow-md bg-[#0e1726] border-slate-800 hover:border-amber-500/50"
+                        className={`group border rounded-2xl overflow-hidden transition-all duration-150 cursor-pointer flex flex-col justify-between active:scale-[0.96] active:brightness-110 active:border-amber-400 select-none shadow-md ${
+                          isLight ? 'bg-white border-slate-200 shadow-xs' : 'bg-[#0e1726] border-slate-800 hover:border-amber-500/50'
+                        }`}
                       >
-                        <div className="relative h-24 sm:h-28 w-full bg-slate-900/80 flex items-center justify-center p-2 overflow-hidden">
+                        <div className={`relative h-24 sm:h-28 w-full flex items-center justify-center p-2 overflow-hidden ${isLight ? 'bg-slate-50' : 'bg-slate-900/80'}`}>
                           <img
                             src={prod.image}
                             alt={prod.name}
@@ -2098,7 +2081,7 @@ export default function TabletMobilePosPage() {
 
                         <div className="p-2.5 flex-1 flex flex-col justify-between space-y-1.5">
                           <div>
-                            <h3 className="text-[12px] font-black line-clamp-1 leading-tight text-white">
+                            <h3 className={`text-[12px] font-black line-clamp-1 leading-tight ${isLight ? 'text-slate-900' : 'text-white'}`}>
                               {prod.name}
                             </h3>
                             <p className="text-[9.5px] text-slate-400 line-clamp-1 mt-0.5">
@@ -2140,7 +2123,7 @@ export default function TabletMobilePosPage() {
             {/* MODO 2: LISTA CON CARDS GRANDES PARA TABLET                       */}
             {/* ================================================================= */}
             {cardViewMode === 'lista' && (
-              <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain touch-pan-y p-1 pb-24 scrollbar-none catalog-scroll-area bg-[#070a12]" style={{ backgroundColor: "#070a12" }}>
+              <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain touch-pan-y p-1 pb-24 scrollbar-none catalog-scroll-area transition-colors duration-200" style={{ backgroundColor: currentCanvas.bg }}>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                   {filteredProducts.map((prod) => {
                     const qtyInCart = getCartQty(prod.id);
@@ -2148,10 +2131,14 @@ export default function TabletMobilePosPage() {
                       <div
                         key={prod.id}
                         onClick={() => addToCart(prod)}
-                        className="p-3 border rounded-2xl flex items-center justify-between gap-3 transition-all cursor-pointer active:scale-[0.98] active:brightness-105 active:border-amber-400 select-none shadow-sm bg-slate-900/90 border-slate-800 hover:border-amber-500/40"
+                        className={`p-3 border rounded-2xl flex items-center justify-between gap-3 transition-all cursor-pointer active:scale-[0.98] active:brightness-105 active:border-amber-400 select-none shadow-sm ${
+                          isLight ? 'bg-white border-slate-200 shadow-xs' : 'bg-slate-900/90 border-slate-800 hover:border-amber-500/40'
+                        }`}
                       >
                         <div className="flex items-center gap-3 min-w-0 flex-1">
-                          <div className="relative shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden bg-slate-900/80 border border-slate-700 flex items-center justify-center p-1.5">
+                          <div className={`relative shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden border flex items-center justify-center p-1.5 ${
+                            isLight ? 'bg-slate-50 border-slate-200' : 'bg-slate-900/80 border-slate-700'
+                          }`}>
                             <img
                               src={prod.image}
                               alt={prod.name}
@@ -2172,7 +2159,7 @@ export default function TabletMobilePosPage() {
                                 {prod.sku}
                               </span>
                             </div>
-                            <h4 className="text-xs font-black truncate text-white mt-0.5">
+                            <h4 className={`text-xs font-black truncate mt-0.5 ${isLight ? 'text-slate-900' : 'text-white'}`}>
                               {prod.name}
                             </h4>
                             <span className="text-[10px] text-slate-400 block line-clamp-1 mt-0.5">

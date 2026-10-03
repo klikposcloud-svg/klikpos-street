@@ -70,11 +70,11 @@ export const TabletPosBottomNav: React.FC<TabletPosBottomNavProps> = ({
     <>
       <style jsx global>{`
         :root {
-          --nav-bg: #090d16;
-          --nav-border: rgba(255, 255, 255, 0.14);
+          --nav-bg: ${isLight ? '#ffffff' : '#090d16'};
+          --nav-border: ${isLight ? 'rgba(0, 0, 0, 0.08)' : 'rgba(255, 255, 255, 0.14)'};
           --color-neon: ${primaryColor || '#f59e0b'};
           --color-neon-glow: ${primaryColor ? primaryColor + '66' : 'rgba(245, 158, 11, 0.45)'};
-          --color-inactive: #94a3b8;
+          --color-inactive: ${isLight ? '#64748b' : '#94a3b8'};
         }
 
         /* Backdrop INVISIBLE para cerrar al tocar fuera SIN difuminar ni oscurecer la página activa */
@@ -92,7 +92,7 @@ export const TabletPosBottomNav: React.FC<TabletPosBottomNavProps> = ({
           pointer-events: auto;
         }
 
-        /* Contenedor maestro del Navbar y del Abanico Trasero */
+        /* Contenedor maestro del Navbar y del Abanico Trasero (Adaptativo Móvil y Tablet Horizontal) */
         .pos-navbar-wrapper {
           position: fixed;
           bottom: 0;
@@ -100,8 +100,8 @@ export const TabletPosBottomNav: React.FC<TabletPosBottomNavProps> = ({
           right: 0;
           height: 74px;
           width: 100%;
-          max-width: 680px;
-          margin: 0 auto;
+          max-width: 100%;
+          margin: 0;
           z-index: 50;
           user-select: none;
           pointer-events: none;
@@ -249,16 +249,16 @@ export const TabletPosBottomNav: React.FC<TabletPosBottomNavProps> = ({
         .pos-navbar__bg svg {
           width: 100%;
           height: 100%;
-          fill: #090d16;
+          fill: ${isLight ? '#ffffff' : '#090d16'};
         }
 
         .pos-navbar__bg path {
-          fill: #090d16;
-          stroke: rgba(255, 255, 255, 0.14);
+          fill: ${isLight ? '#ffffff' : '#090d16'};
+          stroke: ${isLight ? 'rgba(0, 0, 0, 0.08)' : 'rgba(255, 255, 255, 0.14)'};
           stroke-width: 1.5;
         }
 
-        /* Grilla de items con CENTRADO VERTICAL EQUILIBRADO DENTRO DE LA BARRA */
+        /* Grilla de items con CENTRADO VERTICAL EQUILIBRADO Y ADAPTACIÓN HORIZONTAL TABLET */
         .pos-navbar__items {
           position: relative;
           z-index: 52;
@@ -266,8 +266,12 @@ export const TabletPosBottomNav: React.FC<TabletPosBottomNavProps> = ({
           grid-template-columns: 1fr 1fr 1.15fr 1fr 1fr;
           align-items: center;
           height: 100%;
+          max-width: 860px;
+          margin: 0 auto;
           padding-top: 24px;
           padding-bottom: 6px;
+          padding-left: 12px;
+          padding-right: 12px;
           box-sizing: border-box;
         }
 

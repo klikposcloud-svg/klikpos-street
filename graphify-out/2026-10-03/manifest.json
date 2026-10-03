@@ -24,15 +24,15 @@
     "semantic_hash": ""
   },
   "next.config.js": {
-    "mtime": 1790645626.191679,
-    "seen": 1790646466.148495,
-    "ast_hash": "b6a053031b147c224ef4c9319b85a715",
+    "mtime": 1790952690.811147,
+    "seen": 1791060696.685065,
+    "ast_hash": "d1644d66c106d09b1b36ceacb5312b6c",
     "semantic_hash": ""
   },
   "package.json": {
-    "mtime": 1790813053.2246351,
-    "seen": 1790813728.3172412,
-    "ast_hash": "94547043a5bf8b7b06f766135531cf42",
+    "mtime": 1791050048.0920167,
+    "seen": 1791060696.685067,
+    "ast_hash": "b1b6870cee3fa62cee110e10761becf5",
     "semantic_hash": ""
   },
   "postcss.config.js": {
@@ -48,14 +48,14 @@
     "semantic_hash": ""
   },
   "public/sw.js": {
-    "mtime": 1790813140.4782662,
-    "seen": 1790813728.3172495,
-    "ast_hash": "99775fa03cafffbff273bb0adf5a6654",
+    "mtime": 1791058132.8594933,
+    "seen": 1791060696.6850748,
+    "ast_hash": "5b448fb58c345d6207f561d4b9f2f9e4",
     "semantic_hash": ""
   },
   "public/workbox-00a24876.js": {
-    "mtime": 1790813140.4794466,
-    "seen": 1790813728.3172555,
+    "mtime": 1791058132.8594933,
+    "seen": 1791060696.6850858,
     "ast_hash": "2f569fb030b2a09996588b309a8d636e",
     "semantic_hash": "2f569fb030b2a09996588b309a8d636e"
   },
@@ -102,9 +102,9 @@
     "semantic_hash": ""
   },
   "src/app/api/bcv/rate/route.ts": {
-    "mtime": 1790731574.895929,
-    "seen": 1790770155.5196419,
-    "ast_hash": "bbb66a21062dc9c8c923fbb445892662",
+    "mtime": 1790984623.701488,
+    "seen": 1791060696.6853116,
+    "ast_hash": "f9c830baf2201ddfd1693719320049b8",
     "semantic_hash": ""
   },
   "src/app/api/delivery/orders/[id]/route.ts": {
@@ -132,15 +132,15 @@
     "semantic_hash": "3624c1621217346db4a25df077d87051"
   },
   "src/app/api/payments/webhook/route.ts": {
-    "mtime": 1790617804.6767457,
-    "seen": 1790624246.5781715,
-    "ast_hash": "cd5d9374f2bb6bce60c39474b9690d00",
+    "mtime": 1790903051.428657,
+    "seen": 1791060696.6853218,
+    "ast_hash": "8013359e9a307a3e974a46094593179c",
     "semantic_hash": ""
   },
   "src/app/api/products/download-image/route.ts": {
-    "mtime": 1790731522.5845914,
-    "seen": 1790770155.5197697,
-    "ast_hash": "15e44552c74bab54774dca0f51bdfeb7",
+    "mtime": 1790903084.5524926,
+    "seen": 1791060696.6853237,
+    "ast_hash": "2b00df97f801c7f7f71c967b52220534",
     "semantic_hash": ""
   },
   "src/app/api/products/search-images/route.ts": {
@@ -282,15 +282,15 @@
     "semantic_hash": ""
   },
   "src/app/dashboard/layout.tsx": {
-    "mtime": 1790809433.7560315,
-    "seen": 1790813728.3175642,
-    "ast_hash": "7370352a4ce2f08431997de06a8bdeaa",
+    "mtime": 1790891135.6282904,
+    "seen": 1791060696.6853878,
+    "ast_hash": "b33196bf3043a487463db32ff0fa0afa",
     "semantic_hash": ""
   },
   "src/app/dashboard/pos/page.tsx": {
-    "mtime": 1790802044.2501907,
-    "seen": 1790813728.3175714,
-    "ast_hash": "efac67dcb9d59e206fac293131f3238d",
+    "mtime": 1790891095.7888594,
+    "seen": 1791060696.6853936,
+    "ast_hash": "bb172667ab07743ad6d24376b12d5816",
     "semantic_hash": ""
   },
   "src/app/dashboard/reports/page.tsx": {
@@ -306,9 +306,9 @@
     "semantic_hash": ""
   },
   "src/app/dashboard/settings/page.tsx": {
-    "mtime": 1790718723.0187292,
-    "seen": 1790770155.5200574,
-    "ast_hash": "b760e3d5474028effb4c61700bfd0839",
+    "mtime": 1790958234.896085,
+    "seen": 1791060696.6853988,
+    "ast_hash": "4ba8aa1a8eca90ad8d55d736576eb1c4",
     "semantic_hash": ""
   },
   "src/app/delivery-app/page.tsx": {
@@ -318,9 +318,9 @@
     "semantic_hash": "17cfd67cb8f05cd133d4d0945ff3baa8"
   },
   "src/app/layout.tsx": {
-    "mtime": 1790477706.1604974,
-    "seen": 1790482593.255664,
-    "ast_hash": "20df24aca495d8334508348f7eab3e88",
+    "mtime": 1790963578.7221217,
+    "seen": 1791060696.6854048,
+    "ast_hash": "598657a40e311dd04ad312a0d763230e",
     "semantic_hash": ""
   },
   "src/app/login/page.tsx": {
@@ -390,9 +390,9 @@
     "semantic_hash": "8d93fddd557cb002c76c8d2c32875a72"
   },
   "src/components/LicenseActivationModal.tsx": {
-    "mtime": 1790768357.3052423,
-    "seen": 1790770155.520198,
-    "ast_hash": "1a3973268b603d7d144b6d3b5c6e8090",
+    "mtime": 1791038320.3987238,
+    "seen": 1791060696.6854472,
+    "ast_hash": "922d02d68e3ff857005eb88a98afadcf",
     "semantic_hash": ""
   },
   "src/components/LockScreenModal.tsx": {
@@ -450,10 +450,10 @@
     "semantic_hash": ""
   },
   "src/lib/background-remover.ts": {
-    "mtime": 1789915288.4932847,
-    "seen": 1790363920.7984648,
-    "ast_hash": "75d19122e4e5985457a59ebc0efdca52",
-    "semantic_hash": "75d19122e4e5985457a59ebc0efdca52"
+    "mtime": 1791045197.4058561,
+    "seen": 1791060696.6855283,
+    "ast_hash": "64b2812e7d5ae041d9dfeea5aeddd106",
+    "semantic_hash": ""
   },
   "src/lib/backup/cloud-backup-service.ts": {
     "mtime": 1789789205.75674,
@@ -486,9 +486,9 @@
     "semantic_hash": "0e96830335624dc2f42e5532073b17d5"
   },
   "src/lib/firebase/cloud-sync-service.ts": {
-    "mtime": 1790801941.425701,
-    "seen": 1790813728.3177145,
-    "ast_hash": "14ebccf115e3de7b17945cebc4dce07f",
+    "mtime": 1790977643.9586582,
+    "seen": 1791060696.6855528,
+    "ast_hash": "80a1ca33f468b920c412b80749864039",
     "semantic_hash": ""
   },
   "src/lib/firebase/config.ts": {
@@ -636,9 +636,9 @@
     "semantic_hash": ""
   },
   "src/lib/services/bcv-service.ts": {
-    "mtime": 1790370817.3492131,
-    "seen": 1790372297.1816535,
-    "ast_hash": "1f6f50c56cfe927b93864b668044875b",
+    "mtime": 1790984611.5567834,
+    "seen": 1791060696.6856253,
+    "ast_hash": "186ee4d1d1f63dbcc3261ed34ce4105d",
     "semantic_hash": ""
   },
   "src/lib/services/sale-void-service.ts": {
@@ -822,16 +822,16 @@
     "semantic_hash": "7234dc11b57528b78040847b8173e939"
   },
   "tailwind.config.js": {
-    "mtime": 1790115967.3947408,
-    "seen": 1790363920.7985492,
-    "ast_hash": "f1cec44bddb0657ae8902a72098ff871",
-    "semantic_hash": "f1cec44bddb0657ae8902a72098ff871"
+    "mtime": 1791047631.4408965,
+    "seen": 1791060696.6857111,
+    "ast_hash": "42cb6e563cc00699f16c975039901690",
+    "semantic_hash": ""
   },
   "tsconfig.json": {
-    "mtime": 1789834147.8042583,
-    "seen": 1790363920.7985506,
-    "ast_hash": "61d848d07c48310c99fb7e7f1022cf0e",
-    "semantic_hash": "61d848d07c48310c99fb7e7f1022cf0e"
+    "mtime": 1791045357.763951,
+    "seen": 1791060696.6857133,
+    "ast_hash": "a5792f53610e9ab76078e767c3f9d1c7",
+    "semantic_hash": ""
   },
   "venematic-desktop/.eslintrc.json": {
     "mtime": 1790117319.5915616,
@@ -840,8 +840,8 @@
     "semantic_hash": "0f54c4f82cffc8c86bb3fbe3e98739d5"
   },
   "venematic-desktop/android/app/build.gradle": {
-    "mtime": 1790813050.9114199,
-    "seen": 1790813728.3178952,
+    "mtime": 1791059685.998546,
+    "seen": 1791060696.6857176,
     "ast_hash": "1b6d7585867593fe9d7b06b973fd4537",
     "semantic_hash": ""
   },
@@ -912,9 +912,9 @@
     "semantic_hash": ""
   },
   "venematic-desktop/package.json": {
-    "mtime": 1790813053.5054178,
-    "seen": 1790813728.3179255,
-    "ast_hash": "19b34e94d7bcccb2c80efa131f83c51a",
+    "mtime": 1791050048.977677,
+    "seen": 1791060696.6857512,
+    "ast_hash": "2b33860ec85c4c6e8b61d909db740fd9",
     "semantic_hash": ""
   },
   "venematic-desktop/postcss.config.js": {
@@ -930,9 +930,9 @@
     "semantic_hash": ""
   },
   "venematic-desktop/script/build-staging.ps1": {
-    "mtime": 1790637460.9941263,
-    "seen": 1790639385.0761485,
-    "ast_hash": "f431dc7410728ff138a0a13d7bcc6fb6",
+    "mtime": 1790913498.427703,
+    "seen": 1791060696.685766,
+    "ast_hash": "bf2e5bf28b3a55b7d6afd9b6592f5871",
     "semantic_hash": ""
   },
   "venematic-desktop/src-tauri/Cargo.toml": {
@@ -996,21 +996,21 @@
     "semantic_hash": ""
   },
   "venematic-desktop/src/app/api/bcv/rate/route.ts": {
-    "mtime": 1790731596.6930275,
-    "seen": 1790770155.522189,
-    "ast_hash": "3098c27c76a06affaf92449626d19c71",
+    "mtime": 1790984648.1982055,
+    "seen": 1791060696.6858008,
+    "ast_hash": "3b7d2ea6eab48e79624d8f49d497502f",
     "semantic_hash": ""
   },
   "venematic-desktop/src/app/api/payments/webhook/route.ts": {
-    "mtime": 1790295857.1762774,
-    "seen": 1790363920.7986007,
-    "ast_hash": "879b13ca72d893b95181d9acaeb72107",
-    "semantic_hash": "879b13ca72d893b95181d9acaeb72107"
+    "mtime": 1790903051.428657,
+    "seen": 1791060696.685811,
+    "ast_hash": "8013359e9a307a3e974a46094593179c",
+    "semantic_hash": ""
   },
   "venematic-desktop/src/app/api/products/download-image/route.ts": {
-    "mtime": 1790731562.067545,
-    "seen": 1790770155.5222201,
-    "ast_hash": "fc7df4fdcde388aa063f6ea8eaeb7912",
+    "mtime": 1790903084.5524926,
+    "seen": 1791060696.6858127,
+    "ast_hash": "2b00df97f801c7f7f71c967b52220534",
     "semantic_hash": ""
   },
   "venematic-desktop/src/app/api/products/search-images/route.ts": {
@@ -1092,15 +1092,15 @@
     "semantic_hash": ""
   },
   "venematic-desktop/src/app/dashboard/layout.tsx": {
-    "mtime": 1790809433.7560315,
-    "seen": 1790813728.3180416,
-    "ast_hash": "7370352a4ce2f08431997de06a8bdeaa",
+    "mtime": 1790891135.6282904,
+    "seen": 1791060696.6858804,
+    "ast_hash": "b33196bf3043a487463db32ff0fa0afa",
     "semantic_hash": ""
   },
   "venematic-desktop/src/app/dashboard/pos/page.tsx": {
-    "mtime": 1790802044.2501907,
-    "seen": 1790813728.3180473,
-    "ast_hash": "efac67dcb9d59e206fac293131f3238d",
+    "mtime": 1790891095.7888594,
+    "seen": 1791060696.685886,
+    "ast_hash": "bb172667ab07743ad6d24376b12d5816",
     "semantic_hash": ""
   },
   "venematic-desktop/src/app/dashboard/reports/page.tsx": {
@@ -1116,9 +1116,9 @@
     "semantic_hash": ""
   },
   "venematic-desktop/src/app/dashboard/settings/page.tsx": {
-    "mtime": 1790545558.3330834,
-    "seen": 1790553340.51551,
-    "ast_hash": "a45da1ebcc16e9e5c77cb23fd0380e5d",
+    "mtime": 1790952239.6069095,
+    "seen": 1791060696.685892,
+    "ast_hash": "a5826c70fe6092077134a154d7bec64e",
     "semantic_hash": ""
   },
   "venematic-desktop/src/app/layout.tsx": {
@@ -1236,9 +1236,9 @@
     "semantic_hash": "0e96830335624dc2f42e5532073b17d5"
   },
   "venematic-desktop/src/lib/firebase/cloud-sync-service.ts": {
-    "mtime": 1790801941.425701,
-    "seen": 1790813728.318161,
-    "ast_hash": "14ebccf115e3de7b17945cebc4dce07f",
+    "mtime": 1790912442.1975045,
+    "seen": 1791060696.6860101,
+    "ast_hash": "21adf239ea1a9bbed16134b1dcf49931",
     "semantic_hash": ""
   },
   "venematic-desktop/src/lib/firebase/config.ts": {
@@ -1344,9 +1344,9 @@
     "semantic_hash": ""
   },
   "venematic-desktop/src/lib/services/bcv-service.ts": {
-    "mtime": 1790370817.3492131,
-    "seen": 1790460441.6094809,
-    "ast_hash": "1f6f50c56cfe927b93864b668044875b",
+    "mtime": 1790984637.0542717,
+    "seen": 1791060696.6860738,
+    "ast_hash": "186ee4d1d1f63dbcc3261ed34ce4105d",
     "semantic_hash": ""
   },
   "venematic-desktop/src/lib/services/sale-void-service.ts": {
@@ -1572,9 +1572,9 @@
     "semantic_hash": ""
   },
   "dist-apk/VERIFICACION_HASHES_APK.txt": {
-    "mtime": 1790471117.2740047,
-    "seen": 1790482593.3202956,
-    "ast_hash": "4bb3e01938a84b389774d90fe4f21ce9",
+    "mtime": 1790891184.7327046,
+    "seen": 1791060696.6865485,
+    "ast_hash": "23c7b7614be302778a9176d2acc3a2b7",
     "semantic_hash": ""
   },
   "dist-installer/INSTRUCCIONES_ACTIVACION_LICENCIAS.txt": {
@@ -1590,9 +1590,9 @@
     "semantic_hash": ""
   },
   "dist-installer/VERIFICACION_HASHES.txt": {
-    "mtime": 1790813584.386868,
-    "seen": 1790813728.3186357,
-    "ast_hash": "bb1d1ca24073f05d9da670103f6fb9d1",
+    "mtime": 1790824733.5112834,
+    "seen": 1791060696.6865554,
+    "ast_hash": "8c563fc1c450b215a525e8662fb8b74b",
     "semantic_hash": ""
   },
   "docs/INFORME_CLIENTES_VENEMATIC_POS.md": {
@@ -1980,9 +1980,9 @@
     "semantic_hash": ""
   },
   "public/admin-mobile.html": {
-    "mtime": 1790556831.7871077,
-    "seen": 1790557064.3371239,
-    "ast_hash": "39ad2e1e307aa90f7719a86f334ae43c",
+    "mtime": 1790890945.5242908,
+    "seen": 1791060696.686665,
+    "ast_hash": "94f30e1a3c09524e3d945ab9ce09fbc7",
     "semantic_hash": ""
   },
   "docs/INFORME_GENERAL_SISTEMA_Y_VERSIONES.md": {
@@ -2418,9 +2418,9 @@
     "semantic_hash": ""
   },
   "venematic-desktop/public/admin-mobile.html": {
-    "mtime": 1790556843.4694724,
-    "seen": 1790557064.337176,
-    "ast_hash": "8e928c118664db40fc2afa589d5be2fd",
+    "mtime": 1790890945.5242908,
+    "seen": 1791060696.6867077,
+    "ast_hash": "94f30e1a3c09524e3d945ab9ce09fbc7",
     "semantic_hash": ""
   },
   "scripts/apply-all-logos.ps1": {
@@ -2790,15 +2790,15 @@
     "semantic_hash": ""
   },
   "dist-installer/version.json": {
-    "mtime": 1790813053.2318013,
-    "seen": 1790813728.317222,
-    "ast_hash": "8ab44a0a5ea8591c0e0feca96641bef9",
+    "mtime": 1791050048.0970664,
+    "seen": 1791060696.6850023,
+    "ast_hash": "bb2c79b50c89945d9be89b5bd1da84ac",
     "semantic_hash": ""
   },
   "klikpos-releases/version.json": {
-    "mtime": 1790813053.2351844,
-    "seen": 1790813728.3172348,
-    "ast_hash": "8ab44a0a5ea8591c0e0feca96641bef9",
+    "mtime": 1791050048.099285,
+    "seen": 1791060696.685063,
+    "ast_hash": "bb2c79b50c89945d9be89b5bd1da84ac",
     "semantic_hash": ""
   },
   "src/lib/data/master-catalog.json": {
@@ -2826,9 +2826,9 @@
     "semantic_hash": ""
   },
   "scripts/enhance-and-rebrand-mobile.js": {
-    "mtime": 1790622689.9365156,
-    "seen": 1790624246.5781069,
-    "ast_hash": "72d6d3c6fe0d371026abcb7582ef1e60",
+    "mtime": 1790966696.4064987,
+    "seen": 1791060696.6851776,
+    "ast_hash": "bb0762bc70906e79998da677ed616a5f",
     "semantic_hash": ""
   },
   "scripts/repair-mobile-html.js": {
@@ -2874,9 +2874,9 @@
     "semantic_hash": ""
   },
   "public/version.json": {
-    "mtime": 1790813053.2288733,
-    "seen": 1790813728.3172526,
-    "ast_hash": "8ab44a0a5ea8591c0e0feca96641bef9",
+    "mtime": 1791050048.0948522,
+    "seen": 1791060696.6850822,
+    "ast_hash": "bb2c79b50c89945d9be89b5bd1da84ac",
     "semantic_hash": ""
   },
   "scripts/fix-css.js": {
@@ -2886,9 +2886,9 @@
     "semantic_hash": ""
   },
   "version.json": {
-    "mtime": 1790813053.221604,
-    "seen": 1790813728.3183305,
-    "ast_hash": "8ab44a0a5ea8591c0e0feca96641bef9",
+    "mtime": 1791051405.9321907,
+    "seen": 1791060696.6861625,
+    "ast_hash": "d76d85a3197466e2b4b4c654266c37a6",
     "semantic_hash": ""
   },
   ".agents/rules/klikpos-strict-ui-and-zero-regressions.md": {
@@ -3000,9 +3000,9 @@
     "semantic_hash": ""
   },
   "scripts/publish-release-to-github.js": {
-    "mtime": 1790637521.8553224,
-    "seen": 1790639385.0754592,
-    "ast_hash": "996b81c8f22ebaff49fb42da438a8998",
+    "mtime": 1791056700.7315142,
+    "seen": 1791060696.6852143,
+    "ast_hash": "73216c3553fc8ef397b401313891e8b3",
     "semantic_hash": ""
   },
   "scripts/test_big_button_click.js": {
@@ -3030,27 +3030,27 @@
     "semantic_hash": ""
   },
   "src/app/tablet-pos/page.tsx": {
-    "mtime": 1790643058.7182722,
-    "seen": 1790644184.5506835,
-    "ast_hash": "10728e0e27a59d7ec3a842ddc44a820e",
+    "mtime": 1791057900.2994244,
+    "seen": 1791060696.6854224,
+    "ast_hash": "b5826a194799644ff48d930291d4260a",
     "semantic_hash": ""
   },
   "venematic-desktop/src/app/tablet-pos/page.tsx": {
-    "mtime": 1790561088.0580165,
-    "seen": 1790562053.3027027,
-    "ast_hash": "6f7443e53092de628594beff66b65d4a",
+    "mtime": 1790989503.8574042,
+    "seen": 1791060696.6859097,
+    "ast_hash": "2745ba2c6b3ed00e656dcf88ec7fca8f",
     "semantic_hash": ""
   },
   "venematic-desktop/version.json": {
-    "mtime": 1790813053.5030522,
-    "seen": 1790813728.3183286,
-    "ast_hash": "8ab44a0a5ea8591c0e0feca96641bef9",
+    "mtime": 1791051411.668825,
+    "seen": 1791060696.6861584,
+    "ast_hash": "d76d85a3197466e2b4b4c654266c37a6",
     "semantic_hash": ""
   },
   "src/lib/licensing/trial-manager.ts": {
-    "mtime": 1790549067.1095464,
-    "seen": 1790553340.5122075,
-    "ast_hash": "dca405c0702dcfd12d59b829105da6f4",
+    "mtime": 1791048632.576183,
+    "seen": 1791060696.6856043,
+    "ast_hash": "17e8bf1cd5bf891fa9fe7d3100a1ae41",
     "semantic_hash": ""
   },
   "src/lib/sync/firestore-editions-sync.ts": {
@@ -3072,38 +3072,38 @@
     "semantic_hash": ""
   },
   "DISTRIBUCION_KLIKPOS/00_GUIA_OFICIAL_EDICIONES_KLIKPOS.txt": {
-    "mtime": 1790803339.0154352,
-    "seen": 1790813728.3185973,
+    "mtime": 1790816402.8413894,
+    "seen": 1791060696.686456,
     "ast_hash": "df3b9497fb91c5dda79264f573d6a5f8",
     "semantic_hash": ""
   },
   "DISTRIBUCION_KLIKPOS/01_KlikPOS_Satelite_PC_Contingencia/LEEME_SATELITE_PC.txt": {
-    "mtime": 1790803338.630761,
-    "seen": 1790813728.3186023,
+    "mtime": 1790816402.2283688,
+    "seen": 1791060696.6864612,
     "ast_hash": "44dbd2b42b412de250054b628c9ff452",
     "semantic_hash": ""
   },
   "DISTRIBUCION_KLIKPOS/02_Combo_Empresarial_Full/LEEME_DESKTOP_EMPRESARIAL.txt": {
-    "mtime": 1790803338.8235416,
-    "seen": 1790813728.3186042,
+    "mtime": 1790816402.4135952,
+    "seen": 1791060696.686464,
     "ast_hash": "04c50cced870a37ac2114a554f60ab92",
     "semantic_hash": ""
   },
   "DISTRIBUCION_KLIKPOS/03_KlikPOS_Tablet_Standalone_Mesas/LEEME_TABLET_STANDALONE.txt": {
-    "mtime": 1790803338.9315596,
-    "seen": 1790813728.3186064,
+    "mtime": 1790816402.691872,
+    "seen": 1791060696.6864662,
     "ast_hash": "a3c41ad3b9cd7520c3fe5ce2d9dce0f7",
     "semantic_hash": ""
   },
   "DISTRIBUCION_KLIKPOS/04_KlikPOS_Movil_Full_Autonomo_Nube/LEEME_MOVIL_AUTONOMO.txt": {
-    "mtime": 1790803338.9801445,
-    "seen": 1790813728.318608,
+    "mtime": 1790816402.768435,
+    "seen": 1791060696.6864684,
     "ast_hash": "1cfef33f874ccd4c0b16f1b375d186ac",
     "semantic_hash": ""
   },
   "DISTRIBUCION_KLIKPOS/05_KlikPOS_Movil_Full_Para_PC/LEEME_MOVIL_FULL_PC.txt": {
-    "mtime": 1790803339.011748,
-    "seen": 1790813728.3186102,
+    "mtime": 1790816402.8346071,
+    "seen": 1791060696.6864705,
     "ast_hash": "cc3bc49110750e053e24974817669aa3",
     "semantic_hash": ""
   },
@@ -3114,15 +3114,15 @@
     "semantic_hash": ""
   },
   "src/app/api/system/update/route.ts": {
-    "mtime": 1790617773.9474354,
-    "seen": 1790624246.5781937,
-    "ast_hash": "36ce9b9ab7812678cba1465f88bfdc95",
+    "mtime": 1790903064.7260232,
+    "seen": 1791060696.6853492,
+    "ast_hash": "25e44f74b28874ae8d9be12d46651bda",
     "semantic_hash": ""
   },
   "venematic-desktop/src/app/api/system/update/route.ts": {
-    "mtime": 1790554706.4749093,
-    "seen": 1790557064.3359306,
-    "ast_hash": "2d153c7d20c260d158231028a8f318a0",
+    "mtime": 1790903064.7260232,
+    "seen": 1791060696.6858423,
+    "ast_hash": "25e44f74b28874ae8d9be12d46651bda",
     "semantic_hash": ""
   },
   "Logo Klik-POS/K logo white mini.png": {
@@ -3948,27 +3948,27 @@
     "semantic_hash": ""
   },
   "KlikPOS Release/01_KlikPOS_Lite_Desktop/LEEME_KLIKPOS_LITE.txt": {
-    "mtime": 1790813330.3327289,
-    "seen": 1790813728.3186126,
+    "mtime": 1790824493.6877756,
+    "seen": 1791060696.6865203,
     "ast_hash": "0f1b4b9f1c722f14251bf79e1a3fc61a",
     "semantic_hash": ""
   },
   "KlikPOS Release/02_KlikPOS_Pro_Desktop/LEEME_KLIKPOS_PRO.txt": {
-    "mtime": 1790813491.9409611,
-    "seen": 1790813728.3186145,
+    "mtime": 1790824612.5330265,
+    "seen": 1791060696.6865227,
     "ast_hash": "3870d3d0599b83e2d9c76c56f5c98b22",
     "semantic_hash": ""
   },
   "KlikPOS Release/03_KlikPOS_Elite_Desktop/LEEME_KLIKPOS_ELITE.txt": {
-    "mtime": 1790813583.199883,
-    "seen": 1790813728.3186169,
+    "mtime": 1790824731.5614989,
+    "seen": 1791060696.686525,
     "ast_hash": "fd1bfcad47a4e6273f8e2faa3b3702df",
     "semantic_hash": ""
   },
   "KlikPOS Release/VERIFICACION_HASHES.txt": {
-    "mtime": 1790813584.3838532,
-    "seen": 1790813728.3186185,
-    "ast_hash": "bb1d1ca24073f05d9da670103f6fb9d1",
+    "mtime": 1790824733.5061834,
+    "seen": 1791060696.6865304,
+    "ast_hash": "8c563fc1c450b215a525e8662fb8b74b",
     "semantic_hash": ""
   },
   "src/app/api/telemetry/errors/route.ts": {
@@ -4152,9 +4152,9 @@
     "semantic_hash": ""
   },
   "src/components/pos/PosScannerModal.tsx": {
-    "mtime": 1790791508.1332343,
-    "seen": 1790813728.3176785,
-    "ast_hash": "96006e989d4f0d1837c6afd91675a799",
+    "mtime": 1790852639.3038156,
+    "seen": 1791060696.6854923,
+    "ast_hash": "14acdc3c0551e87f16f2bb0c6acc9457",
     "semantic_hash": ""
   },
   "src/components/pos/PosTouchKeypad.tsx": {
@@ -4248,9 +4248,9 @@
     "semantic_hash": ""
   },
   "venematic-desktop/src/components/pos/PosScannerModal.tsx": {
-    "mtime": 1790791508.1332343,
-    "seen": 1790813728.3181303,
-    "ast_hash": "96006e989d4f0d1837c6afd91675a799",
+    "mtime": 1790852639.3038156,
+    "seen": 1791060696.6859689,
+    "ast_hash": "14acdc3c0551e87f16f2bb0c6acc9457",
     "semantic_hash": ""
   },
   "venematic-desktop/src/components/pos/PosTouchKeypad.tsx": {
@@ -4290,9 +4290,9 @@
     "semantic_hash": ""
   },
   "cpanel-admin-panel/index.html": {
-    "mtime": 1790806869.8371947,
-    "seen": 1790813728.3186233,
-    "ast_hash": "d858efd3d036d1b2963885dd70f4d87f",
+    "mtime": 1791054309.7414217,
+    "seen": 1791060696.686542,
+    "ast_hash": "8b2a04d812a632e2db71340e1e7c9a5c",
     "semantic_hash": ""
   },
   "docs/DIRECTIVA_MAESTRA_INGENIERIA_Y_PROMPT_MAESTRO.md": {
@@ -4332,9 +4332,9 @@
     "semantic_hash": ""
   },
   "tools/developer/KLIKPOS_ADMIN_STUDIO.html": {
-    "mtime": 1790806869.8371947,
-    "seen": 1790813728.3187377,
-    "ast_hash": "d858efd3d036d1b2963885dd70f4d87f",
+    "mtime": 1791054309.749946,
+    "seen": 1791060696.6866837,
+    "ast_hash": "8b2a04d812a632e2db71340e1e7c9a5c",
     "semantic_hash": ""
   },
   "Logo Klik-POS/Klikpos_brand_guidelines_present\u2026_2K_20260926140354.jpg": {
@@ -4353,6 +4353,1176 @@
     "mtime": 1790444829.8696122,
     "seen": 1790813728.3188133,
     "ast_hash": "8e3116efc052dd49dbe92b2d7e7ba385",
+    "semantic_hash": ""
+  },
+  "INFORME_INGENIERIA_FLOTA_FIRESTORE.json": {
+    "mtime": 1790970627.2995398,
+    "seen": 1791060696.684989,
+    "ast_hash": "d3f640f609ace3df8227594876df5855",
+    "semantic_hash": ""
+  },
+  "kliko/apps/kliko-matrix/package.json": {
+    "mtime": 1790993238.0,
+    "seen": 1791060696.6850126,
+    "ast_hash": "6c023231d65c5381cb80752505a62a0d",
+    "semantic_hash": ""
+  },
+  "kliko/apps/kliko-matrix/src/App.tsx": {
+    "mtime": 1790995042.7253866,
+    "seen": 1791060696.685015,
+    "ast_hash": "02adb54ef69c9d3794c85fea990e813b",
+    "semantic_hash": ""
+  },
+  "kliko/apps/kliko-matrix/src/components/common/KlikoDocker.tsx": {
+    "mtime": 1790992124.0,
+    "seen": 1791060696.6850185,
+    "ast_hash": "e6e8993f19fc378451699ea8c64a8c2d",
+    "semantic_hash": ""
+  },
+  "kliko/apps/kliko-matrix/src/components/common/KlikoHeader.tsx": {
+    "mtime": 1790992116.0,
+    "seen": 1791060696.6850207,
+    "ast_hash": "5c4a17f427b6daa51de7c372a367e2d6",
+    "semantic_hash": ""
+  },
+  "kliko/apps/kliko-matrix/src/components/common/KlikoLogo.tsx": {
+    "mtime": 1790994732.197755,
+    "seen": 1791060696.6850235,
+    "ast_hash": "67bc42982853806aeda597120f8a9056",
+    "semantic_hash": ""
+  },
+  "kliko/apps/kliko-matrix/src/components/customer/AlliedBrandsCarousel.tsx": {
+    "mtime": 1790995014.9354222,
+    "seen": 1791060696.6850252,
+    "ast_hash": "b090a4daedfc29a60cba58d830505e6e",
+    "semantic_hash": ""
+  },
+  "kliko/apps/kliko-matrix/src/components/customer/FeaturedDishesCarousel.tsx": {
+    "mtime": 1790994992.2974055,
+    "seen": 1791060696.6850286,
+    "ast_hash": "df03346079363e73294497ad5968c011",
+    "semantic_hash": ""
+  },
+  "kliko/apps/kliko-matrix/src/components/customer/KlikoGamificationBar.tsx": {
+    "mtime": 1790995003.378211,
+    "seen": 1791060696.685032,
+    "ast_hash": "a03bb4afd1a2e6ae9ea429fc3c2a915f",
+    "semantic_hash": ""
+  },
+  "kliko/apps/kliko-matrix/src/components/customer/KlikoHeroBanner.tsx": {
+    "mtime": 1790995818.8057845,
+    "seen": 1791060696.6850338,
+    "ast_hash": "a05b1e8877616532a43ed47ad9f60502",
+    "semantic_hash": ""
+  },
+  "kliko/apps/kliko-matrix/src/components/customer/KlikoHubSelector.tsx": {
+    "mtime": 1790993695.7249174,
+    "seen": 1791060696.6850355,
+    "ast_hash": "69458b6b42334ee062111a7b50fc19ba",
+    "semantic_hash": ""
+  },
+  "kliko/apps/kliko-matrix/src/components/customer/LiveActivityTicker.tsx": {
+    "mtime": 1790994977.6642287,
+    "seen": 1791060696.6850374,
+    "ast_hash": "b0129ee6fc20e2fb2709278ddb1a7f5c",
+    "semantic_hash": ""
+  },
+  "kliko/apps/kliko-matrix/src/components/customer/MerchantCard.tsx": {
+    "mtime": 1790992132.0,
+    "seen": 1791060696.6850398,
+    "ast_hash": "a4d7f08477b57ab261f89b8b77c81160",
+    "semantic_hash": ""
+  },
+  "kliko/apps/kliko-matrix/src/components/customer/RoundCategoryList.tsx": {
+    "mtime": 1790995631.7808661,
+    "seen": 1791060696.6850414,
+    "ast_hash": "fabef4152fcb3cdd54434e5b5890e8f4",
+    "semantic_hash": ""
+  },
+  "kliko/apps/kliko-matrix/src/components/wallet/KlikoWalletCard.tsx": {
+    "mtime": 1790993202.0,
+    "seen": 1791060696.685043,
+    "ast_hash": "5fa3e559909c6181b18cb6ebc4517e8c",
+    "semantic_hash": ""
+  },
+  "kliko/apps/kliko-matrix/src/context/ThemeContext.tsx": {
+    "mtime": 1790996374.1324227,
+    "seen": 1791060696.6850448,
+    "ast_hash": "3955957036fa2470d36f4aba3674083a",
+    "semantic_hash": ""
+  },
+  "kliko/apps/kliko-matrix/src/main.tsx": {
+    "mtime": 1790992166.0,
+    "seen": 1791060696.6850467,
+    "ast_hash": "9447666888fa07a460cfca927b829eaf",
+    "semantic_hash": ""
+  },
+  "kliko/apps/kliko-matrix/src/pages/customer/ExplorePage.tsx": {
+    "mtime": 1790995650.3756895,
+    "seen": 1791060696.6850483,
+    "ast_hash": "f50f9673b166f4e9ea0bf65f68bcbb8c",
+    "semantic_hash": ""
+  },
+  "kliko/apps/kliko-matrix/src/pages/customer/OrdersPage.tsx": {
+    "mtime": 1790993202.0,
+    "seen": 1791060696.68505,
+    "ast_hash": "4633867921402392a49acc646e55b2db",
+    "semantic_hash": ""
+  },
+  "kliko/apps/kliko-matrix/tsconfig.json": {
+    "mtime": 1790993238.0,
+    "seen": 1791060696.6850514,
+    "ast_hash": "b14f517660ed367b2417c8cb56b45cc7",
+    "semantic_hash": ""
+  },
+  "kliko/apps/kliko-matrix/vite.config.ts": {
+    "mtime": 1790993194.0,
+    "seen": 1791060696.6850533,
+    "ast_hash": "4c17fbbe92bc9e7b5bb1b27e971cfee3",
+    "semantic_hash": ""
+  },
+  "kliko/packages/design-system/src/theme.ts": {
+    "mtime": 1790992064.0,
+    "seen": 1791060696.685055,
+    "ast_hash": "f14cc8943ab1db143037af580137b12e",
+    "semantic_hash": ""
+  },
+  "kliko/packages/domain-core/src/order.types.ts": {
+    "mtime": 1790993678.0608323,
+    "seen": 1791060696.6850567,
+    "ast_hash": "5ec2b76a54f26b30da154a5fb1d1e9fe",
+    "semantic_hash": ""
+  },
+  "kliko/packages/domain-core/src/stateMachine.ts": {
+    "mtime": 1790993684.5318887,
+    "seen": 1791060696.6850586,
+    "ast_hash": "c84aab626f07ec1c82fd9b025dbbcf5a",
+    "semantic_hash": ""
+  },
+  "kliko/packages/domain-core/src/wallet.types.ts": {
+    "mtime": 1790991676.0,
+    "seen": 1791060696.68506,
+    "ast_hash": "19b656b0f6030e9975fe94157141c8f1",
+    "semantic_hash": ""
+  },
+  "public/version-street.json": {
+    "mtime": 1790954749.4862163,
+    "seen": 1791060696.6850777,
+    "ast_hash": "06bcc0fa280f9e4ff40bb4e884744036",
+    "semantic_hash": ""
+  },
+  "scripts/append-street-css.js": {
+    "mtime": 1790966143.4114475,
+    "seen": 1791060696.6850915,
+    "ast_hash": "3c97c45750152f5841e5f3a7425f5726",
+    "semantic_hash": ""
+  },
+  "scripts/build-all-final-versions.js": {
+    "mtime": 1790913637.2046707,
+    "seen": 1791060696.6851053,
+    "ast_hash": "fc063093729336930867e13625b983f4",
+    "semantic_hash": ""
+  },
+  "scripts/build-klikpos-street-release.js": {
+    "mtime": 1790967100.6882064,
+    "seen": 1791060696.6851153,
+    "ast_hash": "c129fd078d3b69e52ce0962107eee22d",
+    "semantic_hash": ""
+  },
+  "scripts/capture-street-catalog.js": {
+    "mtime": 1790974814.313056,
+    "seen": 1791060696.6851194,
+    "ast_hash": "58cb50aefad4d522ccd81ea050c0c775",
+    "semantic_hash": ""
+  },
+  "scripts/fix-layout-theme.js": {
+    "mtime": 1790963571.5217347,
+    "seen": 1791060696.6851816,
+    "ast_hash": "fbb3754f0d1c744264bf237c4707c698",
+    "semantic_hash": ""
+  },
+  "scripts/fix-lista-container.js": {
+    "mtime": 1790966228.6840827,
+    "seen": 1791060696.685185,
+    "ast_hash": "2b0e73ad26407edc00b55b34b5e94063",
+    "semantic_hash": ""
+  },
+  "scripts/fix-page-bulletproof-dark.js": {
+    "mtime": 1790966166.3734195,
+    "seen": 1791060696.6851878,
+    "ast_hash": "ee4f8061919fe96508e0bca269cecf31",
+    "semantic_hash": ""
+  },
+  "scripts/fix-tablet-pos-instant.js": {
+    "mtime": 1790963586.8686996,
+    "seen": 1791060696.6851897,
+    "ast_hash": "bb1359d7796dc54b5c9a32edec6aa46e",
+    "semantic_hash": ""
+  },
+  "scripts/generate-commercial-flyers.js": {
+    "mtime": 1790824470.5207937,
+    "seen": 1791060696.6851954,
+    "ast_hash": "3ad2ad5d2d46322dfe2bc279b229ed12",
+    "semantic_hash": ""
+  },
+  "scripts/generate-distributor-pdf.js": {
+    "mtime": 1790822242.479446,
+    "seen": 1791060696.6851976,
+    "ast_hash": "8593e4e778da0b68fde1d86467b0eb36",
+    "semantic_hash": ""
+  },
+  "scripts/generate_studio.py": {
+    "mtime": 1791054300.206962,
+    "seen": 1791060696.6851993,
+    "ast_hash": "b949d1b4679b45da19b3f5292bb0162e",
+    "semantic_hash": ""
+  },
+  "scripts/inject-klikai.js": {
+    "mtime": 1790823158.7846458,
+    "seen": 1791060696.6852012,
+    "ast_hash": "ba9a0bc7111d1ff8431b7e1804fe1a94",
+    "semantic_hash": ""
+  },
+  "scripts/patch-settings.js": {
+    "mtime": 1790942798.203326,
+    "seen": 1791060696.6852102,
+    "ast_hash": "e4e67a1ce0b6dc4a5820515bc2c12b09",
+    "semantic_hash": ""
+  },
+  "scripts/publish-release.js": {
+    "mtime": 1791056700.7475028,
+    "seen": 1791060696.685216,
+    "ast_hash": "a0272cfebe01780ae114eb3430de1b2c",
+    "semantic_hash": ""
+  },
+  "scripts/publish-street-pack-to-firestore.mjs": {
+    "mtime": 1790976502.0864282,
+    "seen": 1791060696.6852179,
+    "ast_hash": "4a7f94ba136d59b62ef0e0169ac63195",
+    "semantic_hash": ""
+  },
+  "scripts/run_defensive_security_test.js": {
+    "mtime": 1790902026.4139924,
+    "seen": 1791060696.685229,
+    "ast_hash": "7ddc41279cf3887d0a661b611919cb11",
+    "semantic_hash": ""
+  },
+  "scripts/setup-street-products.js": {
+    "mtime": 1790974393.9441469,
+    "seen": 1791060696.6852329,
+    "ast_hash": "15d92155fac35bbd0a724e018baf786e",
+    "semantic_hash": ""
+  },
+  "scripts/sync-nav-css-to-globals.js": {
+    "mtime": 1790966364.170874,
+    "seen": 1791060696.6852422,
+    "ast_hash": "ca5e98276827d863ede11648cd8582b2",
+    "semantic_hash": ""
+  },
+  "scripts/test-all-tabs.js": {
+    "mtime": 1790963784.5994194,
+    "seen": 1791060696.685247,
+    "ast_hash": "c90a9b5c6fa70976a14645f52eb6ec4b",
+    "semantic_hash": ""
+  },
+  "scripts/test-bulletproof-audit.js": {
+    "mtime": 1790966266.770467,
+    "seen": 1791060696.6852489,
+    "ast_hash": "a5b9ffe44aee089ca1aa88bde94194fc",
+    "semantic_hash": ""
+  },
+  "scripts/test-cobro-scroll.js": {
+    "mtime": 1790963653.8111825,
+    "seen": 1791060696.6852505,
+    "ast_hash": "4db472dfd28c2fcf26629d0f219c1028",
+    "semantic_hash": ""
+  },
+  "scripts/test-firestore-remote-fleet.js": {
+    "mtime": 1790970597.960668,
+    "seen": 1791060696.6852539,
+    "ast_hash": "636b4413ea04ae181608fc35ea26e3b3",
+    "semantic_hash": ""
+  },
+  "scripts/test-licensing-live.js": {
+    "mtime": 1790969365.6225173,
+    "seen": 1791060696.6852558,
+    "ast_hash": "7b284cd51cae08974d30852e854f25d3",
+    "semantic_hash": ""
+  },
+  "scripts/test-publish-rate.mjs": {
+    "mtime": 1790976419.254602,
+    "seen": 1791060696.6852572,
+    "ast_hash": "6971248d1a22887a4676b7fb786e96a9",
+    "semantic_hash": ""
+  },
+  "scripts/verify-sync-and-update-buttons.js": {
+    "mtime": 1790977238.1618125,
+    "seen": 1791060696.6852884,
+    "ast_hash": "783b6c086223c8420360d32c9da5db21",
+    "semantic_hash": ""
+  },
+  "scripts/visual-audit-capture.js": {
+    "mtime": 1790963606.270611,
+    "seen": 1791060696.6852975,
+    "ast_hash": "0d4e183b318fd0adbff012340f0c1d00",
+    "semantic_hash": ""
+  },
+  "src/app/admin/visual-packs/page.tsx": {
+    "mtime": 1790942633.9867194,
+    "seen": 1791060696.685304,
+    "ast_hash": "1e83e58cfc979506e609ab486ccb079c",
+    "semantic_hash": ""
+  },
+  "src/app/api/ai/assistant/route.ts": {
+    "mtime": 1790822961.3052323,
+    "seen": 1791060696.6853058,
+    "ast_hash": "fd80b0b38ea34badda516fd6ca6279f2",
+    "semantic_hash": ""
+  },
+  "src/app/api/vision/scan-invoice/route.ts": {
+    "mtime": 1790822984.6845772,
+    "seen": 1791060696.6853578,
+    "ast_hash": "2cf8734195d3445d119c2ad6e7a6a83c",
+    "semantic_hash": ""
+  },
+  "src/app/presentacion/page.tsx": {
+    "mtime": 1790944308.328806,
+    "seen": 1791060696.6854143,
+    "ast_hash": "fef6b896809a78308c6edf0c52af149b",
+    "semantic_hash": ""
+  },
+  "src/components/licensing/StreetAmbassadorLicenseModal.tsx": {
+    "mtime": 1791051398.141786,
+    "seen": 1791060696.685466,
+    "ast_hash": "9aa29ab1c61ef8564c9c8dda80449055",
+    "semantic_hash": ""
+  },
+  "src/components/marketplace/VisualPacksModal.tsx": {
+    "mtime": 1791046200.0685637,
+    "seen": 1791060696.685468,
+    "ast_hash": "f0cf2daf434566992837585e2aff7544",
+    "semantic_hash": ""
+  },
+  "src/components/tablet-pos/CasinoReelsCatalog.tsx": {
+    "mtime": 1791044981.52118,
+    "seen": 1791060696.6855006,
+    "ast_hash": "b0a9b4234848905fb4b5d4edfc12a5ba",
+    "semantic_hash": ""
+  },
+  "src/components/tablet-pos/DataSyncModal.tsx": {
+    "mtime": 1791044920.866197,
+    "seen": 1791060696.6855025,
+    "ast_hash": "bd25329c22e06b8203400aac62bc62db",
+    "semantic_hash": ""
+  },
+  "src/components/tablet-pos/ProductImageSelector.tsx": {
+    "mtime": 1791046731.3176377,
+    "seen": 1791060696.685504,
+    "ast_hash": "e9144dd68c2dcf25e8382e08a69f2f97",
+    "semantic_hash": ""
+  },
+  "src/components/tablet-pos/SoftwareUpdateModal.tsx": {
+    "mtime": 1791057130.3705053,
+    "seen": 1791060696.6855056,
+    "ast_hash": "e8e49e9e067d85b2ef5daa6b33f9cb9e",
+    "semantic_hash": ""
+  },
+  "src/components/tablet-pos/StreetAutoUpdater.tsx": {
+    "mtime": 1790970130.6514087,
+    "seen": 1791060696.6855075,
+    "ast_hash": "669eba4b8c1ef43d3617682ea734d51c",
+    "semantic_hash": ""
+  },
+  "src/components/tablet-pos/StreetSalesBackupModal.tsx": {
+    "mtime": 1791046653.87923,
+    "seen": 1791060696.6855109,
+    "ast_hash": "eac7bcbfc74ae2e0162c91c9e21a3417",
+    "semantic_hash": ""
+  },
+  "src/components/tablet-pos/TabletPosBottomNav.tsx": {
+    "mtime": 1791045087.3430624,
+    "seen": 1791060696.6855128,
+    "ast_hash": "192311ff6bd33825a49b8bc02d8aaaf1",
+    "semantic_hash": ""
+  },
+  "src/components/tablet-pos/TabletPosHeader.tsx": {
+    "mtime": 1790957420.7729971,
+    "seen": 1791060696.6855145,
+    "ast_hash": "5980041a5c85629abd6d059604925de1",
+    "semantic_hash": ""
+  },
+  "src/components/tablet-pos/TabletPosToolsDock.tsx": {
+    "mtime": 1791044937.1538832,
+    "seen": 1791060696.6855164,
+    "ast_hash": "3a70e8e5a4c4098c0bf77b550e63d8d9",
+    "semantic_hash": ""
+  },
+  "src/lib/licensing/anti-tamper.js": {
+    "mtime": 1790902040.8992982,
+    "seen": 1791060696.68559,
+    "ast_hash": "612b986985f72dd791bb29476c38db1d",
+    "semantic_hash": ""
+  },
+  "src/lib/licensing/anti-tamper.ts": {
+    "mtime": 1790901961.1220932,
+    "seen": 1791060696.6855917,
+    "ast_hash": "fb54d05e4286a29795c4c10dd0b6e957",
+    "semantic_hash": ""
+  },
+  "src/lib/marketplace/visual-packs-service.ts": {
+    "mtime": 1790985168.6051602,
+    "seen": 1791060696.6856084,
+    "ast_hash": "5c0c856fc3ecc629ef7ebc051b1ff4bb",
+    "semantic_hash": ""
+  },
+  "src/lib/services/tabletPosStorage.ts": {
+    "mtime": 1790901765.431553,
+    "seen": 1791060696.6856291,
+    "ast_hash": "0a0f08f7597cb69fb61ac5242d3389ec",
+    "semantic_hash": ""
+  },
+  "src/types/tablet-pos.ts": {
+    "mtime": 1790901740.4243245,
+    "seen": 1791060696.685707,
+    "ast_hash": "4d0e46b8ac708adb1cb5b62cb92bc121",
+    "semantic_hash": ""
+  },
+  "venematic-desktop/public/version-street.json": {
+    "mtime": 1790954757.2192042,
+    "seen": 1791060696.6857612,
+    "ast_hash": "06bcc0fa280f9e4ff40bb4e884744036",
+    "semantic_hash": ""
+  },
+  "venematic-desktop/src/app/admin/visual-packs/page.tsx": {
+    "mtime": 1790942633.9867194,
+    "seen": 1791060696.685792,
+    "ast_hash": "1e83e58cfc979506e609ab486ccb079c",
+    "semantic_hash": ""
+  },
+  "venematic-desktop/src/components/licensing/StreetAmbassadorLicenseModal.tsx": {
+    "mtime": 1790944945.9454305,
+    "seen": 1791060696.6859472,
+    "ast_hash": "7471f2bbe3d42bd93b8312b99140d7b2",
+    "semantic_hash": ""
+  },
+  "venematic-desktop/src/components/marketplace/VisualPacksModal.tsx": {
+    "mtime": 1790984805.7882452,
+    "seen": 1791060696.6859488,
+    "ast_hash": "fc68badf0579840a3d0f99cfe4b6d0b0",
+    "semantic_hash": ""
+  },
+  "venematic-desktop/src/components/tablet-pos/CasinoReelsCatalog.tsx": {
+    "mtime": 1790984843.4837587,
+    "seen": 1791060696.6859744,
+    "ast_hash": "0e6322c1db97b047f9c761877bd921f2",
+    "semantic_hash": ""
+  },
+  "venematic-desktop/src/components/tablet-pos/DataSyncModal.tsx": {
+    "mtime": 1790989138.779599,
+    "seen": 1791060696.685976,
+    "ast_hash": "ce20d1c1f316259b6e0a524baea2996f",
+    "semantic_hash": ""
+  },
+  "venematic-desktop/src/components/tablet-pos/StreetAutoUpdater.tsx": {
+    "mtime": 1790954654.068152,
+    "seen": 1791060696.6859777,
+    "ast_hash": "ced555937a03cb34cb4ef8bb5fb894f9",
+    "semantic_hash": ""
+  },
+  "venematic-desktop/src/components/tablet-pos/TabletPosBottomNav.tsx": {
+    "mtime": 1790989320.953807,
+    "seen": 1791060696.685979,
+    "ast_hash": "f8a7609152663cd7a5d8c9f89b75afdf",
+    "semantic_hash": ""
+  },
+  "venematic-desktop/src/components/tablet-pos/TabletPosHeader.tsx": {
+    "mtime": 1790901782.9114099,
+    "seen": 1791060696.6859803,
+    "ast_hash": "9edec950a354cc780f8ba1381140cb34",
+    "semantic_hash": ""
+  },
+  "venematic-desktop/src/components/tablet-pos/TabletPosToolsDock.tsx": {
+    "mtime": 1790989375.6184478,
+    "seen": 1791060696.6859818,
+    "ast_hash": "1262f95004b9deba548c1add5498dc5b",
+    "semantic_hash": ""
+  },
+  "venematic-desktop/src/lib/licensing/anti-tamper.ts": {
+    "mtime": 1790901961.1220932,
+    "seen": 1791060696.6860425,
+    "ast_hash": "fb54d05e4286a29795c4c10dd0b6e957",
+    "semantic_hash": ""
+  },
+  "venematic-desktop/src/lib/marketplace/visual-packs-service.ts": {
+    "mtime": 1790985168.6051602,
+    "seen": 1791060696.6860585,
+    "ast_hash": "5c0c856fc3ecc629ef7ebc051b1ff4bb",
+    "semantic_hash": ""
+  },
+  "venematic-desktop/src/lib/services/tabletPosStorage.ts": {
+    "mtime": 1790901765.431553,
+    "seen": 1791060696.6860776,
+    "ast_hash": "0a0f08f7597cb69fb61ac5242d3389ec",
+    "semantic_hash": ""
+  },
+  "venematic-desktop/src/types/tablet-pos.ts": {
+    "mtime": 1790901740.4243245,
+    "seen": 1791060696.686148,
+    "ast_hash": "4d0e46b8ac708adb1cb5b62cb92bc121",
+    "semantic_hash": ""
+  },
+  "version-street.json": {
+    "mtime": 1790954739.62701,
+    "seen": 1791060696.6861598,
+    "ast_hash": "06bcc0fa280f9e4ff40bb4e884744036",
+    "semantic_hash": ""
+  },
+  ".agents/rules/klikpos-firestore-and-core-architecture.md": {
+    "mtime": 1790981711.196992,
+    "seen": 1791060696.6863346,
+    "ast_hash": "ec15ef229256e6497b8eb6f958875aa0",
+    "semantic_hash": ""
+  },
+  ".agents/rules/klikpos-release-and-ota-distribution-protocol.md": {
+    "mtime": 1791058019.4709458,
+    "seen": 1791060696.6863368,
+    "ast_hash": "4033386bb983975e7d9bbaa9e9f40096",
+    "semantic_hash": ""
+  },
+  "DISTRIBUCION_KLIKPOS/Manual_Usuario_KlikPOS_Street.html": {
+    "mtime": 1790973337.238948,
+    "seen": 1791060696.6864727,
+    "ast_hash": "f05bc47614abca6d5954170a3476fa89",
+    "semantic_hash": ""
+  },
+  "DISTRIBUCION_KLIKPOS/presentacion-comercial.html": {
+    "mtime": 1790944521.095397,
+    "seen": 1791060696.6864758,
+    "ast_hash": "b63bb8e55c935585371a1cd516694775",
+    "semantic_hash": ""
+  },
+  "ESTADO_PROYECTO_KLIKPOS.md": {
+    "mtime": 1790949540.3436294,
+    "seen": 1791060696.686478,
+    "ast_hash": "8096c80cd7300d462e757da5ca65ff0f",
+    "semantic_hash": ""
+  },
+  "GEMINI.md": {
+    "mtime": 1790981729.7517104,
+    "seen": 1791060696.6864798,
+    "ast_hash": "495739cb72595374be9087e4f61e1962",
+    "semantic_hash": ""
+  },
+  "KLIKPOS_AGENCY_BRAIN/README_AGENCY_OPERATING_SYSTEM.md": {
+    "mtime": 1790992880.0,
+    "seen": 1791060696.6864815,
+    "ast_hash": "73830ce561fb92a0a54ac4f54cbf50b6",
+    "semantic_hash": ""
+  },
+  "KLIKPOS_AGENCY_BRAIN/skills/accidental-data-loss-prevention/SKILL.md": {
+    "mtime": 1789014016.0,
+    "seen": 1791060696.6864834,
+    "ast_hash": "4b2ed6282b48cfcc5d0e49512752ebba",
+    "semantic_hash": ""
+  },
+  "KLIKPOS_AGENCY_BRAIN/skills/agency-backend-architect/SKILL.md": {
+    "mtime": 1789827334.0,
+    "seen": 1791060696.6864853,
+    "ast_hash": "d705655cd1d84c003f26f224e545edfa",
+    "semantic_hash": ""
+  },
+  "KLIKPOS_AGENCY_BRAIN/skills/agency-database-optimizer/SKILL.md": {
+    "mtime": 1789827334.0,
+    "seen": 1791060696.686487,
+    "ast_hash": "fa4379441bcc2762df31703af0786499",
+    "semantic_hash": ""
+  },
+  "KLIKPOS_AGENCY_BRAIN/skills/agency-desktop-app-engineer/SKILL.md": {
+    "mtime": 1789827334.0,
+    "seen": 1791060696.6864886,
+    "ast_hash": "4f37d8efd5bb0e6c0686a50a5a4bef85",
+    "semantic_hash": ""
+  },
+  "KLIKPOS_AGENCY_BRAIN/skills/agency-frontend-developer/SKILL.md": {
+    "mtime": 1789827334.0,
+    "seen": 1791060696.68649,
+    "ast_hash": "72caed9efddb2e8c156f2ff9f935fc67",
+    "semantic_hash": ""
+  },
+  "KLIKPOS_AGENCY_BRAIN/skills/agency-identity-access-engineer/SKILL.md": {
+    "mtime": 1789827334.0,
+    "seen": 1791060696.6864917,
+    "ast_hash": "afcfaddd9600bdf10a3fa3c3ccbde80d",
+    "semantic_hash": ""
+  },
+  "KLIKPOS_AGENCY_BRAIN/skills/agency-payments-billing-engineer/SKILL.md": {
+    "mtime": 1789827334.0,
+    "seen": 1791060696.686493,
+    "ast_hash": "df88eb0c0c8fe2de4b23bc65e05a04ad",
+    "semantic_hash": ""
+  },
+  "KLIKPOS_AGENCY_BRAIN/skills/agency-ui-designer/SKILL.md": {
+    "mtime": 1789827334.0,
+    "seen": 1791060696.6864948,
+    "ast_hash": "9d057a406f891e8a2b26362724388e7a",
+    "semantic_hash": ""
+  },
+  "KLIKPOS_AGENCY_BRAIN/skills/anti-frankenstein-architect/SKILL.md": {
+    "mtime": 1790791170.0,
+    "seen": 1791060696.6864963,
+    "ast_hash": "a4eb0599395f541ab9d776076367cb4a",
+    "semantic_hash": ""
+  },
+  "KLIKPOS_AGENCY_BRAIN/skills/firestore_rules_creation/SKILL.md": {
+    "mtime": 1790707680.0,
+    "seen": 1791060696.6864986,
+    "ast_hash": "898faf9b991f36332427f3bfb65833cb",
+    "semantic_hash": ""
+  },
+  "KLIKPOS_AGENCY_BRAIN/skills/impeccable/SKILL.md": {
+    "mtime": 1790363666.0,
+    "seen": 1791060696.6865003,
+    "ast_hash": "71c015ae4a7d3c7bfb2098bc3255b2e6",
+    "semantic_hash": ""
+  },
+  "KLIKPOS_AGENCY_BRAIN/skills/modern-web-guidance/SKILL.md": {
+    "mtime": 1790301446.0,
+    "seen": 1791060696.6865022,
+    "ast_hash": "3bdaa0a196ca037fa79fcc3395d6d7d8",
+    "semantic_hash": ""
+  },
+  "KLIKPOS_AGENCY_BRAIN/skills/ponytail-audit/SKILL.md": {
+    "mtime": 1790363268.0,
+    "seen": 1791060696.686504,
+    "ast_hash": "741076540e91247a0bace7b89c27ac6b",
+    "semantic_hash": ""
+  },
+  "KLIKPOS_AGENCY_BRAIN/skills/ponytail-debt/SKILL.md": {
+    "mtime": 1790363268.0,
+    "seen": 1791060696.6865065,
+    "ast_hash": "19c1eef33c9b109abb5805a762a545c8",
+    "semantic_hash": ""
+  },
+  "KLIKPOS_AGENCY_BRAIN/skills/ponytail-gain/SKILL.md": {
+    "mtime": 1790363268.0,
+    "seen": 1791060696.6865082,
+    "ast_hash": "8f9cd980326238785d2fc23a9cfddc96",
+    "semantic_hash": ""
+  },
+  "KLIKPOS_AGENCY_BRAIN/skills/ponytail-help/SKILL.md": {
+    "mtime": 1790363268.0,
+    "seen": 1791060696.6865103,
+    "ast_hash": "25b3214341fdc2f0805d2f8a5da6fefd",
+    "semantic_hash": ""
+  },
+  "KLIKPOS_AGENCY_BRAIN/skills/ponytail-review/SKILL.md": {
+    "mtime": 1790363268.0,
+    "seen": 1791060696.6865118,
+    "ast_hash": "52f93e973047baa9a906c6dc5879a4a6",
+    "semantic_hash": ""
+  },
+  "KLIKPOS_AGENCY_BRAIN/skills/ponytail/SKILL.md": {
+    "mtime": 1790363268.0,
+    "seen": 1791060696.686513,
+    "ast_hash": "33f013ce03c8c66a6002ef941a433b81",
+    "semantic_hash": ""
+  },
+  "KLIKPOS_AGENCY_BRAIN/skills/react-doctor/SKILL.md": {
+    "mtime": 1790790350.0,
+    "seen": 1791060696.6865156,
+    "ast_hash": "ac6342bfdb4e1b152f89dd2c923722de",
+    "semantic_hash": ""
+  },
+  "KLIKPOS_AGENCY_BRAIN/skills/react-doctor/references/explain.md": {
+    "mtime": 1790790350.0,
+    "seen": 1791060696.6865175,
+    "ast_hash": "ff147b3446a6d4462dd4b7a4186fe8d7",
+    "semantic_hash": ""
+  },
+  "KlikPOS Release/Manual_Usuario_KlikPOS_Street.html": {
+    "mtime": 1790973337.238948,
+    "seen": 1791060696.686528,
+    "ast_hash": "f05bc47614abca6d5954170a3476fa89",
+    "semantic_hash": ""
+  },
+  "KlikPOS Release/Versiones Finales/VERIFICACION_HASHES.txt": {
+    "mtime": 1790915992.6195538,
+    "seen": 1791060696.6865318,
+    "ast_hash": "0b8e653538ea9803fbf83f242a8c95f5",
+    "semantic_hash": ""
+  },
+  "KlikPOS Release/Versiones Finales/presentacion-comercial.html": {
+    "mtime": 1790944288.799613,
+    "seen": 1791060696.6865335,
+    "ast_hash": "b30eb23551e0f44c5dcfd3139c1c4cf2",
+    "semantic_hash": ""
+  },
+  "KlikPOS Release/Versiones_Finales/VERIFICACION_HASHES.txt": {
+    "mtime": 1790915992.6165128,
+    "seen": 1791060696.6865358,
+    "ast_hash": "0b8e653538ea9803fbf83f242a8c95f5",
+    "semantic_hash": ""
+  },
+  "KlikPOS Release/Versiones_Finales/presentacion-comercial.html": {
+    "mtime": 1790944521.095397,
+    "seen": 1791060696.6865377,
+    "ast_hash": "b63bb8e55c935585371a1cd516694775",
+    "semantic_hash": ""
+  },
+  "cpanel-admin-panel/presentacion-comercial.html": {
+    "mtime": 1790944521.095397,
+    "seen": 1791060696.686544,
+    "ast_hash": "b63bb8e55c935585371a1cd516694775",
+    "semantic_hash": ""
+  },
+  "kliko/KLIKPOS_AGENCY_BRAIN/README_AGENCY_OPERATING_SYSTEM.md": {
+    "mtime": 1790992880.0,
+    "seen": 1791060696.6866128,
+    "ast_hash": "73830ce561fb92a0a54ac4f54cbf50b6",
+    "semantic_hash": ""
+  },
+  "kliko/KLIKPOS_AGENCY_BRAIN/skills/accidental-data-loss-prevention/SKILL.md": {
+    "mtime": 1789014016.0,
+    "seen": 1791060696.6866152,
+    "ast_hash": "4b2ed6282b48cfcc5d0e49512752ebba",
+    "semantic_hash": ""
+  },
+  "kliko/KLIKPOS_AGENCY_BRAIN/skills/agency-backend-architect/SKILL.md": {
+    "mtime": 1789827334.0,
+    "seen": 1791060696.6866179,
+    "ast_hash": "d705655cd1d84c003f26f224e545edfa",
+    "semantic_hash": ""
+  },
+  "kliko/KLIKPOS_AGENCY_BRAIN/skills/agency-database-optimizer/SKILL.md": {
+    "mtime": 1789827334.0,
+    "seen": 1791060696.6866202,
+    "ast_hash": "fa4379441bcc2762df31703af0786499",
+    "semantic_hash": ""
+  },
+  "kliko/KLIKPOS_AGENCY_BRAIN/skills/agency-desktop-app-engineer/SKILL.md": {
+    "mtime": 1789827334.0,
+    "seen": 1791060696.6866221,
+    "ast_hash": "4f37d8efd5bb0e6c0686a50a5a4bef85",
+    "semantic_hash": ""
+  },
+  "kliko/KLIKPOS_AGENCY_BRAIN/skills/agency-frontend-developer/SKILL.md": {
+    "mtime": 1789827334.0,
+    "seen": 1791060696.6866236,
+    "ast_hash": "72caed9efddb2e8c156f2ff9f935fc67",
+    "semantic_hash": ""
+  },
+  "kliko/KLIKPOS_AGENCY_BRAIN/skills/agency-identity-access-engineer/SKILL.md": {
+    "mtime": 1789827334.0,
+    "seen": 1791060696.6866255,
+    "ast_hash": "afcfaddd9600bdf10a3fa3c3ccbde80d",
+    "semantic_hash": ""
+  },
+  "kliko/KLIKPOS_AGENCY_BRAIN/skills/agency-payments-billing-engineer/SKILL.md": {
+    "mtime": 1789827334.0,
+    "seen": 1791060696.6866276,
+    "ast_hash": "df88eb0c0c8fe2de4b23bc65e05a04ad",
+    "semantic_hash": ""
+  },
+  "kliko/KLIKPOS_AGENCY_BRAIN/skills/agency-ui-designer/SKILL.md": {
+    "mtime": 1789827334.0,
+    "seen": 1791060696.6866293,
+    "ast_hash": "9d057a406f891e8a2b26362724388e7a",
+    "semantic_hash": ""
+  },
+  "kliko/KLIKPOS_AGENCY_BRAIN/skills/anti-frankenstein-architect/SKILL.md": {
+    "mtime": 1790791170.0,
+    "seen": 1791060696.686632,
+    "ast_hash": "a4eb0599395f541ab9d776076367cb4a",
+    "semantic_hash": ""
+  },
+  "kliko/KLIKPOS_AGENCY_BRAIN/skills/firestore_rules_creation/SKILL.md": {
+    "mtime": 1790707680.0,
+    "seen": 1791060696.6866348,
+    "ast_hash": "898faf9b991f36332427f3bfb65833cb",
+    "semantic_hash": ""
+  },
+  "kliko/KLIKPOS_AGENCY_BRAIN/skills/impeccable/SKILL.md": {
+    "mtime": 1790363666.0,
+    "seen": 1791060696.6866372,
+    "ast_hash": "71c015ae4a7d3c7bfb2098bc3255b2e6",
+    "semantic_hash": ""
+  },
+  "kliko/KLIKPOS_AGENCY_BRAIN/skills/modern-web-guidance/SKILL.md": {
+    "mtime": 1790301446.0,
+    "seen": 1791060696.686639,
+    "ast_hash": "3bdaa0a196ca037fa79fcc3395d6d7d8",
+    "semantic_hash": ""
+  },
+  "kliko/KLIKPOS_AGENCY_BRAIN/skills/ponytail-audit/SKILL.md": {
+    "mtime": 1790363268.0,
+    "seen": 1791060696.6866412,
+    "ast_hash": "741076540e91247a0bace7b89c27ac6b",
+    "semantic_hash": ""
+  },
+  "kliko/KLIKPOS_AGENCY_BRAIN/skills/ponytail-debt/SKILL.md": {
+    "mtime": 1790363268.0,
+    "seen": 1791060696.6866434,
+    "ast_hash": "19c1eef33c9b109abb5805a762a545c8",
+    "semantic_hash": ""
+  },
+  "kliko/KLIKPOS_AGENCY_BRAIN/skills/ponytail-gain/SKILL.md": {
+    "mtime": 1790363268.0,
+    "seen": 1791060696.686645,
+    "ast_hash": "8f9cd980326238785d2fc23a9cfddc96",
+    "semantic_hash": ""
+  },
+  "kliko/KLIKPOS_AGENCY_BRAIN/skills/ponytail-help/SKILL.md": {
+    "mtime": 1790363268.0,
+    "seen": 1791060696.6866467,
+    "ast_hash": "25b3214341fdc2f0805d2f8a5da6fefd",
+    "semantic_hash": ""
+  },
+  "kliko/KLIKPOS_AGENCY_BRAIN/skills/ponytail-review/SKILL.md": {
+    "mtime": 1790363268.0,
+    "seen": 1791060696.6866486,
+    "ast_hash": "52f93e973047baa9a906c6dc5879a4a6",
+    "semantic_hash": ""
+  },
+  "kliko/KLIKPOS_AGENCY_BRAIN/skills/ponytail/SKILL.md": {
+    "mtime": 1790363268.0,
+    "seen": 1791060696.6866505,
+    "ast_hash": "33f013ce03c8c66a6002ef941a433b81",
+    "semantic_hash": ""
+  },
+  "kliko/KLIKPOS_AGENCY_BRAIN/skills/react-doctor/SKILL.md": {
+    "mtime": 1790790350.0,
+    "seen": 1791060696.6866524,
+    "ast_hash": "ac6342bfdb4e1b152f89dd2c923722de",
+    "semantic_hash": ""
+  },
+  "kliko/KLIKPOS_AGENCY_BRAIN/skills/react-doctor/references/explain.md": {
+    "mtime": 1790790350.0,
+    "seen": 1791060696.6866539,
+    "ast_hash": "ff147b3446a6d4462dd4b7a4186fe8d7",
+    "semantic_hash": ""
+  },
+  "kliko/apps/kliko-matrix/index.html": {
+    "mtime": 1790992166.0,
+    "seen": 1791060696.686656,
+    "ast_hash": "8bf442b92bcdac3d083273dd643e364f",
+    "semantic_hash": ""
+  },
+  "public/manual-usuario.html": {
+    "mtime": 1790973337.238948,
+    "seen": 1791060696.686673,
+    "ast_hash": "f05bc47614abca6d5954170a3476fa89",
+    "semantic_hash": ""
+  },
+  "public/presentacion-comercial.html": {
+    "mtime": 1790944521.095397,
+    "seen": 1791060696.6866746,
+    "ast_hash": "b63bb8e55c935585371a1cd516694775",
+    "semantic_hash": ""
+  },
+  "venematic-desktop/public/presentacion-comercial.html": {
+    "mtime": 1790944521.095397,
+    "seen": 1791060696.6867118,
+    "ast_hash": "b63bb8e55c935585371a1cd516694775",
+    "semantic_hash": ""
+  },
+  "DISTRIBUCION_KLIKPOS/Dossier_Comercial_Distribuidores_KlikPOS.pdf": {
+    "mtime": 1790822256.4562347,
+    "seen": 1791060696.6867256,
+    "ast_hash": "6f540ab3deb8a2152d27d709756a9ca7",
+    "semantic_hash": ""
+  },
+  "DISTRIBUCION_KLIKPOS/Ficha_Promocional_Comida_Rapida_MarcaPropia.pdf": {
+    "mtime": 1790824507.9867103,
+    "seen": 1791060696.6867275,
+    "ast_hash": "c6d915a8e14f1564b35165a731eca9f4",
+    "semantic_hash": ""
+  },
+  "DISTRIBUCION_KLIKPOS/Ficha_Promocional_Despachadores_Gana5.pdf": {
+    "mtime": 1790824505.2039502,
+    "seen": 1791060696.686729,
+    "ast_hash": "aabd35ebc0e1cdd3d6b50952a4c51448",
+    "semantic_hash": ""
+  },
+  "KlikPOS Release/Dossier_Comercial_Distribuidores_KlikPOS.pdf": {
+    "mtime": 1790822256.4562347,
+    "seen": 1791060696.686731,
+    "ast_hash": "6f540ab3deb8a2152d27d709756a9ca7",
+    "semantic_hash": ""
+  },
+  "KlikPOS Release/Ficha_Promocional_Comida_Rapida_MarcaPropia.pdf": {
+    "mtime": 1790824507.9867103,
+    "seen": 1791060696.6867325,
+    "ast_hash": "c6d915a8e14f1564b35165a731eca9f4",
+    "semantic_hash": ""
+  },
+  "KlikPOS Release/Ficha_Promocional_Despachadores_Gana5.pdf": {
+    "mtime": 1790824505.2039502,
+    "seen": 1791060696.686734,
+    "ast_hash": "aabd35ebc0e1cdd3d6b50952a4c51448",
+    "semantic_hash": ""
+  },
+  "docs/Dossier_Comercial_Distribuidores_KlikPOS.pdf": {
+    "mtime": 1790822256.4562347,
+    "seen": 1791060696.6867354,
+    "ast_hash": "6f540ab3deb8a2152d27d709756a9ca7",
+    "semantic_hash": ""
+  },
+  "Productos Street/Cachapa con cochino.png": {
+    "mtime": 1790974263.7258115,
+    "seen": 1791060696.6867864,
+    "ast_hash": "edcfd7add74aa49b4ade3a6368c6cb72",
+    "semantic_hash": ""
+  },
+  "Productos Street/Cachapa con queso.png": {
+    "mtime": 1790974263.6016822,
+    "seen": 1791060696.686788,
+    "ast_hash": "9caec6e1a5750d098bd862cdc2889f02",
+    "semantic_hash": ""
+  },
+  "Productos Street/Combo 5 Perros_.png": {
+    "mtime": 1790974264.1713173,
+    "seen": 1791060696.68679,
+    "ast_hash": "3b462a8de425607279054cb4fc4ae5c2",
+    "semantic_hash": ""
+  },
+  "Productos Street/Combo Perro 4 mas fresco.png": {
+    "mtime": 1790974263.218614,
+    "seen": 1791060696.6867912,
+    "ast_hash": "d5a0df3323dbe4bc8c7b5a813871cf18",
+    "semantic_hash": ""
+  },
+  "Productos Street/Combo Shawarma.png": {
+    "mtime": 1790974263.9951909,
+    "seen": 1791060696.6867933,
+    "ast_hash": "0617ca6957c08a6d48ecec2ad1bb2d04",
+    "semantic_hash": ""
+  },
+  "Productos Street/HAmburguesa.png": {
+    "mtime": 1790974263.47679,
+    "seen": 1791060696.6867957,
+    "ast_hash": "2b935f5504f10e04cfc7fabffbc2d966",
+    "semantic_hash": ""
+  },
+  "Productos Street/Peprito.png": {
+    "mtime": 1790974263.3716507,
+    "seen": 1791060696.6867974,
+    "ast_hash": "6090a0348624630305e8795c0c3ff176",
+    "semantic_hash": ""
+  },
+  "Productos Street/Perro Caliente.png": {
+    "mtime": 1790974263.069947,
+    "seen": 1791060696.6867988,
+    "ast_hash": "ae2fdf38d45e40f7123d25f96e49876f",
+    "semantic_hash": ""
+  },
+  "Productos Street/Refresco.png": {
+    "mtime": 1790974264.2526205,
+    "seen": 1791060696.686801,
+    "ast_hash": "19cc2b44477628fbeb90d3158c597393",
+    "semantic_hash": ""
+  },
+  "Productos Street/Shawarma.png": {
+    "mtime": 1790974263.8444886,
+    "seen": 1791060696.6868026,
+    "ast_hash": "53fecddf431a9b18234eb61dbcc7c978",
+    "semantic_hash": ""
+  },
+  "klikpos-releases/packs/comida-street/cachapa-con-cochino.png": {
+    "mtime": 1790974263.7258115,
+    "seen": 1791060696.6868217,
+    "ast_hash": "edcfd7add74aa49b4ade3a6368c6cb72",
+    "semantic_hash": ""
+  },
+  "klikpos-releases/packs/comida-street/cachapa-con-queso.png": {
+    "mtime": 1790974263.6016822,
+    "seen": 1791060696.6868231,
+    "ast_hash": "9caec6e1a5750d098bd862cdc2889f02",
+    "semantic_hash": ""
+  },
+  "klikpos-releases/packs/comida-street/combo-4-perros-refresco.png": {
+    "mtime": 1790974263.218614,
+    "seen": 1791060696.6868258,
+    "ast_hash": "d5a0df3323dbe4bc8c7b5a813871cf18",
+    "semantic_hash": ""
+  },
+  "klikpos-releases/packs/comida-street/combo-5-perros.png": {
+    "mtime": 1790974264.1713173,
+    "seen": 1791060696.6868272,
+    "ast_hash": "3b462a8de425607279054cb4fc4ae5c2",
+    "semantic_hash": ""
+  },
+  "klikpos-releases/packs/comida-street/combo-shawarma.png": {
+    "mtime": 1790974263.9951909,
+    "seen": 1791060696.6868289,
+    "ast_hash": "0617ca6957c08a6d48ecec2ad1bb2d04",
+    "semantic_hash": ""
+  },
+  "klikpos-releases/packs/comida-street/hamburguesa.png": {
+    "mtime": 1790974263.47679,
+    "seen": 1791060696.6868305,
+    "ast_hash": "2b935f5504f10e04cfc7fabffbc2d966",
+    "semantic_hash": ""
+  },
+  "klikpos-releases/packs/comida-street/pepito.png": {
+    "mtime": 1790974263.3716507,
+    "seen": 1791060696.686833,
+    "ast_hash": "6090a0348624630305e8795c0c3ff176",
+    "semantic_hash": ""
+  },
+  "klikpos-releases/packs/comida-street/perro-caliente.png": {
+    "mtime": 1790974263.069947,
+    "seen": 1791060696.686835,
+    "ast_hash": "ae2fdf38d45e40f7123d25f96e49876f",
+    "semantic_hash": ""
+  },
+  "klikpos-releases/packs/comida-street/refresco.png": {
+    "mtime": 1790974264.2526205,
+    "seen": 1791060696.6868365,
+    "ast_hash": "19cc2b44477628fbeb90d3158c597393",
+    "semantic_hash": ""
+  },
+  "klikpos-releases/packs/comida-street/shawarma.png": {
+    "mtime": 1790974263.8444886,
+    "seen": 1791060696.6868377,
+    "ast_hash": "53fecddf431a9b18234eb61dbcc7c978",
+    "semantic_hash": ""
+  },
+  "public/brand/klikpos-street-logo.png": {
+    "mtime": 1790897905.2044978,
+    "seen": 1791060696.6868634,
+    "ast_hash": "bdfead299c4c196d1d473dd88e9e1463",
+    "semantic_hash": ""
+  },
+  "public/packs/comida-street/cachapa-con-cochino.png": {
+    "mtime": 1790974263.7258115,
+    "seen": 1791060696.6868906,
+    "ast_hash": "edcfd7add74aa49b4ade3a6368c6cb72",
+    "semantic_hash": ""
+  },
+  "public/packs/comida-street/cachapa-con-queso.png": {
+    "mtime": 1790974263.6016822,
+    "seen": 1791060696.686892,
+    "ast_hash": "9caec6e1a5750d098bd862cdc2889f02",
+    "semantic_hash": ""
+  },
+  "public/packs/comida-street/combo-4-perros-refresco.png": {
+    "mtime": 1790974263.218614,
+    "seen": 1791060696.6868942,
+    "ast_hash": "d5a0df3323dbe4bc8c7b5a813871cf18",
+    "semantic_hash": ""
+  },
+  "public/packs/comida-street/combo-5-perros.png": {
+    "mtime": 1790974264.1713173,
+    "seen": 1791060696.6868956,
+    "ast_hash": "3b462a8de425607279054cb4fc4ae5c2",
+    "semantic_hash": ""
+  },
+  "public/packs/comida-street/combo-shawarma.png": {
+    "mtime": 1790974263.9951909,
+    "seen": 1791060696.6868975,
+    "ast_hash": "0617ca6957c08a6d48ecec2ad1bb2d04",
+    "semantic_hash": ""
+  },
+  "public/packs/comida-street/hamburguesa.png": {
+    "mtime": 1790974263.47679,
+    "seen": 1791060696.6868987,
+    "ast_hash": "2b935f5504f10e04cfc7fabffbc2d966",
+    "semantic_hash": ""
+  },
+  "public/packs/comida-street/pepito.png": {
+    "mtime": 1790974263.3716507,
+    "seen": 1791060696.686901,
+    "ast_hash": "6090a0348624630305e8795c0c3ff176",
+    "semantic_hash": ""
+  },
+  "public/packs/comida-street/perro-caliente.png": {
+    "mtime": 1790974263.069947,
+    "seen": 1791060696.686903,
+    "ast_hash": "ae2fdf38d45e40f7123d25f96e49876f",
+    "semantic_hash": ""
+  },
+  "public/packs/comida-street/refresco.png": {
+    "mtime": 1790974264.2526205,
+    "seen": 1791060696.6869047,
+    "ast_hash": "19cc2b44477628fbeb90d3158c597393",
+    "semantic_hash": ""
+  },
+  "public/packs/comida-street/shawarma.png": {
+    "mtime": 1790974263.8444886,
+    "seen": 1791060696.686906,
+    "ast_hash": "53fecddf431a9b18234eb61dbcc7c978",
+    "semantic_hash": ""
+  },
+  "scratch_tablet_view.png": {
+    "mtime": 1790963338.9090874,
+    "seen": 1791060696.6869085,
+    "ast_hash": "a1e723402a0aeb3067fd712bd331ce39",
+    "semantic_hash": ""
+  },
+  "venematic-desktop/public/brand/klikpos-street-logo.png": {
+    "mtime": 1790897905.2044978,
+    "seen": 1791060696.686982,
+    "ast_hash": "bdfead299c4c196d1d473dd88e9e1463",
+    "semantic_hash": ""
+  },
+  "venematic-desktop/public/packs/comida-street/cachapa-con-cochino.png": {
+    "mtime": 1790974263.7258115,
+    "seen": 1791060696.687006,
+    "ast_hash": "edcfd7add74aa49b4ade3a6368c6cb72",
+    "semantic_hash": ""
+  },
+  "venematic-desktop/public/packs/comida-street/cachapa-con-queso.png": {
+    "mtime": 1790974263.6016822,
+    "seen": 1791060696.6870077,
+    "ast_hash": "9caec6e1a5750d098bd862cdc2889f02",
+    "semantic_hash": ""
+  },
+  "venematic-desktop/public/packs/comida-street/combo-4-perros-refresco.png": {
+    "mtime": 1790974263.218614,
+    "seen": 1791060696.6870098,
+    "ast_hash": "d5a0df3323dbe4bc8c7b5a813871cf18",
+    "semantic_hash": ""
+  },
+  "venematic-desktop/public/packs/comida-street/combo-5-perros.png": {
+    "mtime": 1790974264.1713173,
+    "seen": 1791060696.6870112,
+    "ast_hash": "3b462a8de425607279054cb4fc4ae5c2",
+    "semantic_hash": ""
+  },
+  "venematic-desktop/public/packs/comida-street/combo-shawarma.png": {
+    "mtime": 1790974263.9951909,
+    "seen": 1791060696.687013,
+    "ast_hash": "0617ca6957c08a6d48ecec2ad1bb2d04",
+    "semantic_hash": ""
+  },
+  "venematic-desktop/public/packs/comida-street/hamburguesa.png": {
+    "mtime": 1790974263.47679,
+    "seen": 1791060696.6870143,
+    "ast_hash": "2b935f5504f10e04cfc7fabffbc2d966",
+    "semantic_hash": ""
+  },
+  "venematic-desktop/public/packs/comida-street/pepito.png": {
+    "mtime": 1790974263.3716507,
+    "seen": 1791060696.687016,
+    "ast_hash": "6090a0348624630305e8795c0c3ff176",
+    "semantic_hash": ""
+  },
+  "venematic-desktop/public/packs/comida-street/perro-caliente.png": {
+    "mtime": 1790974263.069947,
+    "seen": 1791060696.6870182,
+    "ast_hash": "ae2fdf38d45e40f7123d25f96e49876f",
+    "semantic_hash": ""
+  },
+  "venematic-desktop/public/packs/comida-street/refresco.png": {
+    "mtime": 1790974264.2526205,
+    "seen": 1791060696.68702,
+    "ast_hash": "19cc2b44477628fbeb90d3158c597393",
+    "semantic_hash": ""
+  },
+  "venematic-desktop/public/packs/comida-street/shawarma.png": {
+    "mtime": 1790974263.8444886,
+    "seen": 1791060696.687022,
+    "ast_hash": "53fecddf431a9b18234eb61dbcc7c978",
     "semantic_hash": ""
   }
 }

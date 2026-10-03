@@ -19,20 +19,14 @@ if (fs.existsSync(androidPublic)) {
 }
 fs.mkdirSync(androidPublic, { recursive: true });
 
-// 2. Estilo Inline de Blindaje Dark Total para WebView (0ms, pre-render, inquebrantable)
+// 2. Estilo de Arranque Rápido para WebView (0ms splash oscuro sin romper cambio de tema)
 const darkShieldHeadStyle = `
   <style id="klikpos-street-dark-shield">
-    :root, html, html.light, html[data-theme], body, #klikpos-street-root, main, .catalog-scroll-area, .street-pos-dark-canvas {
-      background-color: #070a12 !important;
-      background: #070a12 !important;
-      color: #f8fafc !important;
-      color-scheme: dark !important;
-    }
-    header, #klikpos-street-root header {
-      background-color: #090d16 !important;
-      background: #090d16 !important;
-      border-color: #1e293b !important;
-      color: #ffffff !important;
+    :root:not([data-theme="light"]):not([data-canvas="light-graphite"]),
+    :root:not([data-theme="light"]):not([data-canvas="light-graphite"]) body {
+      background-color: #040711;
+      color: #f8fafc;
+      color-scheme: dark;
     }
   </style>
 </head>`;
