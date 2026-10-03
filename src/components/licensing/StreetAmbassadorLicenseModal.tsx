@@ -110,11 +110,9 @@ export default function StreetAmbassadorLicenseModal({
     } catch {}
   };
 
-  // Métricas de referidos reales
+  // Métricas de referidos reales ($5 USD por cada comercio activado)
   const paidCount = referrals.filter((r) => r.status === 'paid').length;
-  const targetCount = 3;
-  const progressPercent = Math.min(100, Math.round((paidCount / targetCount) * 100));
-  const totalEarnedUsd = paidCount >= 3 ? 5.0 : Math.round(paidCount * 1.66 * 100) / 100;
+  const totalEarnedUsd = paidCount * 5.0;
   const myReferralCode = `KLIK-REF-${(rif || 'NEGOCIO').replace(/[^0-9A-Z]/gi, '').slice(-4) || '7892'}`;
 
   const handleAddRealReferral = (e: React.FormEvent) => {
@@ -127,7 +125,7 @@ export default function StreetAmbassadorLicenseModal({
       date: 'Hoy (Registrado)',
       status: 'paid',
       planPaid: newRefPlan === 'cash' ? 'Contado $15' : 'Financiado $25',
-      earnedAmount: 1.66,
+      earnedAmount: 5.00,
     };
 
     const updated = [newSub, ...referrals];
@@ -264,7 +262,7 @@ export default function StreetAmbassadorLicenseModal({
             </button>
           </div>
 
-          {/* PROGRAMA DE RECOMPENSAS REAL: GANA $5 POR CADA 3 AMIGOS PAGADOS */}
+          {/* PROGRAMA DE RECOMPENSAS REAL: GANA $5 POR CADA AMIGO PAGADO */}
           <div className="p-4 rounded-2xl border border-emerald-500/30 bg-gradient-to-br from-emerald-950/40 via-slate-900 to-slate-950 space-y-3.5 shadow-md">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
@@ -273,19 +271,19 @@ export default function StreetAmbassadorLicenseModal({
                 </div>
                 <div>
                   <h4 className="text-xs font-black text-white flex items-center gap-1.5">
-                    <span>Programa de Recompensas por Referidos</span>
+                    <span>Programa Oficial de Embajadores</span>
                     <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500 text-slate-950 font-mono font-black shadow-xs">
-                      +$5.00 USD
+                      +$5.00 USD c/u
                     </span>
                   </h4>
                   <p className="text-[11px] text-slate-200">
-                    Por cada <strong className="text-white">3 amigos que suscriban y paguen</strong> su licencia, ¡ganas <strong className="text-emerald-300">$5 USD en efectivo</strong>!
+                    Por cada <strong className="text-white">amigo o comercio que active su licencia</strong>, ¡ganas <strong className="text-emerald-300">$5 USD en efectivo</strong>!
                   </p>
                 </div>
               </div>
 
               <span className="hidden sm:inline-flex text-[11px] font-black font-mono text-emerald-400 bg-emerald-950/60 px-2.5 py-1 rounded-lg border border-emerald-800">
-                Acumulado: ${totalEarnedUsd.toFixed(2)} USD
+                Ganado: ${totalEarnedUsd.toFixed(2)} USD
               </span>
             </div>
 
@@ -294,41 +292,31 @@ export default function StreetAmbassadorLicenseModal({
               <div className="flex items-center justify-between text-xs font-mono font-black">
                 <span className="text-white font-black flex items-center gap-1.5">
                   <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Progreso de Amigos Suscritos:</span>
+                  <span>Comercios Activos Recomendados:</span>
                 </span>
                 <span className="text-emerald-400 font-bold">
-                  {paidCount} de {targetCount} Comercios ({progressPercent}%)
+                  {paidCount} Recomendados (${totalEarnedUsd.toFixed(2)} USD)
                 </span>
-              </div>
-
-              {/* Barra visual con porcentaje */}
-              <div className="w-full h-3 rounded-full bg-slate-800 overflow-hidden relative border border-slate-700">
-                <div
-                  className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-500 rounded-full"
-                  style={{ width: `${progressPercent}%` }}
-                />
               </div>
 
               {/* Hitos 1, 2 y 3 */}
               <div className="grid grid-cols-3 gap-2 pt-1 text-center font-mono">
                 <div className={`p-1.5 rounded-lg border text-[10px] ${paidCount >= 1 ? 'bg-emerald-950/50 border-emerald-500/50 text-emerald-300' : 'bg-slate-900 border-slate-800 text-slate-400'}`}>
                   <span className="block font-bold">1° Amigo:</span>
-                  <span>{paidCount >= 1 ? '✓ $1.66' : 'Pendiente'}</span>
+                  <span>{paidCount >= 1 ? '✓ $5.00 Ganado' : '+$5.00 USD'}</span>
                 </div>
                 <div className={`p-1.5 rounded-lg border text-[10px] ${paidCount >= 2 ? 'bg-emerald-950/50 border-emerald-500/50 text-emerald-300' : 'bg-slate-900 border-slate-800 text-slate-400'}`}>
                   <span className="block font-bold">2° Amigo:</span>
-                  <span>{paidCount >= 2 ? '✓ $3.33' : 'Pendiente'}</span>
+                  <span>{paidCount >= 2 ? '✓ $10.00 Ganado' : '+$10.00 USD'}</span>
                 </div>
                 <div className={`p-1.5 rounded-lg border text-[10px] ${paidCount >= 3 ? 'bg-emerald-500 text-slate-950 font-black' : 'bg-slate-900 border-slate-800 text-slate-400'}`}>
                   <span className="block font-bold">3° Amigo:</span>
-                  <span>{paidCount >= 3 ? '★ $5.00 ¡Cobrar!' : 'Meta $5.00'}</span>
+                  <span>{paidCount >= 3 ? '★ $15.00 Ganado' : '+$15.00 USD'}</span>
                 </div>
               </div>
 
               <p className="text-[11px] text-slate-200 font-medium text-center pt-0.5">
-                {paidCount >= 3
-                  ? '🎉 ¡Completaste la meta! Contacta a soporte para transferirte tus $5.00 USD.'
-                  : `Faltan ${targetCount - paidCount} amigos suscritos para cobrar tu recompensa de $5.00 USD.`}
+                💡 ¡Sin límites! Cobro inmediato de $5.00 por cada comercio activado en tu zona.
               </p>
             </div>
 
