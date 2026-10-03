@@ -202,14 +202,9 @@ export default function StreetSalesBackupModal({
               <TrendingUp className="w-6 h-6 stroke-[2.5]" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <h2 className="text-base sm:text-lg font-black tracking-tight text-white">
-                  Módulo de Ventas & Respaldo
-                </h2>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                  Función Estrella
-                </span>
-              </div>
+              <h2 className="text-base sm:text-lg font-black tracking-tight text-white">
+                Módulo de Ventas & Respaldo
+              </h2>
               <p className="text-xs text-slate-300 font-medium mt-0.5">
                 Auditoría diaria, semanal, mensual y salvaguarda de tu historial contable.
               </p>

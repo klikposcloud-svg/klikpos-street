@@ -59,14 +59,18 @@ export async function removeBackgroundToWhiteCanvas(
         const visited = new Uint8Array(width * height);
         const queue: number[] = [];
 
-        // Inicializar cola con los bordes
+        // Inicializar cola con los bordes marcando visited inmediatamente
         for (let x = 0; x < width; x++) {
-          queue.push(x); // Borde superior
-          queue.push((height - 1) * width + x); // Borde inferior
+          const top = x;
+          const btm = (height - 1) * width + x;
+          visited[top] = 1; queue.push(top);
+          visited[btm] = 1; queue.push(btm);
         }
         for (let y = 1; y < height - 1; y++) {
-          queue.push(y * width); // Borde izquierdo
-          queue.push(y * width + (width - 1)); // Borde derecho
+          const lft = y * width;
+          const rgt = y * width + (width - 1);
+          visited[lft] = 1; queue.push(lft);
+          visited[rgt] = 1; queue.push(rgt);
         }
 
         const colorDistance = (r1: number, g1: number, b1: number, r2: number, g2: number, b2: number) => {
@@ -88,8 +92,6 @@ export async function removeBackgroundToWhiteCanvas(
         let head = 0;
         while (head < queue.length) {
           const pos = queue[head++];
-          if (visited[pos]) continue;
-          visited[pos] = 1;
 
           const x = pos % width;
           const y = Math.floor(pos / width);
@@ -111,11 +113,23 @@ export async function removeBackgroundToWhiteCanvas(
           if (isBackgroundPixel) {
             isBg[pos] = 1;
 
-            // Vecinos 4-direccionales
-            if (x > 0) queue.push(pos - 1);
-            if (x < width - 1) queue.push(pos + 1);
-            if (y > 0) queue.push(pos - width);
-            if (y < height - 1) queue.push(pos + width);
+            // Vecinos 4-direccionales (con deduplicación estricta para no saturar memoria en móviles)
+            if (x > 0 && !visited[pos - 1]) {
+              visited[pos - 1] = 1;
+              queue.push(pos - 1);
+            }
+            if (x < width - 1 && !visited[pos + 1]) {
+              visited[pos + 1] = 1;
+              queue.push(pos + 1);
+            }
+            if (y > 0 && !visited[pos - width]) {
+              visited[pos - width] = 1;
+              queue.push(pos - width);
+            }
+            if (y < height - 1 && !visited[pos + width]) {
+              visited[pos + width] = 1;
+              queue.push(pos + width);
+            }
           }
         }
 

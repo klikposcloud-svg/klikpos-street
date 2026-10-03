@@ -9,7 +9,8 @@ import {
   Bike, 
   ShoppingCart, 
   DollarSign, 
-  Grid 
+  Grid,
+  TrendingUp 
 } from 'lucide-react';
 
 interface TabletPosBottomNavProps {
@@ -21,6 +22,7 @@ interface TabletPosBottomNavProps {
   primaryColor?: string;
   onSelectTab: (tab: 'menu' | 'mesas' | 'pedidos' | 'delivery' | 'cobro') => void;
   onOpenCobro: () => void;
+  onOpenSalesBackup?: () => void;
   onOpenQrModal?: () => void;
   onToggleDocker?: () => void;
   isDockerOpen?: boolean;
@@ -36,6 +38,7 @@ export const TabletPosBottomNav: React.FC<TabletPosBottomNavProps> = ({
   primaryColor = '#f59e0b',
   onSelectTab,
   onOpenCobro,
+  onOpenSalesBackup,
   onOpenQrModal,
   onToggleDocker,
   isDockerOpen,
@@ -582,42 +585,28 @@ export const TabletPosBottomNav: React.FC<TabletPosBottomNavProps> = ({
               <span className="neon-dot"></span>
             </button>
 
-            {/* 5. Cobrar (en Modo Lite/Street) o Delivery (en Modo Restaurante Completo) */}
-            {isLiteMode ? (
-              <button
-                type="button"
-                onClick={() => {
-                  setIsRadialOpen(false);
+            {/* 5. Módulo de Ventas & Respaldo (Acceso Rápido al Historial de Ventas) */}
+            <button
+              type="button"
+              onClick={() => {
+                setIsRadialOpen(false);
+                if (onOpenSalesBackup) {
+                  onOpenSalesBackup();
+                } else {
                   onOpenCobro();
-                }}
-                className={`nav-item ${activeTab === 'cobro' ? 'active' : ''}`}
-                data-tab="cobro"
-                aria-label="Cobrar"
-              >
-                <div className="icon-wrap">
-                  <DollarSign className="w-5 h-5 text-emerald-400" />
-                </div>
-                <span className="label text-emerald-400">Cobrar</span>
-                <span className="neon-dot"></span>
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={() => {
-                  setIsRadialOpen(false);
-                  onSelectTab('delivery');
-                }}
-                className={`nav-item ${activeTab === 'delivery' ? 'active' : ''}`}
-                data-tab="delivery"
-                aria-label="Delivery"
-              >
-                <div className="icon-wrap">
-                  <Bike className="w-5 h-5" />
-                </div>
-                <span className="label">Delivery</span>
-                <span className="neon-dot"></span>
-              </button>
-            )}
+                }
+              }}
+              className="nav-item group"
+              data-tab="respaldo"
+              aria-label="Ventas & Respaldo"
+              title="Módulo de Ventas & Respaldo (Historial)"
+            >
+              <div className="icon-wrap">
+                <TrendingUp className="w-5 h-5 text-emerald-400 group-hover:scale-110 transition-transform" />
+              </div>
+              <span className="label text-emerald-400">Respaldo</span>
+              <span className="neon-dot"></span>
+            </button>
           </div>
         </nav>
       </div>

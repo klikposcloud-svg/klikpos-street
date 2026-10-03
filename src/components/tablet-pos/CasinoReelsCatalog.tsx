@@ -108,16 +108,6 @@ export const CasinoReelsCatalog: React.FC<CasinoReelsCatalogProps> = ({
               <span>📋 Lista</span>
             </button>
           </div>
-
-          {/* Visualización Exclusiva: Street Pro */}
-          <div className="flex items-center shrink-0">
-            <span
-              className="px-2.5 py-1 rounded-xl text-[11px] font-black bg-amber-500 text-slate-950 shadow-xs flex items-center gap-1 select-none"
-              title="Estilo Street Pro Oficial"
-            >
-              🍔 Street Pro
-            </span>
-          </div>
         </div>
 
         {/* Píldoras de Categorías */}

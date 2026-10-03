@@ -191,47 +191,32 @@ export default function VisualPacksModal({
           isLight ? 'bg-white border-slate-200 text-slate-900' : 'bg-slate-900 border-slate-800 text-slate-100'
         }`}
       >
-        {/* HEADER */}
-        <header className="px-6 py-4 border-b flex items-center justify-between shrink-0" style={{ borderColor: isLight ? '#e2e8f0' : '#1e293b' }}>
-          <div className="flex items-center gap-3">
+        {/* HEADER LIMPIO Y DESPEJADO */}
+        <header className="px-5 py-3.5 border-b flex items-center justify-between shrink-0" style={{ borderColor: isLight ? '#e2e8f0' : '#1e293b' }}>
+          <div className="flex items-center gap-2.5 min-w-0">
             <div
-              className="w-10 h-10 rounded-2xl flex items-center justify-center text-white shadow-md font-black"
+              className="w-8 h-8 rounded-xl flex items-center justify-center text-white shrink-0 shadow-sm"
               style={{ backgroundColor: primaryColor }}
             >
-              <Sparkles className="w-5 h-5" />
+              <Sparkles className="w-4 h-4" />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h2 className="text-base sm:text-lg font-black tracking-tight" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
-                  Librería Cloud de Paquetes Visuales
-                </h2>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-sky-500/10 text-sky-500 border border-sky-500/20">
-                  KlikPOS Market
-                </span>
-              </div>
-              <p className="text-xs text-slate-400">
-                Descarga catálogos fotográficos en HD, códigos de barra y rubros listos para tu POS.
+            <div className="min-w-0">
+              <h2 className="text-sm sm:text-base font-black tracking-tight truncate" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
+                Catálogos y Paquetes Visuales
+              </h2>
+              <p className="text-[11px] text-slate-400 truncate">
+                Catálogos fotográficos y rubros listos para importar a tu POS
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setShowClearAllConfirm(true)}
-              className="px-3 py-1.5 rounded-xl border border-rose-500/35 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-bold transition-all flex items-center gap-1.5 active:scale-95 cursor-pointer shadow-xs"
-              title="Limpiar todos los productos locales para configurar una nueva marca o negocio"
-            >
-              <Trash2 className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Limpiar Todo (Marca Nueva)</span>
-            </button>
-            <button
-              onClick={onClose}
-              className="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-all active:scale-90 cursor-pointer"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
+          <button
+            onClick={onClose}
+            className="p-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-all active:scale-90 cursor-pointer shrink-0"
+            title="Cerrar"
+          >
+            <X className="w-5 h-5" />
+          </button>
         </header>
 
         {/* CONTENIDO PRINCIPAL */}

@@ -1530,27 +1530,15 @@ export default function TabletMobilePosPage() {
         >
           {/* Cápsula Vertical Grafito Profundo con Cristal Translúcido y Micro-Tarjetas de Alto Contraste AAA */}
           <aside
-            className="w-14 rounded-[32px] py-3.5 px-1.5 flex flex-col items-center justify-between shadow-2xl border select-none shrink-0 min-h-[440px] z-50 backdrop-blur-xl transition-all"
+            className="w-14 rounded-[32px] py-4 px-1.5 flex flex-col items-center justify-between shadow-2xl border select-none shrink-0 min-h-[380px] z-50 backdrop-blur-xl transition-all"
             style={{
-              backgroundColor: 'rgba(9, 13, 22, 0.82)',
-              borderColor: 'rgba(255, 255, 255, 0.16)',
+              backgroundColor: '#040711',
+              borderColor: 'rgba(255, 255, 255, 0.12)',
               backdropFilter: 'blur(20px) saturate(180%)',
               WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-              boxShadow: '0 25px 60px -10px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.08)'
+              boxShadow: '0 25px 60px -10px rgba(0, 0, 0, 0.98), inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.8)'
             }}
           >
-            {/* Top: LayoutGrid Icon / Brand Pill */}
-            <div
-              className="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 shadow-lg cursor-pointer transition-transform hover:scale-105 active:scale-95"
-              style={{
-                background: 'linear-gradient(135deg, #f59e0b, #d97706)',
-                boxShadow: '0 4px 16px rgba(245, 158, 11, 0.45)'
-              }}
-              title="KlikPOS Tools"
-            >
-              <LayoutGrid className="w-5 h-5 text-slate-950 font-black stroke-[2.4]" />
-            </div>
-
             {/* Íconos Centrales de Acceso Directo con Contraste AAA y Micro-Fondos */}
             <div className="flex flex-col items-center gap-2.5 my-auto">
               {/* 1. Inventario & Stock */}
@@ -1768,20 +1756,20 @@ export default function TabletMobilePosPage() {
             </div>
           )}
 
-          {/* Botón: Sincronizar Data */}
+          {/* Botón: Sincronizar Data (Visible en pantallas medianas/grandes para dar espacio al carrito en móvil) */}
           <button
             type="button"
             onClick={() => setShowSyncModal(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-sky-500/40 bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 font-black text-xs transition-all active:scale-95 shadow-xs cursor-pointer select-none"
+            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-sky-500/40 bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 font-black text-xs transition-all active:scale-95 shadow-xs cursor-pointer select-none shrink-0"
             title="Sincronizar Data (Tasa BCV, Ventas & Catálogo Cloud)"
           >
             <RefreshCw className="w-3.5 h-3.5 text-sky-400" />
-            <span className="hidden sm:inline">Sincronizar Data</span>
+            <span>Sincronizar Data</span>
           </button>
         </div>
 
-        {/* LADO DERECHO: Carrito / Comanda Activa */}
-        <div className="flex items-center gap-1.5">
+        {/* LADO DERECHO: Carrito / Comanda Activa (100% Protegido sin Cortes) */}
+        <div className="flex items-center gap-1.5 shrink-0 ml-1">
           {trialState?.isTrial && (
             <button
               onClick={() => setShowLicenseModal(true)}
@@ -1793,14 +1781,14 @@ export default function TabletMobilePosPage() {
 
           <button
             onClick={() => setIsRightDrawerOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-slate-950 font-black text-xs transition-all duration-200 relative active:scale-95 shadow-md cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-slate-950 font-black text-xs transition-all duration-200 relative active:scale-95 shadow-md cursor-pointer shrink-0 whitespace-nowrap"
             style={{ backgroundColor: currentPal.primary }}
             title="Ver Comanda Activa"
           >
-            <ShoppingCart className="w-3.5 h-3.5 text-slate-950" />
-            <span className="font-mono text-xs font-black">${totalUSD.toFixed(2)}</span>
+            <ShoppingCart className="w-3.5 h-3.5 text-slate-950 shrink-0" />
+            <span className="font-mono text-xs font-black shrink-0">${totalUSD.toFixed(2)}</span>
             {totalItems > 0 && (
-              <span className="bg-slate-950 text-amber-400 text-[10px] font-mono font-black px-1.5 py-0.2 rounded-full shadow-xs anim-badge-spring">
+              <span className="bg-slate-950 text-amber-400 text-[10px] font-mono font-black px-1.5 py-0.2 rounded-full shadow-xs anim-badge-spring shrink-0">
                 {totalItems}
               </span>
             )}
@@ -1882,16 +1870,6 @@ export default function TabletMobilePosPage() {
                   >
                     <List className="w-4 h-4" />
                   </button>
-                </div>
-
-                {/* Visualización Exclusiva: Street Pro */}
-                <div className="flex items-center shrink-0">
-                  <span
-                    className="px-2.5 py-1 rounded-xl text-[11px] font-black bg-amber-500 text-slate-950 shadow-xs flex items-center gap-1 select-none"
-                    title="Visualización Street Pro Oficial"
-                  >
-                    🔥 Street Pro
-                  </span>
                 </div>
               </div>
 
@@ -2889,6 +2867,7 @@ export default function TabletMobilePosPage() {
         primaryColor={currentPal.primary}
         onSelectTab={(tab) => setActiveTab(tab)}
         onOpenCobro={() => setActiveTab('cobro')}
+        onOpenSalesBackup={() => setShowSalesBackupModal(true)}
         onOpenQrModal={() => setShowQrModal(true)}
         onToggleOrderDrawer={() => setIsRightDrawerOpen((prev) => !prev)}
         isOrderDrawerOpen={isRightDrawerOpen}
@@ -3095,20 +3074,6 @@ export default function TabletMobilePosPage() {
                   </button>
                 </div>
               </div>
-
-              {/* Botón QR */}
-              <button
-                onClick={() => {
-                  setIsLeftDrawerOpen(false);
-                  setShowQrModal(true);
-                }}
-                className={`w-full p-2.5 rounded-xl border flex items-center gap-2.5 text-xs font-bold transition-all ${
-                  isLight ? 'bg-slate-50 border-slate-200 text-slate-800' : 'bg-slate-950 border-slate-800 text-slate-200'
-                }`}
-              >
-                <QrCode className="w-4 h-4 text-sky-500" />
-                <span>Mostrar Menú Digital QR</span>
-              </button>
 
               {/* Planes & Financiación Embajadores */}
               <button
@@ -4060,10 +4025,14 @@ export default function TabletMobilePosPage() {
                     setShowInventoryModal(false);
                     setShowVisualPacksModal(true);
                   }}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white text-[11px] font-black shadow-md transition-all active:scale-95 cursor-pointer"
+                  className={`flex items-center gap-1.5 h-8 px-3 rounded-lg border text-xs font-semibold whitespace-nowrap transition-all active:scale-95 cursor-pointer shadow-xs ${
+                    isLight
+                      ? 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-700'
+                      : 'bg-slate-800/90 hover:bg-slate-700 border-slate-700/80 text-slate-200'
+                  }`}
                   title="Descargar paquetes de productos completos con fotos HD"
                 >
-                  <Sparkles className="w-3.5 h-3.5" />
+                  <Sparkles className="w-3.5 h-3.5 text-amber-400" />
                   <span>Paquetes con Fotos HD</span>
                 </button>
                 <button
@@ -4182,6 +4151,7 @@ export default function TabletMobilePosPage() {
                       currentImage={newProductForm.image}
                       onImageSelected={(url) => setNewProductForm({ ...newProductForm, image: url })}
                       productName={newProductForm.name}
+                      barcode={newProductForm.sku}
                       isLight={isLight}
                     />
                   </div>
@@ -4190,7 +4160,7 @@ export default function TabletMobilePosPage() {
                 <div className="flex justify-end pt-1">
                   <button
                     type="submit"
-                    className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black rounded-xl shadow-md transition-all active:scale-95 flex items-center gap-1.5"
+                    className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg shadow-xs transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer"
                   >
                     <Plus className="w-4 h-4" />
                     <span>Guardar en Inventario</span>
@@ -4359,6 +4329,7 @@ export default function TabletMobilePosPage() {
                   currentImage={editingProduct.image}
                   onImageSelected={(url) => setEditingProduct({ ...editingProduct, image: url })}
                   productName={editingProduct.name}
+                  barcode={editingProduct.sku}
                   isLight={false}
                 />
               </div>

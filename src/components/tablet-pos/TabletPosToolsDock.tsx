@@ -68,27 +68,15 @@ export const TabletPosToolsDock: React.FC<TabletPosToolsDockProps> = ({
         }`}
       >
         <aside
-          className="w-14 rounded-[32px] py-3.5 px-1.5 flex flex-col items-center justify-between shadow-2xl border select-none shrink-0 min-h-[420px] z-50 backdrop-blur-xl transition-all"
+          className="w-14 rounded-[32px] py-4 px-1.5 flex flex-col items-center justify-between shadow-2xl border select-none shrink-0 min-h-[380px] z-50 backdrop-blur-xl transition-all"
           style={{
-            backgroundColor: 'rgba(9, 13, 22, 0.92)',
-            borderColor: 'rgba(255, 255, 255, 0.18)',
-            backdropFilter: 'blur(18px) saturate(180%)',
-            WebkitBackdropFilter: 'blur(18px) saturate(180%)',
-            boxShadow: '0 25px 60px -10px rgba(0, 0, 0, 0.95), inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.1)'
+            backgroundColor: '#040711',
+            borderColor: 'rgba(255, 255, 255, 0.12)',
+            backdropFilter: 'blur(20px) saturate(180%)',
+            WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+            boxShadow: '0 25px 60px -10px rgba(0, 0, 0, 0.98), inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.8)'
           }}
         >
-          {/* Top: LayoutGrid Icon / Brand Pill */}
-          <div
-            className="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 shadow-lg cursor-pointer transition-transform hover:scale-105 active:scale-95"
-            style={{
-              background: 'linear-gradient(135deg, #f59e0b, #d97706)',
-              boxShadow: '0 4px 16px rgba(245, 158, 11, 0.5)'
-            }}
-            title="KlikPOS Tools"
-          >
-            <LayoutGrid className="w-5 h-5 text-slate-950 font-black stroke-[2.4]" />
-          </div>
-
           {/* Íconos Centrales de Acceso Directo Vibrantes y de Alto Contraste */}
           <div className="flex flex-col items-center gap-2.5 my-auto">
             {/* 1. Inventario & Stock */}
