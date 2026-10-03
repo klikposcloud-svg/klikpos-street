@@ -431,7 +431,7 @@ export default function StreetAmbassadorLicenseModal({
               {/* BOTÓN DIRECTO PARA COMPARTIR ENLACE POR WHATSAPP */}
               <a
                 href={`https://wa.me/?text=${encodeURIComponent(
-                  `¡Hola colega comerciante! 🚀 Te recomiendo el sistema KlikPOS Street v1.0 para tu negocio. ` +
+                  `¡Hola pana! 🚀 Te recomiendo el sistema KlikPOS Street v1.0 para tu negocio. ` +
                   `Es súper rápido, funciona sin internet, calcula tasa BCV automática y control de mesas/delivery. ` +
                   `Usa mi código de embajador: ${myReferralCode} para obtener precio especial de contado de $15 USD.`
                 )}`}

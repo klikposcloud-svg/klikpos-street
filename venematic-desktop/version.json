@@ -1,15 +1,16 @@
 {
-  "version": "3.0.1",
-  "releaseDate": "2026-09-30",
-  "title": "KlikPOS Suite v3.0.1 - Paletas Clínicas, Edición de Colores en Vivo Unificada y Scroll de Licencia",
+  "version": "3.0.2",
+  "releaseDate": "2026-10-03",
+  "title": "KlikPOS Street Suite v3.0.2 - Atmósferas de Lienzo, Trial 30m Firestore y Modal de Planes",
   "notes": [
-    "Edición de colores en vivo con propagación unificada: las opciones de fondo se aplican predeterminadamente al Canvas, Header y Sidebar simultáneamente.",
-    "Nuevas paletas especializadas para Clínicas y Salud: Cyan Clínico Hospitalario, Verde Quirúrgico Menta, Lavanda Terapéutica y Rosa Maternidad, junto con 3 fondos clínicos.",
-    "Corrección y activación de scroll vertical completo en la página de Licencias (/dashboard/licensing) para acceso total a planes y activación.",
-    "Personalización integral de Header, Sidebar, Botones de Acento y Tipografía con persistencia local.",
-    "Control de activación manual del Menú Interactivo y Mesas KlikMenu exclusivo para Plan Elite."
+    "Prueba Comercial de 30 Minutos predeterminada con registro y telemetría automática en Firestore.",
+    "Nuevo sistema de Lienzos de Atmósfera (Obsidian Blue, Titanio Carbon y Blanco Grafito) con acentos de marca globales.",
+    "Modal de conversión comercial optimizado con los 3 planes oficiales ($15 Contado, $25 Financiado a Crédito, y $50 Vitalicio Pro en 2 cuotas).",
+    "Gatillo de conversión con protección total de catálogo/ventas y escasez sutil con cupos de tasa BCV.",
+    "Rediseño sobrio de botones en gestor de inventario y cabeceras POS sin gradientes saturados.",
+    "Actualización del mensaje de invitación por WhatsApp para promotores y embajadores ('¡Hola pana!')."
   ],
-  "windowsUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.1/KlikPOS_Desktop_Full_Setup.exe",
-  "androidUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.1/KlikPOS_Movil_Full.apk",
+  "windowsUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.2/KlikPOS_Desktop_Full_Setup.exe",
+  "androidUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.2/KlikPOS_Movil_Full.apk",
   "mandatory": false
 }
