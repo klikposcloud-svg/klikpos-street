@@ -1,4 +1,11 @@
-<!DOCTYPE html>
+# -*- coding: utf-8 -*-
+import os
+import shutil
+import subprocess
+
+print("--- Generando KlikPOS Command Studio Matriz v3.1 ---")
+
+html_code = """<!DOCTYPE html>
 <html lang="es" class="dark">
 <head>
   <meta charset="UTF-8">
@@ -1139,7 +1146,7 @@
             <span class="text-[10px] px-2 py-0.5 rounded-full border font-bold ${badgeClass}">${badgeText}</span>
           </td>
           <td class="px-4 py-3 text-right space-x-1.5">
-            ${isCredit ? '<button onclick="markCuota2Paid('' + cli.hwid + '')" class="px-2 py-1 bg-amber-500/20 hover:bg-amber-500/40 text-amber-300 font-bold rounded-lg text-[10px] border border-amber-500/30">Marcar Pagado</button>' : ''}
+            ${isCredit ? '<button onclick="markCuota2Paid(\'' + cli.hwid + '\')" class="px-2 py-1 bg-amber-500/20 hover:bg-amber-500/40 text-amber-300 font-bold rounded-lg text-[10px] border border-amber-500/30">Marcar Pagado</button>' : ''}
             <button onclick="deleteClientRecord('${cli.hwid}')" class="px-2 py-1 bg-rose-500/10 hover:bg-rose-500/30 text-rose-400 font-bold rounded-lg text-[10px]">✕</button>
           </td>
         `;
@@ -1439,3 +1446,36 @@
   </script>
 </body>
 </html>
+"""
+
+# Rutas de destino
+script_dir = os.path.dirname(os.path.abspath(__file__))
+root_dir = os.path.dirname(script_dir)
+
+target1 = os.path.join(root_dir, "cpanel-admin-panel", "index.html")
+target2 = os.path.join(root_dir, "tools", "developer", "KLIKPOS_ADMIN_STUDIO.html")
+
+with open(target1, "w", encoding="utf-8") as f:
+    f.write(html_code)
+print("[OK] Escrito:", target1)
+
+with open(target2, "w", encoding="utf-8") as f:
+    f.write(html_code)
+print("[OK] Escrito:", target2)
+
+# Crear paquete ZIP para cPanel
+zip_target1 = os.path.join(root_dir, "cpanel-admin-panel", "KlikPOS-Admin-Studio-cPanel.zip")
+zip_target2 = os.path.join(root_dir, "DISTRIBUCION_KLIKPOS", "KlikPOS-Admin-Studio-cPanel.zip")
+
+try:
+    cmd = f'powershell -Command "Compress-Archive -Path \'{target1}\' -DestinationPath \'{zip_target1}\' -Force"'
+    subprocess.run(cmd, shell=True, check=True)
+    print("[OK] ZIP cPanel generado:", zip_target1)
+
+    if os.path.exists(os.path.dirname(zip_target2)):
+        shutil.copyfile(zip_target1, zip_target2)
+        print("[OK] ZIP copiado a DISTRIBUCION_KLIKPOS:", zip_target2)
+except Exception as e:
+    print("Error creando ZIP:", e)
+
+print("=== KLIKPOS COMMAND STUDIO MATRIZ v3.1 CONSTRUIDO CON ÉXITO ===")
