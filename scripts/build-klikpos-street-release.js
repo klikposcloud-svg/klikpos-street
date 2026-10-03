@@ -41,6 +41,12 @@ console.log('===============================================================');
 console.log('>>> [COMPILACIÓN OFICIAL] KLIKPOS STREET v1.0 (APK & INNO SETUP)');
 console.log('===============================================================');
 
+// 0. Compilación fresca obligatoria de Next.js (Evita empaquetar código viejo)
+if (!process.argv.includes('--skip-next-build')) {
+  console.log('\n[0/4] Compilando producción fresca de Next.js (npx next build)...');
+  execSync('npx next build', { cwd: root, stdio: 'inherit' });
+}
+
 // 1. Sincronizar assets de Next.js a Android
 console.log('\n[1/4] Sincronizando assets de Next.js para Android...');
 execSync(`node "${path.join(root, 'scripts', 'enhance-and-rebrand-mobile.js')}"`, { stdio: 'inherit' });
