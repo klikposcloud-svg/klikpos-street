@@ -582,8 +582,25 @@ export const TabletPosBottomNav: React.FC<TabletPosBottomNavProps> = ({
               <span className="neon-dot"></span>
             </button>
 
-            {/* 5. Delivery (Moto - Opcional en Modo Completo) */}
-            {!isLiteMode && (
+            {/* 5. Cobrar (en Modo Lite/Street) o Delivery (en Modo Restaurante Completo) */}
+            {isLiteMode ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setIsRadialOpen(false);
+                  onOpenCobro();
+                }}
+                className={`nav-item ${activeTab === 'cobro' ? 'active' : ''}`}
+                data-tab="cobro"
+                aria-label="Cobrar"
+              >
+                <div className="icon-wrap">
+                  <DollarSign className="w-5 h-5 text-emerald-400" />
+                </div>
+                <span className="label text-emerald-400">Cobrar</span>
+                <span className="neon-dot"></span>
+              </button>
+            ) : (
               <button
                 type="button"
                 onClick={() => {

@@ -1778,17 +1778,6 @@ export default function TabletMobilePosPage() {
             <RefreshCw className="w-3.5 h-3.5 text-sky-400" />
             <span className="hidden sm:inline">Sincronizar Data</span>
           </button>
-
-          {/* Botón: Actualizar Software */}
-          <button
-            type="button"
-            onClick={() => setShowUpdateModal(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-amber-500/40 bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 font-black text-xs transition-all active:scale-95 shadow-xs cursor-pointer select-none"
-            title="Actualizar Software desde GitHub Releases"
-          >
-            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-            <span className="hidden sm:inline">Actualizar Software</span>
-          </button>
         </div>
 
         {/* LADO DERECHO: Carrito / Comanda Activa */}
@@ -1852,7 +1841,7 @@ export default function TabletMobilePosPage() {
                   <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" />
                   <input
                     type="text"
-                    placeholder="Buscar producto o código..."
+                    placeholder="Buscar producto..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="w-full pl-8 pr-7 py-1.5 rounded-xl text-xs border transition-colors outline-none font-semibold bg-slate-900 border-slate-700 text-white placeholder:text-slate-500 focus:border-amber-500"
@@ -1867,31 +1856,31 @@ export default function TabletMobilePosPage() {
                   )}
                 </div>
 
-                {/* Selector de Modos: Cuadrícula Adaptativa / Lista */}
+                {/* Selector de Modos: Solo Íconos para dar respiro */}
                 <div className="flex items-center p-0.5 rounded-xl border shrink-0 bg-slate-900 border-slate-800">
                   <button
                     onClick={() => setCardViewMode('food')}
-                    className={`px-2.5 py-1 rounded-lg text-[11px] font-black transition-all cursor-pointer flex items-center gap-1.5 ${
+                    className={`p-1.5 rounded-lg text-xs font-black transition-all cursor-pointer flex items-center justify-center ${
                       cardViewMode === 'food'
                         ? 'bg-amber-500 text-slate-950 shadow-xs'
                         : 'text-slate-400 hover:text-white'
                     }`}
-                    title="Vista Cuadrícula Adaptativa"
+                    title="Vista Cuadrícula"
+                    aria-label="Vista Cuadrícula"
                   >
-                    <LayoutGrid className="w-3.5 h-3.5" />
-                    <span>Cuadrícula</span>
+                    <LayoutGrid className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => setCardViewMode('lista')}
-                    className={`px-2.5 py-1 rounded-lg text-[11px] font-black transition-all cursor-pointer flex items-center gap-1.5 ${
+                    className={`p-1.5 rounded-lg text-xs font-black transition-all cursor-pointer flex items-center justify-center ${
                       cardViewMode === 'lista'
                         ? 'bg-amber-500 text-slate-950 shadow-xs'
                         : 'text-slate-400 hover:text-white'
                     }`}
-                    title="Vista Lista con Cards Grandes"
+                    title="Vista Lista"
+                    aria-label="Vista Lista"
                   >
-                    <List className="w-3.5 h-3.5" />
-                    <span>Lista</span>
+                    <List className="w-4 h-4" />
                   </button>
                 </div>
 

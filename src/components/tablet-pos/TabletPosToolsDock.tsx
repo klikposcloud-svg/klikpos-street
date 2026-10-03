@@ -56,139 +56,146 @@ export const TabletPosToolsDock: React.FC<TabletPosToolsDockProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div
-      className={`fixed top-1/2 -translate-y-1/2 z-50 animate-in fade-in zoom-in-95 duration-200 ${
-        dockSide === 'left' ? 'left-2.5' : 'right-2.5'
-      }`}
-    >
-      <aside
-        className="w-14 rounded-[32px] py-3.5 px-1.5 flex flex-col items-center justify-between shadow-2xl border select-none shrink-0 min-h-[420px] z-50 backdrop-blur-xl transition-all"
-        style={{
-          backgroundColor: 'rgba(9, 13, 22, 0.82)',
-          borderColor: 'rgba(255, 255, 255, 0.16)',
-          backdropFilter: 'blur(18px) saturate(180%)',
-          WebkitBackdropFilter: 'blur(18px) saturate(180%)',
-          boxShadow: '0 25px 60px -10px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.08)'
-        }}
+    <>
+      {/* Backdrop para cerrar al tocar fuera */}
+      <div
+        onClick={onClose}
+        className="fixed inset-0 z-40 bg-black/40 backdrop-blur-[2px] transition-opacity"
+      />
+      <div
+        className={`fixed top-1/2 -translate-y-1/2 z-50 animate-in fade-in zoom-in-95 duration-200 ${
+          dockSide === 'left' ? 'left-2.5' : 'right-2.5'
+        }`}
       >
-        {/* Top: LayoutGrid Icon / Brand Pill */}
-        <div
-          className="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 shadow-lg cursor-pointer transition-transform hover:scale-105 active:scale-95"
+        <aside
+          className="w-14 rounded-[32px] py-3.5 px-1.5 flex flex-col items-center justify-between shadow-2xl border select-none shrink-0 min-h-[420px] z-50 backdrop-blur-xl transition-all"
           style={{
-            background: 'linear-gradient(135deg, #f59e0b, #d97706)',
-            boxShadow: '0 4px 16px rgba(245, 158, 11, 0.45)'
+            backgroundColor: 'rgba(9, 13, 22, 0.92)',
+            borderColor: 'rgba(255, 255, 255, 0.18)',
+            backdropFilter: 'blur(18px) saturate(180%)',
+            WebkitBackdropFilter: 'blur(18px) saturate(180%)',
+            boxShadow: '0 25px 60px -10px rgba(0, 0, 0, 0.95), inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.1)'
           }}
-          title="KlikPOS Tools"
         >
-          <LayoutGrid className="w-5 h-5 text-slate-950 font-black stroke-[2.4]" />
-        </div>
-
-        {/* Íconos Centrales de Acceso Directo con Contraste AAA y Micro-Fondos */}
-        <div className="flex flex-col items-center gap-2.5 my-auto">
-          {/* 1. Inventario & Stock */}
-          <button
-            onClick={onOpenInventory}
-            className="w-10 h-10 rounded-xl flex items-center justify-center text-emerald-300 bg-emerald-500/25 border border-emerald-400/40 hover:bg-emerald-500/40 hover:scale-110 active:scale-95 transition-all shadow-sm cursor-pointer group"
-            title="Gestión de Inventario & Stock"
+          {/* Top: LayoutGrid Icon / Brand Pill */}
+          <div
+            className="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 shadow-lg cursor-pointer transition-transform hover:scale-105 active:scale-95"
+            style={{
+              background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+              boxShadow: '0 4px 16px rgba(245, 158, 11, 0.5)'
+            }}
+            title="KlikPOS Tools"
           >
-            <Package className="w-5 h-5 stroke-[2.2]" />
-          </button>
+            <LayoutGrid className="w-5 h-5 text-slate-950 font-black stroke-[2.4]" />
+          </div>
 
-          {/* 2. Motorizados / Despacho (Opcional en Lite) */}
-          {!isLiteMode && (
+          {/* Íconos Centrales de Acceso Directo Vibrantes y de Alto Contraste */}
+          <div className="flex flex-col items-center gap-2.5 my-auto">
+            {/* 1. Inventario & Stock */}
             <button
-              onClick={onOpenDrivers}
-              className="w-10 h-10 rounded-xl flex items-center justify-center text-amber-300 bg-amber-500/25 border border-amber-400/40 hover:bg-amber-500/40 hover:scale-110 active:scale-95 transition-all shadow-sm cursor-pointer group"
-              title="Gestión de Motorizados & Despachos"
+              onClick={onOpenInventory}
+              className="w-10 h-10 rounded-xl flex items-center justify-center text-white bg-emerald-600 border border-emerald-400 hover:bg-emerald-500 hover:scale-110 active:scale-95 transition-all shadow-md cursor-pointer group"
+              title="Gestión de Inventario & Stock"
             >
-              <Truck className="w-5 h-5 stroke-[2.2]" />
+              <Package className="w-5 h-5 stroke-[2.4]" />
             </button>
-          )}
 
-          {/* 3. Impresora Térmica */}
-          <button
-            onClick={onOpenPrinter}
-            className="w-10 h-10 rounded-xl flex items-center justify-center text-sky-300 bg-sky-500/25 border border-sky-400/40 hover:bg-sky-500/40 hover:scale-110 active:scale-95 transition-all shadow-sm cursor-pointer group"
-            title="Configurar Impresora Térmica"
-          >
-            <Printer className="w-5 h-5 stroke-[2.2]" />
-          </button>
+            {/* 2. Motorizados / Despacho (Opcional en Lite) */}
+            {!isLiteMode && (
+              <button
+                onClick={onOpenDrivers}
+                className="w-10 h-10 rounded-xl flex items-center justify-center text-white bg-amber-600 border border-amber-400 hover:bg-amber-500 hover:scale-110 active:scale-95 transition-all shadow-md cursor-pointer group"
+                title="Gestión de Motorizados & Despachos"
+              >
+                <Truck className="w-5 h-5 stroke-[2.4]" />
+              </button>
+            )}
 
-          {/* 4. Selector de Rubro de Negocio */}
-          <button
-            onClick={onOpenRubros}
-            className="w-10 h-10 rounded-xl flex items-center justify-center text-purple-300 bg-purple-500/25 border border-purple-400/40 hover:bg-purple-500/40 hover:scale-110 active:scale-95 transition-all shadow-sm cursor-pointer group"
-            title="Cambiar Rubro Comercial"
-          >
-            <Boxes className="w-5 h-5 stroke-[2.2]" />
-          </button>
-
-          {/* 5. QR Menú Interactivo (Opcional en Lite) */}
-          {!isLiteMode && (
+            {/* 3. Impresora Térmica */}
             <button
-              onClick={onOpenQrMenu}
-              className="w-10 h-10 rounded-xl flex items-center justify-center text-indigo-300 bg-indigo-500/25 border border-indigo-400/40 hover:bg-indigo-500/40 hover:scale-110 active:scale-95 transition-all shadow-sm cursor-pointer group"
-              title="Generar Menú QR Digital"
+              onClick={onOpenPrinter}
+              className="w-10 h-10 rounded-xl flex items-center justify-center text-white bg-sky-600 border border-sky-400 hover:bg-sky-500 hover:scale-110 active:scale-95 transition-all shadow-md cursor-pointer group"
+              title="Configurar Impresora Térmica"
             >
-              <QrCode className="w-5 h-5 stroke-[2.2]" />
+              <Printer className="w-5 h-5 stroke-[2.4]" />
             </button>
-          )}
 
-          {/* 6. Módulo de Ventas & Respaldo */}
-          <button
-            onClick={onOpenSales || onOpenCart}
-            className="w-10 h-10 rounded-xl flex items-center justify-center text-emerald-300 bg-emerald-500/25 border border-emerald-400/40 hover:bg-emerald-500/40 hover:scale-110 active:scale-95 transition-all shadow-sm cursor-pointer group"
-            title="Módulo de Ventas & Respaldo (Diario, Semanal, Mensual)"
-          >
-            <TrendingUp className="w-5 h-5 stroke-[2.4]" />
-          </button>
+            {/* 4. Selector de Rubro de Negocio */}
+            <button
+              onClick={onOpenRubros}
+              className="w-10 h-10 rounded-xl flex items-center justify-center text-white bg-purple-600 border border-purple-400 hover:bg-purple-500 hover:scale-110 active:scale-95 transition-all shadow-md cursor-pointer group"
+              title="Cambiar Rubro Comercial"
+            >
+              <Boxes className="w-5 h-5 stroke-[2.4]" />
+            </button>
 
-          {/* 7. Sincronizar Data */}
-          <button
-            onClick={onOpenDataSync}
-            className="w-10 h-10 rounded-xl flex items-center justify-center text-cyan-300 bg-cyan-500/25 border border-cyan-400/40 hover:bg-cyan-500/40 hover:scale-110 active:scale-95 transition-all shadow-sm cursor-pointer group"
-            title="Sincronizar Data (Tasa BCV, Ventas & Catálogo Cloud)"
-          >
-            <RefreshCw className="w-5 h-5 stroke-[2.4]" />
-          </button>
+            {/* 5. QR Menú Interactivo (Opcional en Lite) */}
+            {!isLiteMode && (
+              <button
+                onClick={onOpenQrMenu}
+                className="w-10 h-10 rounded-xl flex items-center justify-center text-white bg-indigo-600 border border-indigo-400 hover:bg-indigo-500 hover:scale-110 active:scale-95 transition-all shadow-md cursor-pointer group"
+                title="Generar Menú QR Digital"
+              >
+                <QrCode className="w-5 h-5 stroke-[2.4]" />
+              </button>
+            )}
 
-          {/* 8. Actualizar Software */}
-          <button
-            onClick={onOpenSoftwareUpdate}
-            className="w-10 h-10 rounded-xl flex items-center justify-center text-yellow-300 bg-yellow-500/25 border border-yellow-400/40 hover:bg-yellow-500/40 hover:scale-110 active:scale-95 transition-all shadow-sm cursor-pointer group"
-            title="Actualizar Software (GitHub Release & APK)"
-          >
-            <Sparkles className="w-5 h-5 stroke-[2.4]" />
-          </button>
+            {/* 6. Módulo de Ventas & Respaldo */}
+            <button
+              onClick={onOpenSales || onOpenCart}
+              className="w-10 h-10 rounded-xl flex items-center justify-center text-white bg-teal-600 border border-teal-400 hover:bg-teal-500 hover:scale-110 active:scale-95 transition-all shadow-md cursor-pointer group"
+              title="Módulo de Ventas & Respaldo"
+            >
+              <TrendingUp className="w-5 h-5 stroke-[2.4]" />
+            </button>
 
-          {/* 9. Ajustes & Configuración */}
-          <button
-            onClick={onOpenSettings}
-            className="w-10 h-10 rounded-xl flex items-center justify-center text-slate-100 bg-slate-800/90 border border-slate-600/70 hover:bg-slate-700 hover:scale-110 active:scale-95 transition-all shadow-sm cursor-pointer group"
-            title="Ajustes de Empresa & RIF"
-          >
-            <Settings className="w-5 h-5 stroke-[2.2]" />
-          </button>
-        </div>
+            {/* 7. Sincronizar Data */}
+            <button
+              onClick={onOpenDataSync}
+              className="w-10 h-10 rounded-xl flex items-center justify-center text-white bg-cyan-600 border border-cyan-400 hover:bg-cyan-500 hover:scale-110 active:scale-95 transition-all shadow-md cursor-pointer group"
+              title="Sincronizar Data (Tasa BCV, Ventas & Catálogo Cloud)"
+            >
+              <RefreshCw className="w-5 h-5 stroke-[2.4]" />
+            </button>
 
-        {/* Bottom: Alternar Lado (Izq/Der) y Colapsar */}
-        <div className="flex flex-col items-center gap-2 pt-2 border-t border-white/10 shrink-0 w-full">
-          <button
-            onClick={onToggleSide}
-            className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-300 hover:text-amber-300 hover:bg-white/10 active:scale-90 transition-all cursor-pointer"
-            title={dockSide === 'left' ? 'Mover Docker a la Derecha' : 'Mover Docker a la Izquierda'}
-          >
-            <ArrowLeftRight className="w-4 h-4" />
-          </button>
-          <button
-            onClick={onClose}
-            className="w-9 h-9 rounded-xl flex items-center justify-center text-rose-400 hover:text-rose-300 hover:bg-rose-500/20 active:scale-90 transition-all cursor-pointer"
-            title="Minimizar Docker"
-          >
-            <X className="w-4 h-4 stroke-[2.5]" />
-          </button>
-        </div>
-      </aside>
-    </div>
+            {/* 8. Actualizar Software */}
+            <button
+              onClick={onOpenSoftwareUpdate}
+              className="w-10 h-10 rounded-xl flex items-center justify-center text-white bg-amber-500 border border-amber-300 hover:bg-amber-400 hover:scale-110 active:scale-95 transition-all shadow-md cursor-pointer group"
+              title="Actualizar Software (KlikPOS Cloud)"
+            >
+              <Sparkles className="w-5 h-5 stroke-[2.4]" />
+            </button>
+
+            {/* 9. Ajustes & Configuración */}
+            <button
+              onClick={onOpenSettings}
+              className="w-10 h-10 rounded-xl flex items-center justify-center text-white bg-slate-700 border border-slate-500 hover:bg-slate-600 hover:scale-110 active:scale-95 transition-all shadow-md cursor-pointer group"
+              title="Ajustes de Empresa & RIF"
+            >
+              <Settings className="w-5 h-5 stroke-[2.4]" />
+            </button>
+          </div>
+
+          {/* Bottom: Alternar Lado (Izq/Der) y Colapsar */}
+          <div className="flex flex-col items-center gap-2 pt-2 border-t border-white/10 shrink-0 w-full">
+            <button
+              onClick={onToggleSide}
+              className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-300 hover:text-amber-300 hover:bg-white/10 active:scale-90 transition-all cursor-pointer"
+              title={dockSide === 'left' ? 'Mover Docker a la Derecha' : 'Mover Docker a la Izquierda'}
+            >
+              <ArrowLeftRight className="w-4 h-4" />
+            </button>
+            <button
+              onClick={onClose}
+              className="w-9 h-9 rounded-xl flex items-center justify-center text-rose-400 hover:text-rose-300 hover:bg-rose-500/20 active:scale-90 transition-all cursor-pointer"
+              title="Cerrar Docker"
+            >
+              <X className="w-4 h-4 stroke-[2.5]" />
+            </button>
+          </div>
+        </aside>
+      </div>
+    </>
   );
 };

@@ -101,19 +101,19 @@ export const SoftwareUpdateModal: React.FC<SoftwareUpdateModalProps> = ({
             </div>
             <div>
               <h3 className="text-base font-black tracking-tight text-white flex items-center gap-2">
-                Centro de Actualizaciones de Software
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-sky-500/20 text-sky-400 border border-sky-500/30">
-                  GitHub Release
+                Centro de Actualizaciones
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                  KlikPOS Cloud
                 </span>
               </h3>
               <p className="text-xs text-slate-400">
-                Canal Oficial de Distribución Continua KlikPOS
+                Canal Oficial de Distribución y Mantenimiento
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -121,26 +121,22 @@ export const SoftwareUpdateModal: React.FC<SoftwareUpdateModalProps> = ({
 
         {/* BODY */}
         <div className="p-6 overflow-y-auto space-y-5 flex-1">
-          {/* Tarjeta de Versiones */}
-          <div className="grid grid-cols-2 gap-3 p-4 rounded-2xl bg-slate-900/80 border border-slate-800">
+          {/* Tarjeta de Versiones Simplificada */}
+          <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 flex items-center justify-between">
             <div>
               <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
-                Versión Instalada
+                Versión del Sistema
               </span>
               <span className="text-lg font-black font-mono text-amber-400">
                 {currentVersion}
               </span>
-              <span className="text-[10px] text-slate-500 block">Compilación Local Activa</span>
             </div>
-            <div className="border-l border-slate-800 pl-4">
+            <div className="text-right">
               <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
-                Última en GitHub
+                Última Versión
               </span>
               <span className="text-lg font-black font-mono text-emerald-400">
-                {isLoading ? 'Verificando...' : (releaseInfo?.tag_name || 'Al día')}
-              </span>
-              <span className="text-[10px] text-slate-500 block">
-                {releaseInfo ? new Date(releaseInfo.published_at).toLocaleDateString() : 'klikpos-releases'}
+                {isLoading ? 'Verificando...' : (releaseInfo?.tag_name || currentVersion)}
               </span>
             </div>
           </div>
@@ -149,19 +145,19 @@ export const SoftwareUpdateModal: React.FC<SoftwareUpdateModalProps> = ({
           {isLoading ? (
             <div className="p-6 flex flex-col items-center justify-center text-center space-y-2">
               <RefreshCw className="w-8 h-8 text-amber-400 animate-spin" />
-              <p className="text-sm font-bold text-slate-300">Consultando repositorio de GitHub Releases...</p>
+              <p className="text-sm font-bold text-slate-300">Verificando actualizaciones en KlikPOS Cloud...</p>
             </div>
           ) : errorMsg ? (
             <div className="p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center gap-3 text-rose-300 text-xs">
               <AlertCircle className="w-5 h-5 shrink-0 text-rose-400" />
-              <span>{errorMsg}</span>
+              <span>Aviso: Sin conexión con KlikPOS Cloud para verificar actualizaciones.</span>
             </div>
           ) : hasUpdate ? (
             <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center gap-3 text-amber-300 text-xs animate-pulse">
               <Sparkles className="w-5 h-5 shrink-0 text-amber-400" />
               <div>
-                <strong className="font-black block">¡Nueva versión disponible en GitHub!</strong>
-                <span>Puedes descargar e instalar el archivo directamente sin perder tu configuración.</span>
+                <strong className="font-black block">¡Nueva versión oficial disponible!</strong>
+                <span>Puedes descargar e instalar la actualización directamente sin perder tu configuración.</span>
               </div>
             </div>
           ) : (
@@ -189,7 +185,7 @@ export const SoftwareUpdateModal: React.FC<SoftwareUpdateModalProps> = ({
           {/* Botones de Descarga Directa */}
           <div className="space-y-2 pt-2">
             <h4 className="text-xs font-black uppercase tracking-wider text-slate-400">
-              Descargas Directas desde GitHub:
+              Descargas Oficiales desde KlikPOS Cloud:
             </h4>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               {/* Botón APK */}
