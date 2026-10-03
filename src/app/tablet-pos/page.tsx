@@ -72,6 +72,7 @@ import { StreetAutoUpdater } from '@/components/tablet-pos/StreetAutoUpdater';
 import { cloudSyncService } from '@/lib/firebase/cloud-sync-service';
 import { SoftwareUpdateModal } from '@/components/tablet-pos/SoftwareUpdateModal';
 import { DataSyncModal } from '@/components/tablet-pos/DataSyncModal';
+import { ProductImageSelector } from '@/components/tablet-pos/ProductImageSelector';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db as firestoreDb, isFirebaseConfigured } from '@/lib/firebase/config';
 
@@ -4188,67 +4189,12 @@ export default function TabletMobilePosPage() {
                       )}
                     </div>
 
-                    <div className="flex flex-col sm:flex-row items-center gap-2.5">
-                      {/* Vista previa de la foto */}
-                      <div className="w-16 h-16 rounded-xl overflow-hidden border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 shrink-0 flex items-center justify-center relative shadow-xs">
-                        {newProductForm.image ? (
-                          <img
-                            src={newProductForm.image}
-                            alt="Preview"
-                            className="w-full h-full object-cover"
-                            onError={(e) => {
-                              (e.target as HTMLElement).style.display = 'none';
-                            }}
-                          />
-                        ) : (
-                          <div className="flex flex-col items-center justify-center text-slate-400 p-1 text-center">
-                            <Camera className="w-5 h-5 text-slate-400 mb-0.5" />
-                            <span className="text-[8px] font-bold">Sin foto</span>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Inputs: URL directa y botón de subir archivo / foto */}
-                      <div className="flex-1 w-full space-y-1.5">
-                        <input
-                          type="url"
-                          placeholder="Pegar enlace de imagen https://... (opcional)"
-                          value={newProductForm.image}
-                          onChange={(e) => setNewProductForm({ ...newProductForm, image: e.target.value })}
-                          className={`w-full px-3 py-1.5 rounded-xl text-xs border outline-none font-medium ${
-                            isLight ? 'bg-white border-slate-300 text-slate-900 focus:border-emerald-500' : 'bg-slate-900 border-slate-700 text-white'
-                          }`}
-                        />
-
-                        <div className="flex items-center gap-2">
-                          <label className="flex items-center gap-1.5 px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 text-[10px] font-black rounded-lg cursor-pointer transition-all border border-slate-700 active:scale-95">
-                            <Upload className="w-3 h-3 text-amber-400" />
-                            <span>Subir Archivo / Tomar Foto</span>
-                            <input
-                              type="file"
-                              accept="image/*"
-                              className="hidden"
-                              onChange={(e) => {
-                                const file = e.target.files?.[0];
-                                if (file) {
-                                  const reader = new FileReader();
-                                  reader.onload = (evt) => {
-                                    if (typeof evt.target?.result === 'string') {
-                                      setNewProductForm({ ...newProductForm, image: evt.target.result });
-                                    }
-                                  };
-                                  reader.readAsDataURL(file);
-                                }
-                              }}
-                            />
-                          </label>
-
-                          <span className="text-[9.5px] text-slate-500">
-                            {newProductForm.image ? '✓ Foto lista' : 'Si no eliges foto, se asignará una automáticamente'}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
+                    <ProductImageSelector
+                      currentImage={newProductForm.image}
+                      onImageSelected={(url) => setNewProductForm({ ...newProductForm, image: url })}
+                      productName={newProductForm.name}
+                      isLight={isLight}
+                    />
                   </div>
                 </div>
 
@@ -4420,62 +4366,12 @@ export default function TabletMobilePosPage() {
                   <span>Foto del Producto</span>
                 </label>
 
-                <div className="flex items-center gap-3">
-                  <div className="w-16 h-16 rounded-xl overflow-hidden border border-slate-700 bg-slate-800 shrink-0 flex items-center justify-center relative shadow-xs">
-                    {editingProduct.image ? (
-                      <img
-                        src={editingProduct.image}
-                        alt="Preview"
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <Camera className="w-6 h-6 text-slate-500" />
-                    )}
-                  </div>
-
-                  <div className="flex-1 space-y-1.5">
-                    <input
-                      type="url"
-                      placeholder="URL de imagen https://..."
-                      value={editingProduct.image || ''}
-                      onChange={(e) => setEditingProduct({ ...editingProduct, image: e.target.value })}
-                      className="w-full px-3 py-1.5 rounded-xl text-xs border outline-none bg-slate-950 border-slate-700 text-white"
-                    />
-
-                    <div className="flex items-center gap-2">
-                      <label className="flex items-center gap-1.5 px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 text-[10px] font-black rounded-lg cursor-pointer transition-all border border-slate-700 active:scale-95">
-                        <Upload className="w-3 h-3 text-amber-400" />
-                        <span>Subir Foto</span>
-                        <input
-                          type="file"
-                          accept="image/*"
-                          className="hidden"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) {
-                              const reader = new FileReader();
-                              reader.onload = (evt) => {
-                                if (typeof evt.target?.result === 'string') {
-                                  setEditingProduct({ ...editingProduct, image: evt.target.result });
-                                }
-                              };
-                              reader.readAsDataURL(file);
-                            }
-                          }}
-                        />
-                      </label>
-                      {editingProduct.image && (
-                        <button
-                          type="button"
-                          onClick={() => setEditingProduct({ ...editingProduct, image: '' })}
-                          className="text-[10px] text-rose-400 hover:underline cursor-pointer"
-                        >
-                          Quitar Foto
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </div>
+                <ProductImageSelector
+                  currentImage={editingProduct.image}
+                  onImageSelected={(url) => setEditingProduct({ ...editingProduct, image: url })}
+                  productName={editingProduct.name}
+                  isLight={false}
+                />
               </div>
 
               {/* Nombre y Precio */}
