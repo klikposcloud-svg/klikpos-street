@@ -1,15 +1,20 @@
 const fs = require('fs');
 const path = require('path');
 
-const TOKEN = process.env.GITHUB_RELEASE_TOKEN || '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';
+let TOKEN = process.env.GITHUB_RELEASE_TOKEN || process.env.GITHUB_TOKEN;
 const REPO = 'klikposcloud-svg/klikpos-releases';
+const { execSync } = require('child_process');
 
-// Cargar dinámicamente del manifiesto maestro version.json
+if (!TOKEN) {
+  try {
+    const gitUrl = execSync('git remote get-url origin').toString().trim();
+    const match = gitUrl.match(/https:\/\/[^:]+:([^@]+)@/);
+    if (match) TOKEN = match[1];
+  } catch {}
+}
+
 const rootDir = path.resolve(__dirname, '..');
 const manifestPath = path.join(rootDir, 'version.json');
-if (!fs.existsSync(manifestPath)) {
-  throw new Error(`No se encontró version.json en ${manifestPath}`);
-}
 const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
 
 const TAG = `v${manifest.version.replace(/^v/, '')}`;
@@ -17,8 +22,6 @@ const TITLE = manifest.title || `KlikPOS Enterprise ${TAG}`;
 const NOTES = Array.isArray(manifest.notes)
   ? `### Novedades en KlikPOS Enterprise ${TAG}:\n` + manifest.notes.map(n => `- ${n}`).join('\n')
   : (manifest.notes || `Lanzamiento de ${TAG}`);
-
-const { execSync } = require('child_process');
 
 async function main() {
   console.log(`[1/5] Sincronizando repositorio klikpos-releases hacia GitHub...`);

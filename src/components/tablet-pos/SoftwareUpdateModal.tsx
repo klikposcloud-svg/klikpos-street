@@ -84,7 +84,9 @@ export const SoftwareUpdateModal: React.FC<SoftwareUpdateModalProps> = ({
 
   if (!isOpen) return null;
 
-  const apkAsset = releaseInfo?.assets?.find(a => a.name.toLowerCase().endsWith('.apk'));
+  // Priorizar explícitamente el instalador Street POS antes de cualquier otro APK
+  const streetApk = releaseInfo?.assets?.find(a => a.name.toLowerCase().includes('street') && a.name.toLowerCase().endsWith('.apk'));
+  const apkAsset = streetApk || releaseInfo?.assets?.find(a => a.name.toLowerCase().endsWith('.apk'));
   const exeAsset = releaseInfo?.assets?.find(a => a.name.toLowerCase().endsWith('.exe'));
 
   const apkUrl = apkAsset?.browser_download_url || 'https://github.com/klikposcloud-svg/klikpos-releases/releases/latest/download/KlikPOS_Street.apk';
