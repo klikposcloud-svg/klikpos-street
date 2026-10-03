@@ -72,8 +72,79 @@
   --shadow-modal: 0 24px 64px rgb(0 0 0 / .60);
 }
 
-/* §17.2.1 Contraste Inverso: Lienzo Azul Marino Profundo con Tarjetas Blancas */
-[data-theme="dark"] body {
+/* ========================================================================= */
+/* KLIKPOS SEMANTIC CANVAS & BRAND TOKENS                                   */
+/* ========================================================================= */
+:root {
+  --brand-primary: #059669;
+  --brand-hover: #047857;
+  --brand-accent: #10b981;
+  --brand-glow: rgba(16, 185, 129, 0.4);
+  --brand-contrast-text: #ffffff;
+
+  --pos-canvas-bg: #040711;
+  --pos-surface-bg: #090d16;
+  --pos-surface-card: #0f172a;
+  --pos-border-subtle: #1e293b;
+  --pos-border-strong: #334155;
+  --pos-text-primary: #f8fafc;
+  --pos-text-secondary: #94a3b8;
+}
+
+/* 1. Obsidian Dark Blue (Lienzo Predeterminado / Obsidian Street) */
+html[data-canvas="obsidian"],
+[data-canvas="obsidian"] {
+  --pos-canvas-bg: #040711;
+  --pos-surface-bg: #090d16;
+  --pos-surface-card: #0f172a;
+  --pos-border-subtle: #1e293b;
+  --pos-border-strong: #334155;
+  --pos-text-primary: #f8fafc;
+  --pos-text-secondary: #94a3b8;
+}
+
+html[data-canvas="obsidian"] body,
+body[data-canvas="obsidian"] {
+  background-color: var(--pos-canvas-bg) !important;
+}
+
+/* 2. Deep Titanium / Carbon (Gris Neutro Titanio / Estudio) */
+html[data-canvas="carbon"],
+[data-canvas="carbon"] {
+  --pos-canvas-bg: #0c0d12;
+  --pos-surface-bg: #14161f;
+  --pos-surface-card: #1c1f2b;
+  --pos-border-subtle: #282c3c;
+  --pos-border-strong: #3d4358;
+  --pos-text-primary: #ffffff;
+  --pos-text-secondary: #a1a1aa;
+}
+
+html[data-canvas="carbon"] body,
+body[data-canvas="carbon"] {
+  background-color: var(--pos-canvas-bg) !important;
+}
+
+/* 3. Blanco Industrial Grafito (Luz Diurna / Alto Contraste) */
+html[data-canvas="light-graphite"],
+[data-canvas="light-graphite"] {
+  --pos-canvas-bg: #f1f5f9;
+  --pos-surface-bg: #ffffff;
+  --pos-surface-card: #ffffff;
+  --pos-border-subtle: #e2e8f0;
+  --pos-border-strong: #cbd5e1;
+  --pos-text-primary: #0f172a;
+  --pos-text-secondary: #64748b;
+}
+
+html[data-canvas="light-graphite"] body,
+body[data-canvas="light-graphite"] {
+  background-color: var(--pos-canvas-bg) !important;
+  color: var(--pos-text-primary) !important;
+}
+
+/* §17.2.1 Contraste Inverso: Lienzo Azul Marino Profundo con Tarjetas Blancas (Legacy) */
+[data-theme="dark"]:not([data-canvas]) body {
   background-color: #0a192f !important;
 }
 

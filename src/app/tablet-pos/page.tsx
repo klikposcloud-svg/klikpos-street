@@ -250,6 +250,25 @@ const BRAND_PALETTES = [
   { id: 'coral', name: 'Coral Cálido', primary: '#ea580c', hover: '#c2410c', accent: '#f97316', glow: 'rgba(234, 88, 12, 0.4)' }
 ];
 
+export interface CanvasTheme {
+  id: 'obsidian' | 'carbon' | 'light-graphite';
+  name: string;
+  subtitle: string;
+  bg: string;
+  surface: string;
+  card: string;
+  border: string;
+  isLight: boolean;
+}
+
+const CANVAS_THEMES: readonly CanvasTheme[] = [
+  { id: 'obsidian', name: 'Obsidian Blue', subtitle: 'Lienzo Nocturno Clásico', bg: '#040711', surface: '#090d16', card: '#0f172a', border: '#1e293b', isLight: false },
+  { id: 'carbon', name: 'Titanio Carbon', subtitle: 'Gris Neutro Profesional', bg: '#0c0d12', surface: '#14161f', card: '#1c1f2b', border: '#282c3c', isLight: false },
+  { id: 'light-graphite', name: 'Blanco Grafito', subtitle: 'Luz Diurna / Alto Contraste', bg: '#f1f5f9', surface: '#ffffff', card: '#ffffff', border: '#e2e8f0', isLight: true }
+] as const;
+
+type CanvasThemeId = CanvasTheme['id'];
+
 const VENEZUELAN_BANKS = [
   '0102 - Banco de Venezuela',
   '0134 - Banesco Banco Universal',
@@ -537,10 +556,11 @@ export default function TabletMobilePosPage() {
   const [selectedCategory, setSelectedCategory] = useState('Todos');
   const [searchQuery, setSearchQuery] = useState('');
   
-  // 3. Modos de Vista y Tema (100% Dark Permanente)
+  // 3. Modos de Vista, Lienzo y Branding
   const [cardViewMode, setCardViewMode] = useState<'food' | 'lista'>('food');
   const [themeMode, setThemeMode] = useState<'light' | 'dark'>('dark');
   const [activePalette, setActivePalette] = useState('amber');
+  const [canvasTheme, setCanvasTheme] = useState<CanvasThemeId>('obsidian');
   const [stylePreset, setStylePreset] = useState<'street_pro' | 'gourmet_clean'>('street_pro');
 
   // 4. Drawers y Modales de Configuración
@@ -882,9 +902,10 @@ export default function TabletMobilePosPage() {
       } else {
         setCardViewMode('food');
       }
-      localStorage.setItem('klikpos_street_theme', 'dark');
-      localStorage.setItem('venematic_theme', 'dark');
-      setThemeMode('dark');
+      const savedCanvas = localStorage.getItem('klikpos_canvas_theme');
+      if (savedCanvas && CANVAS_THEMES.some(t => t.id === savedCanvas)) {
+        setCanvasTheme(savedCanvas as CanvasThemeId);
+      }
 
       const savedPalette = localStorage.getItem('venematic_branding_palette');
       if (savedPalette && BRAND_PALETTES.some(p => p.id === savedPalette)) {
@@ -964,24 +985,12 @@ export default function TabletMobilePosPage() {
           }
         });
 
-      // 9. FUNCIÓN ESTRELLA: Iniciar Auto-Sincronización Periódica en Segundo Plano (Cada 1 Hora)
+      // 9. Iniciar Auto-Sincronización Periódica en Segundo Plano (Cada 1 Hora)
       cloudSyncService.startAutoSync(3600);
     } catch {
       // Continuar silenciosamente
     }
   }, []);
-
-  // Sincronización radical del Modo Oscuro con el DOM (Full Dark Monolítico)
-  useEffect(() => {
-    if (typeof document !== 'undefined') {
-      document.documentElement.classList.add('dark');
-      document.documentElement.classList.remove('light');
-      document.documentElement.setAttribute('data-theme', 'dark');
-      document.documentElement.removeAttribute('data-ui-style');
-      document.body.style.backgroundColor = '#090d16';
-      document.documentElement.style.backgroundColor = '#090d16';
-    }
-  }, [themeMode]);
 
   // Monitor del Período de Prueba de 15 Minutos
   useEffect(() => {
@@ -997,27 +1006,48 @@ export default function TabletMobilePosPage() {
     return () => clearInterval(timer);
   }, []);
 
-  // Guardar Cambios de Carrito, Vistas y Tema con Sincronización de Body/HTML
+  const currentCanvas = CANVAS_THEMES.find(t => t.id === canvasTheme) || CANVAS_THEMES[0];
+  const currentPal = BRAND_PALETTES.find(p => p.id === activePalette) || BRAND_PALETTES[0];
+  const isLight = currentCanvas.isLight;
+  const IS_LITE_MODE = true;
+
+  // Sincronización Completa de Lienzo, Superficies y Branding en CSS Variables
   useEffect(() => {
     try {
       localStorage.setItem('klikpos_card_view_mode', cardViewMode);
       localStorage.setItem('klikpos_tablet_cart', JSON.stringify(cart));
-      localStorage.setItem('klikpos_street_theme', 'dark');
-      localStorage.setItem('venematic_theme', 'dark');
+      localStorage.setItem('klikpos_canvas_theme', canvasTheme);
+      localStorage.setItem('venematic_theme', isLight ? 'light' : 'dark');
       localStorage.setItem('venematic_branding_palette', activePalette);
 
-      document.documentElement.classList.add('dark');
-      document.documentElement.classList.remove('light');
-      document.documentElement.setAttribute('data-theme', 'dark');
-      document.documentElement.removeAttribute('data-ui-style');
-      document.body.style.backgroundColor = '#090d16';
-      document.documentElement.style.backgroundColor = '#090d16';
-    } catch {}
-  }, [cardViewMode, cart, themeMode, activePalette]);
+      const root = document.documentElement;
+      root.setAttribute('data-canvas', canvasTheme);
+      root.setAttribute('data-theme', isLight ? 'light' : 'dark');
 
-  const currentPal = BRAND_PALETTES.find(p => p.id === activePalette) || BRAND_PALETTES[0];
-  const isLight = false;
-  const IS_LITE_MODE = true;
+      if (isLight) {
+        root.classList.remove('dark');
+        root.classList.add('light');
+      } else {
+        root.classList.add('dark');
+        root.classList.remove('light');
+      }
+
+      // Inyección dinámica de tokens de acento y branding
+      root.style.setProperty('--brand-primary', currentPal.primary);
+      root.style.setProperty('--brand-hover', currentPal.hover);
+      root.style.setProperty('--brand-accent', currentPal.accent);
+      root.style.setProperty('--brand-glow', currentPal.glow);
+
+      // Inyección dinámica de tokens de lienzo y superficies
+      root.style.setProperty('--pos-canvas-bg', currentCanvas.bg);
+      root.style.setProperty('--pos-surface-bg', currentCanvas.surface);
+      root.style.setProperty('--pos-surface-card', currentCanvas.card);
+      root.style.setProperty('--pos-border-subtle', currentCanvas.border);
+
+      document.body.style.backgroundColor = currentCanvas.bg;
+      root.style.backgroundColor = currentCanvas.bg;
+    } catch {}
+  }, [cardViewMode, cart, canvasTheme, activePalette, isLight, currentPal, currentCanvas]);
 
   // Cálculos Financieros
   const totalUSD = cart.reduce((acc, item) => acc + (item.priceUSD * item.qty), 0);
@@ -1440,13 +1470,19 @@ export default function TabletMobilePosPage() {
   return (
     <div
       id="klikpos-street-root"
-      className="h-screen flex flex-col font-sans select-none overflow-hidden relative bg-[#070a12] text-slate-100 street-pos-dark-canvas"
+      className={`h-screen flex flex-col font-sans select-none overflow-hidden relative transition-colors duration-200 ${
+        isLight ? 'text-slate-900 bg-slate-100' : 'text-slate-100 street-pos-dark-canvas'
+      }`}
       style={{
-        backgroundColor: '#070a12',
+        backgroundColor: currentCanvas.bg,
         '--brand-color': currentPal.primary,
         '--brand-hover': currentPal.hover,
         '--brand-accent': currentPal.accent,
         '--brand-glow': currentPal.glow,
+        '--pos-canvas-bg': currentCanvas.bg,
+        '--pos-surface-bg': currentCanvas.surface,
+        '--pos-surface-card': currentCanvas.card,
+        '--pos-border-subtle': currentCanvas.border,
       } as React.CSSProperties}
     >
       <style jsx global>{`
@@ -1532,11 +1568,13 @@ export default function TabletMobilePosPage() {
           <aside
             className="w-14 rounded-[32px] py-4 px-1.5 flex flex-col items-center justify-between shadow-2xl border select-none shrink-0 min-h-[380px] z-50 backdrop-blur-xl transition-all"
             style={{
-              backgroundColor: '#040711',
-              borderColor: 'rgba(255, 255, 255, 0.12)',
+              backgroundColor: isLight ? '#ffffff' : currentCanvas.bg,
+              borderColor: isLight ? '#cbd5e1' : 'rgba(255, 255, 255, 0.12)',
               backdropFilter: 'blur(20px) saturate(180%)',
               WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-              boxShadow: '0 25px 60px -10px rgba(0, 0, 0, 0.98), inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.8)'
+              boxShadow: isLight
+                ? '0 20px 40px -10px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.05)'
+                : '0 25px 60px -10px rgba(0, 0, 0, 0.98), inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.8)'
             }}
           >
             {/* Íconos Centrales de Acceso Directo con Contraste AAA y Micro-Fondos */}
@@ -1664,8 +1702,13 @@ export default function TabletMobilePosPage() {
       {/* 2. HEADER SUPERIOR ELEGANTE Y PERFECTAMENTE ORGANIZADO                     */}
       {/* ========================================================================= */}
       <header
-        className="h-14 px-3 flex items-center justify-between border-b shrink-0 z-20 shadow-xs bg-[#090d16] border-slate-800/90 text-white"
-        style={{ backgroundColor: '#090d16' }}
+        className={`h-14 px-3 flex items-center justify-between border-b shrink-0 z-20 shadow-xs transition-colors duration-200 ${
+          isLight ? 'border-slate-200 text-slate-900' : 'border-slate-800/90 text-white'
+        }`}
+        style={{
+          backgroundColor: currentCanvas.surface,
+          borderColor: isLight ? '#e2e8f0' : currentCanvas.border
+        }}
       >
         {/* LADO IZQUIERDO: Logo KlikPOS Street + Acciones Principales */}
         <div className="flex items-center gap-2">
@@ -1676,8 +1719,8 @@ export default function TabletMobilePosPage() {
             title="KlikPOS Street"
           >
             <div className="flex items-baseline tracking-tight font-black text-lg">
-              <span className="text-white">Klik</span>
-              <span className="text-amber-500 group-hover:text-amber-400 transition-colors">POS</span>
+              <span style={{ color: isLight ? '#0f172a' : '#ffffff' }}>Klik</span>
+              <span style={{ color: currentPal.primary }} className="transition-colors">POS</span>
             </div>
             <span className="text-[9px] font-extrabold text-amber-500/95 tracking-widest text-right -mt-0.5">
               Street
@@ -3054,24 +3097,50 @@ export default function TabletMobilePosPage() {
                   ))}
                 </div>
 
-                <div className="pt-2 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
-                  <span className="text-xs font-bold text-slate-500">Lienzo:</span>
-                  <button
-                    onClick={() => {
-                      const next = themeMode === 'light' ? 'dark' : 'light';
-                      setThemeMode(next);
-                      try { localStorage.setItem('venematic_theme', next); } catch {}
-                    }}
-                    className="flex items-center gap-1.5 px-3 py-1 rounded-xl border text-xs font-bold transition-all active:scale-95"
-                    style={{
-                      backgroundColor: isLight ? '#ffffff' : '#1e293b',
-                      borderColor: isLight ? '#cbd5e1' : '#334155',
-                      color: isLight ? '#0f172a' : '#ffffff'
-                    }}
-                  >
-                    {isLight ? <Moon className="w-3.5 h-3.5 text-slate-700" /> : <Sun className="w-3.5 h-3.5 text-amber-400" />}
-                    <span>{isLight ? 'Modo Oscuro' : 'Blanco Oficial'}</span>
-                  </button>
+                <div className="pt-2.5 border-t border-slate-200 dark:border-slate-800 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-slate-500">Lienzo & Atmósfera:</span>
+                    <span className="text-[10px] font-mono font-bold text-slate-400">
+                      {currentCanvas.name}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-1.5">
+                    {CANVAS_THEMES.map((canvas) => {
+                      const isSelected = canvasTheme === canvas.id;
+                      return (
+                        <button
+                          key={canvas.id}
+                          type="button"
+                          onClick={() => {
+                            setCanvasTheme(canvas.id);
+                            try { localStorage.setItem('klikpos_canvas_theme', canvas.id); } catch {}
+                          }}
+                          className={`p-2 rounded-xl border flex flex-col items-center gap-1 transition-all active:scale-95 cursor-pointer ${
+                            isSelected ? 'ring-2 font-black shadow-xs' : 'opacity-80 hover:opacity-100'
+                          }`}
+                          style={{
+                            backgroundColor: canvas.surface,
+                            borderColor: isSelected ? currentPal.primary : canvas.border,
+                            color: canvas.isLight ? '#0f172a' : '#ffffff'
+                          }}
+                        >
+                          <div className="flex items-center gap-1">
+                            <span
+                              className="w-2.5 h-2.5 rounded-full border border-black/20"
+                              style={{ backgroundColor: canvas.bg }}
+                            />
+                            <span className="text-[9px] font-bold truncate max-w-[70px]">
+                              {canvas.name}
+                            </span>
+                          </div>
+                          <span className="text-[8px] opacity-75 font-mono">
+                            {canvas.isLight ? '☀️ Diurno' : '🌙 Nocturno'}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
 
