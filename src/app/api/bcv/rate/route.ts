@@ -10,7 +10,7 @@ let latestBcvData: {
   lastUpdated: string;
   isManual?: boolean;
 } = {
-  rate: 857.01,
+  rate: 871.37,
   date: '',
   source: 'Predeterminada',
   lastUpdated: '',

@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>KlikPOS Street - Presentación Comercial para Comercios</title>
+  <meta name="description" content="Convierte tu teléfono o tablet en una Caja Registradora Inteligente. Facturación táctil, tasa BCV automática y 100% offline.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@600;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #030712;
+      --card-bg: rgba(17, 24, 39, 0.75);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --primary: #0ea5e9;
+      --primary-glow: rgba(14, 165, 233, 0.25);
+      --emerald: #10b981;
+      --emerald-glow: rgba(16, 185, 129, 0.2);
+      --amber: #f59e0b;
+      --amber-glow: rgba(245, 158, 11, 0.2);
+      --purple: #8b5cf6;
+      --text: #f9fafb;
+      --text-muted: #9ca3af;
+      --radius: 24px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* Ambient Glowing Background */
+    .glow-ambient {
+      position: fixed;
+      width: 500px;
+      height: 500px;
+      border-radius: 50%;
+      background: radial-gradient(circle, var(--primary-glow) 0%, rgba(14, 165, 233, 0) 70%);
+      top: -100px;
+      right: -100px;
+      pointer-events: none;
+      z-index: 0;
+      filter: blur(60px);
+      transition: all 0.8s ease;
+    }
+
+    .glow-ambient-2 {
+      position: fixed;
+      width: 450px;
+      height: 450px;
+      border-radius: 50%;
+      background: radial-gradient(circle, var(--emerald-glow) 0%, rgba(16, 185, 129, 0) 70%);
+      bottom: -100px;
+      left: -100px;
+      pointer-events: none;
+      z-index: 0;
+      filter: blur(60px);
+      transition: all 0.8s ease;
+    }
+
+    /* Presentation Container (Mobile App Frame) */
+    .app-viewport {
+      position: relative;
+      width: 100%;
+      max-width: 460px;
+      height: 100vh;
+      max-height: 920px;
+      background: rgba(11, 15, 25, 0.85);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--card-border);
+      border-radius: 0px;
+      display: flex;
+      flex-direction: column;
+      z-index: 10;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+      overflow: hidden;
+    }
+
+    @media (min-width: 500px) {
+      .app-viewport {
+        border-radius: 36px;
+        height: 94vh;
+      }
+    }
+
+    /* Top Bar */
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px 12px;
+      border-bottom: 1px solid var(--card-border);
+      z-index: 20;
+      background: rgba(3, 7, 18, 0.6);
+      backdrop-filter: blur(12px);
+    }
+
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #0284c7, #0ea5e9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      color: white;
+      font-size: 16px;
+      box-shadow: 0 4px 12px var(--primary-glow);
+    }
+
+    .brand-title {
+      font-weight: 900;
+      font-size: 16px;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-title span {
+      color: var(--primary);
+    }
+
+    .slide-counter {
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--text-muted);
+      background: rgba(255, 255, 255, 0.06);
+      padding: 4px 10px;
+      border-radius: 20px;
+      border: 1px solid var(--card-border);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Slider Container */
+    .slides-wrapper {
+      position: relative;
+      flex: 1;
+      width: 100%;
+      overflow: hidden;
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      padding: 24px 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(20px) scale(0.98);
+      transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      overflow-y: auto;
+      scrollbar-width: none;
+    }
+
+    .slide::-webkit-scrollbar {
+      display: none;
+    }
+
+    .slide.active {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0) scale(1);
+      z-index: 5;
+    }
+
+    /* Staggered Fade-In Animations for Children */
+    .slide.active .anim-1 { animation: fadeInUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) 0.10s both; }
+    .slide.active .anim-2 { animation: fadeInUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) 0.22s both; }
+    .slide.active .anim-3 { animation: fadeInUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) 0.34s both; }
+    .slide.active .anim-4 { animation: fadeInUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) 0.46s both; }
+    .slide.active .anim-5 { animation: fadeInUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) 0.58s both; }
+    .slide.active .anim-6 { animation: fadeInUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) 0.70s both; }
+    .slide.active .anim-7 { animation: fadeInUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) 0.82s both; }
+    .slide.active .anim-8 { animation: fadeInUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) 0.94s both; }
+
+    @keyframes fadeInUp {
+      0% {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Typography & UI Elements */
+    .tag-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 100px;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 12px;
+    }
+
+    .tag-blue {
+      background: rgba(14, 165, 233, 0.15);
+      color: #38bdf8;
+      border: 1px solid rgba(14, 165, 233, 0.3);
+    }
+
+    .tag-emerald {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .tag-amber {
+      background: rgba(245, 158, 11, 0.15);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .slide-title {
+      font-size: 24px;
+      font-weight: 900;
+      line-height: 1.15;
+      letter-spacing: -0.03em;
+      margin-bottom: 10px;
+    }
+
+    .slide-subtitle {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+
+    /* Cards & Features */
+    .feature-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      margin-bottom: 10px;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .feature-icon-box {
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .feature-text h4 {
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 3px;
+      letter-spacing: -0.01em;
+    }
+
+    .feature-text p {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    /* Plan Pricing Cards */
+    .plan-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 16px;
+      margin-bottom: 12px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .plan-card.highlight {
+      border: 2px solid var(--emerald);
+      background: rgba(16, 185, 129, 0.08);
+      box-shadow: 0 8px 24px var(--emerald-glow);
+    }
+
+    .plan-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+
+    .plan-name {
+      font-size: 13px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .plan-badge {
+      font-size: 9px;
+      font-weight: 900;
+      padding: 3px 8px;
+      border-radius: 12px;
+      text-transform: uppercase;
+    }
+
+    .plan-price-row {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+
+    .plan-price {
+      font-size: 28px;
+      font-weight: 900;
+      font-family: 'JetBrains Mono', monospace;
+      letter-spacing: -0.04em;
+    }
+
+    .plan-old-price {
+      font-size: 13px;
+      color: #64748b;
+      text-decoration: line-through;
+      font-weight: 700;
+    }
+
+    .plan-terms {
+      font-size: 11px;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    .plan-features-list {
+      list-style: none;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .plan-features-list li {
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #cbd5e1;
+    }
+
+    .plan-features-list li span.check {
+      color: var(--emerald);
+      font-weight: 900;
+    }
+
+    /* Big Action Button */
+    .cta-button {
+      width: 100%;
+      padding: 16px 20px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-weight: 900;
+      font-size: 14px;
+      box-shadow: 0 10px 25px rgba(16, 185, 129, 0.4);
+      border: none;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .cta-button:active {
+      transform: scale(0.97);
+    }
+
+    /* Mockup Display Box */
+    .pos-preview-box {
+      background: rgba(3, 7, 18, 0.8);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin: 10px 0;
+    }
+
+    .bcv-banner {
+      background: rgba(245, 158, 11, 0.12);
+      border: 1px solid rgba(245, 158, 11, 0.25);
+      border-radius: 12px;
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+      font-weight: 800;
+      color: #fef08a;
+    }
+
+    .product-grid-sample {
+      display: grid;
+      grid-cols: 3;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .product-sample-card {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      padding: 8px;
+      text-align: center;
+    }
+
+    .product-sample-card img {
+      width: 100%;
+      height: 48px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-bottom: 4px;
+      background: white;
+    }
+
+    .product-sample-card .p-name {
+      font-size: 9.5px;
+      font-weight: 800;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: #f1f5f9;
+    }
+
+    .product-sample-card .p-price {
+      font-size: 11px;
+      font-weight: 900;
+      color: var(--emerald);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Navigation Bar at Bottom */
+    .bottom-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 20px 20px;
+      border-top: 1px solid var(--card-border);
+      background: rgba(3, 7, 18, 0.7);
+      backdrop-filter: blur(12px);
+      z-index: 20;
+    }
+
+    .nav-dots {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.2);
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .dot.active {
+      width: 22px;
+      background: var(--primary);
+      box-shadow: 0 0 10px var(--primary-glow);
+    }
+
+    .nav-buttons {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-nav {
+      padding: 8px 16px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 800;
+      border: 1px solid var(--card-border);
+      background: rgba(255, 255, 255, 0.05);
+      color: white;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .btn-nav:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .btn-nav.primary {
+      background: var(--primary);
+      border-color: var(--primary);
+      box-shadow: 0 4px 12px var(--primary-glow);
+    }
+
+    .btn-nav:disabled {
+      opacity: 0.3;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ambient background glow elements -->
+  <div class="glow-ambient" id="ambient1"></div>
+  <div class="glow-ambient-2" id="ambient2"></div>
+
+  <!-- Main Mobile Presenter Frame -->
+  <div class="app-viewport">
+    
+    <!-- Top Header -->
+    <header class="top-bar">
+      <div class="brand-logo">
+        <div class="brand-icon">K</div>
+        <div class="brand-title">KlikPOS <span>Street</span></div>
+      </div>
+      <div class="slide-counter" id="slideCounter">01 / 05</div>
+    </header>
+
+    <!-- Slides Wrapper -->
+    <main class="slides-wrapper" id="slidesWrapper">
+
+      <!-- =================================================================== -->
+      <!-- SLIDE 1: EL GANCHO PRINCIPAL / HERO                                 -->
+      <!-- =================================================================== -->
+      <section class="slide active" data-slide="1">
+        <div>
+          <div class="anim-1">
+            <span class="tag-badge tag-blue">🚀 Terminal Inteligente para Negocios</span>
+          </div>
+
+          <h1 class="slide-title anim-2">
+            Convierte tu teléfono en una <span style="color: #38bdf8;">Caja Registradora</span> y olvídate de la calculadora.
+          </h1>
+
+          <p class="slide-subtitle anim-3">
+            El sistema de ventas y cobro creado para el comerciante que necesita rapidez, orden y cero enredos con el cambio.
+          </p>
+
+          <div class="pos-preview-box anim-4">
+            <div class="bcv-banner">
+              <span>🇻🇪 TASA OFICIAL BCV</span>
+              <span id="demoBcv">ACTUALIZADA AL SEGUNDO</span>
+            </div>
+
+            <div class="product-grid-sample">
+              <div class="product-sample-card">
+                <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=200&auto=format&fit=crop&q=80" alt="Burger">
+                <div class="p-name">Burger Doble</div>
+                <div class="p-price">$5.00</div>
+              </div>
+              <div class="product-sample-card">
+                <img src="https://images.unsplash.com/photo-1527061011665-3652c757a4d4?w=200&auto=format&fit=crop&q=80" alt="Licores">
+                <div class="p-name">Ron Gran Rsv</div>
+                <div class="p-price">$12.50</div>
+              </div>
+              <div class="product-sample-card">
+                <img src="https://images.unsplash.com/photo-1588964895597-cfccd6e2dbf9?w=200&auto=format&fit=crop&q=80" alt="Viveres">
+                <div class="p-name">Harina PAN</div>
+                <div class="p-price">$1.30</div>
+              </div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 6px; border-top: 1px solid rgba(255,255,255,0.08); font-size: 11px;">
+              <span style="color: #94a3b8;">Total Ticket:</span>
+              <span style="font-weight: 900; color: #10b981; font-family: monospace; font-size: 14px;">$18.80 / Bs. 733.20</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="anim-5">
+          <p style="font-size: 11.5px; text-align: center; color: #94a3b8; margin-bottom: 10px;">
+            Desliza para ver por qué más de 500 comercios ya no usan libretas 👇
+          </p>
+          <button class="cta-button" onclick="nextSlide()" style="background: linear-gradient(135deg, #0284c7, #0ea5e9);">
+            <span>Ver las 5 Ventajas Clave</span>
+            <span>→</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- =================================================================== -->
+      <!-- SLIDE 2: LAS 5 BONDADES QUE ENAMORAN AL COMERCIANTE                -->
+      <!-- =================================================================== -->
+      <section class="slide" data-slide="2">
+        <div>
+          <div class="anim-1">
+            <span class="tag-badge tag-emerald">⭐ Ventajas Exclusivas</span>
+          </div>
+
+          <h2 class="slide-title anim-2">
+            Diseñado para la <span style="color: #34d399;">realidad de la calle</span> en Venezuela
+          </h2>
+
+          <p class="slide-subtitle anim-3">
+            Todo lo que un negocio necesita para operar sin trabas, sin puntos caros y sin errores de vuelto.
+          </p>
+
+          <div class="feature-card anim-4">
+            <div class="feature-icon-box" style="background: rgba(16, 185, 129, 0.15); color: #34d399;">💵</div>
+            <div class="feature-text">
+              <h4>Tasa BCV Oficial al Segundo</h4>
+              <p>Cobras en Dólares ($) o Bolívares (Bs.) automáticamente. Calcula el cambio exacto sin tocar la calculadora.</p>
+            </div>
+          </div>
+
+          <div class="feature-card anim-5">
+            <div class="feature-icon-box" style="background: rgba(14, 165, 233, 0.15); color: #38bdf8;">🔋</div>
+            <div class="feature-text">
+              <h4>100% Funcional SIN INTERNET</h4>
+              <p>¿Se fue la luz o no hay señal? Sigues vendiendo y registrando todo el día sin consumir saldo ni datos.</p>
+            </div>
+          </div>
+
+          <div class="feature-card anim-6">
+            <div class="feature-icon-box" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24;">🍔</div>
+            <div class="feature-text">
+              <h4>Catálogo Táctil con Fotos HD</h4>
+              <p>Cobras con un solo toque en la foto del producto. Fotos profesionales listas por rubro (comida, víveres, licores).</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="anim-7">
+          <button class="cta-button" onclick="nextSlide()" style="background: linear-gradient(135deg, #0284c7, #0ea5e9);">
+            <span>Ver Control de Fiados y Seguridad</span>
+            <span>→</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- =================================================================== -->
+      <!-- SLIDE 3: FIADOS Y SEGURO ANTIRROBO                                  -->
+      <!-- =================================================================== -->
+      <section class="slide" data-slide="3">
+        <div>
+          <div class="anim-1">
+            <span class="tag-badge tag-amber">🔒 Protección & Finanzas</span>
+          </div>
+
+          <h2 class="slide-title anim-2">
+            Control de <span style="color: #fbbf24;">Fiados</span> y Seguro Antirrobo
+          </h2>
+
+          <p class="slide-subtitle anim-3">
+            Evita pérdidas de dinero y mantén las cuentas de tu negocio respaldadas al 100%.
+          </p>
+
+          <div class="feature-card anim-4">
+            <div class="feature-icon-box" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24;">📒</div>
+            <div class="feature-text">
+              <h4>Adiós al Cuaderno de Fiados</h4>
+              <p>Registra al cliente y lo que te debe en 1 segundo. Envíale su estado de cuenta directo a su WhatsApp con un solo toque.</p>
+            </div>
+          </div>
+
+          <div class="feature-card anim-5">
+            <div class="feature-icon-box" style="background: rgba(139, 92, 246, 0.15); color: #c084fc;">🛡️</div>
+            <div class="feature-text">
+              <h4>Seguro Antirrobo & Cloud Backup</h4>
+              <p>Si te roban el teléfono, se te moja o se daña, <strong>NO PIERDES TUS DATOS</strong>. Pones tu clave en otro equipo y recuperas todo en 3 segundos.</p>
+            </div>
+          </div>
+
+          <div class="feature-card anim-6">
+            <div class="feature-icon-box" style="background: rgba(16, 185, 129, 0.15); color: #34d399;">🖨️</div>
+            <div class="feature-text">
+              <h4>Impresión Bluetooth o Ticket Digital</h4>
+              <p>Conecta cualquier impresora térmica portátil o envía el comprobante por WhatsApp a tus clientes.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="anim-7">
+          <button class="cta-button" onclick="nextSlide()">
+            <span>Ver Opciones de Precios y Planes</span>
+            <span>→</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- =================================================================== -->
+      <!-- SLIDE 4: LOS 3 PLANES DE PAGO APROBADOS                            -->
+      <!-- =================================================================== -->
+      <section class="slide" data-slide="4">
+        <div>
+          <div class="anim-1">
+            <span class="tag-badge tag-emerald">💰 Precios Transparentes</span>
+          </div>
+
+          <h2 class="slide-title anim-2">
+            Elige el plan que mejor se <span style="color: #34d399;">adapte a tu bolsillo</span>
+          </h2>
+
+          <p class="slide-subtitle anim-3" style="margin-bottom: 12px;">
+            Sin letras chiquitas ni costos ocultos.
+          </p>
+
+          <!-- Plan 1: Contado $15 -->
+          <div class="plan-card highlight anim-4">
+            <div class="plan-header">
+              <span class="plan-name" style="color: #34d399;">🟢 Oferta Lanzamiento (Contado)</span>
+              <span class="plan-badge" style="background: #10b981; color: white;">Ahorras $10</span>
+            </div>
+            <div class="plan-price-row">
+              <span class="plan-price" style="color: #10b981;">$15</span>
+              <span class="plan-old-price">Precio Real: $25</span>
+              <span style="font-size: 11px; color: #94a3b8;">Pago Único</span>
+            </div>
+            <ul class="plan-features-list">
+              <li><span class="check">✓</span> Licencia de por vida para tu teléfono o tablet</li>
+              <li><span class="check">✓</span> Catálogo de fotos HD y control de fiados</li>
+              <li><span class="check">✓</span> <strong>30 Días de Seguro Cloud GRATIS</strong></li>
+            </ul>
+          </div>
+
+          <!-- Plan 2: Financiado $25 -->
+          <div class="plan-card anim-5">
+            <div class="plan-header">
+              <span class="plan-name" style="color: #38bdf8;">🔵 Plan Financiado a Crédito</span>
+              <span class="plan-badge" style="background: rgba(14,165,233,0.2); color: #38bdf8;">En 2 Partes</span>
+            </div>
+            <div class="plan-price-row">
+              <span class="plan-price" style="color: #38bdf8;">$25</span>
+              <span style="font-size: 11px; color: #94a3b8;">Total ($10 hoy + $15 en 15 días)</span>
+            </div>
+            <p class="plan-terms">
+              Arranca a trabajar con solo <strong style="color: white;">$10 USD hoy</strong> y pagas los <strong style="color: white;">$15 restantes a los 15 días</strong> con las mismas ganancias del negocio.
+            </p>
+          </div>
+
+          <!-- Plan 3: VIP $50 -->
+          <div class="plan-card anim-6">
+            <div class="plan-header">
+              <span class="plan-name" style="color: #c084fc;">🟣 Plan Full VIP Blindado</span>
+              <span class="plan-badge" style="background: rgba(139,92,246,0.2); color: #c084fc;">1 Año Todo Incluido</span>
+            </div>
+            <div class="plan-price-row">
+              <span class="plan-price" style="color: #c084fc;">$50</span>
+              <span style="font-size: 11px; color: #94a3b8;">En 2 cuotas de $25</span>
+            </div>
+            <p class="plan-terms">
+              <strong>$25 hoy + $25 a la quincena.</strong> Incluye Licencia Vitalicia + 1 Año Completo de Seguro Antirrobo Cloud + Personalización con tu Logo.
+            </p>
+          </div>
+        </div>
+
+        <div class="anim-7">
+          <button class="cta-button" onclick="nextSlide()" style="background: linear-gradient(135deg, #10b981, #059669);">
+            <span>Solicitar Demostración Gratis</span>
+            <span>→</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- =================================================================== -->
+      <!-- SLIDE 5: CIERRE Y LLAMADO A LA ACCIÓN (CERO RIESGO)                -->
+      <!-- =================================================================== -->
+      <section class="slide" data-slide="5">
+        <div>
+          <div class="anim-1">
+            <span class="tag-badge tag-emerald">🛡️ Garantía Total de Confianza</span>
+          </div>
+
+          <h2 class="slide-title anim-2">
+            Pruébalo gratis en tu teléfono <span style="color: #34d399;">antes de pagar</span> un solo dólar.
+          </h2>
+
+          <p class="slide-subtitle anim-3">
+            Te instalamos la aplicación de inmediato. Pruébala en tu propio mostrador por 15 minutos, cobra a tus clientes y compruébalo por ti mismo.
+          </p>
+
+          <div class="feature-card anim-4" style="background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.3);">
+            <div class="feature-icon-box" style="background: #10b981; color: white;">⚡</div>
+            <div class="feature-text">
+              <h4 style="color: #34d399;">Instalación en 5 Minutos</h4>
+              <p>No necesitas conocimientos técnicos ni configuraciones engorrosas. Te dejamos la app lista con tus productos cargados.</p>
+            </div>
+          </div>
+
+          <div class="feature-card anim-5" style="background: rgba(14, 165, 233, 0.1); border-color: rgba(14, 165, 233, 0.3);">
+            <div class="feature-icon-box" style="background: #0ea5e9; color: white;">💬</div>
+            <div class="feature-text">
+              <h4 style="color: #38bdf8;">Atención Humana Directa</h4>
+              <p>Soporte continuo vía WhatsApp para dudas, respaldos y asesoría para tu negocio.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="anim-6" style="display: flex; flex-direction: column; gap: 10px;">
+          <a
+            id="whatsappCtaBtn"
+            href="https://wa.me/584248298026?text=%C2%A1Hola%20KlikPOS!%20%F0%9F%9A%80%20Vi%20la%20presentaci%C3%B3n%20comercial%20y%20quiero%20instalar%20la%20demostraci%C3%B3n%20gratuita%20en%20mi%20negocio."
+            target="_blank"
+            class="cta-button"
+            style="font-size: 15px; padding: 18px;"
+          >
+            <span>📱 INSTALAR DEMO GRATIS POR WHATSAPP</span>
+          </a>
+
+          <p class="anim-7" style="text-align: center; font-size: 11px; color: #94a3b8;">
+            Disponible para teléfonos y tablets Android en toda Venezuela 🇻🇪
+          </p>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Bottom Navigation Bar -->
+    <footer class="bottom-nav">
+      <button class="btn-nav" id="btnPrev" onclick="prevSlide()" disabled>
+        <span>← Atrás</span>
+      </button>
+
+      <div class="nav-dots" id="navDots">
+        <div class="dot active" onclick="goToSlide(1)"></div>
+        <div class="dot" onclick="goToSlide(2)"></div>
+        <div class="dot" onclick="goToSlide(3)"></div>
+        <div class="dot" onclick="goToSlide(4)"></div>
+        <div class="dot" onclick="goToSlide(5)"></div>
+      </div>
+
+      <button class="btn-nav primary" id="btnNext" onclick="nextSlide()">
+        <span>Siguiente →</span>
+      </button>
+    </footer>
+
+  </div>
+
+  <script>
+    let currentSlide = 1;
+    const totalSlides = 5;
+
+    const slides = document.querySelectorAll('.slide');
+    const dots = document.querySelectorAll('.dot');
+    const counter = document.getElementById('slideCounter');
+    const btnPrev = document.getElementById('btnPrev');
+    const btnNext = document.getElementById('btnNext');
+    const ambient1 = document.getElementById('ambient1');
+    const ambient2 = document.getElementById('ambient2');
+
+    const ambientColors = [
+      { c1: 'rgba(14, 165, 233, 0.25)', c2: 'rgba(16, 185, 129, 0.2)' },
+      { c1: 'rgba(16, 185, 129, 0.25)', c2: 'rgba(14, 165, 233, 0.2)' },
+      { c1: 'rgba(245, 158, 11, 0.25)', c2: 'rgba(139, 92, 246, 0.2)' },
+      { c1: 'rgba(16, 185, 129, 0.3)', c2: 'rgba(245, 158, 11, 0.25)' },
+      { c1: 'rgba(16, 185, 129, 0.35)', c2: 'rgba(14, 165, 233, 0.3)' }
+    ];
+
+    function updateSlide() {
+      slides.forEach((s, idx) => {
+        if (idx + 1 === currentSlide) {
+          s.classList.add('active');
+        } else {
+          s.classList.remove('active');
+        }
+      });
+
+      dots.forEach((d, idx) => {
+        if (idx + 1 === currentSlide) {
+          d.classList.add('active');
+        } else {
+          d.classList.remove('active');
+        }
+      });
+
+      counter.textContent = `0${currentSlide} / 0${totalSlides}`;
+      btnPrev.disabled = currentSlide === 1;
+
+      if (currentSlide === totalSlides) {
+        btnNext.innerHTML = '<span>Contactar 📱</span>';
+        btnNext.style.background = '#10b981';
+        btnNext.style.borderColor = '#10b981';
+      } else {
+        btnNext.innerHTML = '<span>Siguiente →</span>';
+        btnNext.style.background = '#0ea5e9';
+        btnNext.style.borderColor = '#0ea5e9';
+      }
+
+      // Update ambient lighting smoothly
+      const colors = ambientColors[currentSlide - 1];
+      if (colors) {
+        ambient1.style.background = `radial-gradient(circle, ${colors.c1} 0%, rgba(0,0,0,0) 70%)`;
+        ambient2.style.background = `radial-gradient(circle, ${colors.c2} 0%, rgba(0,0,0,0) 70%)`;
+      }
+    }
+
+    function nextSlide() {
+      if (currentSlide < totalSlides) {
+        currentSlide++;
+        updateSlide();
+      } else {
+        const ctaBtn = document.getElementById('whatsappCtaBtn');
+        if (ctaBtn) ctaBtn.click();
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 1) {
+        currentSlide--;
+        updateSlide();
+      }
+    }
+
+    function goToSlide(n) {
+      if (n >= 1 && n <= totalSlides) {
+        currentSlide = n;
+        updateSlide();
+      }
+    }
+
+    // Touch Swipe Gestures for Mobile
+    let touchStartX = 0;
+    let touchEndX = 0;
+    const wrapper = document.getElementById('slidesWrapper');
+
+    wrapper.addEventListener('touchstart', e => {
+      touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+
+    wrapper.addEventListener('touchend', e => {
+      touchEndX = e.changedTouches[0].screenX;
+      handleSwipe();
+    }, { passive: true });
+
+    function handleSwipe() {
+      const swipeDistance = touchEndX - touchStartX;
+      if (swipeDistance < -45) {
+        nextSlide();
+      } else if (swipeDistance > 45) {
+        prevSlide();
+      }
+    }
+
+    // Keyboard navigation (Left / Right arrows)
+    document.addEventListener('keydown', e => {
+      if (e.key === 'ArrowRight' || e.key === ' ') nextSlide();
+      if (e.key === 'ArrowLeft') prevSlide();
+    });
+  </script>
+</body>
+</html>

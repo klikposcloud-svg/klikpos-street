@@ -2,15 +2,17 @@
 
 import React from 'react';
 import { 
-  Sparkles, 
+  LayoutGrid, 
   Package, 
   Truck, 
   Printer, 
   Boxes, 
   QrCode, 
-  ShoppingCart, 
+  TrendingUp,
   Settings, 
   ArrowLeftRight, 
+  RefreshCw,
+  Sparkles,
   X 
 } from 'lucide-react';
 
@@ -25,8 +27,12 @@ interface TabletPosToolsDockProps {
   onOpenPrinter: () => void;
   onOpenRubros: () => void;
   onOpenQrMenu: () => void;
-  onOpenCart: () => void;
+  onOpenCart?: () => void;
+  onOpenSales?: () => void;
+  onOpenDataSync?: () => void;
+  onOpenSoftwareUpdate?: () => void;
   onOpenSettings: () => void;
+  isLiteMode?: boolean;
 }
 
 export const TabletPosToolsDock: React.FC<TabletPosToolsDockProps> = ({
@@ -41,7 +47,11 @@ export const TabletPosToolsDock: React.FC<TabletPosToolsDockProps> = ({
   onOpenRubros,
   onOpenQrMenu,
   onOpenCart,
-  onOpenSettings
+  onOpenSales,
+  onOpenDataSync,
+  onOpenSoftwareUpdate,
+  onOpenSettings,
+  isLiteMode = true
 }) => {
   if (!isOpen) return null;
 
@@ -52,23 +62,25 @@ export const TabletPosToolsDock: React.FC<TabletPosToolsDockProps> = ({
       }`}
     >
       <aside
-        className="w-14 rounded-[30px] py-3.5 px-1.5 flex flex-col items-center justify-between shadow-2xl border select-none shrink-0 min-h-[410px] z-50"
+        className="w-14 rounded-[32px] py-3.5 px-1.5 flex flex-col items-center justify-between shadow-2xl border select-none shrink-0 min-h-[420px] z-50 backdrop-blur-xl transition-all"
         style={{
-          backgroundColor: '#090d16',
+          backgroundColor: 'rgba(9, 13, 22, 0.82)',
           borderColor: 'rgba(255, 255, 255, 0.16)',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.12)'
+          backdropFilter: 'blur(18px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(18px) saturate(180%)',
+          boxShadow: '0 25px 60px -10px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.08)'
         }}
       >
-        {/* Top: Sparkles Icon / Brand Pill */}
+        {/* Top: LayoutGrid Icon / Brand Pill */}
         <div
-          className="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 shadow-lg cursor-pointer"
+          className="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 shadow-lg cursor-pointer transition-transform hover:scale-105 active:scale-95"
           style={{
             background: 'linear-gradient(135deg, #f59e0b, #d97706)',
-            boxShadow: '0 4px 14px rgba(245, 158, 11, 0.35)'
+            boxShadow: '0 4px 16px rgba(245, 158, 11, 0.45)'
           }}
           title="KlikPOS Tools"
         >
-          <Sparkles className="w-5 h-5 text-slate-950 font-black" />
+          <LayoutGrid className="w-5 h-5 text-slate-950 font-black stroke-[2.4]" />
         </div>
 
         {/* Íconos Centrales de Acceso Directo con Contraste AAA y Micro-Fondos */}
@@ -76,87 +88,104 @@ export const TabletPosToolsDock: React.FC<TabletPosToolsDockProps> = ({
           {/* 1. Inventario & Stock */}
           <button
             onClick={onOpenInventory}
-            className="w-10 h-10 rounded-xl flex items-center justify-center text-emerald-400 bg-emerald-500/18 border border-emerald-500/35 hover:bg-emerald-500/30 hover:scale-110 active:scale-95 transition-all shadow-xs cursor-pointer group"
+            className="w-10 h-10 rounded-xl flex items-center justify-center text-emerald-300 bg-emerald-500/25 border border-emerald-400/40 hover:bg-emerald-500/40 hover:scale-110 active:scale-95 transition-all shadow-sm cursor-pointer group"
             title="Gestión de Inventario & Stock"
           >
-            <Package className="w-5 h-5" />
+            <Package className="w-5 h-5 stroke-[2.2]" />
           </button>
 
-          {/* 2. Motorizados / Despacho */}
-          <button
-            onClick={onOpenDrivers}
-            className="w-10 h-10 rounded-xl flex items-center justify-center text-amber-400 bg-amber-500/18 border border-amber-500/35 hover:bg-amber-500/30 hover:scale-110 active:scale-95 transition-all shadow-xs cursor-pointer group"
-            title="Gestión de Motorizados & Despachos"
-          >
-            <Truck className="w-5 h-5" />
-          </button>
+          {/* 2. Motorizados / Despacho (Opcional en Lite) */}
+          {!isLiteMode && (
+            <button
+              onClick={onOpenDrivers}
+              className="w-10 h-10 rounded-xl flex items-center justify-center text-amber-300 bg-amber-500/25 border border-amber-400/40 hover:bg-amber-500/40 hover:scale-110 active:scale-95 transition-all shadow-sm cursor-pointer group"
+              title="Gestión de Motorizados & Despachos"
+            >
+              <Truck className="w-5 h-5 stroke-[2.2]" />
+            </button>
+          )}
 
           {/* 3. Impresora Térmica */}
           <button
             onClick={onOpenPrinter}
-            className="w-10 h-10 rounded-xl flex items-center justify-center text-indigo-300 bg-indigo-500/18 border border-indigo-500/35 hover:bg-indigo-500/30 hover:scale-110 active:scale-95 transition-all shadow-xs cursor-pointer group"
+            className="w-10 h-10 rounded-xl flex items-center justify-center text-sky-300 bg-sky-500/25 border border-sky-400/40 hover:bg-sky-500/40 hover:scale-110 active:scale-95 transition-all shadow-sm cursor-pointer group"
             title="Configurar Impresora Térmica"
           >
-            <Printer className="w-5 h-5" />
+            <Printer className="w-5 h-5 stroke-[2.2]" />
           </button>
 
           {/* 4. Selector de Rubro de Negocio */}
           <button
             onClick={onOpenRubros}
-            className="w-10 h-10 rounded-xl flex items-center justify-center text-purple-300 bg-purple-500/18 border border-purple-500/35 hover:bg-purple-500/30 hover:scale-110 active:scale-95 transition-all shadow-xs cursor-pointer group"
+            className="w-10 h-10 rounded-xl flex items-center justify-center text-purple-300 bg-purple-500/25 border border-purple-400/40 hover:bg-purple-500/40 hover:scale-110 active:scale-95 transition-all shadow-sm cursor-pointer group"
             title="Cambiar Rubro Comercial"
           >
-            <Boxes className="w-5 h-5" />
+            <Boxes className="w-5 h-5 stroke-[2.2]" />
           </button>
 
-          {/* 5. QR Menú Interactivo */}
+          {/* 5. QR Menú Interactivo (Opcional en Lite) */}
+          {!isLiteMode && (
+            <button
+              onClick={onOpenQrMenu}
+              className="w-10 h-10 rounded-xl flex items-center justify-center text-indigo-300 bg-indigo-500/25 border border-indigo-400/40 hover:bg-indigo-500/40 hover:scale-110 active:scale-95 transition-all shadow-sm cursor-pointer group"
+              title="Generar Menú QR Digital"
+            >
+              <QrCode className="w-5 h-5 stroke-[2.2]" />
+            </button>
+          )}
+
+          {/* 6. Módulo de Ventas & Respaldo */}
           <button
-            onClick={onOpenQrMenu}
-            className="w-10 h-10 rounded-xl flex items-center justify-center text-sky-300 bg-sky-500/18 border border-sky-500/35 hover:bg-sky-500/30 hover:scale-110 active:scale-95 transition-all shadow-xs cursor-pointer group"
-            title="Generar Menú QR Digital"
+            onClick={onOpenSales || onOpenCart}
+            className="w-10 h-10 rounded-xl flex items-center justify-center text-emerald-300 bg-emerald-500/25 border border-emerald-400/40 hover:bg-emerald-500/40 hover:scale-110 active:scale-95 transition-all shadow-sm cursor-pointer group"
+            title="Módulo de Ventas & Respaldo (Diario, Semanal, Mensual)"
           >
-            <QrCode className="w-5 h-5" />
+            <TrendingUp className="w-5 h-5 stroke-[2.4]" />
           </button>
 
-          {/* 6. Comanda / Ticket Activo */}
+          {/* 7. Sincronizar Data */}
           <button
-            onClick={onOpenCart}
-            className="w-10 h-10 rounded-xl flex items-center justify-center text-emerald-300 bg-emerald-500/18 border border-emerald-500/35 hover:bg-emerald-500/30 hover:scale-110 active:scale-95 transition-all shadow-xs relative cursor-pointer group"
-            title="Ver Comanda Activa"
+            onClick={onOpenDataSync}
+            className="w-10 h-10 rounded-xl flex items-center justify-center text-cyan-300 bg-cyan-500/25 border border-cyan-400/40 hover:bg-cyan-500/40 hover:scale-110 active:scale-95 transition-all shadow-sm cursor-pointer group"
+            title="Sincronizar Data (Tasa BCV, Ventas & Catálogo Cloud)"
           >
-            <ShoppingCart className="w-5 h-5" />
-            {totalItems > 0 && (
-              <span className="absolute -top-1 -right-1 bg-amber-400 text-slate-950 text-[9px] font-black w-4.5 h-4.5 rounded-full flex items-center justify-center shadow-md font-mono">
-                {totalItems}
-              </span>
-            )}
+            <RefreshCw className="w-5 h-5 stroke-[2.4]" />
           </button>
 
-          {/* 7. Ajustes & Configuración */}
+          {/* 8. Actualizar Software */}
+          <button
+            onClick={onOpenSoftwareUpdate}
+            className="w-10 h-10 rounded-xl flex items-center justify-center text-yellow-300 bg-yellow-500/25 border border-yellow-400/40 hover:bg-yellow-500/40 hover:scale-110 active:scale-95 transition-all shadow-sm cursor-pointer group"
+            title="Actualizar Software (GitHub Release & APK)"
+          >
+            <Sparkles className="w-5 h-5 stroke-[2.4]" />
+          </button>
+
+          {/* 9. Ajustes & Configuración */}
           <button
             onClick={onOpenSettings}
-            className="w-10 h-10 rounded-xl flex items-center justify-center text-slate-100 bg-slate-800/80 border border-slate-700 hover:bg-slate-700 hover:scale-110 active:scale-95 transition-all shadow-xs cursor-pointer group"
+            className="w-10 h-10 rounded-xl flex items-center justify-center text-slate-100 bg-slate-800/90 border border-slate-600/70 hover:bg-slate-700 hover:scale-110 active:scale-95 transition-all shadow-sm cursor-pointer group"
             title="Ajustes de Empresa & RIF"
           >
-            <Settings className="w-5 h-5" />
+            <Settings className="w-5 h-5 stroke-[2.2]" />
           </button>
         </div>
 
         {/* Bottom: Alternar Lado (Izq/Der) y Colapsar */}
-        <div className="flex flex-col items-center gap-2 pt-2 border-t border-slate-800 shrink-0 w-full">
+        <div className="flex flex-col items-center gap-2 pt-2 border-t border-white/10 shrink-0 w-full">
           <button
             onClick={onToggleSide}
-            className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-300 hover:text-amber-300 hover:bg-slate-800/80 active:scale-90 transition-all cursor-pointer"
+            className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-300 hover:text-amber-300 hover:bg-white/10 active:scale-90 transition-all cursor-pointer"
             title={dockSide === 'left' ? 'Mover Docker a la Derecha' : 'Mover Docker a la Izquierda'}
           >
             <ArrowLeftRight className="w-4 h-4" />
           </button>
           <button
             onClick={onClose}
-            className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-rose-400 hover:bg-rose-500/15 active:scale-90 transition-all cursor-pointer"
+            className="w-9 h-9 rounded-xl flex items-center justify-center text-rose-400 hover:text-rose-300 hover:bg-rose-500/20 active:scale-90 transition-all cursor-pointer"
             title="Minimizar Docker"
           >
-            <X className="w-4 h-4" />
+            <X className="w-4 h-4 stroke-[2.5]" />
           </button>
         </div>
       </aside>

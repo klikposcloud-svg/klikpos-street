@@ -21,12 +21,16 @@ export async function GET(req: NextRequest) {
                       req.headers.get('x-venematic-secret') ||
                       searchParams.get('secret');
 
-  // 1. Simulación de pago de prueba (requiere autenticación para evitar inyección externa maliciosa)
-  if (action === 'test') {
-    if (configuredSecret && tokenHeader !== configuredSecret) {
-      return NextResponse.json({ error: 'No autorizado para emitir pagos de prueba.' }, { status: 401 });
-    }
+  // Protección Red Team: Exigir autenticación para cualquier lectura de datos o mutación en GET
+  if (configuredSecret && tokenHeader !== configuredSecret) {
+    return NextResponse.json(
+      { error: 'No autorizado. Se requiere x-klikpos-secret o token de autorización válido.' },
+      { status: 401 }
+    );
+  }
 
+  // 1. Simulación de pago de prueba
+  if (action === 'test') {
     const testAmount = parseFloat(searchParams.get('monto') || '150.00');
     const testBank = searchParams.get('banco') || 'Banco de Venezuela';
     const testRef = searchParams.get('ref') || Math.floor(100000 + Math.random() * 900000).toString();

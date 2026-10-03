@@ -3,6 +3,9 @@
 import React, { useEffect, useState } from 'react';
 import { Download, RefreshCw, X, Sparkles, CheckCircle2, AlertCircle } from 'lucide-react';
 
+import { doc, onSnapshot, getDoc } from 'firebase/firestore';
+import { db as firestoreDb, isFirebaseConfigured } from '@/lib/firebase/config';
+
 export const CURRENT_STREET_VERSION = '1.0.0';
 
 export interface StreetVersionManifest {
@@ -14,12 +17,14 @@ export interface StreetVersionManifest {
   apkUrl?: string;
   fallbackApkUrl?: string;
   mandatory?: boolean;
+  announcement?: string;
+  hotPatchCss?: string;
 }
 
+// Manifiestos de respaldo HTTP
 const MANIFEST_URLS = [
-  'https://raw.githubusercontent.com/klikposcloud-svg/klikpos-street/main/version.json',
-  '/version-street.json',
-  '/version.json'
+  'https://raw.githubusercontent.com/klikposcloud-svg/klikpos-street/main/version-street.json',
+  '/version-street.json'
 ];
 
 export function compareVersions(v1: string, v2: string): number {
@@ -46,12 +51,66 @@ export const StreetAutoUpdater: React.FC = () => {
   const [showNotesModal, setShowNotesModal] = useState(false);
 
   useEffect(() => {
-    // Comprobación silenciosa diferida 3s tras iniciar la terminal para no interferir con la apertura
+    // 1. Conexión en TIEMPO REAL a Firestore (Colección system_updates/street)
+    let unsubscribeFirestore: (() => void) | null = null;
+
+    if (isFirebaseConfigured() && typeof window !== 'undefined') {
+      try {
+        const updateDocRef = doc(firestoreDb, 'system_updates', 'street');
+        unsubscribeFirestore = onSnapshot(updateDocRef, (snapshot) => {
+          if (snapshot.exists()) {
+            const remoteData = snapshot.data() as any;
+            if (remoteData && remoteData.version) {
+              console.log(`[RemoteOTA] 📡 Actualización detectada en Firestore en vivo: v${remoteData.version}`);
+
+              // Aplicar Hot-Patch CSS de emergencia si viene en Firestore
+              if (remoteData.hotPatchCss) {
+                let styleTag = document.getElementById('remote-hotpatch-css');
+                if (!styleTag) {
+                  styleTag = document.createElement('style');
+                  styleTag.id = 'remote-hotpatch-css';
+                  document.head.appendChild(styleTag);
+                }
+                styleTag.innerHTML = remoteData.hotPatchCss;
+              }
+
+              const isNewer = compareVersions(remoteData.version, CURRENT_STREET_VERSION) > 0;
+              if (isNewer) {
+                const dismissedVer = localStorage.getItem('klikpos_street_dismissed_version');
+                if (dismissedVer === remoteData.version && !remoteData.mandatory) {
+                  setHasUpdate(false);
+                } else {
+                  setManifest({
+                    version: remoteData.version,
+                    buildNumber: remoteData.buildNumber || 1,
+                    releaseDate: remoteData.releaseDate || new Date().toISOString(),
+                    title: remoteData.title || 'Actualización Oficial Disponible',
+                    notes: Array.isArray(remoteData.notes) ? remoteData.notes : ['Mejoras de rendimiento y estabilidad'],
+                    apkUrl: remoteData.apkUrl,
+                    fallbackApkUrl: remoteData.fallbackApkUrl,
+                    mandatory: Boolean(remoteData.mandatory),
+                    announcement: remoteData.announcement,
+                  });
+                  setHasUpdate(true);
+                  setIsDismissed(false);
+                }
+              }
+            }
+          }
+        }, (err) => {
+          console.warn('[RemoteOTA] Firestore listener fallback:', err);
+        });
+      } catch (err) {
+        console.warn('[RemoteOTA] Error conectando a Firestore system_updates:', err);
+      }
+    }
+
+    // 2. Verificación de respaldo HTTP inicial tras 5 segundos
     const timer = setTimeout(() => {
       checkStreetUpdates();
-    }, 3500);
+    }, 5000);
 
-    // Verificación periódica cada 30 minutos si hay conexión a internet activa
+    // Verificación periódica cada 30 minutos si hay internet
     const interval = setInterval(() => {
       if (typeof navigator !== 'undefined' && navigator.onLine) {
         checkStreetUpdates();
@@ -59,6 +118,7 @@ export const StreetAutoUpdater: React.FC = () => {
     }, 30 * 60 * 1000);
 
     return () => {
+      if (unsubscribeFirestore) unsubscribeFirestore();
       clearTimeout(timer);
       clearInterval(interval);
     };
@@ -78,6 +138,12 @@ export const StreetAutoUpdater: React.FC = () => {
         if (res.ok) {
           const data: StreetVersionManifest = await res.json();
           if (data && data.version) {
+            const dismissedVer = localStorage.getItem('klikpos_street_dismissed_version');
+            if (dismissedVer === data.version && !data.mandatory) {
+              setHasUpdate(false);
+              return;
+            }
+
             const isNewer = compareVersions(data.version, CURRENT_STREET_VERSION) > 0;
             if (isNewer) {
               setManifest(data);
@@ -88,8 +154,17 @@ export const StreetAutoUpdater: React.FC = () => {
           }
         }
       } catch (err) {
-        // Silencioso: las terminales de calle pueden tener internet intermitente
+        // Silencioso: terminal offline
       }
+    }
+  };
+
+  const handleDismiss = () => {
+    setIsDismissed(true);
+    if (manifest?.version) {
+      try {
+        localStorage.setItem('klikpos_street_dismissed_version', manifest.version);
+      } catch (e) {}
     }
   };
 
@@ -98,6 +173,12 @@ export const StreetAutoUpdater: React.FC = () => {
     setIsUpdating(true);
 
     try {
+      if (manifest?.version) {
+        try {
+          localStorage.setItem('klikpos_street_dismissed_version', manifest.version);
+        } catch (e) {}
+      }
+
       // 1. Purgar caché de Service Worker
       if (typeof window !== 'undefined' && 'caches' in window) {
         const keys = await caches.keys();
@@ -145,96 +226,98 @@ export const StreetAutoUpdater: React.FC = () => {
 
   return (
     <>
-      {/* Toast flotante superior de actualización */}
+      {/* Toast flotante superior de actualización con CONTRASTE WCAG AAA (>= 7:1) */}
       <aside 
         aria-label="Aviso de actualización disponible"
-        className="fixed top-3 left-1/2 -translate-x-1/2 z-[60] w-[94%] max-w-[480px] bg-[#0c1220]/95 backdrop-blur-md border border-amber-500/40 rounded-2xl shadow-[0_10px_35px_rgba(245,158,11,0.25)] p-3 text-white flex items-center justify-between gap-3 animate-in fade-in slide-in-from-top-4 duration-300"
+        className="fixed top-3 left-1/2 -translate-x-1/2 z-[60] w-[94%] max-w-[500px] bg-[#000000] border-2 border-amber-400 rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.9)] p-3 text-white flex items-center justify-between gap-3 select-none animate-in fade-in slide-in-from-top-4 duration-300"
       >
-        <div className="flex items-center gap-2.5 min-w-0">
-          <div className="w-8 h-8 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center shrink-0 text-amber-400">
-            <Sparkles className="w-4 h-4 animate-spin-slow" />
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-9 h-9 rounded-xl bg-amber-400 text-black flex items-center justify-center shrink-0 font-black shadow-md">
+            <Sparkles className="w-5 h-5 stroke-[2.5]" />
           </div>
           <div className="min-w-0">
-            <div className="flex items-center gap-1.5">
-              <span className="text-[12px] font-bold text-white tracking-wide truncate">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-black text-white tracking-wide truncate">
                 Actualización v{manifest.version}
               </span>
-              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-amber-500 text-slate-950">
+              <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-amber-400 text-black uppercase">
                 NUEVO
               </span>
             </div>
-            <p className="text-[11px] text-slate-400 truncate">
-              {manifest.title || 'Mejoras y nuevas funciones listas'}
+            <p className="text-[11px] font-semibold text-slate-200 truncate mt-0.5">
+              {manifest.title || 'Mejoras y optimizaciones listas para instalar'}
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-1.5 shrink-0">
+        <div className="flex items-center gap-2 shrink-0">
           <button
             onClick={() => setShowNotesModal(true)}
-            className="px-2.5 py-1 text-[11px] font-semibold text-slate-300 hover:text-white bg-white/5 hover:bg-white/10 rounded-lg transition-colors"
+            className="px-2.5 py-1 text-[11px] font-bold text-white hover:text-white bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg transition-colors cursor-pointer"
           >
             Ver
           </button>
           <button
             onClick={handleApplyUpdate}
             disabled={isUpdating}
-            className="px-3 py-1 text-[11px] font-bold bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-lg shadow-sm flex items-center gap-1.5 transition-transform active:scale-95 disabled:opacity-50"
+            className="px-3.5 py-1.5 text-[11px] font-black bg-amber-400 hover:bg-amber-300 text-black rounded-lg shadow-md flex items-center gap-1.5 transition-transform active:scale-95 disabled:opacity-50 cursor-pointer"
           >
             {isUpdating ? (
-              <RefreshCw className="w-3 h-3 animate-spin" />
+              <RefreshCw className="w-3.5 h-3.5 animate-spin" />
             ) : (
-              <Download className="w-3 h-3" />
+              <Download className="w-3.5 h-3.5 stroke-[2.5]" />
             )}
             <span>{isUpdating ? 'Actualizando...' : 'Actualizar'}</span>
           </button>
           <button
-            onClick={() => setIsDismissed(true)}
-            className="p-1 text-slate-400 hover:text-white rounded-lg hover:bg-white/10"
+            onClick={handleDismiss}
+            className="p-1.5 text-slate-300 hover:text-white bg-white/10 hover:bg-white/20 rounded-lg cursor-pointer"
             title="Descartar por ahora"
           >
-            <X className="w-3.5 h-3.5" />
+            <X className="w-4 h-4 stroke-[2.5]" />
           </button>
         </div>
       </aside>
 
-      {/* Modal detallado con notas de la versión */}
+      {/* Modal detallado con notas de la versión - CONTRASTE WCAG AAA (>= 7:1) */}
       {showNotesModal && (
-        <div className="fixed inset-0 z-[70] bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="w-full max-w-md bg-[#090d16] border border-white/10 rounded-2xl p-5 shadow-2xl text-white space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-white/10">
-              <div className="flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-amber-400" />
-                <h3 className="font-bold text-base text-white">
+        <div className="fixed inset-0 z-[70] bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="w-full max-w-md bg-[#000000] border-2 border-amber-400 rounded-3xl p-6 shadow-2xl text-white space-y-5">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+              <div className="flex items-center gap-2.5">
+                <div className="w-7 h-7 rounded-lg bg-amber-400 text-black flex items-center justify-center font-black">
+                  <Sparkles className="w-4 h-4" />
+                </div>
+                <h3 className="font-black text-base text-white tracking-tight">
                   KlikPOS Street v{manifest.version}
                 </h3>
               </div>
               <button
                 onClick={() => setShowNotesModal(false)}
-                className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-white/10"
+                className="p-1.5 rounded-xl bg-slate-800 text-white hover:bg-slate-700 cursor-pointer"
               >
-                <X className="w-5 h-5" />
+                <X className="w-5 h-5 stroke-[2.5]" />
               </button>
             </div>
 
-            <div className="space-y-2">
-              <p className="text-xs text-amber-400 font-semibold uppercase tracking-wider">
+            <div className="space-y-3">
+              <p className="text-xs font-black text-amber-400 uppercase tracking-wider">
                 Novedades de esta versión:
               </p>
-              <ul className="space-y-2 max-h-56 overflow-y-auto pr-1">
+              <ul className="space-y-2.5 max-h-60 overflow-y-auto pr-1">
                 {(manifest.notes || []).map((note, idx) => (
-                  <li key={idx} className="flex items-start gap-2 text-xs text-slate-300">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 mt-0.5 shrink-0" />
-                    <span>{note}</span>
+                  <li key={idx} className="flex items-start gap-2.5 text-xs font-medium text-slate-100">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400 mt-0.5 shrink-0 stroke-[2.5]" />
+                    <span className="leading-snug">{note}</span>
                   </li>
                 ))}
               </ul>
             </div>
 
-            <div className="pt-3 border-t border-white/10 flex items-center justify-end gap-2">
+            <div className="pt-3 border-t border-slate-800 flex items-center justify-end gap-2.5">
               <button
                 onClick={() => setShowNotesModal(false)}
-                className="px-3.5 py-1.5 text-xs text-slate-400 hover:text-white rounded-xl hover:bg-white/5"
+                className="px-4 py-2 text-xs font-bold text-slate-200 hover:text-white bg-slate-800 rounded-xl hover:bg-slate-700 cursor-pointer"
               >
                 Cerrar
               </button>
@@ -244,9 +327,9 @@ export const StreetAutoUpdater: React.FC = () => {
                   handleApplyUpdate();
                 }}
                 disabled={isUpdating}
-                className="px-4 py-1.5 text-xs font-bold bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-xl shadow-lg flex items-center gap-1.5 transition-transform active:scale-95"
+                className="px-5 py-2 text-xs font-black bg-amber-400 hover:bg-amber-300 text-black rounded-xl shadow-lg flex items-center gap-2 transition-transform active:scale-95 cursor-pointer"
               >
-                <Download className="w-3.5 h-3.5" />
+                <Download className="w-4 h-4 stroke-[2.5]" />
                 <span>Instalar Actualización</span>
               </button>
             </div>

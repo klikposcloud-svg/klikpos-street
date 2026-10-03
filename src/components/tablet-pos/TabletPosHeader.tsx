@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Menu, Sparkles, RefreshCw, ShoppingCart } from 'lucide-react';
+import { Menu, LayoutGrid, RefreshCw, ShoppingCart } from 'lucide-react';
 import { TrialState } from '@/lib/licensing/trial-manager';
 
 interface TabletPosHeaderProps {
@@ -93,7 +93,7 @@ export const TabletPosHeader: React.FC<TabletPosHeaderProps> = ({
             }`}
             title="Herramientas & Módulos Rápidos"
           >
-            <Sparkles className="w-4 h-4" />
+            <LayoutGrid className="w-4 h-4" />
           </button>
         </div>
       </div>

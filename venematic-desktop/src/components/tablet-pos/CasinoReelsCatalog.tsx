@@ -109,32 +109,14 @@ export const CasinoReelsCatalog: React.FC<CasinoReelsCatalogProps> = ({
             </button>
           </div>
 
-          {/* Selector de Estilo: Street Food Pro (Dark) vs Gourmet Clean (Light) */}
-          <div className="flex items-center gap-1 shrink-0">
-            <button
-              type="button"
-              onClick={() => onSelectStylePreset('street_pro')}
-              className={`px-2 py-1 rounded-xl text-[11px] font-black transition-all cursor-pointer ${
-                stylePreset === 'street_pro'
-                  ? 'bg-amber-500 text-slate-950 shadow-xs scale-102'
-                  : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white'
-              }`}
-              title="Estilo Street Food Pro (Modo Oscuro & Acentos Ámbar)"
+          {/* Visualización Exclusiva: Street Pro */}
+          <div className="flex items-center shrink-0">
+            <span
+              className="px-2.5 py-1 rounded-xl text-[11px] font-black bg-amber-500 text-slate-950 shadow-xs flex items-center gap-1 select-none"
+              title="Estilo Street Pro Oficial"
             >
               🍔 Street Pro
-            </button>
-            <button
-              type="button"
-              onClick={() => onSelectStylePreset('gourmet_clean')}
-              className={`px-2 py-1 rounded-xl text-[11px] font-black transition-all cursor-pointer ${
-                stylePreset === 'gourmet_clean'
-                  ? 'bg-emerald-600 text-white shadow-xs scale-102'
-                  : isLight ? 'bg-slate-200 text-slate-600 hover:text-slate-900' : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white'
-              }`}
-              title="Estilo Gourmet Clean (Modo Claro & Blanco)"
-            >
-              🌭 Gourmet
-            </button>
+            </span>
           </div>
         </div>
 

@@ -1,0 +1,51 @@
+================================================================================
+KLIKPOS SUITE - MANIFIESTO OFICIAL DE VERSIONES FINALES Y VERIFICACION SHA-256
+Fecha de Compilación: 2026-10-02T04:39:50.908Z
+================================================================================
+
+[APKS ANDROID COMPILADAS]
+• Archivo: KlikPOS_Street_v1.0.apk
+  App: KlikPOS Street (v1.0)
+  Tamaño: 11.15 MB
+  SHA-256: e83670db0d9a5b299b32ae24708130645e959b0ee29d4d93780f64d41a680f31
+
+• Archivo: KlikPOS_Movil_Full_Autonomo.apk
+  App: KlikPOS Móvil Full (v3.0.1)
+  Tamaño: 11.14 MB
+  SHA-256: 7856081c192e5339fd1eaad89ce709b223393b34808c81fe1345a4b266375519
+
+• Archivo: KlikPOS_Satelite.apk
+  App: KlikPOS Satélite (v3.0.1)
+  Tamaño: 11.14 MB
+  SHA-256: 0c02d63d304ac5a658c825a1ece0af01fd97c48b492d5eab7aacd7ede75a2454
+
+• Archivo: KlikAdmin_Vigia_Dueno.apk
+  App: KlikAdmin (v3.0.1)
+  Tamaño: 11.17 MB
+  SHA-256: fd3ee0417e5390787a575e03d3ab36ef85478db815e035380a3af191b95d966e
+
+• Archivo: KlikPOS_Keygen_Master.apk
+  App: KlikPOS Keygen (v3.0.1)
+  Tamaño: 11.15 MB
+  SHA-256: 43948a8277af722ac2ce710d3799e237e8c24ff98f1cca612785a20228404277
+
+[INSTALADORES WINDOWS COMPILADOS (.EXE)]
+• Archivo: KlikPOS_Street_v1.0_Setup.exe
+  Tamaño: 29.23 MB
+  SHA-256: f3d1bb7ba8d397a55fd7fc01dd360f6de93fb5892e63911d1409aa6fe558e975
+
+• Archivo: KlikPOS_Elite_Setup.exe
+  Tamaño: 29.23 MB
+  SHA-256: e3d4bca9333d5fd69d37a371c09a94bd5436b0862bd4fe7298df7b64819642f9
+
+• Archivo: KlikPOS_Pro_Setup.exe
+  Tamaño: 29.23 MB
+  SHA-256: a805a74c2487dd50d500ff75921837ee199b808969bcdb849622d437a7ac9ca5
+
+• Archivo: KlikPOS_Lite_Setup.exe
+  Tamaño: 29.23 MB
+  SHA-256: 558c9ff0754a55150bef9d67a27bf680c27cefbf911fbc706b889c28b04d6c92
+
+================================================================================
+TODOS LOS PAQUETES HAN SIDO FIRMADOS Y VERIFICADOS PARA AUTOACTUALIZACIONES
+================================================================================

@@ -27,28 +27,34 @@ Copy-Item "$desktopDir\launcher\iniciar-klikpos.bat" "$staging\iniciar-klikpos.b
 Copy-Item "$desktopDir\launcher\detener-venematic.bat" "$staging\detener-venematic.bat" -Force
 Copy-Item "$desktopDir\launcher\iniciar-venematic.bat" "$staging\iniciar-venematic.bat" -Force
 
-# Copiar aplicación standalone Next.js compilada más reciente (desde raíz)
+# Copiar aplicación standalone Next.js compilada más reciente (desde raíz) con robocopy de alta velocidad
 Write-Output "Copiando aplicación standalone Next.js compilada..."
+function Fast-CopyDir($src, $dst) {
+    if (Test-Path $src) {
+        New-Item -ItemType Directory -Path $dst -Force | Out-Null
+        robocopy $src $dst /E /NFL /NDL /NJH /NJS /nc /ns /np /r:1 /w:1 | Out-Null
+    }
+}
+
 if (Test-Path "$rootDir\.next\standalone\server.js") {
     Copy-Item "$rootDir\.next\standalone\server.js" "$staging\server.js" -Force
     Copy-Item "$rootDir\.next\standalone\package.json" "$staging\package.json" -Force
-    Copy-Item -Recurse "$rootDir\.next\standalone\.next" "$staging\.next" -Force
-    Copy-Item -Recurse "$rootDir\.next\standalone\node_modules" "$staging\node_modules" -Force
-    Copy-Item -Recurse "$rootDir\.next\static" "$staging\.next\static" -Force
-    Copy-Item -Recurse "$rootDir\public" "$staging\public" -Force
+    Fast-CopyDir "$rootDir\.next\standalone\.next" "$staging\.next"
+    Fast-CopyDir "$rootDir\.next\standalone\node_modules" "$staging\node_modules"
+    Fast-CopyDir "$rootDir\.next\static" "$staging\.next\static"
+    Fast-CopyDir "$rootDir\public" "$staging\public"
 } else {
     Copy-Item "$desktopDir\.next\standalone\server.js" "$staging\server.js" -Force
     Copy-Item "$desktopDir\.next\standalone\package.json" "$staging\package.json" -Force
-    Copy-Item -Recurse "$desktopDir\.next\standalone\.next" "$staging\.next" -Force
-    Copy-Item -Recurse "$desktopDir\.next\standalone\node_modules" "$staging\node_modules" -Force
-    Copy-Item -Recurse "$desktopDir\.next\static" "$staging\.next\static" -Force
-    Copy-Item -Recurse "$desktopDir\public" "$staging\public" -Force
+    Fast-CopyDir "$desktopDir\.next\standalone\.next" "$staging\.next"
+    Fast-CopyDir "$desktopDir\.next\standalone\node_modules" "$staging\node_modules"
+    Fast-CopyDir "$desktopDir\.next\static" "$staging\.next\static"
+    Fast-CopyDir "$desktopDir\public" "$staging\public"
 }
 
 # Garantizar logos oficiales de marca
 if (Test-Path "$rootDir\public\brand") {
-    New-Item -ItemType Directory -Path "$staging\public\brand" -Force | Out-Null
-    Copy-Item -Recurse -Force "$rootDir\public\brand\*" "$staging\public\brand\"
+    Fast-CopyDir "$rootDir\public\brand" "$staging\public\brand"
 }
 
 # Inyectar Preset de Edición en el staging

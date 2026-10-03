@@ -20,9 +20,79 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const imageUrl = body?.url?.trim();
 
-    if (!imageUrl || !imageUrl.startsWith('http')) {
+    if (!imageUrl || typeof imageUrl !== 'string') {
       return NextResponse.json(
         { error: 'URL de imagen no válida' },
+        { status: 400, headers: CORS_HEADERS }
+      );
+    }
+
+    let parsedUrl: URL;
+    try {
+      parsedUrl = new URL(imageUrl);
+    } catch {
+      return NextResponse.json(
+        { error: 'Formato de URL no válido' },
+        { status: 400, headers: CORS_HEADERS }
+      );
+    }
+
+    if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
+      return NextResponse.json(
+        { error: 'Protocolo no permitido. Solo se aceptan URLs http/https.' },
+        { status: 400, headers: CORS_HEADERS }
+      );
+    }
+
+    // Prevención avanzada de SSRF (Server-Side Request Forgery) con resolución DNS
+    const hostname = parsedUrl.hostname.toLowerCase();
+    
+    // 1. Verificación sintáctica básica de nombres
+    const isObviousPrivate = 
+      hostname === 'localhost' ||
+      hostname === '127.0.0.1' ||
+      hostname === '0.0.0.0' ||
+      hostname === '::1' ||
+      hostname === '169.254.169.254' ||
+      hostname.endsWith('.internal') ||
+      hostname.endsWith('.local') ||
+      hostname.endsWith('.lan') ||
+      /^10\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(hostname) ||
+      /^172\.(1[6-9]|2\d|3[0-1])\.\d{1,3}\.\d{1,3}$/.test(hostname) ||
+      /^192\.168\.\d{1,3}\.\d{1,3}$/.test(hostname);
+
+    if (isObviousPrivate) {
+      return NextResponse.json(
+        { error: 'Acceso a redes internas o direcciones locales bloqueado por seguridad.' },
+        { status: 403, headers: CORS_HEADERS }
+      );
+    }
+
+    // 2. Verificación profunda DNS Rebinding (Inspeccionar IP resuelta real)
+    try {
+      const lookupResult = await dns.promises.lookup(hostname, { all: true });
+      const hasPrivateIP = lookupResult.some(({ address }) => {
+        return (
+          address === '127.0.0.1' ||
+          address === '::1' ||
+          address.startsWith('10.') ||
+          address.startsWith('192.168.') ||
+          address.startsWith('169.254.') ||
+          address.startsWith('fc00:') ||
+          address.startsWith('fe80:') ||
+          /^172\.(1[6-9]|2\d|3[0-1])\./.test(address)
+        );
+      });
+
+      if (hasPrivateIP) {
+        return NextResponse.json(
+          { error: 'La dirección IP de destino resuelve a una red privada no autorizada (Protección SSRF).' },
+          { status: 403, headers: CORS_HEADERS }
+        );
+      }
+    } catch {
+      return NextResponse.json(
+        { error: 'No se pudo resolver el nombre de host de la imagen.' },
         { status: 400, headers: CORS_HEADERS }
       );
     }

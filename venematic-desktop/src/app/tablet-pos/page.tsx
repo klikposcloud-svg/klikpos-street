@@ -57,15 +57,23 @@ import {
   Image as ImageIcon,
   Camera,
   Upload,
-  Smartphone
+  Smartphone,
+  List,
+  MapPin
 } from 'lucide-react';
 import LicenseActivationModal from '@/components/LicenseActivationModal';
 import VisualPacksModal from '@/components/marketplace/VisualPacksModal';
 import StreetAmbassadorLicenseModal from '@/components/licensing/StreetAmbassadorLicenseModal';
+import StreetSalesBackupModal from '@/components/tablet-pos/StreetSalesBackupModal';
 import { evaluateTrialState, TrialState } from '@/lib/licensing/trial-manager';
 import { db } from '@/lib/db';
 import { TabletPosBottomNav } from '@/components/tablet-pos/TabletPosBottomNav';
 import { StreetAutoUpdater } from '@/components/tablet-pos/StreetAutoUpdater';
+import { cloudSyncService } from '@/lib/firebase/cloud-sync-service';
+import { SoftwareUpdateModal } from '@/components/tablet-pos/SoftwareUpdateModal';
+import { DataSyncModal } from '@/components/tablet-pos/DataSyncModal';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { db as firestoreDb, isFirebaseConfigured } from '@/lib/firebase/config';
 
 interface CartItem {
   id: string;
@@ -260,147 +268,123 @@ const VENEZUELAN_BANKS = [
 const SAMPLE_PRODUCTS: Product[] = [
   {
     id: '1',
-    name: 'Hamburguesa Doble Especial',
+    name: 'Hamburguesa Clásica Especial 200g',
     category: 'Hamburguesas',
     priceUSD: 6.50,
     tag: '🔥 Más Vendido',
     prepTime: '8-10 min',
-    image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&q=80',
-    description: 'Carne 200g, doble queso cheddar fundido, tocineta crujiente, vegetales frescos y salsa especial.',
+    image: '/packs/comida-street/hamburguesa.png',
+    description: 'Carne 200g a la plancha, queso cheddar fundido, lechuga romana, tomate y salsas de la casa.',
     sku: 'HMB-01',
-    ingredients: ['Carne Res 200g', 'Cheddar Fundido', 'Tocineta Ahumada', 'Salsa de la Casa']
+    ingredients: ['Carne Res 200g', 'Cheddar Fundido', 'Vegetales Frescos', 'Salsa de la Casa']
   },
   {
     id: '2',
-    name: 'Perro Caliente Especial Jumbo',
-    category: 'Perros',
-    priceUSD: 3.50,
-    tag: '⭐ Favorito',
-    prepTime: '4-6 min',
-    image: 'https://images.unsplash.com/photo-1619740455993-9e612b1af08a?w=600&q=80',
-    description: 'Salchicha polaca premium, lluvia de queso blanco rallado, papitas crocantes y combo de 4 salsas.',
-    sku: 'PER-01',
-    ingredients: ['Salchicha Polaca', 'Queso Rallado', 'Papitas Rellenas', '4 Salsas']
-  },
-  {
-    id: '3',
-    name: 'Combo Parrillero Mixto XL',
-    category: 'Combos',
-    priceUSD: 12.00,
-    tag: '💥 Ahorro',
-    prepTime: '12-15 min',
-    image: 'https://images.unsplash.com/photo-1544025162-d76694265947?w=600&q=80',
-    description: 'Lomito de res, pechuga a la brasa, chorizo ahumado, papas rústicas, ensalada cole slaw y guasacaca.',
-    sku: 'CMB-01',
-    ingredients: ['Lomito Res', 'Pechuga Grille', 'Chorizo Ahumado', 'Papas Rústicas']
-  },
-  {
-    id: '4',
-    name: 'Papas Fritas Gratinadas Tocineta',
-    category: 'Extras',
-    priceUSD: 4.00,
-    tag: '🥓 Crujiente',
-    prepTime: '6-8 min',
-    image: 'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=600&q=80',
-    description: 'Canasta de papas fritas recién hechas bañadas en salsa cheddar y tocineta ahumada picada.',
-    sku: 'EXT-01',
-    ingredients: ['Papas Corte Grueso', 'Cheddar Caliente', 'Tocineta Crispy']
-  },
-  {
-    id: '5',
-    name: 'Pepito Mixto Gratinado 30cm',
-    category: 'Hamburguesas',
-    priceUSD: 8.50,
-    tag: '🏆 Gigante',
-    prepTime: '10-12 min',
-    image: 'https://images.unsplash.com/photo-1509722747041-616f39b57569?w=600&q=80',
-    description: 'Pan artesanal de 30cm, lomito jugoso, pollo grille, queso de mano gratinado, maíz y papitas.',
-    sku: 'PEP-01',
-    ingredients: ['Lomito Tierno', 'Pechuga Pollo', 'Queso de Mano', 'Maíz Tierno']
-  },
-  {
-    id: '6',
-    name: 'Refresco Familiar 1.5L Frío',
-    category: 'Bebidas',
-    priceUSD: 2.50,
-    tag: '🧊 Bien Frío',
-    prepTime: 'Inmediato',
-    image: 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=600&q=80',
-    description: 'Coca-Cola, Pepsi, Chinotto o Frescolita a temperatura bajo cero.',
-    sku: 'BEB-01',
-    ingredients: ['Envase 1.5 Litros', 'Bien Frío']
-  },
-  {
-    id: '7',
-    name: 'Tequeños Gourmet de Queso (6 uds)',
-    category: 'Extras',
-    priceUSD: 4.50,
-    tag: '🧀 Crujientes',
-    prepTime: '5-7 min',
-    image: 'https://images.unsplash.com/photo-1541592106381-b31e9677c0e5?w=600&q=80',
-    description: 'Masa fina dorada rellena de abundante queso llanero fundido acompañado de salsa tártara de ajo.',
-    sku: 'EXT-02',
-    ingredients: ['6 Unidades Grandes', 'Queso Llanero Fundido', 'Salsa Tártara']
-  },
-  {
-    id: '8',
-    name: 'Crispy Chicken Supreme Burger',
-    category: 'Hamburguesas',
-    priceUSD: 7.00,
-    tag: '🍗 Pollo Crispy',
-    prepTime: '8-10 min',
-    image: 'https://images.unsplash.com/photo-1625813506062-0aeb1d7a094b?w=600&q=80',
-    description: 'Pechuga de pollo súper crujiente marinada con especias, lechuga romana, pepinillos y mayonesa chipotle.',
-    sku: 'HMB-02',
-    ingredients: ['Pechuga Empanizada', 'Lechuga Romana', 'Pepinillos Dulces', 'Mayo Chipotle']
-  },
-  {
-    id: '9',
     name: 'Perro Caliente Tradicional Con Todo',
     category: 'Perros',
     priceUSD: 2.50,
     tag: '🌭 Callejero',
     prepTime: '3-5 min',
-    image: 'https://images.unsplash.com/photo-1627054234036-749e4975f284?w=600&q=80',
-    description: 'El clásico de la noche: salchicha, cebolla picadita, repollo, papitas, queso blanco y las 3 salsas.',
-    sku: 'PER-02',
-    ingredients: ['Salchicha Viena', 'Repollo y Cebollita', 'Queso Blanco', '3 Salsas Tradicionales']
+    image: '/packs/comida-street/perro-caliente.png',
+    description: 'Salchicha de primera, cebollita picada, repollo, lluvia de papitas crocantes, queso blanco y las 3 salsas.',
+    sku: 'PER-01',
+    ingredients: ['Salchicha de Primera', 'Cebollita y Repollo', 'Papitas Ralladas', 'Queso Blanco', '3 Salsas']
+  },
+  {
+    id: '3',
+    name: 'Pepito Mixto Gratinado 30cm',
+    category: 'Hamburguesas',
+    priceUSD: 8.50,
+    tag: '🏆 Gigante',
+    prepTime: '10-12 min',
+    image: '/packs/comida-street/pepito.png',
+    description: 'Pan artesanal suave de 30cm, lomito jugoso, pollo grille, papitas crocantes y queso de mano gratinado.',
+    sku: 'PEP-01',
+    ingredients: ['Pan Baguette 30cm', 'Lomito Tierno', 'Pechuga Pollo', 'Queso de Mano', 'Maíz']
+  },
+  {
+    id: '4',
+    name: 'Cachapa con Cochino Frito',
+    category: 'Extras',
+    priceUSD: 9.50,
+    tag: '🥩 Tradicional',
+    prepTime: '10-12 min',
+    image: '/packs/comida-street/cachapa-con-cochino.png',
+    description: 'Masa de maíz tierno recién molido, abundante queso de mano fresco, mantequilla llanera y porción de cochino frito crujiente.',
+    sku: 'CAC-01',
+    ingredients: ['Maíz Tierno', 'Queso de Mano Fresco', 'Cochino Frito Crujiente', 'Mantequilla Llanera']
+  },
+  {
+    id: '5',
+    name: 'Cachapa con Queso de Mano Doble',
+    category: 'Extras',
+    priceUSD: 6.00,
+    tag: '🧀 Criollo',
+    prepTime: '6-8 min',
+    image: '/packs/comida-street/cachapa-con-queso.png',
+    description: 'Cachapa dorada con doble rueda de queso de mano artesanal y mantequilla derretida.',
+    sku: 'CAC-02',
+    ingredients: ['Maíz Tierno', 'Doble Rueda Queso Mano', 'Mantequilla']
+  },
+  {
+    id: '6',
+    name: 'Mega Promo 5 Perros Calientes',
+    category: 'Combos',
+    priceUSD: 10.00,
+    tag: '💥 Ahorro',
+    prepTime: '8-10 min',
+    image: '/packs/comida-street/combo-5-perros.png',
+    description: '5 Perros calientes tradicionales completos con papitas, queso blanco y salsas variadas.',
+    sku: 'CMB-01',
+    ingredients: ['5x Perros Calientes', 'Papitas Ralladas', 'Queso Blanco', 'Salsas Tradicionales']
+  },
+  {
+    id: '7',
+    name: 'Combo 4 Perros + Refresco 1.5L',
+    category: 'Combos',
+    priceUSD: 11.50,
+    tag: '👥 Familiar',
+    prepTime: '8-10 min',
+    image: '/packs/comida-street/combo-4-perros-refresco.png',
+    description: '4 Perros calientes especiales con todo + 1 Refresco familiar de 1.5 litros bien frío.',
+    sku: 'CMB-02',
+    ingredients: ['4x Perros Especiales', '1x Refresco 1.5L Frío', 'Salsas Variadas']
+  },
+  {
+    id: '8',
+    name: 'Shawarma Mixto Libanés Especial',
+    category: 'Hamburguesas',
+    priceUSD: 5.50,
+    tag: '🌯 Clásico',
+    prepTime: '6-8 min',
+    image: '/packs/comida-street/shawarma.png',
+    description: 'Pan pita árabe tostado, carne marinada y pollo al trompo, lechuga, tomate, crema de ajo y salsa tártara.',
+    sku: 'SHW-01',
+    ingredients: ['Pan Pita Árabe', 'Carne y Pollo al Trompo', 'Crema de Ajo', 'Salsa Tártara']
+  },
+  {
+    id: '9',
+    name: 'Combo Shawarma + Papas + Refresco',
+    category: 'Combos',
+    priceUSD: 8.50,
+    tag: '🍟 Combo Brutal',
+    prepTime: '8-10 min',
+    image: '/packs/comida-street/combo-shawarma.png',
+    description: '1 Shawarma Mixto grande + 1 ración de papas fritas crocantes + 1 bebida personal fría.',
+    sku: 'CMB-03',
+    ingredients: ['1x Shawarma Mixto', '1x Ración Papas Fritas', '1x Bebida Personal']
   },
   {
     id: '10',
-    name: 'Combo Pareja (2 Burgers + Papas + 2 Bebidas)',
-    category: 'Combos',
-    priceUSD: 14.50,
-    tag: '👥 Para Dos',
-    prepTime: '10-14 min',
-    image: 'https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?w=600&q=80',
-    description: '2 Hamburguesas Clásicas completas + 1 porción grande de papas + 2 bebidas de lata a elección.',
-    sku: 'CMB-02',
-    ingredients: ['2x Hamburguesas Clásicas', '1x Papas Grandes', '2x Bebidas Lata']
-  },
-  {
-    id: '11',
-    name: 'Malta Polar Retornable Bien Fría',
+    name: 'Refresco Personal Frío 355ml',
     category: 'Bebidas',
-    priceUSD: 1.25,
-    tag: '🍺 Clásica',
+    priceUSD: 1.50,
+    tag: '🧊 Bien Frío',
     prepTime: 'Inmediato',
-    image: 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=600&q=80',
-    description: 'Malta Polar con hielo frappé o servida directamente de la nevera.',
-    sku: 'BEB-02',
-    ingredients: ['Botella Vidrio 222ml', 'Fría de Nevera']
-  },
-  {
-    id: '12',
-    name: 'Aros de Cebolla Crujientes (8 uds)',
-    category: 'Extras',
-    priceUSD: 3.50,
-    tag: '🧅 Frito',
-    prepTime: '5-7 min',
-    image: 'https://images.unsplash.com/photo-1639024471287-032f6640dc1f?w=600&q=80',
-    description: 'Aros de cebolla dulce rebozados con panko extra crujiente servidos con salsa barbacoa.',
-    sku: 'EXT-03',
-    ingredients: ['8 Aros Grandes', 'Rebozado Panko', 'Salsa BBQ Ahumada']
+    image: '/packs/comida-street/refresco.png',
+    description: 'Refresco frío a elección (Coca-Cola, Pepsi, Chinotto, Kolita) bien frío.',
+    sku: 'BEB-01',
+    ingredients: ['Lata / Botella 355ml', 'Bien Frío']
   }
 ];
 RUBROS_CATALOG.comida.sampleProducts = SAMPLE_PRODUCTS;
@@ -419,14 +403,93 @@ const NOTE_PRESETS = [
 ];
 
 const DEFAULT_CUSTOMERS: Customer[] = [
-  { id: '1', name: 'Consumidor Final', docId: 'V-00000000', phone: '', address: 'Venta de Mostrador' },
-  { id: '2', name: 'Carlos Rodríguez', docId: 'V-18456123', phone: '0414-1234567', address: 'Calle 5 con Av. 2' },
-  { id: '3', name: 'María Gómez', docId: 'V-22987654', phone: '0424-9876543', address: 'Urb. Los Rosales' },
-  { id: '4', name: 'Inversiones Gourmet C.A.', docId: 'J-40987123-5', phone: '0212-9988776', address: 'Zona Industrial' }
+  { id: '1', name: 'Consumidor Final', docId: 'V-00000000', phone: '', address: 'Consumo en Salón' },
+  { id: '2', name: 'Carlos Rodríguez', docId: 'V-18456123', phone: '0414-1234567', address: 'Calle 5 con Av. Principal' },
+  { id: '3', name: 'María Gómez', docId: 'V-22987654', phone: '0424-9876543', address: 'Urb. Los Rosales, Casa #14' },
+  { id: '4', name: 'Inversiones Gourmet C.A.', docId: 'J-40987123-5', phone: '0212-9988776', address: 'Zona Industrial Galpón 4' }
 ];
 
-// Sonido hiperrealista de caja registradora con Web Audio API (Cero latencia, 100% offline)
-const playCashRegisterSound = () => {
+interface PosOrder {
+  id: string;
+  orderNumber: string;
+  type: 'local' | 'delivery' | 'llevar';
+  status: 'en_cola' | 'listo' | 'despachado';
+  paymentStatus: 'pagado' | 'por_cobrar';
+  paymentMethod: string;
+  items: CartItem[];
+  totalUSD: number;
+  totalVES: number;
+  customer: Customer;
+  table?: string;
+  driverId?: string;
+  driverName?: string;
+  deliveryAddress?: string;
+  notes?: string;
+  createdAt: string;
+  timeFormatted: string;
+}
+
+const DEFAULT_SAMPLE_ORDERS: PosOrder[] = [
+  {
+    id: 'ord_1',
+    orderNumber: 'PED-101',
+    type: 'local',
+    status: 'en_cola',
+    paymentStatus: 'pagado',
+    paymentMethod: 'Pago Móvil',
+    items: [
+      { id: '1', name: 'Hamburguesa Doble Especial', priceUSD: 6.50, qty: 2, category: 'Hamburguesas', notes: 'Sin cebolla' },
+      { id: '6', name: 'Refresco Familiar 1.5L Frío', priceUSD: 2.50, qty: 1, category: 'Bebidas' }
+    ],
+    totalUSD: 15.50,
+    totalVES: 15.50 * 848.55,
+    customer: { id: '2', name: 'Carlos Rodríguez', docId: 'V-18456123', phone: '0414-1234567' },
+    table: 'Mesa 4',
+    createdAt: new Date(Date.now() - 1000 * 60 * 12).toISOString(),
+    timeFormatted: '12 min'
+  },
+  {
+    id: 'ord_2',
+    orderNumber: 'PED-102',
+    type: 'delivery',
+    status: 'en_cola',
+    paymentStatus: 'por_cobrar',
+    paymentMethod: 'Cobro en Destino',
+    items: [
+      { id: '2', name: 'Perro Caliente Especial Jumbo', priceUSD: 3.50, qty: 3, category: 'Perros', notes: 'Con todo y queso parmesano' }
+    ],
+    totalUSD: 10.50,
+    totalVES: 10.50 * 848.55,
+    customer: { id: '3', name: 'María Gómez', docId: 'V-22987654', phone: '0424-9876543', address: 'Urb. Los Rosales, Calle 3, Casa #14' },
+    deliveryAddress: 'Urb. Los Rosales, Calle 3, Casa #14',
+    driverName: 'Alexander Morales',
+    driverId: '1',
+    createdAt: new Date(Date.now() - 1000 * 60 * 6).toISOString(),
+    timeFormatted: '6 min'
+  },
+  {
+    id: 'ord_3',
+    orderNumber: 'PED-100',
+    type: 'delivery',
+    status: 'despachado',
+    paymentStatus: 'pagado',
+    paymentMethod: 'Zelle',
+    items: [
+      { id: '4', name: 'Papas Fritas Gratinadas Tocineta', priceUSD: 4.00, qty: 2, category: 'Extras' }
+    ],
+    totalUSD: 8.00,
+    totalVES: 8.00 * 848.55,
+    customer: { id: '4', name: 'Inversiones Gourmet C.A.', docId: 'J-40987123-5', phone: '0212-9988776', address: 'Zona Industrial Galpón 4' },
+    deliveryAddress: 'Zona Industrial Galpón 4',
+    driverName: 'José Luis Rivas',
+    driverId: '2',
+    createdAt: new Date(Date.now() - 1000 * 60 * 45).toISOString(),
+    timeFormatted: '45 min'
+  }
+];
+
+// Tap digital háptico sutil y moderno (Cero latencia, 100% offline)
+const playDigitalTapSound = () => {
   try {
     if (typeof window === 'undefined') return;
     const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
@@ -437,66 +500,43 @@ const playCashRegisterSound = () => {
     }
 
     const t = ctx.currentTime;
-
-    // 1. Golpe mecánico inicial de apertura de gaveta (Drawer Thud)
-    const thud = ctx.createOscillator();
-    const thudGain = ctx.createGain();
-    thud.type = 'triangle';
-    thud.frequency.setValueAtTime(140, t);
-    thud.frequency.exponentialRampToValueAtTime(35, t + 0.07);
-    thudGain.gain.setValueAtTime(0.22, t);
-    thudGain.gain.exponentialRampToValueAtTime(0.001, t + 0.08);
-    thud.connect(thudGain);
-    thudGain.connect(ctx.destination);
-    thud.start(t);
-    thud.stop(t + 0.08);
-
-    // 2. Primera campana metálica brillante (Chime Ting 1)
-    const bell1 = ctx.createOscillator();
-    const bellGain1 = ctx.createGain();
-    bell1.type = 'sine';
-    bell1.frequency.setValueAtTime(1760, t + 0.02); // A6
-    bell1.frequency.exponentialRampToValueAtTime(2093, t + 0.08); // C7
-    bellGain1.gain.setValueAtTime(0, t);
-    bellGain1.gain.setValueAtTime(0.35, t + 0.02);
-    bellGain1.gain.exponentialRampToValueAtTime(0.001, t + 0.40);
-    bell1.connect(bellGain1);
-    bellGain1.connect(ctx.destination);
-    bell1.start(t + 0.02);
-    bell1.stop(t + 0.40);
-
-    // 3. Segunda campana metálica ("Ka-Ching!" armónico resonante)
-    const bell2 = ctx.createOscillator();
-    const bellGain2 = ctx.createGain();
-    bell2.type = 'sine';
-    bell2.frequency.setValueAtTime(2793.83, t + 0.07); // F7
-    bell2.frequency.exponentialRampToValueAtTime(3322.44, t + 0.16); // G#7
-    bellGain2.gain.setValueAtTime(0, t);
-    bellGain2.gain.setValueAtTime(0.38, t + 0.07);
-    bellGain2.gain.exponentialRampToValueAtTime(0.0001, t + 0.65);
-    bell2.connect(bellGain2);
-    bellGain2.connect(ctx.destination);
-    bell2.start(t + 0.07);
-    bell2.stop(t + 0.65);
+    // Tap suave de alta frecuencia con decaimiento ultra-corto (estilo háptico moderno / iOS digital tap)
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(880, t);
+    osc.frequency.exponentialRampToValueAtTime(440, t + 0.035);
+    gain.gain.setValueAtTime(0.12, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.035);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(t);
+    osc.stop(t + 0.035);
   } catch {
-    // Si el navegador bloquea audio por políticas de interacción, continúa sin interrumpir
+    // Si el navegador bloquea audio por políticas, continúa silenciosamente
   }
 };
 
 export default function TabletMobilePosPage() {
+  // 0. Pantalla de Bienvenida con Loader Animado (1s)
+  const [showSplash, setShowSplash] = useState(false);
+
+  // Splash desactivado para carga instantánea 0ms
+
   // 1. Tasa BCV y Modo de Consulta
-  const [bcvRate, setBcvRate] = useState(848.55);
+  const [bcvRate, setBcvRate] = useState(871.37);
   const [bcvMode, setBcvMode] = useState<'auto' | 'manual'>('auto');
   const [isBcvEditing, setIsBcvEditing] = useState(false);
-  const [customBcvInput, setCustomBcvInput] = useState('848.55');
+  const [customBcvInput, setCustomBcvInput] = useState('871.37');
   const [isFetchingBcv, setIsFetchingBcv] = useState(false);
+  const [bcvToast, setBcvToast] = useState<{ message: string; type: 'success' | 'info' | 'error' } | null>(null);
 
   // 2. Navegación Principal
   const [activeTab, setActiveTab] = useState<'menu' | 'mesas' | 'pedidos' | 'delivery' | 'cobro'>('menu');
   const [selectedCategory, setSelectedCategory] = useState('Todos');
   const [searchQuery, setSearchQuery] = useState('');
   
-  // 3. Modos de Vista (Solo 2: Visual 2-Columnas Casino y Lista Ergonómica) y Tema
+  // 3. Modos de Vista y Tema (100% Dark Permanente)
   const [cardViewMode, setCardViewMode] = useState<'food' | 'lista'>('food');
   const [themeMode, setThemeMode] = useState<'light' | 'dark'>('dark');
   const [activePalette, setActivePalette] = useState('amber');
@@ -524,6 +564,7 @@ export default function TabletMobilePosPage() {
   const [showDriversModal, setShowDriversModal] = useState(false);
   const [showPrinterModal, setShowPrinterModal] = useState(false);
   const [showRubroModal, setShowRubroModal] = useState(false);
+  const [showSalesBackupModal, setShowSalesBackupModal] = useState(false);
 
   // Motorizados
   const [drivers, setDrivers] = useState<Motorizado[]>(DEFAULT_DRIVERS);
@@ -539,7 +580,20 @@ export default function TabletMobilePosPage() {
   });
   const [printerTestAlert, setPrinterTestAlert] = useState(false);
 
-  // Gestión de Productos
+  // Gestión de Pedidos y Despachos (En Cola, Listos, Despachados)
+  const [orders, setOrders] = useState<PosOrder[]>(DEFAULT_SAMPLE_ORDERS);
+  const [orderFilterStatus, setOrderFilterStatus] = useState<'todos' | 'en_cola' | 'listo' | 'despachado'>('todos');
+  const [orderFilterType, setOrderFilterType] = useState<'todos' | 'local' | 'delivery'>('todos');
+
+  // Modalidad de Despacho en Cobro (Local, Delivery Pagado, Cobro en Destino)
+  const [fulfillmentMode, setFulfillmentMode] = useState<'local' | 'delivery_paid' | 'delivery_cod'>('local');
+  const [selectedDriverId, setSelectedDriverId] = useState<string>('1');
+  const [deliveryAddressInput, setDeliveryAddressInput] = useState<string>('');
+
+  // Edición Completa de Producto
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+
+  // Gestión de Productos Nuevos
   const [newProductForm, setNewProductForm] = useState({
     name: '',
     category: 'Hamburguesas',
@@ -605,88 +659,136 @@ export default function TabletMobilePosPage() {
   // 10. Período de Prueba y Licencia Oficial
   const [trialState, setTrialState] = useState<TrialState | null>(null);
   const [showLicenseModal, setShowLicenseModal] = useState(false);
+  const [showUpdateModal, setShowUpdateModal] = useState(false);
+  const [showSyncModal, setShowSyncModal] = useState(false);
 
   // 11. Carrito Persistente
   const [cart, setCart] = useState<CartItem[]>([
-    { id: '1', name: 'Hamburguesa Doble Especial', priceUSD: 6.50, qty: 2, category: 'Hamburguesas', notes: 'Sin cebolla, extra salsa tártara', sku: 'HMB-01', image: SAMPLE_PRODUCTS[0].image },
-    { id: '6', name: 'Refresco Familiar 1.5L Frío', priceUSD: 2.50, qty: 1, category: 'Bebidas', sku: 'BEB-01', image: SAMPLE_PRODUCTS[5].image }
+    { id: '1', name: 'Hamburguesa Clásica Especial 200g', priceUSD: 6.50, qty: 2, category: 'Hamburguesas', notes: 'Sin cebolla, extra salsa de la casa', sku: 'HMB-01', image: SAMPLE_PRODUCTS[0].image },
+    { id: '10', name: 'Refresco Personal Frío 355ml', priceUSD: 1.50, qty: 1, category: 'Bebidas', sku: 'BEB-01', image: SAMPLE_PRODUCTS[9].image }
   ]);
 
-  // Consulta automática de la Tasa Oficial BCV Multi-Fuente
+  // Consulta automática de la Tasa Oficial BCV Multi-Fuente con Respaldo Firestore (0 CORS)
   const fetchBcvRateAuto = async () => {
     setIsFetchingBcv(true);
+    let resolvedRate: number | null = null;
+    let resolvedSource = '';
+
     try {
-      // 1. Intento primario: Endpoint interno del servidor (con 4 capas de scraping y caché)
+      // 1. Prioridad 1: Servidor Local / API Route (Scraper directo a bcv.org.ve en tiempo real)
       try {
         const res = await fetch('/api/bcv/rate?refresh=true');
         if (res.ok) {
           const data = await res.json();
           if (data && typeof data.rate === 'number' && data.rate > 0) {
-            setBcvRate(data.rate);
-            setCustomBcvInput(data.rate.toFixed(2));
-            try {
-              localStorage.setItem('klikpos_bcv_rate', String(data.rate));
-              localStorage.setItem('klikpos_bcv_mode', 'auto');
-            } catch {}
-            return;
+            resolvedRate = data.rate;
+            resolvedSource = data.source || 'Portal Oficial BCV (bcv.org.ve)';
           }
         }
       } catch {}
 
-      // 2. Espejo 1: DolarAPI Venezuela
-      try {
-        const res = await fetch('https://ve.dolarapi.com/v1/dolares/oficial');
-        if (res.ok) {
-          const data = await res.json();
-          const rate = data.promedio || data.precio || data.valor;
-          if (typeof rate === 'number' && rate > 0) {
-            setBcvRate(rate);
-            setCustomBcvInput(rate.toFixed(2));
-            try {
-              localStorage.setItem('klikpos_bcv_rate', String(rate));
-              localStorage.setItem('klikpos_bcv_mode', 'auto');
-            } catch {}
-            return;
+      // 2. Prioridad 2: Respaldo Cloud Firestore (0 CORS, colección canónica bcv_rates/latest y fallback system_config)
+      if (!resolvedRate) {
+        try {
+          const cloudRate = await cloudSyncService.fetchLatestBcvRate();
+          if (cloudRate && cloudRate.rate > 0) {
+            resolvedRate = cloudRate.rate;
+            resolvedSource = cloudRate.source || 'Respaldo Cloud';
           }
+        } catch (e) {
+          console.warn('[BCV] Firestore read fallback:', e);
         }
-      } catch {}
+      }
 
-      // 3. Espejo 2: Open Exchange Rates VES
-      try {
-        const res = await fetch('https://open.er-api.com/v6/latest/USD');
-        if (res.ok) {
-          const data = await res.json();
-          const val = parseFloat(data?.rates?.VES);
-          if (!isNaN(val) && val > 0) {
-            setBcvRate(val);
-            setCustomBcvInput(val.toFixed(2));
-            try {
-              localStorage.setItem('klikpos_bcv_rate', String(val));
-              localStorage.setItem('klikpos_bcv_mode', 'auto');
-            } catch {}
-            return;
+      // 3. Prioridad 3: DolarAPI Venezuela
+      if (!resolvedRate) {
+        try {
+          const res = await fetch('https://ve.dolarapi.com/v1/dolares/oficial');
+          if (res.ok) {
+            const data = await res.json();
+            const rate = data.promedio || data.precio || data.valor;
+            if (typeof rate === 'number' && rate > 0) {
+              resolvedRate = rate;
+              resolvedSource = 'DolarAPI Venezuela';
+            }
           }
-        }
-      } catch {}
+        } catch {}
+      }
 
-      // 4. Espejo 3: CDN Fawaz Ahmed Currency
-      try {
-        const res = await fetch('https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json');
-        if (res.ok) {
-          const data = await res.json();
-          const val = parseFloat(data?.usd?.ves);
-          if (!isNaN(val) && val > 0) {
-            setBcvRate(val);
-            setCustomBcvInput(val.toFixed(2));
-            try {
-              localStorage.setItem('klikpos_bcv_rate', String(val));
-              localStorage.setItem('klikpos_bcv_mode', 'auto');
-            } catch {}
-            return;
+      // 4. Prioridad 4: PyDolar Venezuela
+      if (!resolvedRate) {
+        try {
+          const res = await fetch('https://pydolarvenezuela-api.vercel.app/api/v1/dollar?page=bcv');
+          if (res.ok) {
+            const data = await res.json();
+            const val = parseFloat(data?.monitors?.usd?.price);
+            if (!isNaN(val) && val > 0) {
+              resolvedRate = val;
+              resolvedSource = 'PyDolar Venezuela';
+            }
           }
-        }
-      } catch {}
+        } catch {}
+      }
 
+      // 5. Prioridad 5: Open Exchange Rates VES
+      if (!resolvedRate) {
+        try {
+          const res = await fetch('https://open.er-api.com/v6/latest/USD');
+          if (res.ok) {
+            const data = await res.json();
+            const val = parseFloat(data?.rates?.VES);
+            if (!isNaN(val) && val > 0) {
+              resolvedRate = val;
+              resolvedSource = 'OpenExchange';
+            }
+          }
+        } catch {}
+      }
+
+      // 6. Prioridad 6: Fawaz Ahmed Currency CDN
+      if (!resolvedRate) {
+        try {
+          const res = await fetch('https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json');
+          if (res.ok) {
+            const data = await res.json();
+            const val = parseFloat(data?.usd?.ves);
+            if (!isNaN(val) && val > 0) {
+              resolvedRate = val;
+              resolvedSource = 'CurrencyCDN';
+            }
+          }
+        } catch {}
+      }
+
+      if (resolvedRate && resolvedRate > 0) {
+        const rounded = Math.round(resolvedRate * 100) / 100;
+        setBcvRate(rounded);
+        setCustomBcvInput(rounded.toFixed(2));
+        try {
+          localStorage.setItem('klikpos_bcv_rate', String(rounded));
+          localStorage.setItem('klikpos_bcv_mode', 'auto');
+          if (isFirebaseConfigured()) {
+            cloudSyncService.pushBcvRate(rounded, resolvedSource).catch(() => {});
+            setDoc(doc(firestoreDb, 'system_config', 'bcv_rate'), {
+              rate: rounded,
+              source: resolvedSource,
+              updatedAt: new Date().toISOString()
+            }, { merge: true }).catch(() => {});
+          }
+        } catch {}
+
+        setBcvToast({
+          message: `✅ Tasa BCV Actualizada: Bs. ${rounded.toFixed(2)} (${resolvedSource})`,
+          type: 'success'
+        });
+        setTimeout(() => setBcvToast(null), 4000);
+      } else {
+        setBcvToast({
+          message: `⚠️ Conectado en modo offline. Tasa actual: Bs. ${bcvRate.toFixed(2)}`,
+          type: 'info'
+        });
+        setTimeout(() => setBcvToast(null), 4000);
+      }
     } catch {
       try {
         const saved = localStorage.getItem('klikpos_bcv_rate');
@@ -700,13 +802,28 @@ export default function TabletMobilePosPage() {
   const handleSaveManualBcv = () => {
     const parsed = parseFloat(customBcvInput.replace(',', '.'));
     if (!isNaN(parsed) && parsed > 0) {
-      setBcvRate(parsed);
+      const rounded = Math.round(parsed * 100) / 100;
+      setBcvRate(rounded);
       setBcvMode('manual');
       setIsBcvEditing(false);
       try {
-        localStorage.setItem('klikpos_bcv_rate', String(parsed));
+        localStorage.setItem('klikpos_bcv_rate', String(rounded));
         localStorage.setItem('klikpos_bcv_mode', 'manual');
+        if (isFirebaseConfigured()) {
+          cloudSyncService.pushBcvRate(rounded, 'Ajuste Manual en Terminal').catch(() => {});
+          setDoc(doc(firestoreDb, 'system_config', 'bcv_rate'), {
+            rate: rounded,
+            source: 'Ajuste Manual en Terminal',
+            updatedAt: new Date().toISOString()
+          }, { merge: true }).catch(() => {});
+        }
       } catch {}
+
+      setBcvToast({
+        message: `✅ Tasa manual fijada: Bs. ${rounded.toFixed(2)}`,
+        type: 'info'
+      });
+      setTimeout(() => setBcvToast(null), 4000);
     }
   };
 
@@ -845,6 +962,9 @@ export default function TabletMobilePosPage() {
             setMenuQrUrl(`${window.location.origin}/menu`);
           }
         });
+
+      // 9. FUNCIÓN ESTRELLA: Iniciar Auto-Sincronización Periódica en Segundo Plano (Cada 1 Hora)
+      cloudSyncService.startAutoSync(3600);
     } catch {
       // Continuar silenciosamente
     }
@@ -896,6 +1016,7 @@ export default function TabletMobilePosPage() {
 
   const currentPal = BRAND_PALETTES.find(p => p.id === activePalette) || BRAND_PALETTES[0];
   const isLight = false;
+  const IS_LITE_MODE = true;
 
   // Cálculos Financieros
   const totalUSD = cart.reduce((acc, item) => acc + (item.priceUSD * item.qty), 0);
@@ -908,7 +1029,7 @@ export default function TabletMobilePosPage() {
   const vueltoVESfromVES = Math.max(0, cashVESReceived - totalVES);
 
   const addToCart = (prod: Product) => {
-    playCashRegisterSound();
+    playDigitalTapSound();
     setCart((prev) => {
       const exists = prev.find((item) => item.id === prod.id);
       if (exists) {
@@ -929,6 +1050,7 @@ export default function TabletMobilePosPage() {
   };
 
   const updateQty = (id: string, delta: number) => {
+    playDigitalTapSound();
     setCart((prev) =>
       prev
         .map((item) => (item.id === id ? { ...item, qty: Math.max(0, item.qty + delta) } : item))
@@ -1011,6 +1133,28 @@ export default function TabletMobilePosPage() {
     setEditingPriceId(null);
   };
 
+  // Guardar Edición Completa de Producto (Foto, Nombre, Categoría, SKU, Descripción)
+  const handleSaveFullProductEdit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingProduct) return;
+    const updated = products.map(p => p.id === editingProduct.id ? editingProduct : p);
+    setProducts(updated);
+    try {
+      localStorage.setItem('klikpos_tablet_products', JSON.stringify(updated));
+      db.products.put({
+        id: Number(editingProduct.id) || undefined,
+        name: editingProduct.name,
+        category: editingProduct.category,
+        priceUSD: editingProduct.priceUSD,
+        barcode: editingProduct.sku,
+        image: editingProduct.image,
+        isActive: true,
+        updatedAt: new Date().toISOString()
+      } as any).catch(() => {});
+    } catch {}
+    setEditingProduct(null);
+  };
+
   // Gestión de Motorizados y Despachos
   const handleAddDriver = (e: React.FormEvent) => {
     e.preventDefault();
@@ -1057,13 +1201,28 @@ export default function TabletMobilePosPage() {
       `¡Hola ${driverName}! Tienes un nuevo pedido asignado:\n\n` +
       `👤 *Cliente:* ${selectedCustomer.name}\n` +
       `📞 *Teléfono Cliente:* ${selectedCustomer.phone || 'No especificado'}\n` +
-      `📍 *Dirección de Entrega:*\n${selectedCustomer.address || 'Entrega a Domicilio'}\n\n` +
+      `📍 *Dirección de Entrega:*\n${deliveryAddressInput || selectedCustomer.address || 'Entrega a Domicilio'}\n\n` +
       `📦 *Detalle del Pedido:*\n${itemsSummary || '• 1x Orden estándar'}\n\n` +
       `💰 *TOTAL A COBRAR EN DESTINO:*\n` +
       `💵 *$${totalUSD.toFixed(2)} USD* (o *Bs. ${totalVES.toFixed(2)}* a tasa BCV ${bcvRate.toFixed(2)})\n\n` +
       `Por favor confirmar recepción de esta orden. ¡Buen viaje! 🚀`;
 
     window.open(`https://api.whatsapp.com/send?phone=${fullPhone}&text=${encodeURIComponent(msg)}`, '_blank');
+  };
+
+  // Gestión de Estados de Pedidos
+  const handleAdvanceOrderStatus = (orderId: string, nextStatus: 'en_cola' | 'listo' | 'despachado') => {
+    playDigitalTapSound();
+    const updated = orders.map(o => o.id === orderId ? { ...o, status: nextStatus } : o);
+    setOrders(updated);
+    try { localStorage.setItem('klikpos_tablet_orders', JSON.stringify(updated)); } catch {}
+  };
+
+  const handleMarkOrderPaid = (orderId: string) => {
+    playDigitalTapSound();
+    const updated = orders.map(o => o.id === orderId ? { ...o, paymentStatus: 'pagado' as const } : o);
+    setOrders(updated);
+    try { localStorage.setItem('klikpos_tablet_orders', JSON.stringify(updated)); } catch {}
   };
 
   // Configuración de Impresora
@@ -1160,12 +1319,15 @@ export default function TabletMobilePosPage() {
     }
 
     const ticketNo = `TK-${Math.floor(100000 + Math.random() * 900000)}`;
+    const orderNo = `PED-${Math.floor(100 + Math.random() * 900)}`;
     const now = new Date().toLocaleString('es-VE', { dateStyle: 'short', timeStyle: 'short' });
 
     let refNumber = '';
     if (selectedPaymentMethod === 'pago_movil') refNumber = pagoMovilRefInput || 'S/R';
     else if (selectedPaymentMethod === 'card_debit') refNumber = cardVoucherRef || 'Lote-POS';
     else if (selectedPaymentMethod === 'zelle') refNumber = zelleConfirmation || 'Zelle-OK';
+
+    const chosenDriver = drivers.find(d => d.id === selectedDriverId);
 
     const saleTicket: CompletedSaleTicket = {
       ticketNumber: ticketNo,
@@ -1175,17 +1337,39 @@ export default function TabletMobilePosPage() {
       totalUSD: totalUSD,
       totalVES: totalVES,
       bcvRate: bcvRate,
-      paymentMethod: selectedPaymentMethod,
+      paymentMethod: fulfillmentMode === 'delivery_cod' ? 'Cobro en Destino (Delivery)' : selectedPaymentMethod,
       reference: refNumber,
       amountReceivedUSD: selectedPaymentMethod === 'cash_usd' ? cashUSDReceived : undefined,
       changeUSD: selectedPaymentMethod === 'cash_usd' ? vueltoUSD : undefined,
       changeVES: selectedPaymentMethod === 'cash_usd' ? vueltoVESfromUSD : (selectedPaymentMethod === 'cash_ves' ? vueltoVESfromVES : undefined),
       customer: selectedCustomer,
-      table: activeTable ? `Mesa #${activeTable}` : 'Barra / Mostrador'
+      table: fulfillmentMode === 'local' ? (activeTable ? `Mesa #${activeTable}` : 'Barra / Mostrador') : `Delivery (${chosenDriver?.name || 'Motorizado'})`
     };
 
-    // Guardar en Dexie y LocalStorage
+    // Crear registro de Pedido en Cola
+    const newOrder: PosOrder = {
+      id: 'ord_' + Date.now(),
+      orderNumber: orderNo,
+      type: fulfillmentMode === 'local' ? 'local' : 'delivery',
+      status: 'en_cola',
+      paymentStatus: fulfillmentMode === 'delivery_cod' ? 'por_cobrar' : 'pagado',
+      paymentMethod: fulfillmentMode === 'delivery_cod' ? 'Cobro en Destino' : selectedPaymentMethod,
+      items: [...cart],
+      totalUSD: totalUSD,
+      totalVES: totalVES,
+      customer: selectedCustomer,
+      table: fulfillmentMode === 'local' ? (activeTable ? `Mesa #${activeTable}` : 'Mostrador') : undefined,
+      driverId: fulfillmentMode !== 'local' ? selectedDriverId : undefined,
+      driverName: fulfillmentMode !== 'local' ? (chosenDriver?.name || 'Por Asignar') : undefined,
+      deliveryAddress: fulfillmentMode !== 'local' ? (deliveryAddressInput || selectedCustomer.address || 'Entrega a Domicilio') : undefined,
+      createdAt: new Date().toISOString(),
+      timeFormatted: 'Ahora'
+    };
+
+    const nextOrders = [newOrder, ...orders];
+    setOrders(nextOrders);
     try {
+      localStorage.setItem('klikpos_tablet_orders', JSON.stringify(nextOrders));
       const pastSales = JSON.parse(localStorage.getItem('klikpos_tablet_sales') || '[]');
       localStorage.setItem('klikpos_tablet_sales', JSON.stringify([saleTicket, ...pastSales.slice(0, 100)]));
 
@@ -1206,7 +1390,7 @@ export default function TabletMobilePosPage() {
         totalVES: totalVES,
         bcvRate: bcvRate,
         payments: [{
-          method: selectedPaymentMethod as any,
+          method: (fulfillmentMode === 'delivery_cod' ? 'cash_usd' : selectedPaymentMethod) as any,
           amountUSD: totalUSD,
           amountVES: totalVES,
           reference: refNumber
@@ -1216,7 +1400,7 @@ export default function TabletMobilePosPage() {
         cashierName: 'Cajero Tablet',
         customerName: selectedCustomer.name,
         customerDoc: selectedCustomer.docId,
-        status: 'completed',
+        status: (fulfillmentMode === 'delivery_cod' ? 'pending' : 'completed') as any,
         source: 'tablet'
       }).catch(() => {});
     } catch {}
@@ -1226,6 +1410,7 @@ export default function TabletMobilePosPage() {
     setPagoMovilRefInput('');
     setCashUSDReceived(0);
     setCashVESReceived(0);
+    setDeliveryAddressInput('');
   };
 
   // Crear Mesa / Barra Dinámica
@@ -1253,9 +1438,10 @@ export default function TabletMobilePosPage() {
 
   return (
     <div
-      className="h-screen flex flex-col font-sans select-none overflow-hidden relative bg-[#090d16] text-slate-100"
+      id="klikpos-street-root"
+      className="h-screen flex flex-col font-sans select-none overflow-hidden relative bg-[#070a12] text-slate-100 street-pos-dark-canvas"
       style={{
-        backgroundColor: '#090d16',
+        backgroundColor: '#070a12',
         '--brand-color': currentPal.primary,
         '--brand-hover': currentPal.hover,
         '--brand-accent': currentPal.accent,
@@ -1311,6 +1497,29 @@ export default function TabletMobilePosPage() {
         }
       `}</style>
 
+      {/* 0. Pantalla de Bienvenida / Splash Screen Animada Oficial */}
+      {showSplash && (
+        <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#070a12] text-white select-none animate-out fade-out duration-300">
+          <div className="flex flex-col items-center gap-4 text-center p-6">
+            <div className="w-20 h-20 rounded-3xl bg-gradient-to-tr from-amber-500 to-amber-600 flex items-center justify-center shadow-2xl shadow-amber-500/30 ring-4 ring-amber-500/20 animate-pulse">
+              <LayoutGrid className="w-10 h-10 text-slate-950 stroke-[2.5]" />
+            </div>
+            <div className="space-y-1">
+              <h1 className="text-2xl sm:text-3xl font-black tracking-tight">
+                Klik<span className="text-amber-400">POS</span> <span className="text-[10px] sm:text-xs uppercase px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30 font-mono">Street v01</span>
+              </h1>
+              <p className="text-[11px] sm:text-xs text-slate-400 font-mono tracking-widest uppercase">
+                Sistema POS Autónomo Comercial
+              </p>
+            </div>
+            <div className="flex items-center gap-2 mt-2">
+              <div className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
+              <span className="text-[10px] font-mono text-slate-400">Iniciando módulos y catálogo...</span>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Docker Flotante Abierto: EXCLUSIVAMENTE Pill Vertical con Íconos Directos */}
       {isDockerOpen && (
         <div
@@ -1318,25 +1527,27 @@ export default function TabletMobilePosPage() {
             dockSide === 'left' ? 'left-2.5' : 'right-2.5'
           }`}
         >
-          {/* Cápsula Vertical Grafito Profundo con Micro-Tarjetas de Alto Contraste AAA */}
+          {/* Cápsula Vertical Grafito Profundo con Cristal Translúcido y Micro-Tarjetas de Alto Contraste AAA */}
           <aside
-            className="w-14 rounded-[30px] py-3.5 px-1.5 flex flex-col items-center justify-between shadow-2xl border select-none shrink-0 min-h-[410px] z-50"
+            className="w-14 rounded-[32px] py-3.5 px-1.5 flex flex-col items-center justify-between shadow-2xl border select-none shrink-0 min-h-[440px] z-50 backdrop-blur-xl transition-all"
             style={{
-              backgroundColor: '#090d16',
+              backgroundColor: 'rgba(9, 13, 22, 0.82)',
               borderColor: 'rgba(255, 255, 255, 0.16)',
-              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.12)'
+              backdropFilter: 'blur(20px) saturate(180%)',
+              WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+              boxShadow: '0 25px 60px -10px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.08)'
             }}
           >
-            {/* Top: Sparkles Icon / Brand Pill */}
+            {/* Top: LayoutGrid Icon / Brand Pill */}
             <div
-              className="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 shadow-lg cursor-pointer"
+              className="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 shadow-lg cursor-pointer transition-transform hover:scale-105 active:scale-95"
               style={{
                 background: 'linear-gradient(135deg, #f59e0b, #d97706)',
-                boxShadow: '0 4px 14px rgba(245, 158, 11, 0.35)'
+                boxShadow: '0 4px 16px rgba(245, 158, 11, 0.45)'
               }}
               title="KlikPOS Tools"
             >
-              <Sparkles className="w-5 h-5 text-slate-950 font-black" />
+              <LayoutGrid className="w-5 h-5 text-slate-950 font-black stroke-[2.4]" />
             </div>
 
             {/* Íconos Centrales de Acceso Directo con Contraste AAA y Micro-Fondos */}
@@ -1344,96 +1555,113 @@ export default function TabletMobilePosPage() {
               {/* 1. Inventario & Stock */}
               <button
                 onClick={() => setShowInventoryModal(true)}
-                className="w-10 h-10 rounded-xl flex items-center justify-center text-emerald-400 bg-emerald-500/18 border border-emerald-500/35 hover:bg-emerald-500/30 hover:scale-110 active:scale-95 transition-all shadow-xs cursor-pointer group"
+                className="w-10 h-10 rounded-xl flex items-center justify-center text-emerald-300 bg-emerald-500/25 border border-emerald-400/40 hover:bg-emerald-500/40 hover:scale-110 active:scale-95 transition-all shadow-sm cursor-pointer group"
                 title="Gestión de Inventario & Stock"
               >
-                <Package className="w-5 h-5" />
+                <Package className="w-5 h-5 stroke-[2.2]" />
               </button>
 
               {/* 1b. Paquetes Visuales & Catálogos Cloud con Fotos HD */}
               <button
                 onClick={() => setShowVisualPacksModal(true)}
-                className="w-10 h-10 rounded-xl flex items-center justify-center text-cyan-300 bg-cyan-500/18 border border-cyan-500/35 hover:bg-cyan-500/30 hover:scale-110 active:scale-95 transition-all shadow-xs cursor-pointer group"
+                className="w-10 h-10 rounded-xl flex items-center justify-center text-cyan-300 bg-cyan-500/25 border border-cyan-400/40 hover:bg-cyan-500/40 hover:scale-110 active:scale-95 transition-all shadow-sm cursor-pointer group"
                 title="Librería Cloud de Paquetes Visuales & Fotos HD"
               >
-                <ImageIcon className="w-5 h-5" />
+                <ImageIcon className="w-5 h-5 stroke-[2.2]" />
               </button>
 
-              {/* 2. Motorizados / Despacho */}
-              <button
-                onClick={() => setShowDriversModal(true)}
-                className="w-10 h-10 rounded-xl flex items-center justify-center text-amber-400 bg-amber-500/18 border border-amber-500/35 hover:bg-amber-500/30 hover:scale-110 active:scale-95 transition-all shadow-xs cursor-pointer group"
-                title="Motorizados & Despacho Delivery"
-              >
-                <Truck className="w-5 h-5" />
-              </button>
+              {/* 2. Motorizados / Despacho (Opcional en Lite) */}
+              {!IS_LITE_MODE && (
+                <button
+                  onClick={() => setShowDriversModal(true)}
+                  className="w-10 h-10 rounded-xl flex items-center justify-center text-amber-300 bg-amber-500/25 border border-amber-400/40 hover:bg-amber-500/40 hover:scale-110 active:scale-95 transition-all shadow-sm cursor-pointer group"
+                  title="Motorizados & Despacho Delivery"
+                >
+                  <Truck className="w-5 h-5 stroke-[2.2]" />
+                </button>
+              )}
 
               {/* 3. Impresora Térmica POS */}
               <button
                 onClick={() => setShowPrinterModal(true)}
-                className="w-10 h-10 rounded-xl flex items-center justify-center text-indigo-300 bg-indigo-500/18 border border-indigo-500/35 hover:bg-indigo-500/30 hover:scale-110 active:scale-95 transition-all shadow-xs cursor-pointer group"
+                className="w-10 h-10 rounded-xl flex items-center justify-center text-sky-300 bg-sky-500/25 border border-sky-400/40 hover:bg-sky-500/40 hover:scale-110 active:scale-95 transition-all shadow-sm cursor-pointer group"
                 title="Configuración de Impresora POS"
               >
-                <Printer className="w-5 h-5" />
+                <Printer className="w-5 h-5 stroke-[2.2]" />
               </button>
 
               {/* 4. Cambiar Rubro Comercial */}
               <button
                 onClick={() => setShowRubroModal(true)}
-                className="w-10 h-10 rounded-xl flex items-center justify-center text-purple-300 bg-purple-500/18 border border-purple-500/35 hover:bg-purple-500/30 hover:scale-110 active:scale-95 transition-all shadow-xs cursor-pointer group"
+                className="w-10 h-10 rounded-xl flex items-center justify-center text-purple-300 bg-purple-500/25 border border-purple-400/40 hover:bg-purple-500/40 hover:scale-110 active:scale-95 transition-all shadow-sm cursor-pointer group"
                 title="Cambiar Rubro Comercial (Comida, Farmacia, Bodega, etc.)"
               >
-                <Boxes className="w-5 h-5" />
+                <Boxes className="w-5 h-5 stroke-[2.2]" />
               </button>
 
-              {/* 5. Menú QR Dinámico para Clientes */}
+              {/* 5. Menú QR Dinámico para Clientes (Opcional en Lite) */}
+              {!IS_LITE_MODE && (
+                <button
+                  onClick={() => setShowQrModal(true)}
+                  className="w-10 h-10 rounded-xl flex items-center justify-center text-indigo-300 bg-indigo-500/25 border border-indigo-400/40 hover:bg-indigo-500/40 hover:scale-110 active:scale-95 transition-all shadow-sm cursor-pointer group"
+                  title="Generar Menú QR Digital para Clientes"
+                >
+                  <QrCode className="w-5 h-5 stroke-[2.2]" />
+                </button>
+              )}
+
+              {/* 6. Módulo de Ventas & Respaldo */}
               <button
-                onClick={() => setShowQrModal(true)}
-                className="w-10 h-10 rounded-xl flex items-center justify-center text-sky-300 bg-sky-500/18 border border-sky-500/35 hover:bg-sky-500/30 hover:scale-110 active:scale-95 transition-all shadow-xs cursor-pointer group"
-                title="Generar Menú QR Digital para Clientes"
+                onClick={() => setShowSalesBackupModal(true)}
+                className="w-10 h-10 rounded-xl flex items-center justify-center text-emerald-300 bg-emerald-500/25 border border-emerald-400/40 hover:bg-emerald-500/40 hover:scale-110 active:scale-95 transition-all shadow-sm cursor-pointer group"
+                title="Módulo de Ventas & Respaldo (Diario, Semanal, Mensual)"
               >
-                <QrCode className="w-5 h-5" />
+                <TrendingUp className="w-5 h-5 stroke-[2.4]" />
               </button>
 
-              {/* 6. Comanda / Ticket Activo */}
+              {/* 7. Sincronizar Data */}
               <button
-                onClick={() => setIsRightDrawerOpen(true)}
-                className="w-10 h-10 rounded-xl flex items-center justify-center text-emerald-300 bg-emerald-500/18 border border-emerald-500/35 hover:bg-emerald-500/30 hover:scale-110 active:scale-95 transition-all shadow-xs relative cursor-pointer group"
-                title="Ver Comanda Activa"
+                onClick={() => setShowSyncModal(true)}
+                className="w-10 h-10 rounded-xl flex items-center justify-center text-cyan-300 bg-cyan-500/25 border border-cyan-400/40 hover:bg-cyan-500/40 hover:scale-110 active:scale-95 transition-all shadow-sm cursor-pointer group"
+                title="Sincronizar Data (Tasa BCV, Ventas & Catálogo Cloud)"
               >
-                <ShoppingCart className="w-5 h-5" />
-                {totalItems > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-amber-400 text-slate-950 text-[9px] font-black w-4.5 h-4.5 rounded-full flex items-center justify-center shadow-md font-mono">
-                    {totalItems}
-                  </span>
-                )}
+                <RefreshCw className="w-5 h-5 stroke-[2.4]" />
               </button>
 
-              {/* 7. Ajustes & Configuración */}
+              {/* 8. Actualizar Software */}
+              <button
+                onClick={() => setShowUpdateModal(true)}
+                className="w-10 h-10 rounded-xl flex items-center justify-center text-yellow-300 bg-yellow-500/25 border border-yellow-400/40 hover:bg-yellow-500/40 hover:scale-110 active:scale-95 transition-all shadow-sm cursor-pointer group"
+                title="Actualizar Software (GitHub Release & APK)"
+              >
+                <Sparkles className="w-5 h-5 stroke-[2.4]" />
+              </button>
+
+              {/* 9. Ajustes & Configuración */}
               <button
                 onClick={() => setIsLeftDrawerOpen(true)}
-                className="w-10 h-10 rounded-xl flex items-center justify-center text-slate-100 bg-slate-800/80 border border-slate-700 hover:bg-slate-700 hover:scale-110 active:scale-95 transition-all shadow-xs cursor-pointer group"
+                className="w-10 h-10 rounded-xl flex items-center justify-center text-slate-100 bg-slate-800/90 border border-slate-600/70 hover:bg-slate-700 hover:scale-110 active:scale-95 transition-all shadow-sm cursor-pointer group"
                 title="Ajustes de Empresa & RIF"
               >
-                <Settings className="w-5 h-5" />
+                <Settings className="w-5 h-5 stroke-[2.2]" />
               </button>
             </div>
 
             {/* Bottom: Alternar Lado (Izq/Der) y Colapsar */}
-            <div className="flex flex-col items-center gap-2 pt-2 border-t border-slate-800 shrink-0 w-full">
+            <div className="flex flex-col items-center gap-2 pt-2 border-t border-white/10 shrink-0 w-full">
               <button
                 onClick={handleToggleDockSide}
-                className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-300 hover:text-amber-300 hover:bg-slate-800/80 active:scale-90 transition-all cursor-pointer"
+                className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-300 hover:text-amber-300 hover:bg-white/10 active:scale-90 transition-all cursor-pointer"
                 title={dockSide === 'left' ? 'Mover Docker a la Derecha' : 'Mover Docker a la Izquierda'}
               >
                 <ArrowLeftRight className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setIsDockerOpen(false)}
-                className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-rose-400 hover:bg-rose-500/15 active:scale-90 transition-all cursor-pointer"
+                className="w-9 h-9 rounded-xl flex items-center justify-center text-rose-400 hover:text-rose-300 hover:bg-rose-500/20 active:scale-90 transition-all cursor-pointer"
                 title="Minimizar Docker"
               >
-                <X className="w-4 h-4" />
+                <X className="w-4 h-4 stroke-[2.5]" />
               </button>
             </div>
           </aside>
@@ -1447,7 +1675,7 @@ export default function TabletMobilePosPage() {
       {/* 2. HEADER SUPERIOR ELEGANTE Y PERFECTAMENTE ORGANIZADO                     */}
       {/* ========================================================================= */}
       <header
-        className="h-14 px-3 flex items-center justify-between border-b shrink-0 z-20 shadow-xs bg-[#090d16] border-slate-800/90"
+        className="h-14 px-3 flex items-center justify-between border-b shrink-0 z-20 shadow-xs bg-[#090d16] border-slate-800/90 text-white"
         style={{ backgroundColor: '#090d16' }}
       >
         {/* LADO IZQUIERDO: Logo KlikPOS Street + Acciones Principales */}
@@ -1532,12 +1760,34 @@ export default function TabletMobilePosPage() {
                 }}
                 disabled={isFetchingBcv}
                 className="p-0.5 hover:text-sky-400 text-slate-400 transition-colors cursor-pointer"
-                title="Actualizar tasa desde DolarAPI"
+                title="Actualizar tasa oficial BCV"
               >
                 <RefreshCw className={`w-3 h-3 ${isFetchingBcv ? 'animate-spin text-sky-400' : ''}`} />
               </button>
             </div>
           )}
+
+          {/* Botón: Sincronizar Data */}
+          <button
+            type="button"
+            onClick={() => setShowSyncModal(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-sky-500/40 bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 font-black text-xs transition-all active:scale-95 shadow-xs cursor-pointer select-none"
+            title="Sincronizar Data (Tasa BCV, Ventas & Catálogo Cloud)"
+          >
+            <RefreshCw className="w-3.5 h-3.5 text-sky-400" />
+            <span className="hidden sm:inline">Sincronizar Data</span>
+          </button>
+
+          {/* Botón: Actualizar Software */}
+          <button
+            type="button"
+            onClick={() => setShowUpdateModal(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-amber-500/40 bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 font-black text-xs transition-all active:scale-95 shadow-xs cursor-pointer select-none"
+            title="Actualizar Software desde GitHub Releases"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+            <span className="hidden sm:inline">Actualizar Software</span>
+          </button>
         </div>
 
         {/* LADO DERECHO: Carrito / Comanda Activa */}
@@ -1568,16 +1818,32 @@ export default function TabletMobilePosPage() {
         </div>
       </header>
 
+      {/* Notificación Flotante de Tasa BCV Oficial */}
+      {bcvToast && (
+        <div className="fixed top-16 left-1/2 -translate-x-1/2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="px-4 py-2 rounded-2xl bg-[#0b132b]/95 border border-sky-500/40 text-white text-xs font-bold shadow-2xl flex items-center gap-2.5 backdrop-blur-md">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span>{bcvToast.message}</span>
+            <button
+              onClick={() => setBcvToast(null)}
+              className="ml-2 text-slate-400 hover:text-white p-0.5 cursor-pointer text-xs"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* ========================================================================= */}
       {/* 3. LIENZO PRINCIPAL CON SCROLL 100% FLUIDO Y DESBLOQUEADO                 */}
       {/* ========================================================================= */}
-      <main className="flex-1 min-h-0 overflow-hidden flex flex-col p-2 sm:p-3 pb-20 max-w-6xl mx-auto w-full">
+      <main className="flex-1 min-h-0 overflow-hidden flex flex-col p-2 sm:p-3 max-w-6xl mx-auto w-full street-pos-dark-canvas" style={{ backgroundColor: "#070a12" }}>
         {/* ======================================================================= */}
-        {/* VISTA 1: MENÚ Y CATÁLOGO TÁCTIL (SOLO 2 MODOS: VISUAL 2-COLS Y LISTA)    */}
+        {/* VISTA 1: MENÚ Y CATÁLOGO TÁCTIL (GRID ADAPTATIVO TABLET & MODO LISTA)   */}
         {/* ======================================================================= */}
         {activeTab === 'menu' && (
-          <div className="flex-1 min-h-0 flex flex-col space-y-2">
-            {/* 1. Barra de Búsqueda + Selector de Vista (Visual / Lista) + Selector de Tema (Street Pro / Gourmet) */}
+          <div className="flex-1 min-h-0 flex flex-col space-y-2 street-pos-dark-canvas" style={{ backgroundColor: '#070a12' }}>
+            {/* 1. Barra de Búsqueda + Selector de Vista (Cuadrícula / Lista) + Selector de Tema */}
             <div className="space-y-1.5 shrink-0">
               <div className="flex flex-wrap items-center justify-between gap-1.5">
                 {/* Buscador */}
@@ -1585,14 +1851,10 @@ export default function TabletMobilePosPage() {
                   <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" />
                   <input
                     type="text"
-                    placeholder="Buscar producto..."
+                    placeholder="Buscar producto o código..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className={`w-full pl-8 pr-7 py-1.5 rounded-xl text-xs border transition-colors outline-none font-semibold ${
-                      isLight
-                        ? 'bg-white border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-slate-800'
-                        : 'bg-slate-900 border-slate-700 text-white placeholder:text-slate-500 focus:border-amber-500'
-                    }`}
+                    className="w-full pl-8 pr-7 py-1.5 rounded-xl text-xs border transition-colors outline-none font-semibold bg-slate-900 border-slate-700 text-white placeholder:text-slate-500 focus:border-amber-500"
                   />
                   {searchQuery && (
                     <button
@@ -1604,68 +1866,42 @@ export default function TabletMobilePosPage() {
                   )}
                 </div>
 
-                {/* Selector de Solo 2 Modos: Visual (Casino 2 Cols) y Lista */}
-                <div className={`flex items-center p-0.5 rounded-xl border shrink-0 ${
-                  isLight ? 'bg-slate-100 border-slate-300' : 'bg-slate-900 border-slate-800'
-                }`}>
+                {/* Selector de Modos: Cuadrícula Adaptativa / Lista */}
+                <div className="flex items-center p-0.5 rounded-xl border shrink-0 bg-slate-900 border-slate-800">
                   <button
                     onClick={() => setCardViewMode('food')}
-                    className={`px-2.5 py-1 rounded-lg text-[11px] font-black transition-all cursor-pointer flex items-center gap-1 ${
+                    className={`px-2.5 py-1 rounded-lg text-[11px] font-black transition-all cursor-pointer flex items-center gap-1.5 ${
                       cardViewMode === 'food'
                         ? 'bg-amber-500 text-slate-950 shadow-xs'
                         : 'text-slate-400 hover:text-white'
                     }`}
-                    title="Vista Visual 2 Columnas Independientes (Modo Casino)"
+                    title="Vista Cuadrícula Adaptativa"
                   >
-                    <span>🎰 2 Columnas</span>
+                    <LayoutGrid className="w-3.5 h-3.5" />
+                    <span>Cuadrícula</span>
                   </button>
                   <button
                     onClick={() => setCardViewMode('lista')}
-                    className={`px-2.5 py-1 rounded-lg text-[11px] font-black transition-all cursor-pointer flex items-center gap-1 ${
+                    className={`px-2.5 py-1 rounded-lg text-[11px] font-black transition-all cursor-pointer flex items-center gap-1.5 ${
                       cardViewMode === 'lista'
                         ? 'bg-amber-500 text-slate-950 shadow-xs'
                         : 'text-slate-400 hover:text-white'
                     }`}
-                    title="Vista Lista Ergonómica"
+                    title="Vista Lista con Cards Grandes"
                   >
-                    <span>📋 Lista</span>
+                    <List className="w-3.5 h-3.5" />
+                    <span>Lista</span>
                   </button>
                 </div>
 
-                {/* Selector de Estilo: Street Food Pro (Dark) vs Gourmet Clean (Light) */}
-                <div className="flex items-center gap-1 shrink-0">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setStylePreset('street_pro');
-                      setThemeMode('dark');
-                      setActivePalette('amber');
-                    }}
-                    className={`px-2 py-1 rounded-xl text-[11px] font-black transition-all cursor-pointer ${
-                      stylePreset === 'street_pro'
-                        ? 'bg-amber-500 text-slate-950 shadow-xs scale-102'
-                        : 'bg-slate-800/80 text-slate-400 hover:text-white'
-                    }`}
-                    title="Estilo Street Food Pro (Modo Oscuro & Acentos Ámbar)"
+                {/* Visualización Exclusiva: Street Pro */}
+                <div className="flex items-center shrink-0">
+                  <span
+                    className="px-2.5 py-1 rounded-xl text-[11px] font-black bg-amber-500 text-slate-950 shadow-xs flex items-center gap-1 select-none"
+                    title="Visualización Street Pro Oficial"
                   >
-                    🍔 Street Pro
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setStylePreset('gourmet_clean');
-                      setThemeMode('dark');
-                      setActivePalette('emerald');
-                    }}
-                    className={`px-2 py-1 rounded-xl text-[11px] font-black transition-all cursor-pointer ${
-                      stylePreset === 'gourmet_clean'
-                        ? 'bg-emerald-600 text-white shadow-xs scale-102'
-                        : 'bg-slate-800/80 text-slate-400 hover:text-white'
-                    }`}
-                    title="Estilo Gourmet (Acentos Esmeralda Neón)"
-                  >
-                    🌭 Gourmet
-                  </button>
+                    🔥 Street Pro
+                  </span>
                 </div>
               </div>
 
@@ -1677,11 +1913,7 @@ export default function TabletMobilePosPage() {
                     onClick={() => setSelectedCategory(cat)}
                     className={`px-2.5 py-1 rounded-xl text-[11px] font-bold whitespace-nowrap transition-all duration-200 border active:scale-95 cursor-pointer ${
                       selectedCategory === cat
-                        ? isLight
-                          ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs font-black'
-                          : 'bg-amber-500/20 border-amber-500 text-amber-400 shadow-sm shadow-amber-500/10 font-black'
-                        : isLight
-                        ? 'bg-white border-slate-300 text-slate-700 hover:bg-slate-100'
+                        ? 'bg-amber-500/20 border-amber-500 text-amber-400 shadow-sm shadow-amber-500/10 font-black'
                         : 'bg-slate-900 border-slate-800 text-slate-300 hover:bg-slate-850'
                     }`}
                   >
@@ -1692,259 +1924,147 @@ export default function TabletMobilePosPage() {
             </div>
 
             {/* ================================================================= */}
-            {/* MODO 1: VISUAL CASINO (2 COLUMNAS INDEPENDIENTES SIEMPRE ACTIVAS) */}
+            {/* MODO 1: CUADRÍCULA ADAPTATIVA (2 COLS MÓVIL, 3-5 COLS EN TABLET)  */}
             {/* ================================================================= */}
             {cardViewMode === 'food' && (
-              <div className="grid grid-cols-2 gap-2 flex-1 min-h-0 overflow-hidden">
-                {/* REEL IZQUIERDO: COMIDA PRINCIPAL */}
-                <div className={`flex flex-col h-full min-h-0 overflow-hidden border rounded-2xl shadow-md ${
-                  isLight ? 'bg-slate-100 border-slate-200' : 'bg-[#090d16] border-slate-800'
-                }`}>
-                  <div className={`px-2 py-1.5 border-b flex items-center justify-between shrink-0 ${
-                    isLight ? 'bg-white border-slate-200 text-slate-800' : 'bg-[#0f172a] border-slate-800 text-amber-400'
-                  }`}>
-                    <span className="text-[10px] font-black uppercase tracking-wider flex items-center gap-1">
-                      🍔 Comida Principal
-                    </span>
-                    <span className="text-[9px] font-mono text-slate-400 font-bold">
-                      {filteredProducts.filter((_, idx) => idx % 2 === 0).length} ítems
-                    </span>
-                  </div>
-                  <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain touch-pan-y p-1.5 space-y-2 pb-24 scrollbar-none">
-                    {filteredProducts
-                      .filter((_, idx) => idx % 2 === 0)
-                      .map((prod) => {
-                        const qtyInCart = getCartQty(prod.id);
-                        return (
-                          <div
-                            key={prod.id}
-                            onClick={() => addToCart(prod)}
-                            className={`group border rounded-2xl overflow-hidden transition-all duration-150 cursor-pointer flex flex-col justify-between active:scale-[0.95] active:brightness-110 active:border-amber-400 select-none shadow-md ${
-                              isLight
-                                ? 'bg-white border-slate-200 hover:border-slate-300'
-                                : 'bg-[#0e1726] border-slate-800 hover:border-amber-500/50'
-                            }`}
-                          >
-                            <div className="relative h-24 sm:h-28 w-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
-                              <img
-                                src={prod.image}
-                                alt={prod.name}
-                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                                loading="lazy"
-                              />
-                              <span className="absolute top-1.5 left-1.5 text-[8.5px] font-black bg-slate-950 text-white px-2 py-0.5 rounded-full shadow-xs">
-                                {prod.tag}
-                              </span>
-                              {qtyInCart > 0 && (
-                                <span
-                                  className="absolute top-1.5 right-1.5 text-slate-950 font-black font-mono text-[10.5px] w-5 h-5 rounded-full flex items-center justify-center shadow-md bg-amber-400 anim-badge-spring"
-                                >
-                                  {qtyInCart}
-                                </span>
-                              )}
-                            </div>
+              <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain touch-pan-y p-1 pb-24 scrollbar-none catalog-scroll-area bg-[#070a12]" style={{ backgroundColor: "#070a12" }}>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2.5 sm:gap-3">
+                  {filteredProducts.map((prod) => {
+                    const qtyInCart = getCartQty(prod.id);
+                    return (
+                      <div
+                        key={prod.id}
+                        onClick={() => addToCart(prod)}
+                        className="group border rounded-2xl overflow-hidden transition-all duration-150 cursor-pointer flex flex-col justify-between active:scale-[0.96] active:brightness-110 active:border-amber-400 select-none shadow-md bg-[#0e1726] border-slate-800 hover:border-amber-500/50"
+                      >
+                        <div className="relative h-24 sm:h-28 w-full bg-slate-900/80 flex items-center justify-center p-2 overflow-hidden">
+                          <img
+                            src={prod.image}
+                            alt={prod.name}
+                            className="w-full h-full object-contain drop-shadow-md group-hover:scale-105 transition-transform duration-300"
+                            loading="lazy"
+                          />
+                          <span className="absolute top-1.5 left-1.5 text-[8.5px] font-black bg-slate-950/90 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded-full shadow-xs">
+                            {prod.tag}
+                          </span>
+                          {qtyInCart > 0 && (
+                            <span className="absolute top-1.5 right-1.5 text-slate-950 font-black font-mono text-[10.5px] w-5 h-5 rounded-full flex items-center justify-center shadow-md bg-amber-400 anim-badge-spring">
+                              {qtyInCart}
+                            </span>
+                          )}
+                        </div>
 
-                            <div className="p-2 flex-1 flex flex-col justify-between space-y-1.5">
-                              <div>
-                                <h3
-                                  className="text-[11.5px] font-black line-clamp-1 leading-tight"
-                                  style={{ color: isLight ? '#0f172a' : '#ffffff' }}
-                                >
-                                  {prod.name}
-                                </h3>
-                                <p className="text-[9.5px] text-slate-400 line-clamp-1 mt-0.5">
-                                  {prod.description}
-                                </p>
-                              </div>
-
-                              <div className="flex items-center justify-between pt-1 border-t border-slate-100 dark:border-slate-800/80">
-                                <div>
-                                  <span className="text-xs font-black font-mono block text-amber-400">
-                                    ${prod.priceUSD.toFixed(2)}
-                                  </span>
-                                  <span className="text-[8.5px] font-mono text-slate-400 font-bold block">
-                                    Bs. {(prod.priceUSD * bcvRate).toFixed(0)}
-                                  </span>
-                                </div>
-
-                                <div className="flex items-center gap-1">
-                                  <button
-                                    type="button"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      addToCart(prod);
-                                    }}
-                                    className="w-7 h-7 rounded-xl bg-amber-500 hover:bg-amber-400 active:scale-90 active:bg-amber-300 text-slate-950 flex items-center justify-center transition-all shadow-sm font-black cursor-pointer"
-                                    title="Añadir a la comanda"
-                                  >
-                                    <Plus className="w-4 h-4 stroke-[2.8]" />
-                                  </button>
-                                </div>
-                              </div>
-                            </div>
+                        <div className="p-2.5 flex-1 flex flex-col justify-between space-y-1.5">
+                          <div>
+                            <h3 className="text-[12px] font-black line-clamp-1 leading-tight text-white">
+                              {prod.name}
+                            </h3>
+                            <p className="text-[9.5px] text-slate-400 line-clamp-1 mt-0.5">
+                              {prod.description}
+                            </p>
                           </div>
-                        );
-                      })}
-                  </div>
-                </div>
 
-                {/* REEL DERECHO: BEBIDAS & EXTRAS */}
-                <div className={`flex flex-col h-full min-h-0 overflow-hidden border rounded-2xl shadow-md ${
-                  isLight ? 'bg-slate-100 border-slate-200' : 'bg-[#090d16] border-slate-800'
-                }`}>
-                  <div className={`px-2 py-1.5 border-b flex items-center justify-between shrink-0 ${
-                    isLight ? 'bg-white border-slate-200 text-slate-800' : 'bg-[#0f172a] border-slate-800 text-amber-400'
-                  }`}>
-                    <span className="text-[10px] font-black uppercase tracking-wider flex items-center gap-1">
-                      🥤 Bebidas & Extras
-                    </span>
-                    <span className="text-[9px] font-mono text-slate-400 font-bold">
-                      {filteredProducts.filter((_, idx) => idx % 2 !== 0).length} ítems
-                    </span>
-                  </div>
-                  <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain touch-pan-y p-1.5 space-y-2 pb-24 scrollbar-none">
-                    {filteredProducts
-                      .filter((_, idx) => idx % 2 !== 0)
-                      .map((prod) => {
-                        const qtyInCart = getCartQty(prod.id);
-                        return (
-                          <div
-                            key={prod.id}
-                            onClick={() => addToCart(prod)}
-                            className={`group border rounded-2xl overflow-hidden transition-all duration-150 cursor-pointer flex flex-col justify-between active:scale-[0.95] active:brightness-110 active:border-amber-400 select-none shadow-md ${
-                              isLight
-                                ? 'bg-white border-slate-200 hover:border-slate-300'
-                                : 'bg-[#0e1726] border-slate-800 hover:border-amber-500/50'
-                            }`}
-                          >
-                            <div className="relative h-24 sm:h-28 w-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
-                              <img
-                                src={prod.image}
-                                alt={prod.name}
-                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                                loading="lazy"
-                              />
-                              <span className="absolute top-1.5 left-1.5 text-[8.5px] font-black bg-slate-950 text-white px-2 py-0.5 rounded-full shadow-xs">
-                                {prod.tag}
+                          <div className="flex items-center justify-between pt-1 border-t border-slate-800/80">
+                            <div>
+                              <span className="text-xs font-black font-mono block text-amber-400">
+                                ${prod.priceUSD.toFixed(2)}
                               </span>
-                              {qtyInCart > 0 && (
-                                <span
-                                  className="absolute top-1.5 right-1.5 text-slate-950 font-black font-mono text-[10.5px] w-5 h-5 rounded-full flex items-center justify-center shadow-md bg-amber-400 anim-badge-spring"
-                                >
-                                  {qtyInCart}
-                                </span>
-                              )}
+                              <span className="text-[8.5px] font-mono text-slate-400 font-bold block">
+                                Bs. {(prod.priceUSD * bcvRate).toFixed(0)}
+                              </span>
                             </div>
 
-                            <div className="p-2 flex-1 flex flex-col justify-between space-y-1.5">
-                              <div>
-                                <h3
-                                  className="text-[11.5px] font-black line-clamp-1 leading-tight"
-                                  style={{ color: isLight ? '#0f172a' : '#ffffff' }}
-                                >
-                                  {prod.name}
-                                </h3>
-                                <p className="text-[9.5px] text-slate-400 line-clamp-1 mt-0.5">
-                                  {prod.description}
-                                </p>
-                              </div>
-
-                              <div className="flex items-center justify-between pt-1 border-t border-slate-100 dark:border-slate-800/80">
-                                <div>
-                                  <span className="text-xs font-black font-mono block text-amber-400">
-                                    ${prod.priceUSD.toFixed(2)}
-                                  </span>
-                                  <span className="text-[8.5px] font-mono text-slate-400 font-bold block">
-                                    Bs. {(prod.priceUSD * bcvRate).toFixed(0)}
-                                  </span>
-                                </div>
-
-                                <div className="flex items-center gap-1">
-                                  <button
-                                    type="button"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      addToCart(prod);
-                                    }}
-                                    className="w-7 h-7 rounded-xl bg-amber-500 hover:bg-amber-400 active:scale-90 active:bg-amber-300 text-slate-950 flex items-center justify-center transition-all shadow-sm font-black cursor-pointer"
-                                    title="Añadir a la comanda"
-                                  >
-                                    <Plus className="w-4 h-4 stroke-[2.8]" />
-                                  </button>
-                                </div>
-                              </div>
-                            </div>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                addToCart(prod);
+                              }}
+                              className="w-7 h-7 rounded-xl bg-amber-500 hover:bg-amber-400 active:scale-90 active:bg-amber-300 text-slate-950 flex items-center justify-center transition-all shadow-sm font-black cursor-pointer"
+                              title="Añadir a la comanda"
+                            >
+                              <Plus className="w-4 h-4 stroke-[2.8]" />
+                            </button>
                           </div>
-                        );
-                      })}
-                  </div>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             )}
 
             {/* ================================================================= */}
-            {/* MODO 2: LISTA ERGONÓMICA CON FILAS DIRECTAS                       */}
+            {/* MODO 2: LISTA CON CARDS GRANDES PARA TABLET                       */}
             {/* ================================================================= */}
             {cardViewMode === 'lista' && (
-              <div className="space-y-2 overflow-y-auto max-h-[calc(100vh-215px)] pb-28 p-1 scrollbar-none no-scrollbar">
-                {filteredProducts.map((prod) => {
-                  const qtyInCart = getCartQty(prod.id);
-                  return (
-                    <div
-                      key={prod.id}
-                      onClick={() => addToCart(prod)}
-                      className={`p-2.5 border rounded-2xl flex items-center justify-between gap-3 transition-all cursor-pointer active:scale-[0.97] active:brightness-105 active:border-amber-400 select-none shadow-xs ${
-                        isLight ? 'bg-white border-slate-200 hover:border-slate-300' : 'bg-slate-900 border-slate-800 hover:border-amber-500/40'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                        <div className="relative shrink-0">
-                          <img
-                            src={prod.image}
-                            alt={prod.name}
-                            className="w-12 h-12 rounded-xl object-cover"
-                          />
-                          {qtyInCart > 0 && (
-                            <span className="absolute -top-1.5 -right-1.5 text-slate-950 font-black font-mono text-[9px] w-4.5 h-4.5 rounded-full flex items-center justify-center shadow-md bg-amber-400 anim-badge-spring">
-                              {qtyInCart}
+              <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain touch-pan-y p-1 pb-24 scrollbar-none catalog-scroll-area bg-[#070a12]" style={{ backgroundColor: "#070a12" }}>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  {filteredProducts.map((prod) => {
+                    const qtyInCart = getCartQty(prod.id);
+                    return (
+                      <div
+                        key={prod.id}
+                        onClick={() => addToCart(prod)}
+                        className="p-3 border rounded-2xl flex items-center justify-between gap-3 transition-all cursor-pointer active:scale-[0.98] active:brightness-105 active:border-amber-400 select-none shadow-sm bg-slate-900/90 border-slate-800 hover:border-amber-500/40"
+                      >
+                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                          <div className="relative shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden bg-slate-900/80 border border-slate-700 flex items-center justify-center p-1.5">
+                            <img
+                              src={prod.image}
+                              alt={prod.name}
+                              className="w-full h-full object-contain drop-shadow-sm"
+                            />
+                            {qtyInCart > 0 && (
+                              <span className="absolute top-1 right-1 text-slate-950 font-black font-mono text-[9px] w-4.5 h-4.5 rounded-full flex items-center justify-center shadow-md bg-amber-400 anim-badge-spring">
+                                {qtyInCart}
+                              </span>
+                            )}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-[9px] font-mono font-bold uppercase text-amber-400 bg-amber-400/10 px-1.5 py-0.2 rounded">
+                                {prod.category}
+                              </span>
+                              <span className="text-[9px] text-slate-500 font-mono">
+                                {prod.sku}
+                              </span>
+                            </div>
+                            <h4 className="text-xs font-black truncate text-white mt-0.5">
+                              {prod.name}
+                            </h4>
+                            <span className="text-[10px] text-slate-400 block line-clamp-1 mt-0.5">
+                              {prod.description}
                             </span>
-                          )}
-                        </div>
-                        <div className="min-w-0">
-                          <h4 className="text-xs font-black truncate" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
-                            {prod.name}
-                          </h4>
-                          <span className="text-[10px] text-slate-400 block truncate">
-                            {prod.description}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-3 shrink-0">
-                        <div className="text-right">
-                          <span className="text-xs font-black font-mono block text-amber-400">
-                            ${prod.priceUSD.toFixed(2)}
-                          </span>
-                          <span className="text-[9px] font-mono text-slate-400">
-                            Bs. {(prod.priceUSD * bcvRate).toFixed(2)}
-                          </span>
+                          </div>
                         </div>
 
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            addToCart(prod);
-                          }}
-                          className="w-8 h-8 rounded-xl bg-amber-500 hover:bg-amber-400 active:scale-90 active:bg-amber-300 text-slate-950 flex items-center justify-center transition-all shadow-md font-black cursor-pointer"
-                          title="Añadir a la comanda"
-                        >
-                          <Plus className="w-4 h-4 stroke-[2.8]" />
-                        </button>
+                        <div className="flex items-center gap-2.5 shrink-0 pl-1">
+                          <div className="text-right">
+                            <span className="text-xs font-black font-mono block text-amber-400">
+                              ${prod.priceUSD.toFixed(2)}
+                            </span>
+                            <span className="text-[9px] font-mono text-slate-400">
+                              Bs. {(prod.priceUSD * bcvRate).toFixed(0)}
+                            </span>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              addToCart(prod);
+                            }}
+                            className="w-8 h-8 rounded-xl bg-amber-500 hover:bg-amber-400 active:scale-90 active:bg-amber-300 text-slate-950 flex items-center justify-center transition-all shadow-md font-black cursor-pointer"
+                            title="Añadir a la comanda"
+                          >
+                            <Plus className="w-4 h-4 stroke-[2.8]" />
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
               </div>
             )}
           </div>
@@ -1954,7 +2074,7 @@ export default function TabletMobilePosPage() {
         {/* VISTA 2: MESAS Y CUENTAS DE BARRA (+ BOTÓN AGREGAR DINÁMICO)            */}
         {/* ======================================================================= */}
         {activeTab === 'mesas' && (
-          <div className="space-y-4">
+          <div className="space-y-4 flex-1 min-h-0 overflow-y-auto pb-44 px-1 scrollbar-none">
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-sm font-black uppercase tracking-wider flex items-center gap-2" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
@@ -2024,61 +2144,221 @@ export default function TabletMobilePosPage() {
         )}
 
         {/* ======================================================================= */}
-        {/* VISTA 3: PEDIDOS ENTRANTES / COCINA                                     */}
+        {/* VISTA 3: PEDIDOS Y DESPACHOS EN VIVO (LOCAL & DELIVERY)                 */}
         {/* ======================================================================= */}
         {activeTab === 'pedidos' && (
-          <div className="space-y-4">
-            <h2 className="text-sm font-black uppercase tracking-wider flex items-center gap-2" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
-              <ClipboardList className="w-4 h-4" style={{ color: currentPal.primary }} />
-              <span>Pedidos en Cocina y Comandas QR</span>
-            </h2>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              <div className={`border rounded-2xl p-3 space-y-2.5 ${isLight ? 'bg-white border-slate-200' : 'bg-slate-900 border-slate-800'}`}>
-                <div className="flex items-center justify-between text-xs font-black text-amber-600 pb-1 border-b border-slate-200 dark:border-slate-800">
-                  <span>🟡 NUEVOS ENTRANTES (1)</span>
-                  <span className="text-[9px] bg-amber-100 dark:bg-amber-950/60 px-2 py-0.5 rounded-full">QR Mesa</span>
-                </div>
-                <div className={`p-2.5 rounded-xl border space-y-2 ${isLight ? 'bg-slate-50 border-slate-200' : 'bg-slate-950 border-slate-800'}`}>
-                  <div className="flex justify-between items-center text-xs">
-                    <span className="font-black" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>Mesa 4 • Juan C.</span>
-                    <span className="font-mono font-bold" style={{ color: currentPal.primary }}>$15.50</span>
-                  </div>
-                  <p className="text-[11px] text-slate-500">2x Hamburguesa Doble, 1x Papas Gratinadas</p>
-                  <button
-                    className="w-full py-1.5 text-white rounded-lg text-xs font-black active:scale-95"
-                    style={{ backgroundColor: currentPal.primary }}
-                  >
-                    Aceptar y Pasar a Plancha
-                  </button>
-                </div>
-              </div>
-
-              <div className={`border rounded-2xl p-3 space-y-2.5 ${isLight ? 'bg-white border-slate-200' : 'bg-slate-900 border-slate-800'}`}>
-                <div className="flex items-center justify-between text-xs font-black text-sky-600 pb-1 border-b border-slate-200 dark:border-slate-800">
-                  <span>🔵 EN PLANCHA / PREPARACIÓN (1)</span>
-                </div>
-                <div className={`p-2.5 rounded-xl border space-y-2 ${isLight ? 'bg-slate-50 border-slate-200' : 'bg-slate-950 border-slate-800'}`}>
-                  <div className="flex justify-between items-center text-xs">
-                    <span className="font-black" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>Barra 1 • María P.</span>
-                    <span className="font-mono font-bold" style={{ color: currentPal.primary }}>$4.00</span>
-                  </div>
-                  <p className="text-[11px] text-slate-500">1x Papas Fritas Gratinadas</p>
-                  <button className="w-full py-1.5 bg-sky-600 hover:bg-sky-500 text-white rounded-lg text-xs font-black active:scale-95">
-                    Marcar Listo para Servir
-                  </button>
-                </div>
-              </div>
-
-              <div className={`border rounded-2xl p-3 space-y-2.5 ${isLight ? 'bg-white border-slate-200' : 'bg-slate-900 border-slate-800'}`}>
-                <div className="flex items-center justify-between text-xs font-black text-emerald-600 pb-1 border-b border-slate-200 dark:border-slate-800">
-                  <span>🟢 LISTOS / ENTREGADOS</span>
-                </div>
-                <p className="text-xs text-slate-400 italic text-center py-4">
-                  Todos los pedidos listos fueron despachados.
+          <div className="space-y-3 flex-1 min-h-0 flex flex-col pb-44 overflow-y-auto px-1 scrollbar-none">
+            {/* Header & Filtros */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-2 border-b border-slate-800 shrink-0">
+              <div>
+                <h2 className="text-sm font-black uppercase tracking-wider flex items-center gap-2 text-white">
+                  <ClipboardList className="w-4 h-4" style={{ color: currentPal.primary }} />
+                  <span>Control de Pedidos & Despachos</span>
+                </h2>
+                <p className="text-[11px] text-slate-400 font-mono">
+                  {orders.filter(o => o.status === 'en_cola').length} en cola • {orders.filter(o => o.status === 'listo').length} listos • {orders.filter(o => o.status === 'despachado').length} despachados
                 </p>
               </div>
+
+              {/* Filtros de Tipo y Estado */}
+              <div className="flex flex-wrap items-center gap-1.5">
+                {/* Filtro por Tipo */}
+                <div className="flex items-center p-0.5 rounded-xl border border-slate-800 bg-slate-900">
+                  {(['todos', 'local', 'delivery'] as const).map((t) => (
+                    <button
+                      key={t}
+                      onClick={() => setOrderFilterType(t)}
+                      className={`px-2 py-1 rounded-lg text-[10px] font-black uppercase transition-all ${
+                        orderFilterType === t
+                          ? 'bg-amber-500 text-slate-950 shadow-xs'
+                          : 'text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      {t === 'todos' ? 'Todos' : t === 'local' ? 'Local' : 'Delivery'}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Filtro por Estado */}
+                <div className="flex items-center p-0.5 rounded-xl border border-slate-800 bg-slate-900">
+                  {(['todos', 'en_cola', 'listo', 'despachado'] as const).map((st) => (
+                    <button
+                      key={st}
+                      onClick={() => setOrderFilterStatus(st)}
+                      className={`px-2 py-1 rounded-lg text-[10px] font-black uppercase transition-all ${
+                        orderFilterStatus === st
+                          ? 'bg-amber-500 text-slate-950 shadow-xs'
+                          : 'text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      {st === 'todos' ? 'Todos' : st === 'en_cola' ? 'En Cola' : st === 'listo' ? 'Listos' : 'Despachados'}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
+
+            {/* Tablero de Pedidos */}
+            {(() => {
+              const visibleOrders = orders.filter((o) => {
+                const matchStatus = orderFilterStatus === 'todos' || o.status === orderFilterStatus;
+                const matchType = orderFilterType === 'todos' || o.type === orderFilterType;
+                return matchStatus && matchType;
+              });
+
+              if (visibleOrders.length === 0) {
+                return (
+                  <div className="text-center py-12 text-slate-400 text-xs italic border border-slate-800/80 rounded-2xl bg-slate-900/40">
+                    No hay pedidos registrados con los filtros seleccionados.
+                  </div>
+                );
+              }
+
+              return (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {visibleOrders.map((ord) => {
+                    const isDelivery = ord.type === 'delivery';
+                    const isEnCola = ord.status === 'en_cola';
+                    const isListo = ord.status === 'listo';
+                    const isDespachado = ord.status === 'despachado';
+                    const isPendingPayment = ord.paymentStatus === 'por_cobrar';
+
+                    return (
+                      <div
+                        key={ord.id}
+                        className={`border rounded-2xl p-3.5 space-y-3 transition-all flex flex-col justify-between shadow-md ${
+                          isEnCola ? 'bg-[#0f172a] border-amber-500/40' :
+                          isListo ? 'bg-[#0f172a] border-sky-500/40' :
+                          'bg-slate-900/80 border-slate-800 opacity-90'
+                        }`}
+                      >
+                        {/* Cabecera del Pedido */}
+                        <div className="space-y-1.5 pb-2 border-b border-slate-800">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-xs font-mono font-black text-amber-400">
+                                {ord.orderNumber}
+                              </span>
+                              <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full ${
+                                isDelivery ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30' : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                              }`}>
+                                {isDelivery ? 'Delivery' : (ord.table || 'Local')}
+                              </span>
+                            </div>
+
+                            <span className="text-[10px] font-mono text-slate-400">
+                              {ord.timeFormatted}
+                            </span>
+                          </div>
+
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="font-bold text-slate-200">
+                              {ord.customer?.name || 'Cliente'}
+                            </span>
+                            <div className="text-right">
+                              <span className="font-mono font-black text-amber-400">
+                                ${ord.totalUSD.toFixed(2)}
+                              </span>
+                              <span className="text-[9.5px] font-mono text-slate-400 block">
+                                Bs. {(ord.totalUSD * bcvRate).toFixed(0)}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Estado de Pago */}
+                          <div className="flex items-center justify-between pt-0.5">
+                            <span className="text-[10px] text-slate-400 font-mono">
+                              Pago: <b className="text-slate-300">{ord.paymentMethod}</b>
+                            </span>
+                            <span className={`text-[9px] font-black px-2 py-0.5 rounded-md ${
+                              isPendingPayment
+                                ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
+                                : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                            }`}>
+                              {isPendingPayment ? 'Por Cobrar en Destino' : 'Pagado'}
+                            </span>
+                          </div>
+
+                          {/* Dirección / Motorizado si es Delivery */}
+                          {isDelivery && (
+                            <div className="p-2 rounded-xl bg-slate-950 border border-slate-800 space-y-1 text-[10px] font-mono text-slate-300">
+                              {ord.driverName && (
+                                <p className="flex items-center gap-1 text-purple-300">
+                                  <Bike className="w-3 h-3" />
+                                  <span>Chofer: <b>{ord.driverName}</b></span>
+                                </p>
+                              )}
+                              {ord.deliveryAddress && (
+                                <p className="flex items-start gap-1 text-slate-400">
+                                  <MapPin className="w-3 h-3 text-amber-400 shrink-0 mt-0.5" />
+                                  <span className="line-clamp-2">{ord.deliveryAddress}</span>
+                                </p>
+                              )}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Lista de Ítems */}
+                        <div className="space-y-1 flex-1 py-1 max-h-32 overflow-y-auto">
+                          {ord.items.map((it, idx) => (
+                            <div key={idx} className="flex justify-between items-baseline text-xs">
+                              <div className="truncate pr-2 text-slate-200">
+                                <span className="font-mono font-bold text-amber-400">{it.qty}x</span> {it.name}
+                                {it.notes && (
+                                  <span className="block text-[9.5px] text-amber-300 italic font-sans pl-4">
+                                    Nota: {it.notes}
+                                  </span>
+                                )}
+                              </div>
+                              <span className="font-mono text-slate-400 shrink-0 text-[11px]">
+                                ${(it.priceUSD * it.qty).toFixed(2)}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Botones de Transición de Estado */}
+                        <div className="space-y-1.5 pt-2 border-t border-slate-800">
+                          {isEnCola && (
+                            <button
+                              onClick={() => handleAdvanceOrderStatus(ord.id, 'listo')}
+                              className="w-full py-2 bg-sky-600 hover:bg-sky-500 text-white rounded-xl text-xs font-black transition-all active:scale-95 shadow-xs flex items-center justify-center gap-1.5 cursor-pointer"
+                            >
+                              <span>Aceptar y Marcar Listo</span>
+                            </button>
+                          )}
+
+                          {isListo && (
+                            <button
+                              onClick={() => handleAdvanceOrderStatus(ord.id, 'despachado')}
+                              className="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-black transition-all active:scale-95 shadow-xs flex items-center justify-center gap-1.5 cursor-pointer"
+                            >
+                              <Bike className="w-3.5 h-3.5" />
+                              <span>{isDelivery ? 'Despachar Motorizado' : 'Entregar al Cliente'}</span>
+                            </button>
+                          )}
+
+                          {isDespachado && (
+                            <div className="w-full py-1.5 bg-slate-800/80 text-emerald-400 rounded-xl text-xs font-black text-center border border-emerald-500/20">
+                              ✓ Orden Finalizada y Entregada
+                            </div>
+                          )}
+
+                          {isPendingPayment && (
+                            <button
+                              onClick={() => handleMarkOrderPaid(ord.id)}
+                              className="w-full py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-xl text-[11px] font-black transition-all active:scale-95 flex items-center justify-center gap-1 cursor-pointer"
+                            >
+                              <span>Marcar Pago Recibido ($)</span>
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })()}
           </div>
         )}
 
@@ -2086,7 +2366,7 @@ export default function TabletMobilePosPage() {
         {/* VISTA 4: DELIVERY Y RUTAS DE MOTORIZADOS                                */}
         {/* ======================================================================= */}
         {activeTab === 'delivery' && (
-          <div className="space-y-4">
+          <div className="space-y-4 flex-1 min-h-0 overflow-y-auto pb-44 px-1 scrollbar-none">
             {/* Header con estadísticas y botón de alta rápida */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-slate-200 dark:border-slate-800">
               <div>
@@ -2232,7 +2512,7 @@ export default function TabletMobilePosPage() {
         {/* VISTA 5: PASARELA DE COBRO COMPLETA (CLIENTE + PAGO MÓVIL + VUELTO)      */}
         {/* ======================================================================= */}
         {activeTab === 'cobro' && (
-          <div className="max-w-xl mx-auto space-y-4 pb-6">
+          <div className="max-w-xl mx-auto w-full space-y-4 flex-1 min-h-0 overflow-y-auto pb-44 px-2 scrollbar-none">
             {/* Header del Totalizador */}
             <div className={`border rounded-3xl p-5 text-center shadow-lg ${
               isLight ? 'bg-white border-slate-200' : 'bg-slate-900 border-slate-800'
@@ -2248,12 +2528,87 @@ export default function TabletMobilePosPage() {
               </div>
             </div>
 
-            {/* SECCIÓN 1: SELECCIÓN Y REGISTRO DE CLIENTE */}
-            <div className={`border rounded-2xl p-4 space-y-2.5 shadow-xs ${
-              isLight ? 'bg-white border-slate-200' : 'bg-slate-900 border-slate-800'
-            }`}>
+            {/* SECCIÓN 1: MODALIDAD DE DESPACHO Y ENTREGA */}
+            <div className="border rounded-2xl p-4 space-y-3 shadow-xs bg-slate-900 border-slate-800">
+              <span className="text-xs font-black uppercase tracking-wider block text-white">
+                Modalidad de Entrega / Despacho:
+              </span>
+
+              <div className="grid grid-cols-3 gap-2">
+                {[
+                  { id: 'local', label: 'En Local / Mesa', desc: 'Consumo en salón o mostrador', icon: Store, color: 'text-emerald-400' },
+                  { id: 'delivery_paid', label: 'Delivery Pagado', desc: 'Cobrado previo al despacho', icon: Bike, color: 'text-sky-400' },
+                  { id: 'delivery_cod', label: 'Cobro en Destino', desc: 'El chofer cobra al entregar', icon: Truck, color: 'text-amber-400' },
+                ].map((mode) => {
+                  const Icon = mode.icon;
+                  const isSelected = fulfillmentMode === mode.id;
+                  return (
+                    <button
+                      key={mode.id}
+                      type="button"
+                      onClick={() => setFulfillmentMode(mode.id as any)}
+                      className={`p-2.5 rounded-xl border flex flex-col items-center text-center gap-1 transition-all active:scale-95 cursor-pointer ${
+                        isSelected
+                          ? 'border-2 bg-[#0f172a] shadow-md'
+                          : 'bg-slate-950 hover:bg-slate-850 border-slate-800'
+                      }`}
+                      style={{
+                        borderColor: isSelected ? currentPal.primary : undefined,
+                      }}
+                    >
+                      <Icon className={`w-5 h-5 ${mode.color}`} />
+                      <span className="text-[11px] font-black text-white leading-tight">
+                        {mode.label}
+                      </span>
+                      <span className="text-[9px] text-slate-400 leading-tight">
+                        {mode.desc}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Parámetros de Delivery si aplica */}
+              {fulfillmentMode !== 'local' && (
+                <div className="p-3 rounded-xl border border-slate-800 bg-slate-950/80 space-y-2.5 mt-2">
+                  <div>
+                    <label className="text-[10px] font-bold text-slate-400 block mb-1">
+                      Asignar Motorizado / Chofer:
+                    </label>
+                    <select
+                      value={selectedDriverId}
+                      onChange={(e) => setSelectedDriverId(e.target.value)}
+                      className="w-full px-3 py-2 rounded-xl text-xs font-bold border outline-none bg-slate-900 border-slate-700 text-white"
+                    >
+                      <option value="">Por Asignar / Chofer Particular</option>
+                      {drivers.map((d) => (
+                        <option key={d.id} value={d.id}>
+                          {d.name} ({d.vehicle}) - {d.status}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="text-[10px] font-bold text-slate-400 block mb-1">
+                      Dirección o Punto de Referencia:
+                    </label>
+                    <input
+                      type="text"
+                      placeholder={selectedCustomer.address || 'Ej. Urb. Los Rosales, Calle 3, Casa #14'}
+                      value={deliveryAddressInput}
+                      onChange={(e) => setDeliveryAddressInput(e.target.value)}
+                      className="w-full px-3 py-2 rounded-xl text-xs font-medium border outline-none bg-slate-900 border-slate-700 text-white"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* SECCIÓN 2: DATOS DEL CLIENTE / FACTURACIÓN */}
+            <div className="border rounded-2xl p-4 space-y-2.5 shadow-xs bg-slate-900 border-slate-800">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-1.5 text-xs font-black" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
+                <div className="flex items-center gap-1.5 text-xs font-black text-white">
                   <User className="w-4 h-4" style={{ color: currentPal.primary }} />
                   <span>Datos del Cliente / Facturación</span>
                 </div>
@@ -2268,11 +2623,9 @@ export default function TabletMobilePosPage() {
                 </button>
               </div>
 
-              <div className={`p-3 rounded-xl border flex items-center justify-between ${
-                isLight ? 'bg-slate-50 border-slate-200' : 'bg-slate-950 border-slate-800'
-              }`}>
+              <div className="p-3 rounded-xl border flex items-center justify-between bg-slate-950 border-slate-800">
                 <div>
-                  <h4 className="text-xs font-black" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
+                  <h4 className="text-xs font-black text-white">
                     {selectedCustomer.name}
                   </h4>
                   <div className="flex gap-2 text-[10px] text-slate-500 font-mono mt-0.5">
@@ -2280,19 +2633,24 @@ export default function TabletMobilePosPage() {
                     {selectedCustomer.phone && <span>Tel: {selectedCustomer.phone}</span>}
                   </div>
                 </div>
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-800 font-bold text-slate-700 dark:text-slate-300">
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 font-bold text-slate-300">
                   Seleccionado
                 </span>
               </div>
             </div>
 
-            {/* SECCIÓN 2: SELECTOR DE MÉTODO DE PAGO */}
-            <div className={`border rounded-2xl p-4 space-y-3 shadow-xs ${
-              isLight ? 'bg-white border-slate-200' : 'bg-slate-900 border-slate-800'
-            }`}>
-              <span className="text-xs font-black uppercase tracking-wider block" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
-                Selecciona Método de Pago:
-              </span>
+            {/* SECCIÓN 3: SELECTOR DE MÉTODO DE PAGO */}
+            <div className="border rounded-2xl p-4 space-y-3 shadow-xs bg-slate-900 border-slate-800">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-black uppercase tracking-wider block text-white">
+                  {fulfillmentMode === 'delivery_cod' ? 'Método Acordado en Destino:' : 'Selecciona Método de Pago:'}
+                </span>
+                {fulfillmentMode === 'delivery_cod' && (
+                  <span className="text-[9px] font-mono font-bold text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded">
+                    Por Cobrar en Destino
+                  </span>
+                )}
+              </div>
 
               <div className="grid grid-cols-3 gap-2">
                 {[
@@ -2546,6 +2904,7 @@ export default function TabletMobilePosPage() {
         isOrderDrawerOpen={isRightDrawerOpen}
         onToggleDocker={() => setIsDockerOpen((prev) => !prev)}
         isDockerOpen={isDockerOpen}
+        isLiteMode={IS_LITE_MODE}
       />
 
       {/* ========================================================================= */}
@@ -2830,64 +3189,73 @@ export default function TabletMobilePosPage() {
           />
 
           <aside
-            className={`relative w-84 max-w-[88vw] border-l h-full p-4 flex flex-col justify-between shadow-2xl z-10 anim-drawer-right ${
-              isLight ? 'bg-white border-slate-200' : 'bg-slate-900 border-slate-800'
-            }`}
+            className="relative w-full max-w-[380px] border-l border-white/10 h-full p-4 flex flex-col justify-between shadow-2xl z-10 anim-drawer-right text-white"
+            style={{
+              backgroundColor: '#090d16',
+              boxShadow: '-10px 0 40px rgba(0, 0, 0, 0.8)'
+            }}
           >
             <div className="space-y-3 flex-1 flex flex-col min-h-0">
-              <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-800 shrink-0">
-                <div className="flex items-center gap-2">
-                  <ShoppingCart className="w-5 h-5" style={{ color: currentPal.primary }} />
-                  <span className="text-sm font-black" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
-                    {activeTable ? `Mesa #${activeTable}` : 'Comanda Actual'}
-                  </span>
+              <div className="flex items-center justify-between pb-3 border-b border-white/10 shrink-0">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+                    <ShoppingCart className="w-4 h-4 stroke-[2.2]" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-black text-white">
+                      {activeTable ? `Mesa #${activeTable}` : 'Comanda Actual'}
+                    </h3>
+                    <span className="text-[10px] text-emerald-400 font-mono font-bold">
+                      {totalItems} {totalItems === 1 ? 'producto' : 'productos'}
+                    </span>
+                  </div>
                 </div>
                 <button
                   onClick={() => setIsRightDrawerOpen(false)}
-                  className="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-800 active:scale-90"
+                  className="p-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white transition-all active:scale-90 cursor-pointer border border-white/10"
+                  title="Cerrar comanda"
                 >
-                  <X className="w-5 h-5" />
+                  <X className="w-4 h-4 stroke-[2.2]" />
                 </button>
               </div>
 
               {/* Lista de Ítems */}
-              <div className="flex-1 overflow-y-auto space-y-2 pr-1">
+              <div className="flex-1 overflow-y-auto space-y-2 pr-1 custom-scrollbar">
                 {cart.length === 0 ? (
-                  <div className="text-center py-10 text-slate-400 text-xs italic">
-                    No hay productos en esta cuenta.
+                  <div className="text-center py-16 text-slate-500 text-xs italic flex flex-col items-center gap-2">
+                    <ShoppingCart className="w-8 h-8 opacity-30 text-slate-400" />
+                    <span>No hay productos en esta cuenta.</span>
                   </div>
                 ) : (
                   cart.map((item) => (
                     <div
                       key={item.id}
-                      className={`p-2.5 rounded-xl border space-y-1.5 transition-all ${
-                        isLight ? 'bg-slate-50 border-slate-200' : 'bg-slate-950 border-slate-800'
-                      }`}
+                      className="p-3 rounded-2xl border border-white/10 bg-[#111726] hover:border-white/20 space-y-2 transition-all shadow-sm"
                     >
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1 pr-2">
-                          <h4 className="text-xs font-black line-clamp-1" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1 pr-1">
+                          <h4 className="text-xs font-black text-white leading-tight">
                             {item.name}
                           </h4>
-                          <span className="text-[10px] font-mono" style={{ color: currentPal.primary }}>
-                            ${item.priceUSD.toFixed(2)} c/u
+                          <span className="text-[11px] font-mono text-emerald-400 font-bold">
+                            ${item.priceUSD.toFixed(2)} <span className="text-slate-400 font-normal">c/u</span>
                           </span>
                         </div>
-                        <span className="text-xs font-black font-mono" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
+                        <span className="text-xs font-black font-mono text-white shrink-0">
                           ${(item.priceUSD * item.qty).toFixed(2)}
                         </span>
                       </div>
 
                       {item.notes && (
-                        <p className="text-[9px] text-amber-700 dark:text-amber-300 italic bg-amber-50 dark:bg-amber-950/20 px-1.5 py-0.5 rounded border border-amber-200 dark:border-amber-900/40">
+                        <p className="text-[10px] text-amber-300 italic bg-amber-500/15 px-2 py-1 rounded-lg border border-amber-500/30">
                           📝 {item.notes}
                         </p>
                       )}
 
-                      <div className="flex items-center justify-between pt-1 border-t border-slate-200 dark:border-slate-800">
+                      <div className="flex items-center justify-between pt-1.5 border-t border-white/5">
                         <button
                           onClick={() => setEditingItemNotes(item)}
-                          className="text-[10px] text-slate-500 hover:text-slate-800 dark:hover:text-white underline flex items-center gap-1"
+                          className="text-[11px] text-slate-400 hover:text-amber-400 underline underline-offset-2 flex items-center gap-1 transition-colors cursor-pointer"
                         >
                           <Edit3 className="w-3 h-3" />
                           <span>{item.notes ? 'Editar Nota' : '+ Nota'}</span>
@@ -2895,19 +3263,18 @@ export default function TabletMobilePosPage() {
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() => updateQty(item.id, -1)}
-                            className="w-6 h-6 rounded-lg bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-white flex items-center justify-center text-xs font-black active:scale-90"
+                            className="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 flex items-center justify-center text-xs font-black active:scale-90 transition-all cursor-pointer"
                           >
-                            <Minus className="w-3 h-3" />
+                            <Minus className="w-3 h-3 stroke-[2.5]" />
                           </button>
-                          <span className="text-xs font-mono font-black w-4 text-center" style={{ color: currentPal.primary }}>
+                          <span className="text-xs font-mono font-black w-5 text-center text-emerald-400">
                             {item.qty}
                           </span>
                           <button
                             onClick={() => updateQty(item.id, 1)}
-                            className="w-6 h-6 rounded-lg text-white flex items-center justify-center text-xs font-black active:scale-90 shadow-xs"
-                            style={{ backgroundColor: currentPal.primary }}
+                            className="w-7 h-7 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white flex items-center justify-center text-xs font-black active:scale-90 shadow-sm transition-all cursor-pointer"
                           >
-                            <Plus className="w-3 h-3" />
+                            <Plus className="w-3 h-3 stroke-[2.5]" />
                           </button>
                         </div>
                       </div>
@@ -2919,26 +3286,29 @@ export default function TabletMobilePosPage() {
 
             {/* Totalizadores y Botón Ir a Cobrar */}
             {cart.length > 0 && (
-              <div className="pt-3 border-t border-slate-200 dark:border-slate-800 space-y-2 shrink-0">
-                <div className="flex justify-between items-center text-xs">
-                  <span className="text-slate-500">Total USD:</span>
-                  <span className="font-mono font-black text-base" style={{ color: currentPal.primary }}>
-                    ${totalUSD.toFixed(2)}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center text-xs">
-                  <span className="text-slate-500">Total Bs (BCV):</span>
-                  <span className="font-mono font-black text-xs" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
-                    Bs. {totalVES.toFixed(2)}
-                  </span>
+              <div className="pt-3 border-t border-white/10 space-y-3 shrink-0">
+                <div className="p-3 rounded-2xl bg-[#06080e] border border-white/10 space-y-1.5">
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="text-slate-300 font-bold">Total USD:</span>
+                    <span className="font-mono font-black text-lg text-emerald-400">
+                      ${totalUSD.toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center text-xs pt-1 border-t border-white/5">
+                    <span className="text-slate-400 font-medium">Total Bs (BCV):</span>
+                    <span className="font-mono font-black text-sm text-amber-300">
+                      Bs. {totalVES.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </span>
+                  </div>
+                  <div className="text-[10px] text-slate-500 font-mono text-right">
+                    Tasa: Bs. {bcvRate.toFixed(2)}
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-2 pt-1">
                   <button
                     onClick={() => setCart([])}
-                    className={`py-2.5 active:scale-95 text-xs font-bold rounded-xl border transition-all ${
-                      isLight ? 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200' : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border-slate-700'
-                    }`}
+                    className="py-3 px-3 active:scale-95 text-xs font-bold rounded-xl border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 transition-all cursor-pointer flex items-center justify-center gap-1"
                   >
                     Vaciar
                   </button>
@@ -2947,8 +3317,7 @@ export default function TabletMobilePosPage() {
                       setIsRightDrawerOpen(false);
                       setActiveTab('cobro');
                     }}
-                    className="py-2.5 text-white text-xs font-black rounded-xl shadow-md active:scale-95 transition-all"
-                    style={{ backgroundColor: currentPal.primary }}
+                    className="py-3 px-3 text-white text-xs font-black rounded-xl shadow-lg active:scale-95 transition-all cursor-pointer bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 shadow-emerald-500/20 flex items-center justify-center gap-1.5"
                   >
                     Ir a Cobrar ➔
                   </button>
@@ -3978,6 +4347,15 @@ export default function TabletMobilePosPage() {
 
                           <button
                             type="button"
+                            onClick={() => setEditingProduct({ ...p })}
+                            className="p-1.5 text-slate-400 hover:text-amber-400 rounded-lg hover:bg-slate-800 transition-colors"
+                            title="Editar detalles y foto del producto"
+                          >
+                            <Edit3 className="w-4 h-4" />
+                          </button>
+
+                          <button
+                            type="button"
                             onClick={() => handleDeleteProduct(p.id)}
                             className="p-1.5 text-slate-400 hover:text-rose-500 rounded-lg transition-colors"
                             title="Eliminar producto"
@@ -4002,6 +4380,195 @@ export default function TabletMobilePosPage() {
                 Cerrar Gestor
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* 13b.2. MODAL DE EDICIÓN COMPLETA DE PRODUCTO (FOTO, NOMBRE, SKU, PRECIO)  */}
+      {/* ========================================================================= */}
+      {editingProduct && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 bg-black/70 backdrop-blur-xs animate-in fade-in duration-200">
+          <div className="border rounded-3xl p-5 max-w-lg w-full max-h-[90vh] flex flex-col shadow-2xl relative bg-slate-900 border-slate-800 text-white">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-800 shrink-0">
+              <div className="flex items-center gap-2">
+                <div className="p-2 rounded-xl bg-amber-500/10 text-amber-500">
+                  <Edit3 className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-black uppercase tracking-wider text-white">
+                    Editar Producto
+                  </h3>
+                  <p className="text-[11px] text-slate-400 font-medium">
+                    Actualiza imagen, precio, categoría y detalles
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setEditingProduct(null)}
+                className="p-1.5 rounded-xl text-slate-400 hover:text-white transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveFullProductEdit} className="flex-1 overflow-y-auto space-y-3.5 py-3 pr-1">
+              {/* Foto del Producto */}
+              <div>
+                <label className="text-[10px] font-bold text-slate-400 flex items-center gap-1 mb-1">
+                  <ImageIcon className="w-3.5 h-3.5 text-amber-500" />
+                  <span>Foto del Producto</span>
+                </label>
+
+                <div className="flex items-center gap-3">
+                  <div className="w-16 h-16 rounded-xl overflow-hidden border border-slate-700 bg-slate-800 shrink-0 flex items-center justify-center relative shadow-xs">
+                    {editingProduct.image ? (
+                      <img
+                        src={editingProduct.image}
+                        alt="Preview"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <Camera className="w-6 h-6 text-slate-500" />
+                    )}
+                  </div>
+
+                  <div className="flex-1 space-y-1.5">
+                    <input
+                      type="url"
+                      placeholder="URL de imagen https://..."
+                      value={editingProduct.image || ''}
+                      onChange={(e) => setEditingProduct({ ...editingProduct, image: e.target.value })}
+                      className="w-full px-3 py-1.5 rounded-xl text-xs border outline-none bg-slate-950 border-slate-700 text-white"
+                    />
+
+                    <div className="flex items-center gap-2">
+                      <label className="flex items-center gap-1.5 px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 text-[10px] font-black rounded-lg cursor-pointer transition-all border border-slate-700 active:scale-95">
+                        <Upload className="w-3 h-3 text-amber-400" />
+                        <span>Subir Foto</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              const reader = new FileReader();
+                              reader.onload = (evt) => {
+                                if (typeof evt.target?.result === 'string') {
+                                  setEditingProduct({ ...editingProduct, image: evt.target.result });
+                                }
+                              };
+                              reader.readAsDataURL(file);
+                            }
+                          }}
+                        />
+                      </label>
+                      {editingProduct.image && (
+                        <button
+                          type="button"
+                          onClick={() => setEditingProduct({ ...editingProduct, image: '' })}
+                          className="text-[10px] text-rose-400 hover:underline cursor-pointer"
+                        >
+                          Quitar Foto
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Nombre y Precio */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                <div className="sm:col-span-2">
+                  <label className="text-[10px] font-bold text-slate-400 block mb-0.5">Nombre del Producto *</label>
+                  <input
+                    type="text"
+                    required
+                    value={editingProduct.name}
+                    onChange={(e) => setEditingProduct({ ...editingProduct, name: e.target.value })}
+                    className="w-full px-3 py-1.5 rounded-xl text-xs border outline-none font-bold bg-slate-950 border-slate-700 text-white"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-bold text-slate-400 block mb-0.5">Precio ($ USD) *</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    required
+                    value={editingProduct.priceUSD}
+                    onChange={(e) => setEditingProduct({ ...editingProduct, priceUSD: parseFloat(e.target.value) || 0 })}
+                    className="w-full px-3 py-1.5 rounded-xl text-xs border outline-none font-mono font-bold bg-slate-950 border-slate-700 text-amber-400"
+                  />
+                </div>
+              </div>
+
+              {/* Categoría, SKU y Tag */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                <div>
+                  <label className="text-[10px] font-bold text-slate-400 block mb-0.5">Categoría</label>
+                  <select
+                    value={editingProduct.category}
+                    onChange={(e) => setEditingProduct({ ...editingProduct, category: e.target.value })}
+                    className="w-full px-3 py-1.5 rounded-xl text-xs border outline-none font-bold bg-slate-950 border-slate-700 text-white"
+                  >
+                    {categoriesList.filter(c => c !== 'Todos').map((cat) => (
+                      <option key={cat} value={cat}>{cat}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-bold text-slate-400 block mb-0.5">Código / SKU</label>
+                  <input
+                    type="text"
+                    value={editingProduct.sku || ''}
+                    onChange={(e) => setEditingProduct({ ...editingProduct, sku: e.target.value })}
+                    className="w-full px-3 py-1.5 rounded-xl text-xs border outline-none font-mono bg-slate-950 border-slate-700 text-white"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-bold text-slate-400 block mb-0.5">Etiqueta / Badge</label>
+                  <input
+                    type="text"
+                    value={editingProduct.tag || ''}
+                    onChange={(e) => setEditingProduct({ ...editingProduct, tag: e.target.value })}
+                    className="w-full px-3 py-1.5 rounded-xl text-xs border outline-none font-semibold bg-slate-950 border-slate-700 text-white"
+                  />
+                </div>
+              </div>
+
+              {/* Descripción / Detalles de Cocina */}
+              <div>
+                <label className="text-[10px] font-bold text-slate-400 block mb-0.5">Descripción / Ingredientes</label>
+                <textarea
+                  rows={2}
+                  value={editingProduct.description || ''}
+                  onChange={(e) => setEditingProduct({ ...editingProduct, description: e.target.value })}
+                  placeholder="Detalla los ingredientes o modo de preparación..."
+                  className="w-full px-3 py-1.5 rounded-xl text-xs border outline-none bg-slate-950 border-slate-700 text-white resize-none"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setEditingProduct(null)}
+                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold rounded-xl active:scale-95"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-black rounded-xl shadow-md transition-all active:scale-95 flex items-center gap-1.5"
+                >
+                  <Check className="w-4 h-4" />
+                  <span>Guardar Cambios</span>
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
@@ -4425,6 +4992,21 @@ export default function TabletMobilePosPage() {
       />
 
       {/* ========================================================================= */}
+      {/* 14C. MÓDULO ESTRELLA DE VENTAS & RESPALDO (DIARIO / SEMANAL / MENSUAL)    */}
+      {/* ========================================================================= */}
+      <StreetSalesBackupModal
+        isOpen={showSalesBackupModal}
+        onClose={() => setShowSalesBackupModal(false)}
+        bcvRate={bcvRate}
+        primaryColor={currentPal.primary}
+        onPrintTicket={(sale) => {
+          try {
+            if (typeof window !== 'undefined') window.print();
+          } catch {}
+        }}
+      />
+
+      {/* ========================================================================= */}
       {/* 15. MODAL DE LIBRERÍA DE PAQUETES VISUALES & CATÁLOGOS CLOUD              */}
       {/* ========================================================================= */}
       <VisualPacksModal
@@ -4436,30 +5018,67 @@ export default function TabletMobilePosPage() {
           try {
             const dbProds = await db.products.toArray();
             if (dbProds && dbProds.length > 0) {
-              const mapped: Product[] = dbProds.map(p => ({
-                id: p.id || String(Math.random()),
+              const mapped: Product[] = dbProds.map((p: any) => ({
+                id: String(p.id || Math.random()),
                 name: p.name,
-                category: p.category,
-                priceUsd: Number(p.priceUsd) || 0,
-                image: p.imageUrl || p.image || 'https://images.unsplash.com/photo-1527061011665-3652c757a4d4?w=400&auto=format&fit=crop&q=80',
-                badge: p.badge || undefined,
-                stock: p.stock !== undefined ? p.stock : 50,
-                isStockManaged: p.isStockManaged !== undefined ? p.isStockManaged : true,
-                costUsd: p.costUsd || 0,
-                barcode: p.barcode || ''
+                category: p.category || 'General',
+                priceUSD: Number(p.priceUSD || p.priceUsd) || 0,
+                tag: p.tag || p.badge || '⭐ Nuevo',
+                prepTime: 'Inmediato',
+                image: p.image || p.imageUrl || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&q=80',
+                description: p.description || `${p.name} - Calidad garantizada.`,
+                sku: p.sku || p.barcode || 'SKU-00'
               }));
               setProducts(mapped);
               localStorage.setItem('klikpos_tablet_products', JSON.stringify(mapped));
-            }
-
-            const dbCats = await db.categories.toArray();
-            if (dbCats && dbCats.length > 0) {
-              const catNames = Array.from(new Set(dbCats.map(c => c.name)));
-              setCategoriesList(prev => Array.from(new Set([...prev, ...catNames])));
+            } else {
+              setProducts([]);
+              localStorage.setItem('klikpos_tablet_products', JSON.stringify([]));
             }
           } catch (err) {
             console.warn('Error refrescando productos importados:', err);
           }
+        }}
+      />
+
+      {/* ========================================================================= */}
+      {/* 16. MODAL DE ACTUALIZACIÓN DE SOFTWARE (GITHUB RELEASES & DESCARGA APK)   */}
+      {/* ========================================================================= */}
+      <SoftwareUpdateModal
+        isOpen={showUpdateModal}
+        onClose={() => setShowUpdateModal(false)}
+        currentVersion="v1.0.0"
+      />
+
+      {/* ========================================================================= */}
+      {/* 17. MODAL DE SINCRONIZACIÓN DE DATA (BCV 4 PROVEEDORES + FIRESTORE)       */}
+      {/* ========================================================================= */}
+      <DataSyncModal
+        isOpen={showSyncModal}
+        onClose={() => setShowSyncModal(false)}
+        currentBcvRate={bcvRate}
+        onBcvUpdated={(newRate) => {
+          setBcvRate(newRate);
+          setCustomBcvInput(newRate.toFixed(2));
+        }}
+        onPacksUpdated={async () => {
+          try {
+            const dbProds = await db.products.toArray();
+            if (dbProds && dbProds.length > 0) {
+              const mapped: Product[] = dbProds.map((p: any) => ({
+                id: String(p.id || Math.random()),
+                name: p.name,
+                category: p.category || 'General',
+                priceUSD: Number(p.priceUSD || p.priceUsd) || 0,
+                tag: p.tag || p.badge || '⭐ Nuevo',
+                prepTime: 'Inmediato',
+                image: p.image || p.imageUrl || '/packs/comida-street/hamburguesa.png',
+                description: p.description || `${p.name} - Calidad garantizada.`,
+                sku: p.sku || p.barcode || 'SKU-00'
+              }));
+              setProducts(mapped);
+            }
+          } catch {}
         }}
       />
     </div>

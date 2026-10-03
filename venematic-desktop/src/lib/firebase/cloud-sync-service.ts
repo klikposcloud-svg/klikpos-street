@@ -34,6 +34,10 @@ class CloudSyncService {
 
   constructor() {
     if (typeof window !== 'undefined') {
+      const savedHwid = localStorage.getItem('klikpos_terminal_hwid') || localStorage.getItem('venematic_terminal_hwid') || localStorage.getItem('venematic_store_id');
+      if (savedHwid) {
+        this.currentStoreId = savedHwid;
+      }
       this.initListeners();
     }
   }
@@ -43,6 +47,12 @@ class CloudSyncService {
   }
 
   public getStoreId(): string {
+    if (typeof window !== 'undefined') {
+      const savedHwid = localStorage.getItem('klikpos_terminal_hwid') || localStorage.getItem('venematic_terminal_hwid') || localStorage.getItem('venematic_store_id');
+      if (savedHwid) {
+        this.currentStoreId = savedHwid;
+      }
+    }
     return this.currentStoreId;
   }
 
@@ -101,9 +111,60 @@ class CloudSyncService {
       state,
       pendingSales: overridePending ?? 0,
       lastSyncAt,
-      storeId: this.currentStoreId,
+      storeId: this.getStoreId(),
       errorMessage,
     };
+  }
+
+  /**
+   * Publica el resumen de totales y la tasa oficial BCV a Firestore
+   */
+  public async pushSummaryToCloud(customBcvRate?: number): Promise<boolean> {
+    if (!isFirebaseConfigured() || (typeof navigator !== 'undefined' && !navigator.onLine)) {
+      return false;
+    }
+
+    try {
+      const storeId = this.getStoreId();
+      const allSales = await localDb.sales.toArray();
+      let currentBcv = customBcvRate;
+      if (!currentBcv || currentBcv <= 0) {
+        const bcvSetting = await localDb.settings.get('bcv_rate');
+        currentBcv = bcvSetting?.value || 1;
+      }
+
+      const bcvVal = Number(currentBcv) || 1;
+      let totalUSD = 0;
+      let totalVES = 0;
+      allSales.forEach((s: any) => {
+        const u = Number(s?.totalUSD) || 0;
+        totalUSD += u;
+        const sRate = Number(s?.bcvRate) || bcvVal;
+        totalVES += Number(s?.totalVES) || (u * sRate);
+      });
+
+      const summaryRef = doc(firestoreDb, `stores/${storeId}/summary`, 'latest');
+      await setDoc(
+        summaryRef,
+        {
+          storeId: storeId,
+          totalUSD: Number(totalUSD.toFixed(2)),
+          totalVES: Number(totalVES.toFixed(2)),
+          bcvRate: Number(currentBcv),
+          salesCount: allSales.length,
+          lastSaleAt: allSales.length > 0 ? allSales[allSales.length - 1].timestamp : new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          source: 'desktop_pos',
+          terminalName: 'Caja Principal'
+        },
+        { merge: true }
+      );
+
+      return true;
+    } catch (err) {
+      console.error('[CloudSync] Error actualizando resumen en Firestore:', err);
+      return false;
+    }
   }
 
   /**
@@ -133,6 +194,7 @@ class CloudSyncService {
       const batchSize = 100;
       let totalSynced = 0;
 
+      const storeId = this.getStoreId();
       for (let i = 0; i < unsyncedSales.length; i += batchSize) {
         const chunk = unsyncedSales.slice(i, i + batchSize);
         const batch = writeBatch(firestoreDb);
@@ -141,7 +203,7 @@ class CloudSyncService {
           const docId = sale.receiptNumber || `SALE-${sale.id}-${Date.now()}`;
           const saleRef = doc(
             firestoreDb,
-            `stores/${this.currentStoreId}/sales`,
+            `stores/${storeId}/sales`,
             docId
           );
 
@@ -149,7 +211,7 @@ class CloudSyncService {
             saleRef,
             {
               id: docId,
-              storeId: this.currentStoreId,
+              storeId: storeId,
               receiptNumber: sale.receiptNumber,
               timestamp: sale.timestamp,
               items: sale.items || [],
@@ -182,6 +244,9 @@ class CloudSyncService {
         totalSynced += chunk.length;
       }
 
+      // 3. Actualizar resumen y tasa BCV en Firestore
+      await this.pushSummaryToCloud();
+
       const now = new Date().toISOString();
       if (typeof window !== 'undefined') {
         localStorage.setItem(LAST_SYNC_KEY, now);
@@ -205,6 +270,7 @@ class CloudSyncService {
     }
 
     try {
+      const storeId = this.getStoreId();
       const localProducts = await localDb.products.toArray();
       if (localProducts.length === 0) return 0;
 
@@ -219,7 +285,7 @@ class CloudSyncService {
           const docId = prod.barcode || `PROD-${prod.id}`;
           const prodRef = doc(
             firestoreDb,
-            `stores/${this.currentStoreId}/products`,
+            `stores/${storeId}/products`,
             docId
           );
 
@@ -227,7 +293,7 @@ class CloudSyncService {
             prodRef,
             {
               id: docId,
-              storeId: this.currentStoreId,
+              storeId: storeId,
               barcode: prod.barcode,
               name: prod.name,
               category: prod.category || 'General',
@@ -264,7 +330,8 @@ class CloudSyncService {
     }
 
     try {
-      const colRef = collection(firestoreDb, `stores/${this.currentStoreId}/products`);
+      const storeId = this.getStoreId();
+      const colRef = collection(firestoreDb, `stores/${storeId}/products`);
       const snapshot = await getDocs(colRef);
 
       if (snapshot.empty) return 0;
@@ -325,6 +392,7 @@ class CloudSyncService {
     }
 
     try {
+      const storeId = this.getStoreId();
       const localShifts = await localDb.cashShifts.toArray();
       if (localShifts.length === 0) return 0;
 
@@ -337,13 +405,13 @@ class CloudSyncService {
 
         for (const shift of chunk) {
           const docId = `SHIFT-${shift.id || shift.openedAt}`;
-          const shiftRef = doc(firestoreDb, `stores/${this.currentStoreId}/shifts`, docId);
+          const shiftRef = doc(firestoreDb, `stores/${storeId}/shifts`, docId);
 
           batch.set(
             shiftRef,
             {
               id: docId,
-              storeId: this.currentStoreId,
+              storeId: storeId,
               openedAt: shift.openedAt,
               closedAt: shift.closedAt || null,
               cashierName: shift.cashierName,
@@ -391,6 +459,7 @@ class CloudSyncService {
       const productsUploaded = await this.pushProductsToCloud();
       const productsPulled = await this.pullProductsFromCloud();
       const shiftsUploaded = await this.pushShiftsToCloud();
+      await this.pushSummaryToCloud();
 
       return {
         sales: salesResult.syncedCount,
@@ -410,9 +479,10 @@ class CloudSyncService {
     if (typeof window === 'undefined') return;
     setTimeout(() => {
       this.syncPendingSales().catch(() => {});
+      this.pushSummaryToCloud().catch(() => {});
       this.pushProductsToCloud().catch(() => {});
       this.pushShiftsToCloud().catch(() => {});
-    }, 150);
+    }, 100);
   }
 
   /**

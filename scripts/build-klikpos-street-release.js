@@ -51,6 +51,16 @@ try {
   execSync('powershell -Command "Get-Process -Name java, javaw, gradle -ErrorAction SilentlyContinue | Stop-Process -Force"', { stdio: 'ignore' });
 } catch (e) {}
 
+const appBuildDir = path.join(androidDir, 'app', 'build');
+if (fs.existsSync(appBuildDir)) {
+  try {
+    fs.rmSync(appBuildDir, { recursive: true, force: true });
+    console.log('✓ Limpiado directorio app/build para compilación limpia.');
+  } catch (e) {
+    console.warn('Aviso al limpiar app/build:', e.message);
+  }
+}
+
 const bakGradle = fs.readFileSync(appGradle, 'utf8');
 const bakStrings = fs.readFileSync(stringsXml, 'utf8');
 const bakManifest = fs.readFileSync(manifestXml, 'utf8');
@@ -111,7 +121,7 @@ try {
   fs.writeFileSync(appGradle, bakGradle, 'utf8');
   fs.writeFileSync(stringsXml, bakStrings, 'utf8');
   fs.writeFileSync(manifestXml, bakManifest, 'utf8');
-  if (bakIndex) fs.writeFileSync(publicIndex, bakIndex, 'utf8');
+  // bakIndex revert removed to keep fresh Street index.html
 }
 
 // 3. Compilar Instalador Inno Setup para Windows (KlikPOS Street v1.0)

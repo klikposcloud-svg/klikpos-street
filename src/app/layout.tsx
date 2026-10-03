@@ -27,7 +27,8 @@ export default function RootLayout({
             __html: `
               (function() {
                 try {
-                  var t = localStorage.getItem('venematic_theme');
+                  var isTabletPos = typeof window !== 'undefined' && (window.location.pathname.indexOf('/tablet-pos') !== -1 || window.location.hash.indexOf('tablet-pos') !== -1);
+                  var t = isTabletPos ? 'dark' : localStorage.getItem('venematic_theme');
                   // Preestablecido: SIEMPRE entrar en Modo Blanco Profesional por defecto
                   if (!t || t !== 'dark' && t !== 'glass') {
                     t = 'light';
@@ -63,6 +64,10 @@ export default function RootLayout({
                     gray: { bg: '#f1f5f9', card: '#ffffff', text: '#0f172a', muted: '#475569', border: '#cbd5e1', secBg: '#e2e8f0', secBorder: '#cbd5e1', secText: '#0f172a' }
                   };
                   var ind = bgThemes[bgPreset] || bgThemes.white;
+                  if (isTabletPos) {
+                    isDark = true;
+                    ind = { bg: '#070a12', card: '#0c1220', text: '#ffffff', muted: '#94a3b8', border: '#1e293b', secBg: '#090d16', secBorder: '#1e293b', secText: '#ffffff' };
+                  }
                   if (bgPreset === 'custom' && customBg) {
                     var hex = customBg.replace('#', '');
                     if (hex.length === 3) hex = hex.split('').map(function(c) { return c + c; }).join('');

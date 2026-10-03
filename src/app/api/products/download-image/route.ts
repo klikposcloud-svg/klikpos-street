@@ -44,24 +44,56 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Prevención de SSRF (Server-Side Request Forgery)
+    // Prevención avanzada de SSRF (Server-Side Request Forgery) con resolución DNS
     const hostname = parsedUrl.hostname.toLowerCase();
-    const isLocalOrPrivate = 
+    
+    // 1. Verificación sintáctica básica de nombres
+    const isObviousPrivate = 
       hostname === 'localhost' ||
       hostname === '127.0.0.1' ||
       hostname === '0.0.0.0' ||
       hostname === '::1' ||
-      hostname === '169.254.169.254' || // AWS/GCP/Azure instance metadata
+      hostname === '169.254.169.254' ||
       hostname.endsWith('.internal') ||
       hostname.endsWith('.local') ||
+      hostname.endsWith('.lan') ||
       /^10\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(hostname) ||
       /^172\.(1[6-9]|2\d|3[0-1])\.\d{1,3}\.\d{1,3}$/.test(hostname) ||
       /^192\.168\.\d{1,3}\.\d{1,3}$/.test(hostname);
 
-    if (isLocalOrPrivate) {
+    if (isObviousPrivate) {
       return NextResponse.json(
         { error: 'Acceso a redes internas o direcciones locales bloqueado por seguridad.' },
         { status: 403, headers: CORS_HEADERS }
+      );
+    }
+
+    // 2. Verificación profunda DNS Rebinding (Inspeccionar IP resuelta real)
+    try {
+      const lookupResult = await dns.promises.lookup(hostname, { all: true });
+      const hasPrivateIP = lookupResult.some(({ address }) => {
+        return (
+          address === '127.0.0.1' ||
+          address === '::1' ||
+          address.startsWith('10.') ||
+          address.startsWith('192.168.') ||
+          address.startsWith('169.254.') ||
+          address.startsWith('fc00:') ||
+          address.startsWith('fe80:') ||
+          /^172\.(1[6-9]|2\d|3[0-1])\./.test(address)
+        );
+      });
+
+      if (hasPrivateIP) {
+        return NextResponse.json(
+          { error: 'La dirección IP de destino resuelve a una red privada no autorizada (Protección SSRF).' },
+          { status: 403, headers: CORS_HEADERS }
+        );
+      }
+    } catch {
+      return NextResponse.json(
+        { error: 'No se pudo resolver el nombre de host de la imagen.' },
+        { status: 400, headers: CORS_HEADERS }
       );
     }
 

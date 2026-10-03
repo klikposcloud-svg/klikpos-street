@@ -30,9 +30,9 @@
     "semantic_hash": ""
   },
   "package.json": {
-    "mtime": 1790680431.6257815,
-    "seen": 1790680875.4787166,
-    "ast_hash": "f9d2b6629521a5d87743a7138f3a4160",
+    "mtime": 1790768824.3517222,
+    "seen": 1790770155.5191917,
+    "ast_hash": "19b34e94d7bcccb2c80efa131f83c51a",
     "semantic_hash": ""
   },
   "postcss.config.js": {
@@ -48,14 +48,14 @@
     "semantic_hash": ""
   },
   "public/sw.js": {
-    "mtime": 1790705348.9161277,
-    "seen": 1790705981.2932425,
-    "ast_hash": "f1806507f4b3cfc06f3142ba139ffec3",
+    "mtime": 1790768992.4871564,
+    "seen": 1790770155.5192118,
+    "ast_hash": "291c30d15f901bda112b8f84da4af8cd",
     "semantic_hash": ""
   },
   "public/workbox-00a24876.js": {
-    "mtime": 1790705348.9161277,
-    "seen": 1790705981.2932482,
+    "mtime": 1790768992.4886737,
+    "seen": 1790770155.5192266,
     "ast_hash": "2f569fb030b2a09996588b309a8d636e",
     "semantic_hash": "2f569fb030b2a09996588b309a8d636e"
   },
@@ -96,15 +96,15 @@
     "semantic_hash": "1c93deb1ed6268f14d9c32c15800ff13"
   },
   "src/app/api/bcv-rate/route.ts": {
-    "mtime": 1790470812.3153038,
-    "seen": 1790482593.2471244,
-    "ast_hash": "d2f924c6272251d95a5232d510fd50a5",
+    "mtime": 1790731609.4265728,
+    "seen": 1790770155.5196364,
+    "ast_hash": "d65bbe8cfa2e64341254ed977f380f26",
     "semantic_hash": ""
   },
   "src/app/api/bcv/rate/route.ts": {
-    "mtime": 1790627392.720088,
-    "seen": 1790628458.7660062,
-    "ast_hash": "bf4db813d54246cc13e056a60d5c85af",
+    "mtime": 1790731574.895929,
+    "seen": 1790770155.5196419,
+    "ast_hash": "bbb66a21062dc9c8c923fbb445892662",
     "semantic_hash": ""
   },
   "src/app/api/delivery/orders/[id]/route.ts": {
@@ -138,16 +138,16 @@
     "semantic_hash": ""
   },
   "src/app/api/products/download-image/route.ts": {
-    "mtime": 1790617781.6507146,
-    "seen": 1790624246.578173,
-    "ast_hash": "688085a9cab1c3c169bab7ed6ef7ff56",
+    "mtime": 1790731522.5845914,
+    "seen": 1790770155.5197697,
+    "ast_hash": "15e44552c74bab54774dca0f51bdfeb7",
     "semantic_hash": ""
   },
   "src/app/api/products/search-images/route.ts": {
-    "mtime": 1790109274.5269017,
-    "seen": 1790363920.7983973,
-    "ast_hash": "550ad83958e6d93096a2a0504b8e4b2c",
-    "semantic_hash": "550ad83958e6d93096a2a0504b8e4b2c"
+    "mtime": 1790731489.2686732,
+    "seen": 1790770155.5197864,
+    "ast_hash": "086afa7e2fa448bf53004c0904125f40",
+    "semantic_hash": ""
   },
   "src/app/api/scanner/create-product/route.ts": {
     "mtime": 1790099398.4071603,
@@ -156,15 +156,15 @@
     "semantic_hash": "12e07dcb7d8c6eaead51adf66b6a2666"
   },
   "src/app/api/scanner/events/route.ts": {
-    "mtime": 1790100523.2862124,
-    "seen": 1790363920.7984,
-    "ast_hash": "9da1b3b5d30dddd71f25de7394205d09",
-    "semantic_hash": "9da1b3b5d30dddd71f25de7394205d09"
+    "mtime": 1790731678.0683663,
+    "seen": 1790770155.5198476,
+    "ast_hash": "27eeea0ff7fac1b346c6055a94b40be9",
+    "semantic_hash": ""
   },
   "src/app/api/scanner/inventory/route.ts": {
-    "mtime": 1790704591.5184994,
-    "seen": 1790705981.2934248,
-    "ast_hash": "0a7eeec939c6a651fe03da711c0f0738",
+    "mtime": 1790731639.3341665,
+    "seen": 1790770155.5198534,
+    "ast_hash": "ba239f897a033eaeced41d8345e9f28e",
     "semantic_hash": ""
   },
   "src/app/api/scanner/sale/route.ts": {
@@ -180,9 +180,9 @@
     "semantic_hash": "48eff566f54666ca77ddc7bab717597c"
   },
   "src/app/api/scanner/status/route.ts": {
-    "mtime": 1790440919.2538917,
-    "seen": 1790460441.6090293,
-    "ast_hash": "a8805fc8be66938059c72d23f52c0573",
+    "mtime": 1790731665.1539104,
+    "seen": 1790770155.5198712,
+    "ast_hash": "8bbbd3c64aa68a2f044b060949292d7e",
     "semantic_hash": ""
   },
   "src/app/api/scanner/trigger/route.ts": {
@@ -282,15 +282,15 @@
     "semantic_hash": ""
   },
   "src/app/dashboard/layout.tsx": {
-    "mtime": 1790625289.3100533,
-    "seen": 1790626117.8859851,
-    "ast_hash": "7ee65128415be48055425d98a25e8bea",
+    "mtime": 1790768802.8882616,
+    "seen": 1790770155.5200226,
+    "ast_hash": "7493594270d2d77fc1d5ae6d39cbf227",
     "semantic_hash": ""
   },
   "src/app/dashboard/pos/page.tsx": {
-    "mtime": 1790680137.3359182,
-    "seen": 1790680875.4789627,
-    "ast_hash": "aacd47b9452b728e19ad690b0f8bb6f2",
+    "mtime": 1790730532.9234369,
+    "seen": 1790770155.5200408,
+    "ast_hash": "f13893e592895a111ec5bbfce94a92d2",
     "semantic_hash": ""
   },
   "src/app/dashboard/reports/page.tsx": {
@@ -306,9 +306,9 @@
     "semantic_hash": ""
   },
   "src/app/dashboard/settings/page.tsx": {
-    "mtime": 1790641208.043452,
-    "seen": 1790642407.4512382,
-    "ast_hash": "01cfb1a95e2285bfa908db1d82978469",
+    "mtime": 1790718723.0187292,
+    "seen": 1790770155.5200574,
+    "ast_hash": "b760e3d5474028effb4c61700bfd0839",
     "semantic_hash": ""
   },
   "src/app/delivery-app/page.tsx": {
@@ -348,9 +348,9 @@
     "semantic_hash": "dff31a89a0d04b3fe8a9f83520bac746"
   },
   "src/app/scanner/page.tsx": {
-    "mtime": 1790705315.0232635,
-    "seen": 1790705981.2935069,
-    "ast_hash": "3f248732d502bc11739374f6d5433212",
+    "mtime": 1790731860.3628254,
+    "seen": 1790770155.5201147,
+    "ast_hash": "b1872dfb4ef7ffba44e93c6f719089e7",
     "semantic_hash": ""
   },
   "src/app/sw.ts": {
@@ -366,15 +366,15 @@
     "semantic_hash": ""
   },
   "src/components/AdminPinModal.tsx": {
-    "mtime": 1789949541.121312,
-    "seen": 1790363920.798447,
-    "ast_hash": "67b205cd4098ee8934ad43c2fe339e0e",
-    "semantic_hash": "67b205cd4098ee8934ad43c2fe339e0e"
+    "mtime": 1790727777.8564687,
+    "seen": 1790770155.5201392,
+    "ast_hash": "4cd923075c98e8ee4d0fdeca6f9cca44",
+    "semantic_hash": ""
   },
   "src/components/BrandingSettings.tsx": {
-    "mtime": 1790545899.9600985,
-    "seen": 1790553340.5115926,
-    "ast_hash": "f0b395af3563d77053329748591016b4",
+    "mtime": 1790768460.4299145,
+    "seen": 1790770155.5201514,
+    "ast_hash": "c71d81acb087319635762af4a12f848a",
     "semantic_hash": ""
   },
   "src/components/CloudSyncSettingsCard.tsx": {
@@ -390,16 +390,16 @@
     "semantic_hash": "8d93fddd557cb002c76c8d2c32875a72"
   },
   "src/components/LicenseActivationModal.tsx": {
-    "mtime": 1790558017.990777,
-    "seen": 1790562053.3023663,
-    "ast_hash": "bec978a1aa94e2cf5456c9fde49449eb",
+    "mtime": 1790768357.3052423,
+    "seen": 1790770155.520198,
+    "ast_hash": "1a3973268b603d7d144b6d3b5c6e8090",
     "semantic_hash": ""
   },
   "src/components/LockScreenModal.tsx": {
-    "mtime": 1789931008.2641785,
-    "seen": 1790363920.7984533,
-    "ast_hash": "aff09368722580ee17772ddb131e7767",
-    "semantic_hash": "aff09368722580ee17772ddb131e7767"
+    "mtime": 1790727777.8404262,
+    "seen": 1790770155.520203,
+    "ast_hash": "3b8817c370245925dd402fcf504fa3d7",
+    "semantic_hash": ""
   },
   "src/components/LoginModal.tsx": {
     "mtime": 1790444886.4527957,
@@ -462,9 +462,9 @@
     "semantic_hash": "a14786c7e35d1f622e48ad107c9d3900"
   },
   "src/lib/db.ts": {
-    "mtime": 1790528795.226261,
-    "seen": 1790542421.3543072,
-    "ast_hash": "dc62ebf3819d788f27aa2348e30579eb",
+    "mtime": 1790726712.3198843,
+    "seen": 1790770155.5203836,
+    "ast_hash": "cf032351fea26452cd01e583b9cc319d",
     "semantic_hash": ""
   },
   "src/lib/delivery-store.ts": {
@@ -588,15 +588,15 @@
     "semantic_hash": ""
   },
   "src/lib/licensing/license-manager.ts": {
-    "mtime": 1789789146.9791944,
-    "seen": 1790363920.798499,
-    "ast_hash": "84cd70e60745c9245f2c67778e9f0266",
-    "semantic_hash": "84cd70e60745c9245f2c67778e9f0266"
+    "mtime": 1790727852.775369,
+    "seen": 1790770155.520756,
+    "ast_hash": "8cde5f80026657bd11f9ecd6456befc1",
+    "semantic_hash": ""
   },
   "src/lib/licensing/plan-features.ts": {
-    "mtime": 1790548882.729808,
-    "seen": 1790553340.5122035,
-    "ast_hash": "2edf34f7184fb847477e601a1c532709",
+    "mtime": 1790718728.3478303,
+    "seen": 1790770155.5207782,
+    "ast_hash": "30520724234abea7d3b884e8498d68b7",
     "semantic_hash": ""
   },
   "src/lib/licensing/use-license-features.ts": {
@@ -648,9 +648,9 @@
     "semantic_hash": "1fcde3bfb5ed03ebe6c558b1d04de01b"
   },
   "src/lib/theme.ts": {
-    "mtime": 1790546238.1000054,
-    "seen": 1790553340.512248,
-    "ast_hash": "be4fa7572fe805cfbf22764607507f98",
+    "mtime": 1790768205.3283422,
+    "seen": 1790770155.5208778,
+    "ast_hash": "f126f08c9ae7e9a123a13923d1323114",
     "semantic_hash": ""
   },
   "src/lib/utils/analytics-service.ts": {
@@ -912,9 +912,9 @@
     "semantic_hash": ""
   },
   "venematic-desktop/package.json": {
-    "mtime": 1790680431.9604714,
-    "seen": 1790680875.4792364,
-    "ast_hash": "f9d2b6629521a5d87743a7138f3a4160",
+    "mtime": 1790768825.2224567,
+    "seen": 1790770155.5216682,
+    "ast_hash": "19b34e94d7bcccb2c80efa131f83c51a",
     "semantic_hash": ""
   },
   "venematic-desktop/postcss.config.js": {
@@ -990,15 +990,15 @@
     "semantic_hash": "3e31e7c90172f1cd7398b5fb1b731e17"
   },
   "venematic-desktop/src/app/api/bcv-rate/route.ts": {
-    "mtime": 1790206963.2513673,
-    "seen": 1790363920.798598,
-    "ast_hash": "c36bc2fd495112f1ca9d0f8da393f874",
-    "semantic_hash": "c36bc2fd495112f1ca9d0f8da393f874"
+    "mtime": 1790731626.2788272,
+    "seen": 1790770155.5221822,
+    "ast_hash": "d65bbe8cfa2e64341254ed977f380f26",
+    "semantic_hash": ""
   },
   "venematic-desktop/src/app/api/bcv/rate/route.ts": {
-    "mtime": 1790462781.4048219,
-    "seen": 1790463324.3392878,
-    "ast_hash": "cfa2b7a04d9fd30dd561dd23d1806e60",
+    "mtime": 1790731596.6930275,
+    "seen": 1790770155.522189,
+    "ast_hash": "3098c27c76a06affaf92449626d19c71",
     "semantic_hash": ""
   },
   "venematic-desktop/src/app/api/payments/webhook/route.ts": {
@@ -1008,15 +1008,15 @@
     "semantic_hash": "879b13ca72d893b95181d9acaeb72107"
   },
   "venematic-desktop/src/app/api/products/download-image/route.ts": {
-    "mtime": 1790109331.6062274,
-    "seen": 1790435266.9767323,
-    "ast_hash": "e5ab9425c27f9fadeb758d1442af60eb",
+    "mtime": 1790731562.067545,
+    "seen": 1790770155.5222201,
+    "ast_hash": "fc7df4fdcde388aa063f6ea8eaeb7912",
     "semantic_hash": ""
   },
   "venematic-desktop/src/app/api/products/search-images/route.ts": {
-    "mtime": 1790109274.5269017,
-    "seen": 1790460441.6093156,
-    "ast_hash": "550ad83958e6d93096a2a0504b8e4b2c",
+    "mtime": 1790731502.3752363,
+    "seen": 1790770155.5222242,
+    "ast_hash": "086afa7e2fa448bf53004c0904125f40",
     "semantic_hash": ""
   },
   "venematic-desktop/src/app/api/scanner/create-product/route.ts": {
@@ -1026,15 +1026,15 @@
     "semantic_hash": "12e07dcb7d8c6eaead51adf66b6a2666"
   },
   "venematic-desktop/src/app/api/scanner/events/route.ts": {
-    "mtime": 1790100523.2862124,
-    "seen": 1790460441.609319,
-    "ast_hash": "9da1b3b5d30dddd71f25de7394205d09",
+    "mtime": 1790731684.6738634,
+    "seen": 1790770155.5222342,
+    "ast_hash": "27eeea0ff7fac1b346c6055a94b40be9",
     "semantic_hash": ""
   },
   "venematic-desktop/src/app/api/scanner/inventory/route.ts": {
-    "mtime": 1790099378.6678467,
-    "seen": 1790460441.6093206,
-    "ast_hash": "822fd835fc6f30f9a256b6568a8b96b5",
+    "mtime": 1790731652.0138583,
+    "seen": 1790770155.522239,
+    "ast_hash": "d45e6acd14c010bd7e6738f387156ac9",
     "semantic_hash": ""
   },
   "venematic-desktop/src/app/api/scanner/sale/route.ts": {
@@ -1050,9 +1050,9 @@
     "semantic_hash": ""
   },
   "venematic-desktop/src/app/api/scanner/status/route.ts": {
-    "mtime": 1790440919.2538917,
-    "seen": 1790460441.6093254,
-    "ast_hash": "a8805fc8be66938059c72d23f52c0573",
+    "mtime": 1790731672.053334,
+    "seen": 1790770155.5222528,
+    "ast_hash": "8bbbd3c64aa68a2f044b060949292d7e",
     "semantic_hash": ""
   },
   "venematic-desktop/src/app/api/scanner/trigger/route.ts": {
@@ -1092,15 +1092,15 @@
     "semantic_hash": ""
   },
   "venematic-desktop/src/app/dashboard/layout.tsx": {
-    "mtime": 1790545583.8052478,
-    "seen": 1790553340.515498,
-    "ast_hash": "ac81b598873b7828246dbdb8a4780b9d",
+    "mtime": 1790768802.8882616,
+    "seen": 1790770155.5227706,
+    "ast_hash": "7493594270d2d77fc1d5ae6d39cbf227",
     "semantic_hash": ""
   },
   "venematic-desktop/src/app/dashboard/pos/page.tsx": {
-    "mtime": 1790545668.9285524,
-    "seen": 1790553340.5155013,
-    "ast_hash": "c7d0446aa067f4fd15b41b5e72f4df5f",
+    "mtime": 1790730604.574161,
+    "seen": 1790770155.5227847,
+    "ast_hash": "2ff0614ced0d7b956ed8077f3c46ac03",
     "semantic_hash": ""
   },
   "venematic-desktop/src/app/dashboard/reports/page.tsx": {
@@ -1140,9 +1140,9 @@
     "semantic_hash": ""
   },
   "venematic-desktop/src/app/scanner/page.tsx": {
-    "mtime": 1790536499.7409582,
-    "seen": 1790542421.3545725,
-    "ast_hash": "bbf7c7752e7f69bd2c778eb78fe6211d",
+    "mtime": 1790731860.3628254,
+    "seen": 1790770155.5228398,
+    "ast_hash": "b1872dfb4ef7ffba44e93c6f719089e7",
     "semantic_hash": ""
   },
   "venematic-desktop/src/components/AdminPinModal.tsx": {
@@ -1152,9 +1152,9 @@
     "semantic_hash": "67b205cd4098ee8934ad43c2fe339e0e"
   },
   "venematic-desktop/src/components/BrandingSettings.tsx": {
-    "mtime": 1790545899.9600985,
-    "seen": 1790553340.5155556,
-    "ast_hash": "f0b395af3563d77053329748591016b4",
+    "mtime": 1790768460.4299145,
+    "seen": 1790770155.5228734,
+    "ast_hash": "c71d81acb087319635762af4a12f848a",
     "semantic_hash": ""
   },
   "venematic-desktop/src/components/CloudSyncSettingsCard.tsx": {
@@ -1170,9 +1170,9 @@
     "semantic_hash": "8d93fddd557cb002c76c8d2c32875a72"
   },
   "venematic-desktop/src/components/LicenseActivationModal.tsx": {
-    "mtime": 1790558030.5138154,
-    "seen": 1790562053.3027303,
-    "ast_hash": "bec978a1aa94e2cf5456c9fde49449eb",
+    "mtime": 1790768357.3052423,
+    "seen": 1790770155.5229156,
+    "ast_hash": "1a3973268b603d7d144b6d3b5c6e8090",
     "semantic_hash": ""
   },
   "venematic-desktop/src/components/LockScreenModal.tsx": {
@@ -1356,9 +1356,9 @@
     "semantic_hash": "1fcde3bfb5ed03ebe6c558b1d04de01b"
   },
   "venematic-desktop/src/lib/theme.ts": {
-    "mtime": 1790546238.1000054,
-    "seen": 1790553340.5157304,
-    "ast_hash": "be4fa7572fe805cfbf22764607507f98",
+    "mtime": 1790768205.3283422,
+    "seen": 1790770155.523222,
+    "ast_hash": "f126f08c9ae7e9a123a13923d1323114",
     "semantic_hash": ""
   },
   "venematic-desktop/src/lib/utils/business-rubros.ts": {
@@ -1596,9 +1596,9 @@
     "semantic_hash": ""
   },
   "dist-installer/VERIFICACION_HASHES.txt": {
-    "mtime": 1790680749.59221,
-    "seen": 1790680875.4799194,
-    "ast_hash": "92feaed249f181a2bfff68756287e892",
+    "mtime": 1790770013.604122,
+    "seen": 1790770155.5255806,
+    "ast_hash": "e5589ec7424798aae597e9a7ec94cba2",
     "semantic_hash": ""
   },
   "docs/INFORME_CLIENTES_VENEMATIC_POS.md": {
@@ -2832,15 +2832,15 @@
     "semantic_hash": ""
   },
   "dist-installer/version.json": {
-    "mtime": 1790680431.6343899,
-    "seen": 1790680875.4786985,
-    "ast_hash": "d9b3847753f225ffe5a6be8f749d23b0",
+    "mtime": 1790768824.3668032,
+    "seen": 1790770155.5191483,
+    "ast_hash": "575bf9885bb82138fd7c04338509e79c",
     "semantic_hash": ""
   },
   "klikpos-releases/version.json": {
-    "mtime": 1790680431.637671,
-    "seen": 1790680875.4787102,
-    "ast_hash": "d9b3847753f225ffe5a6be8f749d23b0",
+    "mtime": 1790768824.3713548,
+    "seen": 1790770155.5191762,
+    "ast_hash": "575bf9885bb82138fd7c04338509e79c",
     "semantic_hash": ""
   },
   "src/lib/data/master-catalog.json": {
@@ -2922,9 +2922,9 @@
     "semantic_hash": ""
   },
   "public/version.json": {
-    "mtime": 1790680431.630456,
-    "seen": 1790680875.4787288,
-    "ast_hash": "d9b3847753f225ffe5a6be8f749d23b0",
+    "mtime": 1790768824.3581846,
+    "seen": 1790770155.5192187,
+    "ast_hash": "575bf9885bb82138fd7c04338509e79c",
     "semantic_hash": ""
   },
   "scripts/fix-css.js": {
@@ -2934,9 +2934,9 @@
     "semantic_hash": ""
   },
   "version.json": {
-    "mtime": 1790680431.6226635,
-    "seen": 1790680875.479577,
-    "ast_hash": "d9b3847753f225ffe5a6be8f749d23b0",
+    "mtime": 1790768824.3391752,
+    "seen": 1790770155.5235932,
+    "ast_hash": "575bf9885bb82138fd7c04338509e79c",
     "semantic_hash": ""
   },
   ".agents/rules/klikpos-strict-ui-and-zero-regressions.md": {
@@ -3090,9 +3090,9 @@
     "semantic_hash": ""
   },
   "venematic-desktop/version.json": {
-    "mtime": 1790680431.9558609,
-    "seen": 1790680875.4795747,
-    "ast_hash": "d9b3847753f225ffe5a6be8f749d23b0",
+    "mtime": 1790768825.2158756,
+    "seen": 1790770155.5235844,
+    "ast_hash": "575bf9885bb82138fd7c04338509e79c",
     "semantic_hash": ""
   },
   "DIRECTIVA_MAESTRA_INGENIERIA_Y_PROMPT_MAESTRO.md": {
@@ -4002,27 +4002,27 @@
     "semantic_hash": ""
   },
   "KlikPOS Release/01_KlikPOS_Lite_Desktop/LEEME_KLIKPOS_LITE.txt": {
-    "mtime": 1790680614.3716633,
-    "seen": 1790680875.479891,
-    "ast_hash": "c4f89197cb2557cf409350542af7b61b",
+    "mtime": 1790769691.2501879,
+    "seen": 1790770155.5255048,
+    "ast_hash": "0f859fdb733177a62bd9fc71b1b1bd3e",
     "semantic_hash": ""
   },
   "KlikPOS Release/02_KlikPOS_Pro_Desktop/LEEME_KLIKPOS_PRO.txt": {
-    "mtime": 1790680684.6136575,
-    "seen": 1790680875.479893,
-    "ast_hash": "5d1624474f8f68769eac8743fae7b856",
+    "mtime": 1790769845.225836,
+    "seen": 1790770155.5255156,
+    "ast_hash": "b09de22b39cc0e2a3bdd514681521967",
     "semantic_hash": ""
   },
   "KlikPOS Release/03_KlikPOS_Elite_Desktop/LEEME_KLIKPOS_ELITE.txt": {
-    "mtime": 1790680747.420855,
-    "seen": 1790680875.479895,
-    "ast_hash": "58856473f0aeaa9cdcbdc2efe3c89d34",
+    "mtime": 1790770011.965235,
+    "seen": 1790770155.5255227,
+    "ast_hash": "cda8d0c3ac47342d0213bbb7410b3d28",
     "semantic_hash": ""
   },
   "KlikPOS Release/VERIFICACION_HASHES.txt": {
-    "mtime": 1790680749.5886776,
-    "seen": 1790680875.4798975,
-    "ast_hash": "92feaed249f181a2bfff68756287e892",
+    "mtime": 1790770013.5950682,
+    "seen": 1790770155.52553,
+    "ast_hash": "e5589ec7424798aae597e9a7ec94cba2",
     "semantic_hash": ""
   },
   "src/app/api/telemetry/errors/route.ts": {
@@ -4113,6 +4113,54 @@
     "mtime": 1790680246.9845583,
     "seen": 1790680875.4800355,
     "ast_hash": "a1962b44239738bd6879a687281517ca",
+    "semantic_hash": ""
+  },
+  "src/app/api/sync/menu/catalog/route.ts": {
+    "mtime": 1790718667.220296,
+    "seen": 1790770155.5198874,
+    "ast_hash": "28be809b06471fa056974cdd83419cf8",
+    "semantic_hash": ""
+  },
+  "src/app/api/sync/menu/orders/route.ts": {
+    "mtime": 1790718667.2142723,
+    "seen": 1790770155.5198922,
+    "ast_hash": "052503a9da0f591d86331ef4ce75bdd9",
+    "semantic_hash": ""
+  },
+  "src/app/dashboard/mesas/page.tsx": {
+    "mtime": 1790768339.9578352,
+    "seen": 1790770155.5200343,
+    "ast_hash": "381a90635bbf146afa15ad5ceeded591",
+    "semantic_hash": ""
+  },
+  "src/components/InteractiveMenuSyncCard.tsx": {
+    "mtime": 1790768510.351653,
+    "seen": 1790770155.5201812,
+    "ast_hash": "3cf338d02848c6fda49f3f9df2699361",
+    "semantic_hash": ""
+  },
+  "src/lib/security/input-guard.ts": {
+    "mtime": 1790726645.800569,
+    "seen": 1790770155.5208254,
+    "ast_hash": "4f60d5e7b999ad799ced5368ccb9c668",
+    "semantic_hash": ""
+  },
+  "src/lib/sync/menu-pos-bridge.ts": {
+    "mtime": 1790718788.4782536,
+    "seen": 1790770155.5208652,
+    "ast_hash": "576bd2a45e29e14c3df3d5123bc88c4a",
+    "semantic_hash": ""
+  },
+  "venematic-desktop/src/app/dashboard/mesas/page.tsx": {
+    "mtime": 1790768339.9578352,
+    "seen": 1790770155.5227785,
+    "ast_hash": "381a90635bbf146afa15ad5ceeded591",
+    "semantic_hash": ""
+  },
+  "venematic-desktop/src/components/InteractiveMenuSyncCard.tsx": {
+    "mtime": 1790768510.351653,
+    "seen": 1790770155.5228965,
+    "ast_hash": "3cf338d02848c6fda49f3f9df2699361",
     "semantic_hash": ""
   }
 }

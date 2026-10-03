@@ -24,9 +24,11 @@ import {
   Calendar,
   Phone,
   MessageCircle,
+  CloudDownload,
 } from 'lucide-react';
 import LegalViewerModal from '@/components/LegalViewerModal';
 import { getWhatsAppActivationUrl } from '@/lib/licensing/trial-manager';
+import { cloudSyncService } from '@/lib/firebase/cloud-sync-service';
 
 interface LicenseModalProps {
   isOpen: boolean;
@@ -44,6 +46,7 @@ export default function LicenseActivationModal({ isOpen, onClose, onSuccess, isT
   const [statusInfo, setStatusInfo] = useState<ActivatedLicenseInfo | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const [isRestoring, setIsRestoring] = useState(false);
 
   // Estados de Cumplimiento Legal (EULA, T&C, Privacidad)
   const [termsAccepted, setTermsAccepted] = useState(false);
@@ -151,7 +154,7 @@ export default function LicenseActivationModal({ isOpen, onClose, onSuccess, isT
       localStorage.setItem('venematic_terms_version', '2026.1');
     } catch {}
 
-    // Guardar la activación
+    // Guardar la activación local
     saveActivatedLicense(
       {
         hwid,
@@ -164,9 +167,54 @@ export default function LicenseActivationModal({ isOpen, onClose, onSuccess, isT
       productKey.trim().toUpperCase()
     );
 
-    setSuccessMsg('¡Activación exitosa! Terminal autenticada permanentemente.');
+    // FUNCIÓN ESTRELLA: Registrar automáticamente en Firestore (Colección users / stores)
+    cloudSyncService.registerUserLicenseAndConfig({
+      hwid,
+      rif: rif.trim().toUpperCase(),
+      storeName: storeName.trim(),
+      productKey: productKey.trim().toUpperCase(),
+      plan: verification.plan || 'vitalicia',
+      appVersion: 'KlikPOS Desktop / Web',
+    }).then(res => {
+      if (res.success) {
+        console.log('[Licensing] Terminal y configuración respaldadas en Firestore.');
+      }
+    }).catch(() => {});
+
+    setSuccessMsg('¡Activación exitosa! Terminal autenticada permanentemente y respaldada en la nube.');
     setStatusInfo(getStoredLicenseStatus(hwid));
     if (onSuccess) onSuccess();
+  };
+
+  // FUNCIÓN ESTRELLA DE RECUPERACIÓN: Restaurar datos del negocio desde Firestore
+  const handleRestoreBusiness = async () => {
+    const searchKey = rif.trim() || productKey.trim();
+    if (!searchKey) {
+      setErrorMsg('Indique su RIF o Clave de Producto para buscar y restaurar su negocio desde la nube.');
+      return;
+    }
+
+    setIsRestoring(true);
+    setErrorMsg(null);
+    setSuccessMsg('Conectando con Firestore para recuperar su negocio...');
+
+    try {
+      const res = await cloudSyncService.restoreUserAndConfig(searchKey);
+      if (res.success) {
+        setSuccessMsg(res.message);
+        if (res.config?.storeName) setStoreName(res.config.storeName);
+        if (res.config?.rif) setRif(res.config.rif);
+        if (onSuccess) {
+          setTimeout(() => onSuccess(), 2000);
+        }
+      } else {
+        setErrorMsg(res.message);
+      }
+    } catch (err: any) {
+      setErrorMsg(err?.message || 'Error al conectar con el servidor en la nube.');
+    } finally {
+      setIsRestoring(false);
+    }
   };
 
   const handleGenerateInKeygen = () => {
@@ -179,26 +227,26 @@ export default function LicenseActivationModal({ isOpen, onClose, onSuccess, isT
   };
 
   return (
-    <div className="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center p-2 sm:p-4 select-none overflow-y-auto">
-      <div className="bg-white rounded-3xl shadow-2xl border border-slate-300 w-full max-w-xl my-auto overflow-hidden animate-in fade-in zoom-in-95 duration-200 flex flex-col max-h-[92vh]">
+    <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-2 sm:p-4 select-none overflow-y-auto">
+      <div className="bg-[#070a12] text-white rounded-3xl shadow-2xl border border-slate-800 w-full max-w-xl my-auto overflow-hidden animate-in fade-in zoom-in-95 duration-200 flex flex-col max-h-[92vh]">
         {/* Cabecera */}
-        <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 p-5 text-white flex items-center justify-between shrink-0">
+        <div className="bg-[#090d16] border-b border-slate-800 p-5 text-white flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-indigo-500/20 border border-indigo-400/30 flex items-center justify-center text-indigo-400 shadow-inner">
-              <ShieldCheck className="w-6 h-6" />
+            <div className="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400 shadow-inner">
+              <ShieldCheck className="w-6 h-6 stroke-[2.5]" />
             </div>
             <div>
-              <h3 className="font-extrabold text-base tracking-tight text-white flex items-center gap-2">
+              <h3 className="font-black text-base tracking-tight text-white flex items-center gap-2">
                 <span>Licenciamiento y Activación Offline</span>
                 <span
                   onClick={handleBadgeClick}
-                  className="text-[10px] bg-indigo-500/30 text-indigo-200 px-2 py-0.5 rounded-full border border-indigo-400/20 font-mono cursor-default select-none"
+                  className="text-[10px] bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded-full border border-amber-500/30 font-mono cursor-default select-none font-bold"
                   title="Sistema de Cifrado Offline"
                 >
                   HMAC-SHA256
                 </span>
               </h3>
-              <p className="text-xs text-slate-400 mt-0.5">
+              <p className="text-xs text-slate-300 mt-0.5 font-medium">
                 Protección antipiratería por Hardware ID vinculada al equipo
               </p>
             </div>
@@ -206,22 +254,22 @@ export default function LicenseActivationModal({ isOpen, onClose, onSuccess, isT
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-white/10 transition-colors"
+            className="p-1.5 text-slate-300 hover:text-white rounded-xl hover:bg-slate-800 transition-colors"
           >
-            <X className="w-5 h-5" />
+            <X className="w-5 h-5 stroke-[2.5]" />
           </button>
         </div>
 
         {/* Pestañas de Navegación (Ocultas para clientes - Solo visibles si el desarrollador desbloquea con PIN) */}
         {developerUnlocked && (
-          <div className="bg-slate-100 border-b border-slate-200 px-5 pt-2.5 flex items-center gap-2 shrink-0 animate-in fade-in duration-200">
+          <div className="bg-[#090d16] border-b border-slate-800 px-5 pt-2.5 flex items-center gap-2 shrink-0 animate-in fade-in duration-200">
             <button
               type="button"
               onClick={() => setShowKeygenTab(false)}
               className={`px-3 py-2 text-xs font-bold rounded-t-xl border-t border-x transition-all flex items-center gap-1.5 ${
                 !showKeygenTab
-                  ? 'bg-white border-slate-200 text-indigo-700 shadow-xs'
-                  : 'border-transparent text-slate-500 hover:text-slate-800'
+                  ? 'bg-[#070a12] border-slate-700 text-amber-400 shadow-xs'
+                  : 'border-transparent text-slate-400 hover:text-slate-200'
               }`}
             >
               <Lock className="w-3.5 h-3.5" />
@@ -233,43 +281,43 @@ export default function LicenseActivationModal({ isOpen, onClose, onSuccess, isT
               onClick={() => setShowKeygenTab(true)}
               className={`px-3 py-2 text-xs font-bold rounded-t-xl border-t border-x transition-all flex items-center gap-1.5 ${
                 showKeygenTab
-                  ? 'bg-white border-slate-200 text-indigo-700 shadow-xs'
-                  : 'border-transparent text-slate-500 hover:text-slate-800'
+                  ? 'bg-[#070a12] border-slate-700 text-amber-400 shadow-xs'
+                  : 'border-transparent text-slate-400 hover:text-slate-200'
               }`}
             >
-              <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
               <span>Generador Privado (Keygen Propietario)</span>
             </button>
           </div>
         )}
 
         {/* Cuerpo con Scroll */}
-        <div className="p-4 sm:p-6 overflow-y-auto overscroll-contain flex-1 space-y-5 scrollbar-thin scrollbar-thumb-slate-300">
+        <div className="p-4 sm:p-6 overflow-y-auto overscroll-contain flex-1 space-y-5 scrollbar-thin bg-[#070a12]">
           {!showKeygenTab ? (
             /* ================= PESTAÑA 1: ACTIVACIÓN DE TERMINAL ================= */
             <div className="space-y-4">
               {/* Tarjeta de Conversión de Alta Calidad (Para usuarios en prueba o sin licencia permanente) */}
               {(statusInfo?.status !== 'active' || isTrialNotice) && (
-                <div className="p-4 bg-gradient-to-br from-emerald-50 via-teal-50 to-indigo-50 rounded-2xl border-2 border-emerald-400/80 shadow-sm space-y-3">
+                <div className="p-4 bg-gradient-to-br from-emerald-950/40 via-slate-900 to-slate-950 rounded-2xl border border-emerald-500/40 shadow-sm space-y-3">
                   <div className="flex items-start gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-sm">
-                      <Sparkles className="w-5 h-5 text-amber-300" />
+                    <div className="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 shadow-sm">
+                      <Sparkles className="w-5 h-5 text-amber-400" />
                     </div>
                     <div>
-                      <h4 className="font-extrabold text-sm text-slate-900 leading-snug">
+                      <h4 className="font-black text-sm text-white leading-snug">
                         ¡Nos alegra que KlikPOS impulse tu negocio!
                       </h4>
-                      <p className="text-xs text-slate-700 mt-0.5 leading-relaxed font-medium">
+                      <p className="text-xs text-slate-200 mt-0.5 leading-relaxed font-medium">
                         Has disfrutado tu período de prueba gratuita en esta terminal.
                       </p>
                     </div>
                   </div>
 
                   {/* Garantía de Datos Seguros */}
-                  <div className="p-3 bg-white/95 rounded-xl border border-emerald-300 flex items-start gap-2.5">
-                    <ShieldCheck className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
-                    <div className="text-xs text-slate-800 leading-relaxed">
-                      <strong className="text-emerald-950 font-bold block mb-0.5">
+                  <div className="p-3 bg-[#090d16] rounded-xl border border-emerald-500/30 flex items-start gap-2.5">
+                    <ShieldCheck className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+                    <div className="text-xs text-slate-200 leading-relaxed">
+                      <strong className="text-emerald-300 font-black block mb-0.5">
                         🛡️ ¡TUS PRODUCTOS Y DATOS ESTÁN 100% SEGUROS!
                       </strong>
                       Todos los productos, precios y configuraciones que acabas de ingresar están guardados localmente. Nada se borrará al activar tu licencia oficial.
@@ -282,9 +330,9 @@ export default function LicenseActivationModal({ isOpen, onClose, onSuccess, isT
                       href={getWhatsAppActivationUrl(hwid, storeName, rif)}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex-1 py-3 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs uppercase tracking-wider rounded-xl shadow-md flex items-center justify-center gap-2 transition-all active:scale-95"
+                      className="flex-1 py-3 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs uppercase tracking-wider rounded-xl shadow-md flex items-center justify-center gap-2 transition-all active:scale-95"
                     >
-                      <Phone className="w-4 h-4 text-emerald-100" />
+                      <Phone className="w-4 h-4 text-white" />
                       <span>Chatear por WhatsApp (0424-8298026)</span>
                     </a>
                   </div>
@@ -294,37 +342,37 @@ export default function LicenseActivationModal({ isOpen, onClose, onSuccess, isT
               {/* Tarjeta de Estado Actual */}
               <div className={`p-4 rounded-2xl border flex items-start gap-3 ${
                 statusInfo?.status === 'active'
-                  ? 'bg-emerald-50 border-emerald-300 text-emerald-950'
-                  : 'bg-amber-50 border-amber-300 text-amber-950'
+                  ? 'bg-emerald-950/40 border-emerald-500/40 text-emerald-300'
+                  : 'bg-amber-950/40 border-amber-500/40 text-amber-300'
               }`}>
                 {statusInfo?.status === 'active' ? (
-                  <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
+                  <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
                 ) : (
-                  <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                  <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
                 )}
                 <div>
-                  <h4 className="font-extrabold text-xs uppercase tracking-wider">
+                  <h4 className="font-black text-xs uppercase tracking-wider text-white">
                     {statusInfo?.status === 'active' ? 'Licencia Comercial Verificada' : 'Estado de Licencia'}
                   </h4>
-                  <p className="text-xs font-medium mt-0.5 leading-relaxed">{statusInfo?.message}</p>
+                  <p className="text-xs font-medium text-slate-200 mt-0.5 leading-relaxed">{statusInfo?.message}</p>
                 </div>
               </div>
 
               {/* ID de Máquina (Hardware ID) */}
-              <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
+              <div className="p-4 bg-[#090d16] rounded-2xl border border-slate-800 space-y-2">
                 <div className="flex items-center justify-between">
-                  <label className="text-xs font-extrabold text-slate-700 flex items-center gap-1.5">
-                    <Cpu className="w-4 h-4 text-indigo-600" />
+                  <label className="text-xs font-black text-slate-200 flex items-center gap-1.5">
+                    <Cpu className="w-4 h-4 text-sky-400" />
                     <span>Identificador de Hardware de este Computador (HWID):</span>
                   </label>
-                  <span className="text-[10px] text-slate-400 font-bold uppercase">Inmutable</span>
+                  <span className="text-[10px] text-amber-400 font-bold uppercase">Inmutable</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <input
                     type="text"
                     readOnly
                     value={hwid}
-                    className="flex-1 px-3 py-2.5 bg-white border border-slate-300 rounded-xl font-mono font-black text-sm tracking-wider text-slate-900 outline-none select-all"
+                    className="flex-1 px-3 py-2.5 bg-[#0c1220] border border-slate-700 rounded-xl font-mono font-black text-sm tracking-wider text-sky-400 outline-none select-all"
                   />
                   <button
                     type="button"
@@ -332,14 +380,14 @@ export default function LicenseActivationModal({ isOpen, onClose, onSuccess, isT
                     className={`px-3.5 py-2.5 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all shadow-xs shrink-0 ${
                       copiedHwid
                         ? 'bg-emerald-600 text-white'
-                        : 'bg-slate-800 hover:bg-slate-900 text-white'
+                        : 'bg-slate-800 hover:bg-slate-700 text-white'
                     }`}
                   >
-                    {copiedHwid ? <CheckCircle2 className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                    {copiedHwid ? <CheckCircle2 className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
                     <span>{copiedHwid ? 'Copiado' : 'Copiar ID'}</span>
                   </button>
                 </div>
-                <p className="text-[11px] text-slate-500 leading-relaxed">
+                <p className="text-[11px] text-slate-300 leading-relaxed font-medium">
                   Envía este código al distribuidor autorizado para recibir tu clave de desbloqueo firmada.
                 </p>
               </div>
@@ -348,7 +396,7 @@ export default function LicenseActivationModal({ isOpen, onClose, onSuccess, isT
               <form onSubmit={handleActivate} className="space-y-3">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">
+                    <label className="block text-xs font-black text-slate-900 mb-1">
                       RIF o Cédula Registrada *:
                     </label>
                     <div className="relative">
@@ -365,7 +413,7 @@ export default function LicenseActivationModal({ isOpen, onClose, onSuccess, isT
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">
+                    <label className="block text-xs font-black text-slate-900 mb-1">
                       Clave de Producto (Product Key) *:
                     </label>
                     <div className="relative">
@@ -443,20 +491,31 @@ export default function LicenseActivationModal({ isOpen, onClose, onSuccess, isT
                     </span>
                   </label>
                   {!termsAccepted && (
-                    <p className="text-[10px] text-amber-700 font-medium pl-6">
+                    <p className="text-xs text-amber-800 font-bold pl-6">
                       * Es indispensable aceptar las condiciones de uso y propiedad intelectual para registrar la licencia.
                     </p>
                   )}
                 </div>
 
-                <div className="pt-2 flex justify-end gap-2">
+                <div className="pt-2 flex flex-col sm:flex-row justify-between items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={handleRestoreBusiness}
+                    disabled={isRestoring}
+                    className="w-full sm:w-auto px-4 py-2.5 rounded-xl border border-sky-500/30 bg-[#0c1220] hover:bg-slate-800 text-sky-400 text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95 disabled:opacity-50"
+                    title="Si cambiaste de equipo o reinstalaste la app, recupera tu configuración y productos desde la nube"
+                  >
+                    <CloudDownload className={`w-4 h-4 text-sky-400 ${isRestoring ? 'animate-bounce' : ''}`} />
+                    <span>{isRestoring ? 'Restaurando...' : 'Recuperar Negocio desde Nube'}</span>
+                  </button>
+
                   <button
                     type="submit"
                     disabled={!termsAccepted}
                     className={`w-full sm:w-auto px-6 py-2.5 font-extrabold text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-2 ${
                       termsAccepted
-                        ? 'bg-indigo-700 hover:bg-indigo-800 text-white cursor-pointer active:scale-95'
-                        : 'bg-slate-300 text-slate-500 cursor-not-allowed'
+                        ? 'bg-emerald-600 hover:bg-emerald-500 text-white cursor-pointer active:scale-95'
+                        : 'bg-slate-800 text-slate-500 cursor-not-allowed'
                     }`}
                     title={!termsAccepted ? 'Debe aceptar el marco legal para activar' : 'Activar licencia'}
                   >

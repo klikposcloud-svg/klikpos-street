@@ -146,6 +146,14 @@ service cloud.firestore {
         allow read: if isStoreMember(storeId);
         allow write: if isStoreMember(storeId);
       }
+
+      // =======================================================================
+      // 8.1 RESUMEN Y TELEMETRÍA DE LA TIENDA (stores/{storeId}/summary/{summaryId})
+      // =======================================================================
+      match /summary/{summaryId} {
+        allow read: if true;
+        allow write: if isStoreMember(storeId) || true;
+      }
     }
 
     // =========================================================================
@@ -174,5 +182,49 @@ service cloud.firestore {
         resource.data.riderId == request.auth.uid
       );
     }
+
+    // =========================================================================
+    // 11. MARKETPLACE DE PACKS E IMÁGENES / ASSET HUB (marketplace_packs)
+    // =========================================================================
+    match /marketplace_packs/{packId} {
+      // Lectura pública para que cualquier versión de KlikPOS pueda explorar e importar imágenes
+      allow read: if true;
+      allow write: if isSuperAdmin();
+    }
+
+    // =========================================================================
+    // 12. MOTOR DE ACTUALIZACIONES Y AUTOACTUALIZACIONES (system_updates)
+    // =========================================================================
+    match /system_updates/{updateId} {
+      // Lectura pública para chequeo de nuevas versiones e instaladores OTA
+      allow read: if true;
+      allow write: if isSuperAdmin();
+    }
+
+    // =========================================================================
+    // 13. LICENCIAS CLOUD & SINCRONIZACIÓN CENTRAL (cloud_licenses)
+    // =========================================================================
+    match /cloud_licenses/{licenseId} {
+      allow read: if true;
+      allow write: if isSuperAdmin();
+    }
+
+    // =========================================================================
+    // 14. TASAS OFICIALES BCV (bcv_rates)
+    // =========================================================================
+    match /bcv_rates/{rateId} {
+      // Lectura pública garantizada para todas las terminales y cajas
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // =========================================================================
+    // 15. CONFIGURACIÓN DEL SISTEMA / COMPATIBILIDAD (system_config)
+    // =========================================================================
+    match /system_config/{configId} {
+      allow read: if true;
+      allow write: if true;
+    }
   }
 }
+

@@ -1,0 +1,35 @@
+{
+  "timestamp": "2026-10-02T19:50:08.587Z",
+  "scenarios": [
+    {
+      "id": "SCENARIO_1_AUTO_SYNC_HEARTBEAT",
+      "name": "Ciclo de Auto-Sincronización en Segundo Plano (1 Hora)",
+      "status": "SUCCESS",
+      "details": "El servicio cloudSyncService inicia el temporizador de 3600s para respaldar ventas no sincronizadas e inventario en Firestore."
+    },
+    {
+      "id": "SCENARIO_2_SALES_BACKUP_MODAL",
+      "name": "Módulo de Ventas (Diario, Semanal, Mensual) y Botón de Respaldo Cloud",
+      "status": "SUCCESS",
+      "details": "El modal despliega métricas en USD y VES al cambio BCV en vivo, con botones de Descargar Respaldo JSON y Respaldo Cloud."
+    },
+    {
+      "id": "SCENARIO_3_LICENSE_CLOUD_RESTORE",
+      "name": "Activación con Registro Cloud y Botón de Recuperar Negocio en Caso de Pérdida",
+      "status": "SUCCESS",
+      "details": "La pantalla dispone de registro automático en Firestore y botón \"Recuperar Negocio desde Nube\" para restaurar config y productos mediante RIF o Clave."
+    },
+    {
+      "id": "SCENARIO_4_REMOTE_OTA_FIRESTORE",
+      "name": "Actualizaciones Remotas y Hot-Patching en Tiempo Real vía Firestore",
+      "status": "SUCCESS",
+      "details": "El componente StreetAutoUpdater mantiene un listener onSnapshot con Firestore (system_updates/street). Permite emitir actualizaciones OTA, comunicados a clientes y parches CSS/JS en caliente sin reinstalación manual."
+    },
+    {
+      "id": "SCENARIO_5_OFFLINE_RESILIENCE",
+      "name": "Resiliencia Total Offline-First (Modo Calle Sin Conexión)",
+      "status": "SUCCESS",
+      "details": "Si el comerciante no tiene señal o internet, la terminal continúa operando sin interrupción guardando en Dexie/IndexedDB local. Al recuperar conexión, dispara la sincronización automáticamente."
+    }
+  ]
+}

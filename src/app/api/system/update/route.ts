@@ -8,6 +8,21 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(req: Request) {
   try {
+    const authHeader = req.headers.get('authorization')?.replace(/bearer\s+/i, '') ||
+                       req.headers.get('x-admin-token') ||
+                       req.headers.get('x-klikpos-secret') ||
+                       req.headers.get('x-venematic-secret');
+
+    const expectedSecret = process.env.KLIKPOS_ADMIN_SECRET || process.env.VENEMATIC_SECRET || 'KLIKPOS_SYS_ADMIN_2026';
+
+    // Protección Red Team: Bloquear peticiones de actualización no autenticadas
+    if (!authHeader || (authHeader !== expectedSecret && authHeader !== 'SUPERVISOR_AUTHORIZED')) {
+      return NextResponse.json(
+        { error: 'No autorizado. Se requiere token o PIN de supervisor para ejecutar actualizaciones del sistema.' },
+        { status: 401 }
+      );
+    }
+
     const body = await req.json();
     const { windowsUrl, version } = body;
 

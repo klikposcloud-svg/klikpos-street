@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manual Maestro de Usuario y Operaciones | KlikPOS Street & Standalone v1.0</title>
+  <meta name="description" content="Manual de usuario, operaciones, contingencia offline y gestión remota de KlikPOS Street y Tablet Standalone.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;800&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-canvas: #070a12;
+      --bg-card: #0c1220;
+      --bg-header: #090d16;
+      --border-color: #1e293b;
+      --border-focus: #f59e0b;
+      --primary: #f59e0b;
+      --primary-hover: #d97706;
+      --primary-glow: rgba(245, 158, 11, 0.2);
+      --accent-blue: #38bdf8;
+      --accent-green: #10b981;
+      --accent-purple: #a855f7;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-subtle: #64748b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background-color: var(--bg-canvas);
+      color: var(--text-main);
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* BARRA LATERAL DE NAVEGACIÓN */
+    aside.sidebar {
+      width: 320px;
+      background: var(--bg-header);
+      border-right: 1px solid var(--border-color);
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      overflow-y: auto;
+      padding: 2rem 1.25rem;
+      z-index: 50;
+      scrollbar-width: thin;
+      scrollbar-color: #334155 transparent;
+    }
+
+    aside.sidebar::-webkit-scrollbar {
+      width: 6px;
+    }
+    aside.sidebar::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 9999px;
+    }
+
+    .brand-box {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 1.5rem;
+    }
+
+    .brand-icon {
+      width: 42px;
+      height: 42px;
+      background: linear-gradient(135deg, #f59e0b, #b45309);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 1.25rem;
+      color: #070a12;
+      box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+    }
+
+    .brand-text h1 {
+      font-size: 1.15rem;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      color: #ffffff;
+    }
+
+    .brand-text span {
+      font-size: 0.7rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--primary);
+    }
+
+    .nav-group-title {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      color: var(--text-subtle);
+      margin: 1.25rem 0 0.5rem 0.5rem;
+    }
+
+    .nav-list {
+      list-style: none;
+    }
+
+    .nav-list a {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      padding: 0.6rem 0.75rem;
+      border-radius: 10px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+
+    .nav-list a:hover {
+      background: #1e293b;
+      color: #ffffff;
+      transform: translateX(4px);
+    }
+
+    .nav-list a.active {
+      background: var(--primary-glow);
+      color: var(--primary);
+      border-left: 3px solid var(--primary);
+    }
+
+    /* CONTENEDOR PRINCIPAL */
+    main.content {
+      margin-left: 320px;
+      flex: 1;
+      padding: 3rem 4rem 6rem;
+      max-width: 1100px;
+    }
+
+    /* ENCABEZADOS Y TIPOGRAFÍA */
+    .hero-banner {
+      background: linear-gradient(180deg, rgba(245, 158, 11, 0.08) 0%, rgba(7, 10, 18, 0) 100%);
+      border: 1px solid rgba(245, 158, 11, 0.2);
+      border-radius: 24px;
+      padding: 2.5rem;
+      margin-bottom: 3.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .badge-hero {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      color: var(--primary);
+      font-size: 0.75rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      padding: 0.35rem 0.85rem;
+      border-radius: 9999px;
+      margin-bottom: 1rem;
+    }
+
+    .hero-title {
+      font-size: 2.5rem;
+      font-weight: 900;
+      line-height: 1.15;
+      letter-spacing: -0.03em;
+      margin-bottom: 0.75rem;
+      color: #ffffff;
+    }
+
+    .hero-subtitle {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      max-width: 750px;
+    }
+
+    section {
+      margin-bottom: 4rem;
+      scroll-margin-top: 2rem;
+    }
+
+    h2.section-heading {
+      font-size: 1.75rem;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 1.5rem;
+    }
+
+    h3.sub-heading {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: #f1f5f9;
+      margin: 1.75rem 0 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    p {
+      margin-bottom: 1rem;
+      color: #cbd5e1;
+      font-size: 0.95rem;
+    }
+
+    /* TARJETAS Y CONTENEDORES */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 1.75rem;
+      margin: 1.25rem 0;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.25rem;
+      margin: 1.5rem 0;
+    }
+
+    .feature-item {
+      background: #090d16;
+      border: 1px solid #1e293b;
+      border-radius: 16px;
+      padding: 1.25rem;
+      transition: border-color 0.2s;
+    }
+
+    .feature-item:hover {
+      border-color: rgba(245, 158, 11, 0.4);
+    }
+
+    .feature-icon {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+      display: inline-block;
+    }
+
+    .feature-title {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: #ffffff;
+      margin-bottom: 0.35rem;
+    }
+
+    .feature-desc {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* ALERTAS ESTILIZADAS */
+    .alert {
+      border-radius: 16px;
+      padding: 1.25rem 1.5rem;
+      margin: 1.5rem 0;
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+      font-size: 0.9rem;
+    }
+
+    .alert-star {
+      background: rgba(245, 158, 11, 0.1);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      color: #fde68a;
+    }
+
+    .alert-info {
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      color: #bae6fd;
+    }
+
+    .alert-success {
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #a7f3d0;
+    }
+
+    .alert-icon {
+      font-size: 1.4rem;
+      line-height: 1;
+      shrink: 0;
+    }
+
+    /* PASOS NUMERADOS */
+    .step-list {
+      list-style: none;
+      counter-reset: step-counter;
+      margin: 1.5rem 0;
+    }
+
+    .step-item {
+      position: relative;
+      padding-left: 3.5rem;
+      margin-bottom: 1.75rem;
+    }
+
+    .step-item::before {
+      counter-increment: step-counter;
+      content: counter(step-counter);
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 2.25rem;
+      height: 2.25rem;
+      background: #1e293b;
+      border: 2px solid var(--primary);
+      color: var(--primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 0.9rem;
+    }
+
+    .step-title {
+      font-weight: 800;
+      font-size: 1rem;
+      color: #ffffff;
+      margin-bottom: 0.25rem;
+    }
+
+    /* CÓDIGO Y COMANDOS */
+    code, pre {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    code {
+      background: #1e293b;
+      color: #38bdf8;
+      padding: 0.2rem 0.45rem;
+      border-radius: 6px;
+      font-size: 0.82rem;
+      font-weight: 600;
+    }
+
+    pre {
+      background: #020617;
+      border: 1px solid #1e293b;
+      border-radius: 14px;
+      padding: 1.25rem;
+      overflow-x: auto;
+      font-size: 0.85rem;
+      color: #e2e8f0;
+      margin: 1rem 0;
+    }
+
+    /* TABLAS */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      font-size: 0.88rem;
+    }
+
+    th, td {
+      padding: 0.85rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    th {
+      background: #090d16;
+      color: #ffffff;
+      font-weight: 800;
+      text-transform: uppercase;
+      font-size: 0.72rem;
+      letter-spacing: 0.05em;
+    }
+
+    td {
+      color: #cbd5e1;
+    }
+
+    tr:hover td {
+      background: rgba(30, 41, 59, 0.4);
+    }
+
+    /* BOTONES */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.7rem 1.25rem;
+      border-radius: 12px;
+      font-weight: 800;
+      font-size: 0.85rem;
+      text-decoration: none;
+      transition: all 0.2s;
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #070a12;
+      box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-hover);
+      transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+      background: #1e293b;
+      color: #ffffff;
+      border: 1px solid #334155;
+    }
+
+    .btn-secondary:hover {
+      background: #334155;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 900px) {
+      aside.sidebar {
+        display: none;
+      }
+      main.content {
+        margin-left: 0;
+        padding: 2rem 1.5rem;
+      }
+      .hero-title {
+        font-size: 1.85rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- BARRA LATERAL DE ÍNDICE -->
+  <aside class="sidebar">
+    <div class="brand-box">
+      <div class="brand-icon">K</div>
+      <div class="brand-text">
+        <h1>KlikPOS Manual</h1>
+        <span>Street & Tablet v1.0</span>
+      </div>
+    </div>
+
+    <div class="nav-group-title">Fundamentos</div>
+    <ul class="nav-list">
+      <li><a href="#intro" class="active">🌟 1. Introducción y Arquitectura</a></li>
+      <li><a href="#instalacion">📲 2. Instalación y Activación</a></li>
+      <li><a href="#anti-perdida">☁️ 3. Función Anti-Pérdida</a></li>
+    </ul>
+
+    <div class="nav-group-title">Operaciones Diarias</div>
+    <ul class="nav-list">
+      <li><a href="#pos-ventas">⚡ 4. Caja Rápida & Catálogo</a></li>
+      <li><a href="#cobro-bcv">💵 5. Cobro y Multimoneda BCV</a></li>
+      <li><a href="#pedidos-delivery">🛵 6. Pedidos, Delivery & Mesas</a></li>
+    </ul>
+
+    <div class="nav-group-title">Auditoría & Nube</div>
+    <ul class="nav-list">
+      <li><a href="#modulo-ventas">📈 7. Ventas & Respaldo (Estrella)</a></li>
+      <li><a href="#paquetes-visuales">🎨 8. Paquetes Visuales PNG</a></li>
+      <li><a href="#flota-remota">📡 9. Control Remoto & Hot-Patch</a></li>
+    </ul>
+
+    <div class="nav-group-title">Soporte</div>
+    <ul class="nav-list">
+      <li><a href="#faq">❓ 10. Preguntas Frecuentes</a></li>
+    </ul>
+  </aside>
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <main class="content">
+
+    <!-- HERO BANNER -->
+    <div class="hero-banner">
+      <div class="badge-hero">Documentación Oficial de Ingeniería</div>
+      <h1 class="hero-title">Manual de Instrucciones & Operaciones de Flota</h1>
+      <p class="hero-subtitle">
+        Guía maestra para cajeros, administradores y distribuidores comerciales de <strong>KlikPOS Street & Tablet Standalone</strong>. 
+        Aprende a operar a máxima velocidad, realizar respaldos en 1 clic y mantener toda tu flota sincronizada en la nube.
+      </p>
+      <div style="margin-top: 1.5rem; display: flex; gap: 0.75rem; flex-wrap: wrap;">
+        <a href="#pos-ventas" class="btn btn-primary">⚡ Iniciar Venta Rápida</a>
+        <a href="#modulo-ventas" class="btn btn-secondary">📈 Conocer Módulo de Respaldo</a>
+      </div>
+    </div>
+
+    <!-- SECCIÓN 1: INTRODUCCIÓN -->
+    <section id="intro">
+      <h2 class="section-heading">🌟 1. Introducción y Arquitectura del Sistema</h2>
+      <p>
+        <strong>KlikPOS Street</strong> es una solución de punto de venta desarrollada específicamente para el comercio dinámico, puestos callejeros, locales de comida rápida, bodegones y boutiques. Combina dos mundos tecnológicos fundamentales:
+      </p>
+
+      <div class="card-grid">
+        <div class="feature-item">
+          <div class="feature-icon">🛡️</div>
+          <div class="feature-title">Arquitectura Offline-First (Local)</div>
+          <div class="feature-desc">
+            Todos los datos (productos, precios, ventas y turnos) se procesan y almacenan dentro de la memoria interna del teléfono o PC (IndexedDB / Dexie). La aplicación <strong>nunca se traba ni se detiene</strong> si se cae la señal telefónica o la luz.
+          </div>
+        </div>
+
+        <div class="feature-item">
+          <div class="feature-icon">☁️</div>
+          <div class="feature-title">Sincronización Híbrida Firestore</div>
+          <div class="feature-desc">
+            Cuando el equipo detecta conexión a Wi-Fi o datos móviles, respalda automáticamente las ventas, actualiza el inventario y recibe actualizaciones en caliente desde la nube sin intervención humana.
+          </div>
+        </div>
+
+        <div class="feature-item">
+          <div class="feature-icon">🔐</div>
+          <div class="feature-title">Seguridad Criptográfica HMAC</div>
+          <div class="feature-desc">
+            Licenciamiento inmutable vinculado al Hardware ID del equipo físico. Imposible de clonar o piratear sin la firma criptográfica del distribuidor.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECCIÓN 2: INSTALACIÓN Y ACTIVACIÓN -->
+    <section id="instalacion">
+      <h2 class="section-heading">📲 2. Instalación y Activación Oficial</h2>
+      <p>
+        El proceso de despliegue toma menos de 2 minutos en cualquier teléfono inteligente, tablet Android (versión 8.0 en adelante) o computador con Windows.
+      </p>
+
+      <div class="card">
+        <ol class="step-list">
+          <li class="step-item">
+            <div class="step-title">Instalar el APK o Ejecutable</div>
+            <p>Descarga y abre <code>KlikPOS_Street_v1.0.apk</code> en tu teléfono. Acepta los permisos de almacenamiento local e instalación de aplicaciones autorizadas.</p>
+          </li>
+          <li class="step-item">
+            <div class="step-title">Copiar el Hardware ID (HWID)</div>
+            <p>Al abrir la app por primera vez, el sistema genera un código único de 16 caracteres (ej: <code>VN7C-7C10-7D10-E63F</code>). Toca el botón <strong>"Copiar ID"</strong>.</p>
+          </li>
+          <li class="step-item">
+            <div class="step-title">Solicitar Clave al Distribuidor</div>
+            <p>Presiona el botón verde <strong>"Chatear por WhatsApp"</strong> para enviar el HWID y tu RIF/Cédula al distribuidor. Recibirás tu Clave Oficial de Activación.</p>
+          </li>
+          <li class="step-item">
+            <div class="step-title">Activar y Respaldar en Firestore</div>
+            <p>Pega la clave en la casilla correspondiente, marca la casilla de Términos Legales y pulsa <strong>"Activar Terminal Oficial"</strong>. La aplicación queda autenticada permanentemente.</p>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- SECCIÓN 3: FUNCIÓN ANTI-PÉRDIDA -->
+    <section id="anti-perdida">
+      <h2 class="section-heading">☁️ 3. Función Anti-Pérdida & Restauración de Desastre</h2>
+      <div class="alert alert-star">
+        <div class="alert-icon">⭐</div>
+        <div>
+          <strong>Protección ante Robo, Pérdida o Daño de Teléfono:</strong>
+          Al activar tu licencia oficial, KlikPOS registra automáticamente tu negocio, RIF y configuración inicial en la nube de Firestore. Si cambias de teléfono o se daña la pantalla, no pierdes tu trabajo.
+        </div>
+      </div>
+
+      <h3 class="sub-heading">¿Cómo recuperar tu negocio en un nuevo teléfono?</h3>
+      <ol class="step-list">
+        <li class="step-item">
+          <div class="step-title">Instala KlikPOS en el nuevo teléfono limpio</div>
+          <p>Abre la aplicación recién instalada.</p>
+        </li>
+        <li class="step-item">
+          <div class="step-title">Abre la pantalla de Licenciamiento</div>
+          <p>En el formulario de activación, introduce tu <strong>RIF</strong> o tu <strong>Clave de Activación</strong> que tenías en el teléfono anterior.</p>
+        </li>
+        <li class="step-item">
+          <div class="step-title">Presiona el botón "Recuperar Negocio desde Nube"</div>
+          <p>El sistema consultará Firestore en vivo y descargará:</p>
+          <ul style="margin-left: 1.5rem; margin-top: 0.5rem; font-size: 0.85rem; color: #94a3b8;">
+            <li>Nombre de tu comercio, RIF, teléfono y dirección.</li>
+            <li>Cuenta y datos de Pago Móvil guardados.</li>
+            <li>Catálogo completo de productos e inventario.</li>
+          </ul>
+        </li>
+      </ol>
+    </section>
+
+    <!-- SECCIÓN 4: CAJA RÁPIDA & CATÁLOGO -->
+    <section id="pos-ventas">
+      <h2 class="section-heading">⚡ 4. Operación de Caja Rápida & Catálogo</h2>
+      <p>
+        La interfaz de ventas fue diseñada con ergonomía táctil para permitir cobrar una orden en menos de 5 segundos.
+      </p>
+
+      <div class="card-grid">
+        <div class="feature-item">
+          <div class="feature-icon">🍔</div>
+          <div class="feature-title">Modo Cuadrícula Gourmet</div>
+          <div class="feature-desc">Muestra tarjetas con fotografías de alta definición, badges de más vendido, tiempo de preparación e ingredientes. Ideal para salón o cafeterías.</div>
+        </div>
+
+        <div class="feature-item">
+          <div class="feature-icon">📋</div>
+          <div class="feature-title">Modo Lista Ultra-Rápido</div>
+          <div class="feature-desc">Optimizado para puestos de alta afluencia callejera o ventas nocturnas. Agrega productos con un solo tap sin distracciones visuales.</div>
+        </div>
+
+        <div class="feature-item">
+          <div class="feature-icon">🛒</div>
+          <div class="feature-title">Carrito Flotante Persistente</div>
+          <div class="feature-desc">Permite sumar o restar cantidades (+ / -), agregar notas especiales de preparación (ej: "Sin cebolla, extra salsa") o limpiar la comanda con 1 clic.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECCIÓN 5: COBRO Y MULTIMONEDA BCV -->
+    <section id="cobro-bcv">
+      <h2 class="section-heading">💵 5. Pasarela de Cobro & Tasa Oficial BCV</h2>
+      <p>
+        El sistema liquida simultáneamente en <strong>Dólares ($)</strong> y <strong>Bolívares (Bs.)</strong> aplicando la tasa oficial del Banco Central de Venezuela en tiempo real.
+      </p>
+
+      <div class="alert alert-info">
+        <div class="alert-icon">ℹ️</div>
+        <div>
+          <strong>Blindaje de Tasa Multi-Espejo:</strong> La tasa BCV se consulta automáticamente mediante 4 servidores redundantes. Si falla una fuente, conmuta a la siguiente sin detener la caja. También puedes pulsar la tasa en pantalla para escribir una tasa manual personalizada.
+        </div>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Método de Pago</th>
+            <th>Moneda</th>
+            <th>Comportamiento y Características</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Pago Móvil</strong></td>
+            <td>VES (Bs.)</td>
+            <td>Muestra los datos bancarios del negocio en pantalla con botón de copiado rápido y casilla para ingresar los últimos 4 o 6 dígitos de referencia.</td>
+          </tr>
+          <tr>
+            <td><strong>Efectivo Divisas ($)</strong></td>
+            <td>USD ($)</td>
+            <td>Calcula el vuelto exacto a entregar tanto en billetes de dólares como en bolívares al cambio exacto.</td>
+          </tr>
+          <tr>
+            <td><strong>Efectivo Bolívares (Bs.)</strong></td>
+            <td>VES (Bs.)</td>
+            <td>Liquidación directa en bolívares en efectivo con cálculo de cambio.</td>
+          </tr>
+          <tr>
+            <td><strong>Punto de Venta / Tarjeta</strong></td>
+            <td>VES (Bs.)</td>
+            <td>Débito o crédito nacional con registro de número de comprobante o voucher bancario.</td>
+          </tr>
+          <tr>
+            <td><strong>Zelle / Token Digital</strong></td>
+            <td>USD ($)</td>
+            <td>Registro de titular y código de confirmación digital.</td>
+          </tr>
+          <tr>
+            <td><strong>Fiado / Vale de Crédito</strong></td>
+            <td>USD / VES</td>
+            <td>Registra la deuda a nombre del cliente en su estado de cuenta para cobro posterior.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- SECCIÓN 6: PEDIDOS, DELIVERY Y MESAS -->
+    <section id="pedidos-delivery">
+      <h2 class="section-heading">🛵 6. Módulo de Pedidos, Delivery & Mesas</h2>
+      <p>
+        KlikPOS Street cuenta con gestión operativa completa para despachos locales y a domicilio:
+      </p>
+
+      <div class="card">
+        <h3 class="sub-heading">Flujo de Pedidos (3 Estados)</h3>
+        <div class="card-grid">
+          <div class="feature-item">
+            <span style="color: #f59e0b; font-weight: 800;">1. En Cola (Cocina)</span>
+            <p style="font-size: 0.82rem; margin-top: 0.35rem; color: #94a3b8;">La comanda ingresa y se notifica al personal con el detalle de ingredientes y notas.</p>
+          </div>
+          <div class="feature-item">
+            <span style="color: #38bdf8; font-weight: 800;">2. Listo para Entrega</span>
+            <p style="font-size: 0.82rem; margin-top: 0.35rem; color: #94a3b8;">El pedido está empacado esperando retiro en mostrador o asignación de motorizado.</p>
+          </div>
+          <div class="feature-item">
+            <span style="color: #10b981; font-weight: 800;">3. Despachado</span>
+            <p style="font-size: 0.82rem; margin-top: 0.35rem; color: #94a3b8;">Entrega finalizada o repartidor en ruta hacia el cliente.</p>
+          </div>
+        </div>
+
+        <h3 class="sub-heading">Asignación de Motorizados & Cobro en Destino</h3>
+        <p>
+          En la pestaña de <strong>Delivery</strong> puedes registrar tus repartidores propios con su nombre, teléfono y placa de moto. 
+          Al cobrar una orden de delivery, puedes marcar si ya fue pagada por adelantado o si el motorizado tiene que cobrar en destino (efectivo o Pago Móvil).
+        </p>
+      </div>
+    </section>
+
+    <!-- SECCIÓN 7: MÓDULO DE VENTAS Y RESPALDO (ESTRELLA) -->
+    <section id="modulo-ventas">
+      <h2 class="section-heading">📈 7. Módulo de Ventas & Respaldo (La Función Estrella)</h2>
+      
+      <div class="alert alert-star">
+        <div class="alert-icon">🌟</div>
+        <div>
+          <strong>Acceso Directo desde el Docker Flotante:</strong>
+          Toca el icono de gráfica naranja (<code>TrendingUp</code>) en la barra de herramientas inferior. Se abrirá el modal de auditoría en tiempo real.
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 class="sub-heading">Filtros de Período en 1 Toque</h3>
+        <ul>
+          <li style="margin-bottom: 0.5rem;">📅 <strong>Diario (Hoy):</strong> Muestra exclusivamente lo vendido durante el día o turno activo de caja.</li>
+          <li style="margin-bottom: 0.5rem;">📊 <strong>Semanal (7 Días):</strong> Total facturado en los últimos 7 días con desglose por forma de pago.</li>
+          <li style="margin-bottom: 0.5rem;">📈 <strong>Mensual:</strong> Resumen mensual consolidado para contabilidad y cuadre fiscal.</li>
+          <li style="margin-bottom: 0.5rem;">🗂️ <strong>Todo el Historial:</strong> Acumulado total de tickets emitidos en la máquina.</li>
+        </ul>
+
+        <h3 class="sub-heading" style="margin-top: 1.5rem;">Las Dos Formas de Respaldo</h3>
+        <div class="card-grid">
+          <div class="feature-item" style="border-left: 4px solid #10b981;">
+            <div class="feature-title">💾 Descargar Respaldo JSON</div>
+            <div class="feature-desc">Descarga inmediatamente a la memoria de tu teléfono o PC un archivo <code>.json</code> con la copia íntegra de todas tus ventas, clientes y productos. Puedes guardarlo en un pendrive o enviarlo por correo.</div>
+          </div>
+
+          <div class="feature-item" style="border-left: 4px solid #38bdf8;">
+            <div class="feature-title">☁️ Respaldo Cloud a Firestore</div>
+            <div class="feature-desc">Envía todas las ventas y productos a la nube central. Si tienes varios teléfonos o sucursales, todo se consolida en tiempo real.</div>
+          </div>
+        </div>
+
+        <h3 class="sub-heading">Auto-Sincronización Cada 1 Hora (Sin intervención)</h3>
+        <p>
+          No tienes que recordar pulsar el botón. El sistema incluye un motor interno que cada <strong>3.600 segundos (1 hora)</strong> y tras cada venta registrada dispara una sincronización silenciosa a Firestore para asegurar que nunca se pierda un solo ticket.
+        </p>
+      </div>
+    </section>
+
+    <!-- SECCIÓN 8: PAQUETES VISUALES PNG -->
+    <section id="paquetes-visuales">
+      <h2 class="section-heading">🎨 8. Cómo Crear y Cargar Paquetes de Imágenes PNG</h2>
+      <p>
+        Si tienes fotografías de productos en formato PNG sin fondo (transparentes), puedes empaquetarlas para que los clientes las instalen en su app con 1 solo toque.
+      </p>
+
+      <div class="card">
+        <h3 class="sub-heading">Método Recomendado: Panel Administrador Visual</h3>
+        <ol class="step-list">
+          <li class="step-item">
+            <div class="step-title">Abre el Administrador de Paquetes</div>
+            <p>En el navegador, ingresa a: <code>http://localhost:3000/admin/visual-packs</code></p>
+          </li>
+          <li class="step-item">
+            <div class="step-title">Crea un Nuevo Paquete</div>
+            <p>Haz clic en <strong>"+ Nuevo Paquete Visual"</strong>. Coloca el nombre (ej: <em>Catálogo Hamburguesas Gourmet HD</em>) y selecciona el rubro.</p>
+          </li>
+          <li class="step-item">
+            <div class="step-title">Añade los Productos con tus PNGs</div>
+            <p>Coloca el nombre, precio en dólares y la URL o ruta de la foto PNG (ej: <code>/packs/comida/hamburguesa.png</code>).</p>
+          </li>
+          <li class="step-item">
+            <div class="step-title">Publica en Firestore</div>
+            <p>Al pulsar <strong>"Guardar y Publicar en Firestore"</strong>, el paquete estará disponible inmediatamente para todas las terminales en la calle.</p>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- SECCIÓN 9: CONTROL REMOTO & HOT-PATCH -->
+    <section id="flota-remota">
+      <h2 class="section-heading">📡 9. Control de Flota Remota, Actualizaciones OTA & Hot-Patch</h2>
+      <div class="alert alert-success">
+        <div class="alert-icon">🛡️</div>
+        <div>
+          <strong>Cero Miedo al Despliegue en la Calle:</strong>
+          Si notas un error visual, un color desalineado o quieres enviar una mejora a 50 clientes que ya tienen la app instalada, <strong>no tienes que reinstalar el APK</strong>.
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 class="sub-heading">¿Cómo gobernar la flota desde Firebase Console?</h3>
+        <p>
+          En tu proyecto de Firebase, entra a la colección: <code>system_updates/street</code>
+        </p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Campo en Firestore</th>
+              <th>Tipo</th>
+              <th>Efecto en los teléfonos de los clientes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>hotPatchCss</code></td>
+              <td>String (CSS)</td>
+              <td><strong>Inyección de estilo en 0 segundos.</strong> Si quieres corregir un botón o color, escribes la regla CSS y en 1 segundo cambia en todas las pantallas.</td>
+            </tr>
+            <tr>
+              <td><code>version</code></td>
+              <td>String (ej: "1.0.1")</td>
+              <td>Muestra un banner flotante en la parte superior del teléfono indicando que hay una actualización lista para instalar.</td>
+            </tr>
+            <tr>
+              <td><code>announcement</code></td>
+              <td>String</td>
+              <td>Muestra un comunicado oficial o aviso en pantalla para los cajeros.</td>
+            </tr>
+            <tr>
+              <td><code>mandatory</code></td>
+              <td>Boolean</td>
+              <td>Si es <code>true</code>, obliga al terminal a actualizar antes de continuar.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- SECCIÓN 10: PREGUNTAS FRECUENTES -->
+    <section id="faq">
+      <h2 class="section-heading">❓ 10. Preguntas Frecuentes & Solución de Problemas</h2>
+      
+      <div class="card">
+        <h3 class="sub-heading">¿Qué pasa si se va la luz o el internet en el negocio?</h3>
+        <p>
+          <strong>Absolutamente nada.</strong> KlikPOS Street sigue cobrando, imprimiendo tickets e ingresando comandas de forma 100% normal. Cuando regrese la conexión, las ventas se enviarán a la nube automáticamente.
+        </p>
+
+        <h3 class="sub-heading">¿Se borran mis productos al activar la licencia oficial?</h3>
+        <p>
+          <strong>No.</strong> Todos los productos, precios, categorías y configuraciones que ingresaste durante el período de prueba se conservan íntegramente.
+        </p>
+
+        <h3 class="sub-heading">¿Cómo conecto una impresora de tickets térmica?</h3>
+        <p>
+          Abre el Docker lateral, toca el icono de <strong>Impresora</strong> y selecciona si tu impresora es <strong>Bluetooth</strong> (para teléfonos y tablets) o <strong>USB / Red</strong> (para PC). Puedes configurar papel de 58mm o 80mm.
+        </p>
+
+        <h3 class="sub-heading">¿Puedo tener varios cajeros o turnos?</h3>
+        <p>
+          Sí. En la sección de configuración puedes registrar varios nombres de cajeros y abrir/cerrar turnos con arqueo ciego o arqueo auditado.
+        </p>
+      </div>
+    </section>
+
+    <!-- PIE DE PÁGINA -->
+    <footer style="margin-top: 5rem; padding-top: 2rem; border-top: 1px solid var(--border-color); text-align: center; color: var(--text-subtle); font-size: 0.8rem;">
+      <p>KlikPOS Commercial Suite • Manual Técnico y de Operaciones v1.0 • Todos los derechos reservados.</p>
+      <p style="margin-top: 0.25rem;">Desarrollado bajo arquitectura Offline-First con sincronización en tiempo real para Google Cloud / Firebase Firestore.</p>
+    </footer>
+
+  </main>
+
+  <script>
+    // Resaltar elemento activo en el menú lateral según el scroll
+    const sections = document.querySelectorAll('section');
+    const navLinks = document.querySelectorAll('.nav-list a');
+
+    window.addEventListener('scroll', () => {
+      let current = '';
+      sections.forEach(section => {
+        const sectionTop = section.offsetTop;
+        if (pageYOffset >= sectionTop - 120) {
+          current = section.getAttribute('id');
+        }
+      });
+
+      navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === `#${current}`) {
+          link.classList.add('active');
+        }
+      });
+    });
+  </script>
+</body>
+</html>
