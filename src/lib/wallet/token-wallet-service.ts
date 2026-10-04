@@ -208,16 +208,23 @@ class TokenWalletService {
       this.wallets.push(wallet);
     }
 
-    // Calcular monto en Tokens USD
-    let creditedUSD = req.amountUSD || 0;
-    if (!creditedUSD && req.amountVES && req.rateBCV > 0) {
-      creditedUSD = Number((req.amountVES / req.rateBCV).toFixed(2));
-    }
-    const vesEquivalent = req.amountVES || Number((creditedUSD * req.rateBCV).toFixed(2));
+    // Calcular monto en Tokens USD de manera blindada
+    const rawUSD = Number(req.amountUSD);
+    const rawVES = Number(req.amountVES);
+    const rawRate = Number(req.rateBCV);
 
-    if (creditedUSD <= 0) {
-      return { success: false, message: 'El monto a recargar debe ser mayor a 0.' };
+    let creditedUSD = (Number.isFinite(rawUSD) && rawUSD > 0) ? rawUSD : 0;
+    if (creditedUSD === 0 && Number.isFinite(rawVES) && rawVES > 0 && Number.isFinite(rawRate) && rawRate > 0) {
+      creditedUSD = Number((rawVES / rawRate).toFixed(2));
     }
+
+    if (!Number.isFinite(creditedUSD) || creditedUSD <= 0) {
+      return { success: false, message: 'El monto a recargar debe ser un número válido mayor a 0.' };
+    }
+
+    const vesEquivalent = (Number.isFinite(rawVES) && rawVES > 0) 
+      ? Number(rawVES.toFixed(2)) 
+      : Number((creditedUSD * (Number.isFinite(rawRate) && rawRate > 0 ? rawRate : 49.00)).toFixed(2));
 
     // Acreditar saldo
     wallet.balanceUSD = Number((wallet.balanceUSD + creditedUSD).toFixed(2));
@@ -448,7 +455,7 @@ class TokenWalletService {
       id: `tx_${Date.now()}_ret`,
       walletId: wallet.walletId,
       type: 'cash_out',
-      amountUSD: req.amountUSD,
+      amountUSD: sanitizedAmount,
       feeUSD,
       netAmountUSD: netUSD,
       netAmountVES: netVES,

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   X,
   TrendingUp,
@@ -26,7 +26,7 @@ import {
 } from 'lucide-react';
 import { db, LocalSale } from '@/lib/db';
 import { formatUSD, formatVES } from '@/lib/formatters';
-import { exportDatabaseBackup } from '@/lib/services/backup-service';
+import { exportDatabaseBackup, importDatabaseBackup } from '@/lib/services/backup-service';
 import { playSuccessChime, playBeep } from '@/lib/utils/sound';
 import { cloudSyncService } from '@/lib/firebase/cloud-sync-service';
 
@@ -35,6 +35,7 @@ interface StreetSalesBackupModalProps {
   onClose: () => void;
   bcvRate: number;
   primaryColor?: string;
+  isLight?: boolean;
   onPrintTicket?: (sale: LocalSale) => void;
 }
 
@@ -45,6 +46,7 @@ export default function StreetSalesBackupModal({
   onClose,
   bcvRate,
   primaryColor = '#f59e0b',
+  isLight = false,
   onPrintTicket
 }: StreetSalesBackupModalProps) {
   const [sales, setSales] = useState<LocalSale[]>([]);
@@ -165,6 +167,36 @@ export default function StreetSalesBackupModal({
     }
   };
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // FUNCIÓN DE RESTAURACIÓN: Importar respaldo JSON local a IndexedDB
+  const handleImportFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setIsBackingUp(true);
+    setBackupStatusMsg('Leyendo archivo y restaurando ventas y datos...');
+    try {
+      const text = await file.text();
+      const data = JSON.parse(text);
+      const res = await importDatabaseBackup(data);
+      if (res.success) {
+        playSuccessChime();
+        setBackupStatusMsg('✅ ¡Respaldo restaurado con éxito! Todas tus ventas y catálogo han sido recuperados.');
+        await loadSales();
+      } else {
+        playBeep();
+        setBackupStatusMsg(`⚠️ Error al restaurar: ${res.message}`);
+      }
+    } catch (err: any) {
+      playBeep();
+      setBackupStatusMsg(`⚠️ Archivo inválido: ${err?.message || 'No se pudo leer el archivo JSON'}`);
+    } finally {
+      setIsBackingUp(false);
+      if (e.target) e.target.value = '';
+      setTimeout(() => setBackupStatusMsg(null), 6000);
+    }
+  };
+
   // Respaldo en la nube / Sincronización silenciosa con Firestore
   const handleCloudSync = async () => {
     setCloudSyncStatus('syncing');
@@ -189,11 +221,26 @@ export default function StreetSalesBackupModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/90 backdrop-blur-md select-none">
-      <div className="relative w-full max-w-4xl max-h-[92vh] rounded-3xl border border-slate-800 shadow-2xl flex flex-col overflow-hidden bg-[#070a12] text-slate-100">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/80 backdrop-blur-md select-none">
+      <div 
+        data-street-modal="true"
+        className="relative w-full max-w-4xl max-h-[92vh] rounded-3xl border shadow-2xl flex flex-col overflow-hidden"
+        style={{
+          backgroundColor: isLight ? '#f8fafc' : '#070a12',
+          borderColor: isLight ? '#cbd5e1' : '#1e293b',
+          color: isLight ? '#0f172a' : '#f8fafc'
+        }}
+      >
         
         {/* ENCABEZADO CON CONTRASTE WCAG AAA (21:1) */}
-        <div className="px-6 py-4.5 border-b border-slate-800 flex items-center justify-between shrink-0 bg-[#090d16]">
+        <div 
+          className="px-6 py-4.5 border-b flex items-center justify-between shrink-0"
+          style={{
+            backgroundColor: isLight ? '#ffffff' : '#090d16',
+            borderColor: isLight ? '#e2e8f0' : '#1e293b',
+            color: isLight ? '#0f172a' : '#ffffff'
+          }}
+        >
           <div className="flex items-center gap-3">
             <div
               className="w-11 h-11 rounded-2xl flex items-center justify-center text-slate-950 font-black shadow-md"
@@ -202,24 +249,32 @@ export default function StreetSalesBackupModal({
               <TrendingUp className="w-6 h-6 stroke-[2.5]" />
             </div>
             <div>
-              <h2 className="text-base sm:text-lg font-black tracking-tight text-white">
+              <h2 className={`text-base sm:text-lg font-black tracking-tight ${isLight ? 'text-slate-900' : 'text-white'}`}>
                 Módulo de Ventas & Respaldo
               </h2>
-              <p className="text-xs text-slate-300 font-medium mt-0.5">
+              <p className={`text-xs font-medium mt-0.5 ${isLight ? 'text-slate-600' : 'text-slate-300'}`}>
                 Auditoría diaria, semanal, mensual y salvaguarda de tu historial contable.
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 font-mono text-xs">
-              <span className="text-slate-400">Tasa BCV:</span>
-              <span className="font-black text-sky-400">Bs. {bcvRate.toFixed(2)}</span>
+            <div 
+              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border font-mono text-xs"
+              style={{
+                backgroundColor: isLight ? '#f1f5f9' : '#0f172a',
+                borderColor: isLight ? '#cbd5e1' : '#1e293b'
+              }}
+            >
+              <span className={isLight ? 'text-slate-500 font-bold' : 'text-slate-400'}>Tasa BCV:</span>
+              <span className={`font-black ${isLight ? 'text-sky-700' : 'text-sky-400'}`}>Bs. {bcvRate.toFixed(2)}</span>
             </div>
 
             <button
               onClick={onClose}
-              className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white transition-all active:scale-90 cursor-pointer"
+              className={`p-2 rounded-xl transition-all active:scale-90 cursor-pointer ${
+                isLight ? 'bg-slate-100 hover:bg-slate-200 text-slate-700' : 'bg-slate-800 hover:bg-slate-700 text-white'
+              }`}
               title="Cerrar ventana"
             >
               <X className="w-5 h-5 stroke-[2.5]" />
@@ -228,19 +283,29 @@ export default function StreetSalesBackupModal({
         </div>
 
         {/* CONTENIDO PRINCIPAL */}
-        <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-5 bg-[#070a12]">
+        <div 
+          className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-5"
+          style={{
+            backgroundColor: isLight ? '#f8fafc' : '#070a12',
+            color: isLight ? '#0f172a' : '#ffffff'
+          }}
+        >
           
           {/* BARRA SUPERIOR DE SELECTOR DE PERÍODO & BOTONES DE RESPALDO */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#090d16] p-3.5 rounded-2xl border border-slate-800">
+          <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-2xl border ${
+            isLight ? 'bg-white border-slate-200 shadow-xs' : 'bg-[#090d16] border-slate-800'
+          }`}>
             {/* Filtros de Período (Diario / Semanal / Mensual / Todo) */}
-            <div className="flex items-center gap-1.5 p-1 rounded-xl bg-[#0c1220] border border-slate-800">
+            <div className={`flex items-center gap-1.5 p-1 rounded-xl border ${
+              isLight ? 'bg-slate-100 border-slate-200' : 'bg-[#0c1220] border-slate-800'
+            }`}>
               <button
                 type="button"
                 onClick={() => setPeriod('daily')}
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                   period === 'daily'
                     ? 'bg-amber-500 text-slate-950 font-black shadow-xs'
-                    : 'text-slate-300 hover:text-white'
+                    : isLight ? 'text-slate-600 hover:text-slate-900' : 'text-slate-300 hover:text-white'
                 }`}
               >
                 📅 Diario (Hoy)
@@ -251,7 +316,7 @@ export default function StreetSalesBackupModal({
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                   period === 'weekly'
                     ? 'bg-amber-500 text-slate-950 font-black shadow-xs'
-                    : 'text-slate-300 hover:text-white'
+                    : isLight ? 'text-slate-600 hover:text-slate-900' : 'text-slate-300 hover:text-white'
                 }`}
               >
                 📊 Semanal (7d)
@@ -262,7 +327,7 @@ export default function StreetSalesBackupModal({
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                   period === 'monthly'
                     ? 'bg-amber-500 text-slate-950 font-black shadow-xs'
-                    : 'text-slate-300 hover:text-white'
+                    : isLight ? 'text-slate-600 hover:text-slate-900' : 'text-slate-300 hover:text-white'
                 }`}
               >
                 📈 Mensual ({new Date().toLocaleString('es-VE', { month: 'short' }).toUpperCase()})
@@ -273,7 +338,7 @@ export default function StreetSalesBackupModal({
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                   period === 'all'
                     ? 'bg-amber-500 text-slate-950 font-black shadow-xs'
-                    : 'text-slate-300 hover:text-white'
+                    : isLight ? 'text-slate-600 hover:text-slate-900' : 'text-slate-300 hover:text-white'
                 }`}
               >
                 🗂️ Historial
@@ -281,30 +346,72 @@ export default function StreetSalesBackupModal({
             </div>
 
             {/* BOTONES ACCIÓN DE LA FUNCIÓN ESTRELLA DE RESPALDO */}
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               {/* Botón 1: Descargar Copia Local JSON */}
               <button
                 type="button"
                 onClick={handleExportBackup}
                 disabled={isBackingUp}
-                className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black flex items-center gap-1.5 transition-all shadow-md active:scale-95 cursor-pointer disabled:opacity-50"
-                title="Descargar copia de seguridad en archivo JSON"
+                className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black flex items-center gap-1.5 transition-all shadow-md active:scale-95 cursor-pointer disabled:opacity-50"
+                title="Descargar copia de seguridad en archivo JSON (se guarda en tu carpeta Descargas)"
               >
-                <Download className="w-4 h-4 stroke-[2.5]" />
-                <span>{isBackingUp ? 'Respaldando...' : 'Descargar Respaldo'}</span>
+                <Download className="w-3.5 h-3.5 stroke-[2.5]" />
+                <span>{isBackingUp ? 'Respaldando...' : 'Descargar'}</span>
               </button>
 
-              {/* Botón 2: Respaldo Cloud */}
+              {/* Input y Botón 2: Subir / Restaurar Copia JSON */}
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleImportFile}
+                accept=".json,application/json"
+                className="hidden"
+              />
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isBackingUp}
+                className={`px-3 py-1.5 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all shadow-xs active:scale-95 cursor-pointer disabled:opacity-50 ${
+                  isLight
+                    ? 'bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300'
+                    : 'bg-slate-800 hover:bg-slate-700 text-white border border-slate-700'
+                }`}
+                title="Buscar y subir archivo JSON de respaldo desde tu carpeta de Descargas para restaurar ventas"
+              >
+                <Upload className="w-3.5 h-3.5 stroke-[2.5]" />
+                <span>Subir / Restaurar</span>
+              </button>
+
+              {/* Botón 3: Respaldo Cloud */}
               <button
                 type="button"
                 onClick={handleCloudSync}
                 disabled={cloudSyncStatus === 'syncing'}
-                className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-sky-400 border border-slate-700 text-xs font-black flex items-center gap-1.5 transition-all shadow-xs active:scale-95 cursor-pointer"
+                className={`px-3 py-1.5 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all shadow-xs active:scale-95 cursor-pointer ${
+                  isLight
+                    ? 'bg-slate-100 hover:bg-slate-200 text-sky-700 border border-slate-300'
+                    : 'bg-slate-800 hover:bg-slate-700 text-sky-400 border border-slate-700'
+                }`}
                 title="Sincronizar y respaldar en la nube"
               >
-                <Cloud className={`w-4 h-4 ${cloudSyncStatus === 'syncing' ? 'animate-bounce text-amber-400' : ''}`} />
-                <span>{cloudSyncStatus === 'syncing' ? 'Sincronizando...' : 'Respaldo Cloud'}</span>
+                <Cloud className={`w-3.5 h-3.5 ${cloudSyncStatus === 'syncing' ? 'animate-bounce text-amber-400' : ''}`} />
+                <span>{cloudSyncStatus === 'syncing' ? 'Sincronizando...' : 'Cloud'}</span>
               </button>
+            </div>
+          </div>
+
+          {/* GUÍA RÁPIDA DE RESPALDOS LOCALES */}
+          <div 
+            className="p-3 rounded-2xl border text-xs flex items-center gap-2.5 shadow-2xs"
+            style={{
+              backgroundColor: isLight ? '#f1f5f9' : '#0c1220',
+              borderColor: isLight ? '#cbd5e1' : '#1e293b',
+              color: isLight ? '#334155' : '#94a3b8'
+            }}
+          >
+            <Database className="w-4 h-4 text-sky-500 shrink-0" />
+            <div className="leading-tight">
+              <span className="font-bold text-slate-800 dark:text-slate-200">¿Dónde se guarda?</span> Al presionar <strong className="text-emerald-600 dark:text-emerald-400 font-black">Descargar</strong>, el archivo JSON se almacena automáticamente en tu carpeta <strong className="text-sky-600 dark:text-sky-400">Descargas (Downloads)</strong>. Para restaurar en otra tablet o PC, presiona <strong className="font-black text-slate-900 dark:text-white">Subir / Restaurar</strong> y selecciónalo allí.
             </div>
           </div>
 
@@ -319,111 +426,133 @@ export default function StreetSalesBackupModal({
           {/* CUADRÍCULA DE MÉTRICAS (KPIS) DE ALTO IMPACTO */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {/* KPI 1: Total USD */}
-            <div className="p-4 rounded-2xl bg-[#0c1220] border border-slate-800 flex flex-col justify-between shadow-xs">
-              <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">
+            <div className={`p-4 rounded-2xl border flex flex-col justify-between shadow-xs ${
+              isLight ? 'bg-white border-slate-200' : 'bg-[#0c1220] border-slate-800'
+            }`}>
+              <span className={`text-[10px] font-black uppercase tracking-wider ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
                 Total Facturado ($)
               </span>
               <div className="my-1">
-                <span className="text-xl sm:text-2xl font-black font-mono text-emerald-400">
+                <span className={`text-xl sm:text-2xl font-black font-mono ${isLight ? 'text-emerald-600' : 'text-emerald-400'}`}>
                   {formatUSD(metrics.totalUSD)}
                 </span>
               </div>
-              <span className="text-[10px] text-slate-400 font-medium">
+              <span className={`text-[10px] font-medium ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
                 En el período {period === 'daily' ? 'de hoy' : period === 'weekly' ? 'semanal' : 'del mes'}
               </span>
             </div>
 
             {/* KPI 2: Total Bolívares */}
-            <div className="p-4 rounded-2xl bg-[#0c1220] border border-slate-800 flex flex-col justify-between shadow-xs">
-              <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">
+            <div className={`p-4 rounded-2xl border flex flex-col justify-between shadow-xs ${
+              isLight ? 'bg-white border-slate-200' : 'bg-[#0c1220] border-slate-800'
+            }`}>
+              <span className={`text-[10px] font-black uppercase tracking-wider ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
                 Total en Bolívares (Bs.)
               </span>
               <div className="my-1">
-                <span className="text-lg sm:text-xl font-black font-mono text-sky-400 truncate block">
+                <span className={`text-lg sm:text-xl font-black font-mono truncate block ${isLight ? 'text-sky-700' : 'text-sky-400'}`}>
                   {formatVES(metrics.totalVES)}
                 </span>
               </div>
-              <span className="text-[10px] text-slate-400 font-mono">
+              <span className={`text-[10px] font-mono ${isLight ? 'text-slate-500 font-bold' : 'text-slate-400'}`}>
                 Tasa: {bcvRate.toFixed(2)} Bs/$
               </span>
             </div>
 
             {/* KPI 3: Cantidad de Ventas */}
-            <div className="p-4 rounded-2xl bg-[#0c1220] border border-slate-800 flex flex-col justify-between shadow-xs">
-              <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">
+            <div className={`p-4 rounded-2xl border flex flex-col justify-between shadow-xs ${
+              isLight ? 'bg-white border-slate-200' : 'bg-[#0c1220] border-slate-800'
+            }`}>
+              <span className={`text-[10px] font-black uppercase tracking-wider ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
                 Tickets Emitidos
               </span>
               <div className="my-1 flex items-baseline gap-1.5">
-                <span className="text-2xl font-black font-mono text-white">
+                <span className={`text-2xl font-black font-mono ${isLight ? 'text-slate-900' : 'text-white'}`}>
                   {metrics.ticketCount}
                 </span>
-                <span className="text-xs text-slate-400 font-bold">ventas</span>
+                <span className={`text-xs font-bold ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>ventas</span>
               </div>
-              <span className="text-[10px] text-slate-400 font-medium">
+              <span className={`text-[10px] font-medium ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
                 100% registradas en base local
               </span>
             </div>
 
             {/* KPI 4: Ticket Promedio */}
-            <div className="p-4 rounded-2xl bg-[#0c1220] border border-slate-800 flex flex-col justify-between shadow-xs">
-              <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">
+            <div className={`p-4 rounded-2xl border flex flex-col justify-between shadow-xs ${
+              isLight ? 'bg-white border-slate-200' : 'bg-[#0c1220] border-slate-800'
+            }`}>
+              <span className={`text-[10px] font-black uppercase tracking-wider ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
                 Ticket Promedio ($)
               </span>
               <div className="my-1">
-                <span className="text-xl sm:text-2xl font-black font-mono text-amber-400">
+                <span className={`text-xl sm:text-2xl font-black font-mono ${isLight ? 'text-amber-600' : 'text-amber-400'}`}>
                   {formatUSD(metrics.avgTicket)}
                 </span>
               </div>
-              <span className="text-[10px] text-slate-400 font-medium">
+              <span className={`text-[10px] font-medium ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
                 Promedio por cliente
               </span>
             </div>
           </div>
 
           {/* DESGLOSE POR FORMAS DE PAGO */}
-          <div className="p-4 rounded-2xl bg-[#090d16] border border-slate-800 space-y-3">
+          <div className={`p-4 rounded-2xl border space-y-3 ${
+            isLight ? 'bg-white border-slate-200 shadow-xs' : 'bg-[#090d16] border-slate-800'
+          }`}>
             <div className="flex items-center justify-between">
-              <span className="text-xs font-black uppercase tracking-wider text-slate-200 flex items-center gap-2">
-                <DollarSign className="w-4 h-4 text-emerald-400" />
+              <span className={`text-xs font-black uppercase tracking-wider flex items-center gap-2 ${
+                isLight ? 'text-slate-900' : 'text-slate-200'
+              }`}>
+                <DollarSign className={`w-4 h-4 ${isLight ? 'text-emerald-600' : 'text-emerald-400'}`} />
                 <span>Desglose por Métodos de Pago Liquidado</span>
               </span>
-              <span className="text-[10px] font-mono text-slate-400">
+              <span className={`text-[10px] font-mono ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
                 {metrics.ticketCount} transacciones auditadas
               </span>
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5 text-xs">
-              <div className="p-2.5 rounded-xl bg-[#0c1220] border border-slate-800">
-                <span className="text-[10px] text-emerald-400 font-bold block">💵 Efectivo ($ / Bs)</span>
-                <span className="text-sm font-black font-mono text-white mt-1 block">
+              <div className={`p-2.5 rounded-xl border ${
+                isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#0c1220] border-slate-800'
+              }`}>
+                <span className={`text-[10px] font-bold block ${isLight ? 'text-emerald-700' : 'text-emerald-400'}`}>💵 Efectivo ($ / Bs)</span>
+                <span className={`text-sm font-black font-mono mt-1 block ${isLight ? 'text-slate-900' : 'text-white'}`}>
                   {formatUSD(metrics.cashUsd + metrics.cashVes)}
                 </span>
               </div>
 
-              <div className="p-2.5 rounded-xl bg-[#0c1220] border border-slate-800">
-                <span className="text-[10px] text-sky-400 font-bold block">📱 Pago Móvil (Bs.)</span>
-                <span className="text-sm font-black font-mono text-white mt-1 block">
+              <div className={`p-2.5 rounded-xl border ${
+                isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#0c1220] border-slate-800'
+              }`}>
+                <span className={`text-[10px] font-bold block ${isLight ? 'text-sky-700' : 'text-sky-400'}`}>📱 Pago Móvil (Bs.)</span>
+                <span className={`text-sm font-black font-mono mt-1 block ${isLight ? 'text-slate-900' : 'text-white'}`}>
                   {formatUSD(metrics.pagoMovil)}
                 </span>
               </div>
 
-              <div className="p-2.5 rounded-xl bg-[#0c1220] border border-slate-800">
-                <span className="text-[10px] text-indigo-400 font-bold block">💳 Punto de Venta</span>
-                <span className="text-sm font-black font-mono text-white mt-1 block">
+              <div className={`p-2.5 rounded-xl border ${
+                isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#0c1220] border-slate-800'
+              }`}>
+                <span className={`text-[10px] font-bold block ${isLight ? 'text-indigo-700' : 'text-indigo-400'}`}>💳 Punto de Venta</span>
+                <span className={`text-sm font-black font-mono mt-1 block ${isLight ? 'text-slate-900' : 'text-white'}`}>
                   {formatUSD(metrics.puntoTarjeta)}
                 </span>
               </div>
 
-              <div className="p-2.5 rounded-xl bg-[#0c1220] border border-slate-800">
-                <span className="text-[10px] text-purple-400 font-bold block">⚡ Zelle / Digital</span>
-                <span className="text-sm font-black font-mono text-white mt-1 block">
+              <div className={`p-2.5 rounded-xl border ${
+                isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#0c1220] border-slate-800'
+              }`}>
+                <span className={`text-[10px] font-bold block ${isLight ? 'text-purple-700' : 'text-purple-400'}`}>⚡ Zelle / Digital</span>
+                <span className={`text-sm font-black font-mono mt-1 block ${isLight ? 'text-slate-900' : 'text-white'}`}>
                   {formatUSD(metrics.zelle)}
                 </span>
               </div>
 
-              <div className="p-2.5 rounded-xl bg-[#0c1220] border border-slate-800 col-span-2 sm:col-span-1">
-                <span className="text-[10px] text-amber-400 font-bold block">📝 Fiados / Créditos</span>
-                <span className="text-sm font-black font-mono text-white mt-1 block">
+              <div className={`p-2.5 rounded-xl border col-span-2 sm:col-span-1 ${
+                isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#0c1220] border-slate-800'
+              }`}>
+                <span className={`text-[10px] font-bold block ${isLight ? 'text-amber-700' : 'text-amber-400'}`}>📝 Fiados / Créditos</span>
+                <span className={`text-sm font-black font-mono mt-1 block ${isLight ? 'text-slate-900' : 'text-white'}`}>
                   {formatUSD(metrics.credito)}
                 </span>
               </div>
@@ -433,15 +562,19 @@ export default function StreetSalesBackupModal({
           {/* LISTA DE TICKETS Y VENTAS DEL PERÍODO */}
           <div className="space-y-2.5">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-black uppercase tracking-wider text-slate-200 flex items-center gap-1.5">
-                <Receipt className="w-4 h-4 text-amber-400" />
+              <span className={`text-xs font-black uppercase tracking-wider flex items-center gap-1.5 ${
+                isLight ? 'text-slate-900' : 'text-slate-200'
+              }`}>
+                <Receipt className={`w-4 h-4 ${isLight ? 'text-amber-600' : 'text-amber-400'}`} />
                 <span>Historial de Comprobantes ({filteredSales.length})</span>
               </span>
 
               <button
                 type="button"
                 onClick={loadSales}
-                className="text-xs font-bold text-slate-400 hover:text-white flex items-center gap-1 cursor-pointer transition-colors"
+                className={`text-xs font-bold flex items-center gap-1 cursor-pointer transition-colors ${
+                  isLight ? 'text-slate-600 hover:text-slate-900' : 'text-slate-400 hover:text-white'
+                }`}
               >
                 <RefreshCw className="w-3.5 h-3.5" />
                 <span>Refrescar</span>
@@ -449,12 +582,14 @@ export default function StreetSalesBackupModal({
             </div>
 
             {filteredSales.length === 0 ? (
-              <div className="p-8 rounded-2xl border border-dashed border-slate-800 bg-[#090d16] text-center space-y-2">
-                <Receipt className="w-8 h-8 text-slate-500 mx-auto" />
-                <p className="text-xs text-slate-300 font-bold">
+              <div className={`p-8 rounded-2xl border border-dashed text-center space-y-2 ${
+                isLight ? 'border-slate-300 bg-white text-slate-700' : 'border-slate-800 bg-[#090d16] text-slate-300'
+              }`}>
+                <Receipt className="w-8 h-8 text-slate-400 mx-auto" />
+                <p className="text-xs font-bold">
                   No hay ventas registradas en el período seleccionado ({period === 'daily' ? 'hoy' : period === 'weekly' ? 'esta semana' : 'este mes'}).
                 </p>
-                <p className="text-[11px] text-slate-400">
+                <p className={`text-[11px] ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
                   Las ventas cobradas desde el Punto de Venta aparecerán aquí automáticamente en tiempo real.
                 </p>
               </div>
@@ -466,32 +601,38 @@ export default function StreetSalesBackupModal({
                   return (
                     <div
                       key={sale.id || sale.receiptNumber}
-                      className="p-3 rounded-2xl border border-slate-800 bg-[#090d16] hover:border-slate-700 transition-all text-xs"
+                      className={`p-3 rounded-2xl border transition-all text-xs ${
+                        isLight
+                          ? 'border-slate-200 bg-white hover:border-slate-300 shadow-2xs'
+                          : 'border-slate-800 bg-[#090d16] hover:border-slate-700'
+                      }`}
                     >
                       <div className="flex items-center justify-between gap-2">
                         <div className="min-w-0">
                           <div className="flex items-center gap-2">
-                            <span className="font-mono font-black text-amber-400">
+                            <span className={`font-mono font-black ${isLight ? 'text-amber-600' : 'text-amber-400'}`}>
                               #{sale.receiptNumber}
                             </span>
-                            <span className="text-[10px] text-slate-400 font-mono">
+                            <span className={`text-[10px] font-mono ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
                               {sale.timestamp ? new Date(sale.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
                             </span>
-                            <span className="text-[10px] px-2 py-0.2 rounded-full bg-slate-800 text-slate-300 font-mono">
+                            <span className={`text-[10px] px-2 py-0.2 rounded-full font-mono ${
+                              isLight ? 'bg-slate-100 text-slate-700' : 'bg-slate-800 text-slate-300'
+                            }`}>
                               {sale.items?.length || 0} ítems
                             </span>
                           </div>
-                          <span className="text-[11px] text-slate-300 truncate block mt-0.5">
+                          <span className={`text-[11px] truncate block mt-0.5 ${isLight ? 'text-slate-700 font-medium' : 'text-slate-300'}`}>
                             Cajero: {sale.cashierName || 'Cajero Principal'}
                           </span>
                         </div>
 
                         <div className="flex items-center gap-3">
                           <div className="text-right">
-                            <div className="font-mono font-black text-emerald-400 text-sm">
+                            <div className={`font-mono font-black text-sm ${isLight ? 'text-emerald-700' : 'text-emerald-400'}`}>
                               {formatUSD(sale.totalUSD)}
                             </div>
-                            <span className="font-mono text-[10px] text-slate-400 block">
+                            <span className={`font-mono text-[10px] block ${isLight ? 'text-slate-500 font-bold' : 'text-slate-400'}`}>
                               {formatVES(sale.totalVES)}
                             </span>
                           </div>
@@ -501,7 +642,9 @@ export default function StreetSalesBackupModal({
                             <button
                               type="button"
                               onClick={() => onPrintTicket(sale)}
-                              className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white active:scale-95 transition-all cursor-pointer"
+                              className={`p-2 rounded-xl active:scale-95 transition-all cursor-pointer ${
+                                isLight ? 'bg-slate-100 hover:bg-slate-200 text-slate-700' : 'bg-slate-800 hover:bg-slate-700 text-white'
+                              }`}
                               title="Reimprimir Comprobante Térmico"
                             >
                               <Printer className="w-4 h-4" />
@@ -512,7 +655,11 @@ export default function StreetSalesBackupModal({
                           <button
                             type="button"
                             onClick={() => setExpandedSaleId(isExpanded ? null : (sale.id || sale.receiptNumber))}
-                            className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white active:scale-95 transition-all cursor-pointer"
+                            className={`p-2 rounded-xl active:scale-95 transition-all cursor-pointer ${
+                              isLight
+                                ? 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+                                : 'bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white'
+                            }`}
                             title="Ver ítems vendidos"
                           >
                             {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
@@ -522,14 +669,20 @@ export default function StreetSalesBackupModal({
 
                       {/* DETALLE EXPANDIDO DE LA VENTA */}
                       {isExpanded && (
-                        <div className="mt-3 pt-3 border-t border-slate-800 space-y-1.5 animate-in fade-in duration-150">
-                          <span className="text-[10px] uppercase font-black tracking-wider text-slate-400 block mb-1">
+                        <div className={`mt-3 pt-3 border-t space-y-1.5 animate-in fade-in duration-150 ${
+                          isLight ? 'border-slate-150' : 'border-slate-800'
+                        }`}>
+                          <span className={`text-[10px] uppercase font-black tracking-wider block mb-1 ${
+                            isLight ? 'text-slate-500' : 'text-slate-400'
+                          }`}>
                             Artículos en este comprobante:
                           </span>
                           {sale.items?.map((it, idx) => (
-                            <div key={idx} className="flex items-center justify-between text-[11px] text-slate-300 font-mono">
+                            <div key={idx} className={`flex items-center justify-between text-[11px] font-mono ${
+                              isLight ? 'text-slate-700' : 'text-slate-300'
+                            }`}>
                               <span>{it.qty}x {it.name}</span>
-                              <span className="font-bold text-white">{formatUSD(it.totalUSD)}</span>
+                              <span className={`font-bold ${isLight ? 'text-slate-900' : 'text-white'}`}>{formatUSD(it.totalUSD)}</span>
                             </div>
                           ))}
                         </div>
@@ -543,9 +696,11 @@ export default function StreetSalesBackupModal({
         </div>
 
         {/* PIE DEL MODAL CON INDICADOR DE PROTECCIÓN */}
-        <div className="px-6 py-3.5 border-t border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-[#090d16] text-xs text-slate-300">
+        <div className={`px-6 py-3.5 border-t flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs ${
+          isLight ? 'bg-white border-slate-200 text-slate-700' : 'bg-[#090d16] border-slate-800 text-slate-300'
+        }`}>
           <div className="flex items-center gap-2">
-            <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
+            <ShieldCheck className={`w-4 h-4 shrink-0 ${isLight ? 'text-emerald-600' : 'text-emerald-400'}`} />
             <span className="text-[11px]">
               Tus ventas se almacenan de forma local en este dispositivo y están protegidas ante cortes de internet.
             </span>
@@ -554,7 +709,9 @@ export default function StreetSalesBackupModal({
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-black text-xs transition-all active:scale-95 cursor-pointer self-end sm:self-auto"
+            className={`px-4 py-1.5 rounded-xl font-black text-xs transition-all active:scale-95 cursor-pointer self-end sm:self-auto ${
+              isLight ? 'bg-slate-900 hover:bg-slate-800 text-white' : 'bg-slate-800 hover:bg-slate-700 text-white'
+            }`}
           >
             Cerrar
           </button>

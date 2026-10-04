@@ -38,10 +38,11 @@ export default function RootLayout({
                     localStorage.getItem('klikpos_street_mode') === 'true' ||
                     !!localStorage.getItem('klikpos_canvas_theme')
                   );
-                  var t = isTabletPos ? 'dark' : localStorage.getItem('venematic_theme');
-                  // Preestablecido: Solo entrar en Modo Blanco si NO es Tablet/Street POS
+                  var savedStreetCanvas = localStorage.getItem('klikpos_canvas_theme');
+                  var t = (isTabletPos && savedStreetCanvas === 'light-graphite') ? 'light' : (isTabletPos ? 'dark' : localStorage.getItem('venematic_theme'));
+                  // Preestablecido: Solo entrar en Modo Blanco si NO es Tablet/Street POS o si seleccionó light-graphite
                   if (!t || (t !== 'dark' && t !== 'glass')) {
-                    t = isTabletPos ? 'dark' : 'light';
+                    t = (isTabletPos && savedStreetCanvas !== 'light-graphite') ? 'dark' : 'light';
                     try { localStorage.setItem('venematic_theme', t); } catch(e) {}
                   }
                   var p = localStorage.getItem('venematic_branding_palette') || 'petrol';
@@ -75,8 +76,13 @@ export default function RootLayout({
                   };
                   var ind = bgThemes[bgPreset] || bgThemes.white;
                   if (isTabletPos) {
-                    isDark = true;
-                    ind = { bg: '#070a12', card: '#0c1220', text: '#ffffff', muted: '#94a3b8', border: '#1e293b', secBg: '#090d16', secBorder: '#1e293b', secText: '#ffffff' };
+                    if (savedStreetCanvas === 'light-graphite') {
+                      isDark = false;
+                      ind = { bg: '#ffffff', card: '#ffffff', text: '#0f172a', muted: '#475569', border: '#e2e8f0', secBg: '#ffffff', secBorder: '#e2e8f0', secText: '#0f172a' };
+                    } else {
+                      isDark = true;
+                      ind = { bg: '#070a12', card: '#0c1220', text: '#ffffff', muted: '#94a3b8', border: '#1e293b', secBg: '#090d16', secBorder: '#1e293b', secText: '#ffffff' };
+                    }
                   }
                   if (bgPreset === 'custom' && customBg) {
                     var hex = customBg.replace('#', '');

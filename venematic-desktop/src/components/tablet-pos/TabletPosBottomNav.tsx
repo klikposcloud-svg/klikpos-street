@@ -46,12 +46,18 @@ export const TabletPosBottomNav: React.FC<TabletPosBottomNavProps> = ({
 
   const handleToggleRadial = (e: React.MouseEvent) => {
     e.stopPropagation();
+    if (!isRadialOpen && isDockerOpen && onToggleDocker) {
+      onToggleDocker();
+    }
     setIsRadialOpen((prev) => !prev);
   };
 
   const handleAction = (type: 'orden' | 'qr' | 'cobro' | 'mesas', e: React.MouseEvent) => {
     e.stopPropagation();
     setIsRadialOpen(false);
+    if (isDockerOpen && onToggleDocker) {
+      onToggleDocker();
+    }
     if (type === 'orden') {
       if (onToggleOrderDrawer) onToggleOrderDrawer();
     } else if (type === 'qr') {

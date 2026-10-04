@@ -200,17 +200,12 @@ export default function VisualPacksModal({
             >
               <Sparkles className="w-5 h-5" />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h2 className="text-base sm:text-lg font-black tracking-tight" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
-                  Librería Cloud de Paquetes Visuales
-                </h2>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-sky-500/10 text-sky-500 border border-sky-500/20">
-                  KlikPOS Market
-                </span>
-              </div>
-              <p className="text-xs text-slate-400">
-                Descarga catálogos fotográficos en HD, códigos de barra y rubros listos para tu POS.
+            <div className="min-w-0">
+              <h2 className="text-sm sm:text-base font-bold tracking-tight truncate leading-tight" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
+                Paquetes Visuales
+              </h2>
+              <p className="text-[11px] text-slate-400 font-medium truncate mt-0.5">
+                Fotos HD listas para importar
               </p>
             </div>
           </div>
@@ -534,17 +529,17 @@ export default function VisualPacksModal({
                     {isImporting === selectedPack.id ? (
                       <>
                         <RefreshCw className="w-4 h-4 animate-spin" />
-                        <span>Descargando & Guardando en POS...</span>
+                        <span>Descargando...</span>
                       </>
                     ) : installedIds.includes(selectedPack.id) ? (
                       <>
                         <RefreshCw className="w-4 h-4" />
-                        <span>Re-descargar e Integrar</span>
+                        <span>Re-descargar</span>
                       </>
                     ) : (
                       <>
                         <Download className="w-4 h-4" />
-                        <span>Descargar e Instalar en mi POS</span>
+                        <span>Descargar</span>
                       </>
                     )}
                   </button>

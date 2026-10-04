@@ -31,6 +31,13 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    if (base64Data.length > 10 * 1024 * 1024) {
+      return NextResponse.json(
+        { error: 'La imagen excede el límite máximo de 7MB.' },
+        { status: 413 }
+      );
+    }
+
     const currentBcv = Number(bcvRate) || 40.0;
 
     const prompt = `Eres un auditor experto en digitalización de facturas y notas de entrega de proveedores para supermercados, bodegas y comercios en Venezuela.

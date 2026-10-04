@@ -74,9 +74,13 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     const { rate, updatedBy } = body;
+    const numRate = Number(rate);
 
-    if (!rate || typeof rate !== 'number' || rate <= 0) {
-      return NextResponse.json({ error: 'Tasa inválida' }, { status: 400, headers: CORS_HEADERS });
+    if (!Number.isFinite(numRate) || numRate < 1 || numRate > 10000000) {
+      return NextResponse.json(
+        { error: 'Tasa inválida. Debe ser un número finito entre 1 y 10,000,000.' },
+        { status: 400, headers: CORS_HEADERS }
+      );
     }
 
     const today = new Date().toISOString().split('T')[0];

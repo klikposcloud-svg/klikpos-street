@@ -73,12 +73,13 @@ export const TabletPosToolsDock: React.FC<TabletPosToolsDockProps> = ({
       >
         {/* Top: LayoutGrid Icon / Brand Pill */}
         <div
+          onClick={onClose}
           className="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 shadow-lg cursor-pointer transition-transform hover:scale-105 active:scale-95"
           style={{
             background: 'linear-gradient(135deg, #f59e0b, #d97706)',
             boxShadow: '0 4px 16px rgba(245, 158, 11, 0.45)'
           }}
-          title="KlikPOS Tools"
+          title="KlikPOS Tools (Cerrar)"
         >
           <LayoutGrid className="w-5 h-5 text-slate-950 font-black stroke-[2.4]" />
         </div>
@@ -87,7 +88,10 @@ export const TabletPosToolsDock: React.FC<TabletPosToolsDockProps> = ({
         <div className="flex flex-col items-center gap-2.5 my-auto">
           {/* 1. Inventario & Stock */}
           <button
-            onClick={onOpenInventory}
+            onClick={() => {
+              onClose();
+              onOpenInventory();
+            }}
             className="w-10 h-10 rounded-xl flex items-center justify-center text-emerald-300 bg-emerald-500/25 border border-emerald-400/40 hover:bg-emerald-500/40 hover:scale-110 active:scale-95 transition-all shadow-sm cursor-pointer group"
             title="Gestión de Inventario & Stock"
           >
@@ -97,7 +101,10 @@ export const TabletPosToolsDock: React.FC<TabletPosToolsDockProps> = ({
           {/* 2. Motorizados / Despacho (Opcional en Lite) */}
           {!isLiteMode && (
             <button
-              onClick={onOpenDrivers}
+              onClick={() => {
+                onClose();
+                onOpenDrivers();
+              }}
               className="w-10 h-10 rounded-xl flex items-center justify-center text-amber-300 bg-amber-500/25 border border-amber-400/40 hover:bg-amber-500/40 hover:scale-110 active:scale-95 transition-all shadow-sm cursor-pointer group"
               title="Gestión de Motorizados & Despachos"
             >
@@ -107,7 +114,10 @@ export const TabletPosToolsDock: React.FC<TabletPosToolsDockProps> = ({
 
           {/* 3. Impresora Térmica */}
           <button
-            onClick={onOpenPrinter}
+            onClick={() => {
+              onClose();
+              onOpenPrinter();
+            }}
             className="w-10 h-10 rounded-xl flex items-center justify-center text-sky-300 bg-sky-500/25 border border-sky-400/40 hover:bg-sky-500/40 hover:scale-110 active:scale-95 transition-all shadow-sm cursor-pointer group"
             title="Configurar Impresora Térmica"
           >
@@ -116,7 +126,10 @@ export const TabletPosToolsDock: React.FC<TabletPosToolsDockProps> = ({
 
           {/* 4. Selector de Rubro de Negocio */}
           <button
-            onClick={onOpenRubros}
+            onClick={() => {
+              onClose();
+              onOpenRubros();
+            }}
             className="w-10 h-10 rounded-xl flex items-center justify-center text-purple-300 bg-purple-500/25 border border-purple-400/40 hover:bg-purple-500/40 hover:scale-110 active:scale-95 transition-all shadow-sm cursor-pointer group"
             title="Cambiar Rubro Comercial"
           >
@@ -126,7 +139,10 @@ export const TabletPosToolsDock: React.FC<TabletPosToolsDockProps> = ({
           {/* 5. QR Menú Interactivo (Opcional en Lite) */}
           {!isLiteMode && (
             <button
-              onClick={onOpenQrMenu}
+              onClick={() => {
+                onClose();
+                onOpenQrMenu();
+              }}
               className="w-10 h-10 rounded-xl flex items-center justify-center text-indigo-300 bg-indigo-500/25 border border-indigo-400/40 hover:bg-indigo-500/40 hover:scale-110 active:scale-95 transition-all shadow-sm cursor-pointer group"
               title="Generar Menú QR Digital"
             >
@@ -136,7 +152,11 @@ export const TabletPosToolsDock: React.FC<TabletPosToolsDockProps> = ({
 
           {/* 6. Módulo de Ventas & Respaldo */}
           <button
-            onClick={onOpenSales || onOpenCart}
+            onClick={() => {
+              onClose();
+              if (onOpenSales) onOpenSales();
+              else if (onOpenCart) onOpenCart();
+            }}
             className="w-10 h-10 rounded-xl flex items-center justify-center text-emerald-300 bg-emerald-500/25 border border-emerald-400/40 hover:bg-emerald-500/40 hover:scale-110 active:scale-95 transition-all shadow-sm cursor-pointer group"
             title="Módulo de Ventas & Respaldo (Diario, Semanal, Mensual)"
           >
@@ -145,7 +165,10 @@ export const TabletPosToolsDock: React.FC<TabletPosToolsDockProps> = ({
 
           {/* 7. Sincronizar Data */}
           <button
-            onClick={onOpenDataSync}
+            onClick={() => {
+              onClose();
+              if (onOpenDataSync) onOpenDataSync();
+            }}
             className="w-10 h-10 rounded-xl flex items-center justify-center text-cyan-300 bg-cyan-500/25 border border-cyan-400/40 hover:bg-cyan-500/40 hover:scale-110 active:scale-95 transition-all shadow-sm cursor-pointer group"
             title="Sincronizar Data (Tasa BCV, Ventas & Catálogo Cloud)"
           >
@@ -154,7 +177,10 @@ export const TabletPosToolsDock: React.FC<TabletPosToolsDockProps> = ({
 
           {/* 8. Actualizar Software */}
           <button
-            onClick={onOpenSoftwareUpdate}
+            onClick={() => {
+              onClose();
+              if (onOpenSoftwareUpdate) onOpenSoftwareUpdate();
+            }}
             className="w-10 h-10 rounded-xl flex items-center justify-center text-yellow-300 bg-yellow-500/25 border border-yellow-400/40 hover:bg-yellow-500/40 hover:scale-110 active:scale-95 transition-all shadow-sm cursor-pointer group"
             title="Actualizar Software (GitHub Release & APK)"
           >
@@ -163,7 +189,10 @@ export const TabletPosToolsDock: React.FC<TabletPosToolsDockProps> = ({
 
           {/* 9. Ajustes & Configuración */}
           <button
-            onClick={onOpenSettings}
+            onClick={() => {
+              onClose();
+              onOpenSettings();
+            }}
             className="w-10 h-10 rounded-xl flex items-center justify-center text-slate-100 bg-slate-800/90 border border-slate-600/70 hover:bg-slate-700 hover:scale-110 active:scale-95 transition-all shadow-sm cursor-pointer group"
             title="Ajustes de Empresa & RIF"
           >

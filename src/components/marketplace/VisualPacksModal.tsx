@@ -192,27 +192,27 @@ export default function VisualPacksModal({
         }`}
       >
         {/* HEADER LIMPIO Y DESPEJADO */}
-        <header className="px-5 py-3.5 border-b flex items-center justify-between shrink-0" style={{ borderColor: isLight ? '#e2e8f0' : '#1e293b' }}>
+        <header className="px-4 sm:px-5 py-3 border-b flex items-center justify-between shrink-0 gap-3" style={{ borderColor: isLight ? '#e2e8f0' : '#1e293b' }}>
           <div className="flex items-center gap-2.5 min-w-0">
             <div
-              className="w-8 h-8 rounded-xl flex items-center justify-center text-white shrink-0 shadow-sm"
+              className="w-9 h-9 rounded-xl flex items-center justify-center text-white shrink-0 shadow-sm"
               style={{ backgroundColor: primaryColor }}
             >
-              <Sparkles className="w-4 h-4" />
+              <Sparkles className="w-4 h-4 stroke-[2.2]" />
             </div>
             <div className="min-w-0">
-              <h2 className="text-sm sm:text-base font-black tracking-tight truncate" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
-                Catálogos y Paquetes Visuales
+              <h2 className="text-sm sm:text-base font-bold tracking-tight truncate leading-tight" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
+                Paquetes Visuales
               </h2>
-              <p className="text-[11px] text-slate-400 truncate">
-                Catálogos fotográficos y rubros listos para importar a tu POS
+              <p className="text-[11px] text-slate-400 font-medium truncate mt-0.5">
+                Fotos HD listas para importar
               </p>
             </div>
           </div>
 
           <button
             onClick={onClose}
-            className="p-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-all active:scale-90 cursor-pointer shrink-0"
+            className="w-8 h-8 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all active:scale-90 cursor-pointer shrink-0"
             title="Cerrar"
           >
             <X className="w-5 h-5" />
@@ -519,17 +519,17 @@ export default function VisualPacksModal({
                     {isImporting === selectedPack.id ? (
                       <>
                         <RefreshCw className="w-4 h-4 animate-spin" />
-                        <span>Descargando & Guardando en POS...</span>
+                        <span>Descargando...</span>
                       </>
                     ) : installedIds.includes(selectedPack.id) ? (
                       <>
                         <RefreshCw className="w-4 h-4" />
-                        <span>Re-descargar e Integrar</span>
+                        <span>Re-descargar</span>
                       </>
                     ) : (
                       <>
                         <Download className="w-4 h-4" />
-                        <span>Descargar e Instalar en mi POS</span>
+                        <span>Descargar</span>
                       </>
                     )}
                   </button>

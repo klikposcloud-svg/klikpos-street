@@ -33,6 +33,13 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    if (base64Data.length > 10 * 1024 * 1024) {
+      return NextResponse.json(
+        { error: 'La imagen excede el límite máximo de 7MB.' },
+        { status: 413 }
+      );
+    }
+
     const prompt = `Analiza detenidamente la fotografía de este producto para un sistema de punto de venta (POS) de supermercado/bodega.
 Devuelve EXCLUSIVAMENTE un JSON válido (sin markdown, sin comillas invertidas, sin explicaciones) con la siguiente estructura:
 {

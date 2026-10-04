@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   UtensilsCrossed,
   LayoutGrid,
@@ -73,392 +73,48 @@ import { cloudSyncService } from '@/lib/firebase/cloud-sync-service';
 import { SoftwareUpdateModal } from '@/components/tablet-pos/SoftwareUpdateModal';
 import { DataSyncModal } from '@/components/tablet-pos/DataSyncModal';
 import { ProductImageSelector } from '@/components/tablet-pos/ProductImageSelector';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { PrinterConfigModal } from '@/components/tablet-pos/PrinterConfigModal';
+import { BusinessRubroModal } from '@/components/tablet-pos/BusinessRubroModal';
+import { DeliveryDriversModal } from '@/components/tablet-pos/DeliveryDriversModal';
+import { EditProductModal } from '@/components/tablet-pos/EditProductModal';
+import { CompanyConfigModal } from '@/components/tablet-pos/CompanyConfigModal';
+import { PagoMovilConfigModal } from '@/components/tablet-pos/PagoMovilConfigModal';
+import { CustomerModal } from '@/components/tablet-pos/CustomerModal';
+import {
+  SAMPLE_PRODUCTS,
+  RUBROS_CATALOG,
+  DEFAULT_DRIVERS,
+  CATEGORIES,
+  NOTE_PRESETS,
+  DEFAULT_CUSTOMERS,
+  BRAND_PALETTES,
+  CANVAS_THEMES,
+  VENEZUELAN_BANKS,
+} from '@/lib/data/tablet-pos-rubros';
+import type {
+  CanvasTheme,
+  CanvasThemeId,
+  Motorizado,
+  PrinterConfig,
+  RubroId,
+  CardViewMode,
+  CartItem,
+  Product,
+  Customer,
+  CompanyInfo,
+  PagoMovilInfo,
+  MixedPaymentEntry,
+  CompletedSaleTicket,
+  PosOrder,
+} from '@/types/tablet-pos';
+import { doc, setDoc } from 'firebase/firestore';
 import { db as firestoreDb, isFirebaseConfigured } from '@/lib/firebase/config';
+import { useBcvRate } from '@/hooks/useBcvRate';
+import { useCart } from '@/hooks/useCart';
+import { useCheckout } from '@/hooks/useCheckout';
+import { calcCartTotals } from '@/lib/pos/cart-calculations';
 
-interface CartItem {
-  id: string;
-  name: string;
-  priceUSD: number;
-  qty: number;
-  notes?: string;
-  category: string;
-  image?: string;
-  sku?: string;
-}
-
-interface Product {
-  id: string;
-  name: string;
-  category: string;
-  priceUSD: number;
-  image: string;
-  description: string;
-  tag: string;
-  prepTime: string;
-  sku: string;
-  ingredients?: string[];
-}
-
-interface Customer {
-  id: string;
-  name: string;
-  docId: string;
-  phone: string;
-  address?: string;
-}
-
-interface CompanyInfo {
-  name: string;
-  rif: string;
-  phone: string;
-  address: string;
-  footerMsg: string;
-}
-
-interface PagoMovilInfo {
-  bank: string;
-  phone: string;
-  idDoc: string;
-  ownerName: string;
-}
-
-export interface MixedPaymentEntry {
-  id: string;
-  method: 'pago_movil' | 'cash_usd' | 'cash_ves' | 'card_debit' | 'zelle';
-  currency: 'USD' | 'VES';
-  amount: number;
-  amountUSD: number;
-  amountVES: number;
-  reference?: string;
-}
-
-interface CompletedSaleTicket {
-  ticketNumber: string;
-  timestamp: string;
-  items: CartItem[];
-  subtotalUSD: number;
-  totalUSD: number;
-  totalVES: number;
-  bcvRate: number;
-  paymentMethod: string;
-  reference?: string;
-  amountReceivedUSD?: number;
-  changeUSD?: number;
-  changeVES?: number;
-  customer: Customer;
-  table?: string;
-  mixedPayments?: MixedPaymentEntry[];
-}
-
-interface Motorizado {
-  id: string;
-  name: string;
-  phone: string;
-  vehicle: string;
-  status: 'disponible' | 'en_ruta' | 'inactivo';
-}
-
-interface PrinterConfig {
-  connection: 'bluetooth' | 'lan' | 'usb';
-  ip: string;
-  port: number;
-  paperWidth: '58mm' | '80mm';
-  autoCut: boolean;
-}
-
-type RubroId = 'comida' | 'ropa' | 'panaderia' | 'minimarket' | 'farmacia' | 'ferreteria';
-
-const DEFAULT_DRIVERS: Motorizado[] = [
-  { id: '1', name: 'Alexander Morales', phone: '04141234567', vehicle: 'Bera SBR Azul - AF1G22', status: 'disponible' },
-  { id: '2', name: 'José Luis Rivas', phone: '04249876543', vehicle: 'Empire Keeway Rojo - AA4B11', status: 'en_ruta' },
-  { id: '3', name: 'Manuel Bastidas', phone: '04125556677', vehicle: 'Haojin Águila Negro - AB99CC', status: 'disponible' }
-];
-
-const RUBROS_CATALOG: Record<RubroId, { name: string; label: string; icon: string; description: string; categories: string[]; sampleProducts: Product[] }> = {
-  comida: {
-    name: 'Comida & Gastronomía',
-    label: 'Comida & Gastronomía',
-    icon: '🍔',
-    description: 'Hamburguesas, pizzas, combos, perros calientes y bebidas.',
-    categories: ['Todos', 'Combos', 'Hamburguesas', 'Perros', 'Bebidas', 'Extras'],
-    sampleProducts: [] // Se llena con SAMPLE_PRODUCTS
-  },
-  ropa: {
-    name: 'Ropa, Calzado & Boutique',
-    label: 'Ropa, Calzado & Boutique',
-    icon: '👕',
-    description: 'Moda femenina, masculina, calzado y accesorios de vestir.',
-    categories: ['Todos', 'Caballeros', 'Damas', 'Calzado', 'Accesorios', 'Ofertas'],
-    sampleProducts: [
-      { id: 'r1', name: 'Camiseta Oversize Algodón Premium', category: 'Caballeros', priceUSD: 14.00, tag: '🔥 En Tendencia', prepTime: 'Inmediato', image: 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=600&q=80', description: 'Algodón 100% peruano peinado, corte relajado.', sku: 'ROP-01' },
-      { id: 'r2', name: 'Jeans Skinny Denim Stretch', category: 'Damas', priceUSD: 22.00, tag: '⭐ Favorito', prepTime: 'Inmediato', image: 'https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=600&q=80', description: 'Denim stretch levanta cola tiro alto.', sku: 'ROP-02' },
-      { id: 'r3', name: 'Zapatos Deportivos Sneakers Urban', category: 'Calzado', priceUSD: 35.00, tag: '💥 Premium', prepTime: 'Inmediato', image: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?w=600&q=80', description: 'Suela amortiguada antideslizante con acabado transpirable.', sku: 'ROP-03' },
-      { id: 'r4', name: 'Gorra Clásica Vintage Ajustable', category: 'Accesorios', priceUSD: 8.50, tag: '🧢 Estilo', prepTime: 'Inmediato', image: 'https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=600&q=80', description: 'Broche metálico trasero con visera curva.', sku: 'ROP-04' }
-    ]
-  },
-  panaderia: {
-    name: 'Panadería, Café & Pastelería',
-    label: 'Panadería, Café & Pastelería',
-    icon: '🥖',
-    description: 'Panes artesanales, repostería fina, desayunos y cafetería.',
-    categories: ['Todos', 'Panes', 'Café', 'Pastelería', 'Charcutería', 'Bebidas'],
-    sampleProducts: [
-      { id: 'p1', name: 'Canilla Tradicional Crujiente', category: 'Panes', priceUSD: 0.80, tag: '🥖 Fresco', prepTime: 'Inmediato', image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600&q=80', description: 'Pan tipo canilla recién horneado con corteza dorada.', sku: 'PAN-01' },
-      { id: 'p2', name: 'Café Capuchino Cremoso Grande', category: 'Café', priceUSD: 2.00, tag: '☕ Caliente', prepTime: '3 min', image: 'https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=600&q=80', description: 'Espresso doble con leche espumada y canela.', sku: 'PAN-02' },
-      { id: 'p3', name: 'Croissant Mantequilla con Jamón y Queso', category: 'Pastelería', priceUSD: 3.50, tag: '🥐 Relleno', prepTime: '2 min', image: 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=600&q=80', description: 'Masa hojaldrada con mantequilla y relleno horneado.', sku: 'PAN-03' },
-      { id: 'p4', name: 'Torta Tres Leches Casera Porción', category: 'Pastelería', priceUSD: 3.00, tag: '🍰 Dulce', prepTime: 'Inmediato', image: 'https://images.unsplash.com/photo-1588195538326-c5b1e9f80a1b?w=600&q=80', description: 'Bizcocho bañado en mezcla de tres leches y merengue tostado.', sku: 'PAN-04' }
-    ]
-  },
-  minimarket: {
-    name: 'Abastos, Minimarkets & Víveres',
-    label: 'Abastos, Minimarkets & Víveres',
-    icon: '🛒',
-    description: 'Alimentos no perecederos, bebidas, víveres y charcutería.',
-    categories: ['Todos', 'Víveres', 'Lácteos', 'Snacks', 'Bebidas', 'Limpieza'],
-    sampleProducts: [
-      { id: 'm1', name: 'Harina de Maíz Blanco 1Kg', category: 'Víveres', priceUSD: 1.15, tag: '🌽 Esencial', prepTime: 'Inmediato', image: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=600&q=80', description: 'Harina precocida tradicional para arepas.', sku: 'VIV-01' },
-      { id: 'm2', name: 'Arroz Blanco Tradicional 1Kg', category: 'Víveres', priceUSD: 1.30, tag: '🍚 Básico', prepTime: 'Inmediato', image: 'https://images.unsplash.com/photo-1536304993881-ff6e9eefa2a6?w=600&q=80', description: 'Grano entero de primera calidad.', sku: 'VIV-02' },
-      { id: 'm3', name: 'Queso Paisa Rebanado 250g', category: 'Lácteos', priceUSD: 2.80, tag: '🧀 Fresco', prepTime: 'Inmediato', image: 'https://images.unsplash.com/photo-1624806992066-5ffcf7ca186b?w=600&q=80', description: 'Queso blanco semiduro pasteurizado.', sku: 'VIV-03' },
-      { id: 'm4', name: 'Snack Papitas Tostadas Onduladas', category: 'Snacks', priceUSD: 1.50, tag: '🥔 Crujiente', prepTime: 'Inmediato', image: 'https://images.unsplash.com/photo-1566478989037-eec170784d0b?w=600&q=80', description: 'Papas fritas saladas crujientes bolsa familiar.', sku: 'VIV-04' }
-    ]
-  },
-  farmacia: {
-    name: 'Farmacia & Cuidado Personal',
-    label: 'Farmacia & Cuidado Personal',
-    icon: '💊',
-    description: 'Medicamentos sin récipe, productos de higiene y primeros auxilios.',
-    categories: ['Todos', 'Analgésicos', 'Cuidado Personal', 'Primeros Auxilios', 'Vitaminas'],
-    sampleProducts: [
-      { id: 'f1', name: 'Acetaminofén 500mg (10 Tabletas)', category: 'Analgésicos', priceUSD: 1.20, tag: '💊 Farmacia', prepTime: 'Inmediato', image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=600&q=80', description: 'Alivio del dolor y la fiebre.', sku: 'FAR-01' },
-      { id: 'f2', name: 'Alcohol Antiséptico 70% 500ml', category: 'Primeros Auxilios', priceUSD: 2.50, tag: '🩹 Botiquín', prepTime: 'Inmediato', image: 'https://images.unsplash.com/photo-1584744982491-665216d95f8b?w=600&q=80', description: 'Solución desinfectante tópica para curas.', sku: 'FAR-02' },
-      { id: 'f3', name: 'Vitamina C 1000mg Efervescente', category: 'Vitaminas', priceUSD: 3.80, tag: '🍊 Inmunidad', prepTime: 'Inmediato', image: 'https://images.unsplash.com/photo-1577401239170-897942555fb3?w=600&q=80', description: 'Tubo con 10 tabletas efervescentes sabor naranja.', sku: 'FAR-03' }
-    ]
-  },
-  ferreteria: {
-    name: 'Ferretería & Repuestos',
-    label: 'Ferretería & Repuestos',
-    icon: '🔧',
-    description: 'Herramientas, material eléctrico, plomería y pinturas.',
-    categories: ['Todos', 'Herramientas', 'Fijación', 'Eléctricos', 'Pinturas', 'Plomería'],
-    sampleProducts: [
-      { id: 'fe1', name: 'Cinta Métrica Profesional 5 Metros', category: 'Herramientas', priceUSD: 4.50, tag: '📏 Precisión', prepTime: 'Inmediato', image: 'https://images.unsplash.com/photo-1586864387967-d02ef85d93e8?w=600&q=80', description: 'Carcasa engomada de alto impacto con traba.', sku: 'FER-01' },
-      { id: 'fe2', name: 'Tirro Plástico Aislante Negro 3M', category: 'Eléctricos', priceUSD: 1.20, tag: '⚡ Electricidad', prepTime: 'Inmediato', image: 'https://images.unsplash.com/photo-1581783342308-f792dbdd27c5?w=600&q=80', description: 'Cinta aislante para empalmes de hasta 600V.', sku: 'FER-02' },
-      { id: 'fe3', name: 'Bombillo LED 12W Luz Blanca 6500K', category: 'Eléctricos', priceUSD: 1.80, tag: '💡 Ahorrador', prepTime: 'Inmediato', image: 'https://images.unsplash.com/photo-1550524514-9b69b5961e93?w=600&q=80', description: 'Rosca estándar E27 larga duración.', sku: 'FER-03' }
-    ]
-  }
-};
-
-const BRAND_PALETTES = [
-  { id: 'slate', name: 'Grafito Klik', primary: '#1e293b', hover: '#0f172a', accent: '#334155', glow: 'rgba(30, 41, 59, 0.4)' },
-  { id: 'emerald', name: 'Esmeralda', primary: '#059669', hover: '#047857', accent: '#10b981', glow: 'rgba(16, 185, 129, 0.4)' },
-  { id: 'petrol', name: 'Petróleo', primary: '#0e4f5a', hover: '#0a3d46', accent: '#15616d', glow: 'rgba(14, 79, 90, 0.4)' },
-  { id: 'blue', name: 'Azul Real', primary: '#2563eb', hover: '#1d4ed8', accent: '#3b82f6', glow: 'rgba(37, 99, 235, 0.4)' },
-  { id: 'sky', name: 'Cielo', primary: '#0284c7', hover: '#0369a1', accent: '#38bdf8', glow: 'rgba(2, 132, 199, 0.4)' },
-  { id: 'amber', name: 'Ámbar Sol', primary: '#d97706', hover: '#b45309', accent: '#f59e0b', glow: 'rgba(217, 119, 6, 0.4)' },
-  { id: 'ruby', name: 'Rubí', primary: '#dc2626', hover: '#b91c1c', accent: '#ef4444', glow: 'rgba(220, 38, 38, 0.4)' },
-  { id: 'purple', name: 'Púrpura', primary: '#7c3aed', hover: '#6d28d9', accent: '#8b5cf6', glow: 'rgba(124, 58, 237, 0.4)' },
-  { id: 'coral', name: 'Coral Cálido', primary: '#ea580c', hover: '#c2410c', accent: '#f97316', glow: 'rgba(234, 88, 12, 0.4)' }
-];
-
-export interface CanvasTheme {
-  id: 'obsidian' | 'carbon' | 'light-graphite';
-  name: string;
-  subtitle: string;
-  bg: string;
-  surface: string;
-  card: string;
-  border: string;
-  isLight: boolean;
-}
-
-const CANVAS_THEMES: readonly CanvasTheme[] = [
-  { id: 'obsidian', name: 'Obsidian Blue', subtitle: 'Lienzo Nocturno Clásico', bg: '#040711', surface: '#090d16', card: '#0f172a', border: '#1e293b', isLight: false },
-  { id: 'carbon', name: 'Titanio Carbon', subtitle: 'Gris Neutro Profesional', bg: '#0c0d12', surface: '#14161f', card: '#1c1f2b', border: '#282c3c', isLight: false },
-  { id: 'light-graphite', name: 'Blanco Grafito', subtitle: 'Luz Diurna / Alto Contraste', bg: '#f1f5f9', surface: '#ffffff', card: '#ffffff', border: '#e2e8f0', isLight: true }
-] as const;
-
-type CanvasThemeId = CanvasTheme['id'];
-
-const VENEZUELAN_BANKS = [
-  '0102 - Banco de Venezuela',
-  '0134 - Banesco Banco Universal',
-  '0105 - Banco Mercantil',
-  '0108 - Banco Provincial (BBVA)',
-  '0191 - Banco Nacional de Crédito (BNC)',
-  '0172 - Bancamiga Banco Universal',
-  '0114 - Bancaribe',
-  '0115 - Banco Exterior',
-  '0163 - Banco del Tesoro',
-  '0175 - Banco Bicentenario',
-  '0151 - BFC Banco Fondo Común',
-  '0137 - Banco Sofitasa',
-  '0168 - Bancrecer'
-];
-
-const SAMPLE_PRODUCTS: Product[] = [
-  {
-    id: '1',
-    name: 'Hamburguesa Clásica Especial 200g',
-    category: 'Hamburguesas',
-    priceUSD: 6.50,
-    tag: '🔥 Más Vendido',
-    prepTime: '8-10 min',
-    image: '/packs/comida-street/hamburguesa.png',
-    description: 'Carne 200g a la plancha, queso cheddar fundido, lechuga romana, tomate y salsas de la casa.',
-    sku: 'HMB-01',
-    ingredients: ['Carne Res 200g', 'Cheddar Fundido', 'Vegetales Frescos', 'Salsa de la Casa']
-  },
-  {
-    id: '2',
-    name: 'Perro Caliente Tradicional Con Todo',
-    category: 'Perros',
-    priceUSD: 2.50,
-    tag: '🌭 Callejero',
-    prepTime: '3-5 min',
-    image: '/packs/comida-street/perro-caliente.png',
-    description: 'Salchicha de primera, cebollita picada, repollo, lluvia de papitas crocantes, queso blanco y las 3 salsas.',
-    sku: 'PER-01',
-    ingredients: ['Salchicha de Primera', 'Cebollita y Repollo', 'Papitas Ralladas', 'Queso Blanco', '3 Salsas']
-  },
-  {
-    id: '3',
-    name: 'Pepito Mixto Gratinado 30cm',
-    category: 'Hamburguesas',
-    priceUSD: 8.50,
-    tag: '🏆 Gigante',
-    prepTime: '10-12 min',
-    image: '/packs/comida-street/pepito.png',
-    description: 'Pan artesanal suave de 30cm, lomito jugoso, pollo grille, papitas crocantes y queso de mano gratinado.',
-    sku: 'PEP-01',
-    ingredients: ['Pan Baguette 30cm', 'Lomito Tierno', 'Pechuga Pollo', 'Queso de Mano', 'Maíz']
-  },
-  {
-    id: '4',
-    name: 'Cachapa con Cochino Frito',
-    category: 'Extras',
-    priceUSD: 9.50,
-    tag: '🥩 Tradicional',
-    prepTime: '10-12 min',
-    image: '/packs/comida-street/cachapa-con-cochino.png',
-    description: 'Masa de maíz tierno recién molido, abundante queso de mano fresco, mantequilla llanera y porción de cochino frito crujiente.',
-    sku: 'CAC-01',
-    ingredients: ['Maíz Tierno', 'Queso de Mano Fresco', 'Cochino Frito Crujiente', 'Mantequilla Llanera']
-  },
-  {
-    id: '5',
-    name: 'Cachapa con Queso de Mano Doble',
-    category: 'Extras',
-    priceUSD: 6.00,
-    tag: '🧀 Criollo',
-    prepTime: '6-8 min',
-    image: '/packs/comida-street/cachapa-con-queso.png',
-    description: 'Cachapa dorada con doble rueda de queso de mano artesanal y mantequilla derretida.',
-    sku: 'CAC-02',
-    ingredients: ['Maíz Tierno', 'Doble Rueda Queso Mano', 'Mantequilla']
-  },
-  {
-    id: '6',
-    name: 'Mega Promo 5 Perros Calientes',
-    category: 'Combos',
-    priceUSD: 10.00,
-    tag: '💥 Ahorro',
-    prepTime: '8-10 min',
-    image: '/packs/comida-street/combo-5-perros.png',
-    description: '5 Perros calientes tradicionales completos con papitas, queso blanco y salsas variadas.',
-    sku: 'CMB-01',
-    ingredients: ['5x Perros Calientes', 'Papitas Ralladas', 'Queso Blanco', 'Salsas Tradicionales']
-  },
-  {
-    id: '7',
-    name: 'Combo 4 Perros + Refresco 1.5L',
-    category: 'Combos',
-    priceUSD: 11.50,
-    tag: '👥 Familiar',
-    prepTime: '8-10 min',
-    image: '/packs/comida-street/combo-4-perros-refresco.png',
-    description: '4 Perros calientes especiales con todo + 1 Refresco familiar de 1.5 litros bien frío.',
-    sku: 'CMB-02',
-    ingredients: ['4x Perros Especiales', '1x Refresco 1.5L Frío', 'Salsas Variadas']
-  },
-  {
-    id: '8',
-    name: 'Shawarma Mixto Libanés Especial',
-    category: 'Hamburguesas',
-    priceUSD: 5.50,
-    tag: '🌯 Clásico',
-    prepTime: '6-8 min',
-    image: '/packs/comida-street/shawarma.png',
-    description: 'Pan pita árabe tostado, carne marinada y pollo al trompo, lechuga, tomate, crema de ajo y salsa tártara.',
-    sku: 'SHW-01',
-    ingredients: ['Pan Pita Árabe', 'Carne y Pollo al Trompo', 'Crema de Ajo', 'Salsa Tártara']
-  },
-  {
-    id: '9',
-    name: 'Combo Shawarma + Papas + Refresco',
-    category: 'Combos',
-    priceUSD: 8.50,
-    tag: '🍟 Combo Brutal',
-    prepTime: '8-10 min',
-    image: '/packs/comida-street/combo-shawarma.png',
-    description: '1 Shawarma Mixto grande + 1 ración de papas fritas crocantes + 1 bebida personal fría.',
-    sku: 'CMB-03',
-    ingredients: ['1x Shawarma Mixto', '1x Ración Papas Fritas', '1x Bebida Personal']
-  },
-  {
-    id: '10',
-    name: 'Refresco Personal Frío 355ml',
-    category: 'Bebidas',
-    priceUSD: 1.50,
-    tag: '🧊 Bien Frío',
-    prepTime: 'Inmediato',
-    image: '/packs/comida-street/refresco.png',
-    description: 'Refresco frío a elección (Coca-Cola, Pepsi, Chinotto, Kolita) bien frío.',
-    sku: 'BEB-01',
-    ingredients: ['Lata / Botella 355ml', 'Bien Frío']
-  }
-];
-RUBROS_CATALOG.comida.sampleProducts = SAMPLE_PRODUCTS;
-
-const CATEGORIES = ['Todos', 'Combos', 'Hamburguesas', 'Perros', 'Bebidas', 'Extras'];
-
-const NOTE_PRESETS = [
-  'Con todo (tradicional)',
-  'Sin cebolla',
-  'Sin salsas',
-  'Extra salsa tártara',
-  'Extra salsa de ajo',
-  'Extra queso rallado',
-  'Bien cocido / Dorado',
-  'Para Llevar (Empaque térmico)'
-];
-
-const DEFAULT_CUSTOMERS: Customer[] = [
-  { id: '1', name: 'Consumidor Final', docId: 'V-00000000', phone: '', address: 'Consumo en Salón' },
-  { id: '2', name: 'Carlos Rodríguez', docId: 'V-18456123', phone: '0414-1234567', address: 'Calle 5 con Av. Principal' },
-  { id: '3', name: 'María Gómez', docId: 'V-22987654', phone: '0424-9876543', address: 'Urb. Los Rosales, Casa #14' },
-  { id: '4', name: 'Inversiones Gourmet C.A.', docId: 'J-40987123-5', phone: '0212-9988776', address: 'Zona Industrial Galpón 4' }
-];
-
-interface PosOrder {
-  id: string;
-  orderNumber: string;
-  type: 'local' | 'delivery' | 'llevar';
-  status: 'en_cola' | 'listo' | 'despachado';
-  paymentStatus: 'pagado' | 'por_cobrar';
-  paymentMethod: string;
-  items: CartItem[];
-  totalUSD: number;
-  totalVES: number;
-  customer: Customer;
-  table?: string;
-  driverId?: string;
-  driverName?: string;
-  deliveryAddress?: string;
-  notes?: string;
-  createdAt: string;
-  timeFormatted: string;
-}
+// Tipos locales auxiliares (no presentes en @/types/tablet-pos)
 
 const DEFAULT_SAMPLE_ORDERS: PosOrder[] = [
   {
@@ -549,26 +205,27 @@ const playDigitalTapSound = () => {
 };
 
 export default function TabletMobilePosPage() {
-  // 0. Pantalla de Bienvenida con Loader Animado (1s)
-  const [showSplash, setShowSplash] = useState(false);
-
   // Splash desactivado para carga instantánea 0ms
+  const [showSplash] = useState(false);
 
-  // 1. Tasa BCV y Modo de Consulta
-  const [bcvRate, setBcvRate] = useState(871.37);
-  const [bcvMode, setBcvMode] = useState<'auto' | 'manual'>('auto');
-  const [isBcvEditing, setIsBcvEditing] = useState(false);
-  const [customBcvInput, setCustomBcvInput] = useState('871.37');
-  const [isFetchingBcv, setIsFetchingBcv] = useState(false);
-  const [bcvToast, setBcvToast] = useState<{ message: string; type: 'success' | 'info' | 'error' } | null>(null);
+  // ─── Hooks Anti-Frankenstein ─────────────────────────────────────────────
+
+  // 1. Tasa BCV (extraído a /hooks/useBcvRate)
+  const {
+    bcvRate, setBcvRate, bcvMode, setBcvMode,
+    isBcvEditing, setIsBcvEditing,
+    customBcvInput, setCustomBcvInput,
+    isFetchingBcv, bcvToast, setBcvToast,
+    fetchBcvRateAuto, handleSaveManualBcv,
+  } = useBcvRate();
 
   // 2. Navegación Principal
   const [activeTab, setActiveTab] = useState<'menu' | 'mesas' | 'pedidos' | 'delivery' | 'cobro'>('menu');
   const [selectedCategory, setSelectedCategory] = useState('Todos');
   const [searchQuery, setSearchQuery] = useState('');
-  
+
   // 3. Modos de Vista, Lienzo y Branding
-  const [cardViewMode, setCardViewMode] = useState<'food' | 'lista'>('food');
+  const [cardViewMode, setCardViewMode] = useState<CardViewMode>('reels');
   const [themeMode, setThemeMode] = useState<'light' | 'dark'>('dark');
   const [activePalette, setActivePalette] = useState('amber');
   const [canvasTheme, setCanvasTheme] = useState<CanvasThemeId>('obsidian');
@@ -581,7 +238,6 @@ export default function TabletMobilePosPage() {
   const [showVisualPacksModal, setShowVisualPacksModal] = useState(false);
   const [showStreetAmbassadorModal, setShowStreetAmbassadorModal] = useState(false);
   const [menuQrUrl, setMenuQrUrl] = useState('');
-  const [editingItemNotes, setEditingItemNotes] = useState<CartItem | null>(null);
   const [activeTable, setActiveTable] = useState<number | null>(null);
 
   // 4b. Docker Flotante Minimalista & Nuevos Módulos
@@ -616,11 +272,6 @@ export default function TabletMobilePosPage() {
   const [orders, setOrders] = useState<PosOrder[]>(DEFAULT_SAMPLE_ORDERS);
   const [orderFilterStatus, setOrderFilterStatus] = useState<'todos' | 'en_cola' | 'listo' | 'despachado'>('todos');
   const [orderFilterType, setOrderFilterType] = useState<'todos' | 'local' | 'delivery'>('todos');
-
-  // Modalidad de Despacho en Cobro (Local, Delivery Pagado, Cobro en Destino)
-  const [fulfillmentMode, setFulfillmentMode] = useState<'local' | 'delivery_paid' | 'delivery_cod'>('local');
-  const [selectedDriverId, setSelectedDriverId] = useState<string>('1');
-  const [deliveryAddressInput, setDeliveryAddressInput] = useState<string>('');
 
   // Edición Completa de Producto
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -663,23 +314,6 @@ export default function TabletMobilePosPage() {
   const [newCustomerForm, setNewCustomerForm] = useState({ name: '', docId: '', phone: '', address: '' });
   const [customerSearch, setCustomerSearch] = useState('');
 
-  // 8. Pasarela de Cobro y Métodos
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<'pago_movil' | 'cash_usd' | 'cash_ves' | 'card_debit' | 'zelle' | 'mixed'>('pago_movil');
-  const [pagoMovilRefInput, setPagoMovilRefInput] = useState('');
-  const [cashUSDReceived, setCashUSDReceived] = useState<number>(0);
-  const [cashVESReceived, setCashVESReceived] = useState<number>(0);
-  const [cardVoucherRef, setCardVoucherRef] = useState('');
-  const [zelleConfirmation, setZelleConfirmation] = useState('');
-  const [completedSaleTicket, setCompletedSaleTicket] = useState<CompletedSaleTicket | null>(null);
-  const [copiedPmAlert, setCopiedPmAlert] = useState(false);
-
-  // Estados de Pago Mixto / Combinado
-  const [mixedPayments, setMixedPayments] = useState<MixedPaymentEntry[]>([]);
-  const [mixedInputMethod, setMixedInputMethod] = useState<'pago_movil' | 'cash_usd' | 'cash_ves' | 'card_debit' | 'zelle'>('cash_usd');
-  const [mixedInputCurrency, setMixedInputCurrency] = useState<'USD' | 'VES'>('USD');
-  const [mixedInputAmount, setMixedInputAmount] = useState<string>('');
-  const [mixedInputRef, setMixedInputRef] = useState<string>('');
-
   // 9. Mesas y Cuentas de Barra
   const [diningSpots, setDiningSpots] = useState([
     { id: 1, name: 'Mesa 1', type: 'mesa', status: 'libre', total: 0, items: 0, time: '' },
@@ -701,172 +335,22 @@ export default function TabletMobilePosPage() {
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [showSyncModal, setShowSyncModal] = useState(false);
 
-  // 11. Carrito Persistente
-  const [cart, setCart] = useState<CartItem[]>([
+  // 11. Carrito (extraído a /hooks/useCart)
+  const {
+    cart, setCart,
+    addToCart, updateQty, removeFromCart, clearCart, getCartQty,
+    editingItemNotes, setEditingItemNotes, saveItemNotes,
+  } = useCart([
     { id: '1', name: 'Hamburguesa Clásica Especial 200g', priceUSD: 6.50, qty: 2, category: 'Hamburguesas', notes: 'Sin cebolla, extra salsa de la casa', sku: 'HMB-01', image: SAMPLE_PRODUCTS[0].image },
     { id: '10', name: 'Refresco Personal Frío 355ml', priceUSD: 1.50, qty: 1, category: 'Bebidas', sku: 'BEB-01', image: SAMPLE_PRODUCTS[9].image }
   ]);
 
-  // Consulta automática de la Tasa Oficial BCV Multi-Fuente con Respaldo Firestore (0 CORS)
-  const fetchBcvRateAuto = async () => {
-    setIsFetchingBcv(true);
-    let resolvedRate: number | null = null;
-    let resolvedSource = '';
+  // Cálculos financieros del carrito (funciones puras de /lib/pos/cart-calculations)
+  const { totalUSD, totalVES, totalItems } = calcCartTotals(cart, bcvRate);
 
-    try {
-      // 1. Prioridad 1: Servidor Local / API Route (Scraper directo a bcv.org.ve en tiempo real)
-      try {
-        const res = await fetch('/api/bcv/rate?refresh=true');
-        if (res.ok) {
-          const data = await res.json();
-          if (data && typeof data.rate === 'number' && data.rate > 0) {
-            resolvedRate = data.rate;
-            resolvedSource = data.source || 'Portal Oficial BCV (bcv.org.ve)';
-          }
-        }
-      } catch {}
-
-      // 2. Prioridad 2: Respaldo Cloud Firestore (0 CORS, colección canónica bcv_rates/latest y fallback system_config)
-      if (!resolvedRate) {
-        try {
-          const cloudRate = await cloudSyncService.fetchLatestBcvRate();
-          if (cloudRate && cloudRate.rate > 0) {
-            resolvedRate = cloudRate.rate;
-            resolvedSource = cloudRate.source || 'Respaldo Cloud';
-          }
-        } catch (e) {
-          console.warn('[BCV] Firestore read fallback:', e);
-        }
-      }
-
-      // 3. Prioridad 3: DolarAPI Venezuela
-      if (!resolvedRate) {
-        try {
-          const res = await fetch('https://ve.dolarapi.com/v1/dolares/oficial');
-          if (res.ok) {
-            const data = await res.json();
-            const rate = data.promedio || data.precio || data.valor;
-            if (typeof rate === 'number' && rate > 0) {
-              resolvedRate = rate;
-              resolvedSource = 'DolarAPI Venezuela';
-            }
-          }
-        } catch {}
-      }
-
-      // 4. Prioridad 4: PyDolar Venezuela
-      if (!resolvedRate) {
-        try {
-          const res = await fetch('https://pydolarvenezuela-api.vercel.app/api/v1/dollar?page=bcv');
-          if (res.ok) {
-            const data = await res.json();
-            const val = parseFloat(data?.monitors?.usd?.price);
-            if (!isNaN(val) && val > 0) {
-              resolvedRate = val;
-              resolvedSource = 'PyDolar Venezuela';
-            }
-          }
-        } catch {}
-      }
-
-      // 5. Prioridad 5: Open Exchange Rates VES
-      if (!resolvedRate) {
-        try {
-          const res = await fetch('https://open.er-api.com/v6/latest/USD');
-          if (res.ok) {
-            const data = await res.json();
-            const val = parseFloat(data?.rates?.VES);
-            if (!isNaN(val) && val > 0) {
-              resolvedRate = val;
-              resolvedSource = 'OpenExchange';
-            }
-          }
-        } catch {}
-      }
-
-      // 6. Prioridad 6: Fawaz Ahmed Currency CDN
-      if (!resolvedRate) {
-        try {
-          const res = await fetch('https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json');
-          if (res.ok) {
-            const data = await res.json();
-            const val = parseFloat(data?.usd?.ves);
-            if (!isNaN(val) && val > 0) {
-              resolvedRate = val;
-              resolvedSource = 'CurrencyCDN';
-            }
-          }
-        } catch {}
-      }
-
-      if (resolvedRate && resolvedRate > 0) {
-        const rounded = Math.round(resolvedRate * 100) / 100;
-        setBcvRate(rounded);
-        setCustomBcvInput(rounded.toFixed(2));
-        try {
-          localStorage.setItem('klikpos_bcv_rate', String(rounded));
-          localStorage.setItem('klikpos_bcv_mode', 'auto');
-          if (isFirebaseConfigured()) {
-            cloudSyncService.pushBcvRate(rounded, resolvedSource).catch(() => {});
-            setDoc(doc(firestoreDb, 'system_config', 'bcv_rate'), {
-              rate: rounded,
-              source: resolvedSource,
-              updatedAt: new Date().toISOString()
-            }, { merge: true }).catch(() => {});
-          }
-        } catch {}
-
-        setBcvToast({
-          message: `✅ Tasa BCV Actualizada: Bs. ${rounded.toFixed(2)} (${resolvedSource})`,
-          type: 'success'
-        });
-        setTimeout(() => setBcvToast(null), 4000);
-      } else {
-        setBcvToast({
-          message: `⚠️ Conectado en modo offline. Tasa actual: Bs. ${bcvRate.toFixed(2)}`,
-          type: 'info'
-        });
-        setTimeout(() => setBcvToast(null), 4000);
-      }
-    } catch {
-      try {
-        const saved = localStorage.getItem('klikpos_bcv_rate');
-        if (saved) setBcvRate(parseFloat(saved));
-      } catch {}
-    } finally {
-      setIsFetchingBcv(false);
-    }
-  };
-
-  const handleSaveManualBcv = () => {
-    const parsed = parseFloat(customBcvInput.replace(',', '.'));
-    if (!isNaN(parsed) && parsed > 0) {
-      const rounded = Math.round(parsed * 100) / 100;
-      setBcvRate(rounded);
-      setBcvMode('manual');
-      setIsBcvEditing(false);
-      try {
-        localStorage.setItem('klikpos_bcv_rate', String(rounded));
-        localStorage.setItem('klikpos_bcv_mode', 'manual');
-        if (isFirebaseConfigured()) {
-          cloudSyncService.pushBcvRate(rounded, 'Ajuste Manual en Terminal').catch(() => {});
-          setDoc(doc(firestoreDb, 'system_config', 'bcv_rate'), {
-            rate: rounded,
-            source: 'Ajuste Manual en Terminal',
-            updatedAt: new Date().toISOString()
-          }, { merge: true }).catch(() => {});
-        }
-      } catch {}
-
-      setBcvToast({
-        message: `✅ Tasa manual fijada: Bs. ${rounded.toFixed(2)}`,
-        type: 'info'
-      });
-      setTimeout(() => setBcvToast(null), 4000);
-    }
-  };
 
   // Carga inicial y sincronización con LocalStorage y Dexie DB
+
   useEffect(() => {
     try {
       // 1. Configuración de Empresa
@@ -915,10 +399,12 @@ export default function TabletMobilePosPage() {
 
       // 4. Modos y Temas
       const savedMode = localStorage.getItem('klikpos_card_view_mode') as any;
-      if (savedMode === 'lista' || savedMode === 'food') {
+      if (savedMode === 'lista' || savedMode === 'grid' || savedMode === 'reels') {
         setCardViewMode(savedMode);
+      } else if (savedMode === 'food') {
+        setCardViewMode('reels');
       } else {
-        setCardViewMode('food');
+        setCardViewMode('reels');
       }
       const savedCanvas = localStorage.getItem('klikpos_canvas_theme');
       if (savedCanvas && CANVAS_THEMES.some(t => t.id === savedCanvas)) {
@@ -1010,23 +496,14 @@ export default function TabletMobilePosPage() {
     }
   }, []);
 
-  // Monitor del Período de Prueba de 30 Minutos y Registro en Firestore
+  // Estado de Operación Permanente sin Bloqueo de Licencia
   useEffect(() => {
-    // Registrar instalación en Firestore en segundo plano (idempotente)
     try {
       registerTrialInstallation().catch(() => {});
     } catch {}
 
-    const checkTrial = () => {
-      const state = evaluateTrialState();
-      setTrialState(state);
-      if (state.isTrial && state.isExpired) {
-        setShowStreetAmbassadorModal(true);
-      }
-    };
-    checkTrial();
-    const timer = setInterval(checkTrial, 2000);
-    return () => clearInterval(timer);
+    const state = evaluateTrialState();
+    setTrialState(state);
   }, []);
 
   const currentCanvas = CANVAS_THEMES.find(t => t.id === canvasTheme) || CANVAS_THEMES[0];
@@ -1046,6 +523,7 @@ export default function TabletMobilePosPage() {
       const root = document.documentElement;
       root.setAttribute('data-canvas', canvasTheme);
       root.setAttribute('data-theme', isLight ? 'light' : 'dark');
+      root.setAttribute('data-ui-style', isLight ? 'industrial' : 'street_pro');
 
       if (isLight) {
         root.classList.remove('dark');
@@ -1062,16 +540,79 @@ export default function TabletMobilePosPage() {
       root.style.setProperty('--brand-glow', currentPal.glow);
 
       // Inyección dinámica de tokens de lienzo y superficies
-      root.style.setProperty('--pos-canvas-bg', currentCanvas.bg);
-      root.style.setProperty('--pos-surface-bg', currentCanvas.surface);
-      root.style.setProperty('--pos-surface-card', currentCanvas.card);
-      root.style.setProperty('--pos-border-subtle', currentCanvas.border);
+      const effectiveBg = isLight ? '#ffffff' : (currentCanvas.bg || '#040711');
+      root.style.setProperty('--pos-canvas-bg', effectiveBg);
+      root.style.setProperty('--pos-surface-bg', isLight ? '#ffffff' : currentCanvas.surface);
+      root.style.setProperty('--pos-surface-card', isLight ? '#ffffff' : currentCanvas.card);
+      root.style.setProperty('--pos-border-subtle', isLight ? '#e2e8f0' : currentCanvas.border);
+      root.style.setProperty('--header-bg', isLight ? '#ffffff' : '#090d16');
+      root.style.setProperty('--header-text', isLight ? '#0f172a' : '#ffffff');
+      root.style.setProperty('--industrial-bg', effectiveBg);
+      root.style.setProperty('--industrial-card', isLight ? '#ffffff' : (currentCanvas.card || '#0f172a'));
+      root.style.setProperty('--industrial-text', isLight ? '#0f172a' : '#ffffff');
 
       localStorage.setItem('klikpos_street_mode', 'true');
-      document.body.style.backgroundColor = currentCanvas.bg;
-      root.style.backgroundColor = currentCanvas.bg;
+      localStorage.setItem('venematic_theme', isLight ? 'light' : 'dark');
+      document.body.style.backgroundColor = effectiveBg;
+      root.style.backgroundColor = effectiveBg;
     } catch {}
   }, [cardViewMode, cart, canvasTheme, activePalette, isLight, currentPal, currentCanvas]);
+
+  // Cambio Dinámico Ultra Fluido (View Transitions API + Sincronización Inmediata sin Latencia)
+  const applyThemeTokens = useCallback((targetThemeId: CanvasThemeId) => {
+    const targetCanvas = CANVAS_THEMES.find(t => t.id === targetThemeId) || CANVAS_THEMES[0];
+    const isTargetLight = targetCanvas.isLight;
+    const effectiveBg = isTargetLight ? '#ffffff' : (targetCanvas.bg || '#040711');
+    const root = document.documentElement;
+
+    root.setAttribute('data-canvas', targetThemeId);
+    root.setAttribute('data-theme', isTargetLight ? 'light' : 'dark');
+    root.setAttribute('data-ui-style', isTargetLight ? 'industrial' : 'street_pro');
+
+    if (isTargetLight) {
+      root.classList.remove('dark');
+      root.classList.add('light');
+    } else {
+      root.classList.add('dark');
+      root.classList.remove('light');
+    }
+
+    root.style.setProperty('--pos-canvas-bg', effectiveBg);
+    root.style.setProperty('--pos-surface-bg', isTargetLight ? '#ffffff' : targetCanvas.surface);
+    root.style.setProperty('--pos-surface-card', isTargetLight ? '#ffffff' : targetCanvas.card);
+    root.style.setProperty('--pos-border-subtle', isTargetLight ? '#e2e8f0' : targetCanvas.border);
+    root.style.setProperty('--header-bg', isTargetLight ? '#ffffff' : '#090d16');
+    root.style.setProperty('--header-text', isTargetLight ? '#0f172a' : '#ffffff');
+    root.style.setProperty('--industrial-bg', effectiveBg);
+    root.style.setProperty('--industrial-card', isTargetLight ? '#ffffff' : (targetCanvas.card || '#0f172a'));
+    root.style.setProperty('--industrial-text', isTargetLight ? '#0f172a' : '#ffffff');
+
+    document.body.style.backgroundColor = effectiveBg;
+    root.style.backgroundColor = effectiveBg;
+
+    try {
+      localStorage.setItem('klikpos_canvas_theme', targetThemeId);
+      localStorage.setItem('venematic_theme', isTargetLight ? 'light' : 'dark');
+      localStorage.setItem('klikpos_street_mode', 'true');
+    } catch {}
+  }, []);
+
+  const handleToggleTheme = useCallback((targetThemeId?: CanvasThemeId) => {
+    const nextThemeId: CanvasThemeId = targetThemeId || (isLight ? 'obsidian' : 'light-graphite');
+
+    const updateThemeState = () => {
+      applyThemeTokens(nextThemeId);
+      setCanvasTheme(nextThemeId);
+    };
+
+    if (typeof document !== 'undefined' && 'startViewTransition' in document) {
+      (document as any).startViewTransition(() => {
+        updateThemeState();
+      });
+    } else {
+      updateThemeState();
+    }
+  }, [isLight, applyThemeTokens]);
 
   // Blindaje Anti-Reinicio de Cámara: Persistir y recuperar estado de modal y borradores de inventario
   useEffect(() => {
@@ -1119,118 +660,36 @@ export default function TabletMobilePosPage() {
     } catch {}
   }, [editingProduct]);
 
-  // Cálculos Financieros
-  const totalUSD = cart.reduce((acc, item) => acc + (item.priceUSD * item.qty), 0);
-  const totalVES = totalUSD * bcvRate;
-  const totalItems = cart.reduce((acc, item) => acc + item.qty, 0);
-
-  // Vueltos en Efectivo
-  const vueltoUSD = Math.max(0, cashUSDReceived - totalUSD);
-  const vueltoVESfromUSD = vueltoUSD * bcvRate;
-  const vueltoVESfromVES = Math.max(0, cashVESReceived - totalVES);
-
-  // Cálculos de Pago Mixto / Combinado
-  const mixedPaidUSD = mixedPayments.reduce((acc, p) => acc + p.amountUSD, 0);
-  const mixedPaidVES = mixedPayments.reduce((acc, p) => acc + p.amountVES, 0);
-  const mixedPendingUSD = Math.max(0, totalUSD - mixedPaidUSD);
-  const mixedPendingVES = Math.max(0, totalVES - mixedPaidVES);
-  const mixedChangeUSD = Math.max(0, mixedPaidUSD - totalUSD);
-  const mixedChangeVES = Math.max(0, mixedPaidVES - totalVES);
-  const isMixedComplete = totalUSD > 0 && (mixedPaidUSD >= totalUSD - 0.01 || (bcvRate > 0 && mixedPaidVES >= totalVES - 0.05));
-
-  // Validación Global de Cobro (Evita cobrar si falta dinero para completar la cuenta)
-  let isPaymentComplete = false;
-  let missingAmountUSD = 0;
-  let missingAmountVES = 0;
-
-  if (fulfillmentMode === 'delivery_cod') {
-    isPaymentComplete = true; // Se cobra al entregar en destino
-  } else if (selectedPaymentMethod === 'mixed') {
-    isPaymentComplete = isMixedComplete;
-    missingAmountUSD = mixedPendingUSD;
-    missingAmountVES = mixedPendingVES;
-  } else if (selectedPaymentMethod === 'cash_usd') {
-    isPaymentComplete = cashUSDReceived >= totalUSD - 0.01;
-    missingAmountUSD = Math.max(0, totalUSD - cashUSDReceived);
-    missingAmountVES = missingAmountUSD * bcvRate;
-  } else if (selectedPaymentMethod === 'cash_ves') {
-    isPaymentComplete = cashVESReceived >= totalVES - 0.05;
-    missingAmountVES = Math.max(0, totalVES - cashVESReceived);
-    missingAmountUSD = bcvRate > 0 ? missingAmountVES / bcvRate : 0;
-  } else {
-    // Para Pago Móvil, Punto / Tarjeta o Zelle: se asume pago completo si se confirma
-    isPaymentComplete = true;
-  }
-
-  const handleAddMixedPayment = () => {
-    playDigitalTapSound();
-    const val = parseFloat(mixedInputAmount);
-    if (isNaN(val) || val <= 0) return;
-
-    let valUSD = 0;
-    let valVES = 0;
-    if (mixedInputCurrency === 'USD') {
-      valUSD = val;
-      valVES = val * bcvRate;
-    } else {
-      valVES = val;
-      valUSD = bcvRate > 0 ? val / bcvRate : 0;
-    }
-
-    const newEntry: MixedPaymentEntry = {
-      id: 'mix_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
-      method: mixedInputMethod,
-      currency: mixedInputCurrency,
-      amount: val,
-      amountUSD: valUSD,
-      amountVES: valVES,
-      reference: mixedInputRef.trim() || undefined
-    };
-
-    setMixedPayments(prev => [...prev, newEntry]);
-    setMixedInputAmount('');
-    setMixedInputRef('');
-  };
-
-  const handleRemoveMixedPayment = (id: string) => {
-    playDigitalTapSound();
-    setMixedPayments(prev => prev.filter(p => p.id !== id));
-  };
-
-  const addToCart = (prod: Product) => {
-    playDigitalTapSound();
-    setCart((prev) => {
-      const exists = prev.find((item) => item.id === prod.id);
-      if (exists) {
-        return prev.map((item) =>
-          item.id === prod.id ? { ...item, qty: item.qty + 1 } : item
-        );
-      }
-      return [...prev, {
-        id: prod.id,
-        name: prod.name,
-        priceUSD: prod.priceUSD,
-        qty: 1,
-        category: prod.category,
-        image: prod.image,
-        sku: prod.sku
-      }];
-    });
-  };
-
-  const updateQty = (id: string, delta: number) => {
-    playDigitalTapSound();
-    setCart((prev) =>
-      prev
-        .map((item) => (item.id === id ? { ...item, qty: Math.max(0, item.qty + delta) } : item))
-        .filter((item) => item.qty > 0)
-    );
-  };
-
-  const getCartQty = (productId: string) => {
-    const found = cart.find((i) => i.id === productId);
-    return found ? found.qty : 0;
-  };
+  // 8. Cobro (extraído a /hooks/useCheckout)
+  const {
+    selectedPaymentMethod, setSelectedPaymentMethod,
+    pagoMovilRefInput, setPagoMovilRefInput,
+    cashUSDReceived, setCashUSDReceived,
+    cashVESReceived, setCashVESReceived,
+    cardVoucherRef, setCardVoucherRef,
+    zelleConfirmation, setZelleConfirmation,
+    copiedPmAlert,
+    fulfillmentMode, setFulfillmentMode,
+    selectedDriverId, setSelectedDriverId,
+    deliveryAddressInput, setDeliveryAddressInput,
+    mixedPayments, mixedInputMethod, setMixedInputMethod,
+    mixedInputCurrency, setMixedInputCurrency,
+    mixedInputAmount, setMixedInputAmount,
+    mixedInputRef, setMixedInputRef,
+    handleAddMixedPayment, handleRemoveMixedPayment,
+    vueltoUSD, vueltoVESfromUSD, vueltoVESfromVES,
+    mixedPaidUSD, mixedPaidVES, mixedPendingUSD, mixedPendingVES,
+    mixedChangeUSD, mixedChangeVES, isMixedComplete,
+    isPaymentComplete, missingAmountUSD, missingAmountVES,
+    completedSaleTicket, setCompletedSaleTicket,
+    handleFinalizeSale, handleCopyPagoMovilData,
+  } = useCheckout({
+    cart, clearCart,
+    totalUSD, totalVES, bcvRate,
+    selectedCustomer, activeTable,
+    drivers, orders, setOrders,
+    companyInfo,
+  });
 
   const filteredProducts = products.filter((p) => {
     const matchesCategory = selectedCategory === 'Todos' || p.category === selectedCategory;
@@ -1239,6 +698,11 @@ export default function TabletMobilePosPage() {
                           (p.sku || '').toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
+
+  const leftProducts = filteredProducts.filter((_, idx) => idx % 2 === 0);
+  const rightProducts = filteredProducts.filter((_, idx) => idx % 2 !== 0);
+
+
 
   // Alternar Lado del Docker Flotante (Izquierda / Derecha)
   const handleToggleDockSide = () => {
@@ -1440,20 +904,7 @@ export default function TabletMobilePosPage() {
     setShowPagoMovilModal(false);
   };
 
-  // Copiar datos de Pago Móvil para el cliente
-  const handleCopyPagoMovilData = () => {
-    const text = `*DATOS PARA PAGO MÓVIL*\n` +
-      `🏦 Banco: ${pagoMovilInfo.bank}\n` +
-      `📱 Teléfono: ${pagoMovilInfo.phone}\n` +
-      `📄 Cédula/RIF: ${pagoMovilInfo.idDoc}\n` +
-      `👤 Titular: ${pagoMovilInfo.ownerName}\n` +
-      `💰 Monto en Bs: Bs. ${totalVES.toFixed(2)}`;
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(text);
-      setCopiedPmAlert(true);
-      setTimeout(() => setCopiedPmAlert(false), 2500);
-    }
-  };
+
 
   // Guardar Nuevo Cliente
   const handleCreateCustomer = (e: React.FormEvent) => {
@@ -1484,145 +935,6 @@ export default function TabletMobilePosPage() {
     setShowCustomerModal(false);
   };
 
-  // Finalizar Venta y Generar Ticket
-  const handleFinalizeSale = () => {
-    if (cart.length === 0) {
-      alert('La comanda está vacía. Agrega productos antes de liquidar.');
-      return;
-    }
-
-    if (!isPaymentComplete) {
-      alert(`No se puede completar el cobro: Aún faltan $${missingAmountUSD.toFixed(2)} USD (Bs. ${missingAmountVES.toFixed(2)}) para cubrir el total de la cuenta.`);
-      return;
-    }
-
-    const ticketNo = `TK-${Math.floor(100000 + Math.random() * 900000)}`;
-    const orderNo = `PED-${Math.floor(100 + Math.random() * 900)}`;
-    const now = new Date().toLocaleString('es-VE', { dateStyle: 'short', timeStyle: 'short' });
-
-    let refNumber = '';
-    let ticketPaymentMethod = selectedPaymentMethod as string;
-    let finalAmountReceivedUSD = undefined;
-    let finalChangeUSD = undefined;
-    let finalChangeVES = undefined;
-
-    if (fulfillmentMode === 'delivery_cod') {
-      ticketPaymentMethod = 'Cobro en Destino (Delivery)';
-    } else if (selectedPaymentMethod === 'mixed') {
-      ticketPaymentMethod = 'Pago Mixto / Combinado';
-      refNumber = mixedPayments.map(p => `${p.method === 'cash_usd' ? '$' : p.method === 'cash_ves' ? 'Bs' : p.method}: ${p.currency === 'USD' ? '$' + p.amount.toFixed(2) : 'Bs.' + p.amount.toFixed(2)}${p.reference ? ` (Ref: ${p.reference})` : ''}`).join(' | ');
-      finalAmountReceivedUSD = mixedPaidUSD;
-      finalChangeUSD = mixedChangeUSD;
-      finalChangeVES = mixedChangeVES;
-    } else if (selectedPaymentMethod === 'cash_usd') {
-      finalAmountReceivedUSD = cashUSDReceived;
-      finalChangeUSD = vueltoUSD;
-      finalChangeVES = vueltoVESfromUSD;
-    } else if (selectedPaymentMethod === 'cash_ves') {
-      finalChangeVES = vueltoVESfromVES;
-    } else if (selectedPaymentMethod === 'pago_movil') {
-      refNumber = pagoMovilRefInput || 'S/R';
-    } else if (selectedPaymentMethod === 'card_debit') {
-      refNumber = cardVoucherRef || 'Lote-POS';
-    } else if (selectedPaymentMethod === 'zelle') {
-      refNumber = zelleConfirmation || 'Zelle-OK';
-    }
-
-    const chosenDriver = drivers.find(d => d.id === selectedDriverId);
-
-    const saleTicket: CompletedSaleTicket = {
-      ticketNumber: ticketNo,
-      timestamp: now,
-      items: [...cart],
-      subtotalUSD: totalUSD,
-      totalUSD: totalUSD,
-      totalVES: totalVES,
-      bcvRate: bcvRate,
-      paymentMethod: ticketPaymentMethod,
-      reference: refNumber,
-      amountReceivedUSD: finalAmountReceivedUSD,
-      changeUSD: finalChangeUSD,
-      changeVES: finalChangeVES,
-      customer: selectedCustomer,
-      table: fulfillmentMode === 'local' ? (activeTable ? `Mesa #${activeTable}` : 'Barra / Mostrador') : `Delivery (${chosenDriver?.name || 'Motorizado'})`,
-      mixedPayments: selectedPaymentMethod === 'mixed' ? [...mixedPayments] : undefined
-    };
-
-    // Crear registro de Pedido en Cola
-    const newOrder: PosOrder = {
-      id: 'ord_' + Date.now(),
-      orderNumber: orderNo,
-      type: fulfillmentMode === 'local' ? 'local' : 'delivery',
-      status: 'en_cola',
-      paymentStatus: fulfillmentMode === 'delivery_cod' ? 'por_cobrar' : 'pagado',
-      paymentMethod: ticketPaymentMethod,
-      items: [...cart],
-      totalUSD: totalUSD,
-      totalVES: totalVES,
-      customer: selectedCustomer,
-      table: fulfillmentMode === 'local' ? (activeTable ? `Mesa #${activeTable}` : 'Mostrador') : undefined,
-      driverId: fulfillmentMode !== 'local' ? selectedDriverId : undefined,
-      driverName: fulfillmentMode !== 'local' ? (chosenDriver?.name || 'Por Asignar') : undefined,
-      deliveryAddress: fulfillmentMode !== 'local' ? (deliveryAddressInput || selectedCustomer.address || 'Entrega a Domicilio') : undefined,
-      createdAt: new Date().toISOString(),
-      timeFormatted: 'Ahora'
-    };
-
-    const nextOrders = [newOrder, ...orders];
-    setOrders(nextOrders);
-    try {
-      localStorage.setItem('klikpos_tablet_orders', JSON.stringify(nextOrders));
-      const pastSales = JSON.parse(localStorage.getItem('klikpos_tablet_sales') || '[]');
-      localStorage.setItem('klikpos_tablet_sales', JSON.stringify([saleTicket, ...pastSales.slice(0, 100)]));
-
-      db.sales.add({
-        receiptNumber: ticketNo,
-        timestamp: new Date().toISOString(),
-        items: cart.map(i => ({
-          productId: Number(i.id) || 1,
-          name: i.name,
-          barcode: i.sku || 'SKU-00',
-          qty: i.qty,
-          priceUSD: i.priceUSD,
-          totalUSD: i.priceUSD * i.qty
-        })),
-        subtotalUSD: totalUSD,
-        taxUSD: 0,
-        totalUSD: totalUSD,
-        totalVES: totalVES,
-        bcvRate: bcvRate,
-        payments: selectedPaymentMethod === 'mixed'
-          ? mixedPayments.map(p => ({
-              method: p.method as any,
-              amountUSD: p.amountUSD,
-              amountVES: p.amountVES,
-              reference: p.reference
-            }))
-          : [{
-              method: (fulfillmentMode === 'delivery_cod' ? 'cash_usd' : selectedPaymentMethod) as any,
-              amountUSD: totalUSD,
-              amountVES: totalVES,
-              reference: refNumber
-            }],
-        changeUSD: finalChangeUSD || 0,
-        changeVES: finalChangeVES || 0,
-        cashierName: 'Cajero Tablet',
-        customerName: selectedCustomer.name,
-        customerDoc: selectedCustomer.docId,
-        status: (fulfillmentMode === 'delivery_cod' ? 'pending' : 'completed') as any,
-        source: 'tablet'
-      }).catch(() => {});
-    } catch {}
-
-    setCompletedSaleTicket(saleTicket);
-    setCart([]);
-    setPagoMovilRefInput('');
-    setCashUSDReceived(0);
-    setCashVESReceived(0);
-    setDeliveryAddressInput('');
-    setMixedPayments([]);
-  };
-
   // Crear Mesa / Barra Dinámica
   const handleAddNewSpot = (e: React.FormEvent) => {
     e.preventDefault();
@@ -1649,19 +961,19 @@ export default function TabletMobilePosPage() {
   return (
     <div
       id="klikpos-street-root"
-      className={`h-screen flex flex-col font-sans select-none overflow-hidden relative transition-colors duration-200 ${
-        isLight ? 'text-slate-900 bg-slate-100' : 'text-slate-100 street-pos-dark-canvas'
+      className={`w-full w-screen max-w-none min-h-screen min-h-dvh h-screen flex flex-col font-sans select-none overflow-hidden relative m-0 p-0 transition-colors duration-200 ${
+        isLight ? 'text-slate-900 bg-white light-mode' : 'text-slate-100 bg-[#040711] street-pos-dark-canvas dark-mode'
       }`}
       style={{
-        backgroundColor: currentCanvas.bg,
+        backgroundColor: isLight ? '#ffffff' : (currentCanvas.bg || '#040711'),
         '--brand-color': currentPal.primary,
         '--brand-hover': currentPal.hover,
         '--brand-accent': currentPal.accent,
         '--brand-glow': currentPal.glow,
-        '--pos-canvas-bg': currentCanvas.bg,
-        '--pos-surface-bg': currentCanvas.surface,
-        '--pos-surface-card': currentCanvas.card,
-        '--pos-border-subtle': currentCanvas.border,
+        '--pos-canvas-bg': isLight ? '#ffffff' : currentCanvas.bg,
+        '--pos-surface-bg': isLight ? '#ffffff' : currentCanvas.surface,
+        '--pos-surface-card': isLight ? '#ffffff' : currentCanvas.card,
+        '--pos-border-subtle': isLight ? '#e2e8f0' : currentCanvas.border,
       } as React.CSSProperties}
     >
       <style jsx global>{`
@@ -1738,138 +1050,228 @@ export default function TabletMobilePosPage() {
 
       {/* Docker Flotante Abierto: EXCLUSIVAMENTE Pill Vertical con Íconos Directos */}
       {isDockerOpen && (
-        <div
-          className={`fixed top-1/2 -translate-y-1/2 z-50 animate-in fade-in zoom-in-95 duration-200 ${
-            dockSide === 'left' ? 'left-2.5' : 'right-2.5'
-          }`}
-        >
-          {/* Cápsula Vertical Obsidian Dark Blue con Cristal Translúcido y Micro-Tarjetas de Alto Contraste AAA */}
-          <aside
-            className="street-floating-docker w-14 rounded-[32px] py-4 px-1.5 flex flex-col items-center justify-between shadow-2xl border select-none shrink-0 min-h-[380px] z-50 backdrop-blur-xl transition-all"
-            style={{
-              backgroundColor: '#090d16',
-              borderColor: 'rgba(255, 255, 255, 0.16)',
-              backdropFilter: 'blur(20px) saturate(180%)',
-              WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-              boxShadow: '0 25px 60px -10px rgba(0, 0, 0, 0.95), inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.8)'
-            }}
+        <>
+          {/* Backdrop sutil e interactivo para cerrar al tocar fuera */}
+          <div
+            onClick={() => setIsDockerOpen(false)}
+            className="fixed inset-0 z-40 bg-black/20 backdrop-blur-[1px] transition-opacity"
+            title="Cerrar Docker"
+          />
+          <div
+            className={`fixed top-1/2 -translate-y-1/2 z-50 animate-in fade-in zoom-in-95 duration-200 ${
+              dockSide === 'left' ? 'left-2.5' : 'right-2.5'
+            }`}
           >
-            {/* Íconos Centrales de Acceso Directo con Contraste AAA y Micro-Fondos */}
-            <div className="flex flex-col items-center gap-2.5 my-auto">
-              {/* 1. Inventario & Stock */}
-              <button
-                onClick={() => setShowInventoryModal(true)}
-                className="w-10 h-10 rounded-xl flex items-center justify-center text-emerald-300 bg-emerald-500/25 border border-emerald-400/40 hover:bg-emerald-500/40 hover:scale-110 active:scale-95 transition-all shadow-sm cursor-pointer group"
-                title="Gestión de Inventario & Stock"
-              >
-                <Package className="w-5 h-5 stroke-[2.2]" />
-              </button>
-
-              {/* 1b. Paquetes Visuales & Catálogos Cloud con Fotos HD */}
-              <button
-                onClick={() => setShowVisualPacksModal(true)}
-                className="w-10 h-10 rounded-xl flex items-center justify-center text-cyan-300 bg-cyan-500/25 border border-cyan-400/40 hover:bg-cyan-500/40 hover:scale-110 active:scale-95 transition-all shadow-sm cursor-pointer group"
-                title="Librería Cloud de Paquetes Visuales & Fotos HD"
-              >
-                <ImageIcon className="w-5 h-5 stroke-[2.2]" />
-              </button>
-
-              {/* 2. Motorizados / Despacho (Opcional en Lite) */}
-              {!IS_LITE_MODE && (
+            {/* Cápsula Vertical Adaptativa (Obsidian Dark Blue o Blanco Cristal Translúcido con Contraste AAA) */}
+            <aside
+              className="street-floating-docker w-14 rounded-[32px] py-4 px-1.5 flex flex-col items-center justify-between shadow-2xl border select-none shrink-0 min-h-[380px] z-50 backdrop-blur-xl transition-all"
+              style={{
+                backgroundColor: isLight ? 'rgba(255, 255, 255, 0.94)' : '#090d16',
+                borderColor: isLight ? 'rgba(15, 23, 42, 0.14)' : 'rgba(255, 255, 255, 0.16)',
+                backdropFilter: 'blur(20px) saturate(180%)',
+                WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+                boxShadow: isLight
+                  ? '0 20px 45px -10px rgba(15, 23, 42, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 0 0 1px rgba(15, 23, 42, 0.08)'
+                  : '0 25px 60px -10px rgba(0, 0, 0, 0.95), inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.8)'
+              }}
+            >
+              {/* Íconos Centrales de Acceso Directo con Contraste AAA y Micro-Fondos */}
+              <div className="flex flex-col items-center gap-2.5 my-auto">
+                {/* 1. Inventario & Stock */}
                 <button
-                  onClick={() => setShowDriversModal(true)}
-                  className="w-10 h-10 rounded-xl flex items-center justify-center text-amber-300 bg-amber-500/25 border border-amber-400/40 hover:bg-amber-500/40 hover:scale-110 active:scale-95 transition-all shadow-sm cursor-pointer group"
-                  title="Motorizados & Despacho Delivery"
+                  onClick={() => {
+                    setIsDockerOpen(false);
+                    setShowInventoryModal(true);
+                  }}
+                  className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all shadow-sm cursor-pointer group hover:scale-110 active:scale-95 ${
+                    isLight
+                      ? 'text-emerald-800 bg-emerald-100 border border-emerald-300 hover:bg-emerald-200'
+                      : 'text-emerald-300 bg-emerald-500/25 border border-emerald-400/40 hover:bg-emerald-500/40'
+                  }`}
+                  title="Gestión de Inventario & Stock"
                 >
-                  <Truck className="w-5 h-5 stroke-[2.2]" />
+                  <Package className="w-5 h-5 stroke-[2.2]" />
                 </button>
-              )}
 
-              {/* 3. Impresora Térmica POS */}
-              <button
-                onClick={() => setShowPrinterModal(true)}
-                className="w-10 h-10 rounded-xl flex items-center justify-center text-sky-300 bg-sky-500/25 border border-sky-400/40 hover:bg-sky-500/40 hover:scale-110 active:scale-95 transition-all shadow-sm cursor-pointer group"
-                title="Configuración de Impresora POS"
-              >
-                <Printer className="w-5 h-5 stroke-[2.2]" />
-              </button>
-
-              {/* 4. Cambiar Rubro Comercial */}
-              <button
-                onClick={() => setShowRubroModal(true)}
-                className="w-10 h-10 rounded-xl flex items-center justify-center text-purple-300 bg-purple-500/25 border border-purple-400/40 hover:bg-purple-500/40 hover:scale-110 active:scale-95 transition-all shadow-sm cursor-pointer group"
-                title="Cambiar Rubro Comercial (Comida, Farmacia, Bodega, etc.)"
-              >
-                <Boxes className="w-5 h-5 stroke-[2.2]" />
-              </button>
-
-              {/* 5. Menú QR Dinámico para Clientes (Opcional en Lite) */}
-              {!IS_LITE_MODE && (
+                {/* 1b. Paquetes Visuales & Catálogos Cloud con Fotos HD */}
                 <button
-                  onClick={() => setShowQrModal(true)}
-                  className="w-10 h-10 rounded-xl flex items-center justify-center text-indigo-300 bg-indigo-500/25 border border-indigo-400/40 hover:bg-indigo-500/40 hover:scale-110 active:scale-95 transition-all shadow-sm cursor-pointer group"
-                  title="Generar Menú QR Digital para Clientes"
+                  onClick={() => {
+                    setIsDockerOpen(false);
+                    setShowVisualPacksModal(true);
+                  }}
+                  className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all shadow-sm cursor-pointer group hover:scale-110 active:scale-95 ${
+                    isLight
+                      ? 'text-cyan-800 bg-cyan-100 border border-cyan-300 hover:bg-cyan-200'
+                      : 'text-cyan-300 bg-cyan-500/25 border border-cyan-400/40 hover:bg-cyan-500/40'
+                  }`}
+                  title="Librería Cloud de Paquetes Visuales & Fotos HD"
                 >
-                  <QrCode className="w-5 h-5 stroke-[2.2]" />
+                  <ImageIcon className="w-5 h-5 stroke-[2.2]" />
                 </button>
-              )}
 
-              {/* 6. Módulo de Ventas & Respaldo */}
-              <button
-                onClick={() => setShowSalesBackupModal(true)}
-                className="w-10 h-10 rounded-xl flex items-center justify-center text-emerald-300 bg-emerald-500/25 border border-emerald-400/40 hover:bg-emerald-500/40 hover:scale-110 active:scale-95 transition-all shadow-sm cursor-pointer group"
-                title="Módulo de Ventas & Respaldo (Diario, Semanal, Mensual)"
-              >
-                <TrendingUp className="w-5 h-5 stroke-[2.4]" />
-              </button>
+                {/* 2. Motorizados / Despacho (Opcional en Lite) */}
+                {!IS_LITE_MODE && (
+                  <button
+                    onClick={() => {
+                      setIsDockerOpen(false);
+                      setShowDriversModal(true);
+                    }}
+                    className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all shadow-sm cursor-pointer group hover:scale-110 active:scale-95 ${
+                      isLight
+                        ? 'text-amber-800 bg-amber-100 border border-amber-300 hover:bg-amber-200'
+                        : 'text-amber-300 bg-amber-500/25 border border-amber-400/40 hover:bg-amber-500/40'
+                    }`}
+                    title="Motorizados & Despacho Delivery"
+                  >
+                    <Truck className="w-5 h-5 stroke-[2.2]" />
+                  </button>
+                )}
 
-              {/* 7. Sincronizar Data */}
-              <button
-                onClick={() => setShowSyncModal(true)}
-                className="w-10 h-10 rounded-xl flex items-center justify-center text-cyan-300 bg-cyan-500/25 border border-cyan-400/40 hover:bg-cyan-500/40 hover:scale-110 active:scale-95 transition-all shadow-sm cursor-pointer group"
-                title="Sincronizar Data (Tasa BCV, Ventas & Catálogo Cloud)"
-              >
-                <RefreshCw className="w-5 h-5 stroke-[2.4]" />
-              </button>
+                {/* 3. Impresora Térmica POS */}
+                <button
+                  onClick={() => {
+                    setIsDockerOpen(false);
+                    setShowPrinterModal(true);
+                  }}
+                  className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all shadow-sm cursor-pointer group hover:scale-110 active:scale-95 ${
+                    isLight
+                      ? 'text-sky-800 bg-sky-100 border border-sky-300 hover:bg-sky-200'
+                      : 'text-sky-300 bg-sky-500/25 border border-sky-400/40 hover:bg-sky-500/40'
+                  }`}
+                  title="Configuración de Impresora POS"
+                >
+                  <Printer className="w-5 h-5 stroke-[2.2]" />
+                </button>
 
-              {/* 8. Actualizar Software */}
-              <button
-                onClick={() => setShowUpdateModal(true)}
-                className="w-10 h-10 rounded-xl flex items-center justify-center text-yellow-300 bg-yellow-500/25 border border-yellow-400/40 hover:bg-yellow-500/40 hover:scale-110 active:scale-95 transition-all shadow-sm cursor-pointer group"
-                title="Actualizar Software (GitHub Release & APK)"
-              >
-                <Sparkles className="w-5 h-5 stroke-[2.4]" />
-              </button>
+                {/* 4. Cambiar Rubro Comercial */}
+                <button
+                  onClick={() => {
+                    setIsDockerOpen(false);
+                    setShowRubroModal(true);
+                  }}
+                  className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all shadow-sm cursor-pointer group hover:scale-110 active:scale-95 ${
+                    isLight
+                      ? 'text-purple-800 bg-purple-100 border border-purple-300 hover:bg-purple-200'
+                      : 'text-purple-300 bg-purple-500/25 border border-purple-400/40 hover:bg-purple-500/40'
+                  }`}
+                  title="Cambiar Rubro Comercial (Comida, Farmacia, Bodega, etc.)"
+                >
+                  <Boxes className="w-5 h-5 stroke-[2.2]" />
+                </button>
 
-              {/* 9. Ajustes & Configuración */}
-              <button
-                onClick={() => setIsLeftDrawerOpen(true)}
-                className="w-10 h-10 rounded-xl flex items-center justify-center text-slate-100 bg-slate-800/90 border border-slate-600/70 hover:bg-slate-700 hover:scale-110 active:scale-95 transition-all shadow-sm cursor-pointer group"
-                title="Ajustes de Empresa & RIF"
-              >
-                <Settings className="w-5 h-5 stroke-[2.2]" />
-              </button>
-            </div>
+                {/* 5. Menú QR Dinámico para Clientes (Opcional en Lite) */}
+                {!IS_LITE_MODE && (
+                  <button
+                    onClick={() => {
+                      setIsDockerOpen(false);
+                      setShowQrModal(true);
+                    }}
+                    className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all shadow-sm cursor-pointer group hover:scale-110 active:scale-95 ${
+                      isLight
+                        ? 'text-indigo-800 bg-indigo-100 border border-indigo-300 hover:bg-indigo-200'
+                        : 'text-indigo-300 bg-indigo-500/25 border border-indigo-400/40 hover:bg-indigo-500/40'
+                    }`}
+                    title="Generar Menú QR Digital para Clientes"
+                  >
+                    <QrCode className="w-5 h-5 stroke-[2.2]" />
+                  </button>
+                )}
 
-            {/* Bottom: Alternar Lado (Izq/Der) y Colapsar */}
-            <div className="flex flex-col items-center gap-2 pt-2 border-t border-white/10 shrink-0 w-full">
-              <button
-                onClick={handleToggleDockSide}
-                className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-300 hover:text-amber-300 hover:bg-white/10 active:scale-90 transition-all cursor-pointer"
-                title={dockSide === 'left' ? 'Mover Docker a la Derecha' : 'Mover Docker a la Izquierda'}
-              >
-                <ArrowLeftRight className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => setIsDockerOpen(false)}
-                className="w-9 h-9 rounded-xl flex items-center justify-center text-rose-400 hover:text-rose-300 hover:bg-rose-500/20 active:scale-90 transition-all cursor-pointer"
-                title="Minimizar Docker"
-              >
-                <X className="w-4 h-4 stroke-[2.5]" />
-              </button>
-            </div>
-          </aside>
-        </div>
+                {/* 6. Módulo de Ventas & Respaldo */}
+                <button
+                  onClick={() => {
+                    setIsDockerOpen(false);
+                    setShowSalesBackupModal(true);
+                  }}
+                  className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all shadow-sm cursor-pointer group hover:scale-110 active:scale-95 ${
+                    isLight
+                      ? 'text-emerald-800 bg-emerald-100 border border-emerald-300 hover:bg-emerald-200'
+                      : 'text-emerald-300 bg-emerald-500/25 border border-emerald-400/40 hover:bg-emerald-500/40'
+                  }`}
+                  title="Módulo de Ventas & Respaldo (Diario, Semanal, Mensual)"
+                >
+                  <TrendingUp className="w-5 h-5 stroke-[2.4]" />
+                </button>
+
+                {/* 7. Sincronizar Data */}
+                <button
+                  onClick={() => {
+                    setIsDockerOpen(false);
+                    setShowSyncModal(true);
+                  }}
+                  className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all shadow-sm cursor-pointer group hover:scale-110 active:scale-95 ${
+                    isLight
+                      ? 'text-cyan-800 bg-cyan-100 border border-cyan-300 hover:bg-cyan-200'
+                      : 'text-cyan-300 bg-cyan-500/25 border border-cyan-400/40 hover:bg-cyan-500/40'
+                  }`}
+                  title="Sincronizar Data (Tasa BCV, Ventas & Catálogo Cloud)"
+                >
+                  <RefreshCw className="w-5 h-5 stroke-[2.4]" />
+                </button>
+
+                {/* 8. Actualizar Software */}
+                <button
+                  onClick={() => {
+                    setIsDockerOpen(false);
+                    setShowUpdateModal(true);
+                  }}
+                  className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all shadow-sm cursor-pointer group hover:scale-110 active:scale-95 ${
+                    isLight
+                      ? 'text-amber-800 bg-amber-100 border border-amber-300 hover:bg-amber-200'
+                      : 'text-yellow-300 bg-yellow-500/25 border border-yellow-400/40 hover:bg-yellow-500/40'
+                  }`}
+                  title="Actualizar Software (GitHub Release & APK)"
+                >
+                  <Sparkles className="w-5 h-5 stroke-[2.4]" />
+                </button>
+
+                {/* 9. Ajustes & Configuración */}
+                <button
+                  onClick={() => {
+                    setIsDockerOpen(false);
+                    setIsLeftDrawerOpen(true);
+                  }}
+                  className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all shadow-sm cursor-pointer group hover:scale-110 active:scale-95 ${
+                    isLight
+                      ? 'text-slate-800 bg-slate-100 border border-slate-300 hover:bg-slate-200'
+                      : 'text-slate-100 bg-slate-800/90 border border-slate-600/70 hover:bg-slate-700'
+                  }`}
+                  title="Ajustes de Empresa & RIF"
+                >
+                  <Settings className="w-5 h-5 stroke-[2.2]" />
+                </button>
+              </div>
+
+              {/* Bottom: Alternar Lado (Izq/Der) y Colapsar */}
+              <div className={`flex flex-col items-center gap-2 pt-2 border-t shrink-0 w-full ${
+                isLight ? 'border-slate-200' : 'border-white/10'
+              }`}>
+                <button
+                  onClick={handleToggleDockSide}
+                  className={`w-9 h-9 rounded-xl flex items-center justify-center active:scale-90 transition-all cursor-pointer ${
+                    isLight
+                      ? 'text-slate-600 hover:text-amber-600 hover:bg-slate-100'
+                      : 'text-slate-300 hover:text-amber-300 hover:bg-white/10'
+                  }`}
+                  title={dockSide === 'left' ? 'Mover Docker a la Derecha' : 'Mover Docker a la Izquierda'}
+                >
+                  <ArrowLeftRight className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setIsDockerOpen(false)}
+                  className={`w-9 h-9 rounded-xl flex items-center justify-center active:scale-90 transition-all cursor-pointer ${
+                    isLight
+                      ? 'text-rose-600 hover:text-rose-700 hover:bg-rose-50'
+                      : 'text-rose-400 hover:text-rose-300 hover:bg-rose-500/20'
+                  }`}
+                  title="Minimizar Docker"
+                >
+                  <X className="w-4 h-4 stroke-[2.5]" />
+                </button>
+              </div>
+            </aside>
+          </div>
+        </>
       )}
 
       {/* ========================================================================= */}
@@ -1880,14 +1282,16 @@ export default function TabletMobilePosPage() {
       {/* ========================================================================= */}
       <header
         id="klikpos-street-header"
-        className={`h-14 px-3 flex items-center justify-between border-b shrink-0 z-20 shadow-xs transition-colors duration-200 ${
-          isLight ? 'border-slate-200 text-slate-900' : 'border-slate-800/90 text-white'
+        className={`w-full h-[68px] px-4 sm:px-6 md:px-8 flex items-center border-b shrink-0 z-20 shadow-xs transition-colors duration-200 ${
+          isLight ? 'border-slate-200 text-slate-900 bg-white' : 'border-slate-800/90 text-white bg-[#090d16]'
         }`}
         style={{
-          backgroundColor: currentCanvas.surface,
-          borderColor: isLight ? '#e2e8f0' : currentCanvas.border
+          backgroundColor: isLight ? '#ffffff' : '#090d16',
+          borderColor: isLight ? '#e2e8f0' : currentCanvas.border,
+          color: isLight ? '#0f172a' : '#ffffff'
         }}
       >
+        <div className="w-full max-w-6xl mx-auto flex items-center justify-between">
         {/* LADO IZQUIERDO: Logo KlikPOS Street + Acciones Principales */}
         <div className="flex items-center gap-2">
           {/* Logo KlikPOS Street Vector & Clean Branding */}
@@ -1897,36 +1301,43 @@ export default function TabletMobilePosPage() {
             title="KlikPOS Street"
           >
             <div className="flex items-baseline tracking-tight font-black text-lg">
-              <span style={{ color: isLight ? '#0f172a' : '#ffffff' }}>Klik</span>
-              <span style={{ color: currentPal.primary }} className="transition-colors">POS</span>
+              <span className="klikpos-brand-klik" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>Klik</span>
+              <span style={{ color: currentPal.primary || '#f59e0b' }} className="transition-colors font-black">POS</span>
             </div>
-            <span className="text-[9px] font-extrabold text-amber-500/95 tracking-widest text-right -mt-0.5">
+            <span className="text-[9.5px] font-extrabold text-amber-400 tracking-wider text-right -mt-0.5">
               Street
             </span>
           </div>
         </div>
 
-        {/* CENTRO: Badge Tasa BCV Oficial (Una Sola Línea, Sin Romper Texto) */}
-        <div className="flex items-center justify-center mx-1">
+        {/* CENTRO: Pills Compactas y Espaciadas (BCV Optimizada + Sincronización + Tema) */}
+        <div className="flex items-center gap-2 sm:gap-2.5 mx-auto">
           {isBcvEditing ? (
-            <div className="flex items-center gap-1 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 px-2.5 py-1 rounded-xl shadow-xs">
-              <span className="text-[11px] font-mono font-bold text-slate-400">Bs.</span>
+            <div 
+              className="flex items-center gap-1 border px-2 py-0.5 rounded-full shadow-xs"
+              style={{
+                backgroundColor: isLight ? '#ffffff' : '#0f172a',
+                borderColor: isLight ? '#cbd5e1' : '#334155'
+              }}
+            >
+              <span className="text-[10px] font-mono font-bold text-slate-400">Bs.</span>
               <input
                 type="number"
                 step="0.01"
                 value={customBcvInput}
                 onChange={(e) => setCustomBcvInput(e.target.value)}
-                className="w-16 text-xs font-mono font-black text-slate-900 dark:text-white bg-transparent outline-none"
+                className="w-14 text-xs font-mono font-black outline-none bg-transparent"
+                style={{ color: isLight ? '#0f172a' : '#ffffff' }}
               />
               <button
                 onClick={handleSaveManualBcv}
-                className="px-1.5 py-0.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-[10px] font-black cursor-pointer"
+                className="px-1.5 py-0.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-full text-[9px] font-black cursor-pointer"
               >
                 ✓
               </button>
               <button
                 onClick={() => setIsBcvEditing(false)}
-                className="px-1 py-0.5 text-slate-400 text-[10px] cursor-pointer"
+                className="px-1 py-0.5 text-slate-400 hover:text-slate-600 text-[9px] cursor-pointer"
               >
                 ✕
               </button>
@@ -1934,28 +1345,32 @@ export default function TabletMobilePosPage() {
           ) : (
             <div
               onClick={() => setIsBcvEditing(true)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border transition-all text-xs font-mono font-bold shadow-xs whitespace-nowrap cursor-pointer select-none ${
-                isLight
-                  ? 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-900'
-                  : 'bg-slate-900/90 hover:bg-slate-850 border-slate-800 text-slate-100'
-              }`}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border transition-all text-xs font-mono font-bold shadow-xs whitespace-nowrap cursor-pointer select-none active:scale-95"
+              style={{
+                backgroundColor: isLight ? '#ffffff' : '#0f172a',
+                borderColor: isLight ? '#cbd5e1' : '#1e293b',
+                color: isLight ? '#0f172a' : '#ffffff'
+              }}
               title="Toca para editar tasa BCV manualmente"
             >
-              <span className="text-[10px] font-black text-sky-500 tracking-wider">BCV:</span>
-              <span className="font-black text-xs" style={{ color: isLight ? '#0f172a' : '#38bdf8' }}>
+              <span className="text-[9.5px] font-black tracking-wider" style={{ color: isLight ? '#0284c7' : '#ffffff' }}>
+                BCV:
+              </span>
+              <span className="font-black text-[11px]" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
                 Bs. {bcvRate.toFixed(2)}
               </span>
               <button
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
-                  fetchBcvRateAuto();
+                  fetchBcvRateAuto(true);
                 }}
                 disabled={isFetchingBcv}
-                className="p-0.5 hover:text-sky-400 text-slate-400 transition-colors cursor-pointer"
+                className="p-0.5 hover:text-sky-300 transition-colors cursor-pointer"
+                style={{ color: isLight ? '#64748b' : '#ffffff' }}
                 title="Actualizar tasa oficial BCV"
               >
-                <RefreshCw className={`w-3 h-3 ${isFetchingBcv ? 'animate-spin text-sky-400' : ''}`} />
+                <RefreshCw className={`w-2.5 h-2.5 ${isFetchingBcv ? 'animate-spin text-sky-400' : ''}`} />
               </button>
             </div>
           )}
@@ -1964,11 +1379,31 @@ export default function TabletMobilePosPage() {
           <button
             type="button"
             onClick={() => setShowSyncModal(true)}
-            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-sky-500/40 bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 font-black text-xs transition-all active:scale-95 shadow-xs cursor-pointer select-none shrink-0"
+            className="hidden md:flex items-center gap-1 px-2.5 py-1 rounded-full border border-sky-500/30 bg-sky-500/10 hover:bg-sky-500/20 text-sky-500 dark:text-sky-400 font-black text-[10.5px] transition-all active:scale-95 shadow-xs cursor-pointer select-none shrink-0"
             title="Sincronizar Data (Tasa BCV, Ventas & Catálogo Cloud)"
           >
-            <RefreshCw className="w-3.5 h-3.5 text-sky-400" />
-            <span>Sincronizar Data</span>
+            <RefreshCw className="w-3 h-3 text-sky-500 dark:text-sky-400" />
+            <span>Sync</span>
+          </button>
+
+          {/* Botón Rápido de Cambio de Tema: Ultra Rápido y Fluido */}
+          <button
+            type="button"
+            onClick={() => handleToggleTheme()}
+            className="w-7 h-7 rounded-full border transition-all active:scale-90 cursor-pointer shrink-0 flex items-center justify-center shadow-xs"
+            style={{
+              backgroundColor: isLight ? '#ffffff' : '#0f172a',
+              borderColor: isLight ? '#cbd5e1' : '#334155',
+              color: isLight ? '#0f172a' : '#f59e0b'
+            }}
+            title={isLight ? 'Cambiar a modo Obsidian Nocturno' : 'Cambiar a modo Blanco Grafito'}
+            aria-label="Alternar Tema Diurno/Nocturno"
+          >
+            {isLight ? (
+              <Moon className="w-3.5 h-3.5 text-slate-700" />
+            ) : (
+              <Sun className="w-3.5 h-3.5 text-amber-400" />
+            )}
           </button>
         </div>
 
@@ -1988,24 +1423,28 @@ export default function TabletMobilePosPage() {
 
           <button
             onClick={() => setIsRightDrawerOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-slate-950 font-black text-xs transition-all duration-200 relative active:scale-95 shadow-md cursor-pointer shrink-0 whitespace-nowrap"
-            style={{ backgroundColor: currentPal.primary }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-black text-xs transition-all duration-200 relative active:scale-95 shadow-md cursor-pointer shrink-0 whitespace-nowrap"
+            style={{ 
+              backgroundColor: currentPal.primary,
+              color: '#ffffff'
+            }}
             title="Ver Comanda Activa"
           >
-            <ShoppingCart className="w-3.5 h-3.5 text-slate-950 shrink-0" />
-            <span className="font-mono text-xs font-black shrink-0">${totalUSD.toFixed(2)}</span>
+            <ShoppingCart className="w-3.5 h-3.5 text-white shrink-0" />
+            <span className="font-mono text-xs font-black shrink-0 text-white">${totalUSD.toFixed(2)}</span>
             {totalItems > 0 && (
-              <span className="bg-slate-950 text-amber-400 text-[10px] font-mono font-black px-1.5 py-0.2 rounded-full shadow-xs anim-badge-spring shrink-0">
+              <span className="bg-slate-950 text-white border border-white/20 text-[10px] font-mono font-black px-1.5 py-0.2 rounded-full shadow-xs anim-badge-spring shrink-0">
                 {totalItems}
               </span>
             )}
           </button>
         </div>
+        </div>
       </header>
 
       {/* Notificación Flotante de Tasa BCV Oficial */}
       {bcvToast && (
-        <div className="fixed top-16 left-1/2 -translate-x-1/2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+        <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
           <div className="px-4 py-2 rounded-2xl bg-[#0b132b]/95 border border-sky-500/40 text-white text-xs font-bold shadow-2xl flex items-center gap-2.5 backdrop-blur-md">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
             <span>{bcvToast.message}</span>
@@ -2024,88 +1463,347 @@ export default function TabletMobilePosPage() {
       {/* ========================================================================= */}
       <main
         id="klikpos-street-main"
-        className={`flex-1 min-h-0 overflow-hidden flex flex-col p-2 sm:p-3 max-w-6xl mx-auto w-full transition-colors duration-200 ${isLight ? 'bg-slate-100' : ''}`}
-        style={{ backgroundColor: currentCanvas.bg }}
+        className={`flex-1 min-h-0 overflow-hidden flex flex-col px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 w-full transition-colors duration-200 ${
+          isLight ? 'bg-white' : 'bg-[#040711]'
+        }`}
+        style={{ backgroundColor: isLight ? '#ffffff' : (currentCanvas.bg || '#040711') }}
       >
+        <div className="w-full max-w-6xl mx-auto flex-1 min-h-0 flex flex-col">
         {/* ======================================================================= */}
         {/* VISTA 1: MENÚ Y CATÁLOGO TÁCTIL (GRID ADAPTATIVO TABLET & MODO LISTA)   */}
         {/* ======================================================================= */}
         {activeTab === 'menu' && (
-          <div className={`flex-1 min-h-0 flex flex-col space-y-2 transition-colors duration-200 ${isLight ? 'bg-slate-100' : ''}`} style={{ backgroundColor: currentCanvas.bg }}>
-            {/* 1. Barra de Búsqueda + Selector de Vista (Cuadrícula / Lista) + Selector de Tema */}
+          <div
+            className={`flex-1 min-h-0 flex flex-col space-y-2 transition-colors duration-200 ${
+              isLight ? 'bg-white' : 'bg-[#040711]'
+            }`}
+            style={{ backgroundColor: isLight ? '#ffffff' : (currentCanvas.bg || '#040711') }}
+          >
+            {/* 1. Barra de Búsqueda + Selector de Vista (3 Modos: Tragamonedas, Cuadrícula, Lista) */}
             <div className="space-y-1.5 shrink-0">
-              <div className="flex flex-wrap items-center justify-between gap-1.5">
-                {/* Buscador */}
-                <div className="relative flex-1 min-w-[140px]">
-                  <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" />
+              <div className="flex items-center gap-2.5 sm:gap-3">
+                {/* Buscador amplio y cercano a los selectores de vista */}
+                <div className="relative flex-1 min-w-0">
+                  <Search className={`w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none ${isLight ? 'text-slate-500' : 'text-slate-400'}`} />
                   <input
                     type="text"
                     placeholder="Buscar producto..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-8 pr-7 py-1.5 rounded-xl text-xs border transition-colors outline-none font-semibold bg-slate-900 border-slate-700 text-white placeholder:text-slate-500 focus:border-amber-500"
+                    className={`w-full pl-9 pr-8 py-2 rounded-xl text-xs border transition-colors outline-none font-semibold ${
+                      isLight
+                        ? 'bg-white border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-amber-500 shadow-2xs'
+                        : 'bg-slate-900 border-slate-700 text-white placeholder:text-slate-500 focus:border-amber-500'
+                    }`}
                   />
                   {searchQuery && (
                     <button
                       onClick={() => setSearchQuery('')}
-                      className="absolute right-2 top-2 text-slate-400 hover:text-slate-200"
+                      className={`absolute right-2.5 top-1/2 -translate-y-1/2 cursor-pointer ${isLight ? 'text-slate-500 hover:text-slate-800' : 'text-slate-400 hover:text-slate-200'}`}
                     >
-                      <X className="w-3 h-3" />
+                      <X className="w-3.5 h-3.5" />
                     </button>
                   )}
                 </div>
 
-                {/* Selector de Modos: Solo Íconos para dar respiro */}
-                <div className="flex items-center p-0.5 rounded-xl border shrink-0 bg-slate-900 border-slate-800">
+                {/* Selector de 3 Modos: 🎰 Tragamonedas (2 cols independientes), 🔲 Cuadrícula, 📋 Lista */}
+                <div className={`flex items-center gap-1.5 p-1 rounded-xl border shrink-0 ${isLight ? 'bg-slate-200/80 border-slate-300' : 'bg-slate-900 border-slate-800'}`}>
                   <button
-                    onClick={() => setCardViewMode('food')}
-                    className={`p-1.5 rounded-lg text-xs font-black transition-all cursor-pointer flex items-center justify-center ${
-                      cardViewMode === 'food'
-                        ? 'bg-amber-500 text-slate-950 shadow-xs'
-                        : 'text-slate-400 hover:text-white'
+                    onClick={() => setCardViewMode('reels')}
+                    className={`w-8 h-8 rounded-lg text-xs font-black transition-all cursor-pointer flex items-center justify-center ${
+                      cardViewMode === 'reels' || cardViewMode === 'food'
+                        ? 'shadow-xs'
+                        : isLight ? 'text-slate-700 hover:text-slate-950' : 'text-slate-400 hover:text-white'
                     }`}
-                    title="Vista Cuadrícula"
+                    style={cardViewMode === 'reels' || cardViewMode === 'food' ? { backgroundColor: currentPal.primary, color: '#ffffff' } : {}}
+                    title="Modo Tragamonedas: 2 Columnas con Desplazamiento Independiente"
+                    aria-label="Modo Tragamonedas"
+                  >
+                    <span className="text-sm leading-none">🎰</span>
+                  </button>
+                  <button
+                    onClick={() => setCardViewMode('grid')}
+                    className={`w-8 h-8 rounded-lg text-xs font-black transition-all cursor-pointer flex items-center justify-center ${
+                      cardViewMode === 'grid'
+                        ? 'shadow-xs'
+                        : isLight ? 'text-slate-700 hover:text-slate-950' : 'text-slate-400 hover:text-white'
+                    }`}
+                    style={cardViewMode === 'grid' ? { backgroundColor: currentPal.primary, color: '#ffffff' } : {}}
+                    title="Vista Cuadrícula Adaptativa Tablet"
                     aria-label="Vista Cuadrícula"
                   >
-                    <LayoutGrid className="w-4 h-4" />
+                    <LayoutGrid className="w-4 h-4 text-inherit" />
                   </button>
                   <button
                     onClick={() => setCardViewMode('lista')}
-                    className={`p-1.5 rounded-lg text-xs font-black transition-all cursor-pointer flex items-center justify-center ${
+                    className={`w-8 h-8 rounded-lg text-xs font-black transition-all cursor-pointer flex items-center justify-center ${
                       cardViewMode === 'lista'
-                        ? 'bg-amber-500 text-slate-950 shadow-xs'
-                        : 'text-slate-400 hover:text-white'
+                        ? 'shadow-xs'
+                        : isLight ? 'text-slate-700 hover:text-slate-950' : 'text-slate-400 hover:text-white'
                     }`}
-                    title="Vista Lista"
+                    style={cardViewMode === 'lista' ? { backgroundColor: currentPal.primary, color: '#ffffff' } : {}}
+                    title="Vista Lista Ergonómica"
                     aria-label="Vista Lista"
                   >
-                    <List className="w-4 h-4" />
+                    <List className="w-4 h-4 text-inherit" />
                   </button>
                 </div>
               </div>
 
-              {/* Píldoras de Categorías */}
-              <div className="flex gap-1 overflow-x-auto pb-0.5 scrollbar-none">
-                {CATEGORIES.map((cat) => (
-                  <button
-                    key={cat}
-                    onClick={() => setSelectedCategory(cat)}
-                    className={`px-2.5 py-1 rounded-xl text-[11px] font-bold whitespace-nowrap transition-all duration-200 border active:scale-95 cursor-pointer ${
-                      selectedCategory === cat
-                        ? 'bg-amber-500/20 border-amber-500 text-amber-400 shadow-sm shadow-amber-500/10 font-black'
-                        : 'bg-slate-900 border-slate-800 text-slate-300 hover:bg-slate-850'
-                    }`}
-                  >
-                    {cat}
-                  </button>
-                ))}
+              {/* Píldoras de Categorías (Blindadas contra sobreescrituras con Contraste AAA) */}
+              <div 
+                className="street-categories-bar flex gap-1.5 overflow-x-auto pb-0.5 scrollbar-none"
+                style={{ backgroundColor: 'transparent' }}
+              >
+                {CATEGORIES.map((cat) => {
+                  const isSelected = selectedCategory === cat;
+                  return (
+                    <button
+                      key={cat}
+                      type="button"
+                      onClick={() => setSelectedCategory(cat)}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all duration-150 border active:scale-95 cursor-pointer shadow-xs ${
+                        isSelected
+                          ? 'border-transparent font-black shadow-sm'
+                          : isLight
+                          ? 'hover:bg-slate-100 border-slate-300'
+                          : 'hover:bg-slate-800 border-slate-800'
+                      }`}
+                      style={{
+                        backgroundColor: isSelected
+                          ? currentPal.primary
+                          : (isLight ? '#ffffff' : '#0f172a'),
+                        borderColor: isSelected
+                          ? currentPal.primary
+                          : (isLight ? '#cbd5e1' : '#1e293b'),
+                        color: isSelected
+                          ? '#ffffff'
+                          : (isLight ? '#0f172a' : '#ffffff'),
+                        fontWeight: isSelected ? 900 : 700
+                      }}
+                    >
+                      {cat}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
             {/* ================================================================= */}
-            {/* MODO 1: CUADRÍCULA ADAPTATIVA (2 COLS MÓVIL, 3-5 COLS EN TABLET)  */}
+            {/* MODO 1: 🎰 TRAGAMONEDAS (2 COLUMNAS CON SCROLL 100% INDEPENDIENTE)*/}
             {/* ================================================================= */}
-            {cardViewMode === 'food' && (
+            {(cardViewMode === 'reels' || cardViewMode === 'food') && (
+              <div className="grid grid-cols-2 gap-2 flex-1 min-h-0 overflow-hidden">
+                {/* REEL IZQUIERDO */}
+                <div 
+                  className="flex flex-col h-full min-h-0 overflow-hidden border rounded-2xl shadow-sm"
+                  style={{
+                    backgroundColor: isLight ? '#f8fafc' : '#090d16',
+                    borderColor: isLight ? '#e2e8f0' : '#1e293b'
+                  }}
+                >
+                  <div 
+                    className="px-2.5 py-1.5 border-b flex items-center justify-between shrink-0"
+                    style={{
+                      backgroundColor: isLight ? '#ffffff' : '#0f172a',
+                      borderColor: isLight ? '#e2e8f0' : '#1e293b',
+                      color: isLight ? '#0f172a' : '#fbbf24'
+                    }}
+                  >
+                    <span className="text-[10px] font-black uppercase tracking-wider flex items-center gap-1" style={{ color: isLight ? '#0f172a' : '#fbbf24' }}>
+                      🍟 Columna 1
+                    </span>
+                    <span className="text-[9px] font-mono font-bold" style={{ color: isLight ? '#64748b' : '#94a3b8' }}>
+                      {leftProducts.length} ítems
+                    </span>
+                  </div>
+                  <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain touch-pan-y p-1.5 space-y-2 pb-24 scrollbar-none no-scrollbar">
+                    {leftProducts.map((prod) => {
+                      const qtyInCart = getCartQty(prod.id);
+                      return (
+                        <div
+                          key={prod.id}
+                          onClick={() => addToCart(prod)}
+                          className="group border rounded-2xl overflow-hidden transition-all duration-150 cursor-pointer flex flex-col justify-between active:scale-[0.96] select-none shadow-sm"
+                          style={{
+                            backgroundColor: isLight ? '#ffffff' : '#0e1726',
+                            borderColor: isLight ? '#e2e8f0' : '#1e293b'
+                          }}
+                        >
+                          <div 
+                            className="relative h-22 sm:h-26 w-full flex items-center justify-center p-2 overflow-hidden"
+                            style={{ backgroundColor: isLight ? '#f8fafc' : 'rgba(15, 23, 42, 0.8)' }}
+                          >
+                            <img
+                              src={prod.image}
+                              alt={prod.name}
+                              className="w-full h-full object-contain drop-shadow-sm group-hover:scale-105 transition-transform duration-200"
+                              loading="lazy"
+                            />
+                            <span 
+                              className="absolute top-1.5 left-1.5 text-[8.5px] font-black px-2 py-0.5 rounded-full shadow-xs border"
+                              style={{
+                                backgroundColor: isLight ? '#fef3c7' : 'rgba(2, 6, 23, 0.9)',
+                                color: isLight ? '#92400e' : '#fcd34d',
+                                borderColor: isLight ? '#fde68a' : 'rgba(245, 158, 11, 0.3)'
+                              }}
+                            >
+                              {prod.tag}
+                            </span>
+                            {qtyInCart > 0 && (
+                              <span className="absolute top-1.5 right-1.5 text-slate-950 font-black font-mono text-[10.5px] w-5 h-5 rounded-full flex items-center justify-center shadow-md bg-amber-400 anim-badge-spring">
+                                {qtyInCart}
+                              </span>
+                            )}
+                          </div>
+
+                          <div className="p-2 flex-1 flex flex-col justify-between space-y-1">
+                            <div>
+                              <h3 className={`text-[11.5px] font-black line-clamp-1 leading-tight ${isLight ? 'text-slate-900' : 'text-white'}`}>
+                                {prod.name}
+                              </h3>
+                              <p className="text-[9px] text-slate-400 line-clamp-1 mt-0.5">
+                                {prod.description}
+                              </p>
+                            </div>
+
+                            <div className={`flex items-center justify-between pt-1 border-t ${isLight ? 'border-slate-100' : 'border-slate-800/80'}`}>
+                              <div>
+                                <span className="text-xs font-black font-mono block text-amber-500">
+                                  ${prod.priceUSD.toFixed(2)}
+                                </span>
+                                <span className="text-[8.5px] font-mono text-slate-400 font-bold block">
+                                  Bs. {(prod.priceUSD * bcvRate).toFixed(0)}
+                                </span>
+                              </div>
+
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  addToCart(prod);
+                                }}
+                                className="w-6.5 h-6.5 rounded-xl bg-amber-500 hover:bg-amber-400 active:scale-90 text-slate-950 flex items-center justify-center transition-all shadow-xs font-black cursor-pointer"
+                                title="Añadir a la comanda"
+                              >
+                                <Plus className="w-3.5 h-3.5 stroke-[2.8]" />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* REEL DERECHO */}
+                <div 
+                  className="flex flex-col h-full min-h-0 overflow-hidden border rounded-2xl shadow-sm"
+                  style={{
+                    backgroundColor: isLight ? '#f8fafc' : '#090d16',
+                    borderColor: isLight ? '#e2e8f0' : '#1e293b'
+                  }}
+                >
+                  <div 
+                    className="px-2.5 py-1.5 border-b flex items-center justify-between shrink-0"
+                    style={{
+                      backgroundColor: isLight ? '#ffffff' : '#0f172a',
+                      borderColor: isLight ? '#e2e8f0' : '#1e293b',
+                      color: isLight ? '#0f172a' : '#fbbf24'
+                    }}
+                  >
+                    <span className="text-[10px] font-black uppercase tracking-wider flex items-center gap-1" style={{ color: isLight ? '#0f172a' : '#fbbf24' }}>
+                      🥤 Columna 2
+                    </span>
+                    <span className="text-[9px] font-mono font-bold" style={{ color: isLight ? '#64748b' : '#94a3b8' }}>
+                      {rightProducts.length} ítems
+                    </span>
+                  </div>
+                  <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain touch-pan-y p-1.5 space-y-2 pb-24 scrollbar-none no-scrollbar">
+                    {rightProducts.map((prod) => {
+                      const qtyInCart = getCartQty(prod.id);
+                      return (
+                        <div
+                          key={prod.id}
+                          onClick={() => addToCart(prod)}
+                          className="group border rounded-2xl overflow-hidden transition-all duration-150 cursor-pointer flex flex-col justify-between active:scale-[0.96] select-none shadow-sm"
+                          style={{
+                            backgroundColor: isLight ? '#ffffff' : '#0e1726',
+                            borderColor: isLight ? '#e2e8f0' : '#1e293b'
+                          }}
+                        >
+                          <div 
+                            className="relative h-22 sm:h-26 w-full flex items-center justify-center p-2 overflow-hidden"
+                            style={{ backgroundColor: isLight ? '#f8fafc' : 'rgba(15, 23, 42, 0.8)' }}
+                          >
+                            <img
+                              src={prod.image}
+                              alt={prod.name}
+                              className="w-full h-full object-contain drop-shadow-sm group-hover:scale-105 transition-transform duration-200"
+                              loading="lazy"
+                            />
+                            <span 
+                              className="absolute top-1.5 left-1.5 text-[8.5px] font-black px-2 py-0.5 rounded-full shadow-xs border"
+                              style={{
+                                backgroundColor: isLight ? '#fef3c7' : 'rgba(2, 6, 23, 0.9)',
+                                color: isLight ? '#92400e' : '#fcd34d',
+                                borderColor: isLight ? '#fde68a' : 'rgba(245, 158, 11, 0.3)'
+                              }}
+                            >
+                              {prod.tag}
+                            </span>
+                            {qtyInCart > 0 && (
+                              <span className="absolute top-1.5 right-1.5 text-slate-950 font-black font-mono text-[10.5px] w-5 h-5 rounded-full flex items-center justify-center shadow-md bg-amber-400 anim-badge-spring">
+                                {qtyInCart}
+                              </span>
+                            )}
+                          </div>
+
+                          <div className="p-2 flex-1 flex flex-col justify-between space-y-1">
+                            <div>
+                              <h3 className={`text-[11.5px] font-black line-clamp-1 leading-tight ${isLight ? 'text-slate-900' : 'text-white'}`}>
+                                {prod.name}
+                              </h3>
+                              <p className="text-[9px] text-slate-400 line-clamp-1 mt-0.5">
+                                {prod.description}
+                              </p>
+                            </div>
+
+                            <div className={`flex items-center justify-between pt-1 border-t ${isLight ? 'border-slate-100' : 'border-slate-800/80'}`}>
+                              <div>
+                                <span className="text-xs font-black font-mono block text-amber-500">
+                                  ${prod.priceUSD.toFixed(2)}
+                                </span>
+                                <span className="text-[8.5px] font-mono text-slate-400 font-bold block">
+                                  Bs. {(prod.priceUSD * bcvRate).toFixed(0)}
+                                </span>
+                              </div>
+
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  addToCart(prod);
+                                }}
+                                className="w-6.5 h-6.5 rounded-xl bg-amber-500 hover:bg-amber-400 active:scale-90 text-slate-950 flex items-center justify-center transition-all shadow-xs font-black cursor-pointer"
+                                title="Añadir a la comanda"
+                              >
+                                <Plus className="w-3.5 h-3.5 stroke-[2.8]" />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* ================================================================= */}
+            {/* MODO 2: 🔲 CUADRÍCULA ADAPTATIVA (2 COLS MÓVIL, 3-5 COLS EN TABLET)*/}
+            {/* ================================================================= */}
+            {cardViewMode === 'grid' && (
               <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain touch-pan-y p-1 pb-24 scrollbar-none catalog-scroll-area transition-colors duration-200" style={{ backgroundColor: currentCanvas.bg }}>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2.5 sm:gap-3">
                   {filteredProducts.map((prod) => {
@@ -2145,7 +1843,7 @@ export default function TabletMobilePosPage() {
                             </p>
                           </div>
 
-                          <div className="flex items-center justify-between pt-1 border-t border-slate-800/80">
+                          <div className={`flex items-center justify-between pt-1 border-t ${isLight ? 'border-slate-100' : 'border-slate-800/80'}`}>
                             <div>
                               <span className="text-xs font-black font-mono block text-amber-400">
                                 ${prod.priceUSD.toFixed(2)}
@@ -2176,7 +1874,7 @@ export default function TabletMobilePosPage() {
             )}
 
             {/* ================================================================= */}
-            {/* MODO 2: LISTA CON CARDS GRANDES PARA TABLET                       */}
+            {/* MODO 3: 📋 LISTA CON CARDS GRANDES PARA TABLET                    */}
             {/* ================================================================= */}
             {cardViewMode === 'lista' && (
               <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain touch-pan-y p-1 pb-24 scrollbar-none catalog-scroll-area transition-colors duration-200" style={{ backgroundColor: currentCanvas.bg }}>
@@ -2334,13 +2032,17 @@ export default function TabletMobilePosPage() {
         {activeTab === 'pedidos' && (
           <div className="space-y-3 flex-1 min-h-0 flex flex-col pb-44 overflow-y-auto px-1 scrollbar-none">
             {/* Header & Filtros */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-2 border-b border-slate-800 shrink-0">
+            <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-2 border-b shrink-0 ${
+              isLight ? 'border-slate-200' : 'border-slate-800'
+            }`}>
               <div>
-                <h2 className="text-sm font-black uppercase tracking-wider flex items-center gap-2 text-white">
+                <h2 className={`text-sm font-black uppercase tracking-wider flex items-center gap-2 ${
+                  isLight ? 'text-slate-900' : 'text-white'
+                }`}>
                   <ClipboardList className="w-4 h-4" style={{ color: currentPal.primary }} />
                   <span>Control de Pedidos & Despachos</span>
                 </h2>
-                <p className="text-[11px] text-slate-400 font-mono">
+                <p className={`text-[11px] font-mono ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
                   {orders.filter(o => o.status === 'en_cola').length} en cola • {orders.filter(o => o.status === 'listo').length} listos • {orders.filter(o => o.status === 'despachado').length} despachados
                 </p>
               </div>
@@ -2348,7 +2050,9 @@ export default function TabletMobilePosPage() {
               {/* Filtros de Tipo y Estado */}
               <div className="flex flex-wrap items-center gap-1.5">
                 {/* Filtro por Tipo */}
-                <div className="flex items-center p-0.5 rounded-xl border border-slate-800 bg-slate-900">
+                <div className={`flex items-center p-0.5 rounded-xl border ${
+                  isLight ? 'border-slate-300 bg-slate-100' : 'border-slate-800 bg-slate-900'
+                }`}>
                   {(['todos', 'local', 'delivery'] as const).map((t) => (
                     <button
                       key={t}
@@ -2356,7 +2060,7 @@ export default function TabletMobilePosPage() {
                       className={`px-2 py-1 rounded-lg text-[10px] font-black uppercase transition-all ${
                         orderFilterType === t
                           ? 'bg-amber-500 text-slate-950 shadow-xs'
-                          : 'text-slate-400 hover:text-white'
+                          : isLight ? 'text-slate-600 hover:text-slate-950' : 'text-slate-400 hover:text-white'
                       }`}
                     >
                       {t === 'todos' ? 'Todos' : t === 'local' ? 'Local' : 'Delivery'}
@@ -2365,7 +2069,9 @@ export default function TabletMobilePosPage() {
                 </div>
 
                 {/* Filtro por Estado */}
-                <div className="flex items-center p-0.5 rounded-xl border border-slate-800 bg-slate-900">
+                <div className={`flex items-center p-0.5 rounded-xl border ${
+                  isLight ? 'border-slate-300 bg-slate-100' : 'border-slate-800 bg-slate-900'
+                }`}>
                   {(['todos', 'en_cola', 'listo', 'despachado'] as const).map((st) => (
                     <button
                       key={st}
@@ -2373,7 +2079,7 @@ export default function TabletMobilePosPage() {
                       className={`px-2 py-1 rounded-lg text-[10px] font-black uppercase transition-all ${
                         orderFilterStatus === st
                           ? 'bg-amber-500 text-slate-950 shadow-xs'
-                          : 'text-slate-400 hover:text-white'
+                          : isLight ? 'text-slate-600 hover:text-slate-950' : 'text-slate-400 hover:text-white'
                       }`}
                     >
                       {st === 'todos' ? 'Todos' : st === 'en_cola' ? 'En Cola' : st === 'listo' ? 'Listos' : 'Despachados'}
@@ -2393,7 +2099,9 @@ export default function TabletMobilePosPage() {
 
               if (visibleOrders.length === 0) {
                 return (
-                  <div className="text-center py-12 text-slate-400 text-xs italic border border-slate-800/80 rounded-2xl bg-slate-900/40">
+                  <div className={`text-center py-12 text-xs italic border rounded-2xl ${
+                    isLight ? 'text-slate-500 border-slate-200 bg-slate-50' : 'text-slate-400 border-slate-800/80 bg-slate-900/40'
+                  }`}>
                     No hay pedidos registrados con los filtros seleccionados.
                   </div>
                 );
@@ -2412,39 +2120,49 @@ export default function TabletMobilePosPage() {
                       <div
                         key={ord.id}
                         className={`border rounded-2xl p-3.5 space-y-3 transition-all flex flex-col justify-between shadow-md ${
-                          isEnCola ? 'bg-[#0f172a] border-amber-500/40' :
-                          isListo ? 'bg-[#0f172a] border-sky-500/40' :
-                          'bg-slate-900/80 border-slate-800 opacity-90'
+                          isLight
+                            ? isEnCola
+                              ? 'bg-white border-amber-400 shadow-sm'
+                              : isListo
+                              ? 'bg-white border-sky-400 shadow-sm'
+                              : 'bg-slate-50 border-slate-200 opacity-95'
+                            : isEnCola
+                            ? 'bg-[#0f172a] border-amber-500/40'
+                            : isListo
+                            ? 'bg-[#0f172a] border-sky-500/40'
+                            : 'bg-slate-900/80 border-slate-800 opacity-90'
                         }`}
                       >
                         {/* Cabecera del Pedido */}
-                        <div className="space-y-1.5 pb-2 border-b border-slate-800">
+                        <div className={`space-y-1.5 pb-2 border-b ${isLight ? 'border-slate-100' : 'border-slate-800'}`}>
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-1.5">
-                              <span className="text-xs font-mono font-black text-amber-400">
+                              <span className={`text-xs font-mono font-black ${isLight ? 'text-amber-600' : 'text-amber-400'}`}>
                                 {ord.orderNumber}
                               </span>
                               <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full ${
-                                isDelivery ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30' : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                                isDelivery
+                                  ? isLight ? 'bg-purple-100 text-purple-800 border border-purple-200' : 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
+                                  : isLight ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
                               }`}>
                                 {isDelivery ? 'Delivery' : (ord.table || 'Local')}
                               </span>
                             </div>
 
-                            <span className="text-[10px] font-mono text-slate-400">
+                            <span className={`text-[10px] font-mono ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
                               {ord.timeFormatted}
                             </span>
                           </div>
 
                           <div className="flex items-center justify-between text-xs">
-                            <span className="font-bold text-slate-200">
+                            <span className={`font-bold ${isLight ? 'text-slate-900' : 'text-slate-200'}`}>
                               {ord.customer?.name || 'Cliente'}
                             </span>
                             <div className="text-right">
-                              <span className="font-mono font-black text-amber-400">
+                              <span className={`font-mono font-black ${isLight ? 'text-amber-600' : 'text-amber-400'}`}>
                                 ${ord.totalUSD.toFixed(2)}
                               </span>
-                              <span className="text-[9.5px] font-mono text-slate-400 block">
+                              <span className={`text-[9.5px] font-mono block ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
                                 Bs. {(ord.totalUSD * bcvRate).toFixed(0)}
                               </span>
                             </div>
@@ -2452,13 +2170,13 @@ export default function TabletMobilePosPage() {
 
                           {/* Estado de Pago */}
                           <div className="flex items-center justify-between pt-0.5">
-                            <span className="text-[10px] text-slate-400 font-mono">
-                              Pago: <b className="text-slate-300">{ord.paymentMethod}</b>
+                            <span className={`text-[10px] font-mono ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
+                              Pago: <b className={isLight ? 'text-slate-900' : 'text-slate-300'}>{ord.paymentMethod}</b>
                             </span>
                             <span className={`text-[9px] font-black px-2 py-0.5 rounded-md ${
                               isPendingPayment
-                                ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
-                                : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                                ? isLight ? 'bg-rose-100 text-rose-800 border border-rose-200' : 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
+                                : isLight ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
                             }`}>
                               {isPendingPayment ? 'Por Cobrar en Destino' : 'Pagado'}
                             </span>
@@ -2466,16 +2184,18 @@ export default function TabletMobilePosPage() {
 
                           {/* Dirección / Motorizado si es Delivery */}
                           {isDelivery && (
-                            <div className="p-2 rounded-xl bg-slate-950 border border-slate-800 space-y-1 text-[10px] font-mono text-slate-300">
+                            <div className={`p-2 rounded-xl space-y-1 text-[10px] font-mono ${
+                              isLight ? 'bg-slate-100 border border-slate-200 text-slate-800' : 'bg-slate-950 border border-slate-800 text-slate-300'
+                            }`}>
                               {ord.driverName && (
-                                <p className="flex items-center gap-1 text-purple-300">
+                                <p className={`flex items-center gap-1 ${isLight ? 'text-purple-700' : 'text-purple-300'}`}>
                                   <Bike className="w-3 h-3" />
                                   <span>Chofer: <b>{ord.driverName}</b></span>
                                 </p>
                               )}
                               {ord.deliveryAddress && (
-                                <p className="flex items-start gap-1 text-slate-400">
-                                  <MapPin className="w-3 h-3 text-amber-400 shrink-0 mt-0.5" />
+                                <p className={`flex items-start gap-1 ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
+                                  <MapPin className="w-3 h-3 text-amber-500 shrink-0 mt-0.5" />
                                   <span className="line-clamp-2">{ord.deliveryAddress}</span>
                                 </p>
                               )}
@@ -2487,15 +2207,15 @@ export default function TabletMobilePosPage() {
                         <div className="space-y-1 flex-1 py-1 max-h-32 overflow-y-auto">
                           {ord.items.map((it, idx) => (
                             <div key={idx} className="flex justify-between items-baseline text-xs">
-                              <div className="truncate pr-2 text-slate-200">
-                                <span className="font-mono font-bold text-amber-400">{it.qty}x</span> {it.name}
+                              <div className={`truncate pr-2 ${isLight ? 'text-slate-900' : 'text-slate-200'}`}>
+                                <span className={`font-mono font-bold ${isLight ? 'text-amber-600' : 'text-amber-400'}`}>{it.qty}x</span> {it.name}
                                 {it.notes && (
-                                  <span className="block text-[9.5px] text-amber-300 italic font-sans pl-4">
+                                  <span className={`block text-[9.5px] italic font-sans pl-4 ${isLight ? 'text-amber-700' : 'text-amber-300'}`}>
                                     Nota: {it.notes}
                                   </span>
                                 )}
                               </div>
-                              <span className="font-mono text-slate-400 shrink-0 text-[11px]">
+                              <span className={`font-mono shrink-0 text-[11px] ${isLight ? 'text-slate-600 font-bold' : 'text-slate-400'}`}>
                                 ${(it.priceUSD * it.qty).toFixed(2)}
                               </span>
                             </div>
@@ -2503,7 +2223,7 @@ export default function TabletMobilePosPage() {
                         </div>
 
                         {/* Botones de Transición de Estado */}
-                        <div className="space-y-1.5 pt-2 border-t border-slate-800">
+                        <div className={`space-y-1.5 pt-2 border-t ${isLight ? 'border-slate-100' : 'border-slate-800'}`}>
                           {isEnCola && (
                             <button
                               onClick={() => handleAdvanceOrderStatus(ord.id, 'listo')}
@@ -2524,7 +2244,9 @@ export default function TabletMobilePosPage() {
                           )}
 
                           {isDespachado && (
-                            <div className="w-full py-1.5 bg-slate-800/80 text-emerald-400 rounded-xl text-xs font-black text-center border border-emerald-500/20">
+                            <div className={`w-full py-1.5 rounded-xl text-xs font-black text-center border ${
+                              isLight ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-slate-800/80 text-emerald-400 border-emerald-500/20'
+                            }`}>
                               ✓ Orden Finalizada y Entregada
                             </div>
                           )}
@@ -2714,16 +2436,20 @@ export default function TabletMobilePosPage() {
             </div>
 
             {/* SECCIÓN 1: MODALIDAD DE DESPACHO Y ENTREGA */}
-            <div className="border rounded-2xl p-4 space-y-3 shadow-xs bg-slate-900 border-slate-800">
-              <span className="text-xs font-black uppercase tracking-wider block text-white">
+            <div className={`border rounded-2xl p-4 space-y-3 shadow-xs ${
+              isLight ? 'bg-white border-slate-200' : 'bg-slate-900 border-slate-800'
+            }`}>
+              <span className={`text-xs font-black uppercase tracking-wider block ${
+                isLight ? 'text-slate-900' : 'text-white'
+              }`}>
                 Modalidad de Entrega / Despacho:
               </span>
 
               <div className="grid grid-cols-3 gap-2">
                 {[
-                  { id: 'local', label: 'En Local / Mesa', desc: 'Consumo en salón o mostrador', icon: Store, color: 'text-emerald-400' },
-                  { id: 'delivery_paid', label: 'Delivery Pagado', desc: 'Cobrado previo al despacho', icon: Bike, color: 'text-sky-400' },
-                  { id: 'delivery_cod', label: 'Cobro en Destino', desc: 'El chofer cobra al entregar', icon: Truck, color: 'text-amber-400' },
+                  { id: 'local', label: 'En Local / Mesa', desc: 'Consumo en salón o mostrador', icon: Store, color: 'text-emerald-500' },
+                  { id: 'delivery_paid', label: 'Delivery Pagado', desc: 'Cobrado previo al despacho', icon: Bike, color: 'text-sky-500' },
+                  { id: 'delivery_cod', label: 'Cobro en Destino', desc: 'El chofer cobra al entregar', icon: Truck, color: 'text-amber-500' },
                 ].map((mode) => {
                   const Icon = mode.icon;
                   const isSelected = fulfillmentMode === mode.id;
@@ -2734,18 +2460,18 @@ export default function TabletMobilePosPage() {
                       onClick={() => setFulfillmentMode(mode.id as any)}
                       className={`p-2.5 rounded-xl border flex flex-col items-center text-center gap-1 transition-all active:scale-95 cursor-pointer ${
                         isSelected
-                          ? 'border-2 bg-[#0f172a] shadow-md'
-                          : 'bg-slate-950 hover:bg-slate-850 border-slate-800'
+                          ? isLight ? 'border-2 bg-slate-50 shadow-sm' : 'border-2 bg-[#0f172a] shadow-md'
+                          : isLight ? 'bg-slate-50/60 hover:bg-slate-100 border-slate-200' : 'bg-slate-950 hover:bg-slate-850 border-slate-800'
                       }`}
                       style={{
                         borderColor: isSelected ? currentPal.primary : undefined,
                       }}
                     >
                       <Icon className={`w-5 h-5 ${mode.color}`} />
-                      <span className="text-[11px] font-black text-white leading-tight">
+                      <span className={`text-[11px] font-black leading-tight ${isLight ? 'text-slate-900' : 'text-white'}`}>
                         {mode.label}
                       </span>
-                      <span className="text-[9px] text-slate-400 leading-tight">
+                      <span className={`text-[9px] leading-tight ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
                         {mode.desc}
                       </span>
                     </button>
@@ -2755,15 +2481,19 @@ export default function TabletMobilePosPage() {
 
               {/* Parámetros de Delivery si aplica */}
               {fulfillmentMode !== 'local' && (
-                <div className="p-3 rounded-xl border border-slate-800 bg-slate-950/80 space-y-2.5 mt-2">
+                <div className={`p-3 rounded-xl border space-y-2.5 mt-2 ${
+                  isLight ? 'bg-slate-50 border-slate-200' : 'border-slate-800 bg-slate-950/80'
+                }`}>
                   <div>
-                    <label className="text-[10px] font-bold text-slate-400 block mb-1">
+                    <label className={`text-[10px] font-bold block mb-1 ${isLight ? 'text-slate-700' : 'text-slate-400'}`}>
                       Asignar Motorizado / Chofer:
                     </label>
                     <select
                       value={selectedDriverId}
                       onChange={(e) => setSelectedDriverId(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl text-xs font-bold border outline-none bg-slate-900 border-slate-700 text-white"
+                      className={`w-full px-3 py-2 rounded-xl text-xs font-bold border outline-none ${
+                        isLight ? 'bg-white border-slate-300 text-slate-900' : 'bg-slate-900 border-slate-700 text-white'
+                      }`}
                     >
                       <option value="">Por Asignar / Chofer Particular</option>
                       {drivers.map((d) => (
@@ -2775,7 +2505,7 @@ export default function TabletMobilePosPage() {
                   </div>
 
                   <div>
-                    <label className="text-[10px] font-bold text-slate-400 block mb-1">
+                    <label className={`text-[10px] font-bold block mb-1 ${isLight ? 'text-slate-700' : 'text-slate-400'}`}>
                       Dirección o Punto de Referencia:
                     </label>
                     <input
@@ -2783,7 +2513,9 @@ export default function TabletMobilePosPage() {
                       placeholder={selectedCustomer.address || 'Ej. Urb. Los Rosales, Calle 3, Casa #14'}
                       value={deliveryAddressInput}
                       onChange={(e) => setDeliveryAddressInput(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl text-xs font-medium border outline-none bg-slate-900 border-slate-700 text-white"
+                      className={`w-full px-3 py-2 rounded-xl text-xs font-medium border outline-none ${
+                        isLight ? 'bg-white border-slate-300 text-slate-900' : 'bg-slate-900 border-slate-700 text-white'
+                      }`}
                     />
                   </div>
                 </div>
@@ -2791,16 +2523,18 @@ export default function TabletMobilePosPage() {
             </div>
 
             {/* SECCIÓN 2: DATOS DEL CLIENTE / FACTURACIÓN */}
-            <div className="border rounded-2xl p-4 space-y-2.5 shadow-xs bg-slate-900 border-slate-800">
+            <div className={`border rounded-2xl p-4 space-y-2.5 shadow-xs ${
+              isLight ? 'bg-white border-slate-200' : 'bg-slate-900 border-slate-800'
+            }`}>
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-1.5 text-xs font-black text-white">
+                <div className={`flex items-center gap-1.5 text-xs font-black ${isLight ? 'text-slate-900' : 'text-white'}`}>
                   <User className="w-4 h-4" style={{ color: currentPal.primary }} />
                   <span>Datos del Cliente / Facturación</span>
                 </div>
                 <button
                   type="button"
                   onClick={() => setShowCustomerModal(true)}
-                  className="text-xs font-black hover:underline flex items-center gap-1 active:scale-95"
+                  className="text-xs font-black hover:underline flex items-center gap-1 active:scale-95 cursor-pointer"
                   style={{ color: currentPal.primary }}
                 >
                   <UserPlus className="w-3.5 h-3.5" />
@@ -2808,30 +2542,38 @@ export default function TabletMobilePosPage() {
                 </button>
               </div>
 
-              <div className="p-3 rounded-xl border flex items-center justify-between bg-slate-950 border-slate-800">
+              <div className={`p-3 rounded-xl border flex items-center justify-between ${
+                isLight ? 'bg-slate-50 border-slate-200' : 'bg-slate-950 border-slate-800'
+              }`}>
                 <div>
-                  <h4 className="text-xs font-black text-white">
+                  <h4 className={`text-xs font-black ${isLight ? 'text-slate-900' : 'text-white'}`}>
                     {selectedCustomer.name}
                   </h4>
-                  <div className="flex gap-2 text-[10px] text-slate-500 font-mono mt-0.5">
+                  <div className={`flex gap-2 text-[10px] font-mono mt-0.5 ${isLight ? 'text-slate-600' : 'text-slate-500'}`}>
                     <span>Doc: <b>{selectedCustomer.docId}</b></span>
                     {selectedCustomer.phone && <span>Tel: {selectedCustomer.phone}</span>}
                   </div>
                 </div>
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 font-bold text-slate-300">
+                <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
+                  isLight ? 'bg-slate-200 text-slate-800' : 'bg-slate-800 text-slate-300'
+                }`}>
                   Seleccionado
                 </span>
               </div>
             </div>
 
             {/* SECCIÓN 3: SELECTOR DE MÉTODO DE PAGO */}
-            <div className="border rounded-2xl p-4 space-y-3 shadow-xs bg-slate-900 border-slate-800">
+            <div className={`border rounded-2xl p-4 space-y-3 shadow-xs ${
+              isLight ? 'bg-white border-slate-200' : 'bg-slate-900 border-slate-800'
+            }`}>
               <div className="flex items-center justify-between">
-                <span className="text-xs font-black uppercase tracking-wider block text-white">
+                <span className={`text-xs font-black uppercase tracking-wider block ${
+                  isLight ? 'text-slate-900' : 'text-white'
+                }`}>
                   {fulfillmentMode === 'delivery_cod' ? 'Método Acordado en Destino:' : 'Selecciona Método de Pago:'}
                 </span>
                 {fulfillmentMode === 'delivery_cod' && (
-                  <span className="text-[9px] font-mono font-bold text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded">
+                  <span className="text-[9px] font-mono font-bold text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded">
                     Por Cobrar en Destino
                   </span>
                 )}
@@ -2886,7 +2628,7 @@ export default function TabletMobilePosPage() {
                       </span>
                       <button
                         type="button"
-                        onClick={handleCopyPagoMovilData}
+                        onClick={() => handleCopyPagoMovilData(pagoMovilInfo, totalVES)}
                         className="text-[10px] font-black px-2 py-0.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-md flex items-center gap-1 active:scale-95 transition-all"
                       >
                         <Copy className="w-3 h-3" />
@@ -3244,10 +2986,20 @@ export default function TabletMobilePosPage() {
                       type="button"
                       onClick={handleAddMixedPayment}
                       disabled={!mixedInputAmount || parseFloat(mixedInputAmount) <= 0}
-                      className="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs flex items-center justify-center gap-2 active:scale-98 transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-md"
+                      className={`w-full py-2.5 rounded-xl font-black text-xs flex items-center justify-center gap-2 active:scale-98 transition-all shadow-md ${
+                        !mixedInputAmount || parseFloat(mixedInputAmount) <= 0
+                          ? 'bg-emerald-950/90 border border-emerald-500/40 text-white cursor-not-allowed'
+                          : 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 cursor-pointer shadow-lg shadow-emerald-500/25'
+                      }`}
+                      style={{
+                        color: (!mixedInputAmount || parseFloat(mixedInputAmount) <= 0) ? '#ffffff' : '#022c22',
+                        backgroundColor: (!mixedInputAmount || parseFloat(mixedInputAmount) <= 0) ? '#064e3b' : '#10b981'
+                      }}
                     >
-                      <Plus className="w-4 h-4" />
-                      <span>Registrar Abono a la Cuenta</span>
+                      <Plus className="w-4 h-4 stroke-[3]" style={{ color: (!mixedInputAmount || parseFloat(mixedInputAmount) <= 0) ? '#ffffff' : '#022c22' }} />
+                      <span className="font-black tracking-wide" style={{ color: (!mixedInputAmount || parseFloat(mixedInputAmount) <= 0) ? '#ffffff' : '#022c22' }}>
+                        Registrar Abono a la Cuenta
+                      </span>
                     </button>
                   </div>
 
@@ -3341,6 +3093,7 @@ export default function TabletMobilePosPage() {
             </button>
           </div>
         )}
+        </div>
       </main>
 
       {/* ========================================================================= */}
@@ -3357,11 +3110,26 @@ export default function TabletMobilePosPage() {
         totalItems={totalItems}
         totalUSD={totalUSD}
         primaryColor={currentPal.primary}
-        onSelectTab={(tab) => setActiveTab(tab)}
-        onOpenCobro={() => setActiveTab('cobro')}
-        onOpenSalesBackup={() => setShowSalesBackupModal(true)}
-        onOpenQrModal={() => setShowQrModal(true)}
-        onToggleOrderDrawer={() => setIsRightDrawerOpen((prev) => !prev)}
+        onSelectTab={(tab) => {
+          setIsDockerOpen(false);
+          setActiveTab(tab);
+        }}
+        onOpenCobro={() => {
+          setIsDockerOpen(false);
+          setActiveTab('cobro');
+        }}
+        onOpenSalesBackup={() => {
+          setIsDockerOpen(false);
+          setShowSalesBackupModal(true);
+        }}
+        onOpenQrModal={() => {
+          setIsDockerOpen(false);
+          setShowQrModal(true);
+        }}
+        onToggleOrderDrawer={() => {
+          setIsDockerOpen(false);
+          setIsRightDrawerOpen((prev) => !prev);
+        }}
         isOrderDrawerOpen={isRightDrawerOpen}
         onToggleDocker={() => setIsDockerOpen((prev) => !prev)}
         isDockerOpen={isDockerOpen}
@@ -3406,7 +3174,7 @@ export default function TabletMobilePosPage() {
                   setShowCompanyModal(true);
                 }}
                 className={`w-full p-3 rounded-2xl border flex items-center justify-between text-left transition-all active:scale-96 shadow-2xs ${
-                  isLight ? 'bg-slate-50 hover:bg-slate-100 border-slate-200' : 'bg-slate-950 hover:bg-slate-850 border-slate-800'
+                  isLight ? 'bg-white hover:bg-slate-50 border-slate-300' : 'bg-slate-950 hover:bg-slate-850 border-slate-800'
                 }`}
               >
                 <div className="flex items-center gap-3">
@@ -3417,13 +3185,15 @@ export default function TabletMobilePosPage() {
                     <Building className="w-5 h-5" />
                   </div>
                   <div>
-                    <h4 className="text-xs font-black" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
+                    <h4 className={`text-xs font-black ${isLight ? 'text-slate-950' : 'text-white'}`}>
                       Datos de la Empresa
                     </h4>
-                    <p className="text-[10px] text-slate-500">Nombre, RIF, Teléfono, Dirección</p>
+                    <p className={`text-[10px] font-medium ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
+                      Nombre, RIF, Teléfono, Dirección
+                    </p>
                   </div>
                 </div>
-                <ChevronRight className="w-4 h-4 text-slate-400" />
+                <ChevronRight className={`w-4 h-4 ${isLight ? 'text-slate-500' : 'text-slate-400'}`} />
               </button>
 
               {/* SECCIÓN 2: DATOS DE PAGO MÓVIL (REQUERIMIENTO EXPLÍCITO) */}
@@ -3433,7 +3203,7 @@ export default function TabletMobilePosPage() {
                   setShowPagoMovilModal(true);
                 }}
                 className={`w-full p-3 rounded-2xl border flex items-center justify-between text-left transition-all active:scale-96 shadow-2xs ${
-                  isLight ? 'bg-slate-50 hover:bg-slate-100 border-slate-200' : 'bg-slate-950 hover:bg-slate-850 border-slate-800'
+                  isLight ? 'bg-white hover:bg-slate-50 border-slate-300' : 'bg-slate-950 hover:bg-slate-850 border-slate-800'
                 }`}
               >
                 <div className="flex items-center gap-3">
@@ -3441,13 +3211,15 @@ export default function TabletMobilePosPage() {
                     <Phone className="w-5 h-5" />
                   </div>
                   <div>
-                    <h4 className="text-xs font-black" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
+                    <h4 className={`text-xs font-black ${isLight ? 'text-slate-950' : 'text-white'}`}>
                       Datos de Pago Móvil
                     </h4>
-                    <p className="text-[10px] text-slate-500">Banco, Teléfono, Cédula/RIF</p>
+                    <p className={`text-[10px] font-medium ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
+                      Banco, Teléfono, Cédula/RIF
+                    </p>
                   </div>
                 </div>
-                <ChevronRight className="w-4 h-4 text-slate-400" />
+                <ChevronRight className={`w-4 h-4 ${isLight ? 'text-slate-500' : 'text-slate-400'}`} />
               </button>
 
               {/* SECCIÓN 3: GESTIÓN DE CLIENTES */}
@@ -3457,7 +3229,7 @@ export default function TabletMobilePosPage() {
                   setShowCustomerModal(true);
                 }}
                 className={`w-full p-3 rounded-2xl border flex items-center justify-between text-left transition-all active:scale-96 shadow-2xs ${
-                  isLight ? 'bg-slate-50 hover:bg-slate-100 border-slate-200' : 'bg-slate-950 hover:bg-slate-850 border-slate-800'
+                  isLight ? 'bg-white hover:bg-slate-50 border-slate-300' : 'bg-slate-950 hover:bg-slate-850 border-slate-800'
                 }`}
               >
                 <div className="flex items-center gap-3">
@@ -3465,13 +3237,15 @@ export default function TabletMobilePosPage() {
                     <User className="w-5 h-5" />
                   </div>
                   <div>
-                    <h4 className="text-xs font-black" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
+                    <h4 className={`text-xs font-black ${isLight ? 'text-slate-950' : 'text-white'}`}>
                       Cartera de Clientes
                     </h4>
-                    <p className="text-[10px] text-slate-500">{customers.length} Registrados</p>
+                    <p className={`text-[10px] font-medium ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
+                      {customers.length} Registrados
+                    </p>
                   </div>
                 </div>
-                <ChevronRight className="w-4 h-4 text-slate-400" />
+                <ChevronRight className={`w-4 h-4 ${isLight ? 'text-slate-500' : 'text-slate-400'}`} />
               </button>
 
               {/* SECCIÓN 3B: LIBRERÍA CLOUD DE PAQUETES VISUALES & CATÁLOGOS */}
@@ -3481,7 +3255,7 @@ export default function TabletMobilePosPage() {
                   setShowVisualPacksModal(true);
                 }}
                 className={`w-full p-3 rounded-2xl border flex items-center justify-between text-left transition-all active:scale-96 shadow-2xs ${
-                  isLight ? 'bg-sky-50/70 hover:bg-sky-100/90 border-sky-200' : 'bg-sky-950/40 hover:bg-sky-900/60 border-sky-800/60'
+                  isLight ? 'bg-sky-50/80 hover:bg-sky-100/90 border-sky-300' : 'bg-sky-950/40 hover:bg-sky-900/60 border-sky-800/60'
                 }`}
               >
                 <div className="flex items-center gap-3">
@@ -3490,29 +3264,31 @@ export default function TabletMobilePosPage() {
                   </div>
                   <div>
                     <div className="flex items-center gap-1.5">
-                      <h4 className="text-xs font-black" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
+                      <h4 className={`text-xs font-black ${isLight ? 'text-slate-950' : 'text-white'}`}>
                         Paquetes Visuales & Catálogos
                       </h4>
-                      <span className="px-1.5 py-0.2 rounded text-[8px] font-black uppercase bg-sky-500/20 text-sky-500">
+                      <span className="px-1.5 py-0.2 rounded text-[8px] font-black uppercase bg-sky-500/20 text-sky-600 font-mono">
                         Cloud
                       </span>
                     </div>
-                    <p className="text-[10px] text-slate-500 dark:text-slate-400">Descargar fotos HD, rubros y códigos</p>
+                    <p className={`text-[10px] font-medium ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
+                      Descargar fotos HD, rubros y códigos
+                    </p>
                   </div>
                 </div>
-                <ChevronRight className="w-4 h-4 text-sky-500" />
+                <ChevronRight className="w-4 h-4 text-sky-600" />
               </button>
 
               {/* SECCIÓN 4: BRANDING Y COLORES */}
               <div className={`p-3 rounded-2xl border space-y-2 ${
-                isLight ? 'bg-slate-50 border-slate-200' : 'bg-slate-950 border-slate-800'
+                isLight ? 'bg-slate-50 border-slate-300' : 'bg-slate-950 border-slate-800'
               }`}>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1.5 text-xs font-black" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
                     <Palette className="w-4 h-4" style={{ color: currentPal.primary }} />
                     <span>Colores de Marca</span>
                   </div>
-                  <span className="text-[10px] font-mono font-bold text-slate-400">
+                  <span className={`text-[10px] font-mono font-bold ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
                     {currentPal.name}
                   </span>
                 </div>
@@ -3530,7 +3306,7 @@ export default function TabletMobilePosPage() {
                       }`}
                       style={{
                         backgroundColor: isLight ? '#ffffff' : '#0f172a',
-                        borderColor: activePalette === pal.id ? pal.primary : isLight ? '#e2e8f0' : '#1e293b'
+                        borderColor: activePalette === pal.id ? pal.primary : isLight ? '#cbd5e1' : '#1e293b'
                       }}
                     >
                       <span
@@ -3546,44 +3322,41 @@ export default function TabletMobilePosPage() {
                   ))}
                 </div>
 
-                <div className="pt-2.5 border-t border-slate-200 dark:border-slate-800 space-y-2">
+                <div className={`pt-2.5 border-t space-y-2 ${isLight ? 'border-slate-200' : 'border-slate-800'}`}>
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-slate-500">Lienzo & Atmósfera:</span>
-                    <span className="text-[10px] font-mono font-bold text-slate-400">
+                    <span className={`text-xs font-bold ${isLight ? 'text-slate-700' : 'text-slate-500'}`}>Lienzo & Atmósfera:</span>
+                    <span className={`text-[10px] font-mono font-bold ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
                       {currentCanvas.name}
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-3 gap-1.5">
+                  <div className="grid grid-cols-2 gap-2">
                     {CANVAS_THEMES.map((canvas) => {
                       const isSelected = canvasTheme === canvas.id;
                       return (
                         <button
                           key={canvas.id}
                           type="button"
-                          onClick={() => {
-                            setCanvasTheme(canvas.id);
-                            try { localStorage.setItem('klikpos_canvas_theme', canvas.id); } catch {}
-                          }}
-                          className={`p-2 rounded-xl border flex flex-col items-center gap-1 transition-all active:scale-95 cursor-pointer ${
-                            isSelected ? 'ring-2 font-black shadow-xs' : 'opacity-80 hover:opacity-100'
+                          onClick={() => handleToggleTheme(canvas.id)}
+                          className={`p-2.5 rounded-xl border flex flex-col items-center gap-1.5 transition-all active:scale-95 cursor-pointer ${
+                            isSelected ? 'ring-2 font-black shadow-xs' : 'opacity-90 hover:opacity-100'
                           }`}
                           style={{
                             backgroundColor: canvas.surface,
-                            borderColor: isSelected ? currentPal.primary : canvas.border,
+                            borderColor: isSelected ? currentPal.primary : isLight ? '#cbd5e1' : canvas.border,
                             color: canvas.isLight ? '#0f172a' : '#ffffff'
                           }}
                         >
-                          <div className="flex items-center gap-1">
+                          <div className="flex items-center gap-1.5">
                             <span
-                              className="w-2.5 h-2.5 rounded-full border border-black/20"
+                              className="w-3.5 h-3.5 rounded-full border border-black/20 shrink-0"
                               style={{ backgroundColor: canvas.bg }}
                             />
-                            <span className="text-[9px] font-bold truncate max-w-[70px]">
+                            <span className={`text-[10px] font-black truncate max-w-[95px] ${canvas.isLight ? 'text-slate-950' : 'text-white'}`}>
                               {canvas.name}
                             </span>
                           </div>
-                          <span className="text-[8px] opacity-75 font-mono">
+                          <span className={`text-[9px] font-bold font-mono ${canvas.isLight ? 'text-slate-700' : 'text-slate-400'}`}>
                             {canvas.isLight ? '☀️ Diurno' : '🌙 Nocturno'}
                           </span>
                         </button>
@@ -3600,14 +3373,14 @@ export default function TabletMobilePosPage() {
                   setShowStreetAmbassadorModal(true);
                 }}
                 className={`w-full p-2.5 rounded-xl border flex items-center justify-between text-xs font-bold transition-all ${
-                  isLight ? 'bg-emerald-50 border-emerald-200 text-emerald-900' : 'bg-emerald-950/40 border-emerald-800 text-emerald-200'
+                  isLight ? 'bg-emerald-50 border-emerald-300 text-emerald-950' : 'bg-emerald-950/40 border-emerald-800 text-emerald-200'
                 }`}
               >
                 <div className="flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-emerald-500 animate-pulse" />
-                  <span>Planes Comerciales ($15 / $25)</span>
+                  <Sparkles className="w-4 h-4 text-emerald-600 animate-pulse" />
+                  <span className={isLight ? 'text-emerald-950 font-black' : 'text-emerald-200'}>Planes Comerciales ($15 / $25)</span>
                 </div>
-                <span className="text-[10px] text-emerald-600 font-mono font-bold">Oferta</span>
+                <span className="text-[10px] text-emerald-700 font-mono font-bold bg-emerald-100 px-2 py-0.5 rounded-md">Oferta</span>
               </button>
 
               {/* Presentación Comercial para Clientes */}
@@ -3616,14 +3389,14 @@ export default function TabletMobilePosPage() {
                 target="_blank"
                 rel="noreferrer"
                 className={`w-full p-2.5 rounded-xl border flex items-center justify-between text-xs font-bold transition-all ${
-                  isLight ? 'bg-sky-50 border-sky-200 text-sky-900' : 'bg-sky-950/40 border-sky-800 text-sky-200'
+                  isLight ? 'bg-sky-50 border-sky-300 text-sky-950' : 'bg-sky-950/40 border-sky-800 text-sky-200'
                 }`}
               >
                 <div className="flex items-center gap-2">
-                  <Smartphone className="w-4 h-4 text-sky-500" />
-                  <span>Presentación para Clientes</span>
+                  <Smartphone className="w-4 h-4 text-sky-600" />
+                  <span className={isLight ? 'text-sky-950 font-black' : 'text-sky-200'}>Presentación para Clientes</span>
                 </div>
-                <span className="text-[10px] text-sky-600 font-mono font-bold">Sliders →</span>
+                <span className="text-[10px] text-sky-700 font-mono font-bold bg-sky-100 px-2 py-0.5 rounded-md">Sliders →</span>
               </a>
 
               {/* Licencia Oficial */}
@@ -3633,19 +3406,19 @@ export default function TabletMobilePosPage() {
                   setShowLicenseModal(true);
                 }}
                 className={`w-full p-2.5 rounded-xl border flex items-center justify-between text-xs font-bold transition-all ${
-                  isLight ? 'bg-slate-50 border-slate-200 text-slate-800' : 'bg-slate-950 border-slate-800 text-slate-200'
+                  isLight ? 'bg-white hover:bg-slate-50 border-slate-300 text-slate-950 shadow-xs' : 'bg-slate-950 border-slate-800 text-slate-200'
                 }`}
               >
                 <div className="flex items-center gap-2">
-                  <ShieldCheck className="w-4 h-4 text-emerald-500" />
-                  <span>Activar Clave de Licencia</span>
+                  <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                  <span className={isLight ? 'text-slate-950 font-black' : 'text-slate-100'}>Activar Clave de Licencia</span>
                 </div>
-                <span className="text-[10px] text-emerald-600 font-mono font-bold">Oficial</span>
+                <span className="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-md font-mono font-bold">Oficial</span>
               </button>
             </div>
 
-            <div className="pt-3 border-t border-slate-200 dark:border-slate-800 text-center text-[10px] text-slate-400 font-mono">
-              KlikPOS v2.4.5 • Blanco & Grafito
+            <div className={`pt-3 border-t text-center text-[10px] font-mono ${isLight ? 'border-slate-200 text-slate-600' : 'border-slate-800 text-slate-400'}`}>
+              KlikPOS v3.0.4 • Blanco & Grafito
             </div>
           </aside>
         </div>
@@ -3662,30 +3435,36 @@ export default function TabletMobilePosPage() {
           />
 
           <aside
-            className="relative w-full max-w-[380px] border-l border-white/10 h-full p-4 flex flex-col justify-between shadow-2xl z-10 anim-drawer-right text-white"
+            className={`relative w-full max-w-[380px] border-l h-full p-4 flex flex-col justify-between shadow-2xl z-10 anim-drawer-right transition-colors ${
+              isLight ? 'bg-white border-slate-200 text-slate-900' : 'bg-[#090d16] border-white/10 text-white'
+            }`}
             style={{
-              backgroundColor: '#090d16',
-              boxShadow: '-10px 0 40px rgba(0, 0, 0, 0.8)'
+              backgroundColor: isLight ? '#ffffff' : '#090d16',
+              boxShadow: isLight ? '-10px 0 35px rgba(0, 0, 0, 0.12)' : '-10px 0 40px rgba(0, 0, 0, 0.8)'
             }}
           >
             <div className="space-y-3 flex-1 flex flex-col min-h-0">
-              <div className="flex items-center justify-between pb-3 border-b border-white/10 shrink-0">
+              <div className={`flex items-center justify-between pb-3 border-b shrink-0 ${isLight ? 'border-slate-200' : 'border-white/10'}`}>
                 <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+                  <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${
+                    isLight ? 'bg-emerald-100 border border-emerald-300 text-emerald-800' : 'bg-emerald-500/20 border border-emerald-500/30 text-emerald-400'
+                  }`}>
                     <ShoppingCart className="w-4 h-4 stroke-[2.2]" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-black text-white">
+                    <h3 className={`text-sm font-black ${isLight ? 'text-slate-950' : 'text-white'}`}>
                       {activeTable ? `Mesa #${activeTable}` : 'Comanda Actual'}
                     </h3>
-                    <span className="text-[10px] text-emerald-400 font-mono font-bold">
+                    <span className={`text-[10px] font-mono font-bold ${isLight ? 'text-emerald-700' : 'text-emerald-400'}`}>
                       {totalItems} {totalItems === 1 ? 'producto' : 'productos'}
                     </span>
                   </div>
                 </div>
                 <button
                   onClick={() => setIsRightDrawerOpen(false)}
-                  className="p-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white transition-all active:scale-90 cursor-pointer border border-white/10"
+                  className={`p-1.5 rounded-xl transition-all active:scale-90 cursor-pointer border ${
+                    isLight ? 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-300' : 'bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white border-white/10'
+                  }`}
                   title="Cerrar comanda"
                 >
                   <X className="w-4 h-4 stroke-[2.2]" />
@@ -3703,32 +3482,38 @@ export default function TabletMobilePosPage() {
                   cart.map((item) => (
                     <div
                       key={item.id}
-                      className="p-3 rounded-2xl border border-white/10 bg-[#111726] hover:border-white/20 space-y-2 transition-all shadow-sm"
+                      className={`p-3 rounded-2xl border space-y-2 transition-all shadow-sm ${
+                        isLight ? 'bg-slate-50 border-slate-200 hover:border-slate-300' : 'border-white/10 bg-[#111726] hover:border-white/20'
+                      }`}
                     >
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex-1 pr-1">
-                          <h4 className="text-xs font-black text-white leading-tight">
+                          <h4 className={`text-xs font-black leading-tight ${isLight ? 'text-slate-900' : 'text-white'}`}>
                             {item.name}
                           </h4>
-                          <span className="text-[11px] font-mono text-emerald-400 font-bold">
-                            ${item.priceUSD.toFixed(2)} <span className="text-slate-400 font-normal">c/u</span>
+                          <span className={`text-[11px] font-mono font-bold ${isLight ? 'text-emerald-700' : 'text-emerald-400'}`}>
+                            ${item.priceUSD.toFixed(2)} <span className={isLight ? 'text-slate-500 font-normal' : 'text-slate-400 font-normal'}>c/u</span>
                           </span>
                         </div>
-                        <span className="text-xs font-black font-mono text-white shrink-0">
+                        <span className={`text-xs font-black font-mono shrink-0 ${isLight ? 'text-slate-950' : 'text-white'}`}>
                           ${(item.priceUSD * item.qty).toFixed(2)}
                         </span>
                       </div>
 
                       {item.notes && (
-                        <p className="text-[10px] text-amber-300 italic bg-amber-500/15 px-2 py-1 rounded-lg border border-amber-500/30">
+                        <p className={`text-[10px] italic px-2 py-1 rounded-lg border ${
+                          isLight ? 'bg-amber-50 text-amber-900 border-amber-200' : 'text-amber-300 bg-amber-500/15 border-amber-500/30'
+                        }`}>
                           📝 {item.notes}
                         </p>
                       )}
 
-                      <div className="flex items-center justify-between pt-1.5 border-t border-white/5">
+                      <div className={`flex items-center justify-between pt-1.5 border-t ${isLight ? 'border-slate-200' : 'border-white/5'}`}>
                         <button
                           onClick={() => setEditingItemNotes(item)}
-                          className="text-[11px] text-slate-400 hover:text-amber-400 underline underline-offset-2 flex items-center gap-1 transition-colors cursor-pointer"
+                          className={`text-[11px] underline underline-offset-2 flex items-center gap-1 transition-colors cursor-pointer ${
+                            isLight ? 'text-slate-600 hover:text-amber-700' : 'text-slate-400 hover:text-amber-400'
+                          }`}
                         >
                           <Edit3 className="w-3 h-3" />
                           <span>{item.notes ? 'Editar Nota' : '+ Nota'}</span>
@@ -3736,11 +3521,13 @@ export default function TabletMobilePosPage() {
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() => updateQty(item.id, -1)}
-                            className="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 flex items-center justify-center text-xs font-black active:scale-90 transition-all cursor-pointer"
+                            className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-black active:scale-90 transition-all cursor-pointer ${
+                              isLight ? 'bg-slate-200 hover:bg-slate-300 text-slate-800 border border-slate-300' : 'bg-slate-800 hover:bg-slate-700 text-white border border-slate-700'
+                            }`}
                           >
                             <Minus className="w-3 h-3 stroke-[2.5]" />
                           </button>
-                          <span className="text-xs font-mono font-black w-5 text-center text-emerald-400">
+                          <span className={`text-xs font-mono font-black w-5 text-center ${isLight ? 'text-emerald-700' : 'text-emerald-400'}`}>
                             {item.qty}
                           </span>
                           <button
@@ -3759,17 +3546,19 @@ export default function TabletMobilePosPage() {
 
             {/* Totalizadores y Botón Ir a Cobrar */}
             {cart.length > 0 && (
-              <div className="pt-3 border-t border-white/10 space-y-3 shrink-0">
-                <div className="p-3 rounded-2xl bg-[#06080e] border border-white/10 space-y-1.5">
+              <div className={`pt-3 border-t space-y-3 shrink-0 ${isLight ? 'border-slate-200' : 'border-white/10'}`}>
+                <div className={`p-3 rounded-2xl border space-y-1.5 ${
+                  isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#06080e] border-white/10'
+                }`}>
                   <div className="flex justify-between items-center text-xs">
-                    <span className="text-slate-300 font-bold">Total USD:</span>
-                    <span className="font-mono font-black text-lg text-emerald-400">
+                    <span className={`font-bold ${isLight ? 'text-slate-700' : 'text-slate-300'}`}>Total USD:</span>
+                    <span className={`font-mono font-black text-lg ${isLight ? 'text-emerald-700' : 'text-emerald-400'}`}>
                       ${totalUSD.toFixed(2)}
                     </span>
                   </div>
-                  <div className="flex justify-between items-center text-xs pt-1 border-t border-white/5">
-                    <span className="text-slate-400 font-medium">Total Bs (BCV):</span>
-                    <span className="font-mono font-black text-sm text-amber-300">
+                  <div className={`flex justify-between items-center text-xs pt-1 border-t ${isLight ? 'border-slate-200' : 'border-white/5'}`}>
+                    <span className={`font-medium ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>Total Bs (BCV):</span>
+                    <span className={`font-mono font-black text-sm ${isLight ? 'text-amber-700' : 'text-amber-300'}`}>
                       Bs. {totalVES.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </span>
                   </div>
@@ -3781,7 +3570,7 @@ export default function TabletMobilePosPage() {
                 <div className="grid grid-cols-2 gap-2 pt-1">
                   <button
                     onClick={() => setCart([])}
-                    className="py-3 px-3 active:scale-95 text-xs font-bold rounded-xl border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 transition-all cursor-pointer flex items-center justify-center gap-1"
+                    className="py-3 px-3 active:scale-95 text-xs font-bold rounded-xl border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 dark:text-rose-300 transition-all cursor-pointer flex items-center justify-center gap-1"
                   >
                     Vaciar
                   </button>
@@ -3804,335 +3593,43 @@ export default function TabletMobilePosPage() {
       {/* ========================================================================= */}
       {/* 7. MODAL CONFIGURACIÓN DE EMPRESA (NOMBRE, RIF, TELÉFONO, DIRECCIÓN)       */}
       {/* ========================================================================= */}
-      {showCompanyModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-          <div className={`border rounded-3xl p-5 max-w-md w-full space-y-4 shadow-2xl relative ${
-            isLight ? 'bg-white border-slate-200' : 'bg-slate-900 border-slate-800'
-          }`}>
-            <button
-              onClick={() => setShowCompanyModal(false)}
-              className="absolute top-4 right-4 p-1 text-slate-400 hover:text-slate-800 active:scale-90"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            <div className="flex items-center gap-2">
-              <Building className="w-5 h-5" style={{ color: currentPal.primary }} />
-              <h3 className="text-sm font-black" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
-                Datos de la Empresa y Tickets
-              </h3>
-            </div>
-
-            <form onSubmit={handleSaveCompany} className="space-y-3">
-              <div>
-                <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1">
-                  Nombre Comercial / Razón Social:
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={companyInfo.name}
-                  onChange={(e) => setCompanyInfo({ ...companyInfo, name: e.target.value })}
-                  className={`w-full px-3 py-2 rounded-xl text-xs font-bold border outline-none ${
-                    isLight ? 'bg-white border-slate-300 text-slate-900' : 'bg-slate-950 border-slate-700 text-white'
-                  }`}
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1">
-                    RIF / Identificación Fiscal:
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={companyInfo.rif}
-                    onChange={(e) => setCompanyInfo({ ...companyInfo, rif: e.target.value })}
-                    className={`w-full px-3 py-2 rounded-xl text-xs font-mono font-bold border outline-none ${
-                      isLight ? 'bg-white border-slate-300 text-slate-900' : 'bg-slate-950 border-slate-700 text-white'
-                    }`}
-                  />
-                </div>
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1">
-                    Teléfono del Negocio:
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={companyInfo.phone}
-                    onChange={(e) => setCompanyInfo({ ...companyInfo, phone: e.target.value })}
-                    className={`w-full px-3 py-2 rounded-xl text-xs font-mono font-bold border outline-none ${
-                      isLight ? 'bg-white border-slate-300 text-slate-900' : 'bg-slate-950 border-slate-700 text-white'
-                    }`}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1">
-                  Dirección Física del Establecimiento:
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={companyInfo.address}
-                  onChange={(e) => setCompanyInfo({ ...companyInfo, address: e.target.value })}
-                  className={`w-full px-3 py-2 rounded-xl text-xs font-bold border outline-none ${
-                    isLight ? 'bg-white border-slate-300 text-slate-900' : 'bg-slate-950 border-slate-700 text-white'
-                  }`}
-                />
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1">
-                  Mensaje al Pie del Recibo:
-                </label>
-                <input
-                  type="text"
-                  value={companyInfo.footerMsg}
-                  onChange={(e) => setCompanyInfo({ ...companyInfo, footerMsg: e.target.value })}
-                  className={`w-full px-3 py-2 rounded-xl text-xs border outline-none ${
-                    isLight ? 'bg-white border-slate-300 text-slate-900' : 'bg-slate-950 border-slate-700 text-white'
-                  }`}
-                />
-              </div>
-
-              <button
-                type="submit"
-                className="w-full py-2.5 text-white text-xs font-black rounded-xl shadow-md active:scale-95 transition-all mt-2"
-                style={{ backgroundColor: currentPal.primary }}
-              >
-                Guardar Datos de Empresa
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
+      <CompanyConfigModal
+        isOpen={showCompanyModal}
+        onClose={() => setShowCompanyModal(false)}
+        isLight={isLight}
+        primaryColor={currentPal.primary}
+        companyInfo={companyInfo}
+        setCompanyInfo={setCompanyInfo}
+        onSave={handleSaveCompany}
+      />
 
       {/* ========================================================================= */}
       {/* 8. MODAL CONFIGURACIÓN DE PAGO MÓVIL (BANCO, TELÉFONO, CÉDULA, TITULAR)     */}
       {/* ========================================================================= */}
-      {showPagoMovilModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-          <div className={`border rounded-3xl p-5 max-w-md w-full space-y-4 shadow-2xl relative ${
-            isLight ? 'bg-white border-slate-200' : 'bg-slate-900 border-slate-800'
-          }`}>
-            <button
-              onClick={() => setShowPagoMovilModal(false)}
-              className="absolute top-4 right-4 p-1 text-slate-400 hover:text-slate-800 active:scale-90"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            <div className="flex items-center gap-2">
-              <Phone className="w-5 h-5 text-emerald-600" />
-              <h3 className="text-sm font-black" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
-                Configurar Datos de Pago Móvil
-              </h3>
-            </div>
-
-            <form onSubmit={handleSavePagoMovil} className="space-y-3">
-              <div>
-                <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1">
-                  Banco Receptor:
-                </label>
-                <select
-                  value={pagoMovilInfo.bank}
-                  onChange={(e) => setPagoMovilInfo({ ...pagoMovilInfo, bank: e.target.value })}
-                  className={`w-full px-3 py-2 rounded-xl text-xs font-bold border outline-none ${
-                    isLight ? 'bg-white border-slate-300 text-slate-900' : 'bg-slate-950 border-slate-700 text-white'
-                  }`}
-                >
-                  {VENEZUELAN_BANKS.map((b) => (
-                    <option key={b} value={b}>{b}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1">
-                    Teléfono Pago Móvil:
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="Ej: 04248298026"
-                    value={pagoMovilInfo.phone}
-                    onChange={(e) => setPagoMovilInfo({ ...pagoMovilInfo, phone: e.target.value })}
-                    className={`w-full px-3 py-2 rounded-xl text-xs font-mono font-bold border outline-none ${
-                      isLight ? 'bg-white border-slate-300 text-slate-900' : 'bg-slate-950 border-slate-700 text-white'
-                    }`}
-                  />
-                </div>
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1">
-                    Cédula / RIF Titular:
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="Ej: V-20123456"
-                    value={pagoMovilInfo.idDoc}
-                    onChange={(e) => setPagoMovilInfo({ ...pagoMovilInfo, idDoc: e.target.value })}
-                    className={`w-full px-3 py-2 rounded-xl text-xs font-mono font-bold border outline-none ${
-                      isLight ? 'bg-white border-slate-300 text-slate-900' : 'bg-slate-950 border-slate-700 text-white'
-                    }`}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1">
-                  Nombre del Titular de la Cuenta:
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Nombre o Razón Social registrada en el banco"
-                  value={pagoMovilInfo.ownerName}
-                  onChange={(e) => setPagoMovilInfo({ ...pagoMovilInfo, ownerName: e.target.value })}
-                  className={`w-full px-3 py-2 rounded-xl text-xs font-bold border outline-none ${
-                    isLight ? 'bg-white border-slate-300 text-slate-900' : 'bg-slate-950 border-slate-700 text-white'
-                  }`}
-                />
-              </div>
-
-              <button
-                type="submit"
-                className="w-full py-2.5 text-white text-xs font-black rounded-xl shadow-md active:scale-95 transition-all bg-emerald-600 hover:bg-emerald-500 mt-2"
-              >
-                Guardar Datos de Pago Móvil
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
+      <PagoMovilConfigModal
+        isOpen={showPagoMovilModal}
+        onClose={() => setShowPagoMovilModal(false)}
+        isLight={isLight}
+        pagoMovilInfo={pagoMovilInfo}
+        setPagoMovilInfo={setPagoMovilInfo}
+        onSave={handleSavePagoMovil}
+      />
 
       {/* ========================================================================= */}
       {/* 9. MODAL GESTIÓN Y REGISTRO RÁPIDO DE CLIENTES                             */}
       {/* ========================================================================= */}
-      {showCustomerModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-          <div className={`border rounded-3xl p-5 max-w-md w-full space-y-4 shadow-2xl relative max-h-[90vh] flex flex-col ${
-            isLight ? 'bg-white border-slate-200' : 'bg-slate-900 border-slate-800'
-          }`}>
-            <button
-              onClick={() => setShowCustomerModal(false)}
-              className="absolute top-4 right-4 p-1 text-slate-400 hover:text-slate-800 active:scale-90"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            <div className="flex items-center gap-2 shrink-0">
-              <User className="w-5 h-5" style={{ color: currentPal.primary }} />
-              <h3 className="text-sm font-black" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
-                Seleccionar o Registrar Cliente
-              </h3>
-            </div>
-
-            {/* Formulario de Nuevo Cliente */}
-            <form onSubmit={handleCreateCustomer} className={`p-3 rounded-2xl border space-y-2 shrink-0 ${
-              isLight ? 'bg-slate-50 border-slate-200' : 'bg-slate-950 border-slate-800'
-            }`}>
-              <span className="text-[10px] font-black uppercase text-slate-500 block">
-                + Agregar Nuevo Cliente:
-              </span>
-              <div className="grid grid-cols-2 gap-2">
-                <input
-                  type="text"
-                  placeholder="Nombre / Razón Social *"
-                  required
-                  value={newCustomerForm.name}
-                  onChange={(e) => setNewCustomerForm({ ...newCustomerForm, name: e.target.value })}
-                  className={`px-2.5 py-1.5 rounded-xl text-xs border outline-none font-bold ${
-                    isLight ? 'bg-white border-slate-300 text-slate-900' : 'bg-slate-900 border-slate-700 text-white'
-                  }`}
-                />
-                <input
-                  type="text"
-                  placeholder="Cédula / RIF *"
-                  required
-                  value={newCustomerForm.docId}
-                  onChange={(e) => setNewCustomerForm({ ...newCustomerForm, docId: e.target.value })}
-                  className={`px-2.5 py-1.5 rounded-xl text-xs font-mono font-bold border outline-none ${
-                    isLight ? 'bg-white border-slate-300 text-slate-900' : 'bg-slate-900 border-slate-700 text-white'
-                  }`}
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                <input
-                  type="text"
-                  placeholder="Teléfono (Opcional)"
-                  value={newCustomerForm.phone}
-                  onChange={(e) => setNewCustomerForm({ ...newCustomerForm, phone: e.target.value })}
-                  className={`px-2.5 py-1.5 rounded-xl text-xs font-mono border outline-none ${
-                    isLight ? 'bg-white border-slate-300 text-slate-900' : 'bg-slate-900 border-slate-700 text-white'
-                  }`}
-                />
-                <button
-                  type="submit"
-                  className="py-1.5 text-white text-xs font-black rounded-xl active:scale-95 transition-all shadow-xs"
-                  style={{ backgroundColor: currentPal.primary }}
-                >
-                  Guardar y Seleccionar
-                </button>
-              </div>
-            </form>
-
-            {/* Buscador de Clientes Existentes */}
-            <div className="relative shrink-0">
-              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" />
-              <input
-                type="text"
-                placeholder="Buscar cliente por nombre o cédula..."
-                value={customerSearch}
-                onChange={(e) => setCustomerSearch(e.target.value)}
-                className={`w-full pl-8 pr-3 py-1.5 rounded-xl text-xs border outline-none ${
-                  isLight ? 'bg-white border-slate-300 text-slate-900' : 'bg-slate-950 border-slate-700 text-white'
-                }`}
-              />
-            </div>
-
-            {/* Lista de Clientes */}
-            <div className="flex-1 overflow-y-auto space-y-1.5 pr-1">
-              {customers
-                .filter(c => c.name.toLowerCase().includes(customerSearch.toLowerCase()) || c.docId.toLowerCase().includes(customerSearch.toLowerCase()))
-                .map((cust) => (
-                  <div
-                    key={cust.id}
-                    onClick={() => {
-                      setSelectedCustomer(cust);
-                      setShowCustomerModal(false);
-                    }}
-                    className={`p-2.5 rounded-xl border flex items-center justify-between cursor-pointer transition-all active:scale-98 ${
-                      selectedCustomer.id === cust.id
-                        ? 'border-2 shadow-xs'
-                        : isLight ? 'bg-slate-50 hover:bg-slate-100 border-slate-200' : 'bg-slate-950 hover:bg-slate-850 border-slate-800'
-                    }`}
-                    style={{
-                      borderColor: selectedCustomer.id === cust.id ? currentPal.primary : undefined
-                    }}
-                  >
-                    <div>
-                      <h4 className="text-xs font-black" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
-                        {cust.name}
-                      </h4>
-                      <span className="text-[10px] font-mono text-slate-500 font-bold">
-                        {cust.docId} {cust.phone && `• ${cust.phone}`}
-                      </span>
-                    </div>
-                    {selectedCustomer.id === cust.id && (
-                      <Check className="w-4 h-4" style={{ color: currentPal.primary }} />
-                    )}
-                  </div>
-                ))}
-            </div>
-          </div>
-        </div>
-      )}
+      <CustomerModal
+        isOpen={showCustomerModal}
+        onClose={() => setShowCustomerModal(false)}
+        isLight={isLight}
+        primaryColor={currentPal.primary}
+        customers={customers}
+        selectedCustomer={selectedCustomer}
+        onSelectCustomer={setSelectedCustomer}
+        newCustomerForm={newCustomerForm}
+        setNewCustomerForm={setNewCustomerForm}
+        onCreateCustomer={handleCreateCustomer}
+      />
 
       {/* ========================================================================= */}
       {/* 10. MODAL TICKET DIGITAL DE VENTA FINALIZADA                              */}
@@ -4542,40 +4039,48 @@ export default function TabletMobilePosPage() {
             isLight ? 'bg-white border-slate-200 text-slate-900' : 'bg-slate-900 border-slate-800 text-white'
           }`}>
             {/* Header del Modal */}
-            <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800 shrink-0">
-              <div className="flex items-center gap-2.5">
-                <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-500">
-                  <Package className="w-5 h-5" />
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800 shrink-0 gap-3">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 flex items-center justify-center shrink-0">
+                  <Package className="w-5 h-5 stroke-[2.2]" />
                 </div>
-                <div>
-                  <h3 className="text-sm font-black uppercase tracking-wider" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
-                    Gestor de Inventario y Precios
-                  </h3>
-                  <p className="text-[11px] text-slate-500 font-medium">
-                    {products.length} productos en el catálogo activo • Precios en tiempo real
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white leading-tight truncate">
+                      Inventario
+                    </h3>
+                    <span className="text-[10px] sm:text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 shrink-0">
+                      {products.length}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-500 font-medium truncate mt-0.5">
+                    Catálogo activo
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+
+              <div className="flex items-center gap-1.5 shrink-0">
                 <button
                   type="button"
                   onClick={() => {
                     setShowInventoryModal(false);
                     setShowVisualPacksModal(true);
                   }}
-                  className={`flex items-center gap-1.5 h-8 px-3 rounded-lg border text-xs font-semibold whitespace-nowrap transition-all active:scale-95 cursor-pointer shadow-xs ${
+                  className={`flex items-center gap-1.5 h-8 px-2.5 sm:px-3 rounded-xl border text-xs font-semibold transition-all active:scale-95 cursor-pointer shadow-xs ${
                     isLight
-                      ? 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-700'
-                      : 'bg-slate-800/90 hover:bg-slate-700 border-slate-700/80 text-slate-200'
+                      ? 'bg-amber-50 hover:bg-amber-100 border-amber-200 text-amber-900'
+                      : 'bg-amber-500/10 hover:bg-amber-500/20 border-amber-500/30 text-amber-300'
                   }`}
-                  title="Descargar paquetes de productos completos con fotos HD"
+                  title="Explorar paquetes con fotos HD"
                 >
-                  <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                  <span>Paquetes con Fotos HD</span>
+                  <Sparkles className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                  <span className="hidden sm:inline">Paquetes </span>
+                  <span>Fotos HD</span>
                 </button>
                 <button
                   onClick={() => setShowInventoryModal(false)}
-                  className="p-1.5 rounded-xl text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors"
+                  className="w-8 h-8 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                  title="Cerrar"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -4831,542 +4336,53 @@ export default function TabletMobilePosPage() {
       {/* ========================================================================= */}
       {/* 13b.2. MODAL DE EDICIÓN COMPLETA DE PRODUCTO (FOTO, NOMBRE, SKU, PRECIO)  */}
       {/* ========================================================================= */}
-      {editingProduct && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 bg-black/70 backdrop-blur-xs animate-in fade-in duration-200">
-          <div className="border rounded-3xl p-5 max-w-lg w-full max-h-[90vh] flex flex-col shadow-2xl relative bg-slate-900 border-slate-800 text-white">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800 shrink-0">
-              <div className="flex items-center gap-2">
-                <div className="p-2 rounded-xl bg-amber-500/10 text-amber-500">
-                  <Edit3 className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="text-sm font-black uppercase tracking-wider text-white">
-                    Editar Producto
-                  </h3>
-                  <p className="text-[11px] text-slate-400 font-medium">
-                    Actualiza imagen, precio, categoría y detalles
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={() => setEditingProduct(null)}
-                className="p-1.5 rounded-xl text-slate-400 hover:text-white transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Formulario de Edición (Envoltorio seguro sin <form> para evitar recarga por cámara) */}
-            <div className="flex-1 overflow-y-auto space-y-3.5 py-3 pr-1">
-              {/* Foto del Producto */}
-              <div>
-                <label className="text-[10px] font-bold text-slate-400 flex items-center gap-1 mb-1">
-                  <ImageIcon className="w-3.5 h-3.5 text-amber-500" />
-                  <span>Foto del Producto</span>
-                </label>
-
-                <ProductImageSelector
-                  currentImage={editingProduct.image}
-                  onImageSelected={(url) => setEditingProduct({ ...editingProduct, image: url })}
-                  productName={editingProduct.name}
-                  barcode={editingProduct.sku}
-                  isLight={false}
-                />
-              </div>
-
-              {/* Nombre y Precio */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                <div className="sm:col-span-2">
-                  <label className="text-[10px] font-bold text-slate-400 block mb-0.5">Nombre del Producto *</label>
-                  <input
-                    type="text"
-                    required
-                    value={editingProduct.name}
-                    onChange={(e) => setEditingProduct({ ...editingProduct, name: e.target.value })}
-                    className="w-full px-3 py-1.5 rounded-xl text-xs border outline-none font-bold bg-slate-950 border-slate-700 text-white"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-[10px] font-bold text-slate-400 block mb-0.5">Precio ($ USD) *</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    required
-                    value={editingProduct.priceUSD}
-                    onChange={(e) => setEditingProduct({ ...editingProduct, priceUSD: parseFloat(e.target.value) || 0 })}
-                    className="w-full px-3 py-1.5 rounded-xl text-xs border outline-none font-mono font-bold bg-slate-950 border-slate-700 text-amber-400"
-                  />
-                </div>
-              </div>
-
-              {/* Categoría, SKU y Tag */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                <div>
-                  <label className="text-[10px] font-bold text-slate-400 block mb-0.5">Categoría</label>
-                  <select
-                    value={editingProduct.category}
-                    onChange={(e) => setEditingProduct({ ...editingProduct, category: e.target.value })}
-                    className="w-full px-3 py-1.5 rounded-xl text-xs border outline-none font-bold bg-slate-950 border-slate-700 text-white"
-                  >
-                    {categoriesList.filter(c => c !== 'Todos').map((cat) => (
-                      <option key={cat} value={cat}>{cat}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="text-[10px] font-bold text-slate-400 block mb-0.5">Código / SKU</label>
-                  <input
-                    type="text"
-                    value={editingProduct.sku || ''}
-                    onChange={(e) => setEditingProduct({ ...editingProduct, sku: e.target.value })}
-                    className="w-full px-3 py-1.5 rounded-xl text-xs border outline-none font-mono bg-slate-950 border-slate-700 text-white"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-[10px] font-bold text-slate-400 block mb-0.5">Etiqueta / Badge</label>
-                  <input
-                    type="text"
-                    value={editingProduct.tag || ''}
-                    onChange={(e) => setEditingProduct({ ...editingProduct, tag: e.target.value })}
-                    className="w-full px-3 py-1.5 rounded-xl text-xs border outline-none font-semibold bg-slate-950 border-slate-700 text-white"
-                  />
-                </div>
-              </div>
-
-              {/* Descripción / Detalles de Cocina */}
-              <div>
-                <label className="text-[10px] font-bold text-slate-400 block mb-0.5">Descripción / Ingredientes</label>
-                <textarea
-                  rows={2}
-                  value={editingProduct.description || ''}
-                  onChange={(e) => setEditingProduct({ ...editingProduct, description: e.target.value })}
-                  placeholder="Detalla los ingredientes o modo de preparación..."
-                  className="w-full px-3 py-1.5 rounded-xl text-xs border outline-none bg-slate-950 border-slate-700 text-white resize-none"
-                />
-              </div>
-
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
-                <button
-                  type="button"
-                  onClick={() => setEditingProduct(null)}
-                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold rounded-xl active:scale-95"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="button"
-                  onClick={handleSaveFullProductEdit}
-                  className="px-5 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-black rounded-xl shadow-md transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer"
-                >
-                  <Check className="w-4 h-4" />
-                  <span>Guardar Cambios</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <EditProductModal
+        editingProduct={editingProduct}
+        setEditingProduct={setEditingProduct}
+        categoriesList={categoriesList}
+        onSave={handleSaveFullProductEdit}
+      />
 
       {/* ========================================================================= */}
       {/* 13c. MODAL 2: GESTIÓN DE MOTORIZADOS & DESPACHOS                          */}
       {/* ========================================================================= */}
-      {showDriversModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
-          <div className={`border rounded-3xl p-5 max-w-xl w-full max-h-[90vh] flex flex-col shadow-2xl relative ${
-            isLight ? 'bg-white border-slate-200 text-slate-900' : 'bg-slate-900 border-slate-800 text-white'
-          }`}>
-            {/* Header */}
-            <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800 shrink-0">
-              <div className="flex items-center gap-2.5">
-                <div className="p-2 rounded-xl bg-amber-500/10 text-amber-500">
-                  <Truck className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="text-sm font-black uppercase tracking-wider" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
-                    Motorizados y Delivery WhatsApp
-                  </h3>
-                  <p className="text-[11px] text-slate-500 font-medium">
-                    Despacha pedidos en 1 clic directamente al teléfono de tus repartidores
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={() => setShowDriversModal(false)}
-                className="p-1.5 rounded-xl text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Contenido scrolleable */}
-            <div className="flex-1 overflow-y-auto space-y-4 py-3 pr-1">
-              {/* Formulario de Alta Rápida de Motorizado */}
-              <form onSubmit={handleAddDriver} className={`p-3.5 rounded-2xl border space-y-3 ${
-                isLight ? 'bg-slate-50 border-slate-200' : 'bg-slate-950/60 border-slate-800'
-              }`}>
-                <span className="text-xs font-black uppercase tracking-wider text-amber-600 dark:text-amber-400 flex items-center gap-1.5">
-                  <Plus className="w-4 h-4" />
-                  Registrar Nuevo Chofer
-                </span>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                  <div>
-                    <label className="text-[10px] font-bold text-slate-500 block mb-0.5">Nombre Completo *</label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="Ej. Daniel Pérez"
-                      value={newDriverForm.name}
-                      onChange={(e) => setNewDriverForm({ ...newDriverForm, name: e.target.value })}
-                      className={`w-full px-3 py-1.5 rounded-xl text-xs border outline-none font-semibold ${
-                        isLight ? 'bg-white border-slate-300 text-slate-900' : 'bg-slate-900 border-slate-700 text-white'
-                      }`}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-[10px] font-bold text-slate-500 block mb-0.5">Teléfono WhatsApp *</label>
-                    <input
-                      type="tel"
-                      required
-                      placeholder="04121234567"
-                      value={newDriverForm.phone}
-                      onChange={(e) => setNewDriverForm({ ...newDriverForm, phone: e.target.value })}
-                      className={`w-full px-3 py-1.5 rounded-xl text-xs border outline-none font-mono font-bold ${
-                        isLight ? 'bg-white border-slate-300 text-slate-900' : 'bg-slate-900 border-slate-700 text-white'
-                      }`}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-[10px] font-bold text-slate-500 block mb-0.5">Vehículo / Placa</label>
-                    <input
-                      type="text"
-                      placeholder="Bera SBR Azul / AE34F"
-                      value={newDriverForm.vehicle}
-                      onChange={(e) => setNewDriverForm({ ...newDriverForm, vehicle: e.target.value })}
-                      className={`w-full px-3 py-1.5 rounded-xl text-xs border outline-none font-semibold ${
-                        isLight ? 'bg-white border-slate-300 text-slate-900' : 'bg-slate-900 border-slate-700 text-white'
-                      }`}
-                    />
-                  </div>
-                </div>
-
-                <div className="flex justify-end pt-1">
-                  <button
-                    type="submit"
-                    className="px-4 py-2 bg-amber-600 hover:bg-amber-500 text-white text-xs font-black rounded-xl shadow-md transition-all active:scale-95 flex items-center gap-1.5"
-                  >
-                    <Plus className="w-4 h-4" />
-                    <span>Guardar Motorizado</span>
-                  </button>
-                </div>
-              </form>
-
-              {/* Lista de Motorizados */}
-              <div className="space-y-2">
-                <span className="text-xs font-black uppercase tracking-wider text-slate-500 block">
-                  Choferes Afiliados ({drivers.length})
-                </span>
-
-                <div className="space-y-2">
-                  {drivers.map((d) => (
-                    <div
-                      key={d.id}
-                      className={`p-3 rounded-2xl border flex items-center justify-between gap-3 ${
-                        isLight ? 'bg-white border-slate-200' : 'bg-slate-900 border-slate-800'
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center font-black">
-                          <Bike className="w-4 h-4" />
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <h4 className="text-xs font-black" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
-                              {d.name}
-                            </h4>
-                            <button
-                              onClick={() => handleToggleDriverStatus(d.id)}
-                              className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-md ${
-                                d.status === 'disponible' ? 'bg-emerald-500/10 text-emerald-600' :
-                                d.status === 'en_ruta' ? 'bg-amber-500/10 text-amber-600' :
-                                'bg-slate-150 text-slate-500'
-                              }`}
-                            >
-                              {d.status}
-                            </button>
-                          </div>
-                          <p className="text-[10px] text-slate-400 font-mono">
-                            {d.vehicle} • WhatsApp: {d.phone}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        <button
-                          type="button"
-                          onClick={() => handleDispatchOrderWhatsApp(d.phone, d.name)}
-                          className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-black rounded-xl flex items-center gap-1 shadow-xs active:scale-95 transition-all"
-                          title="Enviar comanda activa por WhatsApp"
-                        >
-                          <Share2 className="w-3.5 h-3.5" />
-                          <span>WhatsApp</span>
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteDriver(d.id)}
-                          className="p-1.5 text-slate-400 hover:text-rose-500 rounded-lg transition-colors"
-                          title="Eliminar chofer"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Footer */}
-            <div className="pt-3 border-t border-slate-200 dark:border-slate-800 flex justify-end shrink-0">
-              <button
-                type="button"
-                onClick={() => setShowDriversModal(false)}
-                className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white text-xs font-black rounded-xl"
-              >
-                Cerrar Motorizados
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <DeliveryDriversModal
+        isOpen={showDriversModal}
+        onClose={() => setShowDriversModal(false)}
+        isLight={isLight}
+        drivers={drivers}
+        newDriverForm={newDriverForm}
+        setNewDriverForm={setNewDriverForm}
+        onAddDriver={handleAddDriver}
+        onToggleDriverStatus={handleToggleDriverStatus}
+        onDispatchOrderWhatsApp={handleDispatchOrderWhatsApp}
+        onDeleteDriver={handleDeleteDriver}
+      />
 
       {/* ========================================================================= */}
       {/* 13d. MODAL 3: CONFIGURACIÓN DE IMPRESORA POS TÉRMICA                      */}
       {/* ========================================================================= */}
-      {showPrinterModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
-          <div className={`border rounded-3xl p-5 max-w-md w-full shadow-2xl relative ${
-            isLight ? 'bg-white border-slate-200 text-slate-900' : 'bg-slate-900 border-slate-800 text-white'
-          }`}>
-            <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
-              <div className="flex items-center gap-2.5">
-                <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-500">
-                  <Printer className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="text-sm font-black uppercase tracking-wider" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
-                    Impresora Térmica POS
-                  </h3>
-                  <p className="text-[11px] text-slate-500 font-medium">
-                    Tickets de comanda y recibos fiscales
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={() => setShowPrinterModal(false)}
-                className="p-1.5 rounded-xl text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <form onSubmit={handleSavePrinterConfig} className="space-y-4 py-4">
-              {/* Tipo de Conexión */}
-              <div>
-                <label className="text-xs font-bold text-slate-500 block mb-1.5">Tipo de Conexión</label>
-                <div className="grid grid-cols-3 gap-2">
-                  {(['bluetooth', 'lan', 'usb'] as const).map((type) => (
-                    <button
-                      key={type}
-                      type="button"
-                      onClick={() => setPrinterConfig({ ...printerConfig, connection: type })}
-                      className={`py-2 px-2 rounded-xl border text-xs font-black uppercase transition-all ${
-                        printerConfig.connection === type
-                          ? 'bg-indigo-600 text-white border-indigo-600 shadow-md'
-                          : isLight ? 'bg-slate-100 border-slate-200 text-slate-700' : 'bg-slate-800 border-slate-700 text-slate-300'
-                      }`}
-                    >
-                      {type === 'lan' ? 'Red LAN' : type}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Parámetros de Red LAN si aplica */}
-              {printerConfig.connection === 'lan' && (
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <label className="text-[10px] font-bold text-slate-500 block mb-1">IP de la Impresora</label>
-                    <input
-                      type="text"
-                      value={printerConfig.ip || '192.168.1.200'}
-                      onChange={(e) => setPrinterConfig({ ...printerConfig, ip: e.target.value })}
-                      className={`w-full px-3 py-1.5 rounded-xl text-xs font-mono font-bold border outline-none ${
-                        isLight ? 'bg-white border-slate-300 text-slate-900' : 'bg-slate-950 border-slate-700 text-white'
-                      }`}
-                    />
-                  </div>
-                  <div>
-                    <label className="text-[10px] font-bold text-slate-500 block mb-1">Puerto (Default 9100)</label>
-                    <input
-                      type="number"
-                      value={printerConfig.port || 9100}
-                      onChange={(e) => setPrinterConfig({ ...printerConfig, port: parseInt(e.target.value) || 9100 })}
-                      className={`w-full px-3 py-1.5 rounded-xl text-xs font-mono font-bold border outline-none ${
-                        isLight ? 'bg-white border-slate-300 text-slate-900' : 'bg-slate-950 border-slate-700 text-white'
-                      }`}
-                    />
-                  </div>
-                </div>
-              )}
-
-              {/* Ancho del Papel */}
-              <div>
-                <label className="text-xs font-bold text-slate-500 block mb-1.5">Ancho del Papel Térmico</label>
-                <div className="grid grid-cols-2 gap-2">
-                  {(['58mm', '80mm'] as const).map((w) => (
-                    <button
-                      key={w}
-                      type="button"
-                      onClick={() => setPrinterConfig({ ...printerConfig, paperWidth: w })}
-                      className={`py-2 px-3 rounded-xl border text-xs font-black transition-all ${
-                        printerConfig.paperWidth === w
-                          ? 'bg-indigo-600 text-white border-indigo-600 shadow-md'
-                          : isLight ? 'bg-slate-100 border-slate-200 text-slate-700' : 'bg-slate-800 border-slate-700 text-slate-300'
-                      }`}
-                    >
-                      {w} (Formato Estándar)
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Alerta de prueba de impresión */}
-              {printerTestAlert && (
-                <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 text-xs font-bold flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 shrink-0" />
-                  <span>¡Comando de prueba enviado exitosamente a la impresora!</span>
-                </div>
-              )}
-
-              {/* Botón de prueba y guardado */}
-              <div className="flex gap-2 pt-2">
-                <button
-                  type="button"
-                  onClick={handleTestPrint}
-                  className="py-2.5 px-3 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 text-slate-700 dark:text-slate-200 text-xs font-bold rounded-xl active:scale-95 transition-all flex items-center gap-1.5"
-                >
-                  <Receipt className="w-4 h-4" />
-                  <span>Ticket Prueba</span>
-                </button>
-
-                <button
-                  type="submit"
-                  className="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-black rounded-xl shadow-md active:scale-95 transition-all"
-                >
-                  Guardar Impresora
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      <PrinterConfigModal
+        isOpen={showPrinterModal}
+        onClose={() => setShowPrinterModal(false)}
+        isLight={isLight}
+        printerConfig={printerConfig}
+        setPrinterConfig={setPrinterConfig}
+        onSave={handleSavePrinterConfig}
+        onTestPrint={handleTestPrint}
+        printerTestAlert={printerTestAlert}
+      />
 
       {/* ========================================================================= */}
       {/* 13e. MODAL 4: SELECTOR DE RUBRO COMERCIAL                                 */}
       {/* ========================================================================= */}
-      {showRubroModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
-          <div className={`border rounded-3xl p-5 max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl relative ${
-            isLight ? 'bg-white border-slate-200 text-slate-900' : 'bg-slate-900 border-slate-800 text-white'
-          }`}>
-            <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800 shrink-0">
-              <div className="flex items-center gap-2.5">
-                <div className="p-2 rounded-xl bg-purple-500/10 text-purple-500">
-                  <Boxes className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="text-sm font-black uppercase tracking-wider" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
-                    Seleccionar Rubro Comercial
-                  </h3>
-                  <p className="text-[11px] text-slate-500 font-medium">
-                    Adapta categorías y productos de muestra con 1 solo toque
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={() => setShowRubroModal(false)}
-                className="p-1.5 rounded-xl text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="flex-1 overflow-y-auto py-3 grid grid-cols-1 sm:grid-cols-2 gap-3 pr-1">
-              {(Object.keys(RUBROS_CATALOG) as RubroId[]).map((rubroKey) => {
-                const r = RUBROS_CATALOG[rubroKey];
-                const isSelected = activeRubro === rubroKey;
-                return (
-                  <button
-                    key={rubroKey}
-                    type="button"
-                    onClick={() => handleSelectRubro(rubroKey)}
-                    className={`p-4 rounded-2xl border text-left transition-all active:scale-98 flex flex-col justify-between space-y-2 ${
-                      isSelected
-                        ? 'border-purple-500 bg-purple-500/10 shadow-md ring-2 ring-purple-500/30'
-                        : isLight
-                        ? 'bg-slate-50 hover:bg-slate-100 border-slate-200'
-                        : 'bg-slate-950/60 hover:bg-slate-800 border-slate-800'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="text-3xl">{r.icon}</span>
-                      {isSelected && (
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-purple-600 text-white">
-                          Rubro Activo
-                        </span>
-                      )}
-                    </div>
-
-                    <div>
-                      <h4 className="text-xs font-black" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
-                        {r.name}
-                      </h4>
-                      <p className="text-[10px] text-slate-400 mt-0.5 line-clamp-2">
-                        {r.description}
-                      </p>
-                    </div>
-
-                    <div className="flex flex-wrap gap-1 pt-1">
-                      {r.categories.filter(c => c !== 'Todos').slice(0, 4).map((c) => (
-                        <span key={c} className="text-[9px] font-medium px-1.5 py-0.5 rounded bg-slate-200/60 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
-                          {c}
-                        </span>
-                      ))}
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-
-            <div className="pt-3 border-t border-slate-200 dark:border-slate-800 flex justify-end shrink-0">
-              <button
-                type="button"
-                onClick={() => setShowRubroModal(false)}
-                className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white text-xs font-black rounded-xl"
-              >
-                Cerrar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <BusinessRubroModal
+        isOpen={showRubroModal}
+        onClose={() => setShowRubroModal(false)}
+        isLight={isLight}
+        activeRubro={activeRubro}
+        onSelectRubro={handleSelectRubro}
+      />
 
       {/* ========================================================================= */}
       {/* 14. MODAL DE LICENCIA OFICIAL Y PRUEBA 15 MINUTOS                         */}
@@ -5394,6 +4410,7 @@ export default function TabletMobilePosPage() {
       <StreetSalesBackupModal
         isOpen={showSalesBackupModal}
         onClose={() => setShowSalesBackupModal(false)}
+        isLight={isLight}
         bcvRate={bcvRate}
         primaryColor={currentPal.primary}
         onPrintTicket={(sale) => {
@@ -5452,6 +4469,7 @@ export default function TabletMobilePosPage() {
       <DataSyncModal
         isOpen={showSyncModal}
         onClose={() => setShowSyncModal(false)}
+        isLight={isLight}
         currentBcvRate={bcvRate}
         onBcvUpdated={(newRate) => {
           setBcvRate(newRate);

@@ -86,9 +86,10 @@ export async function POST(request: Request) {
       }
     }
 
-    if (typeof rate === 'number' && rate > 0) {
+    const numRate = Number(rate);
+    if (Number.isFinite(numRate) && numRate >= 1 && numRate <= 10000000) {
       latestBcvData = {
-        rate: Math.round(rate * 100) / 100,
+        rate: Math.round(numRate * 100) / 100,
         date: new Date().toISOString().split('T')[0],
         source: body.source || 'Ajuste Manual en Terminal',
         lastUpdated: new Date().toISOString(),
@@ -101,7 +102,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: true, ...latestBcvData }, { headers: CORS_HEADERS });
     }
 
-    return NextResponse.json({ success: false, message: 'Tasa inválida' }, { status: 400, headers: CORS_HEADERS });
+    return NextResponse.json(
+      { success: false, message: 'Tasa inválida. Debe ser un número finito entre 1 y 10,000,000.' },
+      { status: 400, headers: CORS_HEADERS }
+    );
   } catch (err: any) {
     return NextResponse.json({ success: false, message: err.message }, { status: 500, headers: CORS_HEADERS });
   }

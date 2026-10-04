@@ -15,10 +15,10 @@ export async function POST(req: Request) {
 
     const expectedSecret = process.env.KLIKPOS_ADMIN_SECRET || process.env.VENEMATIC_SECRET || 'KLIKPOS_SYS_ADMIN_2026';
 
-    // Protección Red Team: Bloquear peticiones de actualización no autenticadas
-    if (!authHeader || (authHeader !== expectedSecret && authHeader !== 'SUPERVISOR_AUTHORIZED')) {
+    // Protección Red Team: Bloquear peticiones de actualización sin autenticación válida
+    if (!authHeader || authHeader !== expectedSecret) {
       return NextResponse.json(
-        { error: 'No autorizado. Se requiere token o PIN de supervisor para ejecutar actualizaciones del sistema.' },
+        { error: 'No autorizado. Se requiere token administrativo válido para ejecutar actualizaciones del sistema.' },
         { status: 401 }
       );
     }

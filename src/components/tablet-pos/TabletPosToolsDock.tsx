@@ -81,7 +81,10 @@ export const TabletPosToolsDock: React.FC<TabletPosToolsDockProps> = ({
           <div className="flex flex-col items-center gap-2.5 my-auto">
             {/* 1. Inventario & Stock */}
             <button
-              onClick={onOpenInventory}
+              onClick={() => {
+                onClose();
+                onOpenInventory();
+              }}
               className="w-10 h-10 rounded-xl flex items-center justify-center text-white bg-emerald-600 border border-emerald-400 hover:bg-emerald-500 hover:scale-110 active:scale-95 transition-all shadow-md cursor-pointer group"
               title="Gestión de Inventario & Stock"
             >
@@ -91,7 +94,10 @@ export const TabletPosToolsDock: React.FC<TabletPosToolsDockProps> = ({
             {/* 2. Motorizados / Despacho (Opcional en Lite) */}
             {!isLiteMode && (
               <button
-                onClick={onOpenDrivers}
+                onClick={() => {
+                  onClose();
+                  onOpenDrivers();
+                }}
                 className="w-10 h-10 rounded-xl flex items-center justify-center text-white bg-amber-600 border border-amber-400 hover:bg-amber-500 hover:scale-110 active:scale-95 transition-all shadow-md cursor-pointer group"
                 title="Gestión de Motorizados & Despachos"
               >
@@ -101,7 +107,10 @@ export const TabletPosToolsDock: React.FC<TabletPosToolsDockProps> = ({
 
             {/* 3. Impresora Térmica */}
             <button
-              onClick={onOpenPrinter}
+              onClick={() => {
+                onClose();
+                onOpenPrinter();
+              }}
               className="w-10 h-10 rounded-xl flex items-center justify-center text-white bg-sky-600 border border-sky-400 hover:bg-sky-500 hover:scale-110 active:scale-95 transition-all shadow-md cursor-pointer group"
               title="Configurar Impresora Térmica"
             >
@@ -110,7 +119,10 @@ export const TabletPosToolsDock: React.FC<TabletPosToolsDockProps> = ({
 
             {/* 4. Selector de Rubro de Negocio */}
             <button
-              onClick={onOpenRubros}
+              onClick={() => {
+                onClose();
+                onOpenRubros();
+              }}
               className="w-10 h-10 rounded-xl flex items-center justify-center text-white bg-purple-600 border border-purple-400 hover:bg-purple-500 hover:scale-110 active:scale-95 transition-all shadow-md cursor-pointer group"
               title="Cambiar Rubro Comercial"
             >
@@ -120,7 +132,10 @@ export const TabletPosToolsDock: React.FC<TabletPosToolsDockProps> = ({
             {/* 5. QR Menú Interactivo (Opcional en Lite) */}
             {!isLiteMode && (
               <button
-                onClick={onOpenQrMenu}
+                onClick={() => {
+                  onClose();
+                  onOpenQrMenu();
+                }}
                 className="w-10 h-10 rounded-xl flex items-center justify-center text-white bg-indigo-600 border border-indigo-400 hover:bg-indigo-500 hover:scale-110 active:scale-95 transition-all shadow-md cursor-pointer group"
                 title="Generar Menú QR Digital"
               >
@@ -130,7 +145,11 @@ export const TabletPosToolsDock: React.FC<TabletPosToolsDockProps> = ({
 
             {/* 6. Módulo de Ventas & Respaldo */}
             <button
-              onClick={onOpenSales || onOpenCart}
+              onClick={() => {
+                onClose();
+                if (onOpenSales) onOpenSales();
+                else if (onOpenCart) onOpenCart();
+              }}
               className="w-10 h-10 rounded-xl flex items-center justify-center text-white bg-teal-600 border border-teal-400 hover:bg-teal-500 hover:scale-110 active:scale-95 transition-all shadow-md cursor-pointer group"
               title="Módulo de Ventas & Respaldo"
             >
@@ -139,7 +158,10 @@ export const TabletPosToolsDock: React.FC<TabletPosToolsDockProps> = ({
 
             {/* 7. Sincronizar Data */}
             <button
-              onClick={onOpenDataSync}
+              onClick={() => {
+                onClose();
+                if (onOpenDataSync) onOpenDataSync();
+              }}
               className="w-10 h-10 rounded-xl flex items-center justify-center text-white bg-cyan-600 border border-cyan-400 hover:bg-cyan-500 hover:scale-110 active:scale-95 transition-all shadow-md cursor-pointer group"
               title="Sincronizar Data (Tasa BCV, Ventas & Catálogo Cloud)"
             >
@@ -148,7 +170,10 @@ export const TabletPosToolsDock: React.FC<TabletPosToolsDockProps> = ({
 
             {/* 8. Actualizar Software */}
             <button
-              onClick={onOpenSoftwareUpdate}
+              onClick={() => {
+                onClose();
+                if (onOpenSoftwareUpdate) onOpenSoftwareUpdate();
+              }}
               className="w-10 h-10 rounded-xl flex items-center justify-center text-white bg-amber-500 border border-amber-300 hover:bg-amber-400 hover:scale-110 active:scale-95 transition-all shadow-md cursor-pointer group"
               title="Actualizar Software (KlikPOS Cloud)"
             >
@@ -157,7 +182,10 @@ export const TabletPosToolsDock: React.FC<TabletPosToolsDockProps> = ({
 
             {/* 9. Ajustes & Configuración */}
             <button
-              onClick={onOpenSettings}
+              onClick={() => {
+                onClose();
+                onOpenSettings();
+              }}
               className="w-10 h-10 rounded-xl flex items-center justify-center text-white bg-slate-700 border border-slate-500 hover:bg-slate-600 hover:scale-110 active:scale-95 transition-all shadow-md cursor-pointer group"
               title="Ajustes de Empresa & RIF"
             >

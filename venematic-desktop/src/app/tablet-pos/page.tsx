@@ -1439,9 +1439,11 @@ export default function TabletMobilePosPage() {
   return (
     <div
       id="klikpos-street-root"
-      className="h-screen flex flex-col font-sans select-none overflow-hidden relative bg-[#070a12] text-slate-100 street-pos-dark-canvas"
+      className={`h-screen flex flex-col font-sans select-none overflow-hidden relative ${
+        isLight ? 'bg-white text-slate-900 light-mode' : 'bg-[#070a12] text-slate-100 street-pos-dark-canvas'
+      }`}
       style={{
-        backgroundColor: '#070a12',
+        backgroundColor: isLight ? '#ffffff' : '#070a12',
         '--brand-color': currentPal.primary,
         '--brand-hover': currentPal.hover,
         '--brand-accent': currentPal.accent,
@@ -1522,150 +1524,189 @@ export default function TabletMobilePosPage() {
 
       {/* Docker Flotante Abierto: EXCLUSIVAMENTE Pill Vertical con Íconos Directos */}
       {isDockerOpen && (
-        <div
-          className={`fixed top-1/2 -translate-y-1/2 z-50 animate-in fade-in zoom-in-95 duration-200 ${
-            dockSide === 'left' ? 'left-2.5' : 'right-2.5'
-          }`}
-        >
-          {/* Cápsula Vertical Grafito Profundo con Cristal Translúcido y Micro-Tarjetas de Alto Contraste AAA */}
-          <aside
-            className="w-14 rounded-[32px] py-3.5 px-1.5 flex flex-col items-center justify-between shadow-2xl border select-none shrink-0 min-h-[440px] z-50 backdrop-blur-xl transition-all"
-            style={{
-              backgroundColor: 'rgba(9, 13, 22, 0.82)',
-              borderColor: 'rgba(255, 255, 255, 0.16)',
-              backdropFilter: 'blur(20px) saturate(180%)',
-              WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-              boxShadow: '0 25px 60px -10px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.08)'
-            }}
+        <>
+          {/* Backdrop sutil e interactivo para cerrar al tocar fuera */}
+          <div
+            onClick={() => setIsDockerOpen(false)}
+            className="fixed inset-0 z-40 bg-black/20 backdrop-blur-[1px] transition-opacity"
+            title="Cerrar Docker"
+          />
+          <div
+            className={`fixed top-1/2 -translate-y-1/2 z-50 animate-in fade-in zoom-in-95 duration-200 ${
+              dockSide === 'left' ? 'left-2.5' : 'right-2.5'
+            }`}
           >
-            {/* Top: LayoutGrid Icon / Brand Pill */}
-            <div
-              className="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 shadow-lg cursor-pointer transition-transform hover:scale-105 active:scale-95"
+            {/* Cápsula Vertical Grafito Profundo con Cristal Translúcido y Micro-Tarjetas de Alto Contraste AAA */}
+            <aside
+              className="w-14 rounded-[32px] py-3.5 px-1.5 flex flex-col items-center justify-between shadow-2xl border select-none shrink-0 min-h-[440px] z-50 backdrop-blur-xl transition-all"
               style={{
-                background: 'linear-gradient(135deg, #f59e0b, #d97706)',
-                boxShadow: '0 4px 16px rgba(245, 158, 11, 0.45)'
+                backgroundColor: 'rgba(9, 13, 22, 0.82)',
+                borderColor: 'rgba(255, 255, 255, 0.16)',
+                backdropFilter: 'blur(20px) saturate(180%)',
+                WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+                boxShadow: '0 25px 60px -10px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.08)'
               }}
-              title="KlikPOS Tools"
             >
-              <LayoutGrid className="w-5 h-5 text-slate-950 font-black stroke-[2.4]" />
-            </div>
-
-            {/* Íconos Centrales de Acceso Directo con Contraste AAA y Micro-Fondos */}
-            <div className="flex flex-col items-center gap-2.5 my-auto">
-              {/* 1. Inventario & Stock */}
-              <button
-                onClick={() => setShowInventoryModal(true)}
-                className="w-10 h-10 rounded-xl flex items-center justify-center text-emerald-300 bg-emerald-500/25 border border-emerald-400/40 hover:bg-emerald-500/40 hover:scale-110 active:scale-95 transition-all shadow-sm cursor-pointer group"
-                title="Gestión de Inventario & Stock"
-              >
-                <Package className="w-5 h-5 stroke-[2.2]" />
-              </button>
-
-              {/* 1b. Paquetes Visuales & Catálogos Cloud con Fotos HD */}
-              <button
-                onClick={() => setShowVisualPacksModal(true)}
-                className="w-10 h-10 rounded-xl flex items-center justify-center text-cyan-300 bg-cyan-500/25 border border-cyan-400/40 hover:bg-cyan-500/40 hover:scale-110 active:scale-95 transition-all shadow-sm cursor-pointer group"
-                title="Librería Cloud de Paquetes Visuales & Fotos HD"
-              >
-                <ImageIcon className="w-5 h-5 stroke-[2.2]" />
-              </button>
-
-              {/* 2. Motorizados / Despacho (Opcional en Lite) */}
-              {!IS_LITE_MODE && (
-                <button
-                  onClick={() => setShowDriversModal(true)}
-                  className="w-10 h-10 rounded-xl flex items-center justify-center text-amber-300 bg-amber-500/25 border border-amber-400/40 hover:bg-amber-500/40 hover:scale-110 active:scale-95 transition-all shadow-sm cursor-pointer group"
-                  title="Motorizados & Despacho Delivery"
-                >
-                  <Truck className="w-5 h-5 stroke-[2.2]" />
-                </button>
-              )}
-
-              {/* 3. Impresora Térmica POS */}
-              <button
-                onClick={() => setShowPrinterModal(true)}
-                className="w-10 h-10 rounded-xl flex items-center justify-center text-sky-300 bg-sky-500/25 border border-sky-400/40 hover:bg-sky-500/40 hover:scale-110 active:scale-95 transition-all shadow-sm cursor-pointer group"
-                title="Configuración de Impresora POS"
-              >
-                <Printer className="w-5 h-5 stroke-[2.2]" />
-              </button>
-
-              {/* 4. Cambiar Rubro Comercial */}
-              <button
-                onClick={() => setShowRubroModal(true)}
-                className="w-10 h-10 rounded-xl flex items-center justify-center text-purple-300 bg-purple-500/25 border border-purple-400/40 hover:bg-purple-500/40 hover:scale-110 active:scale-95 transition-all shadow-sm cursor-pointer group"
-                title="Cambiar Rubro Comercial (Comida, Farmacia, Bodega, etc.)"
-              >
-                <Boxes className="w-5 h-5 stroke-[2.2]" />
-              </button>
-
-              {/* 5. Menú QR Dinámico para Clientes (Opcional en Lite) */}
-              {!IS_LITE_MODE && (
-                <button
-                  onClick={() => setShowQrModal(true)}
-                  className="w-10 h-10 rounded-xl flex items-center justify-center text-indigo-300 bg-indigo-500/25 border border-indigo-400/40 hover:bg-indigo-500/40 hover:scale-110 active:scale-95 transition-all shadow-sm cursor-pointer group"
-                  title="Generar Menú QR Digital para Clientes"
-                >
-                  <QrCode className="w-5 h-5 stroke-[2.2]" />
-                </button>
-              )}
-
-              {/* 6. Módulo de Ventas & Respaldo */}
-              <button
-                onClick={() => setShowSalesBackupModal(true)}
-                className="w-10 h-10 rounded-xl flex items-center justify-center text-emerald-300 bg-emerald-500/25 border border-emerald-400/40 hover:bg-emerald-500/40 hover:scale-110 active:scale-95 transition-all shadow-sm cursor-pointer group"
-                title="Módulo de Ventas & Respaldo (Diario, Semanal, Mensual)"
-              >
-                <TrendingUp className="w-5 h-5 stroke-[2.4]" />
-              </button>
-
-              {/* 7. Sincronizar Data */}
-              <button
-                onClick={() => setShowSyncModal(true)}
-                className="w-10 h-10 rounded-xl flex items-center justify-center text-cyan-300 bg-cyan-500/25 border border-cyan-400/40 hover:bg-cyan-500/40 hover:scale-110 active:scale-95 transition-all shadow-sm cursor-pointer group"
-                title="Sincronizar Data (Tasa BCV, Ventas & Catálogo Cloud)"
-              >
-                <RefreshCw className="w-5 h-5 stroke-[2.4]" />
-              </button>
-
-              {/* 8. Actualizar Software */}
-              <button
-                onClick={() => setShowUpdateModal(true)}
-                className="w-10 h-10 rounded-xl flex items-center justify-center text-yellow-300 bg-yellow-500/25 border border-yellow-400/40 hover:bg-yellow-500/40 hover:scale-110 active:scale-95 transition-all shadow-sm cursor-pointer group"
-                title="Actualizar Software (GitHub Release & APK)"
-              >
-                <Sparkles className="w-5 h-5 stroke-[2.4]" />
-              </button>
-
-              {/* 9. Ajustes & Configuración */}
-              <button
-                onClick={() => setIsLeftDrawerOpen(true)}
-                className="w-10 h-10 rounded-xl flex items-center justify-center text-slate-100 bg-slate-800/90 border border-slate-600/70 hover:bg-slate-700 hover:scale-110 active:scale-95 transition-all shadow-sm cursor-pointer group"
-                title="Ajustes de Empresa & RIF"
-              >
-                <Settings className="w-5 h-5 stroke-[2.2]" />
-              </button>
-            </div>
-
-            {/* Bottom: Alternar Lado (Izq/Der) y Colapsar */}
-            <div className="flex flex-col items-center gap-2 pt-2 border-t border-white/10 shrink-0 w-full">
-              <button
-                onClick={handleToggleDockSide}
-                className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-300 hover:text-amber-300 hover:bg-white/10 active:scale-90 transition-all cursor-pointer"
-                title={dockSide === 'left' ? 'Mover Docker a la Derecha' : 'Mover Docker a la Izquierda'}
-              >
-                <ArrowLeftRight className="w-4 h-4" />
-              </button>
-              <button
+              {/* Top: LayoutGrid Icon / Brand Pill */}
+              <div
                 onClick={() => setIsDockerOpen(false)}
-                className="w-9 h-9 rounded-xl flex items-center justify-center text-rose-400 hover:text-rose-300 hover:bg-rose-500/20 active:scale-90 transition-all cursor-pointer"
-                title="Minimizar Docker"
+                className="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 shadow-lg cursor-pointer transition-transform hover:scale-105 active:scale-95"
+                style={{
+                  background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+                  boxShadow: '0 4px 16px rgba(245, 158, 11, 0.45)'
+                }}
+                title="KlikPOS Tools (Cerrar)"
               >
-                <X className="w-4 h-4 stroke-[2.5]" />
-              </button>
-            </div>
-          </aside>
-        </div>
+                <LayoutGrid className="w-5 h-5 text-slate-950 font-black stroke-[2.4]" />
+              </div>
+
+              {/* Íconos Centrales de Acceso Directo con Contraste AAA y Micro-Fondos */}
+              <div className="flex flex-col items-center gap-2.5 my-auto">
+                {/* 1. Inventario & Stock */}
+                <button
+                  onClick={() => {
+                    setIsDockerOpen(false);
+                    setShowInventoryModal(true);
+                  }}
+                  className="w-10 h-10 rounded-xl flex items-center justify-center text-emerald-300 bg-emerald-500/25 border border-emerald-400/40 hover:bg-emerald-500/40 hover:scale-110 active:scale-95 transition-all shadow-sm cursor-pointer group"
+                  title="Gestión de Inventario & Stock"
+                >
+                  <Package className="w-5 h-5 stroke-[2.2]" />
+                </button>
+
+                {/* 1b. Paquetes Visuales & Catálogos Cloud con Fotos HD */}
+                <button
+                  onClick={() => {
+                    setIsDockerOpen(false);
+                    setShowVisualPacksModal(true);
+                  }}
+                  className="w-10 h-10 rounded-xl flex items-center justify-center text-cyan-300 bg-cyan-500/25 border border-cyan-400/40 hover:bg-cyan-500/40 hover:scale-110 active:scale-95 transition-all shadow-sm cursor-pointer group"
+                  title="Librería Cloud de Paquetes Visuales & Fotos HD"
+                >
+                  <ImageIcon className="w-5 h-5 stroke-[2.2]" />
+                </button>
+
+                {/* 2. Motorizados / Despacho (Opcional en Lite) */}
+                {!IS_LITE_MODE && (
+                  <button
+                    onClick={() => {
+                      setIsDockerOpen(false);
+                      setShowDriversModal(true);
+                    }}
+                    className="w-10 h-10 rounded-xl flex items-center justify-center text-amber-300 bg-amber-500/25 border border-amber-400/40 hover:bg-amber-500/40 hover:scale-110 active:scale-95 transition-all shadow-sm cursor-pointer group"
+                    title="Motorizados & Despacho Delivery"
+                  >
+                    <Truck className="w-5 h-5 stroke-[2.2]" />
+                  </button>
+                )}
+
+                {/* 3. Impresora Térmica POS */}
+                <button
+                  onClick={() => {
+                    setIsDockerOpen(false);
+                    setShowPrinterModal(true);
+                  }}
+                  className="w-10 h-10 rounded-xl flex items-center justify-center text-sky-300 bg-sky-500/25 border border-sky-400/40 hover:bg-sky-500/40 hover:scale-110 active:scale-95 transition-all shadow-sm cursor-pointer group"
+                  title="Configuración de Impresora POS"
+                >
+                  <Printer className="w-5 h-5 stroke-[2.2]" />
+                </button>
+
+                {/* 4. Cambiar Rubro Comercial */}
+                <button
+                  onClick={() => {
+                    setIsDockerOpen(false);
+                    setShowRubroModal(true);
+                  }}
+                  className="w-10 h-10 rounded-xl flex items-center justify-center text-purple-300 bg-purple-500/25 border border-purple-400/40 hover:bg-purple-500/40 hover:scale-110 active:scale-95 transition-all shadow-sm cursor-pointer group"
+                  title="Cambiar Rubro Comercial (Comida, Farmacia, Bodega, etc.)"
+                >
+                  <Boxes className="w-5 h-5 stroke-[2.2]" />
+                </button>
+
+                {/* 5. Menú QR Dinámico para Clientes (Opcional en Lite) */}
+                {!IS_LITE_MODE && (
+                  <button
+                    onClick={() => {
+                      setIsDockerOpen(false);
+                      setShowQrModal(true);
+                    }}
+                    className="w-10 h-10 rounded-xl flex items-center justify-center text-indigo-300 bg-indigo-500/25 border border-indigo-400/40 hover:bg-indigo-500/40 hover:scale-110 active:scale-95 transition-all shadow-sm cursor-pointer group"
+                    title="Generar Menú QR Digital para Clientes"
+                  >
+                    <QrCode className="w-5 h-5 stroke-[2.2]" />
+                  </button>
+                )}
+
+                {/* 6. Módulo de Ventas & Respaldo */}
+                <button
+                  onClick={() => {
+                    setIsDockerOpen(false);
+                    setShowSalesBackupModal(true);
+                  }}
+                  className="w-10 h-10 rounded-xl flex items-center justify-center text-emerald-300 bg-emerald-500/25 border border-emerald-400/40 hover:bg-emerald-500/40 hover:scale-110 active:scale-95 transition-all shadow-sm cursor-pointer group"
+                  title="Módulo de Ventas & Respaldo (Diario, Semanal, Mensual)"
+                >
+                  <TrendingUp className="w-5 h-5 stroke-[2.4]" />
+                </button>
+
+                {/* 7. Sincronizar Data */}
+                <button
+                  onClick={() => {
+                    setIsDockerOpen(false);
+                    setShowSyncModal(true);
+                  }}
+                  className="w-10 h-10 rounded-xl flex items-center justify-center text-cyan-300 bg-cyan-500/25 border border-cyan-400/40 hover:bg-cyan-500/40 hover:scale-110 active:scale-95 transition-all shadow-sm cursor-pointer group"
+                  title="Sincronizar Data (Tasa BCV, Ventas & Catálogo Cloud)"
+                >
+                  <RefreshCw className="w-5 h-5 stroke-[2.4]" />
+                </button>
+
+                {/* 8. Actualizar Software */}
+                <button
+                  onClick={() => {
+                    setIsDockerOpen(false);
+                    setShowUpdateModal(true);
+                  }}
+                  className="w-10 h-10 rounded-xl flex items-center justify-center text-yellow-300 bg-yellow-500/25 border border-yellow-400/40 hover:bg-yellow-500/40 hover:scale-110 active:scale-95 transition-all shadow-sm cursor-pointer group"
+                  title="Actualizar Software (GitHub Release & APK)"
+                >
+                  <Sparkles className="w-5 h-5 stroke-[2.4]" />
+                </button>
+
+                {/* 9. Ajustes & Configuración */}
+                <button
+                  onClick={() => {
+                    setIsDockerOpen(false);
+                    setIsLeftDrawerOpen(true);
+                  }}
+                  className="w-10 h-10 rounded-xl flex items-center justify-center text-slate-100 bg-slate-800/90 border border-slate-600/70 hover:bg-slate-700 hover:scale-110 active:scale-95 transition-all shadow-sm cursor-pointer group"
+                  title="Ajustes de Empresa & RIF"
+                >
+                  <Settings className="w-5 h-5 stroke-[2.2]" />
+                </button>
+              </div>
+
+              {/* Bottom: Alternar Lado (Izq/Der) y Colapsar */}
+              <div className="flex flex-col items-center gap-2 pt-2 border-t border-white/10 shrink-0 w-full">
+                <button
+                  onClick={handleToggleDockSide}
+                  className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-300 hover:text-amber-300 hover:bg-white/10 active:scale-90 transition-all cursor-pointer"
+                  title={dockSide === 'left' ? 'Mover Docker a la Derecha' : 'Mover Docker a la Izquierda'}
+                >
+                  <ArrowLeftRight className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setIsDockerOpen(false)}
+                  className="w-9 h-9 rounded-xl flex items-center justify-center text-rose-400 hover:text-rose-300 hover:bg-rose-500/20 active:scale-90 transition-all cursor-pointer"
+                  title="Minimizar Docker"
+                >
+                  <X className="w-4 h-4 stroke-[2.5]" />
+                </button>
+              </div>
+            </aside>
+          </div>
+        </>
       )}
 
       {/* ========================================================================= */}
@@ -1675,9 +1716,10 @@ export default function TabletMobilePosPage() {
       {/* 2. HEADER SUPERIOR ELEGANTE Y PERFECTAMENTE ORGANIZADO                     */}
       {/* ========================================================================= */}
       <header
-        className="h-14 px-3 flex items-center justify-between border-b shrink-0 z-20 shadow-xs bg-[#090d16] border-slate-800/90 text-white"
+        className="w-full h-[68px] px-4 sm:px-6 md:px-8 flex items-center border-b shrink-0 z-20 shadow-xs bg-[#090d16] border-slate-800/90 text-white"
         style={{ backgroundColor: '#090d16' }}
       >
+        <div className="w-full max-w-6xl mx-auto flex items-center justify-between">
         {/* LADO IZQUIERDO: Logo KlikPOS Street + Acciones Principales */}
         <div className="flex items-center gap-2">
           {/* Logo KlikPOS Street Vector & Clean Branding */}
@@ -1816,11 +1858,12 @@ export default function TabletMobilePosPage() {
             )}
           </button>
         </div>
+        </div>
       </header>
 
       {/* Notificación Flotante de Tasa BCV Oficial */}
       {bcvToast && (
-        <div className="fixed top-16 left-1/2 -translate-x-1/2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+        <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
           <div className="px-4 py-2 rounded-2xl bg-[#0b132b]/95 border border-sky-500/40 text-white text-xs font-bold shadow-2xl flex items-center gap-2.5 backdrop-blur-md">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
             <span>{bcvToast.message}</span>
@@ -1837,12 +1880,24 @@ export default function TabletMobilePosPage() {
       {/* ========================================================================= */}
       {/* 3. LIENZO PRINCIPAL CON SCROLL 100% FLUIDO Y DESBLOQUEADO                 */}
       {/* ========================================================================= */}
-      <main className="flex-1 min-h-0 overflow-hidden flex flex-col p-2 sm:p-3 max-w-6xl mx-auto w-full street-pos-dark-canvas" style={{ backgroundColor: "#070a12" }}>
+      <main
+        id="klikpos-street-main"
+        className={`flex-1 min-h-0 overflow-hidden flex flex-col px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 w-full transition-colors duration-200 ${
+          isLight ? 'bg-white' : 'bg-[#040711]'
+        }`}
+        style={{ backgroundColor: isLight ? '#ffffff' : '#040711' }}
+      >
+        <div className="w-full max-w-6xl mx-auto flex-1 min-h-0 flex flex-col">
         {/* ======================================================================= */}
         {/* VISTA 1: MENÚ Y CATÁLOGO TÁCTIL (GRID ADAPTATIVO TABLET & MODO LISTA)   */}
         {/* ======================================================================= */}
         {activeTab === 'menu' && (
-          <div className="flex-1 min-h-0 flex flex-col space-y-2 street-pos-dark-canvas" style={{ backgroundColor: '#070a12' }}>
+          <div
+            className={`flex-1 min-h-0 flex flex-col space-y-2 transition-colors duration-200 ${
+              isLight ? 'bg-white' : 'bg-[#040711]'
+            }`}
+            style={{ backgroundColor: isLight ? '#ffffff' : '#040711' }}
+          >
             {/* 1. Barra de Búsqueda + Selector de Vista (Cuadrícula / Lista) + Selector de Tema */}
             <div className="space-y-1.5 shrink-0">
               <div className="flex flex-wrap items-center justify-between gap-1.5">
@@ -2881,6 +2936,7 @@ export default function TabletMobilePosPage() {
             </button>
           </div>
         )}
+        </div>
       </main>
 
       {/* ========================================================================= */}
@@ -2897,10 +2953,22 @@ export default function TabletMobilePosPage() {
         totalItems={totalItems}
         totalUSD={totalUSD}
         primaryColor={currentPal.primary}
-        onSelectTab={(tab) => setActiveTab(tab)}
-        onOpenCobro={() => setActiveTab('cobro')}
-        onOpenQrModal={() => setShowQrModal(true)}
-        onToggleOrderDrawer={() => setIsRightDrawerOpen((prev) => !prev)}
+        onSelectTab={(tab) => {
+          setIsDockerOpen(false);
+          setActiveTab(tab);
+        }}
+        onOpenCobro={() => {
+          setIsDockerOpen(false);
+          setActiveTab('cobro');
+        }}
+        onOpenQrModal={() => {
+          setIsDockerOpen(false);
+          setShowQrModal(true);
+        }}
+        onToggleOrderDrawer={() => {
+          setIsDockerOpen(false);
+          setIsRightDrawerOpen((prev) => !prev);
+        }}
         isOrderDrawerOpen={isRightDrawerOpen}
         onToggleDocker={() => setIsDockerOpen((prev) => !prev)}
         isDockerOpen={isDockerOpen}
@@ -4049,36 +4117,48 @@ export default function TabletMobilePosPage() {
             isLight ? 'bg-white border-slate-200 text-slate-900' : 'bg-slate-900 border-slate-800 text-white'
           }`}>
             {/* Header del Modal */}
-            <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800 shrink-0">
-              <div className="flex items-center gap-2.5">
-                <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-500">
-                  <Package className="w-5 h-5" />
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800 shrink-0 gap-3">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 flex items-center justify-center shrink-0">
+                  <Package className="w-5 h-5 stroke-[2.2]" />
                 </div>
-                <div>
-                  <h3 className="text-sm font-black uppercase tracking-wider" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
-                    Gestor de Inventario y Precios
-                  </h3>
-                  <p className="text-[11px] text-slate-500 font-medium">
-                    {products.length} productos en el catálogo activo • Precios en tiempo real
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white leading-tight truncate">
+                      Inventario
+                    </h3>
+                    <span className="text-[10px] sm:text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 shrink-0">
+                      {products.length}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-500 font-medium truncate mt-0.5">
+                    Catálogo activo
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+
+              <div className="flex items-center gap-1.5 shrink-0">
                 <button
                   type="button"
                   onClick={() => {
                     setShowInventoryModal(false);
                     setShowVisualPacksModal(true);
                   }}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white text-[11px] font-black shadow-md transition-all active:scale-95 cursor-pointer"
-                  title="Descargar paquetes de productos completos con fotos HD"
+                  className={`flex items-center gap-1.5 h-8 px-2.5 sm:px-3 rounded-xl border text-xs font-semibold transition-all active:scale-95 cursor-pointer shadow-xs ${
+                    isLight
+                      ? 'bg-amber-50 hover:bg-amber-100 border-amber-200 text-amber-900'
+                      : 'bg-amber-500/10 hover:bg-amber-500/20 border-amber-500/30 text-amber-300'
+                  }`}
+                  title="Explorar paquetes con fotos HD"
                 >
-                  <Sparkles className="w-3.5 h-3.5" />
-                  <span>Paquetes con Fotos HD</span>
+                  <Sparkles className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                  <span className="hidden sm:inline">Paquetes </span>
+                  <span>Fotos HD</span>
                 </button>
                 <button
                   onClick={() => setShowInventoryModal(false)}
-                  className="p-1.5 rounded-xl text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors"
+                  className="w-8 h-8 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                  title="Cerrar"
                 >
                   <X className="w-5 h-5" />
                 </button>

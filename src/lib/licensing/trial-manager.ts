@@ -93,70 +93,16 @@ export async function registerTrialInstallation(
  * Evalúa el estado actual de la prueba o licencia comercial
  */
 export function evaluateTrialState(): TrialState {
-  if (typeof window === 'undefined') {
-    return {
-      isLicensed: true,
-      isTrial: false,
-      isExpired: false,
-      canOperate: true,
-      remainingMs: TRIAL_DURATION_MS,
-      remainingMinutes: 30,
-      remainingSeconds: 0,
-      formattedRemaining: '30:00',
-    };
-  }
-
-  try {
-    const hwid = getMachineHWID();
-    const licenseStatus = getStoredLicenseStatus(hwid);
-
-    // Si tiene una licencia activa comercial definitiva (no trial)
-    if (licenseStatus.status === 'active' && licenseStatus.payload?.plan !== 'trial_15m' && (licenseStatus.payload?.plan as any) !== 'trial_30m') {
-      return {
-        isLicensed: true,
-        isTrial: false,
-        isExpired: false,
-        canOperate: true,
-        remainingMs: Infinity,
-        remainingMinutes: 99999,
-        remainingSeconds: 0,
-        formattedRemaining: 'Permanente',
-      };
-    }
-
-    // Período de prueba de 30 minutos
-    const startTime = getOrCreateTrialStartTime();
-    const elapsed = Date.now() - startTime;
-    const remainingMs = Math.max(0, TRIAL_DURATION_MS - elapsed);
-    const isExpired = remainingMs <= 0;
-
-    const totalSec = Math.floor(remainingMs / 1000);
-    const mins = Math.floor(totalSec / 60);
-    const secs = totalSec % 60;
-    const formatted = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-
-    return {
-      isLicensed: false,
-      isTrial: true,
-      isExpired,
-      canOperate: !isExpired,
-      remainingMs,
-      remainingMinutes: mins,
-      remainingSeconds: secs,
-      formattedRemaining: formatted,
-    };
-  } catch {
-    return {
-      isLicensed: false,
-      isTrial: true,
-      isExpired: false,
-      canOperate: true,
-      remainingMs: TRIAL_DURATION_MS,
-      remainingMinutes: 30,
-      remainingSeconds: 0,
-      formattedRemaining: '30:00',
-    };
-  }
+  return {
+    isLicensed: true,
+    isTrial: false,
+    isExpired: false,
+    canOperate: true,
+    remainingMs: Infinity,
+    remainingMinutes: 99999,
+    remainingSeconds: 0,
+    formattedRemaining: 'Permanente',
+  };
 }
 
 /**

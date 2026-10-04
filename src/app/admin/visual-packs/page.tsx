@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import {
   Sparkles,
@@ -8,6 +8,9 @@ import {
   Plus,
   Trash2,
   UploadCloud,
+  Upload,
+  Image as ImageIcon,
+  Loader2,
   CheckCircle2,
   Lock,
   Search,
@@ -58,6 +61,55 @@ export default function AdminVisualPacksPage() {
   const [imageSearchQuery, setImageSearchQuery] = useState('');
   const [imageSearchResults, setImageSearchResults] = useState<any[]>([]);
   const [isSearchingImages, setIsSearchingImages] = useState(false);
+  const [isProcessingLocalImg, setIsProcessingLocalImg] = useState(false);
+
+  const fileInputCoverRef = useRef<HTMLInputElement>(null);
+  const fileInputProductRef = useRef<HTMLInputElement>(null);
+
+  const handleProcessLocalImage = async (file: File, target: 'cover' | 'product') => {
+    if (!file) return;
+    setIsProcessingLocalImg(true);
+    try {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const maxWidth = 500;
+          let width = img.width;
+          let height = img.height;
+          if (width > maxWidth) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            if (file.type === 'image/png') {
+              ctx.drawImage(img, 0, 0, width, height);
+              const dataUrl = canvas.toDataURL('image/png');
+              if (target === 'cover') setFormData(prev => ({ ...prev, coverImage: dataUrl }));
+              else setProductForm(prev => ({ ...prev, imageUrl: dataUrl }));
+            } else {
+              ctx.fillStyle = '#ffffff';
+              ctx.fillRect(0, 0, width, height);
+              ctx.drawImage(img, 0, 0, width, height);
+              const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+              if (target === 'cover') setFormData(prev => ({ ...prev, coverImage: dataUrl }));
+              else setProductForm(prev => ({ ...prev, imageUrl: dataUrl }));
+            }
+          }
+          setIsProcessingLocalImg(false);
+        };
+        img.src = e.target?.result as string;
+      };
+      reader.readAsDataURL(file);
+    } catch (err) {
+      console.error('Error procesando imagen local:', err);
+      setIsProcessingLocalImg(false);
+    }
+  };
 
   useEffect(() => {
     loadCloudPacks();
@@ -396,14 +448,45 @@ export default function AdminVisualPacksPage() {
                   </div>
 
                   <div>
-                    <label className="text-xs font-bold text-slate-300">URL Portada del Paquete</label>
+                    <label className="text-xs font-bold text-slate-300">Imagen de Portada (URL o Archivo Local)</label>
                     <input
-                      type="url"
-                      placeholder="https://..."
-                      value={formData.coverImage}
-                      onChange={e => setFormData({ ...formData, coverImage: e.target.value })}
-                      className="w-full mt-1 px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white outline-none focus:border-sky-500"
+                      ref={fileInputCoverRef}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={e => {
+                        const file = e.target.files?.[0];
+                        if (file) handleProcessLocalImage(file, 'cover');
+                        e.target.value = '';
+                      }}
                     />
+                    <div className="flex gap-2 mt-1 items-center">
+                      <div className="w-10 h-10 rounded-xl bg-slate-950 border border-slate-800 shrink-0 overflow-hidden flex items-center justify-center relative">
+                        {isProcessingLocalImg ? (
+                          <Loader2 className="w-4 h-4 text-sky-400 animate-spin" />
+                        ) : formData.coverImage ? (
+                          <img src={formData.coverImage} alt="Portada" className="w-full h-full object-cover" />
+                        ) : (
+                          <ImageIcon className="w-4 h-4 text-slate-600" />
+                        )}
+                      </div>
+                      <input
+                        type="text"
+                        placeholder="https://... o selecciona archivo local"
+                        value={formData.coverImage}
+                        onChange={e => setFormData({ ...formData, coverImage: e.target.value })}
+                        className="flex-1 px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white outline-none focus:border-sky-500"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => fileInputCoverRef.current?.click()}
+                        className="px-3 py-2 bg-sky-950 border border-sky-700/60 hover:bg-sky-900 text-sky-200 text-xs font-bold rounded-xl flex items-center gap-1.5 shrink-0 transition-colors"
+                        title="Seleccionar archivo PNG/JPG desde tu equipo"
+                      >
+                        <Upload className="w-3.5 h-3.5" />
+                        <span>Subir Local</span>
+                      </button>
+                    </div>
                   </div>
 
                   <div>
@@ -465,22 +548,51 @@ export default function AdminVisualPacksPage() {
                     </div>
 
                     <div className="sm:col-span-2">
-                      <label className="text-[11px] font-bold text-slate-400">URL Imagen HD</label>
-                      <div className="flex gap-2 mt-1">
+                      <label className="text-[11px] font-bold text-slate-400">Imagen del Producto (PNG Transparente o JPG)</label>
+                      <input
+                        ref={fileInputProductRef}
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={e => {
+                          const file = e.target.files?.[0];
+                          if (file) handleProcessLocalImage(file, 'product');
+                          e.target.value = '';
+                        }}
+                      />
+                      <div className="flex gap-2 mt-1 items-center">
+                        <div className="w-9 h-9 rounded-xl bg-slate-950 border border-slate-800 shrink-0 overflow-hidden flex items-center justify-center relative bg-[radial-gradient(#334155_1px,transparent_1px)] [background-size:8px_8px]">
+                          {isProcessingLocalImg ? (
+                            <Loader2 className="w-4 h-4 text-emerald-400 animate-spin" />
+                          ) : productForm.imageUrl ? (
+                            <img src={productForm.imageUrl} alt="Foto" className="w-full h-full object-contain" />
+                          ) : (
+                            <ImageIcon className="w-4 h-4 text-slate-600" />
+                          )}
+                        </div>
                         <input
-                          type="url"
-                          placeholder="https://..."
+                          type="text"
+                          placeholder="https://... o /packs/... o archivo local"
                           value={productForm.imageUrl}
                           onChange={e => setProductForm({ ...productForm, imageUrl: e.target.value })}
                           className="flex-1 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-xs text-white outline-none"
                         />
                         <button
                           type="button"
+                          onClick={() => fileInputProductRef.current?.click()}
+                          className="px-3 py-1.5 bg-emerald-950 border border-emerald-700/60 hover:bg-emerald-900 text-emerald-200 text-xs font-bold rounded-xl flex items-center gap-1.5 shrink-0 transition-colors"
+                          title="Cargar archivo PNG/JPG desde tu PC o teléfono"
+                        >
+                          <Upload className="w-3.5 h-3.5" />
+                          <span>Subir Local</span>
+                        </button>
+                        <button
+                          type="button"
                           onClick={handleSearchImages}
-                          className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs text-white font-bold rounded-xl flex items-center gap-1"
+                          className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs text-white font-bold rounded-xl flex items-center gap-1 shrink-0"
                         >
                           <Search className="w-3.5 h-3.5" />
-                          <span>Buscar Foto</span>
+                          <span>Buscar Web</span>
                         </button>
                       </div>
                     </div>

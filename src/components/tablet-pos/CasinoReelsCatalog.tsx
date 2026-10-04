@@ -56,16 +56,16 @@ export const CasinoReelsCatalog: React.FC<CasinoReelsCatalogProps> = ({
     <div className="flex-1 min-h-0 flex flex-col space-y-2">
       {/* 1. Barra de Búsqueda + Selector de Vista (2 Columnas / Lista) + Selector de Tema (Street Pro / Gourmet) */}
       <div className="space-y-1.5 shrink-0">
-        <div className="flex flex-wrap items-center justify-between gap-1.5">
-          {/* Buscador */}
-          <div className="relative flex-1 min-w-[140px]">
-            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" />
+        <div className="flex items-center justify-between gap-4 sm:gap-6">
+          {/* Buscador acortado y con respiro visual */}
+          <div className="relative flex-1 max-w-[220px] sm:max-w-[280px]">
+            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
               type="text"
               placeholder="Buscar producto..."
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
-              className={`w-full pl-8 pr-7 py-1.5 rounded-xl text-xs border transition-colors outline-none font-semibold ${
+              className={`w-full pl-9 pr-7 py-1.5 rounded-xl text-xs border transition-colors outline-none font-semibold ${
                 isLight
                   ? 'bg-white border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-slate-800'
                   : 'bg-[#0e1726] border-slate-800 text-white placeholder:text-slate-500 focus:border-amber-500'
@@ -74,7 +74,7 @@ export const CasinoReelsCatalog: React.FC<CasinoReelsCatalogProps> = ({
             {searchQuery && (
               <button
                 onClick={() => onSearchChange('')}
-                className="absolute right-2 top-2 text-slate-400 hover:text-slate-200 cursor-pointer"
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 cursor-pointer"
               >
                 <X className="w-3 h-3" />
               </button>

@@ -49,12 +49,18 @@ export const TabletPosBottomNav: React.FC<TabletPosBottomNavProps> = ({
 
   const handleToggleRadial = (e: React.MouseEvent) => {
     e.stopPropagation();
+    if (!isRadialOpen && isDockerOpen && onToggleDocker) {
+      onToggleDocker();
+    }
     setIsRadialOpen((prev) => !prev);
   };
 
   const handleAction = (type: 'orden' | 'qr' | 'cobro' | 'mesas', e: React.MouseEvent) => {
     e.stopPropagation();
     setIsRadialOpen(false);
+    if (isDockerOpen && onToggleDocker) {
+      onToggleDocker();
+    }
     if (type === 'orden') {
       if (onToggleOrderDrawer) onToggleOrderDrawer();
     } else if (type === 'qr') {
@@ -71,10 +77,10 @@ export const TabletPosBottomNav: React.FC<TabletPosBottomNavProps> = ({
       <style jsx global>{`
         :root {
           --nav-bg: ${isLight ? '#ffffff' : '#090d16'};
-          --nav-border: ${isLight ? 'rgba(0, 0, 0, 0.08)' : 'rgba(255, 255, 255, 0.14)'};
+          --nav-border: ${isLight ? 'rgba(0, 0, 0, 0.12)' : 'rgba(255, 255, 255, 0.14)'};
           --color-neon: ${primaryColor || '#f59e0b'};
           --color-neon-glow: ${primaryColor ? primaryColor + '66' : 'rgba(245, 158, 11, 0.45)'};
-          --color-inactive: ${isLight ? '#64748b' : '#94a3b8'};
+          --color-inactive: ${isLight ? '#475569' : '#94a3b8'};
         }
 
         /* Backdrop INVISIBLE para cerrar al tocar fuera SIN difuminar ni oscurecer la página activa */
@@ -130,7 +136,16 @@ export const TabletPosBottomNav: React.FC<TabletPosBottomNavProps> = ({
           margin-top: -150px;
           margin-left: -150px;
           border-radius: 50%;
-          background: radial-gradient(
+          background: ${isLight ? `radial-gradient(
+            circle at center,
+            transparent 0%,
+            transparent 33%,
+            rgba(0, 0, 0, 0.08) 33.5%,
+            rgba(255, 255, 255, 0.98) 35%,
+            rgba(241, 245, 249, 0.98) 68%,
+            rgba(0, 0, 0, 0.12) 70%,
+            transparent 70.5%
+          )` : `radial-gradient(
             circle at center,
             transparent 0%,
             transparent 33%,
@@ -139,8 +154,8 @@ export const TabletPosBottomNav: React.FC<TabletPosBottomNavProps> = ({
             rgba(16, 23, 36, 0.94) 68%,
             rgba(255, 255, 255, 0.15) 70%,
             transparent 70.5%
-          );
-          box-shadow: 0 0 35px rgba(0, 0, 0, 0.7);
+          )`};
+          box-shadow: ${isLight ? '0 10px 30px rgba(0, 0, 0, 0.18)' : '0 0 35px rgba(0, 0, 0, 0.7)'};
           opacity: 0;
           transform: scale(0.3);
           transition: transform 0.38s cubic-bezier(0.34, 1.45, 0.64, 1), opacity 0.25s ease;
@@ -184,16 +199,15 @@ export const TabletPosBottomNav: React.FC<TabletPosBottomNavProps> = ({
           width: 58px;
           height: 58px;
           border-radius: 50%;
-          background: #1c2330;
-          border: 1.2px solid rgba(255, 255, 255, 0.3);
+          background: ${isLight ? '#ffffff' : '#1c2330'};
+          border: ${isLight ? '1.5px solid #cbd5e1' : '1.2px solid rgba(255, 255, 255, 0.3)'};
           display: flex;
           align-items: center;
           justify-content: center;
-          color: #ffffff;
-          box-shadow: 
-            0 10px 24px rgba(0, 0, 0, 0.7),
-            0 0 10px rgba(255, 255, 255, 0.12),
-            inset 0 1px 2px rgba(255, 255, 255, 0.2);
+          color: ${isLight ? '#0f172a' : '#ffffff'};
+          box-shadow: ${isLight
+            ? '0 8px 24px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.08)'
+            : '0 10px 24px rgba(0, 0, 0, 0.7), 0 0 10px rgba(255, 255, 255, 0.12), inset 0 1px 2px rgba(255, 255, 255, 0.2)'};
           transition: transform 0.15s ease, border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
         }
 
@@ -206,25 +220,24 @@ export const TabletPosBottomNav: React.FC<TabletPosBottomNavProps> = ({
         .radial-btn:active .radial-btn__circle {
           transform: scale(1.06);
           border-color: var(--color-neon);
-          background: #252f40;
-          box-shadow: 
-            0 12px 28px rgba(0, 0, 0, 0.8),
-            0 0 16px var(--color-neon-glow),
-            inset 0 1px 2px rgba(255, 255, 255, 0.3);
+          background: ${isLight ? '#f8fafc' : '#252f40'};
+          box-shadow: ${isLight
+            ? '0 10px 26px rgba(0, 0, 0, 0.16), 0 0 12px var(--color-neon-glow)'
+            : '0 12px 28px rgba(0, 0, 0, 0.8), 0 0 16px var(--color-neon-glow), inset 0 1px 2px rgba(255, 255, 255, 0.3)'};
         }
 
         .radial-btn__label {
           font-size: 10px;
           font-weight: 800;
-          color: #ffffff;
+          color: ${isLight ? '#0f172a' : '#ffffff'};
           letter-spacing: 0.3px;
           white-space: nowrap;
           padding: 2px 7px;
           border-radius: 6px;
-          background: rgba(12, 18, 28, 0.85);
-          border: 1px solid rgba(255, 255, 255, 0.12);
-          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.75);
-          text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
+          background: ${isLight ? 'rgba(255, 255, 255, 0.96)' : 'rgba(12, 18, 28, 0.85)'};
+          border: 1px solid ${isLight ? '#cbd5e1' : 'rgba(255, 255, 255, 0.12)'};
+          box-shadow: ${isLight ? '0 2px 8px rgba(0, 0, 0, 0.1)' : '0 2px 6px rgba(0, 0, 0, 0.75)'};
+          text-shadow: ${isLight ? 'none' : '0 1px 2px rgba(0, 0, 0, 0.9)'};
           line-height: 1.1;
         }
 
@@ -243,18 +256,15 @@ export const TabletPosBottomNav: React.FC<TabletPosBottomNavProps> = ({
           position: absolute;
           inset: 0;
           pointer-events: none;
-          filter: drop-shadow(0 -6px 20px rgba(0, 0, 0, 0.65));
+          filter: ${isLight ? 'drop-shadow(0 -4px 14px rgba(0, 0, 0, 0.08))' : 'drop-shadow(0 -6px 20px rgba(0, 0, 0, 0.65))'};
         }
 
         .pos-navbar__bg svg {
           width: 100%;
           height: 100%;
-          fill: ${isLight ? '#ffffff' : '#090d16'};
         }
 
         .pos-navbar__bg path {
-          fill: ${isLight ? '#ffffff' : '#090d16'};
-          stroke: ${isLight ? 'rgba(0, 0, 0, 0.08)' : 'rgba(255, 255, 255, 0.14)'};
           stroke-width: 1.5;
         }
 
@@ -329,8 +339,27 @@ export const TabletPosBottomNav: React.FC<TabletPosBottomNavProps> = ({
         }
 
         .nav-item.active {
-          color: #ffffff;
+          color: ${isLight ? '#0f172a' : '#ffffff'} !important;
           font-weight: 800;
+        }
+
+        .nav-item.active svg {
+          color: ${isLight ? '#0f172a' : '#ffffff'} !important;
+          stroke: ${isLight ? '#0f172a' : '#ffffff'} !important;
+        }
+
+        .nav-item.active .label {
+          color: ${isLight ? '#0f172a' : '#ffffff'} !important;
+          font-weight: 800 !important;
+        }
+
+        .nav-item:not(.active) svg {
+          color: ${isLight ? '#475569' : '#94a3b8'} !important;
+          stroke: ${isLight ? '#475569' : '#94a3b8'} !important;
+        }
+
+        .nav-item:not(.active) .label {
+          color: ${isLight ? '#475569' : '#94a3b8'} !important;
         }
 
         .nav-item.active .neon-dot {
@@ -354,14 +383,16 @@ export const TabletPosBottomNav: React.FC<TabletPosBottomNavProps> = ({
           width: 52px;
           height: 52px;
           border-radius: 50%;
-          background: #090d16;
-          border: 1.5px solid rgba(255, 255, 255, 0.2);
+          background: ${isLight ? '#ffffff' : '#090d16'};
+          border: ${isLight ? '2px solid rgba(15, 23, 42, 0.15)' : '1.5px solid rgba(255, 255, 255, 0.2)'};
           cursor: pointer;
           outline: none;
           display: flex;
           align-items: center;
           justify-content: center;
-          box-shadow: 0 8px 20px rgba(0, 0, 0, 0.75), inset 0 1px 2px rgba(255, 255, 255, 0.12);
+          box-shadow: ${isLight
+            ? '0 8px 24px rgba(0, 0, 0, 0.14), inset 0 1px 2px rgba(255, 255, 255, 0.9)'
+            : '0 8px 20px rgba(0, 0, 0, 0.75), inset 0 1px 2px rgba(255, 255, 255, 0.12)'};
           transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.2s ease;
           z-index: 56;
         }
@@ -446,7 +477,7 @@ export const TabletPosBottomNav: React.FC<TabletPosBottomNavProps> = ({
             aria-label="Orden"
           >
             <div className="radial-btn__circle relative">
-              <ShoppingCart className="w-6 h-6 text-white" />
+              <ShoppingCart className={`w-6 h-6 ${isLight ? 'text-slate-900' : 'text-white'}`} />
               {totalItems > 0 && (
                 <span className="absolute -top-1 -right-1 bg-amber-500 text-slate-950 font-black text-[9px] w-4 h-4 rounded-full flex items-center justify-center shadow">
                   {totalItems}
@@ -466,7 +497,7 @@ export const TabletPosBottomNav: React.FC<TabletPosBottomNavProps> = ({
             aria-label="Cobrar"
           >
             <div className="radial-btn__circle">
-              <DollarSign className="w-6 h-6 text-white stroke-[2.5]" />
+              <DollarSign className={`w-6 h-6 ${isLight ? 'text-emerald-700' : 'text-white'} stroke-[2.5]`} />
             </div>
             <span className="radial-btn__label">Cobrar</span>
           </button>
@@ -489,7 +520,11 @@ export const TabletPosBottomNav: React.FC<TabletPosBottomNavProps> = ({
             aria-label={isLiteMode ? "Ventas" : "Mesas"}
           >
             <div className="radial-btn__circle">
-              {isLiteMode ? <ClipboardList className="w-6 h-6 text-white" /> : <Grid className="w-6 h-6 text-white" />}
+              {isLiteMode ? (
+                <ClipboardList className={`w-6 h-6 ${isLight ? 'text-slate-900' : 'text-white'}`} />
+              ) : (
+                <Grid className={`w-6 h-6 ${isLight ? 'text-slate-900' : 'text-white'}`} />
+              )}
             </div>
             <span className="radial-btn__label">{isLiteMode ? "Ventas" : "Mesas"}</span>
           </button>
@@ -509,9 +544,13 @@ export const TabletPosBottomNav: React.FC<TabletPosBottomNavProps> = ({
                    L 500,25 
                    L 500,80 
                    L 0,80 Z"
-                fill="#090d16"
-                stroke="rgba(255, 255, 255, 0.14)"
+                fill={isLight ? '#ffffff' : '#090d16'}
+                stroke={isLight ? 'rgba(0, 0, 0, 0.12)' : 'rgba(255, 255, 255, 0.14)'}
                 strokeWidth="1.5"
+                style={{
+                  fill: isLight ? '#ffffff' : '#090d16',
+                  stroke: isLight ? 'rgba(0, 0, 0, 0.12)' : 'rgba(255, 255, 255, 0.14)'
+                }}
               />
             </svg>
           </div>
@@ -529,9 +568,23 @@ export const TabletPosBottomNav: React.FC<TabletPosBottomNavProps> = ({
               aria-label="Menú"
             >
               <div className="icon-wrap">
-                <UtensilsCrossed className="w-5 h-5" />
+                <UtensilsCrossed
+                  className="w-5 h-5 transition-colors"
+                  style={{
+                    color: activeTab === 'menu'
+                      ? (isLight ? '#0f172a' : '#ffffff')
+                      : (isLight ? '#475569' : '#94a3b8')
+                  }}
+                />
               </div>
-              <span className="label">Menú</span>
+              <span
+                className="label"
+                style={{
+                  color: activeTab === 'menu'
+                    ? (isLight ? '#0f172a' : '#ffffff')
+                    : (isLight ? '#475569' : '#94a3b8')
+                }}
+              >Menú</span>
               <span className="neon-dot"></span>
             </button>
 
@@ -549,9 +602,23 @@ export const TabletPosBottomNav: React.FC<TabletPosBottomNavProps> = ({
               aria-label="Docker"
             >
               <div className="icon-wrap">
-                <LayoutGrid className="w-5 h-5" />
+                <LayoutGrid
+                  className="w-5 h-5 transition-colors"
+                  style={{
+                    color: isDockerOpen
+                      ? (isLight ? '#0f172a' : '#ffffff')
+                      : (isLight ? '#475569' : '#94a3b8')
+                  }}
+                />
               </div>
-              <span className="label">Docker</span>
+              <span
+                className="label"
+                style={{
+                  color: isDockerOpen
+                    ? (isLight ? '#0f172a' : '#ffffff')
+                    : (isLight ? '#475569' : '#94a3b8')
+                }}
+              >Docker</span>
               <span className="neon-dot"></span>
             </button>
 
@@ -561,6 +628,10 @@ export const TabletPosBottomNav: React.FC<TabletPosBottomNavProps> = ({
                 type="button"
                 onClick={handleToggleRadial}
                 className={`hero-cobrar ${isRadialOpen ? 'is-open' : ''}`}
+                style={{
+                  backgroundColor: isLight ? '#ffffff' : '#090d16',
+                  borderColor: isLight ? 'rgba(15, 23, 42, 0.15)' : 'rgba(255, 255, 255, 0.2)'
+                }}
                 data-tab="acciones"
                 aria-label="Acciones Rápidas"
               >
@@ -583,9 +654,23 @@ export const TabletPosBottomNav: React.FC<TabletPosBottomNavProps> = ({
               aria-label={isLiteMode ? "Ventas" : "Pedidos"}
             >
               <div className="icon-wrap">
-                <ClipboardList className="w-5 h-5" />
+                <ClipboardList
+                  className="w-5 h-5 transition-colors"
+                  style={{
+                    color: activeTab === 'pedidos'
+                      ? (isLight ? '#0f172a' : '#ffffff')
+                      : (isLight ? '#475569' : '#94a3b8')
+                  }}
+                />
               </div>
-              <span className="label">{isLiteMode ? "Ventas" : "Pedidos"}</span>
+              <span
+                className="label"
+                style={{
+                  color: activeTab === 'pedidos'
+                    ? (isLight ? '#0f172a' : '#ffffff')
+                    : (isLight ? '#475569' : '#94a3b8')
+                }}
+              >{isLiteMode ? "Ventas" : "Pedidos"}</span>
               <span className="neon-dot"></span>
             </button>
 
@@ -606,9 +691,19 @@ export const TabletPosBottomNav: React.FC<TabletPosBottomNavProps> = ({
               title="Módulo de Ventas & Respaldo (Historial)"
             >
               <div className="icon-wrap">
-                <TrendingUp className="w-5 h-5 text-emerald-400 group-hover:scale-110 transition-transform" />
+                <TrendingUp
+                  className="w-5 h-5 group-hover:scale-110 transition-transform"
+                  style={{
+                    color: isLight ? '#047857' : '#34d399'
+                  }}
+                />
               </div>
-              <span className="label text-emerald-400">Respaldo</span>
+              <span
+                className="label font-extrabold"
+                style={{
+                  color: isLight ? '#047857' : '#34d399'
+                }}
+              >Respaldo</span>
               <span className="neon-dot"></span>
             </button>
           </div>

@@ -45,6 +45,16 @@ export interface PagoMovilInfo {
   ownerName: string;
 }
 
+export interface MixedPaymentEntry {
+  id: string;
+  method: 'pago_movil' | 'cash_usd' | 'cash_ves' | 'card_debit' | 'zelle';
+  currency: 'USD' | 'VES';
+  amount: number;
+  amountUSD: number;
+  amountVES: number;
+  reference?: string;
+}
+
 export interface CompletedSaleTicket {
   ticketNumber: string;
   timestamp: string;
@@ -60,7 +70,28 @@ export interface CompletedSaleTicket {
   changeVES?: number;
   customer: Customer;
   table?: string;
+  mixedPayments?: MixedPaymentEntry[];
   integrityHash?: string;
+}
+
+export interface PosOrder {
+  id: string;
+  orderNumber: string;
+  type: 'local' | 'delivery' | 'llevar';
+  status: 'en_cola' | 'listo' | 'despachado';
+  paymentStatus: 'pagado' | 'por_cobrar';
+  paymentMethod: string;
+  items: CartItem[];
+  totalUSD: number;
+  totalVES: number;
+  customer: Customer;
+  table?: string;
+  driverId?: string;
+  driverName?: string;
+  deliveryAddress?: string;
+  notes?: string;
+  createdAt: string;
+  timeFormatted: string;
 }
 
 export interface Motorizado {
@@ -91,6 +122,19 @@ export interface PrinterConfig {
 
 export type RubroId = 'comida' | 'ropa' | 'panaderia' | 'minimarket' | 'farmacia' | 'ferreteria';
 
-export type CardViewMode = 'food' | 'lista';
+export type CardViewMode = 'food' | 'reels' | 'grid' | 'lista';
 
 export type ThemePreset = 'street_pro' | 'gourmet_clean';
+
+export interface CanvasTheme {
+  id: 'obsidian' | 'light-graphite';
+  name: string;
+  subtitle: string;
+  bg: string;
+  surface: string;
+  card: string;
+  border: string;
+  isLight: boolean;
+}
+
+export type CanvasThemeId = CanvasTheme['id'];
