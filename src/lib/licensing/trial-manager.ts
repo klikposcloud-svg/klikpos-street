@@ -90,19 +90,87 @@ export async function registerTrialInstallation(
 }
 
 /**
- * Evalúa el estado actual de la prueba o licencia comercial
+ * Evalúa el estado actual de la prueba o licencia comercial (30 Minutos)
  */
 export function evaluateTrialState(): TrialState {
-  return {
-    isLicensed: true,
-    isTrial: false,
-    isExpired: false,
-    canOperate: true,
-    remainingMs: Infinity,
-    remainingMinutes: 99999,
-    remainingSeconds: 0,
-    formattedRemaining: 'Permanente',
-  };
+  if (typeof window === 'undefined') {
+    return {
+      isLicensed: false,
+      isTrial: true,
+      isExpired: false,
+      canOperate: true,
+      remainingMs: TRIAL_DURATION_MS,
+      remainingMinutes: 30,
+      remainingSeconds: 0,
+      formattedRemaining: '30:00 min',
+    };
+  }
+
+  try {
+    const hwid = getMachineHWID();
+    const licenseStatus = getStoredLicenseStatus(hwid);
+
+    // 1. Si el usuario ya activó su licencia comercial formal (Contado $15, Crédito $25 o VIP $50)
+    if (licenseStatus.status === 'active') {
+      return {
+        isLicensed: true,
+        isTrial: false,
+        isExpired: false,
+        canOperate: true,
+        remainingMs: Infinity,
+        remainingMinutes: 99999,
+        remainingSeconds: 0,
+        formattedRemaining: 'Licencia Oficial Activa',
+      };
+    }
+
+    // 2. Si no tiene licencia, evaluar los 30 minutos de prueba
+    const startTs = getOrCreateTrialStartTime();
+    const elapsed = Date.now() - startTs;
+    const remainingMs = Math.max(0, TRIAL_DURATION_MS - elapsed);
+
+    if (remainingMs > 0) {
+      const remainingSecs = Math.floor(remainingMs / 1000);
+      const mins = Math.floor(remainingSecs / 60);
+      const secs = remainingSecs % 60;
+      const formatted = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')} min`;
+
+      return {
+        isLicensed: false,
+        isTrial: true,
+        isExpired: false,
+        canOperate: true,
+        remainingMs,
+        remainingMinutes: mins,
+        remainingSeconds: secs,
+        formattedRemaining: formatted,
+      };
+    } else {
+      // 3. Período de 30 minutos expirado
+      return {
+        isLicensed: false,
+        isTrial: false,
+        isExpired: true,
+        canOperate: false,
+        remainingMs: 0,
+        remainingMinutes: 0,
+        remainingSeconds: 0,
+        formattedRemaining: 'Prueba 30 min Finalizada',
+      };
+    }
+  } catch (err) {
+    console.warn('[TrialManager] Error evaluando estado de prueba:', err);
+    return {
+      isLicensed: false,
+      isTrial: true,
+      isExpired: false,
+      canOperate: true,
+      remainingMs: TRIAL_DURATION_MS,
+      remainingMinutes: 30,
+      remainingSeconds: 0,
+      formattedRemaining: '30:00 min',
+    };
+  }
 }
 
 /**

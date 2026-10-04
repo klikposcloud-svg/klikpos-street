@@ -120,6 +120,78 @@ export const SAMPLE_PRODUCTS: Product[] = [
     description: 'Refresco frío a elección (Coca-Cola, Pepsi, Chinotto, Kolita) bien frío.',
     sku: 'BEB-01',
     ingredients: ['Lata / Botella 355ml', 'Bien Frío']
+  },
+  {
+    id: '11',
+    name: 'Chicha Tradicional Criolla con Canela',
+    category: 'Bebidas',
+    priceUSD: 2.00,
+    tag: '🥤 Criolla',
+    prepTime: 'Inmediato',
+    image: '/packs/comida-street/chicha.png',
+    description: 'Chicha espesa de arroz con leche condensada generosa y toque de canela molida.',
+    sku: 'BEB-02',
+    ingredients: ['Arroz Cremoso', 'Leche Condensada', 'Canela en Polvo', 'Hielo Picado']
+  },
+  {
+    id: '12',
+    name: 'Combo Burger Especial + Papas + Bebida',
+    category: 'Combos',
+    priceUSD: 8.50,
+    tag: '🍔 Combo Estrella',
+    prepTime: '10-12 min',
+    image: '/packs/comida-street/combo-burger-1.png',
+    description: 'Hamburguesa 200g completa con queso cheddar, huevo, tocineta, papas rústicas y refresco.',
+    sku: 'CMB-04',
+    ingredients: ['Burger 200g', 'Papas Fritas', 'Bebida 355ml', 'Salsas de la Casa']
+  },
+  {
+    id: '13',
+    name: 'Combo Cachapa Doble Queso y Cochino Frito',
+    category: 'Combos',
+    priceUSD: 10.50,
+    tag: '🥩 Supremo Llanero',
+    prepTime: '10-12 min',
+    image: '/packs/comida-street/combo-cachapa-01.png',
+    description: 'Cachapa gigante con doble queso de mano tierno, ración de cochino frito crujiente y bebida.',
+    sku: 'CMB-05',
+    ingredients: ['Cachapa Gigante', 'Doble Queso Mano', 'Cochino Crujiente', 'Bebida Fría']
+  },
+  {
+    id: '14',
+    name: 'Combo Cachapa Criolla Doble Queso Mano',
+    category: 'Combos',
+    priceUSD: 7.50,
+    tag: '🌽 Tradicional',
+    prepTime: '8-10 min',
+    image: '/packs/comida-street/combo-cachapa-02.png',
+    description: 'Cachapa dorada con abundante queso de mano fresco, mantequilla derretida y bebida fría.',
+    sku: 'CMB-06',
+    ingredients: ['Cachapa Fresca', 'Queso de Mano Telita', 'Mantequilla', 'Bebida Fría']
+  },
+  {
+    id: '15',
+    name: 'Combo Pepito Mixto 30cm + Papas + Bebida',
+    category: 'Combos',
+    priceUSD: 11.00,
+    tag: '🥖 Mega Pepito',
+    prepTime: '12-14 min',
+    image: '/packs/comida-street/combo-pepito-01.png',
+    description: 'Pepito mixto lomito y pollo 30cm gratinado con queso de mano y maíz, papas fritas y refresco.',
+    sku: 'CMB-07',
+    ingredients: ['Pepito 30cm Mixto', 'Papas Fritas', 'Refresco Frío', 'Queso Gratinado']
+  },
+  {
+    id: '16',
+    name: 'Combo Dúo Shawarma Mixto Especial',
+    category: 'Combos',
+    priceUSD: 12.00,
+    tag: '🌯 Pareja / Dúo',
+    prepTime: '10-12 min',
+    image: '/packs/comida-street/combo-shawarma-01.png',
+    description: '2 Shawarmas mixtos grandes con pan pita tostado, papas y salsas árabes.',
+    sku: 'CMB-08',
+    ingredients: ['2x Shawarmas Mixtos', 'Ración de Papas', 'Crema de Ajo y Tártara']
   }
 ];
 

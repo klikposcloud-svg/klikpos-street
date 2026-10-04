@@ -37,8 +37,11 @@ process.env.ANDROID_HOME = 'C:\\Users\\pcpro\\AppData\\Local\\Android\\Sdk';
   fs.mkdirSync(d, { recursive: true });
 });
 
+const manifestJson = JSON.parse(fs.readFileSync(path.join(root, 'version.json'), 'utf8'));
+const currentVersion = manifestJson.version || '3.0.4';
+
 console.log('===============================================================');
-console.log('>>> [COMPILACIÓN OFICIAL] KLIKPOS STREET v1.0 (APK & INNO SETUP)');
+console.log(`>>> [COMPILACIÓN OFICIAL] KLIKPOS STREET v${currentVersion} (APK & INNO SETUP)`);
 console.log('===============================================================');
 
 // 0. Compilación fresca obligatoria de Next.js (Evita empaquetar código viejo)
@@ -75,7 +78,7 @@ if (fs.existsSync(publicIndex)) bakIndex = fs.readFileSync(publicIndex, 'utf8');
 
 try {
   let gradle = bakGradle.replace(/applicationId\s+"[^"]+"/, 'applicationId "com.klikpos.street"');
-  gradle = gradle.replace(/versionName\s+"[^"]+"/, 'versionName "1.0"');
+  gradle = gradle.replace(/versionName\s+"[^"]+"/, `versionName "${currentVersion}"`);
   fs.writeFileSync(appGradle, gradle, 'utf8');
 
   const streetStrings = `<?xml version='1.0' encoding='utf-8'?>
@@ -99,7 +102,7 @@ try {
   });
 
   const rawApk = path.join(androidDir, 'app', 'build', 'outputs', 'apk', 'release', 'app-release.apk');
-  const signedStreetApk = path.join(distApkDir, 'KlikPOS_Street_v1.0.apk');
+  const signedStreetApk = path.join(distApkDir, `KlikPOS_Street_v${currentVersion}.apk`);
   fs.copyFileSync(rawApk, signedStreetApk);
 
   console.log('Verificando firma criptográfica del APK...');
@@ -107,12 +110,14 @@ try {
 
   const apkTargets = [
     path.join(distApkDir, 'KlikPOS_Street.apk'),
+    path.join(distApkDir, `KlikPOS_Street_v${currentVersion}.apk`),
     path.join(distApkDir, 'KlikPOS_Street_v1.0.apk'),
     path.join(releaseMobile, 'KlikPOS_Street.apk'),
+    path.join(releaseMobile, `KlikPOS_Street_v${currentVersion}.apk`),
     path.join(releaseMobile, 'KlikPOS_Street_v1.0.apk'),
     path.join(releaseMobile, 'KlikPOS_Tablet_Standalone.apk'),
     path.join(combo3Mesas, 'KlikPOS_Street.apk'),
-    path.join(combo3Mesas, 'KlikPOS_Street_v1.0.apk'),
+    path.join(combo3Mesas, `KlikPOS_Street_v${currentVersion}.apk`),
     path.join(distFolder, 'KlikPOS_Street.apk')
   ];
 
@@ -121,7 +126,7 @@ try {
     console.log('  [✓ APK Copiado]: ' + target);
   }
 
-  console.log('>>> ¡APK KLIKPOS STREET v1.0 GENERADA CON ÉXITO!');
+  console.log(`>>> ¡APK KLIKPOS STREET v${currentVersion} GENERADA CON ÉXITO!`);
 
 } finally {
   fs.writeFileSync(appGradle, bakGradle, 'utf8');
@@ -130,7 +135,7 @@ try {
   // bakIndex revert removed to keep fresh Street index.html
 }
 
-// 3. Compilar Instalador Inno Setup para Windows (KlikPOS Street v1.0)
+// 3. Compilar Instalador Inno Setup para Windows (KlikPOS Street)
 if (isccPath) {
   console.log('\n[3/4] Generando Staging y Compilando con Inno Setup (' + isccPath + ')...');
   
@@ -141,8 +146,8 @@ if (isccPath) {
     console.log('Aviso preparando staging: ' + err.message);
   }
 
-  const outBase = 'KlikPOS_Street_v1.0_Setup';
-  const innoCmd = `"${isccPath}" "/O${releaseStreetDesktop}" "/F${outBase}" "/DAppName=KlikPOS Street" "/DAppEdition=KLIKPOS_STREET" "/DAppVersion=1.0" "${issPath}"`;
+  const outBase = `KlikPOS_Street_v${currentVersion}_Setup`;
+  const innoCmd = `"${isccPath}" "/O${releaseStreetDesktop}" "/F${outBase}" "/DAppName=KlikPOS Street" "/DAppEdition=KLIKPOS_STREET" "/DAppVersion=${currentVersion}" "${issPath}"`;
   console.log('Ejecutando Inno Setup: ' + innoCmd);
   execSync(innoCmd, { stdio: 'inherit' });
 
@@ -150,14 +155,15 @@ if (isccPath) {
   if (fs.existsSync(builtExe)) {
     const distExe = path.join(distInstallerDir, `${outBase}.exe`);
     fs.copyFileSync(builtExe, distExe);
+    fs.copyFileSync(builtExe, path.join(distInstallerDir, 'KlikPOS_Desktop_Full_Setup.exe'));
     console.log('  [✓ Instalador Windows Generado]: ' + builtExe);
     console.log('  [✓ Copiado a dist-installer]: ' + distExe);
 
     // Crear lanzador BAT de desbloqueo rápido
     const batContent = `@echo off
-title Instalador KlikPOS Street v1.0
+title Instalador KlikPOS Street v${currentVersion}
 echo ===============================================================
-echo   INSTALADOR OFICIAL: KlikPOS Street v1.0
+echo   INSTALADOR OFICIAL: KlikPOS Street v${currentVersion}
 echo   Desbloqueando archivo de seguridad SmartScreen de Windows...
 echo ===============================================================
 powershell -NoProfile -ExecutionPolicy Bypass -Command "Get-ChildItem -Path '%~dp0' -Filter '*.exe' | Unblock-File" 2>nul

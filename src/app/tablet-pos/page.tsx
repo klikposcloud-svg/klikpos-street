@@ -80,6 +80,7 @@ import { EditProductModal } from '@/components/tablet-pos/EditProductModal';
 import { CompanyConfigModal } from '@/components/tablet-pos/CompanyConfigModal';
 import { PagoMovilConfigModal } from '@/components/tablet-pos/PagoMovilConfigModal';
 import { CustomerModal } from '@/components/tablet-pos/CustomerModal';
+import InteractivePresentationModal from '@/components/presentation/InteractivePresentationModal';
 import {
   SAMPLE_PRODUCTS,
   RUBROS_CATALOG,
@@ -237,6 +238,7 @@ export default function TabletMobilePosPage() {
   const [showQrModal, setShowQrModal] = useState(false);
   const [showVisualPacksModal, setShowVisualPacksModal] = useState(false);
   const [showStreetAmbassadorModal, setShowStreetAmbassadorModal] = useState(false);
+  const [showPresentationModal, setShowPresentationModal] = useState(false);
   const [menuQrUrl, setMenuQrUrl] = useState('');
   const [activeTable, setActiveTable] = useState<number | null>(null);
 
@@ -496,14 +498,32 @@ export default function TabletMobilePosPage() {
     }
   }, []);
 
-  // Estado de Operación Permanente sin Bloqueo de Licencia
+  // Gestión Dinámica del Trial de 30 Minutos y Bienvenida Automática en Primera Apertura
   useEffect(() => {
     try {
       registerTrialInstallation().catch(() => {});
     } catch {}
 
-    const state = evaluateTrialState();
-    setTrialState(state);
+    // 1. Detección de Primera Apertura: Mostrar Tutorial Slider Automático
+    try {
+      const introSeen = localStorage.getItem('klikpos_onboarding_completed') === 'true';
+      if (!introSeen) {
+        setShowPresentationModal(true);
+      }
+    } catch {}
+
+    // 2. Evaluación inicial y actualización periódica del estado de prueba (cada 1s)
+    const updateState = () => {
+      const state = evaluateTrialState();
+      setTrialState(state);
+      if (state.isExpired && !state.isLicensed) {
+        setShowStreetAmbassadorModal(true);
+      }
+    };
+
+    updateState();
+    const interval = setInterval(updateState, 1000);
+    return () => clearInterval(interval);
   }, []);
 
   const currentCanvas = CANVAS_THEMES.find(t => t.id === canvasTheme) || CANVAS_THEMES[0];
@@ -1413,7 +1433,7 @@ export default function TabletMobilePosPage() {
             <button
               type="button"
               onClick={() => setShowStreetAmbassadorModal(true)}
-              className="hidden md:flex items-center gap-1.5 px-2.5 py-1 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-500 dark:text-amber-400 rounded-lg text-[10px] font-mono font-bold transition-all cursor-pointer"
+              className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-500 dark:text-amber-400 rounded-lg text-[9.5px] sm:text-[10px] font-mono font-bold transition-all cursor-pointer shrink-0"
               title="Prueba Comercial de 30 Minutos Activa. Toca para ver los 3 planes de activación comercial ($15 / $25 / $50)."
             >
               <Clock className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
@@ -3384,20 +3404,22 @@ export default function TabletMobilePosPage() {
               </button>
 
               {/* Presentación Comercial para Clientes */}
-              <a
-                href="/presentacion"
-                target="_blank"
-                rel="noreferrer"
-                className={`w-full p-2.5 rounded-xl border flex items-center justify-between text-xs font-bold transition-all ${
+              <button
+                type="button"
+                onClick={() => {
+                  setIsLeftDrawerOpen(false);
+                  setShowPresentationModal(true);
+                }}
+                className={`w-full p-2.5 rounded-xl border flex items-center justify-between text-xs font-bold transition-all cursor-pointer ${
                   isLight ? 'bg-sky-50 border-sky-300 text-sky-950' : 'bg-sky-950/40 border-sky-800 text-sky-200'
                 }`}
               >
                 <div className="flex items-center gap-2">
-                  <Smartphone className="w-4 h-4 text-sky-600" />
-                  <span className={isLight ? 'text-sky-950 font-black' : 'text-sky-200'}>Presentación para Clientes</span>
+                  <Smartphone className="w-4 h-4 text-sky-600 animate-pulse" />
+                  <span className={isLight ? 'text-sky-950 font-black' : 'text-sky-200'}>Presentación & Tour (Sliders)</span>
                 </div>
-                <span className="text-[10px] text-sky-700 font-mono font-bold bg-sky-100 px-2 py-0.5 rounded-md">Sliders →</span>
-              </a>
+                <span className="text-[10px] text-sky-700 font-mono font-bold bg-sky-100 px-2 py-0.5 rounded-md">Ver Demo ➔</span>
+              </button>
 
               {/* Licencia Oficial */}
               <button
@@ -4493,6 +4515,20 @@ export default function TabletMobilePosPage() {
               setProducts(mapped);
             }
           } catch {}
+        }}
+      />
+
+      {/* ========================================================================= */}
+      {/* 18. MODAL DE PRESENTACIÓN COMERCIAL INTERACTIVA SLIDERS MÓVIL             */}
+      {/* ========================================================================= */}
+      <InteractivePresentationModal
+        isOpen={showPresentationModal}
+        onClose={() => setShowPresentationModal(false)}
+        onStartPos={() => {
+          setActiveTab('menu');
+        }}
+        onOpenAmbassador={() => {
+          setShowStreetAmbassadorModal(true);
         }}
       />
     </div>

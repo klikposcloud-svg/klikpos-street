@@ -1,16 +1,16 @@
 {
-  "version": "3.0.3",
-  "releaseDate": "2026-10-03",
-  "title": "KlikPOS Street Suite v3.0.2 - Atmósferas de Lienzo, Trial 30m Firestore y Modal de Planes",
+  "version": "3.0.4",
+  "releaseDate": "2026-10-04",
+  "title": "KlikPOS Street Suite v3.0.4 - Catálogo Street Food HD, Slider Tutorial y Planes Oficiales",
   "notes": [
-    "Prueba Comercial de 30 Minutos predeterminada con registro y telemetría automática en Firestore.",
-    "Nuevo sistema de Lienzos de Atmósfera (Obsidian Blue, Titanio Carbon y Blanco Grafito) con acentos de marca globales.",
-    "Modal de conversión comercial optimizado con los 3 planes oficiales ($15 Contado, $25 Financiado a Crédito, y $50 Vitalicio Pro en 2 cuotas).",
-    "Gatillo de conversión con protección total de catálogo/ventas y escasez sutil con cupos de tasa BCV.",
-    "Rediseño sobrio de botones en gestor de inventario y cabeceras POS sin gradientes saturados.",
-    "Actualización del mensaje de invitación por WhatsApp para promotores y embajadores ('¡Hola estimado colega!')."
+    "Inclusión de 6 nuevos productos de Street Food con fotos HD transparentes (Chicha criolla, Combos Burger, Cachapa doble queso y cochino, Pepito 30cm y Shawarma doble).",
+    "Tutorial interactivo educativo tipo slider de 6 láminas con guía visual completa de accesos y flujo de venta.",
+    "Período de prueba comercial de 30 minutos dinámico con protección de datos e inventario.",
+    "Soporte de descarga de catálogos privados y personalizados mediante código de acceso vía WhatsApp.",
+    "Suite Keygen actualizada con los planes comerciales oficiales ($15 Contado, $25 Crédito, $50 VIP y $5 Cloud).",
+    "Sincronización en caliente y en segundo plano de tickets, productos y tasas BCV con Firestore."
   ],
-  "windowsUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.3/KlikPOS_Desktop_Full_Setup.exe",
-  "androidUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.3/KlikPOS_Movil_Full.apk",
+  "windowsUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.4/KlikPOS_Desktop_Full_Setup.exe",
+  "androidUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.4/KlikPOS_Movil_Full.apk",
   "mandatory": false
 }

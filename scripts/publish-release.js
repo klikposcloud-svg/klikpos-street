@@ -143,8 +143,13 @@ async function main() {
   console.log('\n[Paso 5/5] Verificando y subiendo binarios (APK / EXE)...');
   const assetsToUpload = [
     {
-      filePath: path.join(rootDir, 'DISTRIBUCION_KLIKPOS', 'KlikPOS_Street.apk'),
+      filePath: path.join(rootDir, 'dist-apk', 'KlikPOS_Street.apk'),
       fileName: 'KlikPOS_Street.apk',
+      contentType: 'application/vnd.android.package-archive'
+    },
+    {
+      filePath: path.join(rootDir, 'dist-apk', 'KlikPOS_Street_v3.0.4.apk'),
+      fileName: 'KlikPOS_Street_v3.0.4.apk',
       contentType: 'application/vnd.android.package-archive'
     },
     {
@@ -153,8 +158,13 @@ async function main() {
       contentType: 'application/vnd.android.package-archive'
     },
     {
-      filePath: path.join(rootDir, 'DISTRIBUCION_KLIKPOS', '02_Combo_Empresarial_Full', 'KlikPOS_Desktop_Full_Setup.exe'),
+      filePath: path.join(rootDir, 'dist-installer', 'KlikPOS_Desktop_Full_Setup.exe'),
       fileName: 'KlikPOS_Desktop_Full_Setup.exe',
+      contentType: 'application/octet-stream'
+    },
+    {
+      filePath: path.join(rootDir, 'dist-installer', 'KlikPOS_Street_v3.0.4_Setup.exe'),
+      fileName: 'KlikPOS_Street_v3.0.4_Setup.exe',
       contentType: 'application/octet-stream'
     }
   ];

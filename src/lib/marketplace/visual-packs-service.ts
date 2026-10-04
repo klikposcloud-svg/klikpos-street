@@ -42,10 +42,10 @@ export const DEFAULT_VISUAL_PACKS: VisualPack[] = [
     category: 'Comida Rápida',
     badge: '⭐ Oficial Street',
     version: '1.0.0',
-    totalProducts: 10,
+    totalProducts: 16,
     coverImage: '/packs/comida-street/hamburguesa.png',
     isFree: true,
-    tags: ['hamburguesas', 'perros', 'cachapas', 'pepito', 'shawarma', 'street', 'venezuela'],
+    tags: ['hamburguesas', 'perros', 'cachapas', 'pepito', 'shawarma', 'chicha', 'combos', 'street', 'venezuela'],
     products: [
       {
         name: 'Hamburguesa Clásica Especial 200g',
@@ -156,6 +156,72 @@ export const DEFAULT_VISUAL_PACKS: VisualPack[] = [
         stock: 100,
         isStockManaged: true,
         description: 'Refresco frío a elección (Coca-Cola, Pepsi, Chinotto, Kolita).'
+      },
+      {
+        name: 'Chicha Tradicional Criolla con Canela',
+        category: 'Bebidas',
+        priceUsd: 2.00,
+        costUsd: 0.90,
+        barcode: '759100000011',
+        imageUrl: '/packs/comida-street/chicha.png',
+        stock: 80,
+        isStockManaged: true,
+        description: 'Chicha espesa de arroz con leche condensada generosa y toque de canela molida.'
+      },
+      {
+        name: 'Combo Burger Especial + Papas + Bebida',
+        category: 'Combos',
+        priceUsd: 8.50,
+        costUsd: 4.50,
+        barcode: '759100000012',
+        imageUrl: '/packs/comida-street/combo-burger-1.png',
+        stock: 40,
+        isStockManaged: true,
+        description: 'Hamburguesa 200g completa con queso cheddar, huevo, tocineta, papas rústicas y refresco.'
+      },
+      {
+        name: 'Combo Cachapa Doble Queso y Cochino Frito',
+        category: 'Combos',
+        priceUsd: 10.50,
+        costUsd: 5.80,
+        barcode: '759100000013',
+        imageUrl: '/packs/comida-street/combo-cachapa-01.png',
+        stock: 35,
+        isStockManaged: true,
+        description: 'Cachapa gigante con doble queso de mano tierno, ración de cochino frito crujiente y bebida.'
+      },
+      {
+        name: 'Combo Cachapa Criolla Doble Queso Mano',
+        category: 'Combos',
+        priceUsd: 7.50,
+        costUsd: 3.80,
+        barcode: '759100000014',
+        imageUrl: '/packs/comida-street/combo-cachapa-02.png',
+        stock: 40,
+        isStockManaged: true,
+        description: 'Cachapa dorada con abundante queso de mano fresco, mantequilla derretida y bebida fría.'
+      },
+      {
+        name: 'Combo Pepito Mixto 30cm + Papas + Bebida',
+        category: 'Combos',
+        priceUsd: 11.00,
+        costUsd: 6.00,
+        barcode: '759100000015',
+        imageUrl: '/packs/comida-street/combo-pepito-01.png',
+        stock: 30,
+        isStockManaged: true,
+        description: 'Pepito mixto lomito y pollo 30cm gratinado con queso de mano y maíz, papas fritas y refresco.'
+      },
+      {
+        name: 'Combo Dúo Shawarma Mixto Especial',
+        category: 'Combos',
+        priceUsd: 12.00,
+        costUsd: 6.50,
+        barcode: '759100000016',
+        imageUrl: '/packs/comida-street/combo-shawarma-01.png',
+        stock: 25,
+        isStockManaged: true,
+        description: '2 Shawarmas mixtos grandes con pan pita tostado, papas y salsas árabes.'
       }
     ]
   }
