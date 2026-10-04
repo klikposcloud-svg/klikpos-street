@@ -168,6 +168,7 @@ export const CasinoReelsCatalog: React.FC<CasinoReelsCatalogProps> = ({
                       <img
                         src={prod.image}
                         alt={prod.name}
+                        onError={(e) => { (e.target as HTMLImageElement).src = '/packs/comida-street/hamburguesa.png'; }}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         loading="lazy"
                       />
@@ -280,6 +281,7 @@ export const CasinoReelsCatalog: React.FC<CasinoReelsCatalogProps> = ({
                       <img
                         src={prod.image}
                         alt={prod.name}
+                        onError={(e) => { (e.target as HTMLImageElement).src = '/packs/comida-street/hamburguesa.png'; }}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         loading="lazy"
                       />
@@ -382,6 +384,7 @@ export const CasinoReelsCatalog: React.FC<CasinoReelsCatalogProps> = ({
                   <img
                     src={prod.image}
                     alt={prod.name}
+                    onError={(e) => { (e.target as HTMLImageElement).src = '/packs/comida-street/hamburguesa.png'; }}
                     className="w-12 h-12 rounded-xl object-cover shrink-0"
                   />
                   <div className="min-w-0 flex-1">

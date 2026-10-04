@@ -332,7 +332,7 @@ export default function VisualPacksModal({
                           alt={pack.title}
                           className="w-full h-full object-cover"
                           onError={(e: any) => {
-                            e.target.src = 'https://images.unsplash.com/photo-1527061011665-3652c757a4d4?w=200&auto=format&fit=crop&q=80';
+                            e.target.src = '/packs/comida-street/hamburguesa.png';
                           }}
                         />
                         {isInstalled && (
@@ -461,7 +461,7 @@ export default function VisualPacksModal({
                           alt={prod.name}
                           className="w-10 h-10 rounded-lg object-contain bg-slate-900/60 p-0.5 shrink-0 border border-slate-200 dark:border-slate-800"
                           onError={(e: any) => {
-                            e.target.src = 'https://images.unsplash.com/photo-1527061011665-3652c757a4d4?w=100&auto=format&fit=crop&q=80';
+                            e.target.src = '/packs/comida-street/hamburguesa.png';
                           }}
                         />
                         <div className="min-w-0 flex-1">

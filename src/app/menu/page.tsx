@@ -38,96 +38,20 @@ interface CartItem extends MenuItem {
   notes?: string;
 }
 
-const DEFAULT_MENU_ITEMS: MenuItem[] = [
-  {
-    id: '1',
-    name: 'Hamburguesa Doble Especial',
-    category: 'Hamburguesas',
-    priceUSD: 6.50,
-    tag: '🔥 Más Vendido',
-    prepTime: '8-10 min',
-    image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&q=80',
-    description: 'Carne 200g, doble queso cheddar fundido, tocineta crujiente, cebolla caramelizada, pepinillos y salsa especial de la casa.',
-    sku: 'HAM-01'
-  },
-  {
-    id: '2',
-    name: 'Perro Caliente Especial Jumbo',
-    category: 'Perros',
-    priceUSD: 3.50,
-    tag: '⭐ Favorito',
-    prepTime: '5-7 min',
-    image: 'https://images.unsplash.com/photo-1619740455993-9e612b1af08a?w=600&q=80',
-    description: 'Salchicha polaca premium, lluvia de queso blanco rallado, papitas crocantes, cebolla picada fina y trío de salsas tradicionales.',
-    sku: 'DOG-01'
-  },
-  {
-    id: '3',
-    name: 'Combo Parrillero Mixto XL',
-    category: 'Combos',
-    priceUSD: 12.00,
-    tag: '💥 Ahorro',
-    prepTime: '12-15 min',
-    image: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=600&q=80',
-    description: 'Lomito de res, pechuga a la brasa, chorizo ahumado, papas rústicas, ensalada cole-slaw fresca, guasacaca y 2 bebidas.',
-    sku: 'CMB-01'
-  },
-  {
-    id: '4',
-    name: 'Papas Fritas Gratinadas Tocineta',
-    category: 'Extras',
-    priceUSD: 4.00,
-    tag: '🧀 Crujiente',
-    prepTime: '6-8 min',
-    image: 'https://images.unsplash.com/photo-1576107232684-1279f3908594?w=600&q=80',
-    description: 'Canasta de papas fritas recién hechas bañadas en salsa cheddar y trocitos de tocineta crocante ahumada.',
-    sku: 'EXT-01'
-  },
-  {
-    id: '5',
-    name: 'Pepito Mixto Gratinado 30cm',
-    category: 'Combos',
-    priceUSD: 8.50,
-    tag: '🏆 Gigante',
-    prepTime: '10-12 min',
-    image: 'https://images.unsplash.com/photo-1509722747041-616f39b57569?w=600&q=80',
-    description: 'Pan artesanal de 30cm, lomito jugoso, pollo grille, queso de mano fundido, aguacate, tocineta y salsa tártara artesanal.',
-    sku: 'PEP-01'
-  },
-  {
-    id: '6',
-    name: 'Refresco Familiar 1.5L Frío',
-    category: 'Bebidas',
-    priceUSD: 2.50,
-    tag: '🧊 Bien Frío',
-    prepTime: 'Inmediato',
-    image: 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=600&q=80',
-    description: 'Coca-Cola, Pepsi, Chinotto o Frescolita a temperatura bajo cero.',
-    sku: 'BEB-01'
-  },
-  {
-    id: '7',
-    name: 'Ración de Tequeños Gourmet (6 und)',
-    category: 'Extras',
-    priceUSD: 4.50,
-    tag: '🔥 Clásico',
-    prepTime: '5 min',
-    image: 'https://images.unsplash.com/photo-1541592106381-b31e9677c0e5?w=600&q=80',
-    description: 'Masa crujiente y dorada rellena de abundante queso llanero fundido acompañado de salsa de papelón con limón.',
-    sku: 'TEQ-01'
-  },
-  {
-    id: '8',
-    name: 'Cerveza Nacional Polar Pilsen',
-    category: 'Bebidas',
-    priceUSD: 1.50,
-    tag: '🍺 Vestida de Novia',
-    prepTime: 'Inmediato',
-    image: 'https://images.unsplash.com/photo-1608270586620-248524c67de9?w=600&q=80',
-    description: 'Botella de vidrio tercio retornable, bien fría punto de nieve.',
-    sku: 'CER-01'
-  }
-];
+import { SAMPLE_PRODUCTS } from '@/lib/data/tablet-pos-rubros';
+
+const DEFAULT_MENU_ITEMS: MenuItem[] = SAMPLE_PRODUCTS.map(p => ({
+  id: p.id,
+  name: p.name,
+  category: p.category,
+  priceUSD: p.priceUSD,
+  image: p.image,
+  description: p.description,
+  tag: p.tag,
+  prepTime: p.prepTime,
+  sku: p.sku
+}));
+
 
 export default function DigitalMenuPage() {
   const [bcvRate, setBcvRate] = useState<number>(848.55);

@@ -195,77 +195,56 @@ export const SAMPLE_PRODUCTS: Product[] = [
   }
 ];
 
+export const CATEGORIES = ['Todos', 'Combos', 'Hamburguesas', 'Perros', 'Bebidas', 'Extras'];
+
 export const RUBROS_CATALOG: Record<RubroId, { name: string; label: string; icon: string; description: string; categories: string[]; sampleProducts: Product[] }> = {
   comida: {
-    name: 'Comida & Gastronomía',
-    label: 'Comida & Gastronomía',
+    name: 'Comida Rápida & Street Food',
+    label: 'Comida Rápida & Street Food',
     icon: '🍔',
-    description: 'Hamburguesas, pizzas, combos, perros calientes y bebidas.',
-    categories: ['Todos', 'Combos', 'Hamburguesas', 'Perros', 'Bebidas', 'Extras'],
+    description: 'Hamburguesas, cachapas, perros calientes, pepitos, combos familiares y bebidas.',
+    categories: CATEGORIES,
     sampleProducts: SAMPLE_PRODUCTS
   },
   ropa: {
-    name: 'Ropa, Calzado & Boutique',
-    label: 'Ropa, Calzado & Boutique',
-    icon: '👕',
-    description: 'Moda femenina, masculina, calzado y accesorios de vestir.',
-    categories: ['Todos', 'Caballeros', 'Damas', 'Calzado', 'Accesorios', 'Ofertas'],
-    sampleProducts: [
-      { id: 'r1', name: 'Camiseta Oversize Algodón Premium', category: 'Caballeros', priceUSD: 14.00, tag: '🔥 En Tendencia', prepTime: 'Inmediato', image: 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=600&q=80', description: 'Algodón 100% peruano peinado, corte relajado.', sku: 'ROP-01' },
-      { id: 'r2', name: 'Jeans Skinny Denim Stretch', category: 'Damas', priceUSD: 22.00, tag: '⭐ Favorito', prepTime: 'Inmediato', image: 'https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=600&q=80', description: 'Denim stretch levanta cola tiro alto.', sku: 'ROP-02' },
-      { id: 'r3', name: 'Zapatos Deportivos Sneakers Urban', category: 'Calzado', priceUSD: 35.00, tag: '💥 Premium', prepTime: 'Inmediato', image: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?w=600&q=80', description: 'Suela amortiguada antideslizante con acabado transpirable.', sku: 'ROP-03' },
-      { id: 'r4', name: 'Gorra Clásica Vintage Ajustable', category: 'Accesorios', priceUSD: 8.50, tag: '🧢 Estilo', prepTime: 'Inmediato', image: 'https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=600&q=80', description: 'Broche metálico trasero con visera curva.', sku: 'ROP-04' }
-    ]
+    name: 'Comida Rápida & Street Food',
+    label: 'Comida Rápida & Street Food',
+    icon: '🍔',
+    description: 'Hamburguesas, cachapas, perros calientes, pepitos, combos familiares y bebidas.',
+    categories: CATEGORIES,
+    sampleProducts: SAMPLE_PRODUCTS
   },
   panaderia: {
-    name: 'Panadería, Café & Pastelería',
-    label: 'Panadería, Café & Pastelería',
-    icon: '🥖',
-    description: 'Panes artesanales, repostería fina, desayunos y cafetería.',
-    categories: ['Todos', 'Panes', 'Café', 'Pastelería', 'Charcutería', 'Bebidas'],
-    sampleProducts: [
-      { id: 'p1', name: 'Canilla Tradicional Crujiente', category: 'Panes', priceUSD: 0.80, tag: '🥖 Fresco', prepTime: 'Inmediato', image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600&q=80', description: 'Pan tipo canilla recién horneado con corteza dorada.', sku: 'PAN-01' },
-      { id: 'p2', name: 'Café Capuchino Cremoso Grande', category: 'Café', priceUSD: 2.00, tag: '☕ Caliente', prepTime: '3 min', image: 'https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=600&q=80', description: 'Espresso doble con leche espumada y canela.', sku: 'PAN-02' },
-      { id: 'p3', name: 'Croissant Mantequilla con Jamón y Queso', category: 'Pastelería', priceUSD: 3.50, tag: '🥐 Relleno', prepTime: '2 min', image: 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=600&q=80', description: 'Masa hojaldrada con mantequilla y relleno horneado.', sku: 'PAN-03' },
-      { id: 'p4', name: 'Torta Tres Leches Casera Porción', category: 'Pastelería', priceUSD: 3.00, tag: '🍰 Dulce', prepTime: 'Inmediato', image: 'https://images.unsplash.com/photo-1588195538326-c5b1e9f80a1b?w=600&q=80', description: 'Bizcocho bañado en mezcla de tres leches y merengue tostado.', sku: 'PAN-04' }
-    ]
+    name: 'Comida Rápida & Street Food',
+    label: 'Comida Rápida & Street Food',
+    icon: '🍔',
+    description: 'Hamburguesas, cachapas, perros calientes, pepitos, combos familiares y bebidas.',
+    categories: CATEGORIES,
+    sampleProducts: SAMPLE_PRODUCTS
   },
   minimarket: {
-    name: 'Abastos, Minimarkets & Víveres',
-    label: 'Abastos, Minimarkets & Víveres',
-    icon: '🛒',
-    description: 'Alimentos no perecederos, bebidas, víveres y charcutería.',
-    categories: ['Todos', 'Víveres', 'Lácteos', 'Snacks', 'Bebidas', 'Limpieza'],
-    sampleProducts: [
-      { id: 'm1', name: 'Harina de Maíz Blanco 1Kg', category: 'Víveres', priceUSD: 1.15, tag: '🌽 Esencial', prepTime: 'Inmediato', image: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=600&q=80', description: 'Harina precocida tradicional para arepas.', sku: 'VIV-01' },
-      { id: 'm2', name: 'Arroz Blanco Tradicional 1Kg', category: 'Víveres', priceUSD: 1.30, tag: '🍚 Básico', prepTime: 'Inmediato', image: 'https://images.unsplash.com/photo-1536304993881-ff6e9eefa2a6?w=600&q=80', description: 'Grano entero de primera calidad.', sku: 'VIV-02' },
-      { id: 'm3', name: 'Queso Paisa Rebanado 250g', category: 'Lácteos', priceUSD: 2.80, tag: '🧀 Fresco', prepTime: 'Inmediato', image: 'https://images.unsplash.com/photo-1624806992066-5ffcf7ca186b?w=600&q=80', description: 'Queso blanco semiduro pasteurizado.', sku: 'VIV-03' },
-      { id: 'm4', name: 'Snack Papitas Tostadas Onduladas', category: 'Snacks', priceUSD: 1.50, tag: '🥔 Crujiente', prepTime: 'Inmediato', image: 'https://images.unsplash.com/photo-1566478989037-eec170784d0b?w=600&q=80', description: 'Papas fritas saladas crujientes bolsa familiar.', sku: 'VIV-04' }
-    ]
+    name: 'Comida Rápida & Street Food',
+    label: 'Comida Rápida & Street Food',
+    icon: '🍔',
+    description: 'Hamburguesas, cachapas, perros calientes, pepitos, combos familiares y bebidas.',
+    categories: CATEGORIES,
+    sampleProducts: SAMPLE_PRODUCTS
   },
   farmacia: {
-    name: 'Farmacia & Cuidado Personal',
-    label: 'Farmacia & Cuidado Personal',
-    icon: '💊',
-    description: 'Medicamentos sin récipe, productos de higiene y primeros auxilios.',
-    categories: ['Todos', 'Analgésicos', 'Cuidado Personal', 'Primeros Auxilios', 'Vitaminas'],
-    sampleProducts: [
-      { id: 'f1', name: 'Acetaminofén 500mg (10 Tabletas)', category: 'Analgésicos', priceUSD: 1.20, tag: '💊 Farmacia', prepTime: 'Inmediato', image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=600&q=80', description: 'Alivio del dolor y la fiebre.', sku: 'FAR-01' },
-      { id: 'f2', name: 'Alcohol Antiséptico 70% 500ml', category: 'Primeros Auxilios', priceUSD: 2.50, tag: '🩹 Botiquín', prepTime: 'Inmediato', image: 'https://images.unsplash.com/photo-1584744982491-665216d95f8b?w=600&q=80', description: 'Solución desinfectante tópica para curas.', sku: 'FAR-02' },
-      { id: 'f3', name: 'Vitamina C 1000mg Efervescente', category: 'Vitaminas', priceUSD: 3.80, tag: '🍊 Inmunidad', prepTime: 'Inmediato', image: 'https://images.unsplash.com/photo-1577401239170-897942555fb3?w=600&q=80', description: 'Tubo con 10 tabletas efervescentes sabor naranja.', sku: 'FAR-03' }
-    ]
+    name: 'Comida Rápida & Street Food',
+    label: 'Comida Rápida & Street Food',
+    icon: '🍔',
+    description: 'Hamburguesas, cachapas, perros calientes, pepitos, combos familiares y bebidas.',
+    categories: CATEGORIES,
+    sampleProducts: SAMPLE_PRODUCTS
   },
   ferreteria: {
-    name: 'Ferretería & Repuestos',
-    label: 'Ferretería & Repuestos',
-    icon: '🔧',
-    description: 'Herramientas, material eléctrico, plomería y pinturas.',
-    categories: ['Todos', 'Herramientas', 'Fijación', 'Eléctricos', 'Pinturas', 'Plomería'],
-    sampleProducts: [
-      { id: 'fe1', name: 'Cinta Métrica Profesional 5 Metros', category: 'Herramientas', priceUSD: 4.50, tag: '📏 Precisión', prepTime: 'Inmediato', image: 'https://images.unsplash.com/photo-1586864387967-d02ef85d93e8?w=600&q=80', description: 'Carcasa engomada de alto impacto con traba.', sku: 'FER-01' },
-      { id: 'fe2', name: 'Tirro Plástico Aislante Negro 3M', category: 'Eléctricos', priceUSD: 1.20, tag: '⚡ Electricidad', prepTime: 'Inmediato', image: 'https://images.unsplash.com/photo-1581783342308-f792dbdd27c5?w=600&q=80', description: 'Cinta aislante para empalmes de hasta 600V.', sku: 'FER-02' },
-      { id: 'fe3', name: 'Bombillo LED 12W Luz Blanca 6500K', category: 'Eléctricos', priceUSD: 1.80, tag: '💡 Ahorrador', prepTime: 'Inmediato', image: 'https://images.unsplash.com/photo-1550524514-9b69b5961e93?w=600&q=80', description: 'Rosca estándar E27 larga duración.', sku: 'FER-03' }
-    ]
+    name: 'Comida Rápida & Street Food',
+    label: 'Comida Rápida & Street Food',
+    icon: '🍔',
+    description: 'Hamburguesas, cachapas, perros calientes, pepitos, combos familiares y bebidas.',
+    categories: CATEGORIES,
+    sampleProducts: SAMPLE_PRODUCTS
   }
 };
 
@@ -274,8 +253,6 @@ export const DEFAULT_DRIVERS: Motorizado[] = [
   { id: '2', name: 'José Luis Rivas', phone: '04249876543', vehicle: 'Empire Keeway Rojo - AA4B11', status: 'en_ruta' },
   { id: '3', name: 'Manuel Bastidas', phone: '04125556677', vehicle: 'Haojin Águila Negro - AB99CC', status: 'disponible' }
 ];
-
-export const CATEGORIES = ['Todos', 'Combos', 'Hamburguesas', 'Perros', 'Bebidas', 'Extras'];
 
 export const NOTE_PRESETS = [
   'Con todo (tradicional)',

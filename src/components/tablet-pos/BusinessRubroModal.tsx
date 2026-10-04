@@ -49,8 +49,8 @@ export function BusinessRubroModal({
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto py-3 grid grid-cols-1 sm:grid-cols-2 gap-3 pr-1">
-          {(Object.keys(RUBROS_CATALOG) as RubroId[]).map((rubroKey) => {
+        <div className="flex-1 overflow-y-auto py-3 grid grid-cols-1 gap-3 pr-1">
+          {(Object.keys(RUBROS_CATALOG) as RubroId[]).filter(k => k === 'comida').map((rubroKey) => {
             const r = RUBROS_CATALOG[rubroKey];
             const isSelected = activeRubro === rubroKey;
             return (

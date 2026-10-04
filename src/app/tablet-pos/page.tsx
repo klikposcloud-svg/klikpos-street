@@ -449,16 +449,30 @@ export default function TabletMobilePosPage() {
       const savedDockSide = localStorage.getItem('klikpos_dock_side') as 'left' | 'right';
       if (savedDockSide === 'left' || savedDockSide === 'right') setDockSide(savedDockSide);
 
-      const savedRubro = localStorage.getItem('klikpos_active_rubro') as RubroId;
-      if (savedRubro && RUBROS_CATALOG[savedRubro]) {
-        setActiveRubro(savedRubro);
-        setCategoriesList(RUBROS_CATALOG[savedRubro].categories);
-      }
+      // Bloqueo y Purificación Oficial: KlikPOS Street inicia 100% con Comida Rápida & Street Food
+      setActiveRubro('comida');
+      setCategoriesList(CATEGORIES);
+      try { localStorage.setItem('klikpos_active_rubro', 'comida'); } catch {}
 
       const savedProducts = localStorage.getItem('klikpos_tablet_products');
       if (savedProducts) {
-        const parsed = JSON.parse(savedProducts);
-        if (Array.isArray(parsed) && parsed.length > 0) setProducts(parsed);
+        try {
+          const parsed = JSON.parse(savedProducts);
+          // Si contiene productos de otros rubros (farmacia, ropa, etc.), URLs de unsplash o no tiene los 16 productos nuevos
+          const hasInvalid = !Array.isArray(parsed) || parsed.length < 16 || parsed.some((p: any) => !p.image || p.image.includes('unsplash') || (!p.image.startsWith('/packs/comida-street') && !p.image.startsWith('data:image')));
+          if (hasInvalid) {
+            setProducts(SAMPLE_PRODUCTS);
+            localStorage.setItem('klikpos_tablet_products', JSON.stringify(SAMPLE_PRODUCTS));
+          } else {
+            setProducts(parsed);
+          }
+        } catch {
+          setProducts(SAMPLE_PRODUCTS);
+          localStorage.setItem('klikpos_tablet_products', JSON.stringify(SAMPLE_PRODUCTS));
+        }
+      } else {
+        setProducts(SAMPLE_PRODUCTS);
+        localStorage.setItem('klikpos_tablet_products', JSON.stringify(SAMPLE_PRODUCTS));
       }
 
       const savedDrivers = localStorage.getItem('klikpos_tablet_drivers');
@@ -760,7 +774,7 @@ export default function TabletMobilePosPage() {
       sku: newProductForm.sku.trim() || `SKU-${Date.now().toString().slice(-4)}`,
       tag: newProductForm.tag.trim() || '⭐ Nuevo',
       prepTime: 'Inmediato',
-      image: newProductForm.image.trim() || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&q=80',
+      image: newProductForm.image.trim() || '/packs/comida-street/hamburguesa.png',
       description: `${newProductForm.name} - Calidad garantizada.`
     };
     const updated = [newProd, ...products];
@@ -1163,7 +1177,7 @@ export default function TabletMobilePosPage() {
                   <Printer className="w-5 h-5 stroke-[2.2]" />
                 </button>
 
-                {/* 4. Cambiar Rubro Comercial */}
+                {/* 4. Catálogo Oficial Street Food */}
                 <button
                   onClick={() => {
                     setIsDockerOpen(false);
@@ -1174,7 +1188,7 @@ export default function TabletMobilePosPage() {
                       ? 'text-purple-800 bg-purple-100 border border-purple-300 hover:bg-purple-200'
                       : 'text-purple-300 bg-purple-500/25 border border-purple-400/40 hover:bg-purple-500/40'
                   }`}
-                  title="Cambiar Rubro Comercial (Comida, Farmacia, Bodega, etc.)"
+                  title="Catálogo Oficial: Comida Rápida & Street Food"
                 >
                   <Boxes className="w-5 h-5 stroke-[2.2]" />
                 </button>
@@ -4461,7 +4475,7 @@ export default function TabletMobilePosPage() {
                 priceUSD: Number(p.priceUSD || p.priceUsd) || 0,
                 tag: p.tag || p.badge || '⭐ Nuevo',
                 prepTime: 'Inmediato',
-                image: p.image || p.imageUrl || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&q=80',
+                image: p.image || p.imageUrl || '/packs/comida-street/hamburguesa.png',
                 description: p.description || `${p.name} - Calidad garantizada.`,
                 sku: p.sku || p.barcode || 'SKU-00'
               }));
