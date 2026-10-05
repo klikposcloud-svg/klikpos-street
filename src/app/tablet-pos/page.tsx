@@ -2183,79 +2183,186 @@ export default function TabletMobilePosPage() {
         {/* ======================================================================= */}
         {activeTab === 'pedidos' && (
           <div className="space-y-3 flex-1 min-h-0 flex flex-col pb-44 overflow-y-auto px-1 scrollbar-none">
-            {/* Header & Filtros */}
-            <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-2 border-b shrink-0 ${
+            {/* Header & Secciones Principales */}
+            <div className={`space-y-3 pb-3 border-b shrink-0 ${
               isLight ? 'border-slate-200' : 'border-slate-800'
             }`}>
-              <div>
-                <h2 className={`text-sm font-black uppercase tracking-wider flex items-center gap-2 ${
-                  isLight ? 'text-slate-900' : 'text-white'
-                }`}>
-                  <ClipboardList className="w-4 h-4" style={{ color: currentPal.primary }} />
-                  <span>Control de Pedidos & Despachos</span>
-                </h2>
-                <p className={`text-[11px] font-mono ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
-                  {orders.filter(o => o.status === 'en_cola').length} en cola • {orders.filter(o => o.status === 'listo').length} listos • {orders.filter(o => o.status === 'despachado').length} despachados
-                </p>
-              </div>
-
-              {/* Filtros de Tipo, Estado y Cobranza */}
-              <div className="flex flex-wrap items-center gap-1.5">
-                {/* Filtro por Tipo */}
-                <div className={`flex items-center p-0.5 rounded-xl border ${
-                  isLight ? 'border-slate-300 bg-slate-100' : 'border-slate-800 bg-slate-900'
-                }`}>
-                  {(['todos', 'local', 'delivery'] as const).map((t) => (
-                    <button
-                      key={t}
-                      onClick={() => setOrderFilterType(t)}
-                      className={`px-2 py-1 rounded-lg text-[10px] font-black uppercase transition-all ${
-                        orderFilterType === t
-                          ? 'bg-amber-500 text-slate-950 shadow-xs'
-                          : isLight ? 'text-slate-600 hover:text-slate-950' : 'text-slate-400 hover:text-white'
-                      }`}
-                    >
-                      {t === 'todos' ? 'Todos' : t === 'local' ? 'Local' : 'Delivery'}
-                    </button>
-                  ))}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
+                  <h2 className={`text-sm sm:text-base font-black uppercase tracking-wider flex items-center gap-2 ${
+                    isLight ? 'text-slate-900' : 'text-white'
+                  }`}>
+                    <ClipboardList className="w-5 h-5" style={{ color: currentPal.primary }} />
+                    <span>Control de Pedidos & Despachos</span>
+                  </h2>
+                  <p className={`text-[11px] font-mono mt-0.5 ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
+                    {orders.filter(o => o.status === 'en_cola').length} en cocina/cola • {orders.filter(o => o.status === 'listo').length} listos • {orders.filter(o => o.status === 'despachado').length} entregados
+                  </p>
                 </div>
 
-                {/* Filtro por Cobro */}
-                <div className={`flex items-center p-0.5 rounded-xl border ${
-                  isLight ? 'border-slate-300 bg-slate-100' : 'border-slate-800 bg-slate-900'
-                }`}>
-                  {(['todos', 'pagado', 'por_cobrar'] as const).map((p) => (
-                    <button
-                      key={p}
-                      onClick={() => setOrderFilterPayment(p)}
-                      className={`px-2 py-1 rounded-lg text-[10px] font-black uppercase transition-all ${
-                        orderFilterPayment === p
-                          ? 'bg-amber-500 text-slate-950 shadow-xs'
-                          : isLight ? 'text-slate-600 hover:text-slate-950' : 'text-slate-400 hover:text-white'
-                      }`}
-                    >
-                      {p === 'todos' ? 'Todos Pagos' : p === 'pagado' ? 'Pagados' : 'Por Cobrar'}
-                    </button>
-                  ))}
-                </div>
-
-                {/* Filtro por Estado */}
-                <div className={`flex items-center p-0.5 rounded-xl border ${
-                  isLight ? 'border-slate-300 bg-slate-100' : 'border-slate-800 bg-slate-900'
+                {/* Filtro por Estado de Despacho (Cocina) */}
+                <div className={`flex items-center p-0.5 rounded-xl border text-[10px] font-bold ${
+                  isLight ? 'border-slate-300 bg-slate-100' : 'border-slate-800 bg-[#0c1220]'
                 }`}>
                   {(['todos', 'en_cola', 'listo', 'despachado'] as const).map((st) => (
                     <button
                       key={st}
+                      type="button"
                       onClick={() => setOrderFilterStatus(st)}
-                      className={`px-2 py-1 rounded-lg text-[10px] font-black uppercase transition-all ${
+                      className={`px-2.5 py-1 rounded-lg uppercase transition-all cursor-pointer ${
                         orderFilterStatus === st
-                          ? 'bg-amber-500 text-slate-950 shadow-xs'
+                          ? 'bg-amber-500 text-slate-950 font-black shadow-xs'
                           : isLight ? 'text-slate-600 hover:text-slate-950' : 'text-slate-400 hover:text-white'
                       }`}
                     >
                       {st === 'todos' ? 'Todos' : st === 'en_cola' ? 'En Cola' : st === 'listo' ? 'Listos' : 'Despachados'}
                     </button>
                   ))}
+                </div>
+              </div>
+
+              {/* SECCIONES PRINCIPALES: TODOS / LOCAL / DELIVERY (PESTAÑAS ESTILO APP MÓVIL) */}
+              <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pt-1">
+                {/* Pestaña 1: Todos */}
+                <button
+                  type="button"
+                  onClick={() => setOrderFilterType('todos')}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-2xl text-xs sm:text-sm font-black transition-all cursor-pointer whitespace-nowrap border ${
+                    orderFilterType === 'todos'
+                      ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-md scale-102'
+                      : isLight
+                        ? 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
+                        : 'bg-[#090d16] border-slate-800 text-slate-300 hover:bg-slate-800/60'
+                  }`}
+                >
+                  <ClipboardList className="w-4 h-4 shrink-0" />
+                  <span>Todos los Pedidos</span>
+                  <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-black ${
+                    orderFilterType === 'todos'
+                      ? 'bg-slate-950 text-amber-400'
+                      : isLight ? 'bg-slate-100 text-slate-700' : 'bg-slate-800 text-slate-300'
+                  }`}>
+                    {orders.length}
+                  </span>
+                </button>
+
+                {/* Pestaña 2: Local (Salón) */}
+                <button
+                  type="button"
+                  onClick={() => setOrderFilterType('local')}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-2xl text-xs sm:text-sm font-black transition-all cursor-pointer whitespace-nowrap border ${
+                    orderFilterType === 'local'
+                      ? 'bg-emerald-600 text-white border-emerald-500 shadow-md scale-102'
+                      : isLight
+                        ? 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
+                        : 'bg-[#090d16] border-slate-800 text-slate-300 hover:bg-slate-800/60'
+                  }`}
+                >
+                  <Store className="w-4 h-4 shrink-0" />
+                  <span>Local / Salón</span>
+                  <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-black ${
+                    orderFilterType === 'local'
+                      ? 'bg-emerald-950 text-emerald-200'
+                      : isLight ? 'bg-slate-100 text-slate-700' : 'bg-slate-800 text-slate-300'
+                  }`}>
+                    {orders.filter(o => o.type !== 'delivery').length}
+                  </span>
+                </button>
+
+                {/* Pestaña 3: Delivery */}
+                <button
+                  type="button"
+                  onClick={() => setOrderFilterType('delivery')}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-2xl text-xs sm:text-sm font-black transition-all cursor-pointer whitespace-nowrap border ${
+                    orderFilterType === 'delivery'
+                      ? 'bg-purple-600 text-white border-purple-500 shadow-md scale-102'
+                      : isLight
+                        ? 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
+                        : 'bg-[#090d16] border-slate-800 text-slate-300 hover:bg-slate-800/60'
+                  }`}
+                >
+                  <Bike className="w-4 h-4 shrink-0" />
+                  <span>Delivery / Despachos</span>
+                  <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-black ${
+                    orderFilterType === 'delivery'
+                      ? 'bg-purple-950 text-purple-200'
+                      : isLight ? 'bg-slate-100 text-slate-700' : 'bg-slate-800 text-slate-300'
+                  }`}>
+                    {orders.filter(o => o.type === 'delivery').length}
+                  </span>
+                </button>
+              </div>
+
+              {/* SUB-SECCIÓN: DESGLOSE DE COBRANZA EN CADA SECCIÓN */}
+              <div className={`p-2.5 rounded-2xl border flex flex-wrap items-center justify-between gap-2 ${
+                isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#0c1220] border-slate-800'
+              }`}>
+                <div className="flex items-center gap-1.5 text-xs font-black">
+                  <span className={isLight ? 'text-slate-600 uppercase text-[10px] tracking-wider' : 'text-slate-400 uppercase text-[10px] tracking-wider'}>
+                    Desglose de Cobro:
+                  </span>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-1.5">
+                  {/* Todos los Pagos */}
+                  <button
+                    type="button"
+                    onClick={() => setOrderFilterPayment('todos')}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer border ${
+                      orderFilterPayment === 'todos'
+                        ? isLight
+                          ? 'bg-slate-900 text-white border-slate-900 shadow-xs'
+                          : 'bg-white text-slate-950 border-white shadow-xs'
+                        : isLight
+                          ? 'bg-white border-slate-300 text-slate-700 hover:bg-slate-100'
+                          : 'bg-slate-900 border-slate-700 text-slate-300 hover:bg-slate-800'
+                    }`}
+                  >
+                    💳 Todos los Pagos ({orders.filter(o => orderFilterType === 'todos' || (orderFilterType === 'delivery' ? o.type === 'delivery' : o.type !== 'delivery')).length})
+                  </button>
+
+                  {/* Pagados */}
+                  <button
+                    type="button"
+                    onClick={() => setOrderFilterPayment('pagado')}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer border ${
+                      orderFilterPayment === 'pagado'
+                        ? 'bg-emerald-600 text-white border-emerald-500 shadow-xs'
+                        : isLight
+                          ? 'bg-white border-emerald-300 text-emerald-800 hover:bg-emerald-50'
+                          : 'bg-slate-900 border-emerald-500/30 text-emerald-400 hover:bg-emerald-950/30'
+                    }`}
+                  >
+                    ✓ Pagados ({orders.filter(o => (orderFilterType === 'todos' || (orderFilterType === 'delivery' ? o.type === 'delivery' : o.type !== 'delivery')) && o.paymentStatus !== 'por_cobrar').length})
+                  </button>
+
+                  {/* Por Cobrar */}
+                  {(() => {
+                    const pendingCount = orders.filter(o => (orderFilterType === 'todos' || (orderFilterType === 'delivery' ? o.type === 'delivery' : o.type !== 'delivery')) && o.paymentStatus === 'por_cobrar').length;
+                    return (
+                      <button
+                        type="button"
+                        onClick={() => setOrderFilterPayment('por_cobrar')}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer border flex items-center gap-1.5 ${
+                          orderFilterPayment === 'por_cobrar'
+                            ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-xs'
+                            : pendingCount > 0
+                              ? isLight
+                                ? 'bg-amber-100 border-amber-300 text-amber-950 hover:bg-amber-200'
+                                : 'bg-amber-500/20 border-amber-500/40 text-amber-300 hover:bg-amber-500/30'
+                              : isLight
+                                ? 'bg-white border-slate-300 text-slate-600 hover:bg-slate-100'
+                                : 'bg-slate-900 border-slate-700 text-slate-400 hover:bg-slate-800'
+                        }`}
+                      >
+                        <Clock className="w-3.5 h-3.5" />
+                        <span>Por Cobrar ({pendingCount})</span>
+                        {pendingCount > 0 && (
+                          <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                        )}
+                      </button>
+                    );
+                  })()}
                 </div>
               </div>
             </div>

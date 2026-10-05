@@ -404,10 +404,10 @@ export default function LicenseActivationModal({ isOpen, onClose, onSuccess, isT
               </div>
 
               {/* Formulario de Activación */}
-              <form onSubmit={handleActivate} className="space-y-3">
+              <form onSubmit={handleActivate} className="space-y-3.5">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-black text-slate-900 mb-1">
+                    <label className="block text-xs font-black text-slate-200 mb-1.5">
                       RIF o Cédula Registrada *:
                     </label>
                     <div className="relative">
@@ -418,13 +418,13 @@ export default function LicenseActivationModal({ isOpen, onClose, onSuccess, isT
                         placeholder="Ej: J-12345678-9"
                         value={rif}
                         onChange={(e) => setRif(e.target.value.toUpperCase())}
-                        className="w-full pl-9 pr-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-mono font-bold text-slate-900 uppercase outline-none focus:ring-2 focus:ring-indigo-500"
+                        className="w-full pl-9 pr-3 py-2.5 bg-[#0c1220] border border-slate-700 rounded-xl text-xs font-mono font-bold text-white uppercase placeholder:text-slate-500 outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-xs font-black text-slate-900 mb-1">
+                    <label className="block text-xs font-black text-slate-200 mb-1.5">
                       Clave de Producto (Product Key) *:
                     </label>
                     <div className="relative">
@@ -435,36 +435,36 @@ export default function LicenseActivationModal({ isOpen, onClose, onSuccess, isT
                         placeholder="VNK-VIT-PERP-XXXX-XXXX..."
                         value={productKey}
                         onChange={(e) => setProductKey(e.target.value.toUpperCase())}
-                        className="w-full pl-9 pr-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-mono font-black text-slate-900 uppercase outline-none focus:ring-2 focus:ring-indigo-500 tracking-tight"
+                        className="w-full pl-9 pr-3 py-2.5 bg-[#0c1220] border border-slate-700 rounded-xl text-xs font-mono font-bold text-white uppercase placeholder:text-slate-500 outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 tracking-tight transition-all"
                       />
                     </div>
                   </div>
                 </div>
 
                 {errorMsg && (
-                  <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 text-xs font-bold flex items-center gap-2">
-                    <AlertTriangle className="w-4 h-4 shrink-0" />
-                    <span>{errorMsg}</span>
+                  <div className="p-3.5 bg-rose-950/90 border border-rose-500/70 rounded-xl text-rose-200 text-xs font-bold flex items-center gap-2.5 shadow-sm">
+                    <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0" />
+                    <span className="leading-snug text-rose-100">{errorMsg}</span>
                   </div>
                 )}
 
                 {successMsg && (
-                  <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-xs font-bold flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 shrink-0" />
-                    <span>{successMsg}</span>
+                  <div className="p-3.5 bg-emerald-950/90 border border-emerald-500/70 rounded-xl text-emerald-200 text-xs font-bold flex items-center gap-2.5 shadow-sm">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                    <span className="leading-snug text-emerald-100">{successMsg}</span>
                   </div>
                 )}
 
                 {/* Aceptación Obligatoria del Marco Legal (EULA, T&C, Privacidad) */}
-                <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
-                  <label className="flex items-start gap-2.5 cursor-pointer select-none text-xs text-slate-700">
+                <div className="p-3.5 rounded-xl bg-[#090d16] border border-slate-800 space-y-1.5">
+                  <label className="flex items-start gap-2.5 cursor-pointer select-none text-xs text-slate-200">
                     <input
                       type="checkbox"
                       checked={termsAccepted}
                       onChange={(e) => setTermsAccepted(e.target.checked)}
-                      className="mt-0.5 w-4 h-4 rounded text-indigo-600 focus:ring-0 cursor-pointer shrink-0"
+                      className="mt-0.5 w-4 h-4 rounded text-amber-500 focus:ring-0 cursor-pointer shrink-0 accent-amber-500"
                     />
-                    <span className="leading-relaxed">
+                    <span className="leading-relaxed text-slate-300">
                       He leído y acepto el{' '}
                       <button
                         type="button"
@@ -472,7 +472,7 @@ export default function LicenseActivationModal({ isOpen, onClose, onSuccess, isT
                           setLegalDocToView('eula');
                           setShowLegalModal(true);
                         }}
-                        className="text-indigo-600 font-bold underline hover:text-indigo-800 cursor-pointer"
+                        className="text-amber-400 font-bold underline hover:text-amber-300 cursor-pointer"
                       >
                         Contrato de Licencia (EULA)
                       </button>
@@ -483,7 +483,7 @@ export default function LicenseActivationModal({ isOpen, onClose, onSuccess, isT
                           setLegalDocToView('terms');
                           setShowLegalModal(true);
                         }}
-                        className="text-indigo-600 font-bold underline hover:text-indigo-800 cursor-pointer"
+                        className="text-amber-400 font-bold underline hover:text-amber-300 cursor-pointer"
                       >
                         Términos & Descargo SENIAT
                       </button>{' '}
@@ -494,7 +494,7 @@ export default function LicenseActivationModal({ isOpen, onClose, onSuccess, isT
                           setLegalDocToView('privacy');
                           setShowLegalModal(true);
                         }}
-                        className="text-indigo-600 font-bold underline hover:text-indigo-800 cursor-pointer"
+                        className="text-amber-400 font-bold underline hover:text-amber-300 cursor-pointer"
                       >
                         Privacidad On-Premise
                       </button>
@@ -502,18 +502,18 @@ export default function LicenseActivationModal({ isOpen, onClose, onSuccess, isT
                     </span>
                   </label>
                   {!termsAccepted && (
-                    <p className="text-xs text-amber-800 font-bold pl-6">
+                    <p className="text-[11px] text-amber-400 font-bold pl-6.5">
                       * Es indispensable aceptar las condiciones de uso y propiedad intelectual para registrar la licencia.
                     </p>
                   )}
                 </div>
 
-                <div className="pt-2 flex flex-col sm:flex-row justify-between items-center gap-2">
+                <div className="pt-2 flex flex-col sm:flex-row justify-between items-center gap-2.5">
                   <button
                     type="button"
                     onClick={handleRestoreBusiness}
                     disabled={isRestoring}
-                    className="w-full sm:w-auto px-4 py-2.5 rounded-xl border border-sky-500/30 bg-[#0c1220] hover:bg-slate-800 text-sky-400 text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95 disabled:opacity-50"
+                    className="w-full sm:w-auto px-4 py-2.5 rounded-xl border border-sky-500/40 bg-[#0c1220] hover:bg-sky-950/60 text-sky-300 text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95 disabled:opacity-50"
                     title="Si cambiaste de equipo o reinstalaste la app, recupera tu configuración y productos desde la nube"
                   >
                     <CloudDownload className={`w-4 h-4 text-sky-400 ${isRestoring ? 'animate-bounce' : ''}`} />
@@ -523,10 +523,10 @@ export default function LicenseActivationModal({ isOpen, onClose, onSuccess, isT
                   <button
                     type="submit"
                     disabled={!termsAccepted}
-                    className={`w-full sm:w-auto px-6 py-2.5 font-extrabold text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-2 ${
+                    className={`w-full sm:w-auto px-6 py-2.5 font-black text-xs rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 ${
                       termsAccepted
-                        ? 'bg-emerald-600 hover:bg-emerald-500 text-white cursor-pointer active:scale-95'
-                        : 'bg-slate-800 text-slate-500 cursor-not-allowed'
+                        ? 'bg-emerald-600 hover:bg-emerald-500 text-white cursor-pointer active:scale-95 shadow-emerald-950/50'
+                        : 'bg-slate-800 text-slate-500 border border-slate-700 cursor-not-allowed'
                     }`}
                     title={!termsAccepted ? 'Debe aceptar el marco legal para activar' : 'Activar licencia'}
                   >
