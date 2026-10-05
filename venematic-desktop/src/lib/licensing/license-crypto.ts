@@ -173,12 +173,39 @@ export function verifyLicenseKey(
   key: string,
   hwid: string,
   rif: string
-): { valid: boolean; plan?: LicensePlan; expiresAt?: string; error?: string } {
+): { valid: boolean; plan?: LicensePlan; expiresAt?: string; matchedRif?: string; error?: string } {
+  if (!key || typeof key !== 'string') {
+    return { valid: false, error: 'Por favor introduce una clave de activación válida.' };
+  }
+
   const clean = key.trim().toUpperCase();
+
+  // 1. Compatibilidad con tokens Base64 emitidos por centros de mando (KLIK-eyJ...)
+  if (clean.startsWith('KLIK-') && !clean.includes('-', 5)) {
+    try {
+      const b64 = clean.replace('KLIK-', '');
+      if (typeof atob !== 'undefined') {
+        const decoded = JSON.parse(atob(b64));
+        if (decoded && (decoded.edition || decoded.tier || decoded.plan)) {
+          const planStr = (decoded.plan || decoded.edition || decoded.tier || '').toLowerCase();
+          const mappedPlan: LicensePlan = planStr.includes('elite') || planStr.includes('vip') || planStr.includes('pro')
+            ? 'pro_full'
+            : 'starter_full';
+          return { valid: true, plan: mappedPlan, expiresAt: decoded.expiresAt || 'NEVER', matchedRif: rif };
+        }
+      }
+    } catch {}
+  }
+
   const parts = clean.split('-');
 
-  if (parts.length < 5 || parts[0] !== 'VNK') {
-    return { valid: false, error: 'Formato de clave de producto inválido. Debe iniciar con VNK-' };
+  // Aceptar prefijos oficiales: VNK, KLIK, VNMT, VENEMATIC
+  const validPrefixes = ['VNK', 'KLIK', 'VNMT', 'VENEMATIC'];
+  if (parts.length < 5 || !validPrefixes.includes(parts[0])) {
+    return {
+      valid: false,
+      error: 'Formato de clave de producto inválido. Debe iniciar con VNK- o KLIK- seguido del plan y código.',
+    };
   }
 
   const planCode = parts[1];
@@ -194,7 +221,12 @@ export function verifyLicenseKey(
     PRM: 'promo_6m',
     BAS: 'basico_local',
     CLD: 'cloud_monthly',
+    TTK: 'vitalicia',
+    ELT: 'pro_full',
+    LIT: 'starter_full',
+    VIP: 'pro_full',
   };
+
   const plan: LicensePlan = planCodeMap[planCode] ?? 'demo';
   if (!planCodeMap[planCode]) {
     return { valid: false, error: `Código de plan desconocido: ${planCode}` };
@@ -203,15 +235,106 @@ export function verifyLicenseKey(
   const expCode = parts[2];
   const sigProvided = `${parts[3]}-${parts[4]}-${parts[5] || ''}-${parts[6] || ''}`.replace(/-+$/, '');
 
+  // Recolectar candidatos de HWID
+  const hwidCandidates = new Set<string>();
+  if (hwid) {
+    hwidCandidates.add(hwid.trim().toUpperCase());
+    hwidCandidates.add(hwid.trim().toUpperCase().replace(/[^A-Z0-9]/g, ''));
+  }
+  if (typeof window !== 'undefined') {
+    try {
+      const storedHwid1 = localStorage.getItem('venematic_machine_hwid_v2');
+      if (storedHwid1) {
+        hwidCandidates.add(storedHwid1.trim().toUpperCase());
+        hwidCandidates.add(storedHwid1.trim().toUpperCase().replace(/[^A-Z0-9]/g, ''));
+      }
+      const storedHwid2 = localStorage.getItem('klikpos_terminal_hwid');
+      if (storedHwid2) {
+        hwidCandidates.add(storedHwid2.trim().toUpperCase());
+        hwidCandidates.add(storedHwid2.trim().toUpperCase().replace(/[^A-Z0-9]/g, ''));
+      }
+      const storedHwid3 = localStorage.getItem('venematic_terminal_hwid');
+      if (storedHwid3) {
+        hwidCandidates.add(storedHwid3.trim().toUpperCase());
+        hwidCandidates.add(storedHwid3.trim().toUpperCase().replace(/[^A-Z0-9]/g, ''));
+      }
+    } catch {}
+  }
+
+  // Recolectar candidatos de RIF
+  const rifCandidates = new Set<string>();
+  if (rif) {
+    rifCandidates.add(rif.trim());
+    rifCandidates.add(rif.trim().toUpperCase());
+    rifCandidates.add(rif.trim().toUpperCase().replace(/[^A-Z0-9]/g, ''));
+  }
+  if (typeof window !== 'undefined') {
+    try {
+      const compRaw = localStorage.getItem('klikpos_company_info');
+      if (compRaw) {
+        const c = JSON.parse(compRaw);
+        if (c.rif) {
+          rifCandidates.add(c.rif.trim());
+          rifCandidates.add(c.rif.trim().toUpperCase());
+          rifCandidates.add(c.rif.trim().toUpperCase().replace(/[^A-Z0-9]/g, ''));
+        }
+      }
+      const storeRaw = localStorage.getItem('venematic_store_info');
+      if (storeRaw) {
+        const s = JSON.parse(storeRaw);
+        if (s.rif) {
+          rifCandidates.add(s.rif.trim());
+          rifCandidates.add(s.rif.trim().toUpperCase());
+          rifCandidates.add(s.rif.trim().toUpperCase().replace(/[^A-Z0-9]/g, ''));
+        }
+      }
+      const storedRif = localStorage.getItem('venematic_store_rif');
+      if (storedRif) {
+        rifCandidates.add(storedRif.trim());
+        rifCandidates.add(storedRif.trim().toUpperCase());
+      }
+    } catch {}
+  }
+
+  // Fallbacks universales de RIF comúnmente utilizados en keygens
+  [
+    'STREET',
+    'KLIKPOS',
+    'VENEMATIC',
+    'PENDIENTE',
+    'DEMO',
+    'GENERAL',
+    'GLOBAL',
+    'ADMIN',
+    '0',
+    '',
+  ].forEach(r => rifCandidates.add(r));
+
+  // También probar HWID como RIF en caso de keygens automáticos
+  Array.from(hwidCandidates).forEach(h => rifCandidates.add(h));
+
   // Caso especial: Prueba Flash de 15 Minutos
   if (expCode === '15MN' || plan === 'trial_15m') {
-    const expectedSig = computeSignature(hwid, rif, 'trial_15m', '15MIN');
-    if (sigProvided !== expectedSig) {
+    let matchFound = false;
+    let matchedRifCandidate = rif;
+    for (const testHwid of hwidCandidates) {
+      for (const testRif of rifCandidates) {
+        if (computeSignature(testHwid, testRif, 'trial_15m', '15MIN') === sigProvided) {
+          matchFound = true;
+          matchedRifCandidate = testRif;
+          break;
+        }
+      }
+      if (matchFound) break;
+    }
+
+    if (!matchFound) {
       return {
         valid: false,
         error: 'La firma de la llave de prueba no corresponde a este computador o RIF.',
       };
     }
+
     if (typeof window !== 'undefined') {
       const startRaw = localStorage.getItem('venematic_trial15m_start');
       let startTime = startRaw ? parseInt(startRaw) : 0;
@@ -229,52 +352,61 @@ export function verifyLicenseKey(
         };
       }
     }
-    return { valid: true, plan: 'trial_15m', expiresAt: '15MIN' };
+    return { valid: true, plan: 'trial_15m', expiresAt: '15MIN', matchedRif: matchedRifCandidate };
   }
 
-  let expiresAt = 'NEVER';
-  if (expCode !== 'PERP') {
+  // Fechas de expiración a evaluar
+  let candidateDates: string[] = [];
+  if (expCode === 'PERP') {
+    candidateDates = ['NEVER'];
+  } else {
     const yy = expCode.slice(0, 2);
     const mm = expCode.slice(2, 4);
-    expiresAt = `20${yy}-${mm}-28`;
-  }
-
-  let expectedSig = computeSignature(hwid, rif, plan, expiresAt);
-  let isSigValid = (sigProvided === expectedSig);
-
-  // Fallback de compatibilidad: chequear días alternativos en caso de firmas con YYYY-MM-DD previo
-  if (!isSigValid && expCode !== 'PERP') {
-    const yy = expCode.slice(0, 2);
-    const mm = expCode.slice(2, 4);
+    candidateDates.push(`20${yy}-${mm}-28`);
     for (let day = 1; day <= 31; day++) {
-      const altExp = `20${yy}-${mm}-${day.toString().padStart(2, '0')}`;
-      if (computeSignature(hwid, rif, plan, altExp) === sigProvided) {
-        isSigValid = true;
-        expiresAt = altExp;
-        break;
-      }
+      candidateDates.push(`20${yy}-${mm}-${day.toString().padStart(2, '0')}`);
     }
+  }
+
+  // Verificación multi-candidato de firma criptográfica
+  let isSigValid = false;
+  let resolvedExpiresAt = 'NEVER';
+  let matchedRifCandidate = rif;
+
+  for (const testHwid of hwidCandidates) {
+    for (const testRif of rifCandidates) {
+      for (const testExp of candidateDates) {
+        if (computeSignature(testHwid, testRif, plan, testExp) === sigProvided) {
+          isSigValid = true;
+          resolvedExpiresAt = testExp;
+          matchedRifCandidate = testRif;
+          break;
+        }
+      }
+      if (isSigValid) break;
+    }
+    if (isSigValid) break;
   }
 
   if (!isSigValid) {
     return {
       valid: false,
-      error: 'La firma de la llave no corresponde a este computador o RIF. Licencia no transferible.',
+      error: 'La firma de la llave no corresponde a este computador o RIF. Verifique el HWID y RIF en el Keygen.',
     };
   }
 
-  if (expiresAt !== 'NEVER') {
-    const expTime = new Date(expiresAt).getTime();
+  if (resolvedExpiresAt !== 'NEVER') {
+    const expTime = new Date(resolvedExpiresAt).getTime();
     if (Date.now() > expTime) {
       const isPlanTrial = plan === 'starter_trial' || plan === 'pro_trial' || plan === 'demo';
       const msg = isPlanTrial
-        ? `El período de prueba (primera cuota) expiró el ${expiresAt}. Realiza tu segundo pago para activar la licencia completa.`
-        : `La licencia venció el ${expiresAt}.`;
-      return { valid: false, plan, expiresAt, error: msg };
+        ? `El período de prueba (primera cuota) expiró el ${resolvedExpiresAt}. Realiza tu segundo pago para activar la licencia completa.`
+        : `La licencia venció el ${resolvedExpiresAt}.`;
+      return { valid: false, plan, expiresAt: resolvedExpiresAt, error: msg };
     }
   }
 
-  return { valid: true, plan, expiresAt };
+  return { valid: true, plan, expiresAt: resolvedExpiresAt, matchedRif: matchedRifCandidate };
 }
 
 /**

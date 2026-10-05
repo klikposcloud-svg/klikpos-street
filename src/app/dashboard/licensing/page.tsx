@@ -21,28 +21,56 @@ import {
   EDITION_DEFINITIONS,
   getActiveEdition,
   applyLicenseUpdate,
+  setActiveEdition,
   LicensePayload
 } from '@/lib/licensing/feature-flags';
+import { getMachineHWID } from '@/lib/licensing/hwid';
+import {
+  verifyLicenseKey,
+  saveActivatedLicense,
+  getStoredLicenseStatus,
+  ActivatedLicenseInfo
+} from '@/lib/licensing/license-crypto';
 import { playSuccessChime, playBeep } from '@/lib/utils/sound';
 
 export default function LicensingInformationPage() {
   const [activeEdition, setActiveEditionState] = useState<KlikEdition>('KLIKPOS_LITE');
-  const [terminalHwid, setTerminalHwid] = useState('HWID-DESKTOP-POS');
+  const [terminalHwid, setTerminalHwid] = useState('CARGANDO...');
+  const [clientRif, setClientRif] = useState('J-00000000-0');
   const [inputActivationKey, setInputActivationKey] = useState('');
   const [activationFeedback, setActivationFeedback] = useState<{ success: boolean; msg: string } | null>(null);
   const [copiedHwid, setCopiedHwid] = useState(false);
+  const [copiedRif, setCopiedRif] = useState(false);
+  const [licenseStatus, setLicenseStatus] = useState<ActivatedLicenseInfo | null>(null);
 
   useEffect(() => {
     const current = getActiveEdition();
     setActiveEditionState(current);
 
-    // Obtener o generar HWID del dispositivo
-    let hwid = localStorage.getItem('klikpos_terminal_hwid');
-    if (!hwid) {
-      hwid = 'KLIK-PC-' + Math.random().toString(36).substring(2, 8).toUpperCase();
-      localStorage.setItem('klikpos_terminal_hwid', hwid);
-    }
+    // Obtener HWID real canónico de la máquina física
+    const hwid = getMachineHWID();
     setTerminalHwid(hwid);
+
+    // Obtener RIF del comercio si está configurado
+    let savedRif = 'J-00000000-0';
+    try {
+      const compRaw = localStorage.getItem('klikpos_company_info');
+      if (compRaw) {
+        const c = JSON.parse(compRaw);
+        if (c.rif) savedRif = c.rif;
+      } else {
+        const storeRaw = localStorage.getItem('venematic_store_info');
+        if (storeRaw) {
+          const s = JSON.parse(storeRaw);
+          if (s.rif) savedRif = s.rif;
+        }
+      }
+    } catch {}
+    setClientRif(savedRif);
+
+    // Obtener estado de licencia almacenado
+    const status = getStoredLicenseStatus(hwid);
+    setLicenseStatus(status);
   }, []);
 
   const handleCopyHwid = () => {
@@ -52,37 +80,82 @@ export default function LicensingInformationPage() {
     setTimeout(() => setCopiedHwid(false), 2500);
   };
 
+  const handleCopyRif = () => {
+    navigator.clipboard.writeText(clientRif);
+    setCopiedRif(true);
+    playSuccessChime();
+    setTimeout(() => setCopiedRif(false), 2500);
+  };
+
   const handleApplyActivationKey = (e: React.FormEvent) => {
     e.preventDefault();
     setActivationFeedback(null);
 
     const cleanKey = inputActivationKey.trim();
-    if (!cleanKey.startsWith('KLIK-')) {
-      setActivationFeedback({ success: false, msg: 'Formato inválido. La clave debe comenzar con "KLIK-".' });
+    if (!cleanKey) {
+      setActivationFeedback({ success: false, msg: 'Por favor introduce la clave de activación generada por el Keygen.' });
       playBeep(400, 0.2, 'sawtooth');
       return;
     }
 
-    try {
-      const b64 = cleanKey.replace('KLIK-', '');
-      const decoded = JSON.parse(atob(b64)) as LicensePayload;
-      if (decoded && (decoded.edition || decoded.tier)) {
-        applyLicenseUpdate(decoded);
-        const newEdition = getActiveEdition();
-        setActiveEditionState(newEdition);
-        playSuccessChime();
-        setActivationFeedback({
-          success: true,
-          msg: `¡Licencia activada con éxito! Su terminal ha sido actualizado a ${EDITION_DEFINITIONS[newEdition]?.name || newEdition}.`
-        });
-        setInputActivationKey('');
-      } else {
-        throw new Error('Payload inválido');
-      }
-    } catch {
-      playBeep(400, 0.2, 'sawtooth');
-      setActivationFeedback({ success: false, msg: 'Clave de licencia no válida o corrupta. Verifique con su asesor comercial.' });
+    // 1. Verificación Criptográfica Canónica con Fallback Universal
+    const verification = verifyLicenseKey(cleanKey, terminalHwid, clientRif);
+
+    if (verification.valid) {
+      const matchedRif = verification.matchedRif || clientRif || 'STREET';
+      const plan = verification.plan || 'pro_full';
+      const expiresAt = verification.expiresAt || 'NEVER';
+
+      // 2. Guardar en almacenamiento seguro del motor criptográfico
+      saveActivatedLicense(
+        {
+          hwid: terminalHwid,
+          rif: matchedRif,
+          plan,
+          expiresAt,
+          issuedAt: new Date().toISOString(),
+          signature: cleanKey.split('-').slice(3).join('-') || 'VERIFIED',
+        },
+        cleanKey
+      );
+
+      // 3. Elevar edición en Feature Flags (Lite -> Pro / Elite)
+      const isElite = plan === 'pro_full' || plan === 'vitalicia';
+      const newEdition: KlikEdition = isElite ? 'KLIKPOS_ELITE' : 'KLIKPOS_PRO';
+      setActiveEdition(newEdition);
+      setActiveEditionState(newEdition);
+
+      // Guardar también payload de compatibilidad enterprise
+      try {
+        const enterpriseLic: LicensePayload = {
+          hwid: terminalHwid,
+          tier: isElite ? 'ENTERPRISE_CLOUD' : 'RETAIL_PRO',
+          edition: newEdition,
+          expiresAt,
+          issuedAt: new Date().toISOString(),
+          companyName: 'KlikPOS Comercio Oficial',
+          signature: cleanKey,
+        };
+        localStorage.setItem('klikpos_enterprise_license_payload', JSON.stringify(enterpriseLic));
+      } catch {}
+
+      playSuccessChime();
+      setActivationFeedback({
+        success: true,
+        msg: `¡Licencia activada con éxito! Su terminal ha quedado habilitado de por vida con edición ${EDITION_DEFINITIONS[newEdition]?.name || newEdition}.`
+      });
+      setLicenseStatus(getStoredLicenseStatus(terminalHwid));
+      setInputActivationKey('');
+      window.dispatchEvent(new CustomEvent('klikpos:license-activated'));
+      return;
     }
+
+    // Si falló la verificación criptográfica, reportar error específico
+    playBeep(400, 0.2, 'sawtooth');
+    setActivationFeedback({
+      success: false,
+      msg: verification.error || 'La clave no corresponde al HWID o RIF de este equipo. Verifique los datos en el Keygen.'
+    });
   };
 
   const getWhatsAppUpgradeUrl = () => {
@@ -197,8 +270,8 @@ export default function LicensingInformationPage() {
         {/* BARRA DESTACADA DE ACTIVACIÓN DE LICENCIA & SOPORTE WHATSAPP (SIEMPRE VISIBLE ARRIBA) */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
           {/* Módulo A: Pegar y Activar Clave (8 Columnas) */}
-          <div className="lg:col-span-8 bg-white dark:bg-slate-800 rounded-3xl p-5 border-2 border-indigo-100 dark:border-slate-700 shadow-xs flex flex-col justify-between">
-            <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+          <div className="lg:col-span-8 bg-white dark:bg-slate-800 rounded-3xl p-5 border-2 border-indigo-100 dark:border-slate-700 shadow-xs flex flex-col justify-between space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-2">
                 <span className="p-1.5 rounded-lg bg-indigo-50 dark:bg-slate-700 text-indigo-600 dark:text-indigo-400">
                   <KeyRound className="w-4 h-4" />
@@ -208,37 +281,88 @@ export default function LicensingInformationPage() {
                 </span>
               </div>
 
-              {/* Botón para Copiar HWID */}
-              <button
-                type="button"
-                onClick={handleCopyHwid}
-                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-700 dark:text-slate-200 text-[11px] font-mono font-bold transition-all cursor-pointer"
-                title="Copiar ID de Terminal para solicitar licencia"
-              >
-                <Copy className="w-3.5 h-3.5" />
-                <span>{copiedHwid ? '¡HWID Copiado!' : `ID: ${terminalHwid}`}</span>
-              </button>
+              <div className="flex items-center gap-2">
+                {/* Botón para Copiar HWID */}
+                <button
+                  type="button"
+                  onClick={handleCopyHwid}
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-700 dark:text-slate-200 text-[11px] font-mono font-bold transition-all cursor-pointer"
+                  title="Copiar ID de Terminal para Keygen"
+                >
+                  <Copy className="w-3.5 h-3.5 text-indigo-500" />
+                  <span>{copiedHwid ? '¡HWID Copiado!' : `HWID: ${terminalHwid}`}</span>
+                </button>
+
+                {/* Botón para Copiar RIF */}
+                <button
+                  type="button"
+                  onClick={handleCopyRif}
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-700 dark:text-slate-200 text-[11px] font-mono font-bold transition-all cursor-pointer"
+                  title="Copiar RIF del Comercio"
+                >
+                  <Copy className="w-3.5 h-3.5 text-emerald-500" />
+                  <span>{copiedRif ? '¡RIF Copiado!' : `RIF: ${clientRif}`}</span>
+                </button>
+              </div>
             </div>
 
-            <form onSubmit={handleApplyActivationKey} className="flex flex-col sm:flex-row gap-2.5">
-              <input
-                type="text"
-                placeholder="Pega aquí tu clave de licencia: KLIK-eyJhbGciOi..."
-                value={inputActivationKey}
-                onChange={(e) => setInputActivationKey(e.target.value)}
-                className="flex-1 h-11 px-3.5 border border-slate-300 dark:border-slate-600 rounded-xl text-xs font-mono text-slate-900 dark:text-white bg-slate-50 dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 select-all"
-              />
-              <button
-                type="submit"
-                className="h-11 px-5 bg-slate-900 hover:bg-slate-800 dark:bg-indigo-600 dark:hover:bg-indigo-700 text-white font-black rounded-xl text-xs transition-all shadow-sm flex items-center justify-center gap-2 shrink-0 cursor-pointer active:scale-95"
-              >
-                <Zap className="w-4 h-4 text-amber-400" />
-                <span>Activar Licencia</span>
-              </button>
+            {/* Banner de Estado Actual de Licencia */}
+            {licenseStatus && licenseStatus.status === 'active' && (
+              <div className="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-between gap-2 text-xs">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                  <span className="font-bold text-emerald-800 dark:text-emerald-300">
+                    {licenseStatus.message || 'Licencia Oficial Activa'}
+                  </span>
+                </div>
+                {licenseStatus.payload?.plan && (
+                  <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-mono font-bold text-[10px] uppercase">
+                    Plan: {licenseStatus.payload.plan}
+                  </span>
+                )}
+              </div>
+            )}
+
+            <form onSubmit={handleApplyActivationKey} className="space-y-2.5">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                <div className="sm:col-span-1">
+                  <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1">
+                    RIF / Cédula del Comercio:
+                  </label>
+                  <input
+                    type="text"
+                    value={clientRif}
+                    onChange={(e) => setClientRif(e.target.value.toUpperCase())}
+                    placeholder="Ej: J-50123456-7"
+                    className="w-full h-11 px-3 border border-slate-300 dark:border-slate-600 rounded-xl text-xs font-mono uppercase text-slate-900 dark:text-white bg-slate-50 dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1">
+                    Clave de Producto (Generada por Keygen):
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="Ej: VNK-PRO-PERP-XXXX-XXXX-XXXX-XXXX"
+                      value={inputActivationKey}
+                      onChange={(e) => setInputActivationKey(e.target.value)}
+                      className="flex-1 h-11 px-3.5 border border-slate-300 dark:border-slate-600 rounded-xl text-xs font-mono text-slate-900 dark:text-white bg-slate-50 dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 select-all"
+                    />
+                    <button
+                      type="submit"
+                      className="h-11 px-5 bg-slate-900 hover:bg-slate-800 dark:bg-indigo-600 dark:hover:bg-indigo-700 text-white font-black rounded-xl text-xs transition-all shadow-sm flex items-center justify-center gap-2 shrink-0 cursor-pointer active:scale-95"
+                    >
+                      <Zap className="w-4 h-4 text-amber-400" />
+                      <span>Activar</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
             </form>
 
             {activationFeedback && (
-              <div className={`mt-3 p-2.5 rounded-xl text-xs font-bold flex items-center gap-2 ${
+              <div className={`p-2.5 rounded-xl text-xs font-bold flex items-center gap-2 ${
                 activationFeedback.success
                   ? 'bg-emerald-50 text-emerald-800 border border-emerald-300'
                   : 'bg-rose-50 text-rose-800 border border-rose-300'

@@ -61,6 +61,7 @@ export default function StreetAmbassadorLicenseModal({
   const [ambassadorCode, setAmbassadorCode] = useState('');
   const [paymentOption, setPaymentOption] = useState<'cash' | 'credit' | 'vip'>('cash');
   const [licenseKeyInput, setLicenseKeyInput] = useState('');
+  const [rifInput, setRifInput] = useState(rif !== 'Pendiente' ? rif : 'STREET');
   const [activationError, setActivationError] = useState('');
   const [activationSuccess, setActivationSuccess] = useState(false);
   const [isLicensed, setIsLicensed] = useState(false);
@@ -82,6 +83,15 @@ export default function StreetAmbassadorLicenseModal({
       const status = getStoredLicenseStatus(id);
       setIsLicensed(status.status === 'active');
 
+      try {
+        const compRaw = localStorage.getItem('klikpos_company_info');
+        if (compRaw) {
+          const comp = JSON.parse(compRaw);
+          if (comp.rif) setRifInput(comp.rif);
+        } else if (rif && rif !== 'Pendiente') {
+          setRifInput(rif);
+        }
+      } catch {}
 
       try {
         const savedCode = localStorage.getItem('klikpos_ambassador_code');
@@ -197,16 +207,18 @@ export default function StreetAmbassadorLicenseModal({
       return;
     }
 
-    const verification = verifyLicenseKey(licenseKeyInput.trim(), hwid, rif || 'STREET');
+    const targetRif = (rifInput || rif || 'STREET').trim().toUpperCase();
+    const verification = verifyLicenseKey(licenseKeyInput.trim(), hwid, targetRif);
     if (verification.valid) {
+      const finalRif = verification.matchedRif || targetRif;
       saveActivatedLicense(
         {
           hwid,
-          rif: rif || 'STREET',
+          rif: finalRif,
           plan: verification.plan || 'vitalicia',
           expiresAt: verification.expiresAt || 'NEVER',
           issuedAt: new Date().toISOString(),
-          signature: 'VERIFIED',
+          signature: licenseKeyInput.trim().split('-').slice(3).join('-') || 'VERIFIED',
         },
         licenseKeyInput.trim()
       );
@@ -214,7 +226,7 @@ export default function StreetAmbassadorLicenseModal({
       // FUNCIÓN ESTRELLA: Registrar terminal y configuración inicial en Firestore
       cloudSyncService.registerUserLicenseAndConfig({
         hwid,
-        rif: rif || 'STREET',
+        rif: finalRif,
         storeName: storeName || 'Negocio Móvil',
         productKey: licenseKeyInput.trim(),
         plan: verification.plan || 'vitalicia',
@@ -223,6 +235,8 @@ export default function StreetAmbassadorLicenseModal({
 
       setActivationSuccess(true);
       setIsLicensed(true);
+      window.dispatchEvent(new CustomEvent('klikpos:license-activated'));
+      window.dispatchEvent(new CustomEvent('venematic:license-activated'));
       if (onLicenseActivated) onLicenseActivated();
     } else {
       setActivationError(verification.error || 'Clave de activación inválida para este equipo.');
@@ -673,20 +687,39 @@ export default function StreetAmbassadorLicenseModal({
               )}
             </div>
 
-            <div className="flex items-center gap-2">
-              <input
-                type="text"
-                placeholder="Pega aquí tu clave (Ej: KLIK-XXXX-XXXX-XXXX)"
-                value={licenseKeyInput}
-                onChange={(e) => setLicenseKeyInput(e.target.value)}
-                className="flex-1 px-3 py-2 rounded-xl text-xs font-mono uppercase bg-[#090d16] border border-slate-700 text-white placeholder:text-slate-400 outline-none focus:border-amber-500"
-              />
-              <button
-                type="submit"
-                className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition-all active:scale-95 shrink-0 cursor-pointer"
-              >
-                Activar
-              </button>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <div className="sm:col-span-1">
+                <label className="text-[10px] font-bold text-slate-400 block mb-1">
+                  RIF del Negocio:
+                </label>
+                <input
+                  type="text"
+                  placeholder="Ej: J-50123456-7"
+                  value={rifInput}
+                  onChange={(e) => setRifInput(e.target.value.toUpperCase())}
+                  className="w-full px-3 py-2 rounded-xl text-xs font-mono uppercase bg-[#090d16] border border-slate-700 text-white placeholder:text-slate-500 outline-none focus:border-amber-500"
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <label className="text-[10px] font-bold text-slate-400 block mb-1">
+                  Clave de Activación:
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="Ej: VNK-PRO-PERP-XXXX... o KLIK-..."
+                    value={licenseKeyInput}
+                    onChange={(e) => setLicenseKeyInput(e.target.value)}
+                    className="flex-1 px-3 py-2 rounded-xl text-xs font-mono uppercase bg-[#090d16] border border-slate-700 text-white placeholder:text-slate-500 outline-none focus:border-amber-500"
+                  />
+                  <button
+                    type="submit"
+                    className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition-all active:scale-95 shrink-0 cursor-pointer"
+                  >
+                    Activar
+                  </button>
+                </div>
+              </div>
             </div>
 
             {activationError && (

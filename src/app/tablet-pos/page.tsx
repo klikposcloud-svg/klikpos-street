@@ -4759,7 +4759,8 @@ export default function TabletMobilePosPage() {
         }}
         isLight={isLight}
         primaryColor={currentPal.primary}
-        storeName="KlikPOS Street Negocio"
+        storeName={companyInfo?.name || "KlikPOS Street Negocio"}
+        rif={companyInfo?.rif || "STREET"}
         onLicenseActivated={() => {
           userDismissedTrialModalRef.current = false;
           setShowStreetAmbassadorModal(false);

@@ -71,15 +71,26 @@ export default function LicenseActivationModal({ isOpen, onClose, onSuccess, isT
 
       // Cargar RIF si está guardado en los ajustes
       try {
+        const compRaw = localStorage.getItem('klikpos_company_info');
+        if (compRaw) {
+          const comp = JSON.parse(compRaw);
+          if (comp.rif) {
+            setRif(comp.rif);
+            setKeygenTargetRif(comp.rif);
+          }
+          if (comp.name) {
+            setStoreName(comp.name);
+          }
+        }
         const rawStore = localStorage.getItem('venematic_store_info');
         if (rawStore) {
           const store = JSON.parse(rawStore);
           if (store.rif) {
-            setRif(store.rif);
-            setKeygenTargetRif(store.rif);
+            setRif(prev => prev || store.rif);
+            setKeygenTargetRif(prev => prev || store.rif);
           }
           if (store.name || store.storeName) {
-            setStoreName(store.name || store.storeName);
+            setStoreName(prev => prev || store.name || store.storeName);
           }
         }
       } catch {}
@@ -148,6 +159,8 @@ export default function LicenseActivationModal({ isOpen, onClose, onSuccess, isT
       return;
     }
 
+    const matchedRif = verification.matchedRif || rif.trim().toUpperCase();
+
     // Registrar aceptación legal vinculante
     try {
       localStorage.setItem('venematic_terms_accepted_at', new Date().toISOString());
@@ -158,7 +171,7 @@ export default function LicenseActivationModal({ isOpen, onClose, onSuccess, isT
     saveActivatedLicense(
       {
         hwid,
-        rif: rif.trim().toUpperCase(),
+        rif: matchedRif,
         plan: verification.plan || 'vitalicia',
         expiresAt: verification.expiresAt || 'NEVER',
         issuedAt: new Date().toISOString(),
@@ -170,7 +183,7 @@ export default function LicenseActivationModal({ isOpen, onClose, onSuccess, isT
     // FUNCIÓN ESTRELLA: Registrar automáticamente en Firestore (Colección users / stores)
     cloudSyncService.registerUserLicenseAndConfig({
       hwid,
-      rif: rif.trim().toUpperCase(),
+      rif: matchedRif,
       storeName: storeName.trim(),
       productKey: productKey.trim().toUpperCase(),
       plan: verification.plan || 'vitalicia',
@@ -183,6 +196,8 @@ export default function LicenseActivationModal({ isOpen, onClose, onSuccess, isT
 
     setSuccessMsg('¡Activación exitosa! Terminal autenticada permanentemente y respaldada en la nube.');
     setStatusInfo(getStoredLicenseStatus(hwid));
+    window.dispatchEvent(new CustomEvent('klikpos:license-activated'));
+    window.dispatchEvent(new CustomEvent('venematic:license-activated'));
     if (onSuccess) onSuccess();
   };
 
