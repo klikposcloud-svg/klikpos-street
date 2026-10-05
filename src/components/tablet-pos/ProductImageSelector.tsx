@@ -17,76 +17,46 @@ interface ProductImageSelectorProps {
  * Utiliza createImageBitmap y URL.createObjectURL para mantener el uso de RAM
  * inferior a 2MB y evitar que el sistema operativo mate el proceso del navegador.
  */
-const compressImageSafely = async (file: File, maxWidth = 480, quality = 0.80): Promise<string> => {
-  // 1. Vía nativa ultra-rápida y de bajo consumo de memoria: createImageBitmap
-  if (typeof window !== 'undefined' && 'createImageBitmap' in window) {
-    try {
-      const bitmap = await createImageBitmap(file);
-      let width = bitmap.width;
-      let height = bitmap.height;
-      if (width > maxWidth) {
-        height = Math.round((height * maxWidth) / width);
-        width = maxWidth;
-      }
-      const canvas = document.createElement('canvas');
-      canvas.width = width;
-      canvas.height = height;
-      const ctx = canvas.getContext('2d', { alpha: false });
-      if (ctx) {
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(0, 0, width, height);
-        ctx.drawImage(bitmap, 0, 0, width, height);
-        bitmap.close();
-        return canvas.toDataURL('image/jpeg', quality);
-      }
-      bitmap.close();
-    } catch (e) {
-      console.warn('[ImageSelector] createImageBitmap fallback:', e);
-    }
-  }
-
-  // 2. Vía fallback con URL.createObjectURL (evita duplicar MB en JS Heap)
+const compressImageSafely = async (file: File, maxWidth = 400, quality = 0.75): Promise<string> => {
   return new Promise((resolve, reject) => {
-    let objectUrl = '';
-    try {
-      objectUrl = URL.createObjectURL(file);
-    } catch (e) {
-      return reject(e);
-    }
-
-    const img = new Image();
-    img.onload = () => {
-      try {
-        const canvas = document.createElement('canvas');
-        let width = img.width;
-        let height = img.height;
-        if (width > maxWidth) {
-          height = Math.round((height * maxWidth) / width);
-          width = maxWidth;
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error('No se pudo leer el archivo de la foto'));
+    reader.onload = () => {
+      const img = new Image();
+      img.onerror = () => reject(new Error('Formato de imagen no compatible'));
+      img.onload = () => {
+        try {
+          let width = img.width || 400;
+          let height = img.height || 400;
+          if (width > maxWidth || height > maxWidth) {
+            if (width > height) {
+              height = Math.round((height * maxWidth) / width);
+              width = maxWidth;
+            } else {
+              width = Math.round((width * maxWidth) / height);
+              height = maxWidth;
+            }
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            resolve(reader.result as string);
+            return;
+          }
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, width, height);
+          ctx.drawImage(img, 0, 0, width, height);
+          const dataUrl = canvas.toDataURL('image/jpeg', quality);
+          resolve(dataUrl);
+        } catch (err) {
+          resolve(reader.result as string);
         }
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d', { alpha: false });
-        if (!ctx) {
-          URL.revokeObjectURL(objectUrl);
-          resolve(objectUrl);
-          return;
-        }
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(0, 0, width, height);
-        ctx.drawImage(img, 0, 0, width, height);
-        URL.revokeObjectURL(objectUrl);
-        resolve(canvas.toDataURL('image/jpeg', quality));
-      } catch (err) {
-        URL.revokeObjectURL(objectUrl);
-        reject(err);
-      }
+      };
+      img.src = reader.result as string;
     };
-    img.onerror = (err) => {
-      URL.revokeObjectURL(objectUrl);
-      reject(err);
-    };
-    img.src = objectUrl;
+    reader.readAsDataURL(file);
   });
 };
 

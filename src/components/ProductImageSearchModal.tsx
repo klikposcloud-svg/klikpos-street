@@ -13,7 +13,9 @@ import {
   Loader2,
   RefreshCw,
   ExternalLink,
-  Filter,
+  Flame,
+  Globe,
+  Link as LinkIcon,
 } from 'lucide-react';
 
 interface ImageResult {
@@ -31,6 +33,25 @@ interface ProductImageSearchModalProps {
   onSelectImage: (dataUrl: string) => void;
 }
 
+const LOCAL_STREET_PRESETS = [
+  { name: 'Hamburguesa Especial 200g', path: '/packs/comida-street/hamburguesa.png', cat: 'Hamburguesas' },
+  { name: 'Perro Caliente Con Todo', path: '/packs/comida-street/perro-caliente.png', cat: 'Perros' },
+  { name: 'Pepito Mixto Gratinado 30cm', path: '/packs/comida-street/pepito.png', cat: 'Hamburguesas' },
+  { name: 'Cachapa con Cochino Frito', path: '/packs/comida-street/cachapa-con-cochino.png', cat: 'Combos' },
+  { name: 'Cachapa Doble Queso de Mano', path: '/packs/comida-street/cachapa-con-queso.png', cat: 'Combos' },
+  { name: 'Mega Promo 5 Perros', path: '/packs/comida-street/combo-5-perros.png', cat: 'Combos' },
+  { name: 'Combo 4 Perros + Refresco 1.5L', path: '/packs/comida-street/combo-4-perros-refresco.png', cat: 'Combos' },
+  { name: 'Shawarma Mixto Libanés', path: '/packs/comida-street/shawarma.png', cat: 'Hamburguesas' },
+  { name: 'Combo Shawarma + Papas + Bebida', path: '/packs/comida-street/combo-shawarma.png', cat: 'Combos' },
+  { name: 'Combo Burger Especial Completa', path: '/packs/comida-street/combo-burger-1.png', cat: 'Combos' },
+  { name: 'Combo Cachapa Cochino Frito', path: '/packs/comida-street/combo-cachapa-01.png', cat: 'Combos' },
+  { name: 'Combo Cachapa Doble Queso', path: '/packs/comida-street/combo-cachapa-02.png', cat: 'Combos' },
+  { name: 'Combo Pepito Mixto 30cm + Papas', path: '/packs/comida-street/combo-pepito-01.png', cat: 'Combos' },
+  { name: 'Combo Dúo Shawarma Mixto', path: '/packs/comida-street/combo-shawarma-01.png', cat: 'Combos' },
+  { name: 'Refresco Frío Personal', path: '/packs/comida-street/refresco.png', cat: 'Bebidas' },
+  { name: 'Chicha Criolla con Canela', path: '/packs/comida-street/chicha.png', cat: 'Bebidas' },
+];
+
 export default function ProductImageSearchModal({
   isOpen,
   onClose,
@@ -39,8 +60,9 @@ export default function ProductImageSearchModal({
   onSelectImage,
 }: ProductImageSearchModalProps) {
   const [mounted, setMounted] = useState(false);
+  const [activeTab, setActiveTab] = useState<'presets' | 'web' | 'url'>('presets');
   const [query, setQuery] = useState(initialQuery || '');
-  const [filterModifier, setFilterModifier] = useState<'none' | 'white-bg' | 'packshot' | 'transparent'>('white-bg');
+  const [directUrl, setDirectUrl] = useState('');
   const [results, setResults] = useState<ImageResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [downloadingUrl, setDownloadingUrl] = useState<string | null>(null);
@@ -50,207 +72,179 @@ export default function ProductImageSearchModal({
     setMounted(true);
   }, []);
 
-  // Ejecutar búsqueda inicial al abrir
   useEffect(() => {
     if (isOpen) {
       const q = initialQuery || barcode || '';
       setQuery(q);
-      if (q) {
-        performSearch(q, filterModifier);
+      if (q && q.trim().length > 1) {
+        setActiveTab('web');
+        performSearch(q);
+      } else {
+        setActiveTab('presets');
       }
     } else {
       setResults([]);
       setErrorMsg(null);
       setDownloadingUrl(null);
+      setDirectUrl('');
     }
   }, [isOpen, initialQuery, barcode]);
 
-  const performSearch = async (searchTerm: string, modifier = filterModifier) => {
-    if (!searchTerm.trim()) return;
+  const performSearch = async (searchTerm: string) => {
+    const clean = searchTerm.trim();
+    if (!clean) return;
     setIsLoading(true);
     setErrorMsg(null);
 
-    let finalQuery = searchTerm.trim();
-    if (modifier === 'white-bg') {
-      finalQuery += ' fondo blanco';
-    } else if (modifier === 'packshot') {
-      finalQuery += ' empaque producto';
-    } else if (modifier === 'transparent') {
-      finalQuery += ' png transparente';
-    }
+    const foundResults: ImageResult[] = [];
+    const seen = new Set<string>();
 
-    let foundResults: ImageResult[] = [];
-
-    // Intento 1: API local Next.js (si existe servidor Node.js activo en desktop/web)
-    try {
-      const params = new URLSearchParams({ q: finalQuery });
-      if (barcode) params.append('barcode', barcode);
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 2000);
-      const res = await fetch(`/api/products/search-images?${params.toString()}`, { signal: controller.signal });
-      clearTimeout(timer);
-      if (res.ok) {
-        const data = await res.json();
-        if (Array.isArray(data.results) && data.results.length > 0) {
-          foundResults = data.results;
+    const addResults = (items: ImageResult[]) => {
+      for (const it of items) {
+        if (it && it.url && !seen.has(it.url)) {
+          seen.add(it.url);
+          foundResults.push(it);
         }
       }
-    } catch {
-      // Si falla la API local (común en Android APK / WebView sin backend Node), pasamos al fallback directo
-    }
+    };
 
-    // Intento 2: Fallback directo desde el cliente (Open Food Facts + Wikimedia Commons con CORS libre)
-    if (foundResults.length === 0) {
-      try {
-        const cleanTerm = searchTerm.trim();
-        const searchPromises: Promise<ImageResult[]>[] = [];
-
-        // 1. Open Food Facts (Búsqueda en catálogo comercial global con fotos de empaques)
-        searchPromises.push(
-          (async () => {
-            try {
-              if (barcode && barcode.length >= 8) {
-                const bcRes = await fetch(`https://world.openfoodfacts.org/api/v2/product/${barcode}.json`);
-                if (bcRes.ok) {
-                  const bcData = await bcRes.json();
-                  if (bcData.status === 1 && bcData.product?.image_url) {
-                    return [{
-                      title: bcData.product.product_name || cleanTerm,
-                      url: bcData.product.image_url,
-                      thumbnail: bcData.product.image_front_thumb_url || bcData.product.image_url,
-                      source: 'Catálogo Oficial'
-                    }];
-                  }
-                }
-              }
-              const offRes = await fetch(
-                `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(cleanTerm)}&search_simple=1&action=process&json=1&page_size=25`
-              );
-              if (offRes.ok) {
-                const data = await offRes.json();
-                if (Array.isArray(data.products)) {
-                  return data.products
-                    .filter((p: any) => p.image_front_url || p.image_url || p.image_small_url)
-                    .map((p: any) => ({
-                      title: p.product_name || cleanTerm,
-                      url: p.image_front_url || p.image_url || p.image_small_url,
-                      thumbnail: p.image_front_thumb_url || p.image_small_url || p.image_url,
-                      source: 'Catálogo Oficial'
-                    }));
-                }
-              }
-            } catch {}
-            return [];
-          })()
-        );
-
-        // 2. Wikimedia Commons (Acceso CORS libre a envases, marcas comerciales y comidas con límite ampliado)
-        searchPromises.push(
-          (async () => {
-            try {
-              const wikiRes = await fetch(
-                `https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(cleanTerm)}&gsrlimit=30&gsrnamespace=6&prop=imageinfo&iiprop=url|thumburl&iiurlwidth=400&format=json&origin=*`
-              );
-              if (wikiRes.ok) {
-                const data = await wikiRes.json();
-                const pages = Object.values(data.query?.pages || {});
-                return pages
-                  .map((page: any) => {
-                    const info = page.imageinfo?.[0];
-                    if (!info?.thumburl && !info?.url) return null;
-                    const title = (page.title || '').replace(/^File:/i, '').replace(/\.[^.]+$/, '');
-                    return {
-                      title: title || cleanTerm,
-                      url: info.url || info.thumburl,
-                      thumbnail: info.thumburl || info.url,
-                      source: 'Web'
-                    };
-                  })
-                  .filter(Boolean) as ImageResult[];
-              }
-            } catch {}
-            return [];
-          })()
-        );
-
-        // 3. Wikipedia Artículos & Fotos de Productos
-        searchPromises.push(
-          (async () => {
-            try {
-              const wpRes = await fetch(
-                `https://es.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(cleanTerm)}&gsrlimit=12&prop=pageimages&pithumbsize=400&format=json&origin=*`
-              );
-              if (wpRes.ok) {
-                const wpData = await wpRes.json();
-                const wpPages = Object.values(wpData.query?.pages || {});
-                return wpPages
-                  .map((page: any) => {
-                    if (!page.thumbnail?.source) return null;
-                    return {
-                      title: page.title || cleanTerm,
-                      url: page.thumbnail.source,
-                      thumbnail: page.thumbnail.source,
-                      source: 'Enciclopedia / Marcas'
-                    };
-                  })
-                  .filter(Boolean) as ImageResult[];
-              }
-            } catch {}
-            return [];
-          })()
-        );
-
-        const allResults = await Promise.all(searchPromises);
-        foundResults = allResults.flat();
-      } catch (e) {
-        console.warn('Fallo en búsqueda directa:', e);
+    // 1. Intento API local si existe (Desktop / Dev)
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 1800);
+      const res = await fetch(`/api/products/search-images?q=${encodeURIComponent(clean)}`, {
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data.results)) {
+          addResults(data.results);
+        }
       }
+    } catch {}
+
+    // 2. Wikipedia Español (Artículos gastronómicos con fotos de alta calidad)
+    try {
+      const wpUrl = `https://es.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(clean)}&gsrlimit=12&prop=pageimages&pithumbsize=480&format=json&origin=*`;
+      const res = await fetch(wpUrl);
+      if (res.ok) {
+        const data = await res.json();
+        const pages = Object.values(data.query?.pages || {});
+        const wpItems: ImageResult[] = pages
+          .filter((p: any) => p.thumbnail?.source)
+          .map((p: any) => ({
+            title: p.title || clean,
+            url: p.thumbnail.source,
+            thumbnail: p.thumbnail.source,
+            source: 'Wikipedia'
+          }));
+        addResults(wpItems);
+      }
+    } catch {}
+
+    // 3. Wikimedia Commons (Filtrando estrictamente fotos reales jpg/png/webp, ignorando pdfs)
+    try {
+      const commonsUrl = `https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(clean)}&gsrlimit=25&gsrnamespace=6&prop=imageinfo&iiprop=url|thumburl&iiurlwidth=400&format=json&origin=*`;
+      const res = await fetch(commonsUrl);
+      if (res.ok) {
+        const data = await res.json();
+        const pages = Object.values(data.query?.pages || {});
+        const commItems: ImageResult[] = pages
+          .map((page: any) => {
+            const title = (page.title || '').toLowerCase();
+            const isImage = title.endsWith('.jpg') || title.endsWith('.jpeg') || title.endsWith('.png') || title.endsWith('.webp');
+            const info = page.imageinfo?.[0];
+            if (!isImage || (!info?.thumburl && !info?.url)) return null;
+            return {
+              title: (page.title || clean).replace(/^File:/i, '').replace(/\.[^.]+$/, ''),
+              url: info.thumburl || info.url,
+              thumbnail: info.thumburl || info.url,
+              source: 'Web Wikimedia'
+            };
+          })
+          .filter(Boolean) as ImageResult[];
+        addResults(commItems);
+      }
+    } catch {}
+
+    // 4. Open Food Facts (Para códigos de barra y productos comerciales)
+    try {
+      if (barcode && barcode.length >= 8) {
+        const bcRes = await fetch(`https://world.openfoodfacts.org/api/v2/product/${barcode}.json`);
+        if (bcRes.ok) {
+          const bcData = await bcRes.json();
+          if (bcData.status === 1 && bcData.product?.image_url) {
+            addResults([{
+              title: bcData.product.product_name || clean,
+              url: bcData.product.image_url,
+              thumbnail: bcData.product.image_front_thumb_url || bcData.product.image_url,
+              source: 'Catálogo Oficial'
+            }]);
+          }
+        }
+      }
+      const offUrl = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(clean)}&search_simple=1&action=process&json=1&page_size=12`;
+      const offRes = await fetch(offUrl);
+      if (offRes.ok) {
+        const data = await offRes.json();
+        if (Array.isArray(data.products)) {
+          const offItems = data.products
+            .filter((p: any) => p.image_front_url || p.image_url)
+            .map((p: any) => ({
+              title: p.product_name || clean,
+              url: p.image_front_url || p.image_url,
+              thumbnail: p.image_front_thumb_url || p.image_url,
+              source: 'Catálogo Alimentos'
+            }));
+          addResults(offItems);
+        }
+      }
+    } catch {}
+
+    // 5. Wikipedia Inglés (Fallback si hubo pocos resultados gastronómicos)
+    if (foundResults.length < 4) {
+      try {
+        const enUrl = `https://en.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(clean)}&gsrlimit=10&prop=pageimages&pithumbsize=480&format=json&origin=*`;
+        const res = await fetch(enUrl);
+        if (res.ok) {
+          const data = await res.json();
+          const pages = Object.values(data.query?.pages || {});
+          const enItems: ImageResult[] = pages
+            .filter((p: any) => p.thumbnail?.source)
+            .map((p: any) => ({
+              title: p.title || clean,
+              url: p.thumbnail.source,
+              thumbnail: p.thumbnail.source,
+              source: 'Global Wiki'
+            }));
+          addResults(enItems);
+        }
+      } catch {}
     }
 
     if (foundResults.length > 0) {
-      const seen = new Set<string>();
-      const unique = foundResults.filter(item => {
-        if (!item.url || seen.has(item.url)) return false;
-        seen.add(item.url);
-        return true;
-      });
-      setResults(unique);
+      setResults(foundResults);
     } else {
       setResults([]);
-      setErrorMsg('No se encontraron imágenes para este producto. Prueba con un nombre más genérico o comercial.');
+      setErrorMsg('No se encontraron imágenes en la web para este término. Puedes elegir una de la galería Street Food o ingresar un enlace directo.');
     }
     setIsLoading(false);
   };
 
   const handleSelectAndDownload = async (imageUrl: string) => {
+    // Si ya es una imagen local del paquete, seleccionarla directamente
+    if (imageUrl.startsWith('/packs/comida-street/')) {
+      onSelectImage(imageUrl);
+      onClose();
+      return;
+    }
+
     setDownloadingUrl(imageUrl);
     setErrorMsg(null);
 
-    // 1. Intento local con API de Node.js
+    // Intentar comprimir y convertir a dataURL local para que funcione 100% offline
     try {
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 2000);
-      const res = await fetch('/api/products/download-image', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: imageUrl }),
-        signal: controller.signal
-      });
-      clearTimeout(timer);
-      if (res.ok) {
-        const data = await res.json();
-        if (data.success && data.dataUrl) {
-          onSelectImage(data.dataUrl);
-          onClose();
-          setDownloadingUrl(null);
-          return;
-        }
-      }
-    } catch {}
-
-    // 2. Descarga y compresión directa en el cliente vía proxy CORS seguro
-    try {
-      const proxyUrl = `https://images.weserv.nl/?url=${encodeURIComponent(imageUrl)}&output=jpg&w=480&q=82`;
       const img = new Image();
       img.crossOrigin = 'anonymous';
       img.onload = () => {
@@ -258,7 +252,7 @@ export default function ProductImageSearchModal({
           const canvas = document.createElement('canvas');
           let width = img.width || 360;
           let height = img.height || 360;
-          const maxDim = 480;
+          const maxDim = 400;
           if (width > maxDim || height > maxDim) {
             if (width > height) {
               height = Math.round((height * maxDim) / width);
@@ -275,7 +269,7 @@ export default function ProductImageSearchModal({
             ctx.fillStyle = '#ffffff';
             ctx.fillRect(0, 0, width, height);
             ctx.drawImage(img, 0, 0, width, height);
-            const dataUrl = canvas.toDataURL('image/jpeg', 0.82);
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.80);
             onSelectImage(dataUrl);
             onClose();
           } else {
@@ -290,11 +284,12 @@ export default function ProductImageSearchModal({
         }
       };
       img.onerror = () => {
+        // Si hay bloqueo CORS al canvas, asignar la URL directamente
         onSelectImage(imageUrl);
         onClose();
         setDownloadingUrl(null);
       };
-      img.src = proxyUrl;
+      img.src = imageUrl;
     } catch {
       onSelectImage(imageUrl);
       onClose();
@@ -324,13 +319,13 @@ export default function ProductImageSearchModal({
             </div>
             <div>
               <h3 className="text-base sm:text-lg font-black text-white tracking-tight flex items-center gap-2">
-                Buscar Foto en Google y la Web
+                Selector de Imágenes & Fotos
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 uppercase">
-                  1 Clic
+                  1 Tap
                 </span>
               </h3>
               <p className="text-xs text-slate-400">
-                Selecciona la foto de catálogo deseada para descargarla y guardarla offline en la ficha del producto.
+                Selecciona una foto oficial Street Food en HD o busca en la web para guardarla en el producto.
               </p>
             </div>
           </div>
@@ -347,255 +342,276 @@ export default function ProductImageSearchModal({
           </button>
         </div>
 
-        {/* BARRA DE BÚSQUEDA Y FILTROS INTELIGENTES (SIN TAG FORM PARA PREVENIR RECARGAS DE PÁGINA) */}
-        <div className="p-4 bg-slate-950/90 border-b border-slate-800 space-y-3 shrink-0">
-          <div className="flex gap-2">
-            <div className="relative flex-1">
-              <Search className="w-4 h-4 text-sky-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                placeholder="Escribe el nombre o descripción del producto a buscar..."
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    performSearch(query, filterModifier);
-                  }
-                }}
-                className="dark-input keep-dark w-full pl-10 pr-4 py-2.5 bg-slate-900 border-2 border-slate-700 rounded-xl text-xs sm:text-sm font-semibold text-white placeholder-slate-400 focus:outline-hidden focus:border-sky-400 focus:ring-2 focus:ring-sky-500/40 transition-all shadow-inner"
-                style={{
-                  color: '#ffffff',
-                  WebkitTextFillColor: '#ffffff',
-                  backgroundColor: '#0f172a',
-                  caretColor: '#38bdf8'
-                }}
-              />
-            </div>
-            <button
-              type="button"
-              disabled={isLoading}
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                performSearch(query, filterModifier);
-              }}
-              className="px-5 py-2.5 bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white font-black text-xs rounded-xl shadow-md flex items-center gap-2 active:scale-95 disabled:opacity-50 transition-all cursor-pointer shrink-0"
-              style={{ color: '#ffffff', WebkitTextFillColor: '#ffffff' }}
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin text-white" />
-                  <span style={{ color: '#ffffff', WebkitTextFillColor: '#ffffff' }}>Buscando...</span>
-                </>
-              ) : (
-                <>
-                  <Search className="w-4 h-4 text-white" />
-                  <span style={{ color: '#ffffff', WebkitTextFillColor: '#ffffff' }}>BUSCAR</span>
-                </>
-              )}
-            </button>
-          </div>
+        {/* NAVEGACIÓN POR PESTAÑAS */}
+        <div className="flex border-b border-slate-800 bg-slate-950 shrink-0">
+          <button
+            type="button"
+            onClick={() => setActiveTab('presets')}
+            className={`flex-1 py-2.5 px-3 text-xs font-black flex items-center justify-center gap-2 border-b-2 transition-all cursor-pointer ${
+              activeTab === 'presets'
+                ? 'border-amber-400 text-amber-300 bg-amber-500/10'
+                : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-900'
+            }`}
+          >
+            <Flame className="w-4 h-4 text-amber-400" />
+            <span>Galería Street Food Oficial (16 Fotos HD)</span>
+          </button>
 
-          {/* Filtros de Calidad Visual */}
-          <div className="flex items-center gap-1.5 overflow-x-auto custom-scrollbar text-xs font-bold">
-            <span className="text-[11px] text-slate-400 flex items-center gap-1 mr-1 shrink-0">
-              <Filter className="w-3 h-3 text-sky-400" /> Filtros:
-            </span>
-            <button
-              type="button"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                setFilterModifier('white-bg');
-                performSearch(query, 'white-bg');
-              }}
-              style={{ color: '#ffffff', WebkitTextFillColor: '#ffffff' }}
-              className={`px-3 py-1 rounded-lg border transition-all shrink-0 cursor-pointer ${
-                filterModifier === 'white-bg'
-                  ? 'bg-sky-600 border-sky-400 shadow-xs'
-                  : 'bg-slate-900 border-slate-700 hover:bg-slate-800'
-              }`}
-            >
-              Fondo Blanco
-            </button>
-            <button
-              type="button"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                setFilterModifier('packshot');
-                performSearch(query, 'packshot');
-              }}
-              style={{ color: '#ffffff', WebkitTextFillColor: '#ffffff' }}
-              className={`px-3 py-1 rounded-lg border transition-all shrink-0 cursor-pointer ${
-                filterModifier === 'packshot'
-                  ? 'bg-sky-600 border-sky-400 shadow-xs'
-                  : 'bg-slate-900 border-slate-700 hover:bg-slate-800'
-              }`}
-            >
-              Empaque Comercial
-            </button>
-            <button
-              type="button"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                setFilterModifier('transparent');
-                performSearch(query, 'transparent');
-              }}
-              style={{ color: '#ffffff', WebkitTextFillColor: '#ffffff' }}
-              className={`px-3 py-1 rounded-lg border transition-all shrink-0 cursor-pointer ${
-                filterModifier === 'transparent'
-                  ? 'bg-sky-600 border-sky-400 shadow-xs'
-                  : 'bg-slate-900 border-slate-700 hover:bg-slate-800'
-              }`}
-            >
-              Sin Fondo (PNG)
-            </button>
-            <button
-              type="button"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                setFilterModifier('none');
-                performSearch(query, 'none');
-              }}
-              style={{ color: '#ffffff', WebkitTextFillColor: '#ffffff' }}
-              className={`px-3 py-1 rounded-lg border transition-all shrink-0 cursor-pointer ${
-                filterModifier === 'none'
-                  ? 'bg-sky-600 border-sky-400 shadow-xs'
-                  : 'bg-slate-900 border-slate-700 hover:bg-slate-800'
-              }`}
-            >
-              Todo / General
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={() => {
+              setActiveTab('web');
+              if (query && results.length === 0) performSearch(query);
+            }}
+            className={`flex-1 py-2.5 px-3 text-xs font-black flex items-center justify-center gap-2 border-b-2 transition-all cursor-pointer ${
+              activeTab === 'web'
+                ? 'border-sky-400 text-sky-300 bg-sky-500/10'
+                : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-900'
+            }`}
+          >
+            <Globe className="w-4 h-4 text-sky-400" />
+            <span>Búsqueda Web & Google</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('url')}
+            className={`flex-1 py-2.5 px-3 text-xs font-black flex items-center justify-center gap-2 border-b-2 transition-all cursor-pointer ${
+              activeTab === 'url'
+                ? 'border-emerald-400 text-emerald-300 bg-emerald-500/10'
+                : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-900'
+            }`}
+          >
+            <LinkIcon className="w-4 h-4 text-emerald-400" />
+            <span>Enlace URL Directo</span>
+          </button>
         </div>
 
-        {/* ALERTA DE ERROR SI EXISTE */}
-        {errorMsg && (
-          <div className="mx-4 mt-3 p-3 rounded-xl bg-rose-950/60 border border-rose-700 text-rose-200 text-xs flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
-              <span>{errorMsg}</span>
+        {/* PESTAÑA 1: GALERÍA LOCAL STREET FOOD */}
+        {activeTab === 'presets' && (
+          <div className="flex-1 overflow-y-auto p-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+                <Flame className="w-3.5 h-3.5" />
+                Catálogo Insignia: PNGs Transparentes en Alta Definición
+              </span>
+              <span className="text-[10px] text-slate-400">1 Tap para asignar</span>
             </div>
-            <button 
-              type="button"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                setErrorMsg(null);
-              }} 
-              className="text-rose-400 hover:text-white font-bold p-1"
-            >
-              &times;
-            </button>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+              {LOCAL_STREET_PRESETS.map((p, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => handleSelectAndDownload(p.path)}
+                  className="p-2.5 rounded-xl border border-slate-800 bg-slate-950/70 hover:border-amber-500/50 hover:bg-slate-800/60 transition-all flex flex-col items-center text-center group cursor-pointer active:scale-95 shadow-sm"
+                >
+                  <div className="w-full h-24 rounded-lg bg-slate-900/90 p-1.5 flex items-center justify-center overflow-hidden mb-2 group-hover:scale-105 transition-transform">
+                    <img
+                      src={p.path}
+                      alt={p.name}
+                      className="max-h-full max-w-full object-contain"
+                    />
+                  </div>
+                  <span className="text-[11px] font-bold text-slate-200 line-clamp-1 group-hover:text-amber-300">
+                    {p.name}
+                  </span>
+                  <span className="text-[9px] text-slate-500 font-mono mt-0.5">
+                    {p.cat}
+                  </span>
+                </button>
+              ))}
+            </div>
           </div>
         )}
 
-        {/* CUADRÍCULA DE RESULTADOS DE FOTOS */}
-        <div className="flex-1 min-h-[350px] p-4 overflow-y-auto custom-scrollbar">
-          {isLoading ? (
-            <div className="h-64 flex flex-col items-center justify-center gap-3 text-slate-400">
-              <Loader2 className="w-8 h-8 text-sky-400 animate-spin" />
-              <p className="text-xs font-semibold">Consultando Google y catálogo de productos...</p>
-            </div>
-          ) : results.length > 0 ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-              {results.map((item, idx) => {
-                const isDownloading = downloadingUrl === item.url;
-                return (
-                  <div
-                    key={idx}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      if (!downloadingUrl) handleSelectAndDownload(item.url);
+        {/* PESTAÑA 2: BÚSQUEDA WEB & GOOGLE */}
+        {activeTab === 'web' && (
+          <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+            {/* BARRA DE BÚSQUEDA */}
+            <div className="p-4 bg-slate-950/90 border-b border-slate-800 shrink-0">
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Search className="w-4 h-4 text-sky-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    placeholder="Escribe el nombre del producto (ej: Hamburguesa, Perro Caliente, Shawarma, Cachapa...)"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        performSearch(query);
+                      }
                     }}
-                    className={`group relative bg-slate-950 border border-slate-800 hover:border-sky-500 rounded-xl overflow-hidden cursor-pointer transition-all duration-150 flex flex-col shadow-sm hover:shadow-lg hover:shadow-sky-500/10 ${
-                      isDownloading ? 'ring-2 ring-sky-400 opacity-80 pointer-events-none' : 'hover:-translate-y-0.5'
-                    }`}
-                  >
-                    {/* Contenedor de la foto sobre fondo claro para contraste de empaques */}
-                    <div className="aspect-square w-full bg-white p-2.5 flex items-center justify-center overflow-hidden relative">
-                      <img
-                        src={item.thumbnail || item.url}
-                        alt={item.title}
-                        className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-200"
-                        loading="lazy"
-                        onError={(e) => {
-                          (e.target as HTMLElement).parentElement?.parentElement?.classList.add('hidden');
-                        }}
-                      />
-
-                      {/* Badge de Fuente */}
-                      <span className="absolute top-1.5 left-1.5 text-[8px] font-bold px-1.5 py-0.5 rounded bg-slate-900/80 text-slate-300 backdrop-blur-xs">
-                        {item.source}
-                      </span>
-
-                      {/* Overlay al pasar el cursor */}
-                      <div className="absolute inset-0 bg-sky-950/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1.5 p-2 text-center">
-                        <div className="w-8 h-8 rounded-full bg-sky-500 text-white flex items-center justify-center shadow-lg">
-                          <Check className="w-5 h-5 stroke-[3]" />
-                        </div>
-                        <span className="text-[10px] font-black text-white uppercase tracking-wider">
-                          Elegir esta foto
-                        </span>
-                      </div>
-
-                      {/* Spinner de Descarga en curso */}
-                      {isDownloading && (
-                        <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center gap-2 p-2">
-                          <Loader2 className="w-7 h-7 text-sky-400 animate-spin" />
-                          <span className="text-[10px] font-black text-sky-200 uppercase">
-                            Descargando...
-                          </span>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Título de la imagen */}
-                    <div className="p-2 bg-slate-900 border-t border-slate-800/80">
-                      <p className="text-[11px] font-bold text-slate-300 truncate" title={item.title}>
-                        {item.title}
-                      </p>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="h-64 flex flex-col items-center justify-center gap-3 text-slate-500 text-center p-4">
-              <ImageIcon className="w-12 h-12 stroke-[1.2] text-slate-600" />
-              <div>
-                <p className="text-sm font-bold text-slate-400">Escribe el nombre del producto arriba para buscar fotos</p>
-                <p className="text-xs text-slate-500 mt-1">
-                  Encuentra fotos de catálogo oficiales con fondo blanco listas para el punto de venta.
-                </p>
+                    className="w-full pl-10 pr-4 py-2.5 bg-slate-900 border-2 border-slate-700 rounded-xl text-xs sm:text-sm font-semibold text-white placeholder-slate-400 focus:outline-hidden focus:border-sky-400 focus:ring-2 focus:ring-sky-500/40 transition-all"
+                  />
+                </div>
+                <button
+                  type="button"
+                  disabled={isLoading}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    performSearch(query);
+                  }}
+                  className="px-5 py-2.5 bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white font-black text-xs rounded-xl shadow-md flex items-center gap-2 active:scale-95 disabled:opacity-50 transition-all cursor-pointer shrink-0"
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin text-white" />
+                      <span>Buscando...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Search className="w-4 h-4 text-white" />
+                      <span>BUSCAR</span>
+                    </>
+                  )}
+                </button>
               </div>
             </div>
-          )}
-        </div>
 
-        {/* PIE DE ACCIONES */}
-        <div className="p-3.5 bg-slate-950 border-t border-slate-800 flex items-center justify-between shrink-0 text-xs">
-          <span className="text-slate-400">
-            {results.length > 0 ? (
-              <span>Mostrando <strong className="text-white">{results.length}</strong> fotos encontradas</span>
-            ) : (
-              <span>Buscador optimizado para catálogo comercial</span>
+            {/* RESULTADOS DE BÚSQUEDA */}
+            <div className="flex-1 overflow-y-auto p-4">
+              {isLoading ? (
+                <div className="py-16 flex flex-col items-center justify-center space-y-3">
+                  <Loader2 className="w-10 h-10 text-sky-400 animate-spin" />
+                  <p className="text-sm font-bold text-slate-300">
+                    Buscando fotografías en la web...
+                  </p>
+                  <p className="text-xs text-slate-500">Consultando fuentes oficiales sin restricciones</p>
+                </div>
+              ) : results.length > 0 ? (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                  {results.map((item, idx) => {
+                    const isDownloading = downloadingUrl === item.url;
+                    return (
+                      <div
+                        key={idx}
+                        className="group relative rounded-xl border border-slate-800 bg-slate-950/60 overflow-hidden hover:border-sky-500/50 hover:shadow-lg transition-all flex flex-col justify-between"
+                      >
+                        <div className="relative aspect-square w-full bg-slate-900 overflow-hidden flex items-center justify-center p-1">
+                          <img
+                            src={item.thumbnail || item.url}
+                            alt={item.title}
+                            className="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-200"
+                            loading="lazy"
+                            onError={(e) => {
+                              (e.target as HTMLElement).style.display = 'none';
+                            }}
+                          />
+                          <span className="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded text-[8.5px] font-bold bg-slate-900/80 text-sky-300 border border-sky-400/20">
+                            {item.source}
+                          </span>
+                        </div>
+
+                        <div className="p-2 space-y-1.5">
+                          <p className="text-[11px] font-semibold text-slate-200 line-clamp-1" title={item.title}>
+                            {item.title}
+                          </p>
+
+                          <button
+                            type="button"
+                            disabled={isDownloading}
+                            onClick={() => handleSelectAndDownload(item.url)}
+                            className="w-full py-1.5 px-2 bg-sky-600 hover:bg-sky-500 text-white rounded-lg text-xs font-bold flex items-center justify-center gap-1 active:scale-95 transition-all cursor-pointer"
+                          >
+                            {isDownloading ? (
+                              <>
+                                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                <span>Asignando...</span>
+                              </>
+                            ) : (
+                              <>
+                                <Check className="w-3.5 h-3.5" />
+                                <span>Seleccionar</span>
+                              </>
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : errorMsg ? (
+                <div className="py-12 flex flex-col items-center justify-center text-center space-y-3 max-w-md mx-auto">
+                  <div className="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-400 flex items-center justify-center">
+                    <AlertCircle className="w-6 h-6" />
+                  </div>
+                  <h4 className="text-sm font-bold text-white">Sin resultados web</h4>
+                  <p className="text-xs text-slate-400">{errorMsg}</p>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('presets')}
+                    className="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-black rounded-xl transition-all shadow-md cursor-pointer"
+                  >
+                    Elegir de Galería Street Food
+                  </button>
+                </div>
+              ) : (
+                <div className="py-12 flex flex-col items-center justify-center text-center space-y-2">
+                  <ImageIcon className="w-12 h-12 text-slate-700" />
+                  <p className="text-xs text-slate-400">Ingresa el nombre del producto y pulsa BUSCAR</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* PESTAÑA 3: ENLACE URL DIRECTO */}
+        {activeTab === 'url' && (
+          <div className="flex-1 p-5 space-y-4">
+            <div>
+              <label className="text-xs font-bold text-slate-300 block mb-1">
+                Pega el enlace directo de la imagen (de Google, WhatsApp o Web):
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="url"
+                  placeholder="https://ejemplo.com/foto-producto.jpg"
+                  value={directUrl}
+                  onChange={(e) => setDirectUrl(e.target.value)}
+                  className="flex-1 px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-hidden focus:border-emerald-500"
+                />
+                <button
+                  type="button"
+                  disabled={!directUrl.trim()}
+                  onClick={() => {
+                    if (directUrl.trim()) handleSelectAndDownload(directUrl.trim());
+                  }}
+                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white text-xs font-bold rounded-xl active:scale-95 transition-all cursor-pointer"
+                >
+                  Usar Esta Foto
+                </button>
+              </div>
+            </div>
+
+            {directUrl.trim() && (
+              <div className="p-3 border border-slate-800 rounded-xl bg-slate-950/60 max-w-sm mx-auto text-center space-y-2">
+                <span className="text-[10px] text-slate-400 font-bold uppercase">Vista Previa:</span>
+                <div className="w-36 h-36 mx-auto rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center overflow-hidden">
+                  <img
+                    src={directUrl}
+                    alt="Vista Previa"
+                    className="max-h-full max-w-full object-contain"
+                    onError={(e) => {
+                      (e.target as HTMLElement).style.display = 'none';
+                    }}
+                  />
+                </div>
+              </div>
             )}
-          </span>
+          </div>
+        )}
+
+        {/* PIE DEL MODAL */}
+        <div className="p-3 border-t border-slate-800 bg-slate-950 flex justify-end shrink-0">
           <button
             type="button"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              onClose();
-            }}
-            className="px-4 py-2 rounded-xl text-xs font-bold text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 transition-all cursor-pointer"
+            onClick={onClose}
+            className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold rounded-xl cursor-pointer"
           >
             Cerrar
           </button>
@@ -604,6 +620,5 @@ export default function ProductImageSearchModal({
     </div>
   );
 
-  if (!mounted) return null;
-  return createPortal(modalContent, document.body);
+  return mounted ? createPortal(modalContent, document.body) : null;
 }

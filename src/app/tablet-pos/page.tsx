@@ -255,6 +255,7 @@ export default function TabletMobilePosPage() {
   const [showPrinterModal, setShowPrinterModal] = useState(false);
   const [showRubroModal, setShowRubroModal] = useState(false);
   const [showSalesBackupModal, setShowSalesBackupModal] = useState(false);
+  const [inventoryToast, setInventoryToast] = useState<string | null>(null);
 
   // Motorizados
   const [drivers, setDrivers] = useState<Motorizado[]>(DEFAULT_DRIVERS);
@@ -458,13 +459,33 @@ export default function TabletMobilePosPage() {
       if (savedProducts) {
         try {
           const parsed = JSON.parse(savedProducts);
-          // Si contiene productos de otros rubros (farmacia, ropa, etc.), URLs de unsplash o no tiene los 16 productos nuevos
-          const hasInvalid = !Array.isArray(parsed) || parsed.length < 16 || parsed.some((p: any) => !p.image || p.image.includes('unsplash') || (!p.image.startsWith('/packs/comida-street') && !p.image.startsWith('data:image')));
-          if (hasInvalid) {
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            // Verificar si contiene ítems obsoletos de rubros no gastronómicos (ropa, farmacia, ferretería)
+            const isOldDummyRubro = parsed.some((p: any) => 
+              p.name?.includes('Atamel') || 
+              p.name?.includes('Destornillador') || 
+              p.name?.includes('Camisa Casual') ||
+              p.category === 'Ropa' ||
+              p.category === 'Farmacia' ||
+              p.category === 'Ferretería'
+            );
+            if (isOldDummyRubro) {
+              setProducts(SAMPLE_PRODUCTS);
+              localStorage.setItem('klikpos_tablet_products', JSON.stringify(SAMPLE_PRODUCTS));
+            } else {
+              // Sanitizar fotos sólo si son inválidas o contienen unsplash, pero CONSERVAR todas las fotos legítimas (Google, data:image, locales)
+              const cleanProds = parsed.map((p: any) => {
+                if (!p.image || p.image.includes('unsplash')) {
+                  return { ...p, image: '/packs/comida-street/hamburguesa.png' };
+                }
+                return p;
+              });
+              setProducts(cleanProds);
+              localStorage.setItem('klikpos_tablet_products', JSON.stringify(cleanProds));
+            }
+          } else {
             setProducts(SAMPLE_PRODUCTS);
             localStorage.setItem('klikpos_tablet_products', JSON.stringify(SAMPLE_PRODUCTS));
-          } else {
-            setProducts(parsed);
           }
         } catch {
           setProducts(SAMPLE_PRODUCTS);
@@ -507,6 +528,17 @@ export default function TabletMobilePosPage() {
 
       // 9. Iniciar Auto-Sincronización Periódica en Segundo Plano (Cada 1 Hora)
       cloudSyncService.startAutoSync(3600);
+
+      // 10. Restaurar borrador de nuevo producto si la cámara reinició la vista en Android
+      const savedDraft = localStorage.getItem('klikpos_new_product_draft');
+      if (savedDraft) {
+        try {
+          const parsedDraft = JSON.parse(savedDraft);
+          if (parsedDraft && typeof parsedDraft === 'object') {
+            setNewProductForm(prev => ({ ...prev, ...parsedDraft }));
+          }
+        } catch {}
+      }
     } catch {
       // Continuar silenciosamente
     }
@@ -761,29 +793,96 @@ export default function TabletMobilePosPage() {
     setShowRubroModal(false);
   };
 
+  // Auto-guardado de borrador de nuevo producto para evitar pérdida si Android reinicia la app al usar la cámara
+  useEffect(() => {
+    try {
+      if (newProductForm.name || newProductForm.priceUSD || newProductForm.sku || newProductForm.image) {
+        localStorage.setItem('klikpos_new_product_draft', JSON.stringify(newProductForm));
+      }
+    } catch {}
+  }, [newProductForm]);
+
+  // Sonido de confirmación con Web Audio API (nativo, 0 dependencias externas)
+  const playKachingSound = () => {
+    try {
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(987.77, ctx.currentTime);
+      osc.frequency.setValueAtTime(1318.51, ctx.currentTime + 0.08);
+      gain.gain.setValueAtTime(0.2, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.35);
+    } catch {}
+  };
+
   // Gestión de Productos e Inventario
   const handleAddProduct = (e?: React.FormEvent | React.SyntheticEvent) => {
     if (e && e.preventDefault) e.preventDefault();
-    const priceNum = parseFloat(newProductForm.priceUSD);
-    if (isNaN(priceNum) || priceNum <= 0) return;
+    
+    const trimmedName = newProductForm.name.trim();
+    if (!trimmedName) {
+      alert('⚠️ Por favor ingresa el nombre del producto.');
+      return;
+    }
+
+    const priceRaw = (newProductForm.priceUSD || '').toString().replace(',', '.').trim();
+    const priceNum = parseFloat(priceRaw);
+    if (isNaN(priceNum) || priceNum <= 0) {
+      alert('⚠️ Por favor ingresa un precio válido mayor a 0 (ejemplo: 5.50).');
+      return;
+    }
+
     const newProd: Product = {
       id: 'prod_' + Date.now(),
-      name: newProductForm.name.trim(),
+      name: trimmedName,
       category: newProductForm.category.trim() || 'General',
       priceUSD: priceNum,
       sku: newProductForm.sku.trim() || `SKU-${Date.now().toString().slice(-4)}`,
       tag: newProductForm.tag.trim() || '⭐ Nuevo',
       prepTime: 'Inmediato',
       image: newProductForm.image.trim() || '/packs/comida-street/hamburguesa.png',
-      description: `${newProductForm.name} - Calidad garantizada.`
+      description: `${trimmedName} - Calidad garantizada.`
     };
+
     const updated = [newProd, ...products];
     setProducts(updated);
+
     try {
       localStorage.setItem('klikpos_tablet_products', JSON.stringify(updated));
-      sessionStorage.removeItem('klikpos_new_product_draft');
-    } catch {}
-    setNewProductForm({ name: '', category: categoriesList[1] || 'General', priceUSD: '', sku: '', tag: '⭐ Nuevo', image: '' });
+      localStorage.removeItem('klikpos_new_product_draft');
+      db.products.put({
+        id: Number(Date.now().toString().slice(-8)) || undefined,
+        name: newProd.name,
+        category: newProd.category,
+        priceUSD: newProd.priceUSD,
+        barcode: newProd.sku,
+        image: newProd.image,
+        isActive: true,
+        updatedAt: new Date().toISOString()
+      } as any).catch(() => {});
+    } catch (storageErr) {
+      console.warn('Aviso guardando producto:', storageErr);
+    }
+
+    setNewProductForm({
+      name: '',
+      category: categoriesList[1] || 'General',
+      priceUSD: '',
+      sku: '',
+      tag: '⭐ Nuevo',
+      image: ''
+    });
+
+    playKachingSound();
+    setInventoryToast(`¡"${newProd.name}" guardado exitosamente!`);
+    setTimeout(() => setInventoryToast(null), 3500);
   };
 
   const handleDeleteProduct = (id: string) => {
@@ -4125,6 +4224,13 @@ export default function TabletMobilePosPage() {
 
             {/* Contenido scrolleable */}
             <div className="flex-1 overflow-y-auto space-y-4 py-3 pr-1">
+              {inventoryToast && (
+                <div className="p-3 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-black flex items-center gap-2 animate-in fade-in duration-200 shadow-md">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <span>{inventoryToast}</span>
+                </div>
+              )}
+
               {/* Formulario de Alta Rápida de Producto (Envoltorio seguro sin <form> para evitar recarga por cámara) */}
               <div className={`p-3.5 rounded-2xl border space-y-3 ${
                 isLight ? 'bg-slate-50 border-slate-200' : 'bg-slate-950/60 border-slate-800'
