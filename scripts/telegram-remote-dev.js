@@ -211,6 +211,19 @@ async function handleMessage(msg) {
       return;
     }
 
+    const lower = text.toLowerCase();
+    if (lower.includes('compila') || lower.includes('release') || lower.includes('publica') || lower.includes('actualiza')) {
+      await sendMessage(chatId, `🚀 *Orden de Compilación Recibida:* Iniciando Protocolo Quirúrgico de Publicación OTA...`);
+      exec('node scripts/publish-release.js', { cwd: WORKSPACE_ROOT, maxBuffer: 1024 * 1024 * 10 }, (err, stdout, stderr) => {
+        if (!err && (stdout || '').includes('CERTIFICACIÓN EXITOSA')) {
+          sendMessage(chatId, `🎉 *¡Compilación y Release finalizadas con éxito!*\n\nLa versión está 100% activa en GitHub y lista para OTA en tus dispositivos.`);
+        } else {
+          sendMessage(chatId, `⚠️ *Detalle de ejecución:*\n\`\`\`\n${(stdout || stderr || '').slice(-400)}\n\`\`\``);
+        }
+      });
+      return;
+    }
+
     // Texto libre (Instrucción de desarrollo)
     fs.appendFileSync(LOG_FILE, `[${new Date().toLocaleTimeString()}] INSTRUCCION: ${text}\n`);
     await sendMessage(chatId, 
