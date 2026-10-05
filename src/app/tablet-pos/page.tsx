@@ -2507,32 +2507,32 @@ export default function TabletMobilePosPage() {
                         <div className={`space-y-1.5 pb-2 border-b ${isLight ? 'border-slate-100' : 'border-slate-800'}`}>
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-1.5">
-                              <span className={`text-xs font-mono font-black ${isLight ? 'text-amber-600' : 'text-amber-400'}`}>
+                              <span className={`text-xs font-mono font-black ${isLight ? 'text-amber-950' : 'text-amber-400'}`}>
                                 {ord.orderNumber}
                               </span>
-                              <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full ${
+                              <span className={`text-[9.5px] font-black uppercase px-2 py-0.5 rounded-full ${
                                 isDelivery
-                                  ? isLight ? 'bg-purple-100 text-purple-800 border border-purple-200' : 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
-                                  : isLight ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                                  ? isLight ? 'bg-purple-100 text-purple-950 border border-purple-400' : 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
+                                  : isLight ? 'bg-emerald-100 text-emerald-950 border border-emerald-400' : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
                               }`}>
                                 {isDelivery ? 'Delivery' : (ord.table || 'Local')}
                               </span>
                             </div>
 
-                            <span className={`text-[10px] font-mono ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
+                            <span className={`text-[10.5px] font-mono font-bold ${isLight ? 'text-slate-800' : 'text-slate-300'}`}>
                               {ord.timeFormatted}
                             </span>
                           </div>
 
                           <div className="flex items-center justify-between text-xs">
-                            <span className={`font-bold ${isLight ? 'text-slate-900' : 'text-slate-200'}`}>
+                            <span className={`font-black ${isLight ? 'text-slate-950' : 'text-slate-100'}`}>
                               {ord.customer?.name || 'Cliente'}
                             </span>
                             <div className="text-right">
-                              <span className={`font-mono font-black ${isLight ? 'text-amber-600' : 'text-amber-400'}`}>
+                              <span className={`font-mono font-black ${isLight ? 'text-amber-950' : 'text-amber-400'}`}>
                                 ${ord.totalUSD.toFixed(2)}
                               </span>
-                              <span className={`text-[9.5px] font-mono block ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
+                              <span className={`text-[10px] font-mono font-bold block ${isLight ? 'text-slate-700' : 'text-slate-300'}`}>
                                 Bs. {(ord.totalUSD * bcvRate).toFixed(0)}
                               </span>
                             </div>
@@ -2540,15 +2540,15 @@ export default function TabletMobilePosPage() {
 
                           {/* Estado de Pago */}
                           <div className="flex items-center justify-between pt-0.5">
-                            <span className={`text-[10px] font-mono ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
-                              Pago: <b className={isLight ? 'text-slate-900' : 'text-slate-300'}>{ord.paymentMethod}</b>
+                            <span className={`text-[10.5px] font-mono ${isLight ? 'text-slate-800 font-bold' : 'text-slate-300'}`}>
+                              Pago: <b className={isLight ? 'text-slate-950 font-black' : 'text-white'}>{ord.paymentMethod}</b>
                             </span>
-                            <span className={`text-[9px] font-black px-2 py-0.5 rounded-md ${
+                            <span className={`text-[9.5px] font-black px-2 py-0.5 rounded-md ${
                               isPendingPayment
-                                ? isLight ? 'bg-rose-100 text-rose-800 border border-rose-200' : 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
-                                : isLight ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                                ? isLight ? 'bg-amber-100 text-amber-950 border border-amber-400' : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                                : isLight ? 'bg-emerald-100 text-emerald-950 border border-emerald-400' : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
                             }`}>
-                              {isPendingPayment ? 'Por Cobrar en Destino' : 'Pagado'}
+                              {isPendingPayment ? '⚠️ Por Cobrar en Destino' : '✓ Pagado'}
                             </span>
                           </div>
 

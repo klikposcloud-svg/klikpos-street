@@ -1,15 +1,15 @@
 {
-  "version": "3.0.6",
+  "version": "3.0.7",
   "releaseDate": "2026-10-05",
-  "title": "KlikPOS Street Suite v3.0.6 - Programa de Referidos Ilimitado ($15 Mínimo de Retiro) y Conciliación 48h",
+  "title": "KlikPOS Street Suite v3.0.7 - Alto Contraste WCAG AAA, Pestañas de Ventas y Formulario Táctil Móvil",
   "notes": [
-    "Programa de Referidos 100% Ilimitado: Ganancia de $5.00 USD por cada comercio o cliente que active su licencia en cualquier parte del país sin límite ni tope de referidos.",
-    "Módulo de Retiros Inteligente: Umbral mínimo de retiro a partir de $15.00 USD (acumulación de 3 referidos) con barra de progreso interactiva y botón de solicitud directa por WhatsApp.",
-    "Regla Oficial de Liquidación a las 48 Horas: Procesamiento de comisiones a las 48 horas hábiles tras la verificación bancaria de la activación para máxima seguridad y cero reversos.",
-    "Optimización para Despliegue Silencioso en Calle: Interfaz optimizada y limpia para la recomendación directa negocio a negocio, agilizando la adopción local.",
-    "Previsualización y control de pedidos: Desglose completo de Delivery vs Local, estados de pago (Pagado / Por Cobrar) y reimpresión de tickets térmicos."
+    "Optimización Quirúrgica de Contraste WCAG AAA: Badges de Delivery, Salón y Pagado con colores oscuros grado 950 y bordes sólidos de alta visibilidad para trabajo bajo luz solar directa.",
+    "Módulo de Ventas & Respaldo en Pestañas: Eliminación del scroll infinito dividiendo la interfaz en 3 vistas: Métricas & Desglose, Historial & Comprobantes, y Respaldo Nube.",
+    "Control de Pedidos & Despachos Segmentado: Pestañas por canal (Todos, Local/Salón, Delivery) y sub-filtros de pago (Todos, Pagados, Por Cobrar con indicador pulsante).",
+    "Registro Táctil de Clientes Mobile-First: Formulario rediseñado para celular con botones para prefijo de cédula venezolana (V-, J-, E-, G-) y tarjetas táctiles amplias.",
+    "Puente de Control Remoto en Vivo: Enlace en tiempo real vía Telegram Bot y túnel seguro para pruebas y despliegue instantáneo desde la calle."
   ],
-  "windowsUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.6/KlikPOS_Desktop_Full_Setup.exe",
-  "androidUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.6/KlikPOS_Movil_Full.apk",
+  "windowsUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.7/KlikPOS_Desktop_Full_Setup.exe",
+  "androidUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.7/KlikPOS_Movil_Full.apk",
   "mandatory": false
 }

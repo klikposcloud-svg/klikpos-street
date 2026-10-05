@@ -440,7 +440,7 @@ export default function StreetSalesBackupModal({
                 <h2 className={`text-base sm:text-lg font-black tracking-tight ${isLight ? 'text-slate-900' : 'text-white'}`}>
                   Módulo de Ventas & Respaldo
                 </h2>
-                <p className={`text-[11px] sm:text-xs font-medium mt-0.5 ${isLight ? 'text-slate-600' : 'text-slate-300'}`}>
+                <p className={`text-[11px] sm:text-xs font-bold mt-0.5 ${isLight ? 'text-slate-700' : 'text-slate-300'}`}>
                   Auditoría contable, métricas en vivo y protección de datos.
                 </p>
               </div>
@@ -947,27 +947,27 @@ export default function StreetSalesBackupModal({
                   </div>
 
                   <div className="flex flex-wrap items-center gap-2 pt-1 text-[10px] font-mono">
-                    <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-bold">
-                      <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" />
+                    <span className={`flex items-center gap-1 font-black ${isLight ? 'text-emerald-950' : 'text-emerald-400'}`}>
+                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block" />
                       Efectivo {metrics.paymentProportions.cash.toFixed(0)}%
                     </span>
-                    <span className="flex items-center gap-1 text-sky-600 dark:text-sky-400 font-bold">
-                      <span className="w-2 h-2 rounded-full bg-sky-500 inline-block" />
+                    <span className={`flex items-center gap-1 font-black ${isLight ? 'text-sky-950' : 'text-sky-400'}`}>
+                      <span className="w-2.5 h-2.5 rounded-full bg-sky-500 inline-block" />
                       Pago Móvil {metrics.paymentProportions.pagoMovil.toFixed(0)}%
                     </span>
-                    <span className="flex items-center gap-1 text-indigo-600 dark:text-indigo-400 font-bold">
-                      <span className="w-2 h-2 rounded-full bg-indigo-500 inline-block" />
+                    <span className={`flex items-center gap-1 font-black ${isLight ? 'text-indigo-950' : 'text-indigo-400'}`}>
+                      <span className="w-2.5 h-2.5 rounded-full bg-indigo-500 inline-block" />
                       Punto {metrics.paymentProportions.punto.toFixed(0)}%
                     </span>
                     {metrics.paymentProportions.zelle > 0 && (
-                      <span className="flex items-center gap-1 text-purple-600 dark:text-purple-400 font-bold">
-                        <span className="w-2 h-2 rounded-full bg-purple-500 inline-block" />
+                      <span className={`flex items-center gap-1 font-black ${isLight ? 'text-purple-950' : 'text-purple-400'}`}>
+                        <span className="w-2.5 h-2.5 rounded-full bg-purple-500 inline-block" />
                         Zelle {metrics.paymentProportions.zelle.toFixed(0)}%
                       </span>
                     )}
                     {metrics.paymentProportions.credito > 0 && (
-                      <span className="flex items-center gap-1 text-amber-600 dark:text-amber-400 font-bold">
-                        <span className="w-2 h-2 rounded-full bg-amber-500 inline-block" />
+                      <span className={`flex items-center gap-1 font-black ${isLight ? 'text-amber-950' : 'text-amber-400'}`}>
+                        <span className="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block" />
                         Fiado {metrics.paymentProportions.credito.toFixed(0)}%
                       </span>
                     )}
@@ -983,56 +983,56 @@ export default function StreetSalesBackupModal({
                   <span className={`text-xs font-black uppercase tracking-wider flex items-center gap-2 ${
                     isLight ? 'text-slate-900' : 'text-slate-200'
                   }`}>
-                    <DollarSign className={`w-4 h-4 ${isLight ? 'text-emerald-600' : 'text-emerald-400'}`} />
+                    <DollarSign className={`w-4 h-4 ${isLight ? 'text-emerald-700' : 'text-emerald-400'}`} />
                     <span>Desglose por Métodos de Pago Liquidado</span>
                   </span>
-                  <span className={`text-[10px] font-mono ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
+                  <span className={`text-[10px] font-mono font-bold ${isLight ? 'text-slate-700' : 'text-slate-300'}`}>
                     {metrics.ticketCount} transacciones auditadas
                   </span>
                 </div>
 
                 <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5 text-xs">
                   <div className={`p-2.5 rounded-xl border ${
-                    isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#0c1220] border-slate-800'
+                    isLight ? 'bg-slate-50 border-slate-300' : 'bg-[#0c1220] border-slate-800'
                   }`}>
-                    <span className={`text-[10px] font-bold block ${isLight ? 'text-emerald-700' : 'text-emerald-400'}`}>💵 Efectivo ($ / Bs)</span>
-                    <span className={`text-sm font-black font-mono mt-1 block ${isLight ? 'text-slate-900' : 'text-white'}`}>
+                    <span className={`text-[10.5px] font-black block ${isLight ? 'text-emerald-950' : 'text-emerald-300'}`}>💵 Efectivo ($ / Bs)</span>
+                    <span className={`text-sm font-black font-mono mt-1 block ${isLight ? 'text-slate-950' : 'text-white'}`}>
                       {formatUSD(metrics.cashUsd + metrics.cashVes)}
                     </span>
                   </div>
 
                   <div className={`p-2.5 rounded-xl border ${
-                    isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#0c1220] border-slate-800'
+                    isLight ? 'bg-slate-50 border-slate-300' : 'bg-[#0c1220] border-slate-800'
                   }`}>
-                    <span className={`text-[10px] font-bold block ${isLight ? 'text-sky-700' : 'text-sky-400'}`}>📱 Pago Móvil (Bs.)</span>
-                    <span className={`text-sm font-black font-mono mt-1 block ${isLight ? 'text-slate-900' : 'text-white'}`}>
+                    <span className={`text-[10.5px] font-black block ${isLight ? 'text-sky-950' : 'text-sky-300'}`}>📱 Pago Móvil (Bs.)</span>
+                    <span className={`text-sm font-black font-mono mt-1 block ${isLight ? 'text-slate-950' : 'text-white'}`}>
                       {formatUSD(metrics.pagoMovil)}
                     </span>
                   </div>
 
                   <div className={`p-2.5 rounded-xl border ${
-                    isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#0c1220] border-slate-800'
+                    isLight ? 'bg-slate-50 border-slate-300' : 'bg-[#0c1220] border-slate-800'
                   }`}>
-                    <span className={`text-[10px] font-bold block ${isLight ? 'text-indigo-700' : 'text-indigo-400'}`}>💳 Punto de Venta</span>
-                    <span className={`text-sm font-black font-mono mt-1 block ${isLight ? 'text-slate-900' : 'text-white'}`}>
+                    <span className={`text-[10.5px] font-black block ${isLight ? 'text-indigo-950' : 'text-indigo-300'}`}>💳 Punto de Venta</span>
+                    <span className={`text-sm font-black font-mono mt-1 block ${isLight ? 'text-slate-950' : 'text-white'}`}>
                       {formatUSD(metrics.puntoTarjeta)}
                     </span>
                   </div>
 
                   <div className={`p-2.5 rounded-xl border ${
-                    isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#0c1220] border-slate-800'
+                    isLight ? 'bg-slate-50 border-slate-300' : 'bg-[#0c1220] border-slate-800'
                   }`}>
-                    <span className={`text-[10px] font-bold block ${isLight ? 'text-purple-700' : 'text-purple-400'}`}>⚡ Zelle / Digital</span>
-                    <span className={`text-sm font-black font-mono mt-1 block ${isLight ? 'text-slate-900' : 'text-white'}`}>
+                    <span className={`text-[10.5px] font-black block ${isLight ? 'text-purple-950' : 'text-purple-300'}`}>⚡ Zelle / Digital</span>
+                    <span className={`text-sm font-black font-mono mt-1 block ${isLight ? 'text-slate-950' : 'text-white'}`}>
                       {formatUSD(metrics.zelle)}
                     </span>
                   </div>
 
                   <div className={`p-2.5 rounded-xl border col-span-2 sm:col-span-1 ${
-                    isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#0c1220] border-slate-800'
+                    isLight ? 'bg-slate-50 border-slate-300' : 'bg-[#0c1220] border-slate-800'
                   }`}>
-                    <span className={`text-[10px] font-bold block ${isLight ? 'text-amber-700' : 'text-amber-400'}`}>📝 Fiados / Créditos</span>
-                    <span className={`text-sm font-black font-mono mt-1 block ${isLight ? 'text-slate-900' : 'text-white'}`}>
+                    <span className={`text-[10.5px] font-black block ${isLight ? 'text-amber-950' : 'text-amber-300'}`}>📝 Fiados / Créditos</span>
+                    <span className={`text-sm font-black font-mono mt-1 block ${isLight ? 'text-slate-950' : 'text-white'}`}>
                       {formatUSD(metrics.credito)}
                     </span>
                   </div>
@@ -1182,36 +1182,48 @@ export default function StreetSalesBackupModal({
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
                           <div className="min-w-0 space-y-1">
                             <div className="flex items-center gap-2 flex-wrap">
-                              <span className={`font-mono font-black ${isLight ? 'text-amber-600' : 'text-amber-400'}`}>
+                              <span className={`font-mono font-black ${isLight ? 'text-amber-950' : 'text-amber-400'}`}>
                                 #{sale.receiptNumber}
                               </span>
-                              <span className={`text-[10px] font-mono ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
+                              <span className={`text-[10.5px] font-mono ${isLight ? 'text-slate-800 font-black' : 'text-slate-300'}`}>
                                 {sale.timestamp ? new Date(sale.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
                               </span>
-                              <span className={`text-[10px] px-2 py-0.2 rounded-full font-mono ${
-                                isLight ? 'bg-slate-100 text-slate-700' : 'bg-slate-800 text-slate-300'
+                              <span className={`text-[10px] px-2 py-0.5 rounded-full font-mono ${
+                                isLight ? 'bg-slate-200 text-slate-950 font-black' : 'bg-slate-800 text-slate-200'
                               }`}>
                                 {sale.items?.length || 0} ítems
                               </span>
 
                               {/* Badge Canal: Delivery o Salón */}
                               {isDel ? (
-                                <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-md bg-purple-500/20 text-purple-300 border border-purple-500/30 flex items-center gap-1">
-                                  <Bike className="w-2.5 h-2.5" />
+                                <span className={`text-[9.5px] font-black uppercase px-2.5 py-0.5 rounded-md flex items-center gap-1 ${
+                                  isLight 
+                                    ? 'bg-purple-100 text-purple-950 border border-purple-400 shadow-2xs' 
+                                    : 'bg-purple-950/70 text-purple-200 border border-purple-500/40'
+                                }`}>
+                                  <Bike className="w-3 h-3 text-purple-600 dark:text-purple-400" />
                                   <span>Delivery {sale.driverName ? `• ${sale.driverName}` : ''}</span>
                                 </span>
                               ) : (
-                                <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
-                                  <Store className="w-2.5 h-2.5" />
+                                <span className={`text-[9.5px] font-black uppercase px-2.5 py-0.5 rounded-md flex items-center gap-1 ${
+                                  isLight 
+                                    ? 'bg-emerald-100 text-emerald-950 border border-emerald-400 shadow-2xs' 
+                                    : 'bg-emerald-950/70 text-emerald-200 border border-emerald-500/40'
+                                }`}>
+                                  <Store className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
                                   <span>{sale.table || 'Salón / Local'}</span>
                                 </span>
                               )}
 
                               {/* Badge Cobro */}
-                              <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-md ${
+                              <span className={`text-[9.5px] font-black uppercase px-2.5 py-0.5 rounded-md ${
                                 isPend
-                                  ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
-                                  : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                                  ? isLight 
+                                    ? 'bg-amber-100 text-amber-950 border border-amber-400 shadow-2xs' 
+                                    : 'bg-amber-950/70 text-amber-200 border border-amber-500/40'
+                                  : isLight 
+                                    ? 'bg-emerald-100 text-emerald-950 border border-emerald-400 shadow-2xs' 
+                                    : 'bg-emerald-950/70 text-emerald-200 border border-emerald-500/40'
                               }`}>
                                 {isPend ? '⚠️ Por Cobrar en Destino' : '✓ Pagado'}
                               </span>
@@ -1219,28 +1231,28 @@ export default function StreetSalesBackupModal({
 
                             <div className="flex items-center gap-2 text-[11px]">
                               {sale.customerName && (
-                                <span className={`font-bold ${isLight ? 'text-slate-900' : 'text-slate-200'}`}>
+                                <span className={`font-black ${isLight ? 'text-slate-950' : 'text-slate-100'}`}>
                                   Cliente: {sale.customerName}
                                 </span>
                               )}
-                              <span className={`text-[10.5px] ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
+                              <span className={`text-[10.5px] ${isLight ? 'text-slate-800 font-bold' : 'text-slate-300'}`}>
                                 • Cajero: {sale.cashierName || 'Cajero Principal'}
                               </span>
                             </div>
 
                             {isDel && sale.deliveryAddress && (
-                              <p className={`text-[10px] truncate max-w-sm flex items-center gap-1 ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
-                                <span className="text-amber-500 font-bold">📍</span> {sale.deliveryAddress}
+                              <p className={`text-[11px] truncate max-w-sm flex items-center gap-1 ${isLight ? 'text-slate-950 font-bold' : 'text-slate-200 font-medium'}`}>
+                                <span className="text-amber-600 dark:text-amber-400 font-black">📍</span> {sale.deliveryAddress}
                               </p>
                             )}
                           </div>
 
                           <div className="flex items-center gap-2.5 shrink-0 self-end sm:self-center">
                             <div className="text-right">
-                              <div className={`font-mono font-black text-sm ${isLight ? 'text-emerald-700' : 'text-emerald-400'}`}>
+                              <div className={`font-mono font-black text-sm ${isLight ? 'text-emerald-950' : 'text-emerald-400'}`}>
                                 {formatUSD(sale.totalUSD)}
                               </div>
-                              <span className={`font-mono text-[10px] block ${isLight ? 'text-slate-500 font-bold' : 'text-slate-400'}`}>
+                              <span className={`font-mono text-[10px] block ${isLight ? 'text-slate-800 font-black' : 'text-slate-300 font-bold'}`}>
                                 {formatVES(sale.totalVES)}
                               </span>
                             </div>
@@ -1473,8 +1485,8 @@ export default function StreetSalesBackupModal({
           isLight ? 'bg-white border-slate-200 text-slate-700' : 'bg-[#090d16] border-slate-800 text-slate-300'
         }`}>
           <div className="flex items-center gap-2">
-            <ShieldCheck className={`w-4 h-4 shrink-0 ${isLight ? 'text-emerald-600' : 'text-emerald-400'}`} />
-            <span className="text-[11px]">
+            <ShieldCheck className={`w-4 h-4 shrink-0 ${isLight ? 'text-emerald-700' : 'text-emerald-400'}`} />
+            <span className={`text-[11px] font-bold ${isLight ? 'text-slate-900' : 'text-slate-200'}`}>
               Tus ventas se almacenan de forma local en este dispositivo y están protegidas ante cortes de internet.
             </span>
           </div>
