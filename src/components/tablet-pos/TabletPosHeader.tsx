@@ -158,9 +158,13 @@ export const TabletPosHeader: React.FC<TabletPosHeaderProps> = ({
         {trialState?.isTrial && (
           <button
             onClick={onOpenLicense}
-            className="hidden md:flex items-center gap-1 px-2 py-1 bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-400 rounded-lg text-[10px] font-mono font-bold cursor-pointer"
+            className="hidden md:flex items-center gap-1 px-2.5 py-1 bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-400 rounded-lg text-[10px] font-mono font-bold cursor-pointer"
           >
-            <span>⏱️ {trialState.remainingMinutes}m</span>
+            <span>
+              ⏱️ {trialState.remainingMinutes >= 60 
+                ? `${Math.floor(trialState.remainingMinutes / 60)}h ${trialState.remainingMinutes % 60}m` 
+                : `${trialState.remainingMinutes}m`}
+            </span>
           </button>
         )}
 

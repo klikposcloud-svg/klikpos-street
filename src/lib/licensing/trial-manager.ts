@@ -11,7 +11,7 @@ import { getMachineHWID } from './hwid';
 import { db as firestoreDb } from '@/lib/firebase/config';
 import { doc, setDoc } from 'firebase/firestore';
 
-export const TRIAL_DURATION_MS = 30 * 60 * 1000; // 30 minutos en milisegundos
+export const TRIAL_DURATION_MS = 3 * 60 * 60 * 1000; // 3 Horas de Evaluación Gratuita (180 minutos)
 export const OFFICIAL_WHATSAPP_PHONE = '584248298026'; // +58 424 829 8026
 
 export interface TrialState {
@@ -26,12 +26,37 @@ export interface TrialState {
 }
 
 /**
- * Obtiene o inicializa el timestamp de inicio del período de prueba (30 min)
+ * Reinicia o reactiva el período de prueba de 3 horas desde este momento
+ */
+export function reactivateTrialFor3Hours(): void {
+  if (typeof window === 'undefined') return;
+  try {
+    const now = Date.now();
+    localStorage.setItem('klikpos_trial_start_ts', String(now));
+    localStorage.setItem('klikpos_trial_extended_3h_v6', 'true');
+    localStorage.removeItem('venematic_trial15m_start');
+    localStorage.removeItem('klikpos_trial_force_expired');
+    window.dispatchEvent(new CustomEvent('klikpos:trial-reactivated', { detail: { now } }));
+  } catch {}
+}
+
+/**
+ * Obtiene o inicializa el timestamp de inicio del período de prueba (3 horas)
  */
 export function getOrCreateTrialStartTime(): number {
   if (typeof window === 'undefined') return Date.now();
   try {
-    const stored = localStorage.getItem('klikpos_trial_start_ts') || localStorage.getItem('venematic_trial15m_start');
+    // Si la reactivación por 3 horas v6 no se ha activado aún en este dispositivo, reiniciamos desde ahora garantizando 180 min
+    const extended = localStorage.getItem('klikpos_trial_extended_3h_v6');
+    if (extended !== 'true') {
+      const now = Date.now();
+      localStorage.setItem('klikpos_trial_start_ts', String(now));
+      localStorage.setItem('klikpos_trial_extended_3h_v6', 'true');
+      localStorage.removeItem('venematic_trial15m_start');
+      return now;
+    }
+
+    const stored = localStorage.getItem('klikpos_trial_start_ts');
     if (stored) {
       const parsed = parseInt(stored, 10);
       if (!isNaN(parsed) && parsed > 0) {
@@ -47,7 +72,7 @@ export function getOrCreateTrialStartTime(): number {
 }
 
 /**
- * Registra la instalación y el inicio del trial de 30 minutos en Firestore
+ * Registra la instalación y el inicio del trial de 3 horas en Firestore
  */
 export async function registerTrialInstallation(
   customHwid?: string,
@@ -67,7 +92,7 @@ export async function registerTrialInstallation(
       storeName: storeName || 'Mi Negocio',
       rif: rif || 'Pendiente',
       installedAt: new Date(startTime).toISOString(),
-      trialDurationMinutes: 30,
+      trialDurationMinutes: 180,
       trialExpiresAt: expiresAt,
       status: Date.now() >= (startTime + TRIAL_DURATION_MS) ? 'trial_expired' : 'trial_active',
       platform: typeof navigator !== 'undefined' ? navigator.userAgent : 'Desconocido',
@@ -90,7 +115,7 @@ export async function registerTrialInstallation(
 }
 
 /**
- * Evalúa el estado actual de la prueba o licencia comercial (30 Minutos)
+ * Evalúa el estado actual de la prueba o licencia comercial (3 Horas)
  */
 export function evaluateTrialState(): TrialState {
   if (typeof window === 'undefined') {
@@ -100,9 +125,9 @@ export function evaluateTrialState(): TrialState {
       isExpired: false,
       canOperate: true,
       remainingMs: TRIAL_DURATION_MS,
-      remainingMinutes: 30,
+      remainingMinutes: 180,
       remainingSeconds: 0,
-      formattedRemaining: '30:00 min',
+      formattedRemaining: '3h restantes',
     };
   }
 
@@ -124,16 +149,19 @@ export function evaluateTrialState(): TrialState {
       };
     }
 
-    // 2. Si no tiene licencia, evaluar los 30 minutos de prueba
+    // 2. Si no tiene licencia, evaluar las 3 horas de prueba
     const startTs = getOrCreateTrialStartTime();
     const elapsed = Date.now() - startTs;
     const remainingMs = Math.max(0, TRIAL_DURATION_MS - elapsed);
 
     if (remainingMs > 0) {
       const remainingSecs = Math.floor(remainingMs / 1000);
-      const mins = Math.floor(remainingSecs / 60);
+      const hours = Math.floor(remainingSecs / 3600);
+      const mins = Math.floor((remainingSecs % 3600) / 60);
       const secs = remainingSecs % 60;
-      const formatted = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')} min`;
+      const formatted = hours > 0 
+        ? `${hours}h ${String(mins).padStart(2, '0')}m restantes`
+        : `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')} min`;
 
       return {
         isLicensed: false,
@@ -141,12 +169,12 @@ export function evaluateTrialState(): TrialState {
         isExpired: false,
         canOperate: true,
         remainingMs,
-        remainingMinutes: mins,
+        remainingMinutes: Math.floor(remainingSecs / 60),
         remainingSeconds: secs,
         formattedRemaining: formatted,
       };
     } else {
-      // 3. Período de 30 minutos expirado
+      // 3. Período de 3 horas expirado
       return {
         isLicensed: false,
         isTrial: false,
@@ -155,7 +183,7 @@ export function evaluateTrialState(): TrialState {
         remainingMs: 0,
         remainingMinutes: 0,
         remainingSeconds: 0,
-        formattedRemaining: 'Prueba 30 min Finalizada',
+        formattedRemaining: 'Prueba 3 Horas Finalizada',
       };
     }
   } catch (err) {
@@ -166,9 +194,9 @@ export function evaluateTrialState(): TrialState {
       isExpired: false,
       canOperate: true,
       remainingMs: TRIAL_DURATION_MS,
-      remainingMinutes: 30,
+      remainingMinutes: 180,
       remainingSeconds: 0,
-      formattedRemaining: '30:00 min',
+      formattedRemaining: '3h restantes',
     };
   }
 }

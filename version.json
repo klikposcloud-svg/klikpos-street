@@ -1,16 +1,15 @@
 {
-  "version": "3.0.4",
+  "version": "3.0.5",
   "releaseDate": "2026-10-04",
-  "title": "KlikPOS Street Suite v3.0.4 - Catálogo Street Food HD, Slider Tutorial y Planes Oficiales",
+  "title": "KlikPOS Street Suite v3.0.5 - Calculadora de Vuelto en Vivo, Gráficas WOW y Corrección de Inventario",
   "notes": [
-    "Inclusión de 6 nuevos productos de Street Food con fotos HD transparentes (Chicha criolla, Combos Burger, Cachapa doble queso y cochino, Pepito 30cm y Shawarma doble).",
-    "Tutorial interactivo educativo tipo slider de 6 láminas con guía visual completa de accesos y flujo de venta.",
-    "Período de prueba comercial de 30 minutos dinámico con protección de datos e inventario.",
-    "Soporte de descarga de catálogos privados y personalizados mediante código de acceso vía WhatsApp.",
-    "Suite Keygen actualizada con los planes comerciales oficiales ($15 Contado, $25 Crédito, $50 VIP y $5 Cloud).",
-    "Sincronización en caliente y en segundo plano de tickets, productos y tasas BCV con Firestore."
+    "Calculadora de vuelto interactiva en vivo integrada directamente en el totalizador de cobro con desglose simultáneo en Dólares ($) y Bolívares (Bs. BCV) y botones de billetes rápidos.",
+    "Solución quirúrgica al inventario: captura de cámara con optimización en Canvas (400x400 JPG ~30KB), búsqueda de imágenes en Wikipedia y guardado confiable en IndexedDB.",
+    "Gráficas analíticas animadas WOW en el modal de ventas y auditoría: distribución por períodos del día (Mañana, Mediodía, Tarde, Noche), pico de ventas semanal y barra de pagos estilo FinTech.",
+    "Período de evaluación y demostración extendido a 3 horas continuas (180 min) con protección anti-bloqueo y reactivación en 1 toque.",
+    "Corrección en recibos y tickets de venta para reflejar de forma exacta el vuelto entregado tanto en Dólares como en Bolívares."
   ],
-  "windowsUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.4/KlikPOS_Desktop_Full_Setup.exe",
-  "androidUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.4/KlikPOS_Movil_Full.apk",
+  "windowsUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.5/KlikPOS_Desktop_Full_Setup.exe",
+  "androidUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.5/KlikPOS_Movil_Full.apk",
   "mandatory": false
 }

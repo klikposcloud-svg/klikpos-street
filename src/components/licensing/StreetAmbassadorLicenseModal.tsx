@@ -25,7 +25,7 @@ import {
   Clock,
 } from 'lucide-react';
 import { getMachineHWID } from '@/lib/licensing/hwid';
-import { OFFICIAL_WHATSAPP_PHONE } from '@/lib/licensing/trial-manager';
+import { OFFICIAL_WHATSAPP_PHONE, reactivateTrialFor3Hours } from '@/lib/licensing/trial-manager';
 import { verifyLicenseKey, saveActivatedLicense, getStoredLicenseStatus } from '@/lib/licensing/license-crypto';
 import { cloudSyncService } from '@/lib/firebase/cloud-sync-service';
 
@@ -594,6 +594,20 @@ export default function StreetAmbassadorLicenseModal({
               </button>
             </div>
           </div>
+
+          {/* BOTÓN INSTANTÁNEO DE REACTIVACIÓN 3 HORAS DE PRUEBA */}
+          <button
+            type="button"
+            onClick={() => {
+              reactivateTrialFor3Hours();
+              if (onLicenseActivated) onLicenseActivated();
+              onClose();
+            }}
+            className="w-full py-2.5 px-4 rounded-2xl border border-sky-500/40 bg-sky-950/40 hover:bg-sky-900/60 text-sky-200 font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-sm active:scale-98 cursor-pointer"
+          >
+            <Clock className="w-4 h-4 text-sky-400 animate-pulse" />
+            <span>⏱️ Continuar con Evaluación (Reactivar 3 Horas Libres)</span>
+          </button>
 
           {/* BOTÓN PRINCIPAL DE SOLICITAR ACTIVACIÓN POR WHATSAPP */}
           <a

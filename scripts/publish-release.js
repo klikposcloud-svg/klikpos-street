@@ -148,8 +148,8 @@ async function main() {
       contentType: 'application/vnd.android.package-archive'
     },
     {
-      filePath: path.join(rootDir, 'dist-apk', 'KlikPOS_Street_v3.0.4.apk'),
-      fileName: 'KlikPOS_Street_v3.0.4.apk',
+      filePath: path.join(rootDir, 'dist-apk', `KlikPOS_Street_${tagName}.apk`),
+      fileName: `KlikPOS_Street_${tagName}.apk`,
       contentType: 'application/vnd.android.package-archive'
     },
     {
@@ -163,8 +163,8 @@ async function main() {
       contentType: 'application/octet-stream'
     },
     {
-      filePath: path.join(rootDir, 'dist-installer', 'KlikPOS_Street_v3.0.4_Setup.exe'),
-      fileName: 'KlikPOS_Street_v3.0.4_Setup.exe',
+      filePath: path.join(rootDir, 'dist-installer', `KlikPOS_Street_${tagName}_Setup.exe`),
+      fileName: `KlikPOS_Street_${tagName}_Setup.exe`,
       contentType: 'application/octet-stream'
     }
   ];

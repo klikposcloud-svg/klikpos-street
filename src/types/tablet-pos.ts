@@ -72,6 +72,11 @@ export interface CompletedSaleTicket {
   table?: string;
   mixedPayments?: MixedPaymentEntry[];
   integrityHash?: string;
+  orderType?: 'local' | 'delivery' | 'llevar';
+  paymentStatus?: 'pagado' | 'por_cobrar';
+  driverName?: string;
+  deliveryAddress?: string;
+  cashierName?: string;
 }
 
 export interface PosOrder {

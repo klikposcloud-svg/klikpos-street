@@ -60,9 +60,15 @@ export interface LocalSale {
   cashierName: string;
   customerDoc?: string;
   customerName?: string;
+  customerPhone?: string;
   shiftId?: number;
-  status: 'completed' | 'cancelled' | 'voided';
-  source?: 'desktop' | 'mobile' | string;
+  status: 'completed' | 'cancelled' | 'voided' | 'pending';
+  source?: 'desktop' | 'mobile' | 'tablet' | string;
+  orderType?: 'local' | 'delivery' | 'llevar';
+  paymentStatus?: 'pagado' | 'por_cobrar';
+  driverName?: string;
+  deliveryAddress?: string;
+  table?: string;
   voidedAt?: string;
   voidedBy?: string;
   voidReason?: string;

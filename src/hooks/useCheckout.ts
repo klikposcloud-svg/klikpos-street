@@ -62,6 +62,7 @@ export interface UseCheckoutReturn {
   vueltoUSD: number;
   vueltoVESfromUSD: number;
   vueltoVESfromVES: number;
+  vueltoUSDfromVES: number;
   mixedPaidUSD: number;
   mixedPaidVES: number;
   mixedPendingUSD: number;
@@ -128,7 +129,7 @@ export function useCheckout({
   const [completedSaleTicket, setCompletedSaleTicket] = useState<CompletedSaleTicket | null>(null);
 
   // ─── Computed: Vueltos ──────────────────────────────────────────────────────
-  const { vueltoUSD, vueltoVESfromUSD, vueltoVESfromVES } = calcCashChange(
+  const { vueltoUSD, vueltoVESfromUSD, vueltoVESfromVES, vueltoUSDfromVES } = calcCashChange(
     cashUSDReceived,
     cashVESReceived,
     totalUSD,
@@ -249,7 +250,9 @@ export function useCheckout({
       finalChangeUSD = vueltoUSD;
       finalChangeVES = vueltoVESfromUSD;
     } else if (selectedPaymentMethod === 'cash_ves') {
+      finalAmountReceivedUSD = bcvRate > 0 ? cashVESReceived / bcvRate : totalUSD;
       finalChangeVES = vueltoVESfromVES;
+      finalChangeUSD = vueltoUSDfromVES;
     } else if (selectedPaymentMethod === 'pago_movil') {
       refNumber = pagoMovilRefInput || 'S/R';
     } else if (selectedPaymentMethod === 'card_debit') {
@@ -282,6 +285,14 @@ export function useCheckout({
       customer: selectedCustomer,
       table: tableLabel,
       mixedPayments: selectedPaymentMethod === 'mixed' ? [...mixedPayments] : undefined,
+      orderType: fulfillmentMode === 'local' ? 'local' : 'delivery',
+      paymentStatus: fulfillmentMode === 'delivery_cod' ? 'por_cobrar' : 'pagado',
+      driverName: fulfillmentMode !== 'local' ? (chosenDriver?.name || 'Por Asignar') : undefined,
+      deliveryAddress:
+        fulfillmentMode !== 'local'
+          ? deliveryAddressInput || selectedCustomer.address || 'Entrega a Domicilio'
+          : undefined,
+      cashierName: 'Cajero Tablet',
     };
 
     const newOrder: PosOrder = {
@@ -354,6 +365,14 @@ export function useCheckout({
           customerDoc: selectedCustomer.docId,
           status: (fulfillmentMode === 'delivery_cod' ? 'pending' : 'completed') as any,
           source: 'tablet',
+          orderType: fulfillmentMode === 'local' ? 'local' : 'delivery',
+          paymentStatus: fulfillmentMode === 'delivery_cod' ? 'por_cobrar' : 'pagado',
+          driverName: fulfillmentMode !== 'local' ? (chosenDriver?.name || 'Por Asignar') : undefined,
+          deliveryAddress:
+            fulfillmentMode !== 'local'
+              ? deliveryAddressInput || selectedCustomer.address || 'Entrega a Domicilio'
+              : undefined,
+          table: tableLabel,
         })
         .catch(() => {});
     } catch {}
@@ -431,6 +450,7 @@ export function useCheckout({
     vueltoUSD,
     vueltoVESfromUSD,
     vueltoVESfromVES,
+    vueltoUSDfromVES,
     mixedPaidUSD,
     mixedPaidVES,
     mixedPendingUSD,

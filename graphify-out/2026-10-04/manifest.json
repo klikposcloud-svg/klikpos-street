@@ -48,14 +48,14 @@
     "semantic_hash": ""
   },
   "public/sw.js": {
-    "mtime": 1791141811.8736389,
-    "seen": 1791142289.4488232,
-    "ast_hash": "d2ef9425f883ced5e7301fd212d7a7c1",
+    "mtime": 1791143600.3643665,
+    "seen": 1791144256.8137076,
+    "ast_hash": "47a6048ad88aad73c4de9081d9c2bc36",
     "semantic_hash": ""
   },
   "public/workbox-00a24876.js": {
-    "mtime": 1791141811.8736389,
-    "seen": 1791142289.44884,
+    "mtime": 1791143600.362908,
+    "seen": 1791144256.813723,
     "ast_hash": "2f569fb030b2a09996588b309a8d636e",
     "semantic_hash": "2f569fb030b2a09996588b309a8d636e"
   },
@@ -840,8 +840,8 @@
     "semantic_hash": "0f54c4f82cffc8c86bb3fbe3e98739d5"
   },
   "venematic-desktop/android/app/build.gradle": {
-    "mtime": 1791142035.7655485,
-    "seen": 1791142289.4508915,
+    "mtime": 1791143971.3012857,
+    "seen": 1791144256.8150814,
     "ast_hash": "1b6d7585867593fe9d7b06b973fd4537",
     "semantic_hash": ""
   },
@@ -3030,9 +3030,9 @@
     "semantic_hash": ""
   },
   "src/app/tablet-pos/page.tsx": {
-    "mtime": 1791140983.5889242,
-    "seen": 1791142289.4499254,
-    "ast_hash": "92589741dd15a1bb1f3102f15b092fd3",
+    "mtime": 1791143416.5666802,
+    "seen": 1791144256.8144195,
+    "ast_hash": "169b3219ded1ed013fa965aa733aa06f",
     "semantic_hash": ""
   },
   "venematic-desktop/src/app/tablet-pos/page.tsx": {
@@ -3180,9 +3180,9 @@
     "semantic_hash": ""
   },
   "src/app/menu/page.tsx": {
-    "mtime": 1790619608.2581265,
-    "seen": 1790624246.5782592,
-    "ast_hash": "1a07aac7c5152aecf23e2524929d5620",
+    "mtime": 1791143368.7679255,
+    "seen": 1791144256.8143911,
+    "ast_hash": "840a1ba03ece5b4c337db8d59978f77b",
     "semantic_hash": ""
   },
   "venematic-desktop/android/app/src/main/java/com/klikpos/pos/MainActivity.java": {
@@ -4668,9 +4668,9 @@
     "semantic_hash": ""
   },
   "src/app/admin/visual-packs/page.tsx": {
-    "mtime": 1791078520.7301493,
-    "seen": 1791142289.4495382,
-    "ast_hash": "1936fb27aa220caf57415635afea11d1",
+    "mtime": 1791143441.933725,
+    "seen": 1791144256.814097,
+    "ast_hash": "e027e7c270870c0aa13d6ffe2171d211",
     "semantic_hash": ""
   },
   "src/app/api/ai/assistant/route.ts": {
@@ -4698,15 +4698,15 @@
     "semantic_hash": ""
   },
   "src/components/marketplace/VisualPacksModal.tsx": {
-    "mtime": 1791081667.7475407,
-    "seen": 1791142289.4500363,
-    "ast_hash": "d2b4a6b6c8852a1598c049a2f40970af",
+    "mtime": 1791143173.050818,
+    "seen": 1791144256.814514,
+    "ast_hash": "9a51b46f8dc910e39539b032e2d310f7",
     "semantic_hash": ""
   },
   "src/components/tablet-pos/CasinoReelsCatalog.tsx": {
-    "mtime": 1791087470.612337,
-    "seen": 1791142289.4501092,
-    "ast_hash": "6698be13a3a3f8ee5f0fb5d09ea0e8f3",
+    "mtime": 1791143396.892902,
+    "seen": 1791144256.8145971,
+    "ast_hash": "e000b6f2143e9329e70bd4ee3d328299",
     "semantic_hash": ""
   },
   "src/components/tablet-pos/DataSyncModal.tsx": {
@@ -5538,9 +5538,9 @@
     "semantic_hash": ""
   },
   "src/components/tablet-pos/BusinessRubroModal.tsx": {
-    "mtime": 1791085939.0832953,
-    "seen": 1791142289.4501033,
-    "ast_hash": "01fe651b030432ada97693561d2af1c9",
+    "mtime": 1791143406.9183004,
+    "seen": 1791144256.8145926,
+    "ast_hash": "a496f4ebd71d731f2050a46362cde254",
     "semantic_hash": ""
   },
   "src/components/tablet-pos/CompanyConfigModal.tsx": {
@@ -5616,9 +5616,9 @@
     "semantic_hash": ""
   },
   "src/lib/data/tablet-pos-rubros.ts": {
-    "mtime": 1791141611.0709867,
-    "seen": 1791142289.4502459,
-    "ast_hash": "e5ba971660a17a0f4662055052c41038",
+    "mtime": 1791143514.2931588,
+    "seen": 1791144256.81473,
+    "ast_hash": "fee4affd399223758c8f4638f4eec82e",
     "semantic_hash": ""
   },
   "src/lib/pos/cart-calculations.ts": {
@@ -6003,6 +6003,60 @@
     "mtime": 1791141292.4063663,
     "seen": 1791142289.4559436,
     "ast_hash": "91543f6dea3e6a6ae53d41163e24ea4a",
+    "semantic_hash": ""
+  },
+  "DISTRIBUCION_KLIKPOS/QR_DESCARGA_KLIKPOS_STREET.png": {
+    "mtime": 1791142533.2983224,
+    "seen": 1791144256.8175654,
+    "ast_hash": "41a941c7d758f0244793286b77c5b95f",
+    "semantic_hash": ""
+  },
+  "DISTRIBUCION_KLIKPOS/QR_DESCARGA_KLIKPOS_STREET.svg": {
+    "mtime": 1791142533.2418585,
+    "seen": 1791144256.817572,
+    "ast_hash": "d594eecce8e5deb4086caeebb930398e",
+    "semantic_hash": ""
+  },
+  "KlikPOS Release/04_Apps_Moviles_Android/QR_DESCARGA_KLIKPOS_STREET.png": {
+    "mtime": 1791142533.2983224,
+    "seen": 1791144256.8175766,
+    "ast_hash": "41a941c7d758f0244793286b77c5b95f",
+    "semantic_hash": ""
+  },
+  "klikpos-releases/QR_DESCARGA_KLIKPOS_STREET.png": {
+    "mtime": 1791142533.2983224,
+    "seen": 1791144256.8177226,
+    "ast_hash": "41a941c7d758f0244793286b77c5b95f",
+    "semantic_hash": ""
+  },
+  "klikpos-releases/QR_DESCARGA_KLIKPOS_STREET.svg": {
+    "mtime": 1791142533.2418585,
+    "seen": 1791144256.8177278,
+    "ast_hash": "d594eecce8e5deb4086caeebb930398e",
+    "semantic_hash": ""
+  },
+  "klikpos-releases/qr-klikpos-street.png": {
+    "mtime": 1791142533.2983224,
+    "seen": 1791144256.8177838,
+    "ast_hash": "41a941c7d758f0244793286b77c5b95f",
+    "semantic_hash": ""
+  },
+  "klikpos-releases/qr-klikpos-street.svg": {
+    "mtime": 1791142533.2418585,
+    "seen": 1791144256.817788,
+    "ast_hash": "d594eecce8e5deb4086caeebb930398e",
+    "semantic_hash": ""
+  },
+  "public/brand/qr-klikpos-street.png": {
+    "mtime": 1791142533.2983224,
+    "seen": 1791144256.8178434,
+    "ast_hash": "41a941c7d758f0244793286b77c5b95f",
+    "semantic_hash": ""
+  },
+  "public/brand/qr-klikpos-street.svg": {
+    "mtime": 1791142533.2418585,
+    "seen": 1791144256.8178473,
+    "ast_hash": "d594eecce8e5deb4086caeebb930398e",
     "semantic_hash": ""
   }
 }

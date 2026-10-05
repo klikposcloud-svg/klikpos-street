@@ -27,7 +27,8 @@ export function calcCashChange(
   const vueltoUSD = Math.max(0, cashUSDReceived - totalUSD);
   const vueltoVESfromUSD = vueltoUSD * bcvRate;
   const vueltoVESfromVES = Math.max(0, cashVESReceived - totalVES);
-  return { vueltoUSD, vueltoVESfromUSD, vueltoVESfromVES };
+  const vueltoUSDfromVES = bcvRate > 0 ? vueltoVESfromVES / bcvRate : 0;
+  return { vueltoUSD, vueltoVESfromUSD, vueltoVESfromVES, vueltoUSDfromVES };
 }
 
 // ─── Pago Mixto / Combinado ─────────────────────────────────────────────────

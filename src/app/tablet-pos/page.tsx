@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   UtensilsCrossed,
   LayoutGrid,
@@ -65,7 +65,8 @@ import LicenseActivationModal from '@/components/LicenseActivationModal';
 import VisualPacksModal from '@/components/marketplace/VisualPacksModal';
 import StreetAmbassadorLicenseModal from '@/components/licensing/StreetAmbassadorLicenseModal';
 import StreetSalesBackupModal from '@/components/tablet-pos/StreetSalesBackupModal';
-import { evaluateTrialState, TrialState, registerTrialInstallation } from '@/lib/licensing/trial-manager';
+import SaleReceiptModal, { orderToSaleTicket, localSaleToTicket } from '@/components/tablet-pos/SaleReceiptModal';
+import { evaluateTrialState, TrialState, registerTrialInstallation, reactivateTrialFor3Hours } from '@/lib/licensing/trial-manager';
 import { db } from '@/lib/db';
 import { TabletPosBottomNav } from '@/components/tablet-pos/TabletPosBottomNav';
 import { StreetAutoUpdater } from '@/components/tablet-pos/StreetAutoUpdater';
@@ -238,6 +239,7 @@ export default function TabletMobilePosPage() {
   const [showQrModal, setShowQrModal] = useState(false);
   const [showVisualPacksModal, setShowVisualPacksModal] = useState(false);
   const [showStreetAmbassadorModal, setShowStreetAmbassadorModal] = useState(false);
+  const userDismissedTrialModalRef = useRef(false);
   const [showPresentationModal, setShowPresentationModal] = useState(false);
   const [menuQrUrl, setMenuQrUrl] = useState('');
   const [activeTable, setActiveTable] = useState<number | null>(null);
@@ -275,6 +277,8 @@ export default function TabletMobilePosPage() {
   const [orders, setOrders] = useState<PosOrder[]>(DEFAULT_SAMPLE_ORDERS);
   const [orderFilterStatus, setOrderFilterStatus] = useState<'todos' | 'en_cola' | 'listo' | 'despachado'>('todos');
   const [orderFilterType, setOrderFilterType] = useState<'todos' | 'local' | 'delivery'>('todos');
+  const [orderFilterPayment, setOrderFilterPayment] = useState<'todos' | 'pagado' | 'por_cobrar'>('todos');
+  const [previewTicket, setPreviewTicket] = useState<CompletedSaleTicket | null>(null);
 
   // Edición Completa de Producto
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -558,18 +562,33 @@ export default function TabletMobilePosPage() {
       }
     } catch {}
 
-    // 2. Evaluación inicial y actualización periódica del estado de prueba (cada 1s)
+    // 2. Evaluación inicial y actualización periódica del estado de prueba (3 Horas)
     const updateState = () => {
       const state = evaluateTrialState();
       setTrialState(state);
       if (state.isExpired && !state.isLicensed) {
-        setShowStreetAmbassadorModal(true);
+        if (!userDismissedTrialModalRef.current) {
+          setShowStreetAmbassadorModal(true);
+        }
+      } else {
+        setShowStreetAmbassadorModal(false);
+        userDismissedTrialModalRef.current = false;
       }
     };
 
     updateState();
     const interval = setInterval(updateState, 1000);
-    return () => clearInterval(interval);
+
+    const handleTrialReactivated = () => {
+      userDismissedTrialModalRef.current = false;
+      updateState();
+    };
+    window.addEventListener('klikpos:trial-reactivated', handleTrialReactivated);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('klikpos:trial-reactivated', handleTrialReactivated);
+    };
   }, []);
 
   const currentCanvas = CANVAS_THEMES.find(t => t.id === canvasTheme) || CANVAS_THEMES[0];
@@ -743,7 +762,7 @@ export default function TabletMobilePosPage() {
     mixedInputAmount, setMixedInputAmount,
     mixedInputRef, setMixedInputRef,
     handleAddMixedPayment, handleRemoveMixedPayment,
-    vueltoUSD, vueltoVESfromUSD, vueltoVESfromVES,
+    vueltoUSD, vueltoVESfromUSD, vueltoVESfromVES, vueltoUSDfromVES,
     mixedPaidUSD, mixedPaidVES, mixedPendingUSD, mixedPendingVES,
     mixedChangeUSD, mixedChangeVES, isMixedComplete,
     isPaymentComplete, missingAmountUSD, missingAmountVES,
@@ -2180,7 +2199,7 @@ export default function TabletMobilePosPage() {
                 </p>
               </div>
 
-              {/* Filtros de Tipo y Estado */}
+              {/* Filtros de Tipo, Estado y Cobranza */}
               <div className="flex flex-wrap items-center gap-1.5">
                 {/* Filtro por Tipo */}
                 <div className={`flex items-center p-0.5 rounded-xl border ${
@@ -2197,6 +2216,25 @@ export default function TabletMobilePosPage() {
                       }`}
                     >
                       {t === 'todos' ? 'Todos' : t === 'local' ? 'Local' : 'Delivery'}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Filtro por Cobro */}
+                <div className={`flex items-center p-0.5 rounded-xl border ${
+                  isLight ? 'border-slate-300 bg-slate-100' : 'border-slate-800 bg-slate-900'
+                }`}>
+                  {(['todos', 'pagado', 'por_cobrar'] as const).map((p) => (
+                    <button
+                      key={p}
+                      onClick={() => setOrderFilterPayment(p)}
+                      className={`px-2 py-1 rounded-lg text-[10px] font-black uppercase transition-all ${
+                        orderFilterPayment === p
+                          ? 'bg-amber-500 text-slate-950 shadow-xs'
+                          : isLight ? 'text-slate-600 hover:text-slate-950' : 'text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      {p === 'todos' ? 'Todos Pagos' : p === 'pagado' ? 'Pagados' : 'Por Cobrar'}
                     </button>
                   ))}
                 </div>
@@ -2222,12 +2260,104 @@ export default function TabletMobilePosPage() {
               </div>
             </div>
 
+            {/* Resumen Métrico de Despachos y Cobranza */}
+            {(() => {
+              const localOrd = orders.filter(o => o.type !== 'delivery');
+              const delivOrd = orders.filter(o => o.type === 'delivery');
+              const codOrd = orders.filter(o => o.paymentStatus === 'por_cobrar');
+              const localTotal = localOrd.reduce((acc, o) => acc + (o.totalUSD || 0), 0);
+              const delivTotal = delivOrd.reduce((acc, o) => acc + (o.totalUSD || 0), 0);
+              const codTotal = codOrd.reduce((acc, o) => acc + (o.totalUSD || 0), 0);
+
+              return (
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                  <div className={`p-2.5 rounded-xl border flex items-center justify-between ${
+                    isLight ? 'bg-emerald-50/80 border-emerald-200' : 'bg-emerald-950/20 border-emerald-500/30'
+                  }`}>
+                    <div className="flex items-center gap-2">
+                      <div className="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 flex items-center justify-center shrink-0">
+                        <Store className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <span className={`text-[9.5px] font-black uppercase tracking-wider block ${isLight ? 'text-emerald-800' : 'text-emerald-300'}`}>
+                          Salón / Local
+                        </span>
+                        <span className={`text-sm font-black font-mono ${isLight ? 'text-slate-900' : 'text-white'}`}>
+                          ${localTotal.toFixed(2)}
+                        </span>
+                      </div>
+                    </div>
+                    <span className={`text-[10px] font-mono px-2 py-0.5 rounded-md font-bold ${
+                      isLight ? 'bg-white text-emerald-800 border border-emerald-200' : 'bg-slate-900 text-emerald-300 border border-emerald-500/20'
+                    }`}>
+                      {localOrd.length} órdenes
+                    </span>
+                  </div>
+
+                  <div className={`p-2.5 rounded-xl border flex items-center justify-between ${
+                    isLight ? 'bg-purple-50/80 border-purple-200' : 'bg-purple-950/20 border-purple-500/30'
+                  }`}>
+                    <div className="flex items-center gap-2">
+                      <div className="w-7 h-7 rounded-lg bg-purple-500/10 text-purple-600 border border-purple-500/20 flex items-center justify-center shrink-0">
+                        <Bike className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <span className={`text-[9.5px] font-black uppercase tracking-wider block ${isLight ? 'text-purple-800' : 'text-purple-300'}`}>
+                          Delivery
+                        </span>
+                        <span className={`text-sm font-black font-mono ${isLight ? 'text-slate-900' : 'text-white'}`}>
+                          ${delivTotal.toFixed(2)}
+                        </span>
+                      </div>
+                    </div>
+                    <span className={`text-[10px] font-mono px-2 py-0.5 rounded-md font-bold ${
+                      isLight ? 'bg-white text-purple-800 border border-purple-200' : 'bg-slate-900 text-purple-300 border border-purple-500/20'
+                    }`}>
+                      {delivOrd.length} envíos
+                    </span>
+                  </div>
+
+                  <div className={`p-2.5 rounded-xl border flex items-center justify-between ${
+                    codOrd.length > 0
+                      ? isLight ? 'bg-amber-50/90 border-amber-300' : 'bg-amber-950/30 border-amber-500/40'
+                      : isLight ? 'bg-slate-50 border-slate-200' : 'bg-slate-900/60 border-slate-800'
+                  }`}>
+                    <div className="flex items-center gap-2">
+                      <div className="w-7 h-7 rounded-lg bg-amber-500/10 text-amber-600 border border-amber-500/20 flex items-center justify-center shrink-0">
+                        <Clock className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <span className={`text-[9.5px] font-black uppercase tracking-wider block ${
+                          codOrd.length > 0 ? (isLight ? 'text-amber-900' : 'text-amber-300') : (isLight ? 'text-slate-500' : 'text-slate-400')
+                        }`}>
+                          Por Cobrar en Destino
+                        </span>
+                        <span className={`text-sm font-black font-mono ${
+                          codOrd.length > 0 ? (isLight ? 'text-amber-800' : 'text-amber-400') : (isLight ? 'text-slate-700' : 'text-slate-300')
+                        }`}>
+                          ${codTotal.toFixed(2)}
+                        </span>
+                      </div>
+                    </div>
+                    <span className={`text-[10px] font-mono px-2 py-0.5 rounded-md font-bold ${
+                      codOrd.length > 0
+                        ? isLight ? 'bg-amber-100 text-amber-950 border border-amber-300' : 'bg-amber-500/20 text-amber-200 border border-amber-500/30'
+                        : isLight ? 'bg-slate-100 text-slate-500' : 'bg-slate-800 text-slate-400'
+                    }`}>
+                      {codOrd.length} pendientes
+                    </span>
+                  </div>
+                </div>
+              );
+            })()}
+
             {/* Tablero de Pedidos */}
             {(() => {
               const visibleOrders = orders.filter((o) => {
                 const matchStatus = orderFilterStatus === 'todos' || o.status === orderFilterStatus;
                 const matchType = orderFilterType === 'todos' || o.type === orderFilterType;
-                return matchStatus && matchType;
+                const matchPayment = orderFilterPayment === 'todos' || o.paymentStatus === orderFilterPayment;
+                return matchStatus && matchType && matchPayment;
               });
 
               if (visibleOrders.length === 0) {
@@ -2355,8 +2485,20 @@ export default function TabletMobilePosPage() {
                           ))}
                         </div>
 
-                        {/* Botones de Transición de Estado */}
+                        {/* Botones de Transición de Estado y Comprobante */}
                         <div className={`space-y-1.5 pt-2 border-t ${isLight ? 'border-slate-100' : 'border-slate-800'}`}>
+                          <button
+                            type="button"
+                            onClick={() => setPreviewTicket(orderToSaleTicket(ord, bcvRate))}
+                            className={`w-full py-1.5 rounded-xl text-xs font-bold transition-all active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer border ${
+                              isLight ? 'bg-amber-50 hover:bg-amber-100 text-amber-950 border-amber-300' : 'bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border-amber-500/30'
+                            }`}
+                            title="Previsualizar e Imprimir Ticket Térmico"
+                          >
+                            <Printer className="w-3.5 h-3.5 text-amber-500" />
+                            <span>Ver / Imprimir Ticket</span>
+                          </button>
+
                           {isEnCola && (
                             <button
                               onClick={() => handleAdvanceOrderStatus(ord.id, 'listo')}
@@ -2553,18 +2695,161 @@ export default function TabletMobilePosPage() {
         {/* ======================================================================= */}
         {activeTab === 'cobro' && (
           <div className="max-w-xl mx-auto w-full space-y-4 flex-1 min-h-0 overflow-y-auto pb-44 px-2 scrollbar-none">
-            {/* Header del Totalizador */}
-            <div className={`border rounded-3xl p-5 text-center shadow-lg ${
+            {/* Header del Totalizador con Calculadora de Vuelto en Vivo */}
+            <div className={`border rounded-3xl p-4 sm:p-5 text-center shadow-lg transition-all ${
               isLight ? 'bg-white border-slate-200' : 'bg-slate-900 border-slate-800'
             }`}>
               <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">
                 Total a Liquidar ({totalItems} productos)
               </span>
-              <div className="text-4xl font-black font-mono mt-1" style={{ color: currentPal.primary }}>
+              <div className="text-3xl sm:text-4xl font-black font-mono mt-1" style={{ color: currentPal.primary }}>
                 ${totalUSD.toFixed(2)} USD
               </div>
-              <div className="text-sm font-mono font-bold text-slate-600 dark:text-slate-300 mt-0.5">
+              <div className="text-xs sm:text-sm font-mono font-bold text-slate-600 dark:text-slate-300 mt-0.5">
                 Bs. {totalVES.toFixed(2)} (Tasa BCV: {bcvRate.toFixed(2)})
+              </div>
+
+              {/* CALCULADORA RÁPIDA DE VUELTO EN VIVO (VISIBILIDAD INMEDIATA) */}
+              <div className="mt-3 pt-3 border-t border-slate-200 dark:border-slate-800 text-left space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5 text-amber-500">
+                    <CircleDollarSign className="w-3.5 h-3.5 text-amber-400" />
+                    <span>Calculadora Rápida de Vuelto:</span>
+                  </span>
+                  <span className="text-[10px] font-mono text-slate-400">
+                    Toca con cuánto paga el cliente
+                  </span>
+                </div>
+
+                {/* Billetes de Dólares Rápidos */}
+                <div className="flex flex-wrap gap-1.5 items-center">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedPaymentMethod('cash_usd');
+                      setCashUSDReceived(totalUSD);
+                    }}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-black font-mono transition-all active:scale-95 cursor-pointer ${
+                      selectedPaymentMethod === 'cash_usd' && Math.abs(cashUSDReceived - totalUSD) < 0.01
+                        ? 'bg-emerald-500 text-slate-950 font-black shadow-xs'
+                        : isLight ? 'bg-slate-100 hover:bg-slate-200 text-slate-800' : 'bg-slate-800 hover:bg-slate-700 text-slate-200'
+                    }`}
+                  >
+                    Exacto (${totalUSD.toFixed(2)})
+                  </button>
+
+                  {[10, 20, 50, 100]
+                    .filter((b) => b >= Math.floor(totalUSD))
+                    .concat(
+                      [5, 10, 20, 50, 100].filter((b) => b < Math.floor(totalUSD)).slice(-1)
+                    )
+                    .filter((v, i, a) => a.indexOf(v) === i)
+                    .sort((a, b) => a - b)
+                    .map((bill) => (
+                      <button
+                        key={bill}
+                        type="button"
+                        onClick={() => {
+                          setSelectedPaymentMethod('cash_usd');
+                          setCashUSDReceived(bill);
+                        }}
+                        className={`px-2.5 py-1 rounded-lg text-xs font-black font-mono transition-all active:scale-95 cursor-pointer ${
+                          selectedPaymentMethod === 'cash_usd' && Math.abs(cashUSDReceived - bill) < 0.01
+                            ? 'bg-amber-500 text-slate-950 font-black shadow-xs'
+                            : isLight ? 'bg-slate-100 hover:bg-slate-200 text-slate-800' : 'bg-slate-800 hover:bg-slate-700 text-slate-200'
+                        }`}
+                      >
+                        ${bill}
+                      </button>
+                    ))}
+
+                  {/* Botón rápido Bolívares */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedPaymentMethod('cash_ves');
+                      setCashVESReceived(Math.ceil(totalVES));
+                    }}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-black font-mono transition-all active:scale-95 cursor-pointer ${
+                      selectedPaymentMethod === 'cash_ves'
+                        ? 'bg-sky-500 text-slate-950 font-black shadow-xs'
+                        : isLight ? 'bg-sky-50 hover:bg-sky-100 text-sky-800 border border-sky-200' : 'bg-sky-950/60 hover:bg-sky-900/60 text-sky-300 border border-sky-800'
+                    }`}
+                  >
+                    En Bs.
+                  </button>
+                </div>
+
+                {/* CAJA DE VUELTO CALCULADO EN VIVO */}
+                {selectedPaymentMethod === 'cash_usd' && cashUSDReceived > 0 && (
+                  <div className={`p-2.5 rounded-xl border flex items-center justify-between transition-all ${
+                    vueltoUSD > 0.001
+                      ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-400 shadow-sm'
+                      : cashUSDReceived >= totalUSD - 0.01
+                      ? 'bg-sky-500/10 border-sky-500/30 text-sky-400'
+                      : 'bg-amber-500/10 border-amber-500/30 text-amber-400'
+                  }`}>
+                    <div className="flex items-center gap-2">
+                      <span className={`w-2.5 h-2.5 rounded-full ${vueltoUSD > 0.001 ? 'bg-emerald-400 animate-pulse' : 'bg-sky-400'}`} />
+                      <span className="text-xs font-black">
+                        {vueltoUSD > 0.001
+                          ? '💵 Vuelto a Entregar al Cliente:'
+                          : cashUSDReceived >= totalUSD - 0.01
+                          ? '✓ Pago Exacto (Sin Vuelto)'
+                          : '⚠️ Falta por pagar:'}
+                      </span>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-sm font-mono font-black block">
+                        {vueltoUSD > 0.001
+                          ? `$${vueltoUSD.toFixed(2)} USD`
+                          : cashUSDReceived >= totalUSD - 0.01
+                          ? '$0.00 USD'
+                          : `$${(totalUSD - cashUSDReceived).toFixed(2)} USD`}
+                      </span>
+                      <span className="text-[10px] font-mono opacity-80 block">
+                        {vueltoUSD > 0.001
+                          ? `ó Bs. ${vueltoVESfromUSD.toFixed(2)}`
+                          : cashUSDReceived >= totalUSD - 0.01
+                          ? 'Bs. 0.00'
+                          : `ó Bs. ${((totalUSD - cashUSDReceived) * bcvRate).toFixed(2)}`}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {selectedPaymentMethod === 'cash_ves' && cashVESReceived > 0 && (
+                  <div className={`p-2.5 rounded-xl border flex items-center justify-between transition-all ${
+                    vueltoVESfromVES > 0.05
+                      ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-400 shadow-sm'
+                      : cashVESReceived >= totalVES - 0.05
+                      ? 'bg-sky-500/10 border-sky-500/30 text-sky-400'
+                      : 'bg-amber-500/10 border-amber-500/30 text-amber-400'
+                  }`}>
+                    <div className="flex items-center gap-2">
+                      <span className={`w-2.5 h-2.5 rounded-full ${vueltoVESfromVES > 0.05 ? 'bg-emerald-400 animate-pulse' : 'bg-sky-400'}`} />
+                      <span className="text-xs font-black">
+                        {vueltoVESfromVES > 0.05
+                          ? '💵 Vuelto a Entregar en Bolívares:'
+                          : cashVESReceived >= totalVES - 0.05
+                          ? '✓ Pago Exacto (Sin Vuelto)'
+                          : '⚠️ Falta por recibir:'}
+                      </span>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-sm font-mono font-black block">
+                        {vueltoVESfromVES > 0.05
+                          ? `Bs. ${vueltoVESfromVES.toFixed(2)}`
+                          : cashVESReceived >= totalVES - 0.05
+                          ? 'Bs. 0.00'
+                          : `Bs. ${(totalVES - cashVESReceived).toFixed(2)}`}
+                      </span>
+                      <span className="text-[10px] font-mono opacity-80 block">
+                        {vueltoVESfromVES > 0.05 && `ó $${vueltoUSDfromVES.toFixed(2)} USD`}
+                      </span>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -2803,10 +3088,14 @@ export default function TabletMobilePosPage() {
                       Monto Recibido en Dólares ($):
                     </label>
                     <input
-                      type="number"
-                      step="1"
-                      value={cashUSDReceived || ''}
-                      onChange={(e) => setCashUSDReceived(parseFloat(e.target.value) || 0)}
+                      type="text"
+                      inputMode="decimal"
+                      value={cashUSDReceived > 0 ? String(cashUSDReceived) : ''}
+                      onChange={(e) => {
+                        const clean = e.target.value.replace(',', '.');
+                        const parsed = parseFloat(clean);
+                        setCashUSDReceived(isNaN(parsed) ? 0 : parsed);
+                      }}
                       placeholder={`Mínimo: $${totalUSD.toFixed(2)}`}
                       className={`w-full px-3 py-2 rounded-xl text-sm font-mono font-black border outline-none ${
                         isLight ? 'bg-white border-slate-300 text-slate-900 focus:border-slate-800' : 'bg-slate-900 border-slate-700 text-white'
@@ -2822,21 +3111,29 @@ export default function TabletMobilePosPage() {
                     </div>
                   )}
 
-                  {/* Botones de Efectivo Rápido */}
-                  <div className="flex flex-wrap gap-1.5">
+                  {/* Botones de Efectivo Rápido en Dólares */}
+                  <div className="flex flex-wrap gap-1.5 items-center">
                     <button
                       type="button"
-                      onClick={() => setCashUSDReceived(Math.ceil(totalUSD))}
-                      className="px-2.5 py-1 bg-slate-200 dark:bg-slate-800 rounded-lg text-xs font-bold active:scale-95"
+                      onClick={() => setCashUSDReceived(totalUSD)}
+                      className={`px-2.5 py-1 rounded-lg text-xs font-bold active:scale-95 cursor-pointer ${
+                        Math.abs(cashUSDReceived - totalUSD) < 0.01
+                          ? 'bg-emerald-500 text-slate-950 font-black'
+                          : 'bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200'
+                      }`}
                     >
-                      Exacto (${Math.ceil(totalUSD)})
+                      Exacto (${totalUSD.toFixed(2)})
                     </button>
                     {[5, 10, 20, 50, 100].map((val) => (
                       <button
                         key={val}
                         type="button"
                         onClick={() => setCashUSDReceived(val)}
-                        className="px-2.5 py-1 bg-slate-200 dark:bg-slate-800 rounded-lg text-xs font-bold active:scale-95"
+                        className={`px-2.5 py-1 rounded-lg text-xs font-bold active:scale-95 cursor-pointer ${
+                          Math.abs(cashUSDReceived - val) < 0.01
+                            ? 'bg-amber-500 text-slate-950 font-black'
+                            : 'bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200'
+                        }`}
                       >
                         ${val}
                       </button>
@@ -2845,16 +3142,17 @@ export default function TabletMobilePosPage() {
 
                   {/* Cálculo de Vuelto en Vivo */}
                   <div className={`p-3 rounded-xl border flex items-center justify-between ${
-                    vueltoUSD > 0 ? 'bg-emerald-500/10 border-emerald-500/30' : 'bg-slate-200/50 dark:bg-slate-900 border-slate-200 dark:border-slate-800'
+                    vueltoUSD > 0.001 ? 'bg-emerald-500/15 border-emerald-500/40' : 'bg-slate-200/50 dark:bg-slate-900 border-slate-200 dark:border-slate-800'
                   }`}>
-                    <span className="text-xs font-black" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
-                      Vuelto / Cambio a Entregar:
+                    <span className="text-xs font-black flex items-center gap-1.5" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
+                      <CircleDollarSign className={`w-4 h-4 ${vueltoUSD > 0.001 ? 'text-emerald-400' : 'text-slate-400'}`} />
+                      <span>{vueltoUSD > 0.001 ? 'Vuelto / Cambio a Entregar:' : 'Vuelto (Sin cambio pendiente):'}</span>
                     </span>
                     <div className="text-right">
-                      <span className="text-sm font-mono font-black text-emerald-600 dark:text-emerald-400 block">
+                      <span className="text-base font-mono font-black text-emerald-600 dark:text-emerald-400 block">
                         ${vueltoUSD.toFixed(2)} USD
                       </span>
-                      <span className="text-[10px] font-mono text-slate-500">
+                      <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400">
                         ó Bs. {vueltoVESfromUSD.toFixed(2)}
                       </span>
                     </div>
@@ -2872,10 +3170,14 @@ export default function TabletMobilePosPage() {
                       Monto Recibido en Bolívares (Bs.):
                     </label>
                     <input
-                      type="number"
-                      step="1"
-                      value={cashVESReceived || ''}
-                      onChange={(e) => setCashVESReceived(parseFloat(e.target.value) || 0)}
+                      type="text"
+                      inputMode="decimal"
+                      value={cashVESReceived > 0 ? String(cashVESReceived) : ''}
+                      onChange={(e) => {
+                        const clean = e.target.value.replace(',', '.');
+                        const parsed = parseFloat(clean);
+                        setCashVESReceived(isNaN(parsed) ? 0 : parsed);
+                      }}
                       placeholder={`Monto total: Bs. ${totalVES.toFixed(2)}`}
                       className={`w-full px-3 py-2 rounded-xl text-sm font-mono font-black border outline-none ${
                         isLight ? 'bg-white border-slate-300 text-slate-900 focus:border-slate-800' : 'bg-slate-900 border-slate-700 text-white'
@@ -2891,15 +3193,58 @@ export default function TabletMobilePosPage() {
                     </div>
                   )}
 
+                  {/* Botones de Efectivo Rápido en Bolívares */}
+                  <div className="flex flex-wrap gap-1.5 items-center">
+                    <button
+                      type="button"
+                      onClick={() => setCashVESReceived(Math.ceil(totalVES))}
+                      className={`px-2.5 py-1 rounded-lg text-xs font-bold active:scale-95 cursor-pointer ${
+                        Math.abs(cashVESReceived - Math.ceil(totalVES)) < 0.05
+                          ? 'bg-emerald-500 text-slate-950 font-black'
+                          : 'bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200'
+                      }`}
+                    >
+                      Exacto (Bs. {Math.ceil(totalVES).toLocaleString('es-VE')})
+                    </button>
+                    {[
+                      Math.ceil(totalVES / 500) * 500,
+                      Math.ceil(totalVES / 1000) * 1000,
+                      Math.ceil(totalVES / 5000) * 5000,
+                      Math.ceil(totalVES / 10000) * 10000,
+                    ]
+                      .filter((v, i, a) => v >= totalVES && a.indexOf(v) === i)
+                      .slice(0, 4)
+                      .map((val) => (
+                        <button
+                          key={val}
+                          type="button"
+                          onClick={() => setCashVESReceived(val)}
+                          className={`px-2.5 py-1 rounded-lg text-xs font-bold active:scale-95 cursor-pointer ${
+                            Math.abs(cashVESReceived - val) < 0.05
+                              ? 'bg-sky-500 text-slate-950 font-black'
+                              : 'bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200'
+                          }`}
+                        >
+                          Bs. {val.toLocaleString('es-VE')}
+                        </button>
+                      ))}
+                  </div>
+
                   <div className={`p-3 rounded-xl border flex items-center justify-between ${
-                    vueltoVESfromVES > 0 ? 'bg-emerald-500/10 border-emerald-500/30' : 'bg-slate-200/50 dark:bg-slate-900 border-slate-200 dark:border-slate-800'
+                    vueltoVESfromVES > 0.05 ? 'bg-emerald-500/15 border-emerald-500/40' : 'bg-slate-200/50 dark:bg-slate-900 border-slate-200 dark:border-slate-800'
                   }`}>
-                    <span className="text-xs font-black" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
-                      Vuelto en Bolívares:
+                    <span className="text-xs font-black flex items-center gap-1.5" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
+                      <CircleDollarSign className={`w-4 h-4 ${vueltoVESfromVES > 0.05 ? 'text-emerald-400' : 'text-slate-400'}`} />
+                      <span>{vueltoVESfromVES > 0.05 ? 'Vuelto en Bolívares:' : 'Vuelto (Sin cambio pendiente):'}</span>
                     </span>
-                    <span className="text-sm font-mono font-black text-emerald-600 dark:text-emerald-400">
-                      Bs. {vueltoVESfromVES.toFixed(2)}
-                    </span>
+                    <div className="text-right">
+                      <span className="text-base font-mono font-black text-emerald-600 dark:text-emerald-400 block">
+                        Bs. {vueltoVESfromVES.toFixed(2)}
+                      </span>
+                      <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400">
+                        ó ${vueltoUSDfromVES.toFixed(2)} USD
+                      </span>
+                    </div>
                   </div>
                 </div>
               )}
@@ -3767,155 +4112,23 @@ export default function TabletMobilePosPage() {
       />
 
       {/* ========================================================================= */}
-      {/* 10. MODAL TICKET DIGITAL DE VENTA FINALIZADA                              */}
+      {/* 10. MODAL TICKET TÉRMICO Y COMPROBANTE (COBRO, PEDIDOS Y VENTAS)          */}
       {/* ========================================================================= */}
-      {completedSaleTicket && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-          <div className={`border rounded-3xl p-5 max-w-sm w-full space-y-3.5 shadow-2xl relative ${
-            isLight ? 'bg-white border-slate-200' : 'bg-slate-900 border-slate-800'
-          }`}>
-            <button
-              onClick={() => setCompletedSaleTicket(null)}
-              className="absolute top-4 right-4 p-1 text-slate-400 hover:text-slate-800 active:scale-90"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            {/* Cabecera del Ticket */}
-            <div className="text-center space-y-0.5 border-b pb-2.5 border-slate-200 dark:border-slate-800">
-              <span className="text-[10px] font-black uppercase text-emerald-600 flex items-center justify-center gap-1">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                ¡Venta Cobrada con Éxito!
-              </span>
-              <h3 className="text-sm font-black" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
-                {companyInfo.name}
-              </h3>
-              <p className="text-[10px] font-mono text-slate-500">
-                RIF: {companyInfo.rif} • Tel: {companyInfo.phone}
-              </p>
-              <p className="text-[9px] text-slate-400">
-                {companyInfo.address}
-              </p>
-              <div className="text-[10px] font-mono font-bold text-slate-500 pt-1">
-                Ticket: <b>{completedSaleTicket.ticketNumber}</b> • {completedSaleTicket.timestamp}
-              </div>
-            </div>
-
-            {/* Cliente */}
-            <div className="text-xs font-mono border-b pb-2 border-slate-200 dark:border-slate-800 space-y-0.5">
-              <p><b>Cliente:</b> {completedSaleTicket.customer.name}</p>
-              <p><b>Cédula/RIF:</b> {completedSaleTicket.customer.docId}</p>
-              {completedSaleTicket.table && <p><b>Ubicación:</b> {completedSaleTicket.table}</p>}
-            </div>
-
-            {/* Desglose de Productos */}
-            <div className="max-h-36 overflow-y-auto space-y-1 text-xs font-mono border-b pb-2 border-slate-200 dark:border-slate-800">
-              {completedSaleTicket.items.map((it) => (
-                <div key={it.id} className="flex justify-between items-baseline">
-                  <span className="truncate pr-2">
-                    {it.qty}x {it.name}
-                  </span>
-                  <span className="shrink-0 font-bold">
-                    ${(it.priceUSD * it.qty).toFixed(2)}
-                  </span>
-                </div>
-              ))}
-            </div>
-
-            {/* Totales y Método de Pago */}
-            <div className="text-xs font-mono space-y-1">
-              <div className="flex justify-between font-black text-sm">
-                <span>TOTAL USD:</span>
-                <span style={{ color: currentPal.primary }}>
-                  ${completedSaleTicket.totalUSD.toFixed(2)}
-                </span>
-              </div>
-              <div className="flex justify-between font-bold">
-                <span>TOTAL BS (BCV):</span>
-                <span>Bs. {completedSaleTicket.totalVES.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between text-slate-500 text-[10px]">
-                <span>Método de Pago:</span>
-                <span className="uppercase font-bold">{completedSaleTicket.paymentMethod}</span>
-              </div>
-              {completedSaleTicket.reference && (
-                <div className="flex justify-between text-slate-500 text-[10px]">
-                  <span>Referencia:</span>
-                  <span className="font-bold">{completedSaleTicket.reference}</span>
-                </div>
-              )}
-              {completedSaleTicket.mixedPayments && completedSaleTicket.mixedPayments.length > 0 && (
-                <div className="py-1.5 border-t border-dashed border-slate-300 dark:border-slate-700 space-y-1 my-1">
-                  <span className="text-[10px] font-black uppercase text-slate-500 block">Desglose Pago Mixto:</span>
-                  {completedSaleTicket.mixedPayments.map((p, idx) => {
-                    const methodNames: Record<string, string> = {
-                      cash_usd: 'Efectivo $',
-                      cash_ves: 'Efectivo Bs',
-                      pago_movil: 'Pago Móvil',
-                      card_debit: 'Punto Débito',
-                      zelle: 'Zelle'
-                    };
-                    return (
-                      <div key={idx} className="flex justify-between text-[10px] font-mono text-slate-600 dark:text-slate-300">
-                        <span>{methodNames[p.method] || p.method}{p.reference ? ` (${p.reference})` : ''}:</span>
-                        <span className="font-bold">{p.currency === 'USD' ? `$${p.amount.toFixed(2)}` : `Bs. ${p.amount.toFixed(2)}`}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-              {completedSaleTicket.changeUSD !== undefined && completedSaleTicket.changeUSD > 0 && (
-                <div className="flex justify-between text-emerald-600 font-bold text-[11px]">
-                  <span>Vuelto Entregado:</span>
-                  <span>${completedSaleTicket.changeUSD.toFixed(2)} / Bs. {completedSaleTicket.changeVES?.toFixed(2)}</span>
-                </div>
-              )}
-            </div>
-
-            <p className="text-[10px] text-center italic text-slate-400 pt-1">
-              "{companyInfo.footerMsg}"
-            </p>
-
-            {/* Botones de Acción */}
-            <div className="grid grid-cols-2 gap-2 pt-2">
-              <button
-                onClick={() => window.print()}
-                className="py-2 rounded-xl text-xs font-bold border flex items-center justify-center gap-1.5 active:scale-95"
-              >
-                <Printer className="w-3.5 h-3.5" />
-                <span>Imprimir Ticket</span>
-              </button>
-              <button
-                onClick={() => {
-                  const receiptText = `*${companyInfo.name}*\n` +
-                    `RIF: ${companyInfo.rif}\n` +
-                    `Ticket: ${completedSaleTicket.ticketNumber}\n` +
-                    `Cliente: ${completedSaleTicket.customer.name}\n` +
-                    `Total: $${completedSaleTicket.totalUSD.toFixed(2)} USD (Bs. ${completedSaleTicket.totalVES.toFixed(2)})\n` +
-                    `Pago: ${completedSaleTicket.paymentMethod} (Ref: ${completedSaleTicket.reference})\n` +
-                    `¡Gracias por su compra!`;
-                  window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(receiptText)}`, '_blank');
-                }}
-                className="py-2 text-white text-xs font-black rounded-xl flex items-center justify-center gap-1.5 active:scale-95 bg-emerald-600 hover:bg-emerald-500"
-              >
-                <Share2 className="w-3.5 h-3.5" />
-                <span>WhatsApp</span>
-              </button>
-            </div>
-
-            <button
-              onClick={() => {
-                setCompletedSaleTicket(null);
-                setActiveTab('menu');
-              }}
-              className="w-full py-2.5 text-white text-xs font-black rounded-xl shadow-md active:scale-95"
-              style={{ backgroundColor: currentPal.primary }}
-            >
-              Nueva Venta
-            </button>
-          </div>
-        </div>
-      )}
+      <SaleReceiptModal
+        completedSaleTicket={completedSaleTicket || previewTicket}
+        onClose={() => {
+          setCompletedSaleTicket(null);
+          setPreviewTicket(null);
+        }}
+        onNewSale={completedSaleTicket ? () => {
+          setCompletedSaleTicket(null);
+          setPreviewTicket(null);
+          setActiveTab('menu');
+        } : undefined}
+        companyInfo={companyInfo}
+        isLight={isLight}
+        primaryColor={currentPal.primary}
+      />
 
       {/* ========================================================================= */}
       {/* 11. MODAL AGREGAR MESA / BARRA DINÁMICA                                    */}
@@ -4540,10 +4753,18 @@ export default function TabletMobilePosPage() {
       {/* ========================================================================= */}
       <StreetAmbassadorLicenseModal
         isOpen={showStreetAmbassadorModal}
-        onClose={() => setShowStreetAmbassadorModal(false)}
+        onClose={() => {
+          setShowStreetAmbassadorModal(false);
+          userDismissedTrialModalRef.current = true;
+        }}
         isLight={isLight}
         primaryColor={currentPal.primary}
         storeName="KlikPOS Street Negocio"
+        onLicenseActivated={() => {
+          userDismissedTrialModalRef.current = false;
+          setShowStreetAmbassadorModal(false);
+          setTrialState(evaluateTrialState());
+        }}
       />
 
       {/* ========================================================================= */}
@@ -4556,9 +4777,8 @@ export default function TabletMobilePosPage() {
         bcvRate={bcvRate}
         primaryColor={currentPal.primary}
         onPrintTicket={(sale) => {
-          try {
-            if (typeof window !== 'undefined') window.print();
-          } catch {}
+          const ticket = localSaleToTicket(sale, companyInfo);
+          setPreviewTicket(ticket);
         }}
       />
 

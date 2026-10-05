@@ -13,7 +13,7 @@
 
 [Setup]
 AppName={#AppName}
-AppVersion=3.0.4
+AppVersion=3.0.5
 AppPublisher=KlikPOS Cloud
 AppPublisherURL=https://klikposcloud.com
 AppSupportURL=https://klikposcloud.com
@@ -26,7 +26,7 @@ VersionInfoProductVersion=3.0.1.0
 DefaultDirName={autopf}\{#AppName}
 DefaultGroupName={#AppName}
 OutputDir=c:\Users\pcpro\OneDrive\Documents\venematic-master\venematic-master\venematic-desktop\dist-installer
-OutputBaseFilename=KlikPOS-Enterprise-Setup-v3.0.4
+OutputBaseFilename=KlikPOS-Enterprise-Setup-v3.0.5
 Compression=lzma2/max
 SolidCompression=yes
 WizardStyle=modern

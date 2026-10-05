@@ -22,7 +22,17 @@ import {
   ChevronUp,
   FileSpreadsheet,
   Layers,
-  Database
+  Database,
+  BarChart3,
+  Flame,
+  Trophy,
+  Zap,
+  Sparkles,
+  PieChart,
+  ArrowUpRight,
+  Bike,
+  Store,
+  Eye
 } from 'lucide-react';
 import { db, LocalSale } from '@/lib/db';
 import { formatUSD, formatVES } from '@/lib/formatters';
@@ -56,6 +66,9 @@ export default function StreetSalesBackupModal({
   const [backupStatusMsg, setBackupStatusMsg] = useState<string | null>(null);
   const [expandedSaleId, setExpandedSaleId] = useState<number | string | null>(null);
   const [cloudSyncStatus, setCloudSyncStatus] = useState<'idle' | 'syncing' | 'synced'>('idle');
+  const [hoveredBarIndex, setHoveredBarIndex] = useState<number | null>(null);
+  const [filterType, setFilterType] = useState<'all' | 'local' | 'delivery'>('all');
+  const [filterPayment, setFilterPayment] = useState<'all' | 'paid' | 'pending'>('all');
 
   // Cargar ventas de IndexedDB / Dexie
   const loadSales = async () => {
@@ -133,6 +146,152 @@ export default function StreetSalesBackupModal({
     const ticketCount = filteredSales.length;
     const avgTicket = ticketCount > 0 ? totalUSD / ticketCount : 0;
 
+    // Métricas dinámicas para el gráfico animado según el período
+    let chartBars: { label: string; subLabel: string; amount: number; count: number; isPeak?: boolean }[] = [];
+
+    if (period === 'daily') {
+      const slots = [
+        { label: 'Mañana', subLabel: '6am - 12pm', amount: 0, count: 0 },
+        { label: 'Mediodía', subLabel: '12pm - 4pm', amount: 0, count: 0 },
+        { label: 'Tarde', subLabel: '4pm - 8pm', amount: 0, count: 0 },
+        { label: 'Noche', subLabel: '8pm - 6am', amount: 0, count: 0 }
+      ];
+
+      for (const s of filteredSales) {
+        const d = s.timestamp ? new Date(s.timestamp) : new Date();
+        const h = d.getHours();
+        const val = s.totalUSD || 0;
+        if (h >= 6 && h < 12) { slots[0].amount += val; slots[0].count++; }
+        else if (h >= 12 && h < 16) { slots[1].amount += val; slots[1].count++; }
+        else if (h >= 16 && h < 20) { slots[2].amount += val; slots[2].count++; }
+        else { slots[3].amount += val; slots[3].count++; }
+      }
+      chartBars = slots;
+    } else if (period === 'weekly') {
+      const days = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+      const now = new Date();
+      const last7: { label: string; subLabel: string; dateStr: string; amount: number; count: number }[] = [];
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
+        const dateStr = d.toISOString().slice(0, 10);
+        last7.push({
+          label: days[d.getDay()],
+          subLabel: `${d.getDate()}/${d.getMonth() + 1}`,
+          dateStr,
+          amount: 0,
+          count: 0
+        });
+      }
+      for (const s of filteredSales) {
+        const sDateStr = (s.timestamp || '').slice(0, 10);
+        const match = last7.find(item => item.dateStr === sDateStr);
+        if (match) {
+          match.amount += s.totalUSD || 0;
+          match.count++;
+        }
+      }
+      chartBars = last7;
+    } else if (period === 'monthly') {
+      const weeks = [
+        { label: 'Sem 1', subLabel: 'Días 1-7', amount: 0, count: 0 },
+        { label: 'Sem 2', subLabel: 'Días 8-14', amount: 0, count: 0 },
+        { label: 'Sem 3', subLabel: 'Días 15-21', amount: 0, count: 0 },
+        { label: 'Sem 4', subLabel: 'Días 22-fin', amount: 0, count: 0 }
+      ];
+      for (const s of filteredSales) {
+        const d = s.timestamp ? new Date(s.timestamp) : new Date();
+        const dom = d.getDate();
+        const val = s.totalUSD || 0;
+        if (dom <= 7) { weeks[0].amount += val; weeks[0].count++; }
+        else if (dom <= 14) { weeks[1].amount += val; weeks[1].count++; }
+        else if (dom <= 21) { weeks[2].amount += val; weeks[2].count++; }
+        else { weeks[3].amount += val; weeks[3].count++; }
+      }
+      chartBars = weeks;
+    } else {
+      const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+      const now = new Date();
+      const last6Months: { label: string; subLabel: string; m: number; y: number; amount: number; count: number }[] = [];
+      for (let i = 5; i >= 0; i--) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        last6Months.push({
+          label: months[d.getMonth()],
+          subLabel: String(d.getFullYear()).slice(-2),
+          m: d.getMonth(),
+          y: d.getFullYear(),
+          amount: 0,
+          count: 0
+        });
+      }
+      for (const s of filteredSales) {
+        const d = s.timestamp ? new Date(s.timestamp) : new Date();
+        const match = last6Months.find(item => item.m === d.getMonth() && item.y === d.getFullYear());
+        if (match) {
+          match.amount += s.totalUSD || 0;
+          match.count++;
+        }
+      }
+      chartBars = last6Months;
+    }
+
+    const maxBarAmount = Math.max(...chartBars.map(b => b.amount), 0);
+    if (maxBarAmount > 0) {
+      chartBars = chartBars.map(b => ({
+        ...b,
+        isPeak: b.amount === maxBarAmount && b.amount > 0
+      }));
+    }
+
+    const peakBar = chartBars.find(b => b.isPeak && b.amount > 0);
+
+    let highestSale: { amount: number; receipt: string; time: string } | null = null;
+    for (const s of filteredSales) {
+      const amt = s.totalUSD || 0;
+      if (!highestSale || amt > highestSale.amount) {
+        highestSale = {
+          amount: amt,
+          receipt: s.receiptNumber || String(s.id || ''),
+          time: s.timestamp ? new Date(s.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''
+        };
+      }
+    }
+
+    let localSalesCount = 0;
+    let localSalesUSD = 0;
+    let deliverySalesCount = 0;
+    let deliverySalesUSD = 0;
+    let pendingSalesCount = 0;
+    let pendingSalesUSD = 0;
+
+    for (const s of filteredSales) {
+      const amt = s.totalUSD || 0;
+      const isDel = s.orderType === 'delivery';
+      const isPend = s.paymentStatus === 'por_cobrar' || s.status === 'pending';
+
+      if (isDel) {
+        deliverySalesCount++;
+        deliverySalesUSD += amt;
+      } else {
+        localSalesCount++;
+        localSalesUSD += amt;
+      }
+
+      if (isPend) {
+        pendingSalesCount++;
+        pendingSalesUSD += amt;
+      }
+    }
+
+    const totalCash = cashUsd + cashVes;
+    const totalPaymentsUSD = totalCash + pagoMovil + puntoTarjeta + zelle + credito;
+    const paymentProportions = {
+      cash: totalPaymentsUSD > 0 ? (totalCash / totalPaymentsUSD) * 100 : 0,
+      pagoMovil: totalPaymentsUSD > 0 ? (pagoMovil / totalPaymentsUSD) * 100 : 0,
+      punto: totalPaymentsUSD > 0 ? (puntoTarjeta / totalPaymentsUSD) * 100 : 0,
+      zelle: totalPaymentsUSD > 0 ? (zelle / totalPaymentsUSD) * 100 : 0,
+      credito: totalPaymentsUSD > 0 ? (credito / totalPaymentsUSD) * 100 : 0
+    };
+
     return {
       totalUSD,
       totalVES,
@@ -143,9 +302,35 @@ export default function StreetSalesBackupModal({
       pagoMovil,
       puntoTarjeta,
       zelle,
-      credito
+      credito,
+      chartBars,
+      maxBarAmount,
+      peakBar,
+      highestSale,
+      paymentProportions,
+      localSalesCount,
+      localSalesUSD,
+      deliverySalesCount,
+      deliverySalesUSD,
+      pendingSalesCount,
+      pendingSalesUSD,
     };
-  }, [filteredSales, bcvRate]);
+  }, [filteredSales, bcvRate, period]);
+
+  // Ventas filtradas para el listado por canal y estado de pago
+  const displayedSales = useMemo(() => {
+    return filteredSales.filter(s => {
+      const isDel = s.orderType === 'delivery';
+      const isPend = s.paymentStatus === 'por_cobrar' || s.status === 'pending';
+
+      if (filterType === 'local' && isDel) return false;
+      if (filterType === 'delivery' && !isDel) return false;
+      if (filterPayment === 'paid' && isPend) return false;
+      if (filterPayment === 'pending' && !isPend) return false;
+
+      return true;
+    });
+  }, [filteredSales, filterType, filterPayment]);
 
   // FUNCIÓN ESTRELLA DE RESPALDO: Exportar respaldo JSON local seguro
   const handleExportBackup = async () => {
@@ -495,6 +680,318 @@ export default function StreetSalesBackupModal({
             </div>
           </div>
 
+          {/* DESGLOSE ESTRATÉGICO: SALÓN VS DELIVERY Y ESTADO DE COBRO */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {/* Salón / Local */}
+            <div className={`p-3.5 rounded-2xl border flex items-center justify-between ${
+              isLight ? 'bg-emerald-50/70 border-emerald-200' : 'bg-emerald-950/20 border-emerald-500/30'
+            }`}>
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 flex items-center justify-center shrink-0">
+                  <Store className="w-5 h-5" />
+                </div>
+                <div>
+                  <span className={`text-[10px] font-black uppercase tracking-wider block ${isLight ? 'text-emerald-800' : 'text-emerald-300'}`}>
+                    Salón / Local
+                  </span>
+                  <span className={`text-base font-black font-mono ${isLight ? 'text-slate-900' : 'text-white'}`}>
+                    {formatUSD(metrics.localSalesUSD)}
+                  </span>
+                </div>
+              </div>
+              <span className={`text-[11px] font-mono px-2 py-0.5 rounded-lg font-bold ${
+                isLight ? 'bg-white text-emerald-800 border border-emerald-200' : 'bg-slate-900 text-emerald-300 border border-emerald-500/20'
+              }`}>
+                {metrics.localSalesCount} ventas
+              </span>
+            </div>
+
+            {/* Delivery */}
+            <div className={`p-3.5 rounded-2xl border flex items-center justify-between ${
+              isLight ? 'bg-purple-50/70 border-purple-200' : 'bg-purple-950/20 border-purple-500/30'
+            }`}>
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-purple-500/10 text-purple-600 border border-purple-500/20 flex items-center justify-center shrink-0">
+                  <Bike className="w-5 h-5" />
+                </div>
+                <div>
+                  <span className={`text-[10px] font-black uppercase tracking-wider block ${isLight ? 'text-purple-800' : 'text-purple-300'}`}>
+                    Delivery a Domicilio
+                  </span>
+                  <span className={`text-base font-black font-mono ${isLight ? 'text-slate-900' : 'text-white'}`}>
+                    {formatUSD(metrics.deliverySalesUSD)}
+                  </span>
+                </div>
+              </div>
+              <span className={`text-[11px] font-mono px-2 py-0.5 rounded-lg font-bold ${
+                isLight ? 'bg-white text-purple-800 border border-purple-200' : 'bg-slate-900 text-purple-300 border border-purple-500/20'
+              }`}>
+                {metrics.deliverySalesCount} despachos
+              </span>
+            </div>
+
+            {/* Por Cobrar en Destino (COD) */}
+            <div className={`p-3.5 rounded-2xl border flex items-center justify-between ${
+              metrics.pendingSalesCount > 0
+                ? isLight ? 'bg-amber-50/90 border-amber-300' : 'bg-amber-950/30 border-amber-500/40'
+                : isLight ? 'bg-slate-50 border-slate-200' : 'bg-slate-900/60 border-slate-800'
+            }`}>
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-600 border border-amber-500/20 flex items-center justify-center shrink-0">
+                  <Clock className="w-5 h-5" />
+                </div>
+                <div>
+                  <span className={`text-[10px] font-black uppercase tracking-wider block ${
+                    metrics.pendingSalesCount > 0 ? (isLight ? 'text-amber-900' : 'text-amber-300') : (isLight ? 'text-slate-500' : 'text-slate-400')
+                  }`}>
+                    Por Cobrar en Destino
+                  </span>
+                  <span className={`text-base font-black font-mono ${
+                    metrics.pendingSalesCount > 0 ? (isLight ? 'text-amber-800' : 'text-amber-400') : (isLight ? 'text-slate-700' : 'text-slate-300')
+                  }`}>
+                    {formatUSD(metrics.pendingSalesUSD)}
+                  </span>
+                </div>
+              </div>
+              <span className={`text-[11px] font-mono px-2 py-0.5 rounded-lg font-bold ${
+                metrics.pendingSalesCount > 0
+                  ? isLight ? 'bg-amber-100 text-amber-950 border border-amber-300' : 'bg-amber-500/20 text-amber-200 border border-amber-500/30'
+                  : isLight ? 'bg-slate-100 text-slate-500' : 'bg-slate-800 text-slate-400'
+              }`}>
+                {metrics.pendingSalesCount} pendientes
+              </span>
+            </div>
+          </div>
+
+          {/* ================================================================= */}
+          {/* NUEVO MÓDULO VISUAL WOW: GRÁFICO DINÁMICO Y ANIMADO DE VENTAS    */}
+          {/* ================================================================= */}
+          <div className={`p-4 sm:p-5 rounded-2xl border space-y-4 transition-all duration-300 ${
+            isLight
+              ? 'bg-white border-slate-200 shadow-sm'
+              : 'bg-gradient-to-b from-[#0c1220] to-[#070a12] border-slate-800 shadow-xl shadow-black/40'
+          }`}>
+            {/* Header del Gráfico con Récords y Pico en Vivo */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-2 border-b border-slate-200 dark:border-slate-800/80">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-500 border border-amber-500/20 flex items-center justify-center shrink-0">
+                  <BarChart3 className="w-4 h-4 stroke-[2.5]" />
+                </div>
+                <div>
+                  <h3 className={`text-xs sm:text-sm font-black tracking-tight ${isLight ? 'text-slate-900' : 'text-white'}`}>
+                    Ritmo de Facturación & Tendencia
+                  </h3>
+                  <p className={`text-[10px] font-medium ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
+                    {period === 'daily' && '⚡ Desglose por franjas horarias de la jornada'}
+                    {period === 'weekly' && '📅 Comparativa de rendimiento de los últimos 7 días'}
+                    {period === 'monthly' && '📈 Evolución semanal en el mes en curso'}
+                    {period === 'all' && '🗂️ Historial acumulado por meses'}
+                  </p>
+                </div>
+              </div>
+
+              {/* Insignias de Impacto / Récords Visuales */}
+              <div className="flex flex-wrap items-center gap-1.5">
+                {metrics.peakBar && (
+                  <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[11px] font-black ${
+                    isLight
+                      ? 'bg-amber-50 border-amber-200 text-amber-800'
+                      : 'bg-amber-500/15 border-amber-500/30 text-amber-300'
+                  }`}>
+                    <Flame className="w-3.5 h-3.5 text-amber-500 animate-pulse" />
+                    <span>Pico: {metrics.peakBar.label} ({formatUSD(metrics.peakBar.amount)})</span>
+                  </div>
+                )}
+                {metrics.highestSale && (
+                  <div className={`hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[11px] font-black ${
+                    isLight
+                      ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                      : 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300'
+                  }`}>
+                    <Trophy className="w-3.5 h-3.5 text-emerald-500" />
+                    <span>Récord: {formatUSD(metrics.highestSale.amount)}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Lienzo del Gráfico de Barras Animadas */}
+            <div className="relative pt-3 pb-1">
+              {/* Líneas Guía de Fondo */}
+              <div className="absolute inset-x-0 top-3 bottom-12 flex flex-col justify-between pointer-events-none opacity-30">
+                <div className={`border-b border-dashed ${isLight ? 'border-slate-300' : 'border-slate-700'}`} />
+                <div className={`border-b border-dashed ${isLight ? 'border-slate-300' : 'border-slate-700'}`} />
+                <div className={`border-b border-dashed ${isLight ? 'border-slate-300' : 'border-slate-700'}`} />
+              </div>
+
+              {/* Contenedor de Columnas */}
+              <div className="grid grid-flow-col auto-cols-fr gap-2 sm:gap-4 items-end h-48 px-1 relative z-10">
+                {metrics.chartBars.map((bar, idx) => {
+                  const hasSales = bar.amount > 0;
+                  const rawPercent = metrics.maxBarAmount > 0 ? (bar.amount / metrics.maxBarAmount) * 100 : 0;
+                  const heightPercent = hasSales ? Math.max(rawPercent, 12) : 6;
+                  const isHovered = hoveredBarIndex === idx;
+
+                  return (
+                    <div
+                      key={idx}
+                      onMouseEnter={() => setHoveredBarIndex(idx)}
+                      onMouseLeave={() => setHoveredBarIndex(null)}
+                      onClick={() => setHoveredBarIndex(isHovered ? null : idx)}
+                      className="flex flex-col items-center h-full justify-end group cursor-pointer"
+                    >
+                      {/* Tooltip Dinámico Flotante en Hover / Tap */}
+                      <div className={`transition-all duration-200 mb-1.5 flex flex-col items-center ${
+                        isHovered ? 'scale-110 opacity-100' : 'opacity-90 group-hover:opacity-100'
+                      }`}>
+                        {bar.isPeak && (
+                          <span className="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.2 rounded-md bg-amber-500 text-slate-950 shadow-xs mb-0.5 animate-bounce">
+                            Pico 🔥
+                          </span>
+                        )}
+                        <span className={`text-[11px] sm:text-xs font-mono font-black ${
+                          hasSales
+                            ? bar.isPeak
+                              ? 'text-amber-500 dark:text-amber-400'
+                              : isLight ? 'text-slate-900' : 'text-emerald-400'
+                            : isLight ? 'text-slate-400' : 'text-slate-600'
+                        }`}>
+                          {hasSales ? `$${bar.amount.toFixed(bar.amount >= 100 ? 0 : 2)}` : '$0'}
+                        </span>
+                      </div>
+
+                      {/* Columna / Barra con Animación Elástica */}
+                      <div className="w-full max-w-[54px] flex-1 flex items-end">
+                        <div
+                          className={`w-full rounded-t-xl transition-all duration-700 ease-out relative overflow-hidden ${
+                            hasSales
+                              ? bar.isPeak
+                                ? 'bg-gradient-to-t from-amber-600 via-amber-500 to-yellow-300 shadow-lg shadow-amber-500/25 ring-2 ring-amber-400/40'
+                                : 'bg-gradient-to-t from-emerald-600 via-teal-500 to-emerald-400 shadow-md shadow-emerald-500/20 group-hover:brightness-110'
+                              : isLight ? 'bg-slate-200/60' : 'bg-slate-800/40'
+                          }`}
+                          style={{
+                            height: `${heightPercent}%`,
+                            transform: isHovered ? 'scaleY(1.03)' : 'scaleY(1)',
+                            transformOrigin: 'bottom'
+                          }}
+                        >
+                          {/* Brillo Superior de Cristal */}
+                          {hasSales && (
+                            <div className="absolute top-0 inset-x-0 h-1 bg-white/40 rounded-t-xl" />
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Cantidad de Ventas y Etiquetas Inferiores */}
+                      <div className="w-full text-center mt-2 space-y-0.5">
+                        <span className={`text-[10px] font-mono font-bold block ${
+                          hasSales
+                            ? isLight ? 'text-slate-700' : 'text-slate-300'
+                            : isLight ? 'text-slate-400' : 'text-slate-600'
+                        }`}>
+                          {bar.count} vtas
+                        </span>
+                        <span className={`text-[10.5px] sm:text-xs font-black block truncate ${
+                          bar.isPeak
+                            ? 'text-amber-600 dark:text-amber-400'
+                            : isLight ? 'text-slate-800' : 'text-slate-200'
+                        }`}>
+                          {bar.label}
+                        </span>
+                        <span className={`text-[9px] font-medium block truncate ${
+                          isLight ? 'text-slate-500' : 'text-slate-400'
+                        }`}>
+                          {bar.subLabel}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Barra Segmentada FinTech de Métodos de Pago */}
+            <div className="pt-2 border-t border-slate-200 dark:border-slate-800/80 space-y-2">
+              <div className="flex items-center justify-between text-[11px]">
+                <span className={`font-bold flex items-center gap-1.5 ${isLight ? 'text-slate-700' : 'text-slate-300'}`}>
+                  <PieChart className="w-3.5 h-3.5 text-sky-400" />
+                  <span>Distribución Proporcional de Cobro</span>
+                </span>
+                <span className={`font-mono text-[10px] ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
+                  Base: {formatUSD(metrics.totalUSD)}
+                </span>
+              </div>
+
+              {/* Barra Continua Segmentada */}
+              <div className="h-3 w-full rounded-full overflow-hidden flex bg-slate-200 dark:bg-slate-800 p-0.5 gap-0.5 shadow-inner">
+                {metrics.paymentProportions.cash > 0 && (
+                  <div
+                    style={{ width: `${metrics.paymentProportions.cash}%` }}
+                    className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-500"
+                    title={`Efectivo: ${metrics.paymentProportions.cash.toFixed(1)}%`}
+                  />
+                )}
+                {metrics.paymentProportions.pagoMovil > 0 && (
+                  <div
+                    style={{ width: `${metrics.paymentProportions.pagoMovil}%` }}
+                    className="h-full rounded-full bg-gradient-to-r from-sky-500 to-blue-500 transition-all duration-500"
+                    title={`Pago Móvil: ${metrics.paymentProportions.pagoMovil.toFixed(1)}%`}
+                  />
+                )}
+                {metrics.paymentProportions.punto > 0 && (
+                  <div
+                    style={{ width: `${metrics.paymentProportions.punto}%` }}
+                    className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-500"
+                    title={`Punto de Venta: ${metrics.paymentProportions.punto.toFixed(1)}%`}
+                  />
+                )}
+                {metrics.paymentProportions.zelle > 0 && (
+                  <div
+                    style={{ width: `${metrics.paymentProportions.zelle}%` }}
+                    className="h-full rounded-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all duration-500"
+                    title={`Zelle / Digital: ${metrics.paymentProportions.zelle.toFixed(1)}%`}
+                  />
+                )}
+                {metrics.paymentProportions.credito > 0 && (
+                  <div
+                    style={{ width: `${metrics.paymentProportions.credito}%` }}
+                    className="h-full rounded-full bg-gradient-to-r from-amber-500 to-orange-500 transition-all duration-500"
+                    title={`Créditos: ${metrics.paymentProportions.credito.toFixed(1)}%`}
+                  />
+                )}
+              </div>
+
+              {/* Leyenda Dinámica con Chips Interactivos */}
+              <div className="flex flex-wrap items-center gap-2 pt-1 text-[10px] font-mono">
+                <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-bold">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" />
+                  Efectivo {metrics.paymentProportions.cash.toFixed(0)}%
+                </span>
+                <span className="flex items-center gap-1 text-sky-600 dark:text-sky-400 font-bold">
+                  <span className="w-2 h-2 rounded-full bg-sky-500 inline-block" />
+                  Pago Móvil {metrics.paymentProportions.pagoMovil.toFixed(0)}%
+                </span>
+                <span className="flex items-center gap-1 text-indigo-600 dark:text-indigo-400 font-bold">
+                  <span className="w-2 h-2 rounded-full bg-indigo-500 inline-block" />
+                  Punto {metrics.paymentProportions.punto.toFixed(0)}%
+                </span>
+                {metrics.paymentProportions.zelle > 0 && (
+                  <span className="flex items-center gap-1 text-purple-600 dark:text-purple-400 font-bold">
+                    <span className="w-2 h-2 rounded-full bg-purple-500 inline-block" />
+                    Zelle {metrics.paymentProportions.zelle.toFixed(0)}%
+                  </span>
+                )}
+                {metrics.paymentProportions.credito > 0 && (
+                  <span className="flex items-center gap-1 text-amber-600 dark:text-amber-400 font-bold">
+                    <span className="w-2 h-2 rounded-full bg-amber-500 inline-block" />
+                    Fiado {metrics.paymentProportions.credito.toFixed(0)}%
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+
           {/* DESGLOSE POR FORMAS DE PAGO */}
           <div className={`p-4 rounded-2xl border space-y-3 ${
             isLight ? 'bg-white border-slate-200 shadow-xs' : 'bg-[#090d16] border-slate-800'
@@ -560,43 +1057,92 @@ export default function StreetSalesBackupModal({
           </div>
 
           {/* LISTA DE TICKETS Y VENTAS DEL PERÍODO */}
+          {/* SECCIÓN LISTADO DETALLADO DE COMPROBANTES */}
           <div className="space-y-2.5">
-            <div className="flex items-center justify-between">
-              <span className={`text-xs font-black uppercase tracking-wider flex items-center gap-1.5 ${
-                isLight ? 'text-slate-900' : 'text-slate-200'
-              }`}>
-                <Receipt className={`w-4 h-4 ${isLight ? 'text-amber-600' : 'text-amber-400'}`} />
-                <span>Historial de Comprobantes ({filteredSales.length})</span>
-              </span>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <span className={`text-xs font-black uppercase tracking-wider flex items-center gap-1.5 ${
+                  isLight ? 'text-slate-900' : 'text-slate-200'
+                }`}>
+                  <Receipt className={`w-4 h-4 ${isLight ? 'text-amber-600' : 'text-amber-400'}`} />
+                  <span>Historial de Comprobantes ({displayedSales.length})</span>
+                </span>
+              </div>
 
-              <button
-                type="button"
-                onClick={loadSales}
-                className={`text-xs font-bold flex items-center gap-1 cursor-pointer transition-colors ${
-                  isLight ? 'text-slate-600 hover:text-slate-900' : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                <RefreshCw className="w-3.5 h-3.5" />
-                <span>Refrescar</span>
-              </button>
+              {/* Filtros de Canal y Cobranza */}
+              <div className="flex flex-wrap items-center gap-2">
+                {/* Filtro por Canal (Local vs Delivery) */}
+                <div className={`flex items-center p-0.5 rounded-xl border text-[10px] font-bold ${
+                  isLight ? 'border-slate-300 bg-slate-100' : 'border-slate-800 bg-slate-900'
+                }`}>
+                  {(['all', 'local', 'delivery'] as const).map(t => (
+                    <button
+                      key={t}
+                      type="button"
+                      onClick={() => setFilterType(t)}
+                      className={`px-2 py-0.5 rounded-lg uppercase transition-all cursor-pointer ${
+                        filterType === t
+                          ? 'bg-amber-500 text-slate-950 font-black shadow-xs'
+                          : isLight ? 'text-slate-600 hover:text-slate-900' : 'text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      {t === 'all' ? 'Todos' : t === 'local' ? 'Local' : 'Delivery'}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Filtro por Estado de Cobro */}
+                <div className={`flex items-center p-0.5 rounded-xl border text-[10px] font-bold ${
+                  isLight ? 'border-slate-300 bg-slate-100' : 'border-slate-800 bg-slate-900'
+                }`}>
+                  {(['all', 'paid', 'pending'] as const).map(p => (
+                    <button
+                      key={p}
+                      type="button"
+                      onClick={() => setFilterPayment(p)}
+                      className={`px-2 py-0.5 rounded-lg uppercase transition-all cursor-pointer ${
+                        filterPayment === p
+                          ? 'bg-amber-500 text-slate-950 font-black shadow-xs'
+                          : isLight ? 'text-slate-600 hover:text-slate-900' : 'text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      {p === 'all' ? 'Todos' : p === 'paid' ? 'Pagados' : 'Por Cobrar'}
+                    </button>
+                  ))}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={loadSales}
+                  className={`text-xs font-bold flex items-center gap-1 cursor-pointer transition-colors p-1 rounded-lg ${
+                    isLight ? 'text-slate-600 hover:text-slate-900' : 'text-slate-400 hover:text-white'
+                  }`}
+                  title="Refrescar ventas"
+                >
+                  <RefreshCw className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Refrescar</span>
+                </button>
+              </div>
             </div>
 
-            {filteredSales.length === 0 ? (
+            {displayedSales.length === 0 ? (
               <div className={`p-8 rounded-2xl border border-dashed text-center space-y-2 ${
                 isLight ? 'border-slate-300 bg-white text-slate-700' : 'border-slate-800 bg-[#090d16] text-slate-300'
               }`}>
                 <Receipt className="w-8 h-8 text-slate-400 mx-auto" />
                 <p className="text-xs font-bold">
-                  No hay ventas registradas en el período seleccionado ({period === 'daily' ? 'hoy' : period === 'weekly' ? 'esta semana' : 'este mes'}).
+                  No hay ventas registradas con los filtros seleccionados ({period === 'daily' ? 'hoy' : period === 'weekly' ? 'esta semana' : 'este mes'}).
                 </p>
                 <p className={`text-[11px] ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
-                  Las ventas cobradas desde el Punto de Venta aparecerán aquí automáticamente en tiempo real.
+                  Cambia los filtros o cobra una nueva venta para verla reflejada aquí.
                 </p>
               </div>
             ) : (
               <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
-                {filteredSales.map((sale) => {
+                {displayedSales.map((sale) => {
                   const isExpanded = expandedSaleId === (sale.id || sale.receiptNumber);
+                  const isDel = sale.orderType === 'delivery';
+                  const isPend = sale.paymentStatus === 'por_cobrar' || sale.status === 'pending';
 
                   return (
                     <div
@@ -607,9 +1153,9 @@ export default function StreetSalesBackupModal({
                           : 'border-slate-800 bg-[#090d16] hover:border-slate-700'
                       }`}
                     >
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-2">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <div className="min-w-0 space-y-1">
+                          <div className="flex items-center gap-2 flex-wrap">
                             <span className={`font-mono font-black ${isLight ? 'text-amber-600' : 'text-amber-400'}`}>
                               #{sale.receiptNumber}
                             </span>
@@ -621,13 +1167,49 @@ export default function StreetSalesBackupModal({
                             }`}>
                               {sale.items?.length || 0} ítems
                             </span>
+
+                            {/* Badge Canal: Delivery o Salón */}
+                            {isDel ? (
+                              <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-md bg-purple-500/20 text-purple-300 border border-purple-500/30 flex items-center gap-1">
+                                <Bike className="w-2.5 h-2.5" />
+                                <span>Delivery {sale.driverName ? `• ${sale.driverName}` : ''}</span>
+                              </span>
+                            ) : (
+                              <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
+                                <Store className="w-2.5 h-2.5" />
+                                <span>{sale.table || 'Salón / Local'}</span>
+                              </span>
+                            )}
+
+                            {/* Badge Cobro */}
+                            <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-md ${
+                              isPend
+                                ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                                : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                            }`}>
+                              {isPend ? '⚠️ Por Cobrar en Destino' : '✓ Pagado'}
+                            </span>
                           </div>
-                          <span className={`text-[11px] truncate block mt-0.5 ${isLight ? 'text-slate-700 font-medium' : 'text-slate-300'}`}>
-                            Cajero: {sale.cashierName || 'Cajero Principal'}
-                          </span>
+
+                          <div className="flex items-center gap-2 text-[11px]">
+                            {sale.customerName && (
+                              <span className={`font-bold ${isLight ? 'text-slate-900' : 'text-slate-200'}`}>
+                                Cliente: {sale.customerName}
+                              </span>
+                            )}
+                            <span className={`text-[10.5px] ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
+                              • Cajero: {sale.cashierName || 'Cajero Principal'}
+                            </span>
+                          </div>
+
+                          {isDel && sale.deliveryAddress && (
+                            <p className={`text-[10px] truncate max-w-sm flex items-center gap-1 ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
+                              <span className="text-amber-500 font-bold">📍</span> {sale.deliveryAddress}
+                            </p>
+                          )}
                         </div>
 
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2.5 shrink-0 self-end sm:self-center">
                           <div className="text-right">
                             <div className={`font-mono font-black text-sm ${isLight ? 'text-emerald-700' : 'text-emerald-400'}`}>
                               {formatUSD(sale.totalUSD)}
@@ -637,17 +1219,20 @@ export default function StreetSalesBackupModal({
                             </span>
                           </div>
 
-                          {/* Botón Imprimir Ticket */}
+                          {/* Botón Ver e Imprimir Comprobante */}
                           {onPrintTicket && (
                             <button
                               type="button"
                               onClick={() => onPrintTicket(sale)}
-                              className={`p-2 rounded-xl active:scale-95 transition-all cursor-pointer ${
-                                isLight ? 'bg-slate-100 hover:bg-slate-200 text-slate-700' : 'bg-slate-800 hover:bg-slate-700 text-white'
+                              className={`px-2.5 py-1.5 rounded-xl active:scale-95 transition-all cursor-pointer flex items-center gap-1 text-[11px] font-black ${
+                                isLight
+                                  ? 'bg-amber-100 hover:bg-amber-200 text-amber-950 border border-amber-300'
+                                  : 'bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30'
                               }`}
-                              title="Reimprimir Comprobante Térmico"
+                              title="Previsualizar e Imprimir Ticket Térmico"
                             >
-                              <Printer className="w-4 h-4" />
+                              <Printer className="w-3.5 h-3.5" />
+                              <span className="hidden sm:inline">Ver Ticket</span>
                             </button>
                           )}
 
