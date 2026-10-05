@@ -501,9 +501,9 @@ export default function InteractivePresentationModal({
                   <Gift className="w-4 h-4" />
                 </div>
                 <div className="min-w-0">
-                  <h4 className="text-xs font-black text-white">Programa Embajador: Tu Terminal GRATIS</h4>
+                  <h4 className="text-xs font-black text-white">Programa de Referidos & Redes: ¡100% ILIMITADO!</h4>
                   <p className="text-[10px] text-slate-300 leading-tight">
-                    Ganas <strong className="text-emerald-400">$5 USD</strong> por cada negocio referido. Refiere a 3 amigos y recuperas el 100% de tu dinero.
+                    Ganas <strong className="text-emerald-400">$5.00 USD por cada negocio referido</strong> (sin límite) y <strong className="text-sky-300">$5 USD al compartir en redes</strong>.
                   </p>
                 </div>
               </div>

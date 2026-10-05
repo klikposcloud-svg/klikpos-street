@@ -23,11 +23,21 @@ import {
   TrendingUp,
   DollarSign,
   Clock,
+  Share2,
+  Camera,
+  ExternalLink,
+  Flame,
+  Globe,
 } from 'lucide-react';
 import { getMachineHWID } from '@/lib/licensing/hwid';
 import { OFFICIAL_WHATSAPP_PHONE, reactivateTrialFor3Hours } from '@/lib/licensing/trial-manager';
 import { verifyLicenseKey, saveActivatedLicense, getStoredLicenseStatus } from '@/lib/licensing/license-crypto';
 import { cloudSyncService } from '@/lib/firebase/cloud-sync-service';
+import {
+  socialRewardsService,
+  SocialRewardsConfig,
+  DEFAULT_SOCIAL_CONFIG,
+} from '@/lib/services/social-rewards-service';
 
 export interface ReferredSubscriber {
   id: string;
@@ -71,11 +81,11 @@ export default function StreetAmbassadorLicenseModal({
   const [newRefStore, setNewRefStore] = useState('');
   const [newRefPlan, setNewRefPlan] = useState<'cash' | 'credit'>('cash');
 
-  // Control de Acceso Exclusivo para Embajadores (Bloqueado por defecto)
-  const [isAmbassadorUnlocked, setIsAmbassadorUnlocked] = useState(false);
-  const [unlockCodeInput, setUnlockCodeInput] = useState('');
-  const [showUnlockInput, setShowUnlockInput] = useState(false);
-  const [unlockError, setUnlockError] = useState('');
+  // Configuración de Campaña en Redes Sociales y Recompensas (Actualizable en Caliente)
+  const [socialConfig, setSocialConfig] = useState<SocialRewardsConfig>(DEFAULT_SOCIAL_CONFIG);
+  const [copiedShareText, setCopiedShareText] = useState(false);
+  const [copiedReferralCode, setCopiedReferralCode] = useState(false);
+
 
   useEffect(() => {
     if (isOpen) {
@@ -83,18 +93,21 @@ export default function StreetAmbassadorLicenseModal({
       setHwid(id);
       const status = getStoredLicenseStatus(id);
       setIsLicensed(status.status === 'active');
+
+      // Cargar configuración de redes sociales con soporte de Actualización en Caliente (Hot OTA)
+      setSocialConfig(socialRewardsService.getConfig());
+      socialRewardsService.fetchLatestConfig().then((cfg) => {
+        setSocialConfig(cfg);
+      }).catch(() => {});
+
       try {
         const savedCode = localStorage.getItem('klikpos_ambassador_code');
         if (savedCode) setAmbassadorCode(savedCode);
-
-        const unlocked = localStorage.getItem('klikpos_ambassador_unlocked') === 'true';
-        setIsAmbassadorUnlocked(unlocked);
 
         // Cargar lista de referidos REALES: purgar cualquier simulación previa
         const rawSubs = localStorage.getItem('klikpos_referred_subscribers');
         if (rawSubs) {
           const parsed: ReferredSubscriber[] = JSON.parse(rawSubs);
-          // Filtrar cualquier muestra ficticia previa
           const realSubs = parsed.filter(s => s.id !== 'ref-1' && !s.storeName.includes('La Estrella'));
           setReferrals(realSubs);
           localStorage.setItem('klikpos_referred_subscribers', JSON.stringify(realSubs));
@@ -105,23 +118,6 @@ export default function StreetAmbassadorLicenseModal({
     }
   }, [isOpen]);
 
-  const handleUnlockAmbassador = (e: React.FormEvent) => {
-    e.preventDefault();
-    const clean = unlockCodeInput.trim().toUpperCase();
-    if (['EMBAJADOR', 'PROMOTOR', 'KLIK-2026', '7892', 'STREET-VIP'].includes(clean) || clean.startsWith('EMB-')) {
-      setIsAmbassadorUnlocked(true);
-      setShowUnlockInput(false);
-      setUnlockError('');
-      localStorage.setItem('klikpos_ambassador_unlocked', 'true');
-    } else {
-      setUnlockError('Código de promotor o embajador no válido');
-    }
-  };
-
-  const handleLockAmbassador = () => {
-    setIsAmbassadorUnlocked(false);
-    localStorage.removeItem('klikpos_ambassador_unlocked');
-  };
 
   const handleCopyHwid = () => {
     navigator.clipboard.writeText(hwid);
@@ -284,210 +280,252 @@ export default function StreetAmbassadorLicenseModal({
             </button>
           </div>
 
-          {/* CONTROL DE VISIBILIDAD: PANEL DE EMBAJADOR EXCLUSIVO */}
-          {isAmbassadorUnlocked ? (
-            /* PROGRAMA DE RECOMPENSAS REAL: GANA $5 POR CADA AMIGO PAGADO */
-            <div className="p-4 rounded-2xl border border-emerald-500/30 bg-gradient-to-br from-emerald-950/40 via-slate-900 to-slate-950 space-y-3.5 shadow-md">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-black shadow-xs">
-                    <Gift className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <h4 className="text-xs font-black text-white flex items-center gap-1.5">
-                      <span>Panel Oficial de Embajador Activo</span>
-                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500 text-slate-950 font-mono font-black shadow-xs">
-                        +$5.00 USD c/u
-                      </span>
-                    </h4>
-                    <p className="text-[11px] text-slate-200">
-                      Por cada <strong className="text-white">amigo o comercio que active su licencia</strong>, ¡ganas <strong className="text-emerald-300">$5 USD en efectivo</strong>!
-                    </p>
-                  </div>
+          {/* ======================================================== */}
+          {/* SECCIÓN 1: CAMPAÑA EN VIVO - COMPARTE EN NUESTRAS REDES */}
+          {/* Actualización en Caliente (Hot OTA) sin recompilar      */}
+          {/* ======================================================== */}
+          <div className="p-4 rounded-3xl border border-sky-500/40 bg-gradient-to-br from-sky-950/50 via-slate-900 to-[#070a12] space-y-3.5 shadow-xl relative overflow-hidden">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-center gap-2.5">
+                <div className="w-10 h-10 rounded-2xl bg-sky-500/20 text-sky-400 flex items-center justify-center font-black shadow-md border border-sky-500/30 shrink-0">
+                  <Share2 className="w-5 h-5" />
                 </div>
-
-                <div className="flex items-center gap-2">
-                  <span className="hidden sm:inline-flex text-[11px] font-black font-mono text-emerald-400 bg-emerald-950/60 px-2.5 py-1 rounded-lg border border-emerald-800">
-                    Ganado: ${totalEarnedUsd.toFixed(2)} USD
-                  </span>
-                  <button
-                    type="button"
-                    onClick={handleLockAmbassador}
-                    className="p-1 px-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-bold flex items-center gap-1 border border-slate-700 cursor-pointer"
-                    title="Bloquear panel de embajador"
-                  >
-                    <Lock className="w-3 h-3 text-amber-400" />
-                    <span>Bloquear</span>
-                  </button>
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h3 className="text-sm font-black text-white tracking-tight">
+                      {socialConfig.campaignTitle || 'Comparte en nuestras redes: Klikpos'}
+                    </h3>
+                    <span className="text-[9px] font-black font-mono px-2 py-0.5 rounded-full bg-sky-500 text-slate-950 uppercase tracking-wider animate-pulse">
+                      ¡Gana $5 USD!
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-300 mt-0.5 leading-relaxed">
+                    Comparte recomendando a <strong className="text-white">Klikpos</strong> en tus redes o estados, toma capture y envíalo para recibir <strong className="text-sky-300 font-bold">$5.00 USD directo</strong> a tu cuenta.
+                  </p>
                 </div>
               </div>
+            </div>
 
-              {/* BARRA DE PROGRESO DE AMIGOS REAL */}
-              <div className="space-y-2 bg-[#090d16] p-3 rounded-xl border border-slate-800">
-                <div className="flex items-center justify-between text-xs font-mono font-black">
-                  <span className="text-white font-black flex items-center gap-1.5">
-                    <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />
-                    <span>Comercios Activos Recomendados:</span>
+            {/* REDES SOCIALES CONFIGURABLES EN CALIENTE (OTA) */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center pt-0.5">
+              {socialConfig.socialNetworks.map((net) => (
+                <a
+                  key={net.id}
+                  href={net.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800 hover:border-sky-500/60 hover:bg-slate-800/80 transition-all flex flex-col items-center justify-center gap-1 group shadow-xs cursor-pointer"
+                >
+                  <span className="text-[10px] font-bold text-slate-300 group-hover:text-white flex items-center gap-1">
+                    {net.name}
+                    <ExternalLink className="w-2.5 h-2.5 opacity-60 group-hover:opacity-100" />
                   </span>
-                  <span className="text-emerald-400 font-bold">
-                    {paidCount} Recomendados (${totalEarnedUsd.toFixed(2)} USD)
+                  <span className="text-xs font-mono font-black text-sky-400 group-hover:text-sky-300 truncate max-w-full">
+                    {net.handle}
                   </span>
-                </div>
+                </a>
+              ))}
+            </div>
 
-                {/* Hitos 1, 2 y 3 */}
-                <div className="grid grid-cols-3 gap-2 pt-1 text-center font-mono">
-                  <div className={`p-1.5 rounded-lg border text-[10px] ${paidCount >= 1 ? 'bg-emerald-950/50 border-emerald-500/50 text-emerald-300' : 'bg-slate-900 border-slate-800 text-slate-400'}`}>
-                    <span className="block font-bold">1° Amigo:</span>
-                    <span>{paidCount >= 1 ? '✓ $5.00 Ganado' : '+$5.00 USD'}</span>
-                  </div>
-                  <div className={`p-1.5 rounded-lg border text-[10px] ${paidCount >= 2 ? 'bg-emerald-950/50 border-emerald-500/50 text-emerald-300' : 'bg-slate-900 border-slate-800 text-slate-400'}`}>
-                    <span className="block font-bold">2° Amigo:</span>
-                    <span>{paidCount >= 2 ? '✓ $10.00 Ganado' : '+$10.00 USD'}</span>
-                  </div>
-                  <div className={`p-1.5 rounded-lg border text-[10px] ${paidCount >= 3 ? 'bg-emerald-500 text-slate-950 font-black' : 'bg-slate-900 border-slate-800 text-slate-400'}`}>
-                    <span className="block font-bold">3° Amigo:</span>
-                    <span>{paidCount >= 3 ? '★ $15.00 Ganado' : '+$15.00 USD'}</span>
-                  </div>
-                </div>
+            {/* BOTONES DE ACCIÓN: COPIAR TEXTO Y ENVIAR CAPTURE POR WHATSAPP */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+              <button
+                type="button"
+                onClick={() => {
+                  navigator.clipboard.writeText(socialConfig.shareMessage);
+                  setCopiedShareText(true);
+                  setTimeout(() => setCopiedShareText(false), 2500);
+                }}
+                className="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs flex items-center justify-center gap-2 border border-slate-700 transition-all active:scale-95 cursor-pointer shadow-sm"
+              >
+                {copiedShareText ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4 text-sky-400" />}
+                <span>{copiedShareText ? '¡Texto para redes copiado!' : 'Copiar texto para publicar'}</span>
+              </button>
 
-                <p className="text-[11px] text-slate-200 font-medium text-center pt-0.5">
-                  💡 ¡Sin límites! Cobro inmediato de $5.00 por cada comercio activado en tu zona.
-                </p>
-              </div>
-
-              {/* LISTA DE COMERCIOS SUSCRITOS Y REGISTRO EN VIVO */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-black text-white flex items-center gap-1.5">
-                    <Users className="w-3.5 h-3.5 text-slate-300" />
-                    <span>Amigos y Comercios Suscritos ({referrals.length})</span>
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => setShowAddForm(!showAddForm)}
-                    className="text-[10px] font-bold text-emerald-400 hover:text-emerald-300 transition-colors flex items-center gap-1 cursor-pointer"
-                  >
-                    <Plus className="w-3 h-3" />
-                    <span>{showAddForm ? 'Ocultar' : '+ Registrar Suscrito'}</span>
-                  </button>
-                </div>
-
-                {showAddForm && (
-                  <form onSubmit={handleAddRealReferral} className="p-3 rounded-xl bg-[#090d16] border border-slate-800 space-y-2">
-                    <input
-                      type="text"
-                      placeholder="Nombre del Comercio (Ej: Farmacia Central)"
-                      value={newRefStore}
-                      onChange={(e) => setNewRefStore(e.target.value)}
-                      className="w-full px-3 py-1.5 rounded-lg text-xs bg-slate-900 border border-slate-700 text-white placeholder:text-slate-500 outline-none focus:border-emerald-500"
-                      required
-                    />
-                    <div className="flex items-center gap-2">
-                      <select
-                        value={newRefPlan}
-                        onChange={(e) => setNewRefPlan(e.target.value as any)}
-                        className="px-2.5 py-1.5 rounded-lg text-xs bg-slate-900 border border-slate-700 text-white outline-none"
-                      >
-                        <option value="cash">Plan Contado $15</option>
-                        <option value="credit">Plan Crédito $25</option>
-                      </select>
-                      <button
-                        type="submit"
-                        className="flex-1 py-1.5 px-3 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs rounded-lg transition-transform active:scale-95 cursor-pointer"
-                      >
-                        Confirmar Suscripción Pagada
-                      </button>
-                    </div>
-                  </form>
-                )}
-
-                {referrals.length === 0 ? (
-                  <div className="p-3 rounded-xl border border-dashed border-slate-700 text-center text-xs text-slate-200">
-                    Aún no tienes referidos registrados. Comparte tu invitación por WhatsApp para empezar a ganar $5 USD.
-                  </div>
-                ) : (
-                  <div className="space-y-1.5 max-h-36 overflow-y-auto pr-1">
-                    {referrals.map((sub) => (
-                      <div
-                        key={sub.id}
-                        className="p-2.5 rounded-xl border border-slate-800 bg-[#090d16] flex items-center justify-between text-xs"
-                      >
-                        <div className="min-w-0">
-                          <span className="font-bold text-white block truncate">{sub.storeName}</span>
-                          <span className="text-[10px] text-slate-300 font-mono">
-                            {sub.date} • {sub.planPaid || 'Plan Activo'}
-                          </span>
-                        </div>
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold font-mono bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
-                          <CheckCircle2 className="w-3 h-3" />
-                          <span>Suscrito y Pagado (+${sub.earnedAmount.toFixed(2)})</span>
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* BOTÓN DIRECTO PARA COMPARTIR ENLACE POR WHATSAPP */}
               <a
-                href={`https://wa.me/?text=${encodeURIComponent(
-                  `¡Hola estimado colega! 🚀 Te recomiendo el sistema KlikPOS Street v1.0 para tu negocio. ` +
-                  `Es súper rápido, funciona sin internet, calcula tasa BCV automática y control de mesas/delivery. ` +
-                  `Usa mi código de embajador: ${myReferralCode} para obtener precio especial de contado de $15 USD.`
-                )}`}
+                href={socialRewardsService.generateClaimRewardUrl(storeName, rif)}
                 target="_blank"
                 rel="noreferrer"
-                className="w-full py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-md active:scale-98"
+                className="py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-950/60 transition-all active:scale-95 cursor-pointer"
               >
-                <Send className="w-3.5 h-3.5" />
-                <span>Compartir mi Invitación por WhatsApp</span>
+                <Camera className="w-4 h-4" />
+                <span>Enviar Capture y Recibir $5 USD</span>
               </a>
             </div>
-          ) : (
-            /* ACCESO DISCRETO: BLOQUEADO PARA CLIENTES NORMALES */
-            <div className="p-3 rounded-2xl border border-slate-800 bg-[#090d16] space-y-2">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-xl bg-slate-800 text-slate-400 flex items-center justify-center">
-                    <Lock className="w-4 h-4 text-amber-400" />
+          </div>
+
+          {/* ======================================================== */}
+          {/* SECCIÓN 2: PROGRAMA DE REFERIDOS 100% ILIMITADO           */}
+          {/* Sin tope de amigos: gana $5 USD por cada comercio activo */}
+          {/* ======================================================== */}
+          <div className="p-4 rounded-3xl border border-emerald-500/40 bg-gradient-to-br from-emerald-950/40 via-slate-900 to-[#070a12] space-y-3.5 shadow-xl">
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <div className="flex items-center gap-2.5">
+                <div className="w-10 h-10 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-black shadow-md border border-emerald-500/30 shrink-0">
+                  <Gift className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h3 className="text-sm font-black text-white tracking-tight">
+                      Programa de Referidos KlikPOS
+                    </h3>
+                    <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-emerald-500 text-slate-950 font-mono font-black shadow-xs">
+                      ¡100% ILIMITADO!
+                    </span>
                   </div>
-                  <div>
-                    <span className="text-xs font-bold text-slate-200 block">¿Eres Promotor o Embajador de Zona?</span>
-                    <span className="text-[10px] text-slate-400">Desbloquea tu panel de comisiones con tu clave</span>
-                  </div>
+                  <p className="text-[11px] text-slate-200 mt-0.5">
+                    Gana <strong className="text-emerald-300 font-bold">$5.00 USD en efectivo</strong> por cada comercio que active su licencia. ¡Sin límite de ganancias!
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-black font-mono text-emerald-400 bg-emerald-950/80 px-3 py-1.5 rounded-xl border border-emerald-700/60 shadow-inner">
+                  Total Ganado: ${totalEarnedUsd.toFixed(2)} USD
+                </span>
+              </div>
+            </div>
+
+            {/* ESCALERA ILIMITADA DE INGRESOS */}
+            <div className="space-y-2 bg-[#090d16] p-3.5 rounded-2xl border border-slate-800">
+              <div className="flex items-center justify-between text-xs font-mono font-black">
+                <span className="text-white flex items-center gap-1.5">
+                  <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Comercios Activos Recomendados:</span>
+                </span>
+                <span className="text-emerald-400 font-bold">
+                  {paidCount} Activos (${totalEarnedUsd.toFixed(2)} USD Acumulado)
+                </span>
+              </div>
+
+              {/* ESCALERA ILIMITADA: 1 ($5), 5 ($25), 10 ($50), 20 ($100), ∞ */}
+              <div className="grid grid-cols-4 gap-2 pt-1 text-center font-mono">
+                <div className={`p-2 rounded-xl border text-[10px] ${paidCount >= 1 ? 'bg-emerald-950/70 border-emerald-500 text-emerald-300 font-bold' : 'bg-slate-900 border-slate-800 text-slate-400'}`}>
+                  <span className="block font-bold">1 Amigo</span>
+                  <span className="text-xs font-black">$5.00</span>
+                </div>
+                <div className={`p-2 rounded-xl border text-[10px] ${paidCount >= 5 ? 'bg-emerald-950/70 border-emerald-500 text-emerald-300 font-bold' : 'bg-slate-900 border-slate-800 text-slate-400'}`}>
+                  <span className="block font-bold">5 Amigos</span>
+                  <span className="text-xs font-black">$25.00</span>
+                </div>
+                <div className={`p-2 rounded-xl border text-[10px] ${paidCount >= 10 ? 'bg-emerald-950/70 border-emerald-500 text-emerald-300 font-bold' : 'bg-slate-900 border-slate-800 text-slate-400'}`}>
+                  <span className="block font-bold">10 Amigos</span>
+                  <span className="text-xs font-black">$50.00</span>
+                </div>
+                <div className="p-2 rounded-xl border text-[10px] bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 font-black border-emerald-300 shadow-md">
+                  <span className="block font-bold">∞ ILIMITADO</span>
+                  <span className="text-xs font-black">+$5.00 c/u</span>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between gap-2 pt-1 bg-slate-900/60 p-2.5 rounded-xl border border-slate-800/80">
+                <div className="min-w-0">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Tu Código de Referido:</span>
+                  <span className="text-xs font-mono font-black text-amber-300">{myReferralCode}</span>
                 </div>
                 <button
                   type="button"
-                  onClick={() => setShowUnlockInput(!showUnlockInput)}
-                  className="px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 text-xs font-black border border-amber-500/30 transition-all active:scale-95 cursor-pointer"
+                  onClick={() => {
+                    navigator.clipboard.writeText(myReferralCode);
+                    setCopiedReferralCode(true);
+                    setTimeout(() => setCopiedReferralCode(false), 2000);
+                  }}
+                  className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold flex items-center gap-1.5 border border-slate-700 active:scale-95 cursor-pointer shrink-0"
                 >
-                  {showUnlockInput ? 'Cancelar' : 'Activar Panel'}
+                  {copiedReferralCode ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                  <span>{copiedReferralCode ? 'Copiado' : 'Copiar Código'}</span>
+                </button>
+              </div>
+            </div>
+
+            {/* LISTA DE COMERCIOS SUSCRITOS Y REGISTRO */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-black text-white flex items-center gap-1.5">
+                  <Users className="w-3.5 h-3.5 text-slate-300" />
+                  <span>Comercios Registrados en tu Red ({referrals.length})</span>
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setShowAddForm(!showAddForm)}
+                  className="text-[11px] font-bold text-emerald-400 hover:text-emerald-300 transition-colors flex items-center gap-1 cursor-pointer"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>{showAddForm ? 'Ocultar' : '+ Registrar Referido'}</span>
                 </button>
               </div>
 
-              {showUnlockInput && (
-                <form onSubmit={handleUnlockAmbassador} className="pt-2 border-t border-slate-800/80 flex gap-2">
+              {showAddForm && (
+                <form onSubmit={handleAddRealReferral} className="p-3 rounded-2xl bg-[#090d16] border border-slate-800 space-y-2">
                   <input
                     type="text"
-                    placeholder="Código de Embajador (Ej: EMBAJADOR)"
-                    value={unlockCodeInput}
-                    onChange={(e) => setUnlockCodeInput(e.target.value)}
-                    className="flex-1 px-3 py-1.5 rounded-xl text-xs font-mono uppercase bg-slate-950 border border-slate-700 text-white placeholder:text-slate-500 outline-none focus:border-amber-400"
-                    autoFocus
+                    placeholder="Nombre del Comercio (Ej: Panadería La Central)"
+                    value={newRefStore}
+                    onChange={(e) => setNewRefStore(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl text-xs bg-slate-900 border border-slate-700 text-white placeholder:text-slate-500 outline-none focus:border-emerald-500"
+                    required
                   />
-                  <button
-                    type="submit"
-                    className="px-3.5 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-black rounded-xl cursor-pointer"
-                  >
-                    Desbloquear
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <select
+                      value={newRefPlan}
+                      onChange={(e) => setNewRefPlan(e.target.value as any)}
+                      className="px-3 py-2 rounded-xl text-xs bg-slate-900 border border-slate-700 text-white outline-none"
+                    >
+                      <option value="cash">Plan Contado $15</option>
+                      <option value="credit">Plan Crédito $25</option>
+                    </select>
+                    <button
+                      type="submit"
+                      className="flex-1 py-2 px-3 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs rounded-xl transition-transform active:scale-95 cursor-pointer shadow-md"
+                    >
+                      Confirmar Referido Pagado
+                    </button>
+                  </div>
                 </form>
               )}
-              {unlockError && (
-                <p className="text-[10px] text-rose-400 font-bold">{unlockError}</p>
+
+              {referrals.length === 0 ? (
+                <div className="p-3.5 rounded-2xl border border-dashed border-slate-800 text-center text-xs text-slate-300 bg-slate-950/40">
+                  Aún no tienes referidos registrados. Comparte tu código o invitación por WhatsApp para empezar a ganar $5 USD sin límites.
+                </div>
+              ) : (
+                <div className="space-y-1.5 max-h-36 overflow-y-auto pr-1">
+                  {referrals.map((sub) => (
+                    <div
+                      key={sub.id}
+                      className="p-2.5 rounded-xl border border-slate-800 bg-[#090d16] flex items-center justify-between text-xs"
+                    >
+                      <div className="min-w-0">
+                        <span className="font-bold text-white block truncate">{sub.storeName}</span>
+                        <span className="text-[10px] text-slate-300 font-mono">
+                          {sub.date} • {sub.planPaid || 'Plan Activo'}
+                        </span>
+                      </div>
+                      <span className="px-2.5 py-1 rounded-full text-[10px] font-bold font-mono bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1 shrink-0">
+                        <CheckCircle2 className="w-3 h-3" />
+                        <span>Comisión Pagada (+${sub.earnedAmount.toFixed(2)})</span>
+                      </span>
+                    </div>
+                  ))}
+                </div>
               )}
             </div>
-          )}
+
+            {/* BOTÓN DIRECTO PARA COMPARTIR INVITACIÓN POR WHATSAPP */}
+            <a
+              href={`https://wa.me/?text=${encodeURIComponent(
+                `¡Hola estimado colega! 🚀 Te recomiendo el sistema KlikPOS para tu negocio. ` +
+                `Es súper rápido, funciona sin internet, calcula tasa BCV automática y emite tickets térmicos. ` +
+                `Usa mi código de referido: ${myReferralCode} para obtener precio especial de contado de $15 USD.`
+              )}`}
+              target="_blank"
+              rel="noreferrer"
+              className="w-full py-2.5 px-3 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs flex items-center justify-center gap-2 transition-all shadow-md active:scale-98 cursor-pointer"
+            >
+              <Send className="w-3.5 h-3.5" />
+              <span>Compartir mi Invitación por WhatsApp</span>
+            </a>
+          </div>
 
           {/* CÓDIGO DE EMBAJADOR / REFERIDO */}
           <div className="p-3.5 rounded-2xl border border-amber-500/30 bg-amber-500/5 space-y-2">

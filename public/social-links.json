@@ -1,0 +1,45 @@
+{
+  "campaignTitle": "Comparte en nuestras redes: Klikpos",
+  "campaignSubtitle": "¡Gana $5 USD por cada referido ilimitado y $5 USD al compartir en redes sociales!",
+  "brandTag": "Klikpos",
+  "rewardAmountUSD": 5.0,
+  "shareMessage": "🚀 ¡Estoy usando KlikPOS en mi negocio! Es súper rápido, calcula la tasa BCV automática, emite ticket térmico y funciona hasta sin internet. 100% recomendado para todo comercio. Síguelos en sus redes: Klikpos",
+  "instructions": [
+    "Publica una foto, video o recomendación de KlikPOS en tus redes (Instagram, TikTok, WhatsApp Estados o Facebook).",
+    "Menciona o etiqueta a Klikpos.",
+    "Toma capture de pantalla de tu publicación.",
+    "Envía el capture a nuestro WhatsApp de soporte con tu Pago Móvil o cuenta para recibir tus $5 USD al instante."
+  ],
+  "whatsappSupportPhone": "584248298026",
+  "socialNetworks": [
+    {
+      "id": "instagram",
+      "name": "Instagram",
+      "handle": "@klikpos",
+      "url": "https://instagram.com/klikpos",
+      "active": true
+    },
+    {
+      "id": "tiktok",
+      "name": "TikTok",
+      "handle": "@klikpos",
+      "url": "https://tiktok.com/@klikpos",
+      "active": true
+    },
+    {
+      "id": "facebook",
+      "name": "Facebook",
+      "handle": "Klikpos Oficial",
+      "url": "https://facebook.com/klikpos",
+      "active": true
+    },
+    {
+      "id": "whatsapp",
+      "name": "WhatsApp Soporte",
+      "handle": "+58 424-8298026",
+      "url": "https://wa.me/584248298026",
+      "active": true
+    }
+  ],
+  "lastUpdated": "2026-10-05T00:00:00Z"
+}
