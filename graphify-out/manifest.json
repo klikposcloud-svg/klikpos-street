@@ -30,9 +30,9 @@
     "semantic_hash": ""
   },
   "package.json": {
-    "mtime": 1791142213.9493659,
-    "seen": 1791142289.4488068,
-    "ast_hash": "56c2d46312819ac5620098c37a30886e",
+    "mtime": 1791165782.4554696,
+    "seen": 1791167204.9204965,
+    "ast_hash": "d4c6441593df8e4c9d275afb5bc3ecc9",
     "semantic_hash": ""
   },
   "postcss.config.js": {
@@ -48,14 +48,14 @@
     "semantic_hash": ""
   },
   "public/sw.js": {
-    "mtime": 1791159965.8456035,
-    "seen": 1791160659.7841694,
-    "ast_hash": "aa9737a2d9c2af05b49b4a0cd4d565a2",
+    "mtime": 1791166120.9395006,
+    "seen": 1791167204.9205208,
+    "ast_hash": "6aa75f5405b7bebc099eeff6fc8e0738",
     "semantic_hash": ""
   },
   "public/workbox-00a24876.js": {
-    "mtime": 1791159965.8467262,
-    "seen": 1791160659.7841883,
+    "mtime": 1791166120.935688,
+    "seen": 1791167204.920545,
     "ast_hash": "2f569fb030b2a09996588b309a8d636e",
     "semantic_hash": "2f569fb030b2a09996588b309a8d636e"
   },
@@ -462,9 +462,9 @@
     "semantic_hash": "a14786c7e35d1f622e48ad107c9d3900"
   },
   "src/lib/db.ts": {
-    "mtime": 1790794106.14884,
-    "seen": 1790813728.3177035,
-    "ast_hash": "4b8adaebd0d34bdeefeeb0f422db2be9",
+    "mtime": 1791165505.3364282,
+    "seen": 1791167204.9229333,
+    "ast_hash": "4a60d1e70b10ac17ab9552e02febdc74",
     "semantic_hash": ""
   },
   "src/lib/delivery-store.ts": {
@@ -840,8 +840,8 @@
     "semantic_hash": "0f54c4f82cffc8c86bb3fbe3e98739d5"
   },
   "venematic-desktop/android/app/build.gradle": {
-    "mtime": 1791160376.2631385,
-    "seen": 1791160659.7857645,
+    "mtime": 1791166846.8130853,
+    "seen": 1791167204.9241161,
     "ast_hash": "1b6d7585867593fe9d7b06b973fd4537",
     "semantic_hash": ""
   },
@@ -912,9 +912,9 @@
     "semantic_hash": ""
   },
   "venematic-desktop/package.json": {
-    "mtime": 1791142214.4595585,
-    "seen": 1791142289.4509957,
-    "ast_hash": "eeadf18cc5c322f6f72eeb1f6ef3ef3d",
+    "mtime": 1791165783.7248852,
+    "seen": 1791167204.9242675,
+    "ast_hash": "5cadb24a567871783c54b4f23f973e90",
     "semantic_hash": ""
   },
   "venematic-desktop/postcss.config.js": {
@@ -2790,15 +2790,15 @@
     "semantic_hash": ""
   },
   "dist-installer/version.json": {
-    "mtime": 1791142213.9521923,
-    "seen": 1791142289.4482768,
-    "ast_hash": "f18e814c1e059d4387f1cb0f052c4192",
+    "mtime": 1791165782.4683623,
+    "seen": 1791167204.9202232,
+    "ast_hash": "802e2b51558884219e1ea70d5c679672",
     "semantic_hash": ""
   },
   "klikpos-releases/version.json": {
-    "mtime": 1791142213.9559915,
-    "seen": 1791142289.448794,
-    "ast_hash": "f18e814c1e059d4387f1cb0f052c4192",
+    "mtime": 1791165782.4807968,
+    "seen": 1791167204.920479,
+    "ast_hash": "802e2b51558884219e1ea70d5c679672",
     "semantic_hash": ""
   },
   "src/lib/data/master-catalog.json": {
@@ -2874,9 +2874,9 @@
     "semantic_hash": ""
   },
   "public/version.json": {
-    "mtime": 1791142213.9509757,
-    "seen": 1791142289.4488344,
-    "ast_hash": "f18e814c1e059d4387f1cb0f052c4192",
+    "mtime": 1791165782.4616117,
+    "seen": 1791167204.9205377,
+    "ast_hash": "802e2b51558884219e1ea70d5c679672",
     "semantic_hash": ""
   },
   "scripts/fix-css.js": {
@@ -2886,9 +2886,9 @@
     "semantic_hash": ""
   },
   "version.json": {
-    "mtime": 1791142213.9462962,
-    "seen": 1791142289.4529605,
-    "ast_hash": "f18e814c1e059d4387f1cb0f052c4192",
+    "mtime": 1791165782.446665,
+    "seen": 1791167204.9259892,
+    "ast_hash": "802e2b51558884219e1ea70d5c679672",
     "semantic_hash": ""
   },
   ".agents/rules/klikpos-strict-ui-and-zero-regressions.md": {
@@ -3030,9 +3030,9 @@
     "semantic_hash": ""
   },
   "src/app/tablet-pos/page.tsx": {
-    "mtime": 1791159838.3131769,
-    "seen": 1791160659.784981,
-    "ast_hash": "e931e18aa8d8616d13f0a96d8b9d86be",
+    "mtime": 1791165214.5223088,
+    "seen": 1791167204.9221165,
+    "ast_hash": "7e2330aea5af1bdc75192e90edf22b7c",
     "semantic_hash": ""
   },
   "venematic-desktop/src/app/tablet-pos/page.tsx": {
@@ -3042,15 +3042,15 @@
     "semantic_hash": ""
   },
   "venematic-desktop/version.json": {
-    "mtime": 1791142214.4564564,
-    "seen": 1791142289.4529476,
-    "ast_hash": "f18e814c1e059d4387f1cb0f052c4192",
+    "mtime": 1791165783.713517,
+    "seen": 1791167204.925972,
+    "ast_hash": "802e2b51558884219e1ea70d5c679672",
     "semantic_hash": ""
   },
   "src/lib/licensing/trial-manager.ts": {
-    "mtime": 1791140042.3466978,
-    "seen": 1791142289.4504228,
-    "ast_hash": "3902c18c25aac82ab1aede621879cf18",
+    "mtime": 1791162506.1928725,
+    "seen": 1791167204.9232075,
+    "ast_hash": "2b9f99f4f53c5d85e3d9a6289f02a2bf",
     "semantic_hash": ""
   },
   "src/lib/sync/firestore-editions-sync.ts": {
@@ -4590,9 +4590,9 @@
     "semantic_hash": ""
   },
   "scripts/publish-release.js": {
-    "mtime": 1791142223.2921839,
-    "seen": 1791142289.4492643,
-    "ast_hash": "0cef85b207d2f98acf8ff757eab6f409",
+    "mtime": 1791164035.6302783,
+    "seen": 1791167204.9210877,
+    "ast_hash": "e395c3f97cdc9e92cc219034dfc9a6d4",
     "semantic_hash": ""
   },
   "scripts/publish-street-pack-to-firestore.mjs": {
@@ -4692,9 +4692,9 @@
     "semantic_hash": ""
   },
   "src/components/licensing/StreetAmbassadorLicenseModal.tsx": {
-    "mtime": 1791051398.141786,
-    "seen": 1791060696.685466,
-    "ast_hash": "9aa29ab1c61ef8564c9c8dda80449055",
+    "mtime": 1791162583.646175,
+    "seen": 1791167204.9223611,
+    "ast_hash": "3a7a7107d59222dd57261db43d8b3a07",
     "semantic_hash": ""
   },
   "src/components/marketplace/VisualPacksModal.tsx": {
@@ -4734,9 +4734,9 @@
     "semantic_hash": ""
   },
   "src/components/tablet-pos/StreetSalesBackupModal.tsx": {
-    "mtime": 1791075958.4965103,
-    "seen": 1791142289.4501724,
-    "ast_hash": "7d84e1f9fc48a2b67d3e980b1e897a04",
+    "mtime": 1791164800.8166058,
+    "seen": 1791167204.922757,
+    "ast_hash": "61234fe5d60b9a7ea2890d463204d649",
     "semantic_hash": ""
   },
   "src/components/tablet-pos/TabletPosBottomNav.tsx": {
@@ -4746,9 +4746,9 @@
     "semantic_hash": ""
   },
   "src/components/tablet-pos/TabletPosHeader.tsx": {
-    "mtime": 1790957420.7729971,
-    "seen": 1791060696.6855145,
-    "ast_hash": "5980041a5c85629abd6d059604925de1",
+    "mtime": 1791162172.9646115,
+    "seen": 1791167204.922779,
+    "ast_hash": "5d394a1d8e619bc085109f2c4d2b74ba",
     "semantic_hash": ""
   },
   "src/components/tablet-pos/TabletPosToolsDock.tsx": {
@@ -4782,9 +4782,9 @@
     "semantic_hash": ""
   },
   "src/types/tablet-pos.ts": {
-    "mtime": 1791088409.2885048,
-    "seen": 1791142289.4507864,
-    "ast_hash": "74480127bf08f558e9ad18e397a89b23",
+    "mtime": 1791164614.3028667,
+    "seen": 1791167204.923973,
+    "ast_hash": "d3c943869293c5b207b6ca91338c3f0c",
     "semantic_hash": ""
   },
   "venematic-desktop/public/version-street.json": {
@@ -5592,9 +5592,9 @@
     "semantic_hash": ""
   },
   "src/components/tablet-pos/SaleReceiptModal.tsx": {
-    "mtime": 1791088252.4380312,
-    "seen": 1791142289.4501567,
-    "ast_hash": "7a204b2a65637d57e886e36e0169ae8e",
+    "mtime": 1791165459.5829852,
+    "seen": 1791167204.9227283,
+    "ast_hash": "819701024253bc5aea916bffcdb8e915",
     "semantic_hash": ""
   },
   "src/hooks/useBcvRate.ts": {
@@ -5610,9 +5610,9 @@
     "semantic_hash": ""
   },
   "src/hooks/useCheckout.ts": {
-    "mtime": 1791088559.4537826,
-    "seen": 1791142289.4502032,
-    "ast_hash": "292f2e8e211ec9252e2495069b931973",
+    "mtime": 1791164642.7731283,
+    "seen": 1791167204.9228294,
+    "ast_hash": "deb9796e782b7e79fdc33c93f236df66",
     "semantic_hash": ""
   },
   "src/lib/data/tablet-pos-rubros.ts": {
@@ -5622,9 +5622,9 @@
     "semantic_hash": ""
   },
   "src/lib/pos/cart-calculations.ts": {
-    "mtime": 1791088473.5418136,
-    "seen": 1791142289.4504507,
-    "ast_hash": "980cb69088afba48b5aef4b7b6240a6d",
+    "mtime": 1791163697.5295663,
+    "seen": 1791167204.923252,
+    "ast_hash": "ac09d872206f4804d326aa7523c84b5a",
     "semantic_hash": ""
   },
   ".agents/skills/better-accessibility/SKILL.md": {
@@ -6057,6 +6057,12 @@
     "mtime": 1791142533.2418585,
     "seen": 1791144256.8178473,
     "ast_hash": "d594eecce8e5deb4086caeebb930398e",
+    "semantic_hash": ""
+  },
+  "scripts/capture_live_sales_chart.js": {
+    "mtime": 1791161195.4981608,
+    "seen": 1791167204.9207501,
+    "ast_hash": "614c426976174ee134fca0768dc4725e",
     "semantic_hash": ""
   }
 }

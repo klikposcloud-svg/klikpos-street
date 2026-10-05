@@ -48,14 +48,14 @@
     "semantic_hash": ""
   },
   "public/sw.js": {
-    "mtime": 1791143600.3643665,
-    "seen": 1791144256.8137076,
-    "ast_hash": "47a6048ad88aad73c4de9081d9c2bc36",
+    "mtime": 1791159965.8456035,
+    "seen": 1791160659.7841694,
+    "ast_hash": "aa9737a2d9c2af05b49b4a0cd4d565a2",
     "semantic_hash": ""
   },
   "public/workbox-00a24876.js": {
-    "mtime": 1791143600.362908,
-    "seen": 1791144256.813723,
+    "mtime": 1791159965.8467262,
+    "seen": 1791160659.7841883,
     "ast_hash": "2f569fb030b2a09996588b309a8d636e",
     "semantic_hash": "2f569fb030b2a09996588b309a8d636e"
   },
@@ -420,9 +420,9 @@
     "semantic_hash": "6dbd90ba8a73abd65027e5324287fed4"
   },
   "src/components/ProductImageSearchModal.tsx": {
-    "mtime": 1791065673.71892,
-    "seen": 1791142289.4500222,
-    "ast_hash": "62e7221575d4a359466a40065391f73e",
+    "mtime": 1791159712.7885466,
+    "seen": 1791160659.7850764,
+    "ast_hash": "0f3402fa0d7fa2316c0bf943f8ab5939",
     "semantic_hash": ""
   },
   "src/components/ProductLabelModal.tsx": {
@@ -840,8 +840,8 @@
     "semantic_hash": "0f54c4f82cffc8c86bb3fbe3e98739d5"
   },
   "venematic-desktop/android/app/build.gradle": {
-    "mtime": 1791143971.3012857,
-    "seen": 1791144256.8150814,
+    "mtime": 1791160376.2631385,
+    "seen": 1791160659.7857645,
     "ast_hash": "1b6d7585867593fe9d7b06b973fd4537",
     "semantic_hash": ""
   },
@@ -3030,9 +3030,9 @@
     "semantic_hash": ""
   },
   "src/app/tablet-pos/page.tsx": {
-    "mtime": 1791143416.5666802,
-    "seen": 1791144256.8144195,
-    "ast_hash": "169b3219ded1ed013fa965aa733aa06f",
+    "mtime": 1791159838.3131769,
+    "seen": 1791160659.784981,
+    "ast_hash": "e931e18aa8d8616d13f0a96d8b9d86be",
     "semantic_hash": ""
   },
   "venematic-desktop/src/app/tablet-pos/page.tsx": {
@@ -4716,9 +4716,9 @@
     "semantic_hash": ""
   },
   "src/components/tablet-pos/ProductImageSelector.tsx": {
-    "mtime": 1791046731.3176377,
-    "seen": 1791060696.685504,
-    "ast_hash": "e9144dd68c2dcf25e8382e08a69f2f97",
+    "mtime": 1791159725.8423147,
+    "seen": 1791160659.785215,
+    "ast_hash": "9e6abedc74f70202cc30e008843e546d",
     "semantic_hash": ""
   },
   "src/components/tablet-pos/SoftwareUpdateModal.tsx": {

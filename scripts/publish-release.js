@@ -87,9 +87,11 @@ async function main() {
   } catch (err) {
     console.error('Error sincronizando repo releases:', err);
   } finally {
-    if (fs.existsSync(tempReleasesDir)) {
-      fs.rmSync(tempReleasesDir, { recursive: true, force: true });
-    }
+    try {
+      if (fs.existsSync(tempReleasesDir)) {
+        fs.rmSync(tempReleasesDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 500 });
+      }
+    } catch (e) {}
   }
 
   // 4. Crear o Actualizar Objeto GitHub Release vía API
