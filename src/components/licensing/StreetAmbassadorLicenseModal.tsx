@@ -23,21 +23,11 @@ import {
   TrendingUp,
   DollarSign,
   Clock,
-  Share2,
-  Camera,
-  ExternalLink,
-  Flame,
-  Globe,
 } from 'lucide-react';
 import { getMachineHWID } from '@/lib/licensing/hwid';
 import { OFFICIAL_WHATSAPP_PHONE, reactivateTrialFor3Hours } from '@/lib/licensing/trial-manager';
 import { verifyLicenseKey, saveActivatedLicense, getStoredLicenseStatus } from '@/lib/licensing/license-crypto';
 import { cloudSyncService } from '@/lib/firebase/cloud-sync-service';
-import {
-  socialRewardsService,
-  SocialRewardsConfig,
-  DEFAULT_SOCIAL_CONFIG,
-} from '@/lib/services/social-rewards-service';
 
 export interface ReferredSubscriber {
   id: string;
@@ -82,8 +72,6 @@ export default function StreetAmbassadorLicenseModal({
   const [newRefPlan, setNewRefPlan] = useState<'cash' | 'credit'>('cash');
 
   // Configuración de Campaña en Redes Sociales y Recompensas (Actualizable en Caliente)
-  const [socialConfig, setSocialConfig] = useState<SocialRewardsConfig>(DEFAULT_SOCIAL_CONFIG);
-  const [copiedShareText, setCopiedShareText] = useState(false);
   const [copiedReferralCode, setCopiedReferralCode] = useState(false);
 
 
@@ -94,11 +82,6 @@ export default function StreetAmbassadorLicenseModal({
       const status = getStoredLicenseStatus(id);
       setIsLicensed(status.status === 'active');
 
-      // Cargar configuración de redes sociales con soporte de Actualización en Caliente (Hot OTA)
-      setSocialConfig(socialRewardsService.getConfig());
-      socialRewardsService.fetchLatestConfig().then((cfg) => {
-        setSocialConfig(cfg);
-      }).catch(() => {});
 
       try {
         const savedCode = localStorage.getItem('klikpos_ambassador_code');
@@ -133,10 +116,29 @@ export default function StreetAmbassadorLicenseModal({
     } catch {}
   };
 
-  // Métricas de referidos reales ($5 USD por cada comercio activado)
+  // Reglas de Negocio de Retiros de Referidos:
+  // 1. Mínimo de retiro: $15 USD (equivalente a 3 comercios activos)
+  // 2. Tiempo de liquidación: 48 horas hábiles tras verificación bancaria
+  const MIN_PAYOUT_USD = 15.0;
   const paidCount = referrals.filter((r) => r.status === 'paid').length;
   const totalEarnedUsd = paidCount * 5.0;
+  const canWithdraw = totalEarnedUsd >= MIN_PAYOUT_USD;
+  const missingForPayout = Math.max(0, MIN_PAYOUT_USD - totalEarnedUsd);
+  const missingReferrals = Math.max(0, Math.ceil(missingForPayout / 5.0));
+  const progressPercent = Math.min(100, Math.round((totalEarnedUsd / MIN_PAYOUT_USD) * 100));
   const myReferralCode = `KLIK-REF-${(rif || 'NEGOCIO').replace(/[^0-9A-Z]/gi, '').slice(-4) || '7892'}`;
+
+  const generateWithdrawalWhatsAppUrl = () => {
+    const text =
+      `¡Hola KlikPOS! 💸 Deseo solicitar el retiro de mis comisiones por referidos:\n\n` +
+      `🏪 *Comercio / Promotor:* ${storeName || 'Mi Negocio'}\n` +
+      `📋 *Código de Referido:* \`${myReferralCode}\`\n` +
+      `💰 *Monto Acumulado a Retirar:* $${totalEarnedUsd.toFixed(2)} USD (${paidCount} comercios activos)\n` +
+      `⏱️ *Condición de Liquidación:* 48 horas tras verificación bancaria\n\n` +
+      `Adjunto mis datos de Pago Móvil para procesar la transferencia. ¡Muchas gracias!`;
+
+    return `https://wa.me/${OFFICIAL_WHATSAPP_PHONE}?text=${encodeURIComponent(text)}`;
+  };
 
   const handleAddRealReferral = (e: React.FormEvent) => {
     e.preventDefault();
@@ -281,84 +283,12 @@ export default function StreetAmbassadorLicenseModal({
           </div>
 
           {/* ======================================================== */}
-          {/* SECCIÓN 1: CAMPAÑA EN VIVO - COMPARTE EN NUESTRAS REDES */}
-          {/* Actualización en Caliente (Hot OTA) sin recompilar      */}
+          {/* SECCIÓN: PROGRAMA DE REFERIDOS 100% ILIMITADO           */}
+          {/* Mínimo de Retiro: $15 USD | Liquidación a las 48 Horas   */}
+          {/* (Sección de Redes desactivada para fase de calle)        */}
           {/* ======================================================== */}
-          <div className="p-4 rounded-3xl border border-sky-500/40 bg-gradient-to-br from-sky-950/50 via-slate-900 to-[#070a12] space-y-3.5 shadow-xl relative overflow-hidden">
-            <div className="flex items-start justify-between gap-3">
-              <div className="flex items-center gap-2.5">
-                <div className="w-10 h-10 rounded-2xl bg-sky-500/20 text-sky-400 flex items-center justify-center font-black shadow-md border border-sky-500/30 shrink-0">
-                  <Share2 className="w-5 h-5" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="text-sm font-black text-white tracking-tight">
-                      {socialConfig.campaignTitle || 'Comparte en nuestras redes: Klikpos'}
-                    </h3>
-                    <span className="text-[9px] font-black font-mono px-2 py-0.5 rounded-full bg-sky-500 text-slate-950 uppercase tracking-wider animate-pulse">
-                      ¡Gana $5 USD!
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-slate-300 mt-0.5 leading-relaxed">
-                    Comparte recomendando a <strong className="text-white">Klikpos</strong> en tus redes o estados, toma capture y envíalo para recibir <strong className="text-sky-300 font-bold">$5.00 USD directo</strong> a tu cuenta.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* REDES SOCIALES CONFIGURABLES EN CALIENTE (OTA) */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center pt-0.5">
-              {socialConfig.socialNetworks.map((net) => (
-                <a
-                  key={net.id}
-                  href={net.url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800 hover:border-sky-500/60 hover:bg-slate-800/80 transition-all flex flex-col items-center justify-center gap-1 group shadow-xs cursor-pointer"
-                >
-                  <span className="text-[10px] font-bold text-slate-300 group-hover:text-white flex items-center gap-1">
-                    {net.name}
-                    <ExternalLink className="w-2.5 h-2.5 opacity-60 group-hover:opacity-100" />
-                  </span>
-                  <span className="text-xs font-mono font-black text-sky-400 group-hover:text-sky-300 truncate max-w-full">
-                    {net.handle}
-                  </span>
-                </a>
-              ))}
-            </div>
-
-            {/* BOTONES DE ACCIÓN: COPIAR TEXTO Y ENVIAR CAPTURE POR WHATSAPP */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
-              <button
-                type="button"
-                onClick={() => {
-                  navigator.clipboard.writeText(socialConfig.shareMessage);
-                  setCopiedShareText(true);
-                  setTimeout(() => setCopiedShareText(false), 2500);
-                }}
-                className="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs flex items-center justify-center gap-2 border border-slate-700 transition-all active:scale-95 cursor-pointer shadow-sm"
-              >
-                {copiedShareText ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4 text-sky-400" />}
-                <span>{copiedShareText ? '¡Texto para redes copiado!' : 'Copiar texto para publicar'}</span>
-              </button>
-
-              <a
-                href={socialRewardsService.generateClaimRewardUrl(storeName, rif)}
-                target="_blank"
-                rel="noreferrer"
-                className="py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-950/60 transition-all active:scale-95 cursor-pointer"
-              >
-                <Camera className="w-4 h-4" />
-                <span>Enviar Capture y Recibir $5 USD</span>
-              </a>
-            </div>
-          </div>
-
-          {/* ======================================================== */}
-          {/* SECCIÓN 2: PROGRAMA DE REFERIDOS 100% ILIMITADO           */}
-          {/* Sin tope de amigos: gana $5 USD por cada comercio activo */}
-          {/* ======================================================== */}
-          <div className="p-4 rounded-3xl border border-emerald-500/40 bg-gradient-to-br from-emerald-950/40 via-slate-900 to-[#070a12] space-y-3.5 shadow-xl">
+          <div className="p-4 rounded-3xl border border-emerald-500/40 bg-gradient-to-br from-emerald-950/40 via-slate-900 to-[#070a12] space-y-4 shadow-xl">
+            {/* CABECERA DEL PROGRAMA */}
             <div className="flex items-center justify-between flex-wrap gap-2">
               <div className="flex items-center gap-2.5">
                 <div className="w-10 h-10 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-black shadow-md border border-emerald-500/30 shrink-0">
@@ -381,8 +311,79 @@ export default function StreetAmbassadorLicenseModal({
 
               <div className="flex items-center gap-2">
                 <span className="text-xs font-black font-mono text-emerald-400 bg-emerald-950/80 px-3 py-1.5 rounded-xl border border-emerald-700/60 shadow-inner">
-                  Total Ganado: ${totalEarnedUsd.toFixed(2)} USD
+                  Total Acumulado: ${totalEarnedUsd.toFixed(2)} USD
                 </span>
+              </div>
+            </div>
+
+            {/* MÓDULO DE RETIROS: MÍNIMO $15 USD + BARRA DE PROGRESO */}
+            <div className="p-3.5 rounded-2xl bg-[#090d16] border border-slate-800 space-y-3">
+              <div className="flex items-center justify-between text-xs">
+                <div className="flex items-center gap-1.5 font-bold text-slate-200">
+                  <DollarSign className="w-4 h-4 text-emerald-400" />
+                  <span>Monto para Retiro:</span>
+                </div>
+                <div className="font-mono text-xs font-black flex items-center gap-1.5">
+                  <span className={canWithdraw ? 'text-emerald-400' : 'text-amber-400'}>
+                    ${totalEarnedUsd.toFixed(2)} USD
+                  </span>
+                  <span className="text-slate-500">/ Mín. $15.00 USD</span>
+                </div>
+              </div>
+
+              {/* Barra de Progreso hacia los $15 USD */}
+              <div className="space-y-1">
+                <div className="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
+                  <div
+                    className={`h-full transition-all duration-500 rounded-full ${
+                      canWithdraw
+                        ? 'bg-gradient-to-r from-emerald-500 to-teal-400 shadow-sm'
+                        : 'bg-gradient-to-r from-amber-500 to-emerald-500'
+                    }`}
+                    style={{ width: `${progressPercent}%` }}
+                  />
+                </div>
+                <div className="flex items-center justify-between text-[10px] text-slate-400 font-medium">
+                  <span>{progressPercent}% completado</span>
+                  <span>
+                    {canWithdraw
+                      ? '✓ Mínimo de retiro alcanzado'
+                      : `Faltan $${missingForPayout.toFixed(2)} USD (${missingReferrals} referido${missingReferrals > 1 ? 's' : ''}) para retirar`}
+                  </span>
+                </div>
+              </div>
+
+              {/* BOTÓN DINÁMICO DE RETIRO */}
+              {canWithdraw ? (
+                <a
+                  href={generateWithdrawalWhatsAppUrl()}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-500 hover:from-emerald-500 hover:to-teal-400 text-white font-black text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-950/60 active:scale-98 transition-all cursor-pointer"
+                >
+                  <DollarSign className="w-4 h-4 stroke-[2.5]" />
+                  <span>Solicitar Retiro de ${totalEarnedUsd.toFixed(2)} USD por WhatsApp</span>
+                </a>
+              ) : (
+                <button
+                  type="button"
+                  disabled
+                  className="w-full py-2.5 px-3 rounded-xl bg-slate-900 border border-slate-800/80 text-slate-400 font-bold text-xs flex items-center justify-center gap-2 cursor-not-allowed opacity-90"
+                >
+                  <Lock className="w-3.5 h-3.5 text-amber-400/80" />
+                  <span>Retiros disponibles a partir de $15.00 USD (3 referidos)</span>
+                </button>
+              )}
+
+              {/* AVISO DE CONCILIACIÓN DE 48 HORAS */}
+              <div className="p-2.5 rounded-xl bg-slate-900/70 border border-slate-800/80 flex items-start gap-2.5 text-[11px] text-slate-300 leading-relaxed">
+                <Clock className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                <div>
+                  <span className="font-bold text-amber-300 block">Condición de Liquidación a las 48 Horas:</span>
+                  <span>
+                    Las comisiones se liquidan a las 48 horas hábiles tras la confirmación bancaria del nuevo comercio, asegurando una conciliación limpia y sin riesgo de reversos.
+                  </span>
+                </div>
               </div>
             </div>
 
@@ -398,19 +399,19 @@ export default function StreetAmbassadorLicenseModal({
                 </span>
               </div>
 
-              {/* ESCALERA ILIMITADA: 1 ($5), 5 ($25), 10 ($50), 20 ($100), ∞ */}
+              {/* ESCALERA ILIMITADA: 1 ($5), 3 ($15 Retiro), 5 ($25), 10 ($50), ∞ */}
               <div className="grid grid-cols-4 gap-2 pt-1 text-center font-mono">
                 <div className={`p-2 rounded-xl border text-[10px] ${paidCount >= 1 ? 'bg-emerald-950/70 border-emerald-500 text-emerald-300 font-bold' : 'bg-slate-900 border-slate-800 text-slate-400'}`}>
                   <span className="block font-bold">1 Amigo</span>
                   <span className="text-xs font-black">$5.00</span>
                 </div>
+                <div className={`p-2 rounded-xl border text-[10px] ${paidCount >= 3 ? 'bg-emerald-950/70 border-emerald-500 text-emerald-300 font-bold' : 'bg-slate-900 border-slate-800 text-slate-400'}`}>
+                  <span className="block font-bold">3 Amigos</span>
+                  <span className="text-xs font-black">$15 (Retiro)</span>
+                </div>
                 <div className={`p-2 rounded-xl border text-[10px] ${paidCount >= 5 ? 'bg-emerald-950/70 border-emerald-500 text-emerald-300 font-bold' : 'bg-slate-900 border-slate-800 text-slate-400'}`}>
                   <span className="block font-bold">5 Amigos</span>
                   <span className="text-xs font-black">$25.00</span>
-                </div>
-                <div className={`p-2 rounded-xl border text-[10px] ${paidCount >= 10 ? 'bg-emerald-950/70 border-emerald-500 text-emerald-300 font-bold' : 'bg-slate-900 border-slate-800 text-slate-400'}`}>
-                  <span className="block font-bold">10 Amigos</span>
-                  <span className="text-xs font-black">$50.00</span>
                 </div>
                 <div className="p-2 rounded-xl border text-[10px] bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 font-black border-emerald-300 shadow-md">
                   <span className="block font-bold">∞ ILIMITADO</span>

@@ -501,9 +501,9 @@ export default function InteractivePresentationModal({
                   <Gift className="w-4 h-4" />
                 </div>
                 <div className="min-w-0">
-                  <h4 className="text-xs font-black text-white">Programa de Referidos & Redes: ¡100% ILIMITADO!</h4>
+                  <h4 className="text-xs font-black text-white">Programa de Referidos: ¡100% ILIMITADO!</h4>
                   <p className="text-[10px] text-slate-300 leading-tight">
-                    Ganas <strong className="text-emerald-400">$5.00 USD por cada negocio referido</strong> (sin límite) y <strong className="text-sky-300">$5 USD al compartir en redes</strong>.
+                    Ganas <strong className="text-emerald-400">$5.00 USD por cada negocio referido</strong> (sin tope). Retiros a partir de $15 USD con liquidación segura en 48 horas.
                   </p>
                 </div>
               </div>
