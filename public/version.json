@@ -1,15 +1,15 @@
 {
-  "version": "3.0.7",
-  "releaseDate": "2026-10-05",
-  "title": "KlikPOS Street Suite v3.0.7 - Alto Contraste WCAG AAA, Pestañas de Ventas y Formulario Táctil Móvil",
+  "version": "3.0.8",
+  "releaseDate": "2026-10-06",
+  "title": "KlikPOS Street Suite v3.0.8 - Búsqueda Web Multifuente, Ultra Contraste Exterior y Validador Inteligente",
   "notes": [
-    "Optimización Quirúrgica de Contraste WCAG AAA: Badges de Delivery, Salón y Pagado con colores oscuros grado 950 y bordes sólidos de alta visibilidad para trabajo bajo luz solar directa.",
-    "Módulo de Ventas & Respaldo en Pestañas: Eliminación del scroll infinito dividiendo la interfaz en 3 vistas: Métricas & Desglose, Historial & Comprobantes, y Respaldo Nube.",
-    "Control de Pedidos & Despachos Segmentado: Pestañas por canal (Todos, Local/Salón, Delivery) y sub-filtros de pago (Todos, Pagados, Por Cobrar con indicador pulsante).",
-    "Registro Táctil de Clientes Mobile-First: Formulario rediseñado para celular con botones para prefijo de cédula venezolana (V-, J-, E-, G-) y tarjetas táctiles amplias.",
-    "Puente de Control Remoto en Vivo: Enlace en tiempo real vía Telegram Bot y túnel seguro para pruebas y despliegue instantáneo desde la calle."
+    "Búsqueda Web Multifuente (+30 Fotos): Integración paralela con DuckDuckGo, OpenFoodFacts y Wikimedia para obtener más de 30 imágenes en catálogo con alta resiliencia en redes móviles.",
+    "Contraste Visual Exterior de Alto Rendimiento: Barra de búsqueda con fondo blanco puro, borde de 2px de alto impacto y texto oscuro de máxima legibilidad para operación bajo luz solar directa.",
+    "Validador Inteligente de Pago Móvil: Módulo de verificación de capturas de pago móvil y análisis inteligente de comprobantes.",
+    "Compresión de Fotos por Hardware Blindada: Procesamiento de cámara con createImageBitmap y liberación de URLs de memoria (RAM < 1.5MB) protegiendo dispositivos contra cierres forzados por el sistema operativo.",
+    "Control de Ciclo de Vida del Tour: Persistencia garantizada del estado del onboarding en almacenamiento local."
   ],
-  "windowsUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.7/KlikPOS_Desktop_Full_Setup.exe",
-  "androidUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.7/KlikPOS_Movil_Full.apk",
+  "windowsUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.8/KlikPOS_Desktop_Full_Setup.exe",
+  "androidUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.8/KlikPOS_Movil_Full.apk",
   "mandatory": false
 }

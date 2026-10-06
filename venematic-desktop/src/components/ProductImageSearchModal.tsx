@@ -86,7 +86,7 @@ export default function ProductImageSearchModal({
       const params = new URLSearchParams({ q: finalQuery });
       if (barcode) params.append('barcode', barcode);
       const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 2000);
+      const timer = setTimeout(() => controller.abort(), 8000);
       const res = await fetch(`/api/products/search-images?${params.toString()}`, { signal: controller.signal });
       clearTimeout(timer);
       if (res.ok) {
@@ -364,12 +364,12 @@ export default function ProductImageSearchModal({
                     performSearch(query, filterModifier);
                   }
                 }}
-                className="dark-input keep-dark w-full pl-10 pr-4 py-2.5 bg-slate-900 border-2 border-slate-700 rounded-xl text-xs sm:text-sm font-semibold text-white placeholder-slate-400 focus:outline-hidden focus:border-sky-400 focus:ring-2 focus:ring-sky-500/40 transition-all shadow-inner"
+                className="w-full pl-10 pr-4 py-2.5 bg-white border-2 border-sky-400 rounded-xl text-xs sm:text-sm font-bold text-slate-950 placeholder-slate-500 focus:outline-hidden focus:ring-2 focus:ring-sky-400/50 shadow-md transition-all"
                 style={{
-                  color: '#ffffff',
-                  WebkitTextFillColor: '#ffffff',
-                  backgroundColor: '#0f172a',
-                  caretColor: '#38bdf8'
+                  color: '#090d16',
+                  WebkitTextFillColor: '#090d16',
+                  backgroundColor: '#ffffff',
+                  caretColor: '#0284c7'
                 }}
               />
             </div>

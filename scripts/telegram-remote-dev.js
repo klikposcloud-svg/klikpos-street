@@ -104,6 +104,9 @@ async function handleMessage(msg) {
   const timestamp = getTimestamp();
 
   console.log(`[Telegram] Mensaje recibido de ${fromName} (${chatId})`);
+  try {
+    fs.writeFileSync(path.join(CAPTURAS_DIR, 'last_chat_id.txt'), String(chatId), 'utf-8');
+  } catch {}
 
   // 1. Manejo de Fotos / Capturas de Pantalla
   if (msg.photo && msg.photo.length > 0) {

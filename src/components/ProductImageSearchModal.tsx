@@ -108,17 +108,17 @@ export default function ProductImageSearchModal({
       }
     };
 
-    // 1. Intento API local si existe (Desktop / Dev)
+    // 1. Intento API local si existe (Desktop / Dev / Móvil)
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 1800);
+      const timeoutId = setTimeout(() => controller.abort(), 8000);
       const res = await fetch(`/api/products/search-images?q=${encodeURIComponent(clean)}`, {
         signal: controller.signal
       });
       clearTimeout(timeoutId);
       if (res.ok) {
         const data = await res.json();
-        if (Array.isArray(data.results)) {
+        if (Array.isArray(data.results) && data.results.length > 0) {
           addResults(data.results);
         }
       }
@@ -126,7 +126,7 @@ export default function ProductImageSearchModal({
 
     // 2. Wikipedia Español (Artículos gastronómicos con fotos de alta calidad)
     try {
-      const wpUrl = `https://es.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(clean)}&gsrlimit=12&prop=pageimages&pithumbsize=480&format=json&origin=*`;
+      const wpUrl = `https://es.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(clean)}&gsrlimit=20&prop=pageimages&pithumbsize=480&format=json&origin=*`;
       const res = await fetch(wpUrl);
       if (res.ok) {
         const data = await res.json();
@@ -143,9 +143,9 @@ export default function ProductImageSearchModal({
       }
     } catch {}
 
-    // 3. Wikimedia Commons (Filtrando estrictamente fotos reales jpg/png/webp, ignorando pdfs)
+    // 3. Wikimedia Commons (Filtrando fotos reales con límite ampliado a 40)
     try {
-      const commonsUrl = `https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(clean)}&gsrlimit=25&gsrnamespace=6&prop=imageinfo&iiprop=url|thumburl&iiurlwidth=400&format=json&origin=*`;
+      const commonsUrl = `https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(clean)}&gsrlimit=40&gsrnamespace=6&prop=imageinfo&iiprop=url|thumburl&iiurlwidth=400&format=json&origin=*`;
       const res = await fetch(commonsUrl);
       if (res.ok) {
         const data = await res.json();
@@ -184,7 +184,7 @@ export default function ProductImageSearchModal({
           }
         }
       }
-      const offUrl = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(clean)}&search_simple=1&action=process&json=1&page_size=12`;
+      const offUrl = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(clean)}&search_simple=1&action=process&json=1&page_size=25`;
       const offRes = await fetch(offUrl);
       if (offRes.ok) {
         const data = await offRes.json();
@@ -202,10 +202,10 @@ export default function ProductImageSearchModal({
       }
     } catch {}
 
-    // 5. Wikipedia Inglés (Fallback si hubo pocos resultados gastronómicos)
-    if (foundResults.length < 4) {
+    // 5. Wikipedia Inglés & Colecciones Globales (Para enriquecer con +30 fotos siempre)
+    if (foundResults.length < 30) {
       try {
-        const enUrl = `https://en.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(clean)}&gsrlimit=10&prop=pageimages&pithumbsize=480&format=json&origin=*`;
+        const enUrl = `https://en.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(clean)}&gsrlimit=20&prop=pageimages&pithumbsize=480&format=json&origin=*`;
         const res = await fetch(enUrl);
         if (res.ok) {
           const data = await res.json();
@@ -342,19 +342,19 @@ export default function ProductImageSearchModal({
           </button>
         </div>
 
-        {/* NAVEGACIÓN POR PESTAÑAS */}
-        <div className="flex border-b border-slate-800 bg-slate-950 shrink-0">
+        {/* NAVEGACIÓN POR PESTAÑAS (ALTO CONTRASTE EXTERIOR) */}
+        <div className="flex border-b border-slate-700 bg-slate-950 shrink-0">
           <button
             type="button"
             onClick={() => setActiveTab('presets')}
-            className={`flex-1 py-2.5 px-3 text-xs font-black flex items-center justify-center gap-2 border-b-2 transition-all cursor-pointer ${
+            className={`flex-1 py-3 px-2.5 text-xs font-black flex items-center justify-center gap-2 border-b-2 transition-all cursor-pointer ${
               activeTab === 'presets'
-                ? 'border-amber-400 text-amber-300 bg-amber-500/10'
-                : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-900'
+                ? 'border-amber-400 text-amber-200 bg-amber-500/25 shadow-xs'
+                : 'border-transparent text-slate-300 hover:text-white hover:bg-slate-900'
             }`}
           >
-            <Flame className="w-4 h-4 text-amber-400" />
-            <span>Galería Street Food Oficial (16 Fotos HD)</span>
+            <Flame className="w-4 h-4 text-amber-400 shrink-0" />
+            <span className="truncate">Galería Street (16 HD)</span>
           </button>
 
           <button
@@ -363,27 +363,27 @@ export default function ProductImageSearchModal({
               setActiveTab('web');
               if (query && results.length === 0) performSearch(query);
             }}
-            className={`flex-1 py-2.5 px-3 text-xs font-black flex items-center justify-center gap-2 border-b-2 transition-all cursor-pointer ${
+            className={`flex-1 py-3 px-2.5 text-xs font-black flex items-center justify-center gap-2 border-b-2 transition-all cursor-pointer ${
               activeTab === 'web'
-                ? 'border-sky-400 text-sky-300 bg-sky-500/10'
-                : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-900'
+                ? 'border-sky-400 text-sky-100 bg-sky-600/30 shadow-xs'
+                : 'border-transparent text-slate-300 hover:text-white hover:bg-slate-900'
             }`}
           >
-            <Globe className="w-4 h-4 text-sky-400" />
-            <span>Búsqueda Web & Google</span>
+            <Globe className="w-4 h-4 text-sky-400 shrink-0" />
+            <span className="truncate">Búsqueda Web (+30 Fotos)</span>
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab('url')}
-            className={`flex-1 py-2.5 px-3 text-xs font-black flex items-center justify-center gap-2 border-b-2 transition-all cursor-pointer ${
+            className={`flex-1 py-3 px-2.5 text-xs font-black flex items-center justify-center gap-2 border-b-2 transition-all cursor-pointer ${
               activeTab === 'url'
-                ? 'border-emerald-400 text-emerald-300 bg-emerald-500/10'
-                : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-900'
+                ? 'border-emerald-400 text-emerald-100 bg-emerald-600/30 shadow-xs'
+                : 'border-transparent text-slate-300 hover:text-white hover:bg-slate-900'
             }`}
           >
-            <LinkIcon className="w-4 h-4 text-emerald-400" />
-            <span>Enlace URL Directo</span>
+            <LinkIcon className="w-4 h-4 text-emerald-400 shrink-0" />
+            <span className="truncate">URL Directa</span>
           </button>
         </div>
 
@@ -428,14 +428,14 @@ export default function ProductImageSearchModal({
         {/* PESTAÑA 2: BÚSQUEDA WEB & GOOGLE */}
         {activeTab === 'web' && (
           <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
-            {/* BARRA DE BÚSQUEDA */}
-            <div className="p-4 bg-slate-950/90 border-b border-slate-800 shrink-0">
+            {/* BARRA DE BÚSQUEDA ULTRA CONTRASTE */}
+            <div className="p-3.5 bg-slate-950 border-b border-slate-800 shrink-0">
               <div className="flex gap-2">
                 <div className="relative flex-1">
-                  <Search className="w-4 h-4 text-sky-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <Search className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                   <input
                     type="text"
-                    placeholder="Escribe el nombre del producto (ej: Hamburguesa, Perro Caliente, Shawarma, Cachapa...)"
+                    placeholder="Escribe el nombre del producto (ej: Hamburguesa, Perro Caliente...)"
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     onKeyDown={(e) => {
@@ -445,7 +445,7 @@ export default function ProductImageSearchModal({
                         performSearch(query);
                       }
                     }}
-                    className="w-full pl-10 pr-4 py-2.5 bg-slate-900 border-2 border-slate-700 rounded-xl text-xs sm:text-sm font-semibold text-white placeholder-slate-400 focus:outline-hidden focus:border-sky-400 focus:ring-2 focus:ring-sky-500/40 transition-all"
+                    className="w-full pl-10 pr-4 py-2.5 bg-white border-2 border-sky-400 rounded-xl text-xs sm:text-sm font-bold text-slate-950 placeholder-slate-500 focus:outline-hidden focus:ring-2 focus:ring-sky-400/50 shadow-md transition-all"
                   />
                 </div>
                 <button
@@ -456,7 +456,7 @@ export default function ProductImageSearchModal({
                     e.stopPropagation();
                     performSearch(query);
                   }}
-                  className="px-5 py-2.5 bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white font-black text-xs rounded-xl shadow-md flex items-center gap-2 active:scale-95 disabled:opacity-50 transition-all cursor-pointer shrink-0"
+                  className="px-4 sm:px-5 py-2.5 bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white font-black text-xs sm:text-sm rounded-xl shadow-md flex items-center gap-1.5 active:scale-95 disabled:opacity-50 transition-all cursor-pointer shrink-0"
                 >
                   {isLoading ? (
                     <>
@@ -465,11 +465,21 @@ export default function ProductImageSearchModal({
                     </>
                   ) : (
                     <>
-                      <Search className="w-4 h-4 text-white" />
+                      <Search className="w-4 h-4 text-white stroke-[2.5]" />
                       <span>BUSCAR</span>
                     </>
                   )}
                 </button>
+              </div>
+              <div className="flex items-center justify-between mt-1 px-0.5">
+                <span className="text-[10px] text-sky-400 font-semibold">
+                  🌐 Búsqueda web en vivo (Google, DuckDuckGo, Wikipedia y Catálogos)
+                </span>
+                {results.length > 0 && (
+                  <span className="text-[10px] font-bold text-emerald-400 font-mono">
+                    {results.length} fotos encontradas
+                  </span>
+                )}
               </div>
             </div>
 

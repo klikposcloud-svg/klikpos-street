@@ -18,16 +18,62 @@ interface ProductImageSelectorProps {
  * inferior a 2MB y evitar que el sistema operativo mate el proceso del navegador.
  */
 const compressImageSafely = async (file: File, maxWidth = 400, quality = 0.75): Promise<string> => {
+  // Estrategia 1: createImageBitmap con redimensionamiento nativo por hardware (RAM < 1MB)
+  if (typeof window !== 'undefined' && 'createImageBitmap' in window) {
+    try {
+      let bitmap: ImageBitmap | null = null;
+      try {
+        bitmap = await createImageBitmap(file, {
+          resizeWidth: maxWidth,
+          resizeQuality: 'medium',
+        });
+      } catch {
+        bitmap = await createImageBitmap(file);
+      }
+
+      if (bitmap) {
+        let width = bitmap.width;
+        let height = bitmap.height;
+        if (width > maxWidth || height > maxWidth) {
+          if (width > height) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          } else {
+            width = Math.round((width * maxWidth) / height);
+            height = maxWidth;
+          }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, width, height);
+          ctx.drawImage(bitmap, 0, 0, width, height);
+          bitmap.close();
+          return canvas.toDataURL('image/jpeg', quality);
+        }
+        bitmap.close();
+      }
+    } catch (e) {
+      console.warn('Fallback a createObjectURL:', e);
+    }
+  }
+
+  // Estrategia 2: URL.createObjectURL para evitar inflar la memoria en Base64 de 30MB
   return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onerror = () => reject(new Error('No se pudo leer el archivo de la foto'));
-    reader.onload = () => {
+    let objectUrl: string | null = null;
+    try {
+      objectUrl = URL.createObjectURL(file);
+    } catch {}
+
+    if (objectUrl) {
       const img = new Image();
-      img.onerror = () => reject(new Error('Formato de imagen no compatible'));
       img.onload = () => {
         try {
-          let width = img.width || 400;
-          let height = img.height || 400;
+          let width = img.naturalWidth || img.width || 400;
+          let height = img.naturalHeight || img.height || 400;
           if (width > maxWidth || height > maxWidth) {
             if (width > height) {
               height = Math.round((height * maxWidth) / width);
@@ -41,22 +87,30 @@ const compressImageSafely = async (file: File, maxWidth = 400, quality = 0.75): 
           canvas.width = width;
           canvas.height = height;
           const ctx = canvas.getContext('2d');
-          if (!ctx) {
-            resolve(reader.result as string);
+          if (ctx) {
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, width, height);
+            ctx.drawImage(img, 0, 0, width, height);
+            const dataUrl = canvas.toDataURL('image/jpeg', quality);
+            if (objectUrl) URL.revokeObjectURL(objectUrl);
+            resolve(dataUrl);
             return;
           }
-          ctx.fillStyle = '#ffffff';
-          ctx.fillRect(0, 0, width, height);
-          ctx.drawImage(img, 0, 0, width, height);
-          const dataUrl = canvas.toDataURL('image/jpeg', quality);
-          resolve(dataUrl);
-        } catch (err) {
-          resolve(reader.result as string);
-        }
+        } catch (err) {}
+        if (objectUrl) URL.revokeObjectURL(objectUrl);
+        reject(new Error('No se pudo procesar la foto'));
       };
-      img.src = reader.result as string;
-    };
-    reader.readAsDataURL(file);
+      img.onerror = () => {
+        if (objectUrl) URL.revokeObjectURL(objectUrl);
+        reject(new Error('Error al decodificar foto'));
+      };
+      img.src = objectUrl;
+    } else {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = () => reject(new Error('Fallo al leer archivo'));
+      reader.readAsDataURL(file);
+    }
   });
 };
 
@@ -111,11 +165,7 @@ export const ProductImageSelector: React.FC<ProductImageSelectorProps> = ({
         className="hidden"
         onChange={handleFileChange}
         onClick={(e) => {
-          // Prevenir recarga o propagación hacia formularios padres
           e.stopPropagation();
-          try {
-            (e.target as any).value = null;
-          } catch {}
         }}
       />
 
@@ -127,9 +177,6 @@ export const ProductImageSelector: React.FC<ProductImageSelectorProps> = ({
         onChange={handleFileChange}
         onClick={(e) => {
           e.stopPropagation();
-          try {
-            (e.target as any).value = null;
-          } catch {}
         }}
       />
 

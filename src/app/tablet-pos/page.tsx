@@ -80,6 +80,7 @@ import { DeliveryDriversModal } from '@/components/tablet-pos/DeliveryDriversMod
 import { EditProductModal } from '@/components/tablet-pos/EditProductModal';
 import { CompanyConfigModal } from '@/components/tablet-pos/CompanyConfigModal';
 import { PagoMovilConfigModal } from '@/components/tablet-pos/PagoMovilConfigModal';
+import { PagoMovilSmartValidator } from '@/components/tablet-pos/PagoMovilSmartValidator';
 import { CustomerModal } from '@/components/tablet-pos/CustomerModal';
 import InteractivePresentationModal from '@/components/presentation/InteractivePresentationModal';
 import {
@@ -252,7 +253,27 @@ export default function TabletMobilePosPage() {
   const [categoriesList, setCategoriesList] = useState<string[]>(CATEGORIES);
 
   // Modales del Docker
-  const [showInventoryModal, setShowInventoryModal] = useState(false);
+  const [showInventoryModal, setShowInventoryModalState] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return sessionStorage.getItem('klikpos_show_inventory_modal') === 'true';
+    }
+    return false;
+  });
+
+  const setShowInventoryModal = (val: boolean | ((prev: boolean) => boolean)) => {
+    setShowInventoryModalState((prev) => {
+      const next = typeof val === 'function' ? val(prev) : val;
+      try {
+        if (next) {
+          sessionStorage.setItem('klikpos_show_inventory_modal', 'true');
+        } else {
+          sessionStorage.removeItem('klikpos_show_inventory_modal');
+        }
+      } catch {}
+      return next;
+    });
+  };
+
   const [showDriversModal, setShowDriversModal] = useState(false);
   const [showPrinterModal, setShowPrinterModal] = useState(false);
   const [showRubroModal, setShowRubroModal] = useState(false);
@@ -3140,49 +3161,19 @@ export default function TabletMobilePosPage() {
               </div>
 
               {/* FORMULARIO DINÁMICO POR MÉTODO DE PAGO */}
-              {/* 1. PAGO MÓVIL */}
+              {/* 1. PAGO MÓVIL CON VALIDACIÓN INTELIGENTE */}
               {selectedPaymentMethod === 'pago_movil' && (
-                <div className={`p-3.5 rounded-xl border space-y-3 ${
-                  isLight ? 'bg-slate-50 border-slate-200' : 'bg-slate-950 border-slate-800'
-                }`}>
-                  {/* Tarjeta de Datos de Pago Móvil para el Cliente */}
-                  <div className="p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-xl space-y-1.5">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-black uppercase text-emerald-700 dark:text-emerald-400">
-                        📱 Datos del Negocio para Recibir:
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => handleCopyPagoMovilData(pagoMovilInfo, totalVES)}
-                        className="text-[10px] font-black px-2 py-0.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-md flex items-center gap-1 active:scale-95 transition-all"
-                      >
-                        <Copy className="w-3 h-3" />
-                        <span>{copiedPmAlert ? '¡Copiado!' : 'Copiar Datos'}</span>
-                      </button>
-                    </div>
-                    <div className="text-xs font-mono text-slate-800 dark:text-slate-200 space-y-0.5">
-                      <p><b>Banco:</b> {pagoMovilInfo.bank}</p>
-                      <p><b>Teléfono:</b> {pagoMovilInfo.phone}</p>
-                      <p><b>Cédula/RIF:</b> {pagoMovilInfo.idDoc}</p>
-                      <p><b>Titular:</b> {pagoMovilInfo.ownerName}</p>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-black mb-1" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
-                      Número de Referencia Bancaria (4 a 6 dígitos):
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Ej: 948271"
-                      value={pagoMovilRefInput}
-                      onChange={(e) => setPagoMovilRefInput(e.target.value)}
-                      className={`w-full px-3 py-2 rounded-xl text-xs font-mono font-bold border outline-none ${
-                        isLight ? 'bg-white border-slate-300 text-slate-900 focus:border-slate-800' : 'bg-slate-900 border-slate-700 text-white'
-                      }`}
-                    />
-                  </div>
-                </div>
+                <PagoMovilSmartValidator
+                  isLight={isLight}
+                  totalVES={totalVES}
+                  totalUSD={totalUSD}
+                  bcvRate={bcvRate}
+                  pagoMovilInfo={pagoMovilInfo}
+                  pagoMovilRefInput={pagoMovilRefInput}
+                  setPagoMovilRefInput={setPagoMovilRefInput}
+                  onAutoConfirmSale={handleFinalizeSale}
+                  primaryColor={currentPal.primary}
+                />
               )}
 
               {/* 2. EFECTIVO USD CON VUELTO EN VIVO */}
@@ -4971,11 +4962,24 @@ export default function TabletMobilePosPage() {
       {/* ========================================================================= */}
       <InteractivePresentationModal
         isOpen={showPresentationModal}
-        onClose={() => setShowPresentationModal(false)}
+        onClose={() => {
+          try {
+            localStorage.setItem('klikpos_onboarding_completed', 'true');
+          } catch {}
+          setShowPresentationModal(false);
+        }}
         onStartPos={() => {
+          try {
+            localStorage.setItem('klikpos_onboarding_completed', 'true');
+          } catch {}
+          setShowPresentationModal(false);
           setActiveTab('menu');
         }}
         onOpenAmbassador={() => {
+          try {
+            localStorage.setItem('klikpos_onboarding_completed', 'true');
+          } catch {}
+          setShowPresentationModal(false);
           setShowStreetAmbassadorModal(true);
         }}
       />

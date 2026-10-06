@@ -1,10 +1,10 @@
 @echo off
-title Instalador KlikPOS Street v3.0.5
+title Instalador KlikPOS Street v3.0.8
 echo ===============================================================
-echo   INSTALADOR OFICIAL: KlikPOS Street v3.0.5
+echo   INSTALADOR OFICIAL: KlikPOS Street v3.0.8
 echo   Desbloqueando archivo de seguridad SmartScreen de Windows...
 echo ===============================================================
 powershell -NoProfile -ExecutionPolicy Bypass -Command "Get-ChildItem -Path '%~dp0' -Filter '*.exe' | Unblock-File" 2>nul
 echo Iniciando asistente de instalacion...
-start "" "%~dp0KlikPOS_Street_v3.0.5_Setup.exe"
+start "" "%~dp0KlikPOS_Street_v3.0.8_Setup.exe"
 exit

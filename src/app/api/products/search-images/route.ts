@@ -39,7 +39,7 @@ async function searchDuckDuckGo(query: string): Promise<ImageResult[]> {
     const results: ImageResult[] = [];
 
     if (Array.isArray(data.results)) {
-      for (const item of data.results.slice(0, 16)) {
+      for (const item of data.results.slice(0, 45)) {
         if (item.image && item.image.startsWith('http')) {
           results.push({
             title: item.title || query,
@@ -85,7 +85,7 @@ async function searchOpenFoodFacts(query: string, barcode?: string): Promise<Ima
     }
 
     // Búsqueda por texto en base de datos de productos de supermercado
-    const searchUrl = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(query)}&search_simple=1&action=process&json=1&page_size=6`;
+    const searchUrl = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(query)}&search_simple=1&action=process&json=1&page_size=25`;
     const res = await fetch(searchUrl, {
       headers: { 'User-Agent': 'VenematicPOS - Web - Version 2.0' },
       signal: AbortSignal.timeout(3000),
@@ -118,7 +118,7 @@ async function searchOpenFoodFacts(query: string, barcode?: string): Promise<Ima
 // 3. Wikimedia / Wikipedia Commons (Fallback adicional para marcas y productos generales)
 async function searchWikimedia(query: string): Promise<ImageResult[]> {
   try {
-    const url = `https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(query)}&gsrnamespace=6&gsrlimit=8&prop=imageinfo&iiprop=url|thumburl&iiurlwidth=400&format=json`;
+    const url = `https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(query)}&gsrnamespace=6&gsrlimit=35&prop=imageinfo&iiprop=url|thumburl&iiurlwidth=400&format=json`;
     const res = await fetch(url, {
       headers: { 'User-Agent': 'VenematicPOS - Web - Version 2.0' },
     });
@@ -170,31 +170,21 @@ export async function GET(req: NextRequest) {
   const cleanQuery = query || barcode || '';
 
   // Ejecutar búsquedas en paralelo con motores complementarios
-  const [offResults, ddgResults, wikiResults] = await Promise.all([
+  const [offResults, ddgResultsWhite, ddgResultsGeneral, wikiResults] = await Promise.all([
     searchOpenFoodFacts(cleanQuery, barcode),
     searchDuckDuckGo(`${cleanQuery} fondo blanco producto`),
+    searchDuckDuckGo(cleanQuery),
     cleanQuery.length > 3 ? searchWikimedia(cleanQuery) : Promise.resolve([]),
   ]);
 
-  // Combinar resultados priorizando catálogo de alimentos si existen
+  // Combinar resultados priorizando catálogo de alimentos y fotos sin duplicados
   const combined: ImageResult[] = [];
   const seenUrls = new Set<string>();
 
-  for (const item of [...offResults, ...ddgResults, ...wikiResults]) {
-    if (!seenUrls.has(item.url)) {
+  for (const item of [...offResults, ...ddgResultsWhite, ...ddgResultsGeneral, ...wikiResults]) {
+    if (item && item.url && !seenUrls.has(item.url)) {
       seenUrls.add(item.url);
       combined.push(item);
-    }
-  }
-
-  // Si con "fondo blanco" dio pocos resultados, intentar búsqueda directa
-  if (combined.length < 4 && cleanQuery) {
-    const fallbackDdg = await searchDuckDuckGo(cleanQuery);
-    for (const item of fallbackDdg) {
-      if (!seenUrls.has(item.url)) {
-        seenUrls.add(item.url);
-        combined.push(item);
-      }
     }
   }
 

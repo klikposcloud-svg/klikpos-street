@@ -46,12 +46,19 @@ export default function InteractivePresentationModal({
 
   const totalSlides = 6;
 
+  const handleDismiss = () => {
+    try {
+      localStorage.setItem('klikpos_onboarding_completed', 'true');
+    } catch {}
+    onClose();
+  };
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!isOpen) return;
       if (e.key === 'ArrowRight') nextSlide();
       if (e.key === 'ArrowLeft') prevSlide();
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') handleDismiss();
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
@@ -117,7 +124,7 @@ export default function InteractivePresentationModal({
               {currentSlide + 1} / {totalSlides}
             </span>
             <button
-              onClick={onClose}
+              onClick={handleDismiss}
               className="p-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white transition-all active:scale-90 cursor-pointer"
               title="Cerrar presentación"
             >
@@ -512,7 +519,7 @@ export default function InteractivePresentationModal({
               <div className="space-y-1.5 pt-1">
                 <button
                   onClick={() => {
-                    onClose();
+                    handleDismiss();
                     if (onStartPos) onStartPos();
                   }}
                   className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 text-slate-950 font-black text-sm flex items-center justify-center gap-2 shadow-xl shadow-emerald-500/30 active:scale-98 transition-transform cursor-pointer"
@@ -525,7 +532,7 @@ export default function InteractivePresentationModal({
                 {onOpenAmbassador && (
                   <button
                     onClick={() => {
-                      onClose();
+                      handleDismiss();
                       onOpenAmbassador();
                     }}
                     className="w-full py-1 text-center text-[11px] font-bold text-amber-400 hover:text-amber-300 transition-colors cursor-pointer"
