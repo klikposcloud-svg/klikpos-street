@@ -714,18 +714,9 @@ export default function TabletMobilePosPage() {
   const handleToggleTheme = useCallback((targetThemeId?: CanvasThemeId) => {
     const nextThemeId: CanvasThemeId = targetThemeId || (isLight ? 'obsidian' : 'light-graphite');
 
-    const updateThemeState = () => {
-      applyThemeTokens(nextThemeId);
-      setCanvasTheme(nextThemeId);
-    };
-
-    if (typeof document !== 'undefined' && 'startViewTransition' in document) {
-      (document as any).startViewTransition(() => {
-        updateThemeState();
-      });
-    } else {
-      updateThemeState();
-    }
+    // Sincronización Inmediata a 0ms (Sin retardo, congelamiento ni desvanecimiento de View Transitions)
+    applyThemeTokens(nextThemeId);
+    setCanvasTheme(nextThemeId);
   }, [isLight, applyThemeTokens]);
 
   // Blindaje Anti-Reinicio de Cámara: Persistir y recuperar estado de modal y borradores de inventario

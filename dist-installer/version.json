@@ -1,5 +1,5 @@
 {
-  "version": "3.0.9",
+  "version": "3.0.10",
   "releaseDate": "2026-10-06",
   "title": "KlikPOS Street Suite v3.0.9 - Visor de Cámara Directo en Pantalla y Blindaje Total Anti-Reinicio",
   "notes": [
@@ -9,7 +9,7 @@
     "Compresión Segura por Hardware: Decodificación y optimización directa para evitar saturación de RAM (RAM < 1.5MB) en teléfonos con recursos limitados.",
     "Búsqueda Web Multifuente (+35 Fotos) y Máximo Contraste Solar: Integración optimizada para catálogo rápido bajo luz directa del sol."
   ],
-  "windowsUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.9/KlikPOS_Desktop_Full_Setup.exe",
-  "androidUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.9/KlikPOS_Movil_Full.apk",
+  "windowsUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.10/KlikPOS_Desktop_Full_Setup.exe",
+  "androidUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.10/KlikPOS_Movil_Full.apk",
   "mandatory": false
 }

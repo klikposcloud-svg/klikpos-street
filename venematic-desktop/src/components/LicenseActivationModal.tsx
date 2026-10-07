@@ -352,14 +352,14 @@ export default function LicenseActivationModal({ isOpen, onClose, onSuccess, isT
                       RIF o Cédula Registrada *:
                     </label>
                     <div className="relative">
-                      <Building className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                      <Building className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2 z-10" />
                       <input
                         type="text"
                         required
                         placeholder="Ej: J-12345678-9"
                         value={rif}
                         onChange={(e) => setRif(e.target.value.toUpperCase())}
-                        className="w-full pl-9 pr-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-mono font-bold text-slate-900 uppercase outline-none focus:ring-2 focus:ring-indigo-500"
+                        className="w-full pl-9 pr-3 py-2.5 bg-white border-2 border-slate-300 rounded-xl text-xs sm:text-sm font-mono font-black text-slate-950 uppercase placeholder:text-slate-400 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30 shadow-inner"
                       />
                     </div>
                   </div>
@@ -369,14 +369,14 @@ export default function LicenseActivationModal({ isOpen, onClose, onSuccess, isT
                       Clave de Producto (Product Key) *:
                     </label>
                     <div className="relative">
-                      <KeyRound className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                      <KeyRound className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2 z-10" />
                       <input
                         type="text"
                         required
                         placeholder="VNK-VIT-PERP-XXXX-XXXX..."
                         value={productKey}
                         onChange={(e) => setProductKey(e.target.value.toUpperCase())}
-                        className="w-full pl-9 pr-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-mono font-black text-slate-900 uppercase outline-none focus:ring-2 focus:ring-indigo-500 tracking-tight"
+                        className="w-full pl-9 pr-3 py-2.5 bg-white border-2 border-slate-300 rounded-xl text-xs sm:text-sm font-mono font-black text-slate-950 uppercase placeholder:text-slate-400 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30 tracking-tight shadow-inner"
                       />
                     </div>
                   </div>

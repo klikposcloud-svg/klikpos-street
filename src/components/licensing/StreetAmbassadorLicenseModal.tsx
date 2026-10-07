@@ -558,7 +558,7 @@ export default function StreetAmbassadorLicenseModal({
               placeholder="Ingresa el código de embajador (Ej: KLIK-REF-4581)"
               value={ambassadorCode}
               onChange={(e) => handleSaveAmbassadorCode(e.target.value)}
-              className="w-full px-3 py-2 rounded-xl text-xs font-mono uppercase bg-[#0c1220] border border-amber-500/40 text-amber-200 placeholder:text-slate-400 outline-none focus:border-amber-400"
+              className="w-full px-3 py-2.5 rounded-xl text-xs sm:text-sm font-mono font-black uppercase bg-white border-2 border-amber-400 text-slate-950 placeholder:text-slate-400 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/30 shadow-inner"
             />
           </div>
 
@@ -697,7 +697,7 @@ export default function StreetAmbassadorLicenseModal({
                   placeholder="Ej: J-50123456-7"
                   value={rifInput}
                   onChange={(e) => setRifInput(e.target.value.toUpperCase())}
-                  className="w-full px-3 py-2 rounded-xl text-xs font-mono uppercase bg-[#090d16] border border-slate-700 text-white placeholder:text-slate-500 outline-none focus:border-amber-500"
+                  className="w-full px-3 py-2.5 rounded-xl text-xs sm:text-sm font-mono font-black uppercase bg-white border-2 border-slate-300 text-slate-950 placeholder:text-slate-400 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/30 shadow-inner"
                 />
               </div>
               <div className="sm:col-span-2">
@@ -710,7 +710,7 @@ export default function StreetAmbassadorLicenseModal({
                     placeholder="Ej: VNK-PRO-PERP-XXXX... o KLIK-..."
                     value={licenseKeyInput}
                     onChange={(e) => setLicenseKeyInput(e.target.value)}
-                    className="flex-1 px-3 py-2 rounded-xl text-xs font-mono uppercase bg-[#090d16] border border-slate-700 text-white placeholder:text-slate-500 outline-none focus:border-amber-500"
+                    className="flex-1 px-3 py-2.5 rounded-xl text-xs sm:text-sm font-mono font-black uppercase bg-white border-2 border-slate-300 text-slate-950 placeholder:text-slate-400 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/30 shadow-inner"
                   />
                   <button
                     type="submit"
