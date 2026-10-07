@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "KlikPOS Suite - Arquitectura de Ingeniería & Flujo de Datos",
+    "output": "KLIKPOS_ARQUITECTURA_TECNICA.html",
+    "quality_profile": "showcase"
+  },
+  "components": [
+    { "id": "cashier_ui", "type": "frontend", "label": "KlikPOS Terminal UI", "sublabel": "Next.js 14 / React 18 / Tailwind", "pos": [50, 270], "size": [170, 70], "tag": "0ms Latencia" },
+    { "id": "dexie_db", "type": "database", "label": "Motor Dexie.js v4", "sublabel": "IndexedDB / Ventas & Stock", "pos": [300, 270], "size": [160, 70], "tag": "Offline-First" },
+    { "id": "payment_bridge", "type": "backend", "label": "Bridge Nativo Pago Móvil", "sublabel": "Capacitor Plugin / JS Queue", "pos": [540, 270], "size": [160, 70] },
+    { "id": "bank_listener", "type": "security", "label": "BankNotificationListener", "sublabel": "NotificationListenerService", "pos": [780, 270], "size": [170, 70], "tag": "Google Play Protect OK" },
+
+    { "id": "bcv_service", "type": "cloud", "label": "Servicio Tasa BCV", "sublabel": "Scraper Oficial & Fallbacks", "pos": [50, 90], "size": [170, 60], "tag": "Multi-fuente" },
+    { "id": "firestore_cloud", "type": "cloud", "label": "Firestore Cloud Sync", "sublabel": "Firebase / Multi-cajas", "pos": [410, 90], "size": [170, 60] },
+    { "id": "ota_service", "type": "cloud", "label": "GitHub Releases OTA", "sublabel": "Distribución v3.0.14 APK/EXE", "pos": [780, 90], "size": [170, 60], "tag": "Actualizador 2 min" },
+
+    { "id": "printer_service", "type": "external", "label": "Impresora Térmica", "sublabel": "ESC/POS 80mm / 58mm Bluetooth/USB", "pos": [50, 430], "size": [170, 60] },
+    { "id": "tauri_desktop", "type": "backend", "label": "Tauri Standalone Rust", "sublabel": "SQLite Local / Instalador Inno", "pos": [300, 430], "size": [160, 60] },
+    { "id": "android_os", "type": "external", "label": "Apps Bancarias & SMS", "sublabel": "BDVApp, Banesco, Mercantil, BNC", "pos": [780, 430], "size": [170, 60], "tag": "Avisos Push / SMS" }
+  ],
+  "boundaries": [
+    { "kind": "region", "label": "KlikPOS Cloud Ecosystem (Nube & Catálogos)", "wraps": ["bcv_service", "firestore_cloud", "ota_service"] },
+    { "kind": "region", "label": "Dispositivo Local de Calle (100% Funcional Sin Internet)", "wraps": ["cashier_ui", "dexie_db", "payment_bridge", "printer_service", "tauri_desktop"] },
+    { "kind": "security-group", "label": "Android Sandbox & Detección de Pagos Segura", "wraps": ["bank_listener", "android_os"] }
+  ],
+  "connections": [
+    { "id": "c-ui-dexie", "from": "cashier_ui", "to": "dexie_db", "label": "Transacciones Locales", "variant": "emphasis" },
+    { "id": "c-ui-bcv", "from": "bcv_service", "to": "cashier_ui", "label": "Tasa Oficial VES", "fromSide": "bottom", "toSide": "top" },
+    { "id": "c-dexie-cloud", "from": "dexie_db", "to": "firestore_cloud", "label": "Sync Asíncrono", "variant": "dashed", "fromSide": "top", "toSide": "bottom" },
+    { "id": "c-ui-printer", "from": "cashier_ui", "to": "printer_service", "label": "Tickets & QR Fiscal", "fromSide": "bottom", "toSide": "top" },
+    { "id": "c-ui-tauri", "from": "cashier_ui", "to": "tauri_desktop", "label": "Contenedor Windows", "variant": "dashed", "fromSide": "bottom", "toSide": "top" },
+    { "id": "c-android-listener", "from": "android_os", "to": "bank_listener", "label": "Captura Notificación", "variant": "security", "fromSide": "top", "toSide": "bottom" },
+    { "id": "c-listener-bridge", "from": "bank_listener", "to": "payment_bridge", "label": "SharedPrefs" },
+    { "id": "c-bridge-ui", "from": "payment_bridge", "to": "cashier_ui", "label": "Eventos JS", "variant": "emphasis" },
+    { "id": "c-ota-ui", "from": "ota_service", "to": "cashier_ui", "label": "Canal OTA v3.0.14", "variant": "dashed" }
+  ],
+  "cards": [
+    { "dot": "emerald", "title": "Arquitectura Offline-First", "items": ["Ventas, cobros e inventario funcionan 100% sin conexión gracias a Dexie.js", "Al conectar a Internet, sincroniza en segundo plano con Firestore"] },
+    { "dot": "amber", "title": "Detección Segura de Pago Móvil", "items": ["NotificationListenerService autorizado por Android captura alertas sin permisos invasivos", "Google Play Protect certifica la instalación sin advertencias de riesgo"] },
+    { "dot": "cyan", "title": "Multi-Divisas & Tasa BCV Blindada", "items": ["Liquidación simultánea en USD y Bolívares en tiempo real", "Manejo de redondeo exacto según normativa bancaria venezolana"] }
+  ]
+}

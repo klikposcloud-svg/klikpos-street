@@ -79,6 +79,9 @@ if (fs.existsSync(publicIndex)) bakIndex = fs.readFileSync(publicIndex, 'utf8');
 try {
   let gradle = bakGradle.replace(/applicationId\s+"[^"]+"/, 'applicationId "com.klikpos.street"');
   gradle = gradle.replace(/versionName\s+"[^"]+"/, `versionName "${currentVersion}"`);
+  const vParts = currentVersion.split('.').map(Number);
+  const vCode = (vParts[0] || 3) * 1000 + (vParts[1] || 0) * 100 + (vParts[2] || 15);
+  gradle = gradle.replace(/versionCode\s+\d+/, `versionCode ${vCode}`);
   fs.writeFileSync(appGradle, gradle, 'utf8');
 
   const streetStrings = `<?xml version='1.0' encoding='utf-8'?>

@@ -1,6 +1,6 @@
 {
   "name": "klikpos",
-  "version": "3.0.14",
+  "version": "3.0.15",
   "description": "KlikPOS Enterprise - Sistema Inteligente de Punto de Venta y Facturación",
   "private": true,
   "scripts": {

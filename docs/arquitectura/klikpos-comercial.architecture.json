@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "KlikPOS Suite - Ecosistema Comercial para Negocios y Franquicias",
+    "output": "KLIKPOS_PRESENTACION_COMERCIAL.html",
+    "quality_profile": "showcase"
+  },
+  "components": [
+    { "id": "cliente_comprador", "type": "external", "label": "Cliente en Mostrador", "sublabel": "Pago en Bolívares, USD o Móvil", "pos": [50, 260], "size": [160, 70], "tag": "Atención Inmediata" },
+    { "id": "terminal_caja", "type": "frontend", "label": "Caja KlikPOS Street", "sublabel": "Táctil, Rápido, Teclado Numérico", "pos": [290, 260], "size": [170, 70], "tag": "< 15 seg por venta" },
+    { "id": "detector_pagomovil", "type": "security", "label": "Detector Pago Móvil", "sublabel": "Autocompleta Referencia y Monto", "pos": [540, 260], "size": [170, 70], "tag": "Anti-Fraude" },
+    { "id": "telefono_dueno", "type": "frontend", "label": "Teléfono del Dueño", "sublabel": "Reportes y Auditoría en Vivo", "pos": [790, 260], "size": [170, 70], "tag": "Control Total" },
+
+    { "id": "catalogo_visual", "type": "database", "label": "Catálogos Visuales HD", "sublabel": "Comida Rápida, Snacks, Bebidas", "pos": [50, 90], "size": [160, 60], "tag": "Fotos Reales" },
+    { "id": "calculadora_bcv", "type": "cloud", "label": "Calculadora BCV Oficial", "sublabel": "Conversión exacta en tiempo real", "pos": [290, 90], "size": [170, 60], "tag": "Cero Errores" },
+    { "id": "nube_respaldo", "type": "cloud", "label": "Respaldo Nube Seguro", "sublabel": "Protección total contra fallas de PC", "pos": [790, 90], "size": [170, 60] },
+
+    { "id": "impresora_fiscal", "type": "external", "label": "Ticket Impreso & QR", "sublabel": "Comprobante Térmico con QR Sudeban", "pos": [290, 430], "size": [170, 60] },
+    { "id": "bancos_venezuela", "type": "external", "label": "Bancos Nacionales", "sublabel": "BDV, Banesco, Mercantil, Provincial", "pos": [540, 430], "size": [170, 60] }
+  ],
+  "boundaries": [
+    { "kind": "region", "label": "Área de Mostrador & Despacho al Cliente", "wraps": ["cliente_comprador", "terminal_caja", "impresora_fiscal", "catalogo_visual"] },
+    { "kind": "security-group", "label": "Validación Financiera & Bancaria en Vivo", "wraps": ["detector_pagomovil", "bancos_venezuela"] },
+    { "kind": "region", "label": "Administración, Gerencia & Respaldo", "wraps": ["telefono_dueno", "nube_respaldo", "calculadora_bcv"] }
+  ],
+  "connections": [
+    { "id": "c-cliente-caja", "from": "cliente_comprador", "to": "terminal_caja", "label": "Orden y Compra", "variant": "emphasis" },
+    { "id": "c-catalogo-caja", "from": "catalogo_visual", "to": "terminal_caja", "label": "Selección 1-Clic", "fromSide": "bottom", "toSide": "top" },
+    { "id": "c-bcv-caja", "from": "calculadora_bcv", "to": "terminal_caja", "label": "Liquidación Bs/USD", "fromSide": "bottom", "toSide": "top" },
+    { "id": "c-caja-ticket", "from": "terminal_caja", "to": "impresora_fiscal", "label": "Impresión Recibo", "fromSide": "bottom", "toSide": "top" },
+    { "id": "c-caja-detector", "from": "terminal_caja", "to": "detector_pagomovil", "label": "Validación", "variant": "emphasis" },
+    { "id": "c-bancos-detector", "from": "bancos_venezuela", "to": "detector_pagomovil", "label": "Confirmación Pago", "variant": "security", "fromSide": "top", "toSide": "bottom" },
+    { "id": "c-detector-dueno", "from": "detector_pagomovil", "to": "telefono_dueno", "label": "Alerta Venta" },
+    { "id": "c-dueno-nube", "from": "telefono_dueno", "to": "nube_respaldo", "label": "Cierres y Métricas", "fromSide": "top", "toSide": "bottom" }
+  ],
+  "cards": [
+    { "dot": "emerald", "title": "Cero Colas en Mostrador", "items": ["Cobro ultra veloz en menos de 15 segundos", "Catálogos con fotos reales para no memorizar códigos"] },
+    { "dot": "amber", "title": "Blindaje Anti-Fraude", "items": ["Detección automática de Pago Móvil para evitar comprobantes falsos", "Conversión oficial BCV transparente para cliente y cajero"] },
+    { "dot": "cyan", "title": "Tranquilidad para el Dueño", "items": ["Reportes de ventas en tiempo real en tu celular", "Protección 100% garantizada de tus datos de venta"] }
+  ]
+}

@@ -511,8 +511,36 @@ export default function TabletMobilePosPage() {
               setProducts(SAMPLE_PRODUCTS);
               localStorage.setItem('klikpos_tablet_products', JSON.stringify(SAMPLE_PRODUCTS));
             } else {
-              // Sanitizar fotos sólo si son inválidas o contienen unsplash, pero CONSERVAR todas las fotos legítimas (Google, data:image, locales)
+              // Sanitizar fotos y curar productos de snacks que hayan asumido erróneamente la foto de comida-street
               const cleanProds = parsed.map((p: any) => {
+                const n = (p.name || '').toLowerCase();
+                const isSnackItem = n.includes('cheese tris') || n.includes('cheetos') || n.includes('dorito') ||
+                  n.includes('todito') || (n.includes('pepito') && !n.includes('mixto') && !n.includes('lomito')) ||
+                  n.includes('platanito') || n.includes('cocosete') || n.includes('susy') ||
+                  n.includes('pinguino') || n.includes('pingüino') || n.includes('carre') || n.includes('carré') ||
+                  n.includes('toronto') || n.includes('galak') || n.includes('bolibomba') ||
+                  n.includes('chiclet') || n.includes('sparkie') || n.includes('ruffle') || n.includes('rufle');
+
+                if (isSnackItem && (!p.image || p.image.includes('comida-street') || p.image.includes('unsplash'))) {
+                  if (n.includes('cheese tris')) return { ...p, image: '/packs/snacks/Cheese Tris.png' };
+                  if (n.includes('cheetos')) return { ...p, image: '/packs/snacks/Cheetos Mega Queso.png' };
+                  if (n.includes('dorito')) return { ...p, image: '/packs/snacks/Doritos Mega Queso.png' };
+                  if (n.includes('todito')) return { ...p, image: '/packs/snacks/De Todito Mix.png' };
+                  if (n.includes('pepito')) return { ...p, image: '/packs/snacks/Pepitos.png' };
+                  if (n.includes('platanito')) return { ...p, image: '/packs/snacks/Platanitos.png' };
+                  if (n.includes('cocosete')) return { ...p, image: '/packs/snacks/Cocosete.png' };
+                  if (n.includes('susy')) return { ...p, image: '/packs/snacks/Susy.png' };
+                  if (n.includes('pinguino') || n.includes('pingüino')) return { ...p, image: '/packs/snacks/Pinguino.png' };
+                  if (n.includes('carre') || n.includes('carré')) return { ...p, image: '/packs/snacks/Carre.png' };
+                  if (n.includes('toronto')) return { ...p, image: '/packs/snacks/Toronto.png' };
+                  if (n.includes('galak')) return { ...p, image: '/packs/snacks/Galak.png' };
+                  if (n.includes('bolibomba')) return { ...p, image: '/packs/snacks/Bolibomba.png' };
+                  if (n.includes('chiclet')) return { ...p, image: '/packs/snacks/Chiclets.png' };
+                  if (n.includes('sparkie')) return { ...p, image: '/packs/snacks/Sparkies.png' };
+                  if (n.includes('ruffle') || n.includes('rufle')) return { ...p, image: '/packs/snacks/Rufles Mega Queso.png' };
+                  return { ...p, image: '/packs/snacks/Cheese Tris.png' };
+                }
+
                 if (!p.image || p.image.includes('unsplash')) {
                   return { ...p, image: '/packs/comida-street/hamburguesa.png' };
                 }
@@ -4924,17 +4952,50 @@ export default function TabletMobilePosPage() {
           try {
             const dbProds = await db.products.toArray();
             if (dbProds && dbProds.length > 0) {
-              const mapped: Product[] = dbProds.map((p: any) => ({
-                id: String(p.id || Math.random()),
-                name: p.name,
-                category: p.category || 'General',
-                priceUSD: Number(p.priceUSD || p.priceUsd) || 0,
-                tag: p.tag || p.badge || '⭐ Nuevo',
-                prepTime: 'Inmediato',
-                image: p.image || p.imageUrl || '/packs/comida-street/hamburguesa.png',
-                description: p.description || `${p.name} - Calidad garantizada.`,
-                sku: p.sku || p.barcode || 'SKU-00'
-              }));
+              const mapped: Product[] = dbProds.map((p: any) => {
+                const n = (p.name || '').toLowerCase();
+                let img = p.image || p.imageUrl || '';
+                const isSnackItem = n.includes('cheese tris') || n.includes('cheetos') || n.includes('dorito') ||
+                  n.includes('todito') || (n.includes('pepito') && !n.includes('mixto') && !n.includes('lomito')) ||
+                  n.includes('platanito') || n.includes('cocosete') || n.includes('susy') ||
+                  n.includes('pinguino') || n.includes('pingüino') || n.includes('carre') || n.includes('carré') ||
+                  n.includes('toronto') || n.includes('galak') || n.includes('bolibomba') ||
+                  n.includes('chiclet') || n.includes('sparkie') || n.includes('ruffle') || n.includes('rufle');
+
+                if (isSnackItem && (!img || img.includes('comida-street'))) {
+                  if (n.includes('cheese tris')) img = '/packs/snacks/Cheese Tris.png';
+                  else if (n.includes('cheetos')) img = '/packs/snacks/Cheetos Mega Queso.png';
+                  else if (n.includes('dorito')) img = '/packs/snacks/Doritos Mega Queso.png';
+                  else if (n.includes('todito')) img = '/packs/snacks/De Todito Mix.png';
+                  else if (n.includes('pepito')) img = '/packs/snacks/Pepitos.png';
+                  else if (n.includes('platanito')) img = '/packs/snacks/Platanitos.png';
+                  else if (n.includes('cocosete')) img = '/packs/snacks/Cocosete.png';
+                  else if (n.includes('susy')) img = '/packs/snacks/Susy.png';
+                  else if (n.includes('pinguino') || n.includes('pingüino')) img = '/packs/snacks/Pinguino.png';
+                  else if (n.includes('carre') || n.includes('carré')) img = '/packs/snacks/Carre.png';
+                  else if (n.includes('toronto')) img = '/packs/snacks/Toronto.png';
+                  else if (n.includes('galak')) img = '/packs/snacks/Galak.png';
+                  else if (n.includes('bolibomba')) img = '/packs/snacks/Bolibomba.png';
+                  else if (n.includes('chiclet')) img = '/packs/snacks/Chiclets.png';
+                  else if (n.includes('sparkie')) img = '/packs/snacks/Sparkies.png';
+                  else if (n.includes('ruffle') || n.includes('rufle')) img = '/packs/snacks/Rufles Mega Queso.png';
+                  else img = '/packs/snacks/Cheese Tris.png';
+                } else if (!img) {
+                  img = '/packs/comida-street/hamburguesa.png';
+                }
+
+                return {
+                  id: String(p.id || Math.random()),
+                  name: p.name,
+                  category: p.category || 'General',
+                  priceUSD: Number(p.priceUSD || p.priceUsd) || 0,
+                  tag: p.tag || p.badge || '⭐ Nuevo',
+                  prepTime: 'Inmediato',
+                  image: img,
+                  description: p.description || `${p.name} - Calidad garantizada.`,
+                  sku: p.sku || p.barcode || 'SKU-00'
+                };
+              });
               setProducts(mapped);
               localStorage.setItem('klikpos_tablet_products', JSON.stringify(mapped));
             } else {

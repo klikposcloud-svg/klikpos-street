@@ -1,14 +1,14 @@
 {
-  "version": "3.0.14",
+  "version": "3.0.15",
   "releaseDate": "2026-10-07",
-  "title": "KlikPOS Suite v3.0.14 - Certificación 100% Limpia Google Play Protect & Detector Pago Móvil Seguro",
+  "title": "KlikPOS Suite v3.0.15 - Certificación Limpia Google Play Protect, Auto-Curación Catálogo Snacks y Diagramas Archify",
   "notes": [
-    "Certificación Oficial Limpia ante Google Play Protect: Eliminación total de permisos intrusivos de SMS (RECEIVE_SMS / READ_SMS) que activaban advertencias de instalación en Android.",
-    "Detección Inteligente de Pago Móvil vía Notificaciones del Sistema: Monitoreo 100% seguro y autorizado mediante NotificationListenerService para capturar avisos de bancos venezolanos (BDVApp, Banesco, Mercantil, Bancamiga, Provincial, BNC, etc.) y SMS entrantes sin comprometer la seguridad.",
-    "Autocompletado Inmediato de Pago Móvil: Relleno instantáneo de número de referencia y validación de monto recibido en pantalla de cobro.",
-    "Conservación de Mejoras: Blindaje de compresión de imágenes por hardware, alto contraste visual en inventario bajo luz solar y catálogo de Snacks."
+    "Certificación Oficial Limpia ante Google Play Protect: Eliminación definitiva del componente SMS Receiver y permisos intrusivos (RECEIVE_SMS / READ_SMS). Instalación fluida sin advertencias de bloqueo.",
+    "Detección Segura de Pago Móvil: Soporte 100% nativo mediante NotificationListenerService para capturar transacciones bancarias (BDVApp, Banesco, Mercantil, Bancamiga, Provincial, BNC) con seguridad garantizada.",
+    "Auto-Curación Visual de Snacks: Corrección y reasignación de imágenes para los 17 productos de snacks venezolanos (Cheese Tris, Doritos, Pepitos, Cocosete, Susy, etc.) evitando imágenes genéricas.",
+    "Arquitectura e Ingeniería Documentada: Integración de diagramas interactivos Archify para presentación comercial y desarrollo."
   ],
-  "windowsUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.14/KlikPOS_Desktop_Full_Setup.exe",
-  "androidUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.14/KlikPOS_Movil_Full.apk",
+  "windowsUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.15/KlikPOS_Desktop_Full_Setup.exe",
+  "androidUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.15/KlikPOS_Movil_Full.apk",
   "mandatory": false
 }

@@ -50,6 +50,24 @@ const LOCAL_STREET_PRESETS = [
   { name: 'Combo Dúo Shawarma Mixto', path: '/packs/comida-street/combo-shawarma-01.png', cat: 'Combos' },
   { name: 'Refresco Frío Personal', path: '/packs/comida-street/refresco.png', cat: 'Bebidas' },
   { name: 'Chicha Criolla con Canela', path: '/packs/comida-street/chicha.png', cat: 'Bebidas' },
+  // Snacks, Golosinas y Chucherías Venezuela
+  { name: 'Cheese Tris Tradicional Frito-Lay', path: '/packs/snacks/Cheese Tris.png', cat: 'Snacks' },
+  { name: 'Doritos Mega Queso Frito-Lay', path: '/packs/snacks/Doritos Mega Queso.png', cat: 'Snacks' },
+  { name: 'Cheetos Mega Queso Frito-Lay', path: '/packs/snacks/Cheetos Mega Queso.png', cat: 'Snacks' },
+  { name: 'De Todito Frito-Lay Familiar', path: '/packs/snacks/De Todito Mix.png', cat: 'Snacks' },
+  { name: 'Pepito Queso Frito-Lay', path: '/packs/snacks/Pepitos.png', cat: 'Snacks' },
+  { name: 'Ruffles Mega Queso Frito-Lay', path: '/packs/snacks/Rufles Mega Queso.png', cat: 'Snacks' },
+  { name: 'Ruffles Papas Saladas Original', path: '/packs/snacks/Rufles Original.png', cat: 'Snacks' },
+  { name: 'Platanitos Ondulados Salados', path: '/packs/snacks/Platanitos.png', cat: 'Snacks' },
+  { name: 'Galleta Cocosete Nestlé Sándwich', path: '/packs/snacks/Cocosete.png', cat: 'Galletas' },
+  { name: 'Galleta Susy Savoy Chocolate', path: '/packs/snacks/Susy.png', cat: 'Galletas' },
+  { name: 'Pastelito Pingüino Marinela Doble', path: '/packs/snacks/Pinguino.png', cat: 'Galletas' },
+  { name: 'Chocolate Savoy Carré Avellanas', path: '/packs/snacks/Carre.png', cat: 'Chocolates' },
+  { name: 'Bombón Toronto Savoy Avellana', path: '/packs/snacks/Toronto.png', cat: 'Chocolates' },
+  { name: 'Chocolate Blanco Galak Nestlé', path: '/packs/snacks/Galak.png', cat: 'Chocolates' },
+  { name: 'Chicle Bolibomba Clásico Fresa', path: '/packs/snacks/Bolibomba.png', cat: 'Golosinas' },
+  { name: 'Chiclets Adams Clásico Menta', path: '/packs/snacks/Chiclets.png', cat: 'Golosinas' },
+  { name: 'Caramelos Masticables Sparkies', path: '/packs/snacks/Sparkies.png', cat: 'Golosinas' },
 ];
 
 export default function ProductImageSearchModal({
