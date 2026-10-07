@@ -8,7 +8,7 @@
 import { getStoredLicenseStatus } from './license-crypto';
 import { getMachineHWID } from './hwid';
 
-export const TRIAL_DURATION_MS = 15 * 60 * 1000; // 15 minutos en milisegundos
+export const TRIAL_DURATION_MS = 3 * 60 * 60 * 1000; // 3 Horas de Evaluación Gratuita
 export const OFFICIAL_WHATSAPP_PHONE = '584248298026'; // +58 424 829 8026
 
 export interface TrialState {
@@ -23,11 +23,21 @@ export interface TrialState {
 }
 
 /**
- * Obtiene el timestamp de inicio del período de prueba (15 min)
+ * Obtiene el timestamp de inicio del período de prueba (3 horas)
  */
 export function getOrCreateTrialStartTime(): number {
   if (typeof window === 'undefined') return Date.now();
   try {
+    const extendedV309 = localStorage.getItem('klikpos_trial_extended_v309');
+    if (extendedV309 !== 'true') {
+      const now = Date.now();
+      localStorage.setItem('klikpos_trial_start_ts', String(now));
+      localStorage.setItem('klikpos_trial_extended_v309', 'true');
+      localStorage.setItem('klikpos_street_license_dismissed', 'true');
+      localStorage.removeItem('venematic_trial15m_start');
+      return now;
+    }
+
     const stored = localStorage.getItem('klikpos_trial_start_ts') || localStorage.getItem('venematic_trial15m_start');
     if (stored) {
       const parsed = parseInt(stored, 10);
@@ -54,9 +64,9 @@ export function evaluateTrialState(): TrialState {
       isExpired: false,
       canOperate: true,
       remainingMs: TRIAL_DURATION_MS,
-      remainingMinutes: 15,
+      remainingMinutes: 180,
       remainingSeconds: 0,
-      formattedRemaining: '15:00',
+      formattedRemaining: '3h restantes',
     };
   }
 

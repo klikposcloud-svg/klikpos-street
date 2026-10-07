@@ -255,7 +255,10 @@ export default function TabletMobilePosPage() {
   // Modales del Docker
   const [showInventoryModal, setShowInventoryModalState] = useState(() => {
     if (typeof window !== 'undefined') {
-      return sessionStorage.getItem('klikpos_show_inventory_modal') === 'true';
+      return (
+        localStorage.getItem('klikpos_show_inventory_modal') === 'true' ||
+        sessionStorage.getItem('klikpos_show_inventory_modal') === 'true'
+      );
     }
     return false;
   });
@@ -265,9 +268,13 @@ export default function TabletMobilePosPage() {
       const next = typeof val === 'function' ? val(prev) : val;
       try {
         if (next) {
+          localStorage.setItem('klikpos_show_inventory_modal', 'true');
           sessionStorage.setItem('klikpos_show_inventory_modal', 'true');
         } else {
+          localStorage.removeItem('klikpos_show_inventory_modal');
           sessionStorage.removeItem('klikpos_show_inventory_modal');
+          localStorage.removeItem('klikpos_new_product_draft');
+          sessionStorage.removeItem('klikpos_new_product_draft');
         }
       } catch {}
       return next;
@@ -588,7 +595,8 @@ export default function TabletMobilePosPage() {
       const state = evaluateTrialState();
       setTrialState(state);
       if (state.isExpired && !state.isLicensed) {
-        if (!userDismissedTrialModalRef.current) {
+        const isDismissed = typeof window !== 'undefined' && localStorage.getItem('klikpos_street_license_dismissed') === 'true';
+        if (!isDismissed && !userDismissedTrialModalRef.current) {
           setShowStreetAmbassadorModal(true);
         }
       } else {
@@ -723,15 +731,15 @@ export default function TabletMobilePosPage() {
   // Blindaje Anti-Reinicio de Cámara: Persistir y recuperar estado de modal y borradores de inventario
   useEffect(() => {
     try {
-      const activeModal = sessionStorage.getItem('klikpos_active_modal');
-      if (activeModal === 'inventory') {
+      const activeModal = localStorage.getItem('klikpos_active_modal') || sessionStorage.getItem('klikpos_active_modal');
+      if (activeModal === 'inventory' || localStorage.getItem('klikpos_show_inventory_modal') === 'true') {
         setShowInventoryModal(true);
       }
-      const draft = sessionStorage.getItem('klikpos_new_product_draft');
+      const draft = localStorage.getItem('klikpos_new_product_draft') || sessionStorage.getItem('klikpos_new_product_draft');
       if (draft) {
         setNewProductForm(JSON.parse(draft));
       }
-      const editingDraft = sessionStorage.getItem('klikpos_editing_product_draft');
+      const editingDraft = localStorage.getItem('klikpos_editing_product_draft') || sessionStorage.getItem('klikpos_editing_product_draft');
       if (editingDraft) {
         setEditingProduct(JSON.parse(editingDraft));
       }
@@ -741,8 +749,10 @@ export default function TabletMobilePosPage() {
   useEffect(() => {
     try {
       if (showInventoryModal) {
+        localStorage.setItem('klikpos_active_modal', 'inventory');
         sessionStorage.setItem('klikpos_active_modal', 'inventory');
       } else {
+        localStorage.removeItem('klikpos_active_modal');
         sessionStorage.removeItem('klikpos_active_modal');
       }
     } catch {}
@@ -751,6 +761,7 @@ export default function TabletMobilePosPage() {
   useEffect(() => {
     try {
       if (newProductForm.name || newProductForm.priceUSD || newProductForm.image) {
+        localStorage.setItem('klikpos_new_product_draft', JSON.stringify(newProductForm));
         sessionStorage.setItem('klikpos_new_product_draft', JSON.stringify(newProductForm));
       }
     } catch {}
@@ -759,8 +770,10 @@ export default function TabletMobilePosPage() {
   useEffect(() => {
     try {
       if (editingProduct) {
+        localStorage.setItem('klikpos_editing_product_draft', JSON.stringify(editingProduct));
         sessionStorage.setItem('klikpos_editing_product_draft', JSON.stringify(editingProduct));
       } else {
+        localStorage.removeItem('klikpos_editing_product_draft');
         sessionStorage.removeItem('klikpos_editing_product_draft');
       }
     } catch {}
@@ -4854,6 +4867,9 @@ export default function TabletMobilePosPage() {
         onClose={() => {
           setShowStreetAmbassadorModal(false);
           userDismissedTrialModalRef.current = true;
+          try {
+            localStorage.setItem('klikpos_street_license_dismissed', 'true');
+          } catch {}
         }}
         isLight={isLight}
         primaryColor={currentPal.primary}
@@ -4862,6 +4878,9 @@ export default function TabletMobilePosPage() {
         onLicenseActivated={() => {
           userDismissedTrialModalRef.current = false;
           setShowStreetAmbassadorModal(false);
+          try {
+            localStorage.removeItem('klikpos_street_license_dismissed');
+          } catch {}
           setTrialState(evaluateTrialState());
         }}
       />

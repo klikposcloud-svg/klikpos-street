@@ -18,7 +18,36 @@ export function EditProductModal({
   categoriesList,
   onSave,
 }: EditProductModalProps) {
+  // Sincronización continua de borrador de edición con localStorage
+  React.useEffect(() => {
+    try {
+      if (editingProduct) {
+        localStorage.setItem('klikpos_editing_product_draft', JSON.stringify(editingProduct));
+        sessionStorage.setItem('klikpos_editing_product_draft', JSON.stringify(editingProduct));
+      } else {
+        localStorage.removeItem('klikpos_editing_product_draft');
+        sessionStorage.removeItem('klikpos_editing_product_draft');
+      }
+    } catch {}
+  }, [editingProduct]);
+
   if (!editingProduct) return null;
+
+  const handleClose = () => {
+    try {
+      localStorage.removeItem('klikpos_editing_product_draft');
+      sessionStorage.removeItem('klikpos_editing_product_draft');
+    } catch {}
+    setEditingProduct(null);
+  };
+
+  const handleSave = () => {
+    try {
+      localStorage.removeItem('klikpos_editing_product_draft');
+      sessionStorage.removeItem('klikpos_editing_product_draft');
+    } catch {}
+    onSave();
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 bg-black/70 backdrop-blur-xs animate-in fade-in duration-200">
@@ -38,7 +67,7 @@ export function EditProductModal({
             </div>
           </div>
           <button
-            onClick={() => setEditingProduct(null)}
+            onClick={handleClose}
             className="p-1.5 rounded-xl text-slate-400 hover:text-white transition-colors"
           >
             <X className="w-5 h-5" />
@@ -140,14 +169,14 @@ export function EditProductModal({
           <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
             <button
               type="button"
-              onClick={() => setEditingProduct(null)}
+              onClick={handleClose}
               className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold rounded-xl active:scale-95"
             >
               Cancelar
             </button>
             <button
               type="button"
-              onClick={onSave}
+              onClick={handleSave}
               className="px-5 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-black rounded-xl shadow-md transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer"
             >
               <Check className="w-4 h-4" />

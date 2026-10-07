@@ -1,15 +1,15 @@
 {
-  "version": "3.0.8",
+  "version": "3.0.9",
   "releaseDate": "2026-10-06",
-  "title": "KlikPOS Street Suite v3.0.8 - Búsqueda Web Multifuente, Ultra Contraste Exterior y Validador Inteligente",
+  "title": "KlikPOS Street Suite v3.0.9 - Visor de Cámara Directo en Pantalla y Blindaje Total Anti-Reinicio",
   "notes": [
-    "Búsqueda Web Multifuente (+30 Fotos): Integración paralela con DuckDuckGo, OpenFoodFacts y Wikimedia para obtener más de 30 imágenes en catálogo con alta resiliencia en redes móviles.",
-    "Contraste Visual Exterior de Alto Rendimiento: Barra de búsqueda con fondo blanco puro, borde de 2px de alto impacto y texto oscuro de máxima legibilidad para operación bajo luz solar directa.",
-    "Validador Inteligente de Pago Móvil: Módulo de verificación de capturas de pago móvil y análisis inteligente de comprobantes.",
-    "Compresión de Fotos por Hardware Blindada: Procesamiento de cámara con createImageBitmap y liberación de URLs de memoria (RAM < 1.5MB) protegiendo dispositivos contra cierres forzados por el sistema operativo.",
-    "Control de Ciclo de Vida del Tour: Persistencia garantizada del estado del onboarding en almacenamiento local."
+    "Cámara en Vivo Directa en Pantalla: Nuevo visor de cámara 100% integrado dentro de la aplicación con cambio de lente (frontal/trasera) y captura a 1 toque, eliminando salidas al sistema operativo y previniendo que Android destruya la app por memoria.",
+    "Blindaje Total Anti-Reinicio de Actividad: Persistencia continua de formularios y modales de inventario en almacenamiento permanente (localStorage), resistiendo pausas del sistema operativo sin reiniciar al menú principal ni perder borradores.",
+    "Control Definitivo del Modal de Licencia: La evaluación de prueba ya no interrumpe al usuario de forma repetitiva tras desestimar el diálogo o durante la toma de fotos en la calle.",
+    "Compresión Segura por Hardware: Decodificación y optimización directa para evitar saturación de RAM (RAM < 1.5MB) en teléfonos con recursos limitados.",
+    "Búsqueda Web Multifuente (+35 Fotos) y Máximo Contraste Solar: Integración optimizada para catálogo rápido bajo luz directa del sol."
   ],
-  "windowsUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.8/KlikPOS_Desktop_Full_Setup.exe",
-  "androidUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.8/KlikPOS_Movil_Full.apk",
+  "windowsUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.9/KlikPOS_Desktop_Full_Setup.exe",
+  "androidUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.9/KlikPOS_Movil_Full.apk",
   "mandatory": false
 }

@@ -46,12 +46,24 @@ export function reactivateTrialFor3Hours(): void {
 export function getOrCreateTrialStartTime(): number {
   if (typeof window === 'undefined') return Date.now();
   try {
-    // Si la reactivación por 3 horas v6 no se ha activado aún en este dispositivo, reiniciamos desde ahora garantizando 180 min
+    // Si la actualización a v3.0.9 no se ha activado aún en este dispositivo, garantizamos 180 min frescos
+    const extendedV309 = localStorage.getItem('klikpos_trial_extended_v309');
+    if (extendedV309 !== 'true') {
+      const now = Date.now();
+      localStorage.setItem('klikpos_trial_start_ts', String(now));
+      localStorage.setItem('klikpos_trial_extended_v309', 'true');
+      localStorage.setItem('klikpos_street_license_dismissed', 'true');
+      localStorage.removeItem('venematic_trial15m_start');
+      localStorage.removeItem('klikpos_trial_force_expired');
+      return now;
+    }
+
     const extended = localStorage.getItem('klikpos_trial_extended_3h_v6');
     if (extended !== 'true') {
       const now = Date.now();
       localStorage.setItem('klikpos_trial_start_ts', String(now));
       localStorage.setItem('klikpos_trial_extended_3h_v6', 'true');
+      localStorage.setItem('klikpos_street_license_dismissed', 'true');
       localStorage.removeItem('venematic_trial15m_start');
       return now;
     }

@@ -983,13 +983,16 @@ export default function TabletMobilePosPage() {
     }
   }, [themeMode]);
 
-  // Monitor del Período de Prueba de 15 Minutos
+  // Monitor del Período de Evaluación
   useEffect(() => {
     const checkTrial = () => {
       const state = evaluateTrialState();
       setTrialState(state);
       if (state.isTrial && state.isExpired) {
-        setShowLicenseModal(true);
+        const isDismissed = typeof window !== 'undefined' && localStorage.getItem('klikpos_street_license_dismissed') === 'true';
+        if (!isDismissed) {
+          setShowLicenseModal(true);
+        }
       }
     };
     checkTrial();
@@ -4279,16 +4282,46 @@ export default function TabletMobilePosPage() {
                               type="file"
                               accept="image/*"
                               className="hidden"
-                              onChange={(e) => {
+                              onChange={async (e) => {
                                 const file = e.target.files?.[0];
-                                if (file) {
-                                  const reader = new FileReader();
-                                  reader.onload = (evt) => {
-                                    if (typeof evt.target?.result === 'string') {
-                                      setNewProductForm({ ...newProductForm, image: evt.target.result });
+                                if (!file) return;
+                                try {
+                                  if ('createImageBitmap' in window) {
+                                    let bitmap: ImageBitmap | null = null;
+                                    try {
+                                      bitmap = await createImageBitmap(file, { resizeWidth: 400, resizeQuality: 'medium' });
+                                    } catch {}
+                                    if (bitmap) {
+                                      const canvas = document.createElement('canvas');
+                                      canvas.width = 400;
+                                      canvas.height = 400;
+                                      const ctx = canvas.getContext('2d');
+                                      if (ctx) {
+                                        ctx.drawImage(bitmap, 0, 0, 400, 400);
+                                        setNewProductForm({ ...newProductForm, image: canvas.toDataURL('image/jpeg', 0.75) });
+                                        bitmap.close();
+                                        return;
+                                      }
+                                      bitmap.close();
                                     }
+                                  }
+                                  const url = URL.createObjectURL(file);
+                                  const img = new Image();
+                                  img.onload = () => {
+                                    const canvas = document.createElement('canvas');
+                                    canvas.width = 400;
+                                    canvas.height = 400;
+                                    const ctx = canvas.getContext('2d');
+                                    if (ctx) {
+                                      ctx.drawImage(img, 0, 0, 400, 400);
+                                      setNewProductForm({ ...newProductForm, image: canvas.toDataURL('image/jpeg', 0.75) });
+                                    }
+                                    URL.revokeObjectURL(url);
                                   };
-                                  reader.readAsDataURL(file);
+                                  img.onerror = () => URL.revokeObjectURL(url);
+                                  img.src = url;
+                                } catch (err) {
+                                  console.error('Error procesando imagen:', err);
                                 }
                               }}
                             />
