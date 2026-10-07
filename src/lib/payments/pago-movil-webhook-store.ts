@@ -85,44 +85,56 @@ export function parseBankNotificationText(raw: string): Partial<WebhookPagoMovil
     banco = 'Bancamiga';
   } else if (/provincial|bbva|dinero rapido/i.test(text)) {
     banco = 'BBVA Provincial';
-  } else if (/bnc|banco nacional de credito/i.test(text)) {
+  } else if (/bnc|banco nacional de cr[eé]dito/i.test(text)) {
     banco = 'BNC';
   } else if (/bicentenario/i.test(text)) {
     banco = 'Banco Bicentenario';
   } else if (/bancaribe|mi pago bancaribe/i.test(text)) {
     banco = 'Bancaribe';
+  } else if (/tesoro/i.test(text)) {
+    banco = 'Banco del Tesoro';
   } else if (/activo/i.test(text)) {
     banco = 'Banco Activo';
   } else if (/plaza/i.test(text)) {
     banco = 'Banco Plaza';
   } else if (/exterior/i.test(text)) {
     banco = 'Banco Exterior';
+  } else if (/caroni/i.test(text)) {
+    banco = 'Banco Caroní';
+  } else if (/100%|cien por ciento/i.test(text)) {
+    banco = '100% Banco';
+  } else if (/banco/i.test(text)) {
+    banco = 'Pago Móvil';
   }
 
   // 2. Extraer Monto
-  // Patrones comunes: "Bs. 150,00", "Bs 150.00", "por Bs. 150,00", "monto: 150,00"
-  const amountMatch = text.match(/(?:bs\.?|monto[:\s]*bs\.?|importe[:\s]*bs\.?|por\s+bs\.?)\s*([0-9.,]+)/i) ||
-                      text.match(/([0-9]+[.,][0-9]{2})\s*bs/i);
+  // Formatos comunes: "Bs. 150,00", "Bs 1.250,50", "Bs.S 150,00", "BsD 150,00", "por Bs. 150,00", "monto: 150,00", "150,00 Bs"
+  const amountMatch = text.match(/(?:bs\.?s?|bsd|ves|monto[:\s]*bs\.?|importe[:\s]*bs\.?|por\s+bs\.?)\s*([0-9.,]+)/i) ||
+                      text.match(/([0-9]+[.,][0-9]{2})\s*(?:bs\.?|ves)/i);
   if (amountMatch && amountMatch[1]) {
     monto = normalizeAmountVES(amountMatch[1]);
   }
 
-  // 3. Extraer Referencia
-  // Patrones comunes: "ref: 123456", "referencia 12345678", "operacion: 123456"
-  const refMatch = text.match(/(?:ref(?:erencia)?|operaci[oó]n|nro|comprobante)[:\s#]+([A-Za-z0-9]{4,12})/i) ||
-                   text.match(/\b([0-9]{6,10})\b/);
-  if (refMatch && refMatch[1]) {
-    referencia = refMatch[1].trim();
-  }
-
-  // 4. Extraer Teléfono (0414, 0424, 0412, 0416, 0426)
+  // 3. Extraer Teléfono (0414, 0424, 0412, 0416, 0426) antes de la referencia para no confundirlos
   const phoneMatch = text.match(/\b(0412|0414|0424|0416|0426)[0-9]{7}\b/);
   if (phoneMatch) {
     telefono = phoneMatch[0];
   }
 
+  // 4. Extraer Referencia
+  // Patrones comunes: "ref: 123456", "referencia 12345678", "operacion: 123456", "nro 123456", "secuencia 123456"
+  const refMatch = text.match(/(?:ref(?:erencia)?|operaci[oó]n|secuencia|nro\.?|comprobante|recibo)[:\s#.]+([A-Za-z0-9]{4,14})/i) ||
+                   text.match(/\b([0-9]{6,12})\b/);
+  if (refMatch && refMatch[1]) {
+    const candidate = refMatch[1].trim();
+    // Evitar que capture el teléfono o una fecha como referencia
+    if (candidate !== telefono && !candidate.startsWith('0412') && !candidate.startsWith('0414') && !candidate.startsWith('0424') && !candidate.startsWith('0416') && !candidate.startsWith('0426')) {
+      referencia = candidate;
+    }
+  }
+
   // 5. Extraer Pagador (si viene "de NOMBRE APELLIDO" o similar)
-  const pagadorMatch = text.match(/(?:de|del)\s+([A-Za-zÁ-ÿ\s]{4,30}?)(?:,|\.|\bref\b|\btel\b|\bpor\b)/i);
+  const pagadorMatch = text.match(/(?:de|del)\s+([A-Za-zÁ-ÿ\s]{4,30}?)(?:,|\.|\bref\b|\btel\b|\btlf\b|\bpor\b)/i);
   if (pagadorMatch && pagadorMatch[1]) {
     pagador = pagadorMatch[1].trim();
   }

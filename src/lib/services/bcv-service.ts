@@ -15,7 +15,7 @@ export interface BcvRateResult {
   isFallback?: boolean;
 }
 
-const DEFAULT_RATE = 871.37;
+const DEFAULT_RATE = 873.87;
 
 /**
  * Intento de scraping directo al Portal Oficial del Banco Central de Venezuela

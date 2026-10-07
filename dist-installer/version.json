@@ -1,15 +1,16 @@
 {
-  "version": "3.0.12",
+  "version": "3.0.13",
   "releaseDate": "2026-10-07",
-  "title": "KlikPOS Street Suite v3.0.12 - Soporte Oficial QR Bancario Suiche 7B, Compresión Hardware y Temas 0ms",
+  "title": "KlikPOS Street Suite v3.0.13 - Detector Nativo Pago Móvil SMS, Pack Snacks y Corrección BCV",
   "notes": [
-    "Soporte de QR Oficial Bancario (Suiche 7B / BDVenlínea): Carga de imagen del código QR oficial emitido por el Banco de Venezuela, Banesco o Bancamiga directamente en la configuración de Pago Móvil, permitiendo que la BDVApp y la banca nacional autocompleten cédula, teléfono y beneficiario al escanear.",
-    "Compresión de QR por Hardware: Subida segura de imágenes de QR procesada por hardware (createImageBitmap, RAM < 1.5MB) con cero desbordamiento de memoria (Anti-OOM).",
-    "Alerta Inteligente de Autocompletado Bancario: Guía interactiva en el POS que explica la necesidad del QR oficial Suiche 7B y ofrece botones de Copia Rápida en 1 toque (Teléfono, Cédula, Monto exacto y Copiar Todo).",
-    "Transición de Tema Instantánea (0ms): Eliminación total del retardo y saltos visuales al alternar entre modo oscuro y diurno en dispositivos móviles y tablets.",
-    "Contraste Visual Blindado: Corrección de botones de alto contraste en el cajón lateral con tipografía oscura pura (#020617) legible bajo luz solar directa."
+    "Detección Nativa de Pago Móvil por SMS (KlikPOS Street): Captura en tiempo real de SMS bancarios (BDV, Banesco, Mercantil Tpago, Bancamiga, Provincial, BNC) con asignación automática de referencia y monto.",
+    "Lectura Inteligente del Buzón SMS del Teléfono: Si el SMS bancario llega antes de abrir el modal o con la aplicación suspendida, la app recupera el pago del buzón automáticamente.",
+    "Soporte de Notificaciones Push Bancarias: Detección alternativa mediante listener de notificaciones de aplicaciones bancarias.",
+    "Controles en Pantalla de Pago Móvil: Indicador de estado del detector nativo en vivo, botón de concesión de permisos y botón 'Sincronizar SMS' manual.",
+    "Nuevo Pack Visual 'Snacks': Paquete oficial de productos y golosinas nacionales publicado en la nube para descarga directa en Inventario.",
+    "Blindaje de Tasa BCV y Alto Contraste: Precisión exacta en consulta de tasa oficial y optimización de contraste en campos de texto de inventario bajo luz solar directa."
   ],
-  "windowsUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.12/KlikPOS_Desktop_Full_Setup.exe",
-  "androidUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.12/KlikPOS_Movil_Full.apk",
+  "windowsUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.13/KlikPOS_Desktop_Full_Setup.exe",
+  "androidUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.13/KlikPOS_Movil_Full.apk",
   "mandatory": false
 }

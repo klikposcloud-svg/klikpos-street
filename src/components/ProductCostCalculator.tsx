@@ -226,7 +226,7 @@ export default function ProductCostCalculator({
                 placeholder="Ej: 24.00"
                 value={costPerBox}
                 onChange={(e) => handleBoxCostChange(e.target.value)}
-                className="w-full pl-6 pr-2 py-1 border border-slate-300 rounded-lg text-xs font-mono font-bold text-slate-800 focus:ring-2 focus:ring-sky-500 outline-none"
+                className="w-full pl-6 pr-2 py-1 bg-white border-2 border-slate-300 rounded-lg text-xs font-mono font-bold text-slate-950 placeholder:text-slate-400 focus:border-sky-600 focus:ring-2 focus:ring-sky-500/20 outline-none"
               />
             </div>
           </div>
@@ -242,7 +242,7 @@ export default function ProductCostCalculator({
               placeholder="Ej: 12"
               value={packageUnits}
               onChange={(e) => handlePackageUnitsChange(e.target.value)}
-              className="w-full px-2.5 py-1 border border-slate-300 rounded-lg text-xs font-mono font-bold text-slate-800 focus:ring-2 focus:ring-sky-500 outline-none"
+              className="w-full px-2.5 py-1 bg-white border-2 border-slate-300 rounded-lg text-xs font-mono font-bold text-slate-950 placeholder:text-slate-400 focus:border-sky-600 focus:ring-2 focus:ring-sky-500/20 outline-none"
             />
           </div>
 
@@ -270,7 +270,7 @@ export default function ProductCostCalculator({
                 placeholder="Ej: 1.50"
                 value={costUSD}
                 onChange={(e) => handleUnitCostChange(e.target.value)}
-                className="w-full pl-6 pr-2 py-1 border border-slate-300 rounded-lg text-xs font-mono font-bold text-slate-800 focus:ring-2 focus:ring-sky-500 outline-none"
+                className="w-full pl-6 pr-2 py-1 bg-white border-2 border-slate-300 rounded-lg text-xs font-mono font-bold text-slate-950 placeholder:text-slate-400 focus:border-sky-600 focus:ring-2 focus:ring-sky-500/20 outline-none"
               />
             </div>
           </div>

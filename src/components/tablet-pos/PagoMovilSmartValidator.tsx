@@ -19,7 +19,20 @@ import {
 } from 'lucide-react';
 import QRCode from 'qrcode';
 import { PagoMovilInfo } from '@/types/tablet-pos';
-import { DEFAULT_WEBHOOK_SECRET, getWebhookSecret } from '@/lib/payments/pago-movil-webhook-store';
+import { DEFAULT_WEBHOOK_SECRET, getWebhookSecret, parseBankNotificationText } from '@/lib/payments/pago-movil-webhook-store';
+import {
+  installNativePaymentBridge,
+  drainNativeQueue,
+  findNativeMatch,
+  getRecentNativePayments,
+  markNativePaymentUsed,
+  isNativeApp,
+  getNativePermissionStatus,
+  requestNativeSmsPermission,
+  openNativeNotificationAccess,
+  openNativeAppSettings,
+  NATIVE_PAYMENT_EVENT
+} from '@/lib/payments/native-payment-bridge';
 
 interface PagoMovilSmartValidatorProps {
   isLight: boolean;
@@ -69,6 +82,8 @@ export function PagoMovilSmartValidator({
   const [liveMatchedPayment, setLiveMatchedPayment] = useState<WebhookPaymentItem | null>(null);
   const [recentPayments, setRecentPayments] = useState<WebhookPaymentItem[]>([]);
   const [isSimulatingTestPayment, setIsSimulatingTestPayment] = useState(false);
+  const [isNative, setIsNative] = useState(false);
+  const [nativeStatus, setNativeStatus] = useState<{ sms: boolean; notifications: boolean } | null>(null);
 
   // Estado del Escáner OCR de Recibo
   const [isAnalyzingReceipt, setIsAnalyzingReceipt] = useState(false);
@@ -125,13 +140,43 @@ export function PagoMovilSmartValidator({
     };
   }, [sudebanPayload, totalVES]);
 
-  // 2. Polling del Webhook en Vivo (Busca pagos recibidos que coincidan con totalVES)
+  // 1.5 Inicializar puente nativo Android (KlikPOS Street / Móvil)
+  useEffect(() => {
+    installNativePaymentBridge();
+    const app = isNativeApp();
+    setIsNative(app);
+    if (app) {
+      getNativePermissionStatus().then(st => setNativeStatus(st));
+    }
+  }, []);
+
+  // 2. Polling del Webhook en Vivo y Buffer Nativo de SMS (Busca pagos recibidos que coincidan con totalVES)
   useEffect(() => {
     if (!isPollingLive || totalVES <= 0) return;
 
     let intervalId: NodeJS.Timeout;
 
     const checkIncomingPayments = async () => {
+      // Prioridad 1: Verificar si el SMS bancario ya cayó en el buffer nativo de la APK
+      const nativeMatch = findNativeMatch(totalVES);
+      if (nativeMatch && !nativeMatch.used) {
+        setLiveMatchedPayment({
+          id: nativeMatch.id,
+          referencia: nativeMatch.referencia,
+          monto: nativeMatch.monto,
+          banco: nativeMatch.banco,
+          telefono: nativeMatch.telefono,
+          pagador: nativeMatch.pagador,
+          timestamp: nativeMatch.timestamp,
+          used: false
+        });
+        if (!pagoMovilRefInput && nativeMatch.referencia) {
+          setPagoMovilRefInput(nativeMatch.referencia);
+        }
+        return;
+      }
+
+      // Prioridad 2: Consultar endpoint webhook HTTP (para terminales conectadas por red o simulador)
       try {
         const secret = getWebhookSecret();
         const res = await fetch(`/api/payments/webhook?match_ves=${totalVES.toFixed(2)}&tolerance=2&secret=${encodeURIComponent(secret)}`, {
@@ -141,7 +186,6 @@ export function PagoMovilSmartValidator({
           const data = await res.json();
           if (data.match && !data.match.used) {
             setLiveMatchedPayment(data.match);
-            // Si la referencia actual está vacía, pre-cargar la detectada
             if (!pagoMovilRefInput) {
               setPagoMovilRefInput(data.match.referencia);
             }
@@ -152,25 +196,78 @@ export function PagoMovilSmartValidator({
       }
     };
 
-    // Ejecutar chequeo inicial y luego cada 3 segundos
+    // Chequeo inicial inmediato y luego cada 2.5 segundos
     checkIncomingPayments();
-    intervalId = setInterval(checkIncomingPayments, 3000);
+    intervalId = setInterval(checkIncomingPayments, 2500);
 
     return () => clearInterval(intervalId);
   }, [isPollingLive, totalVES, pagoMovilRefInput, setPagoMovilRefInput]);
 
-  // 3. Consultar últimos pagos para la pestaña del detector
+  // 2.1 Escuchar eventos en vivo del contenedor Android y del puente nativo
+  useEffect(() => {
+    const handleNativePaymentItem = (e: any) => {
+      const item = e.detail;
+      if (!item || !item.monto) return;
+
+      const diff = Math.abs(item.monto - totalVES);
+      const isMatch = totalVES > 0 && (diff <= 2 || diff <= (totalVES * 0.05));
+
+      if (isMatch || !pagoMovilRefInput) {
+        if (item.referencia) {
+          setPagoMovilRefInput(item.referencia);
+        }
+        setLiveMatchedPayment({
+          id: item.id || `pm_${Date.now()}`,
+          referencia: item.referencia || 'DETECTADA',
+          monto: item.monto,
+          banco: item.banco || 'Pago Móvil',
+          telefono: item.telefono,
+          pagador: item.pagador,
+          timestamp: item.timestamp || Date.now(),
+          used: false
+        });
+      }
+    };
+
+    window.addEventListener(NATIVE_PAYMENT_EVENT, handleNativePaymentItem);
+    return () => {
+      window.removeEventListener(NATIVE_PAYMENT_EVENT, handleNativePaymentItem);
+    };
+  }, [totalVES, pagoMovilRefInput, setPagoMovilRefInput]);
+
+  // 3. Consultar últimos pagos para la pestaña del detector (Combina nativo + webhook)
   const fetchRecentPayments = async () => {
+    const nativeList: WebhookPaymentItem[] = getRecentNativePayments().map(p => ({
+      id: p.id,
+      referencia: p.referencia,
+      monto: p.monto,
+      banco: p.banco,
+      telefono: p.telefono,
+      pagador: p.pagador,
+      timestamp: p.timestamp,
+      used: p.used
+    }));
+
     try {
       const secret = getWebhookSecret();
       const res = await fetch(`/api/payments/webhook?secret=${encodeURIComponent(secret)}`, { cache: 'no-store' });
       if (res.ok) {
         const data = await res.json();
         if (Array.isArray(data.payments)) {
-          setRecentPayments(data.payments);
+          // Fusionar sin duplicados por referencia
+          const combined = [...nativeList];
+          data.payments.forEach((wp: WebhookPaymentItem) => {
+            if (!combined.some(c => c.referencia && c.referencia.toUpperCase() === wp.referencia.toUpperCase())) {
+              combined.push(wp);
+            }
+          });
+          setRecentPayments(combined);
+          return;
         }
       }
     } catch {}
+
+    setRecentPayments(nativeList);
   };
 
   useEffect(() => {
@@ -226,9 +323,44 @@ export function PagoMovilSmartValidator({
     }
   };
 
+  // Sincronización manual forzada del buffer nativo (Buzón SMS del teléfono)
+  const [isSyncingNative, setIsSyncingNative] = useState(false);
+  const handleManualSyncNative = async () => {
+    setIsSyncingNative(true);
+    try {
+      await drainNativeQueue();
+      const st = await getNativePermissionStatus();
+      if (st) setNativeStatus(st);
+      await fetchRecentPayments();
+      const nativeMatch = findNativeMatch(totalVES);
+      if (nativeMatch && !nativeMatch.used) {
+        setLiveMatchedPayment({
+          id: nativeMatch.id,
+          referencia: nativeMatch.referencia,
+          monto: nativeMatch.monto,
+          banco: nativeMatch.banco,
+          telefono: nativeMatch.telefono,
+          pagador: nativeMatch.pagador,
+          timestamp: nativeMatch.timestamp,
+          used: false
+        });
+        if (!pagoMovilRefInput && nativeMatch.referencia) {
+          setPagoMovilRefInput(nativeMatch.referencia);
+        }
+      }
+    } finally {
+      setIsSyncingNative(false);
+    }
+  };
+
   // Aplicar pago detectado en vivo
   const handleApplyLivePayment = async (item: WebhookPaymentItem) => {
     setPagoMovilRefInput(item.referencia);
+    // Marcar como usado en el puente nativo (buffer del dispositivo)
+    markNativePaymentUsed(item.referencia);
+    if (item.id) {
+      markNativePaymentUsed(item.id);
+    }
     // Marcar como usado en el webhook store
     try {
       const secret = getWebhookSecret();
@@ -569,6 +701,75 @@ export function PagoMovilSmartValidator({
       {/* ─── PESTAÑA 2: DETECTOR EN VIVO (WEBHOOK & SMS POLLING) ─── */}
       {activeTab === 'live' && (
         <div className="space-y-3">
+          {/* Tarjeta de Estado del Lector Nativo (Android APK KlikPOS Street) */}
+          {isNative ? (
+            nativeStatus?.sms ? (
+              <div className="flex items-center justify-between p-2.5 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-xs">
+                <div className="flex items-center gap-2 text-emerald-800 dark:text-emerald-300 font-bold">
+                  <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <div>
+                    <p className="leading-none text-emerald-900 dark:text-emerald-200">Lector SMS Nativo Activo</p>
+                    <p className="text-[10px] text-emerald-700/80 dark:text-emerald-400 font-normal mt-0.5">
+                      Detecta automáticamente mensajes de bancos venezolanos
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleManualSyncNative}
+                  disabled={isSyncingNative}
+                  className="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-[10px] font-black flex items-center gap-1 active:scale-95 cursor-pointer shadow-xs shrink-0"
+                >
+                  <RefreshCw className={`w-3 h-3 ${isSyncingNative ? 'animate-spin' : ''}`} />
+                  <span>{isSyncingNative ? 'Leyendo...' : 'Sincronizar SMS'}</span>
+                </button>
+              </div>
+            ) : (
+              <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl space-y-2 text-xs">
+                <div className="flex items-start gap-2">
+                  <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                  <div className="space-y-0.5">
+                    <p className="font-bold text-amber-900 dark:text-amber-100">
+                      Permiso de lectura de SMS inactivo
+                    </p>
+                    <p className="text-[11px] text-slate-600 dark:text-slate-300">
+                      Para que KlikPOS Street capture los pagos móviles al recibirlos en este celular, activa el permiso.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 pt-1">
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      await requestNativeSmsPermission();
+                      const st = await getNativePermissionStatus();
+                      if (st) setNativeStatus(st);
+                    }}
+                    className="px-3 py-1.5 bg-amber-600 hover:bg-amber-500 text-white rounded-lg text-[11px] font-black active:scale-95 cursor-pointer shadow-xs"
+                  >
+                    Activar Permiso SMS
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => openNativeAppSettings()}
+                    className="px-2.5 py-1.5 bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200 rounded-lg text-[11px] font-bold cursor-pointer"
+                  >
+                    Ajustes de la App
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleManualSyncNative}
+                    disabled={isSyncingNative}
+                    className="ml-auto px-2 py-1.5 text-slate-600 hover:text-slate-900 text-[10px] font-bold flex items-center gap-1 cursor-pointer"
+                  >
+                    <RefreshCw className={`w-3 h-3 ${isSyncingNative ? 'animate-spin' : ''}`} />
+                    <span>Reintentar</span>
+                  </button>
+                </div>
+              </div>
+            )
+          ) : null}
+
           {/* Banner de Pago Encontrado en Vivo */}
           {liveMatchedPayment ? (
             <div className="p-3 bg-emerald-500/15 border-2 border-emerald-500 rounded-xl space-y-2 animate-in fade-in zoom-in-95">

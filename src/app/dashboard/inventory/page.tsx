@@ -1613,7 +1613,7 @@ export default function DesktopInventoryPage() {
                         placeholder="O pega URL de imagen..."
                         value={image.startsWith('data:') ? '' : image}
                         onChange={(e) => setImage(e.target.value)}
-                        className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg text-[11px] outline-none focus:ring-1 focus:ring-sky-500"
+                        className="w-full px-2.5 py-1.5 bg-white border-2 border-slate-300 rounded-lg text-xs font-bold text-slate-950 placeholder:text-slate-400 outline-none focus:border-sky-600 focus:ring-2 focus:ring-sky-500/20"
                       />
 
                       {/* Botones Mágicos de IA */}
@@ -1647,7 +1647,7 @@ export default function DesktopInventoryPage() {
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">
+                  <label className="block font-bold text-slate-800 mb-1">
                     Código de Barras / SKU *:
                   </label>
                   <input
@@ -1657,12 +1657,12 @@ export default function DesktopInventoryPage() {
                     placeholder="Ej: 759100100099"
                     value={barcode}
                     onChange={(e) => setBarcode(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg font-mono focus:ring-2 focus:ring-sky-500 outline-none"
+                    className="w-full px-3 py-2 bg-white border-2 border-slate-300 rounded-lg font-mono font-bold text-slate-950 placeholder:text-slate-400 focus:border-sky-600 focus:ring-2 focus:ring-sky-500/20 outline-none text-sm"
                   />
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">
+                  <label className="block font-bold text-slate-800 mb-1">
                     Nombre del Producto *:
                   </label>
                   <input
@@ -1671,14 +1671,14 @@ export default function DesktopInventoryPage() {
                     placeholder="Ej: Leche Completa 1L"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 outline-none"
+                    className="w-full px-3 py-2 bg-white border-2 border-slate-300 rounded-lg font-bold text-slate-950 placeholder:text-slate-400 focus:border-sky-600 focus:ring-2 focus:ring-sky-500/20 outline-none text-sm"
                   />
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   <div>
                     <div className="flex items-center justify-between mb-1">
-                      <label className="block font-semibold text-slate-700 text-xs">
+                      <label className="block font-bold text-slate-800 text-xs">
                         Categoría / Rubro *:
                       </label>
                       <button
@@ -1700,7 +1700,7 @@ export default function DesktopInventoryPage() {
                           setCategory(e.target.value);
                         }
                       }}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white focus:ring-2 focus:ring-sky-500 outline-none text-sm font-medium"
+                      className="w-full px-3 py-2 bg-white border-2 border-slate-300 rounded-lg text-slate-950 font-bold focus:border-sky-600 focus:ring-2 focus:ring-sky-500/20 outline-none text-sm"
                     >
                       {categoriesList.map((cat) => (
                         <option key={cat} value={cat}>
@@ -1714,13 +1714,13 @@ export default function DesktopInventoryPage() {
                   </div>
 
                   <div>
-                    <label className="block font-semibold text-slate-700 mb-1">
+                    <label className="block font-bold text-slate-800 mb-1">
                       Tipo de Venta / Unidad:
                     </label>
                     <select
                       value={unit}
                       onChange={(e) => setUnit(e.target.value)}
-                      className="w-full px-3 py-2 border border-amber-300 bg-amber-50/50 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none text-sm font-semibold text-slate-800"
+                      className="w-full px-3 py-2 bg-white border-2 border-amber-400 rounded-lg focus:border-amber-600 focus:ring-2 focus:ring-amber-500/20 outline-none text-sm font-bold text-slate-950"
                     >
                       <option value="unidad">📦 Por Unidad (pza)</option>
                       <option value="kg">⚖️ Pesable por Kilo (kg)</option>
@@ -1821,7 +1821,7 @@ export default function DesktopInventoryPage() {
 
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label className="block font-semibold text-slate-700 mb-1">
+                    <label className="block font-bold text-slate-800 mb-1">
                       {unit === 'kg' ? 'Stock Inicial (Kilos):' : unit === 'gr' ? 'Stock Inicial (Gramos):' : 'Stock Inicial (Unidades):'}
                     </label>
                     <input
@@ -1830,12 +1830,12 @@ export default function DesktopInventoryPage() {
                       placeholder={unit === 'kg' ? 'Ej: 15.5' : '10'}
                       value={stock}
                       onChange={(e) => setStock(e.target.value)}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg font-mono focus:ring-2 focus:ring-sky-500 outline-none"
+                      className="w-full px-3 py-2 bg-white border-2 border-slate-300 rounded-lg font-mono font-bold text-slate-950 placeholder:text-slate-400 focus:border-sky-600 focus:ring-2 focus:ring-sky-500/20 outline-none text-sm"
                     />
                   </div>
 
                   <div>
-                    <label className="block font-semibold text-slate-700 mb-1">
+                    <label className="block font-bold text-slate-800 mb-1">
                       Stock Mínimo (Alerta):
                     </label>
                     <input
@@ -1844,7 +1844,7 @@ export default function DesktopInventoryPage() {
                       placeholder="3"
                       value={minStock}
                       onChange={(e) => setMinStock(e.target.value)}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg font-mono focus:ring-2 focus:ring-sky-500 outline-none"
+                      className="w-full px-3 py-2 bg-white border-2 border-slate-300 rounded-lg font-mono font-bold text-slate-950 placeholder:text-slate-400 focus:border-sky-600 focus:ring-2 focus:ring-sky-500/20 outline-none text-sm"
                     />
                   </div>
                 </div>
@@ -2059,7 +2059,7 @@ export default function DesktopInventoryPage() {
                         placeholder="O pega URL de imagen..."
                         value={image.startsWith('data:') ? '' : image}
                         onChange={(e) => setImage(e.target.value)}
-                        className="w-full px-2 py-1 border border-slate-300 rounded-lg text-[11px] outline-none focus:ring-1 focus:ring-indigo-500"
+                        className="w-full px-2.5 py-1.5 bg-white border-2 border-slate-300 rounded-lg text-xs font-bold text-slate-950 placeholder:text-slate-400 outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/20"
                       />
 
                       {image && (
@@ -2090,7 +2090,7 @@ export default function DesktopInventoryPage() {
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">
+                  <label className="block font-bold text-slate-800 mb-1">
                     Código de Barras / SKU *:
                   </label>
                   <input
@@ -2098,12 +2098,12 @@ export default function DesktopInventoryPage() {
                     required
                     value={barcode}
                     onChange={(e) => setBarcode(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg font-mono focus:ring-2 focus:ring-indigo-500 outline-none"
+                    className="w-full px-3 py-2 bg-white border-2 border-slate-300 rounded-lg font-mono font-bold text-slate-950 placeholder:text-slate-400 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/20 outline-none text-sm"
                   />
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">
+                  <label className="block font-bold text-slate-800 mb-1">
                     Nombre del Producto *:
                   </label>
                   <input
@@ -2111,14 +2111,14 @@ export default function DesktopInventoryPage() {
                     required
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
+                    className="w-full px-3 py-2 bg-white border-2 border-slate-300 rounded-lg font-bold text-slate-950 placeholder:text-slate-400 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/20 outline-none text-sm"
                   />
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   <div>
                     <div className="flex items-center justify-between mb-1">
-                      <label className="block font-semibold text-slate-700 text-xs">
+                      <label className="block font-bold text-slate-800 text-xs">
                         Categoría / Rubro *:
                       </label>
                       <button
@@ -2140,7 +2140,7 @@ export default function DesktopInventoryPage() {
                           setCategory(e.target.value);
                         }
                       }}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-medium"
+                      className="w-full px-3 py-2 bg-white border-2 border-slate-300 rounded-lg text-slate-950 font-bold focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/20 outline-none text-sm"
                     >
                       {categoriesList.map((cat) => (
                         <option key={cat} value={cat}>
@@ -2154,13 +2154,13 @@ export default function DesktopInventoryPage() {
                   </div>
 
                   <div>
-                    <label className="block font-semibold text-slate-700 mb-1">
+                    <label className="block font-bold text-slate-800 mb-1">
                       Tipo de Venta / Unidad:
                     </label>
                     <select
                       value={unit}
                       onChange={(e) => setUnit(e.target.value)}
-                      className="w-full px-3 py-2 border border-amber-300 bg-amber-50/50 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none text-sm font-semibold text-slate-800"
+                      className="w-full px-3 py-2 bg-white border-2 border-amber-400 rounded-lg focus:border-amber-600 focus:ring-2 focus:ring-amber-500/20 outline-none text-sm font-bold text-slate-950"
                     >
                       <option value="unidad">📦 Por Unidad (pza)</option>
                       <option value="kg">⚖️ Pesable por Kilo (kg)</option>
@@ -2261,7 +2261,7 @@ export default function DesktopInventoryPage() {
 
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label className="block font-semibold text-slate-700 mb-1">
+                    <label className="block font-bold text-slate-800 mb-1">
                       {unit === 'kg' ? 'Stock Actual (Kilos):' : unit === 'gr' ? 'Stock Actual (Gramos):' : 'Stock Actual (Unidades):'}
                     </label>
                     <input
@@ -2270,12 +2270,12 @@ export default function DesktopInventoryPage() {
                       placeholder={unit === 'kg' ? 'Ej: 15.5' : '10'}
                       value={stock}
                       onChange={(e) => setStock(e.target.value)}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg font-mono font-bold text-slate-900 focus:ring-2 focus:ring-indigo-500 outline-none"
+                      className="w-full px-3 py-2 bg-white border-2 border-slate-300 rounded-lg font-mono font-bold text-slate-950 placeholder:text-slate-400 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/20 outline-none text-sm"
                     />
                   </div>
 
                   <div>
-                    <label className="block font-semibold text-slate-700 mb-1">
+                    <label className="block font-bold text-slate-800 mb-1">
                       Stock Mínimo (Alerta):
                     </label>
                     <input
@@ -2284,7 +2284,7 @@ export default function DesktopInventoryPage() {
                       placeholder="3"
                       value={minStock}
                       onChange={(e) => setMinStock(e.target.value)}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg font-mono focus:ring-2 focus:ring-indigo-500 outline-none"
+                      className="w-full px-3 py-2 bg-white border-2 border-slate-300 rounded-lg font-mono font-bold text-slate-950 placeholder:text-slate-400 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/20 outline-none text-sm"
                     />
                   </div>
                 </div>

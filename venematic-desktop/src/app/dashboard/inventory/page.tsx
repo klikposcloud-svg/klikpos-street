@@ -1657,7 +1657,7 @@ export default function DesktopInventoryPage() {
                     placeholder="Ej: 759100100099"
                     value={barcode}
                     onChange={(e) => setBarcode(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg font-mono focus:ring-2 focus:ring-sky-500 outline-none"
+                    className="w-full px-3 py-2 bg-white border-2 border-slate-300 rounded-lg font-mono font-bold text-slate-950 placeholder:text-slate-400 focus:border-sky-500 outline-none"
                   />
                 </div>
 
@@ -1671,7 +1671,7 @@ export default function DesktopInventoryPage() {
                     placeholder="Ej: Leche Completa 1L"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 outline-none"
+                    className="w-full px-3 py-2 bg-white border-2 border-slate-300 rounded-lg font-bold text-slate-950 placeholder:text-slate-400 focus:border-sky-500 outline-none"
                   />
                 </div>
 
@@ -1830,7 +1830,7 @@ export default function DesktopInventoryPage() {
                       placeholder={unit === 'kg' ? 'Ej: 15.5' : '10'}
                       value={stock}
                       onChange={(e) => setStock(e.target.value)}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg font-mono focus:ring-2 focus:ring-sky-500 outline-none"
+                      className="w-full px-3 py-2 bg-white border-2 border-slate-300 rounded-lg font-mono font-bold text-slate-950 placeholder:text-slate-400 focus:border-sky-500 outline-none"
                     />
                   </div>
 
@@ -1844,7 +1844,7 @@ export default function DesktopInventoryPage() {
                       placeholder="3"
                       value={minStock}
                       onChange={(e) => setMinStock(e.target.value)}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg font-mono focus:ring-2 focus:ring-sky-500 outline-none"
+                      className="w-full px-3 py-2 bg-white border-2 border-slate-300 rounded-lg font-mono font-bold text-slate-950 placeholder:text-slate-400 focus:border-sky-500 outline-none"
                     />
                   </div>
                 </div>
@@ -2098,7 +2098,7 @@ export default function DesktopInventoryPage() {
                     required
                     value={barcode}
                     onChange={(e) => setBarcode(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg font-mono focus:ring-2 focus:ring-indigo-500 outline-none"
+                    className="w-full px-3 py-2 bg-white border-2 border-slate-300 rounded-lg font-mono font-bold text-slate-950 placeholder:text-slate-400 focus:border-indigo-500 outline-none"
                   />
                 </div>
 
@@ -2111,7 +2111,7 @@ export default function DesktopInventoryPage() {
                     required
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
+                    className="w-full px-3 py-2 bg-white border-2 border-slate-300 rounded-lg font-bold text-slate-950 placeholder:text-slate-400 focus:border-indigo-500 outline-none"
                   />
                 </div>
 
@@ -2270,7 +2270,7 @@ export default function DesktopInventoryPage() {
                       placeholder={unit === 'kg' ? 'Ej: 15.5' : '10'}
                       value={stock}
                       onChange={(e) => setStock(e.target.value)}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg font-mono font-bold text-slate-900 focus:ring-2 focus:ring-indigo-500 outline-none"
+                      className="w-full px-3 py-2 bg-white border-2 border-slate-300 rounded-lg font-mono font-bold text-slate-950 placeholder:text-slate-400 focus:border-indigo-500 outline-none"
                     />
                   </div>
 
@@ -2284,7 +2284,7 @@ export default function DesktopInventoryPage() {
                       placeholder="3"
                       value={minStock}
                       onChange={(e) => setMinStock(e.target.value)}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg font-mono focus:ring-2 focus:ring-indigo-500 outline-none"
+                      className="w-full px-3 py-2 bg-white border-2 border-slate-300 rounded-lg font-mono font-bold text-slate-950 placeholder:text-slate-400 focus:border-indigo-500 outline-none"
                     />
                   </div>
                 </div>

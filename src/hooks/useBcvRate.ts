@@ -64,89 +64,98 @@ export function useBcvRate(initialRate = FALLBACK_RATE): UseBcvRateReturn {
     let resolvedSource = '';
 
     try {
-      // 1. Prioridad 1: API Route interna (scraper directo a bcv.org.ve)
+      // 1. Prioridad 1: DolarAPI Venezuela (Tiempo Real Oficial BCV, 0 CORS, ultra-rápido)
       try {
-        const res = await fetch('/api/bcv/rate?refresh=true');
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 4000);
+        const res = await fetch('https://ve.dolarapi.com/v1/dolares/oficial', {
+          signal: controller.signal,
+          headers: { Accept: 'application/json' },
+          cache: 'no-store'
+        });
+        clearTimeout(timeout);
         if (res.ok) {
           const data = await res.json();
-          if (data && typeof data.rate === 'number' && data.rate > 0) {
-            resolvedRate = data.rate;
-            resolvedSource = data.source || 'Portal Oficial BCV (bcv.org.ve)';
+          const rate = data.promedio || data.precio || data.valor;
+          if (typeof rate === 'number' && rate > 0) {
+            resolvedRate = rate;
+            resolvedSource = 'BCV Oficial (DolarAPI Venezuela)';
           }
         }
       } catch {}
 
-      // 2. Prioridad 2: Respaldo Cloud Firestore (0 CORS)
+      // 2. Prioridad 2: API Route interna (Scraper directo a bcv.org.ve)
       if (!resolvedRate) {
         try {
-          const cloudRate = await cloudSyncService.fetchLatestBcvRate();
-          if (cloudRate && cloudRate.rate > 0) {
-            resolvedRate = cloudRate.rate;
-            resolvedSource = cloudRate.source || 'Respaldo Cloud';
-          }
-        } catch (e) {
-          console.warn('[BCV] Firestore read fallback:', e);
-        }
-      }
-
-      // 3. Prioridad 3: DolarAPI Venezuela
-      if (!resolvedRate) {
-        try {
-          const res = await fetch('https://ve.dolarapi.com/v1/dolares/oficial');
+          const controller = new AbortController();
+          const timeout = setTimeout(() => controller.abort(), 5000);
+          const res = await fetch('/api/bcv/rate?refresh=true', { signal: controller.signal });
+          clearTimeout(timeout);
           if (res.ok) {
             const data = await res.json();
-            const rate = data.promedio || data.precio || data.valor;
-            if (typeof rate === 'number' && rate > 0) {
-              resolvedRate = rate;
-              resolvedSource = 'DolarAPI Venezuela';
+            if (data && typeof data.rate === 'number' && data.rate > 0) {
+              resolvedRate = data.rate;
+              resolvedSource = data.source || 'Portal Oficial BCV (bcv.org.ve)';
             }
           }
         } catch {}
       }
 
-      // 4. Prioridad 4: PyDolar Venezuela
+      // 3. Prioridad 3: Open Exchange Rates VES (Live)
       if (!resolvedRate) {
         try {
-          const res = await fetch('https://pydolarvenezuela-api.vercel.app/api/v1/dollar?page=bcv');
-          if (res.ok) {
-            const data = await res.json();
-            const val = parseFloat(data?.monitors?.usd?.price);
-            if (!isNaN(val) && val > 0) {
-              resolvedRate = val;
-              resolvedSource = 'PyDolar Venezuela';
-            }
-          }
-        } catch {}
-      }
-
-      // 5. Prioridad 5: Open Exchange Rates VES
-      if (!resolvedRate) {
-        try {
-          const res = await fetch('https://open.er-api.com/v6/latest/USD');
+          const controller = new AbortController();
+          const timeout = setTimeout(() => controller.abort(), 4000);
+          const res = await fetch('https://open.er-api.com/v6/latest/USD', {
+            signal: controller.signal,
+            headers: { Accept: 'application/json' },
+            cache: 'no-store'
+          });
+          clearTimeout(timeout);
           if (res.ok) {
             const data = await res.json();
             const val = parseFloat(data?.rates?.VES);
             if (!isNaN(val) && val > 0) {
               resolvedRate = val;
-              resolvedSource = 'OpenExchange';
+              resolvedSource = 'OpenExchange Rates (VES)';
             }
           }
         } catch {}
       }
 
-      // 6. Prioridad 6: Fawaz Ahmed Currency CDN
+      // 4. Prioridad 4: Fawaz Ahmed Currency CDN
       if (!resolvedRate) {
         try {
-          const res = await fetch('https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json');
+          const controller = new AbortController();
+          const timeout = setTimeout(() => controller.abort(), 4000);
+          const res = await fetch('https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json', {
+            signal: controller.signal,
+            headers: { Accept: 'application/json' },
+            cache: 'no-store'
+          });
+          clearTimeout(timeout);
           if (res.ok) {
             const data = await res.json();
             const val = parseFloat(data?.usd?.ves);
             if (!isNaN(val) && val > 0) {
               resolvedRate = val;
-              resolvedSource = 'CurrencyCDN';
+              resolvedSource = 'CurrencyCDN (Oficial)';
             }
           }
         } catch {}
+      }
+
+      // 5. Prioridad 5 (Modo Offline / Respaldo Cloud): Solo si no hay respuesta de APIs en vivo
+      if (!resolvedRate) {
+        try {
+          const cloudRate = await cloudSyncService.fetchLatestBcvRate();
+          if (cloudRate && cloudRate.rate > 0) {
+            resolvedRate = cloudRate.rate;
+            resolvedSource = cloudRate.source || 'Respaldo Cloud Firestore';
+          }
+        } catch (e) {
+          console.warn('[BCV] Firestore read fallback:', e);
+        }
       }
 
       if (resolvedRate && resolvedRate > 0) {

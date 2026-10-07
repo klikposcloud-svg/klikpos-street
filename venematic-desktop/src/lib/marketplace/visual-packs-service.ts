@@ -526,6 +526,38 @@ export const DEFAULT_VISUAL_PACKS: VisualPack[] = [
         isStockManaged: true,
       }
     ]
+  },
+  {
+    id: 'pack-snacks-venezuela',
+    title: 'Snacks, Chocolates & Chucherías Venezuela (17 Productos HD)',
+    description: 'Catálogo de alta rotación para bodegas y quioscos: Cheese Tris, Doritos, Pepitos, Ruffles, Cocosete, Susy, Toronto, Carré, Galak y más en PNG transparente.',
+    category: 'Snacks & Golosinas',
+    badge: '🔥 Bodega & Kiosco',
+    version: '1.0.0',
+    totalProducts: 17,
+    coverImage: '/packs/snacks/Cheese%20Tris.png',
+    isFree: true,
+    priceUsd: 0,
+    tags: ['snacks', 'chucherias', 'galletas', 'chocolates', 'savoy', 'frito-lay', 'nestle', 'bodega', 'venezuela'],
+    products: [
+      { name: 'Chicle Bolibomba Clásico Fresa', category: 'Golosinas', priceUsd: 0.25, costUsd: 0.12, barcode: '759101000001', imageUrl: '/packs/snacks/Bolibomba.png', stock: 100, isStockManaged: true, description: 'Chicle bomba tradicional sabor a fresa intensa.' },
+      { name: 'Chocolate Savoy Carré con Avellanas 25g', category: 'Chocolates', priceUsd: 1.20, costUsd: 0.75, barcode: '759101000002', imageUrl: '/packs/snacks/Carre.png', stock: 50, isStockManaged: true, description: 'Fino chocolate de leche Savoy relleno con avellana seleccionada.' },
+      { name: 'Cheese Tris Tradicional Frito-Lay 45g', category: 'Snacks', priceUsd: 0.90, costUsd: 0.55, barcode: '759101000003', imageUrl: '/packs/snacks/Cheese%20Tris.png', stock: 80, isStockManaged: true, description: 'Snack crujiente horneado con inconfundible sabor a queso venezolano.' },
+      { name: 'Cheetos Mega Queso Frito-Lay 40g', category: 'Snacks', priceUsd: 0.90, costUsd: 0.55, barcode: '759101000004', imageUrl: '/packs/snacks/Cheetos%20Mega%20Queso.png', stock: 75, isStockManaged: true, description: 'Crujientes palitos de maíz inflado con mega queso.' },
+      { name: 'Chiclets Adams Clásico Menta 2 Pastillas', category: 'Golosinas', priceUsd: 0.35, costUsd: 0.18, barcode: '759101000005', imageUrl: '/packs/snacks/Chiclets.png', stock: 120, isStockManaged: true, description: 'Pastillas de goma de mascar sabor a menta refrescante.' },
+      { name: 'Galleta Cocosete Sándwich Nestlé 50g', category: 'Galletas', priceUsd: 1.00, costUsd: 0.60, barcode: '759101000006', imageUrl: '/packs/snacks/Cocosete.png', stock: 90, isStockManaged: true, description: 'Crujiente barquillo relleno de deliciosa crema de coco auténtico.' },
+      { name: 'De Todito Frito-Lay Familiar 110g', category: 'Snacks', priceUsd: 1.80, costUsd: 1.15, barcode: '759101000007', imageUrl: '/packs/snacks/De%20Todito%20Mix.png', stock: 45, isStockManaged: true, description: 'Mezcla perfecta de Doritos, Cheese Tris, Platanitos y Fritos crujientes.' },
+      { name: 'Doritos Mega Queso Frito-Lay 42g', category: 'Snacks', priceUsd: 1.00, costUsd: 0.65, barcode: '759101000008', imageUrl: '/packs/snacks/Doritos%20Mega%20Queso.png', stock: 80, isStockManaged: true, description: 'Totopos triangulares de maíz crujiente bañados con queso cheddar.' },
+      { name: 'Chocolate Blanco Galak Nestlé 30g', category: 'Chocolates', priceUsd: 1.10, costUsd: 0.70, barcode: '759101000009', imageUrl: '/packs/snacks/Galak.png', stock: 60, isStockManaged: true, description: 'Cremoso chocolate blanco elaborado con leche pura Nestlé.' },
+      { name: 'Pepito Queso Frito-Lay 40g', category: 'Snacks', priceUsd: 0.85, costUsd: 0.50, barcode: '759101000010', imageUrl: '/packs/snacks/Pepitos.png', stock: 90, isStockManaged: true, description: 'Aros y cilindros de maíz inflado suaves con sabor a queso tradicional.' },
+      { name: 'Pastelito Pingüino Marinela Pack Doble', category: 'Galletas', priceUsd: 1.50, costUsd: 0.95, barcode: '759101000011', imageUrl: '/packs/snacks/Pinguino.png', stock: 40, isStockManaged: true, description: 'Esponjoso pastelito de chocolate relleno de rica crema con firma decorativa.' },
+      { name: 'Platanitos Ondulados Salados 45g', category: 'Snacks', priceUsd: 0.80, costUsd: 0.48, barcode: '759101000012', imageUrl: '/packs/snacks/Platanitos.png', stock: 85, isStockManaged: true, description: 'Rebanadas crocantes de plátano verde fritas al punto exacto con sal.' },
+      { name: 'Ruffles Mega Queso Frito-Lay 40g', category: 'Snacks', priceUsd: 1.00, costUsd: 0.65, barcode: '759101000013', imageUrl: '/packs/snacks/Rufles%20Mega%20Queso.png', stock: 70, isStockManaged: true, description: 'Papas onduladas ultra crujientes condimentadas con queso cheddar.' },
+      { name: 'Ruffles Papas Saladas Original 40g', category: 'Snacks', priceUsd: 1.00, costUsd: 0.65, barcode: '759101000014', imageUrl: '/packs/snacks/Rufles%20Original.png', stock: 70, isStockManaged: true, description: 'Papas onduladas naturales con corte grueso y sal marina.' },
+      { name: 'Caramelos Masticables Frutales Sparkies', category: 'Golosinas', priceUsd: 0.50, costUsd: 0.28, barcode: '759101000015', imageUrl: '/packs/snacks/Sparkies.png', stock: 110, isStockManaged: true, description: 'Caramelos confitados masticables surtidos en ricos sabores a frutas.' },
+      { name: 'Galleta Susy Savoy Chocolate 50g', category: 'Galletas', priceUsd: 1.00, costUsd: 0.60, barcode: '759101000016', imageUrl: '/packs/snacks/Susy.png', stock: 90, isStockManaged: true, description: 'Capas crujientes de oblea rellenas de auténtico chocolate Savoy.' },
+      { name: 'Bombón Toronto Savoy Avellana Original', category: 'Chocolates', priceUsd: 0.40, costUsd: 0.22, barcode: '759101000017', imageUrl: '/packs/snacks/Toronto.png', stock: 150, isStockManaged: true, description: 'Emblemático bombón venezolano de chocolate con leche y centro de avellana entera.' }
+    ]
   }
 ];
 
