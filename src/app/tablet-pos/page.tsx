@@ -82,6 +82,7 @@ import { CompanyConfigModal } from '@/components/tablet-pos/CompanyConfigModal';
 import { PagoMovilConfigModal } from '@/components/tablet-pos/PagoMovilConfigModal';
 import { PagoMovilSmartValidator } from '@/components/tablet-pos/PagoMovilSmartValidator';
 import { CustomerModal } from '@/components/tablet-pos/CustomerModal';
+import { PosErrorBoundary } from '@/components/common/PosErrorBoundary';
 import InteractivePresentationModal from '@/components/presentation/InteractivePresentationModal';
 import {
   SAMPLE_PRODUCTS,
@@ -406,10 +407,15 @@ export default function TabletMobilePosPage() {
         }).catch(() => {});
       }
 
-      // 2. Configuración de Pago Móvil
+      // 2. Configuración de Pago Móvil con fusión segura contra campos incompletos
       const savedPm = localStorage.getItem('klikpos_pago_movil');
       if (savedPm) {
-        setPagoMovilInfo(JSON.parse(savedPm));
+        try {
+          const parsed = JSON.parse(savedPm);
+          if (parsed && typeof parsed === 'object') {
+            setPagoMovilInfo(prev => ({ ...prev, ...parsed }));
+          }
+        } catch {}
       }
 
       // 3. Clientes
@@ -2826,20 +2832,21 @@ export default function TabletMobilePosPage() {
         {/* VISTA 5: PASARELA DE COBRO COMPLETA (CLIENTE + PAGO MÓVIL + VUELTO)      */}
         {/* ======================================================================= */}
         {activeTab === 'cobro' && (
-          <div className="max-w-xl mx-auto w-full space-y-4 flex-1 min-h-0 overflow-y-auto pb-44 px-2 scrollbar-none">
-            {/* Header del Totalizador con Calculadora de Vuelto en Vivo */}
-            <div className={`border rounded-3xl p-4 sm:p-5 text-center shadow-lg transition-all ${
-              isLight ? 'bg-white border-slate-200' : 'bg-slate-900 border-slate-800'
-            }`}>
-              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">
-                Total a Liquidar ({totalItems} productos)
-              </span>
-              <div className="text-3xl sm:text-4xl font-black font-mono mt-1" style={{ color: currentPal.primary }}>
-                ${totalUSD.toFixed(2)} USD
-              </div>
-              <div className="text-xs sm:text-sm font-mono font-bold text-slate-600 dark:text-slate-300 mt-0.5">
-                Bs. {totalVES.toFixed(2)} (Tasa BCV: {bcvRate.toFixed(2)})
-              </div>
+          <PosErrorBoundary fallbackTitle="Pasarela de Cobro KlikPOS" onReset={() => setActiveTab('menu')}>
+            <div className="max-w-xl mx-auto w-full space-y-4 flex-1 min-h-0 overflow-y-auto pb-44 px-2 scrollbar-none">
+              {/* Header del Totalizador con Calculadora de Vuelto en Vivo */}
+              <div className={`border rounded-3xl p-4 sm:p-5 text-center shadow-lg transition-all ${
+                isLight ? 'bg-white border-slate-200' : 'bg-slate-900 border-slate-800'
+              }`}>
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">
+                  Total a Liquidar ({totalItems} productos)
+                </span>
+                <div className="text-3xl sm:text-4xl font-black font-mono mt-1" style={{ color: currentPal.primary }}>
+                  ${(totalUSD ?? 0).toFixed(2)} USD
+                </div>
+                <div className="text-xs sm:text-sm font-mono font-bold text-slate-600 dark:text-slate-300 mt-0.5">
+                  Bs. {(totalVES ?? 0).toFixed(2)} (Tasa BCV: {(bcvRate ?? 871.37).toFixed(2)})
+                </div>
 
               {/* CALCULADORA RÁPIDA DE VUELTO EN VIVO (VISIBILIDAD INMEDIATA) */}
               <div className="mt-3 pt-3 border-t border-slate-200 dark:border-slate-800 text-left space-y-2">
@@ -3060,7 +3067,7 @@ export default function TabletMobilePosPage() {
                     </label>
                     <input
                       type="text"
-                      placeholder={selectedCustomer.address || 'Ej. Urb. Los Rosales, Calle 3, Casa #14'}
+                      placeholder={selectedCustomer?.address || 'Ej. Urb. Los Rosales, Calle 3, Casa #14'}
                       value={deliveryAddressInput}
                       onChange={(e) => setDeliveryAddressInput(e.target.value)}
                       className={`w-full px-3 py-2 rounded-xl text-xs font-medium border outline-none ${
@@ -3097,11 +3104,11 @@ export default function TabletMobilePosPage() {
               }`}>
                 <div>
                   <h4 className={`text-xs font-black ${isLight ? 'text-slate-900' : 'text-white'}`}>
-                    {selectedCustomer.name}
+                    {selectedCustomer?.name || 'Cliente Mostrador'}
                   </h4>
                   <div className={`flex gap-2 text-[10px] font-mono mt-0.5 ${isLight ? 'text-slate-600' : 'text-slate-500'}`}>
-                    <span>Doc: <b>{selectedCustomer.docId}</b></span>
-                    {selectedCustomer.phone && <span>Tel: {selectedCustomer.phone}</span>}
+                    <span>Doc: <b>{selectedCustomer?.docId || 'V-00000000'}</b></span>
+                    {selectedCustomer?.phone && <span>Tel: {selectedCustomer.phone}</span>}
                   </div>
                 </div>
                 <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
@@ -3662,7 +3669,7 @@ export default function TabletMobilePosPage() {
               ) : !isPaymentComplete ? (
                 <div className="flex items-center gap-2 text-amber-300">
                   <AlertCircle className="w-5 h-5 text-amber-400 shrink-0" />
-                  <span>Falta Completar: ${missingAmountUSD.toFixed(2)} USD (Bs. {missingAmountVES.toFixed(2)})</span>
+                  <span>Falta Completar: ${(missingAmountUSD ?? 0).toFixed(2)} USD (Bs. ${(missingAmountVES ?? 0).toFixed(2)})</span>
                 </div>
               ) : (
                 <>
@@ -3672,6 +3679,7 @@ export default function TabletMobilePosPage() {
               )}
             </button>
           </div>
+          </PosErrorBoundary>
         )}
         </div>
       </main>
