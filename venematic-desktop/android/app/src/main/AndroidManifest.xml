@@ -35,16 +35,7 @@
                 android:resource="@xml/file_paths"></meta-data>
         </provider>
 
-        <!-- Pago Móvil automático: SMS bancarios -->
-        <receiver
-            android:name=".SmsReceiver"
-            android:exported="true">
-            <intent-filter android:priority="999">
-                <action android:name="android.provider.Telephony.SMS_RECEIVED" />
-            </intent-filter>
-        </receiver>
-
-        <!-- Pago Móvil automático: notificaciones push de apps bancarias -->
+        <!-- Pago Móvil automático: notificaciones push y SMS bancarios vía sistema -->
         <service
             android:name=".BankNotificationListener"
             android:exported="true"
@@ -64,8 +55,6 @@
     <uses-permission android:name="android.permission.FLASHLIGHT" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    <uses-permission android:name="android.permission.RECEIVE_SMS" />
-    <uses-permission android:name="android.permission.READ_SMS" />
     
     <uses-feature android:name="android.hardware.camera" android:required="false" />
     <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />

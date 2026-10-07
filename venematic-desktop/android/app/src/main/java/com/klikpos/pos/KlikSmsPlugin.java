@@ -1,10 +1,7 @@
 package com.klikpos.pos;
 
-import android.Manifest;
 import android.content.ComponentName;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.os.Build;
 import android.provider.Settings;
 
 import com.getcapacitor.JSArray;
@@ -18,7 +15,8 @@ import org.json.JSONArray;
 
 /**
  * Puente JS <-> nativo para Pago Móvil.
- * JS: window.Capacitor.Plugins.KlikSms.drain() / status() / requestSms() / openNotificationAccess()
+ * Utiliza NotificationListenerService para interceptar avisos de bancos y SMS
+ * de manera 100% segura y permitida por Google Play Protect.
  */
 @CapacitorPlugin(name = "KlikSms")
 public class KlikSmsPlugin extends Plugin {
@@ -34,22 +32,15 @@ public class KlikSmsPlugin extends Plugin {
     @PluginMethod
     public void status(PluginCall call) {
         JSObject ret = new JSObject();
-        ret.put("sms", hasSms());
-        ret.put("notifications", hasNotificationAccess());
+        boolean hasAccess = hasNotificationAccess();
+        ret.put("sms", hasAccess);
+        ret.put("notifications", hasAccess);
         call.resolve(ret);
     }
 
     @PluginMethod
     public void requestSms(PluginCall call) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !hasSms() && getActivity() != null) {
-            getActivity().requestPermissions(new String[]{
-                    Manifest.permission.RECEIVE_SMS,
-                    Manifest.permission.READ_SMS
-            }, 501);
-        }
-        JSObject ret = new JSObject();
-        ret.put("sms", hasSms());
-        call.resolve(ret);
+        openNotificationAccess(call);
     }
 
     @PluginMethod
@@ -74,9 +65,7 @@ public class KlikSmsPlugin extends Plugin {
     }
 
     private boolean hasSms() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return true;
-        return getContext().checkSelfPermission(Manifest.permission.RECEIVE_SMS) == PackageManager.PERMISSION_GRANTED
-                || getContext().checkSelfPermission(Manifest.permission.READ_SMS) == PackageManager.PERMISSION_GRANTED;
+        return hasNotificationAccess();
     }
 
     private boolean hasNotificationAccess() {

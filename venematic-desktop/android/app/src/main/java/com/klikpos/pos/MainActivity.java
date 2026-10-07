@@ -1,10 +1,7 @@
 package com.klikpos.pos;
 
-import android.Manifest;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.webkit.WebView;
@@ -28,21 +25,6 @@ public class MainActivity extends BridgeActivity {
         registerPlugin(KlikSmsPlugin.class);
         super.onCreate(savedInstanceState);
         instance = this;
-
-        // Solicitar permisos de SMS (Recepción en vivo y lectura de buzón)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            try {
-                if (checkSelfPermission(Manifest.permission.RECEIVE_SMS) != PackageManager.PERMISSION_GRANTED
-                        || checkSelfPermission(Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED) {
-                    requestPermissions(new String[]{
-                            Manifest.permission.RECEIVE_SMS,
-                            Manifest.permission.READ_SMS
-                    }, 501);
-                }
-            } catch (Exception e) {
-                Log.e(TAG, "Error solicitando permisos SMS", e);
-            }
-        }
     }
 
     @Override
@@ -51,7 +33,7 @@ public class MainActivity extends BridgeActivity {
         super.onDestroy();
     }
 
-    /** Punto único de entrada para SMS y notificaciones bancarias. */
+    /** Punto único de entrada para notificaciones bancarias y alertas de pago. */
     public static synchronized void deliverPaymentText(Context ctx, String body, String sender, String source) {
         try {
             JSONObject item = new JSONObject();
@@ -87,78 +69,7 @@ public class MainActivity extends BridgeActivity {
         JSONArray arr;
         try { arr = new JSONArray(sp.getString(KEY, "[]")); } catch (Exception e) { arr = new JSONArray(); }
         sp.edit().putString(KEY, "[]").apply();
-
-        // Si tenemos permiso READ_SMS, verificar también mensajes bancarios en el buzón SMS
-        // en caso de que el SMS haya llegado antes de abrir la app o con el proceso detenido
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
-                ctx.checkSelfPermission(Manifest.permission.READ_SMS) == PackageManager.PERMISSION_GRANTED) {
-            readRecentInboxSms(ctx, arr);
-        }
-
         return arr;
-    }
-
-    private static void readRecentInboxSms(Context ctx, JSONArray outArr) {
-        android.database.Cursor cursor = null;
-        try {
-            android.net.Uri inboxUri = android.net.Uri.parse("content://sms/inbox");
-            long cutoff = System.currentTimeMillis() - MAX_AGE_MS;
-            String selection = "date > ?";
-            String[] selectionArgs = new String[]{ String.valueOf(cutoff) };
-            String sortOrder = "date DESC LIMIT 15";
-
-            cursor = ctx.getContentResolver().query(
-                    inboxUri,
-                    new String[]{"_id", "address", "body", "date"},
-                    selection,
-                    selectionArgs,
-                    sortOrder
-            );
-
-            if (cursor != null && cursor.moveToFirst()) {
-                java.util.regex.Pattern bankPattern = java.util.regex.Pattern.compile(
-                        "(?i)(pago\\s*m[oó]vil|pagom[oó]vil|pagoclave|tpago|banesco|bdv|mercantil|bancamiga|provincial|bnc|bicentenario|bancaribe).*(bs|ref)",
-                        java.util.regex.Pattern.DOTALL
-                );
-                do {
-                    int bodyIdx = cursor.getColumnIndex("body");
-                    int addrIdx = cursor.getColumnIndex("address");
-                    int dateIdx = cursor.getColumnIndex("date");
-                    int idIdx = cursor.getColumnIndex("_id");
-
-                    String body = bodyIdx >= 0 ? cursor.getString(bodyIdx) : null;
-                    String address = addrIdx >= 0 ? cursor.getString(addrIdx) : "SMS";
-                    long date = dateIdx >= 0 ? cursor.getLong(dateIdx) : System.currentTimeMillis();
-                    String id = "inbox_" + (idIdx >= 0 ? cursor.getString(idIdx) : String.valueOf(date));
-
-                    if (body != null && bankPattern.matcher(body).find()) {
-                        boolean already = false;
-                        for (int i = 0; i < outArr.length(); i++) {
-                            JSONObject existing = outArr.optJSONObject(i);
-                            if (existing != null && body.equals(existing.optString("body", ""))) {
-                                already = true;
-                                break;
-                            }
-                        }
-                        if (!already) {
-                            JSONObject item = new JSONObject();
-                            item.put("id", id);
-                            item.put("body", body);
-                            item.put("sender", address == null ? "SMS" : address);
-                            item.put("source", "inbox");
-                            item.put("timestamp", date > 0 ? date : System.currentTimeMillis());
-                            outArr.put(item);
-                        }
-                    }
-                } while (cursor.moveToNext());
-            }
-        } catch (Exception e) {
-            Log.e(TAG, "Error leyendo buzón SMS nativo", e);
-        } finally {
-            if (cursor != null) {
-                try { cursor.close(); } catch (Exception ignored) {}
-            }
-        }
     }
 
     private static void dispatchToWebView(final JSONObject item) {

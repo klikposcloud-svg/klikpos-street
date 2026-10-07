@@ -1,16 +1,14 @@
 {
-  "version": "3.0.13",
+  "version": "3.0.14",
   "releaseDate": "2026-10-07",
-  "title": "KlikPOS Street Suite v3.0.13 - Detector Nativo Pago Móvil SMS, Pack Snacks y Corrección BCV",
+  "title": "KlikPOS Suite v3.0.14 - Certificación 100% Limpia Google Play Protect & Detector Pago Móvil Seguro",
   "notes": [
-    "Detección Nativa de Pago Móvil por SMS (KlikPOS Street): Captura en tiempo real de SMS bancarios (BDV, Banesco, Mercantil Tpago, Bancamiga, Provincial, BNC) con asignación automática de referencia y monto.",
-    "Lectura Inteligente del Buzón SMS del Teléfono: Si el SMS bancario llega antes de abrir el modal o con la aplicación suspendida, la app recupera el pago del buzón automáticamente.",
-    "Soporte de Notificaciones Push Bancarias: Detección alternativa mediante listener de notificaciones de aplicaciones bancarias.",
-    "Controles en Pantalla de Pago Móvil: Indicador de estado del detector nativo en vivo, botón de concesión de permisos y botón 'Sincronizar SMS' manual.",
-    "Nuevo Pack Visual 'Snacks': Paquete oficial de productos y golosinas nacionales publicado en la nube para descarga directa en Inventario.",
-    "Blindaje de Tasa BCV y Alto Contraste: Precisión exacta en consulta de tasa oficial y optimización de contraste en campos de texto de inventario bajo luz solar directa."
+    "Certificación Oficial Limpia ante Google Play Protect: Eliminación total de permisos intrusivos de SMS (RECEIVE_SMS / READ_SMS) que activaban advertencias de instalación en Android.",
+    "Detección Inteligente de Pago Móvil vía Notificaciones del Sistema: Monitoreo 100% seguro y autorizado mediante NotificationListenerService para capturar avisos de bancos venezolanos (BDVApp, Banesco, Mercantil, Bancamiga, Provincial, BNC, etc.) y SMS entrantes sin comprometer la seguridad.",
+    "Autocompletado Inmediato de Pago Móvil: Relleno instantáneo de número de referencia y validación de monto recibido en pantalla de cobro.",
+    "Conservación de Mejoras: Blindaje de compresión de imágenes por hardware, alto contraste visual en inventario bajo luz solar y catálogo de Snacks."
   ],
-  "windowsUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.13/KlikPOS_Desktop_Full_Setup.exe",
-  "androidUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.13/KlikPOS_Movil_Full.apk",
+  "windowsUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.14/KlikPOS_Desktop_Full_Setup.exe",
+  "androidUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.14/KlikPOS_Movil_Full.apk",
   "mandatory": false
 }

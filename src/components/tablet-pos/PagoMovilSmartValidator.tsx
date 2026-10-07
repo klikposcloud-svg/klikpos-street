@@ -703,14 +703,14 @@ export function PagoMovilSmartValidator({
         <div className="space-y-3">
           {/* Tarjeta de Estado del Lector Nativo (Android APK KlikPOS Street) */}
           {isNative ? (
-            nativeStatus?.sms ? (
+            nativeStatus?.notifications ? (
               <div className="flex items-center justify-between p-2.5 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-xs">
                 <div className="flex items-center gap-2 text-emerald-800 dark:text-emerald-300 font-bold">
                   <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
                   <div>
-                    <p className="leading-none text-emerald-900 dark:text-emerald-200">Lector SMS Nativo Activo</p>
+                    <p className="leading-none text-emerald-900 dark:text-emerald-200">Detector Automático Activo</p>
                     <p className="text-[10px] text-emerald-700/80 dark:text-emerald-400 font-normal mt-0.5">
-                      Detecta automáticamente mensajes de bancos venezolanos
+                      Captura pagos y alertas bancarias al instante (100% seguro)
                     </p>
                   </div>
                 </div>
@@ -721,7 +721,7 @@ export function PagoMovilSmartValidator({
                   className="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-[10px] font-black flex items-center gap-1 active:scale-95 cursor-pointer shadow-xs shrink-0"
                 >
                   <RefreshCw className={`w-3 h-3 ${isSyncingNative ? 'animate-spin' : ''}`} />
-                  <span>{isSyncingNative ? 'Leyendo...' : 'Sincronizar SMS'}</span>
+                  <span>{isSyncingNative ? 'Leyendo...' : 'Sincronizar'}</span>
                 </button>
               </div>
             ) : (
@@ -730,10 +730,10 @@ export function PagoMovilSmartValidator({
                   <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
                   <div className="space-y-0.5">
                     <p className="font-bold text-amber-900 dark:text-amber-100">
-                      Permiso de lectura de SMS inactivo
+                      Activa el Acceso a Notificaciones
                     </p>
                     <p className="text-[11px] text-slate-600 dark:text-slate-300">
-                      Para que KlikPOS Street capture los pagos móviles al recibirlos en este celular, activa el permiso.
+                      Para que KlikPOS capture los pagos móviles automáticamente desde tus mensajes o apps de bancos, habilita las notificaciones.
                     </p>
                   </div>
                 </div>
@@ -741,29 +741,24 @@ export function PagoMovilSmartValidator({
                   <button
                     type="button"
                     onClick={async () => {
-                      await requestNativeSmsPermission();
+                      await openNativeNotificationAccess();
                       const st = await getNativePermissionStatus();
                       if (st) setNativeStatus(st);
                     }}
                     className="px-3 py-1.5 bg-amber-600 hover:bg-amber-500 text-white rounded-lg text-[11px] font-black active:scale-95 cursor-pointer shadow-xs"
                   >
-                    Activar Permiso SMS
+                    Habilitar Notificaciones
                   </button>
                   <button
                     type="button"
-                    onClick={() => openNativeAppSettings()}
-                    className="px-2.5 py-1.5 bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200 rounded-lg text-[11px] font-bold cursor-pointer"
-                  >
-                    Ajustes de la App
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleManualSyncNative}
-                    disabled={isSyncingNative}
+                    onClick={async () => {
+                      const st = await getNativePermissionStatus();
+                      if (st) setNativeStatus(st);
+                    }}
                     className="ml-auto px-2 py-1.5 text-slate-600 hover:text-slate-900 text-[10px] font-bold flex items-center gap-1 cursor-pointer"
                   >
                     <RefreshCw className={`w-3 h-3 ${isSyncingNative ? 'animate-spin' : ''}`} />
-                    <span>Reintentar</span>
+                    <span>Verificar</span>
                   </button>
                 </div>
               </div>
