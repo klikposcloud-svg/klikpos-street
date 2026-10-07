@@ -1144,7 +1144,7 @@ export default function TabletMobilePosPage() {
   return (
     <div
       id="klikpos-street-root"
-      className={`w-full w-screen max-w-none min-h-screen min-h-dvh h-screen flex flex-col font-sans select-none overflow-hidden relative m-0 p-0 transition-colors duration-200 ${
+      className={`w-full w-screen max-w-none min-h-screen min-h-dvh h-screen flex flex-col font-sans select-none overflow-hidden relative m-0 p-0 ${
         isLight ? 'text-slate-900 bg-white light-mode' : 'text-slate-100 bg-[#040711] street-pos-dark-canvas dark-mode'
       }`}
       style={{
@@ -3184,6 +3184,7 @@ export default function TabletMobilePosPage() {
                   setPagoMovilRefInput={setPagoMovilRefInput}
                   onAutoConfirmSale={handleFinalizeSale}
                   primaryColor={currentPal.primary}
+                  onOpenConfig={() => setShowPagoMovilModal(true)}
                 />
               )}
 
@@ -3926,25 +3927,31 @@ export default function TabletMobilePosPage() {
                           key={canvas.id}
                           type="button"
                           onClick={() => handleToggleTheme(canvas.id)}
-                          className={`p-2.5 rounded-xl border flex flex-col items-center gap-1.5 transition-all active:scale-95 cursor-pointer ${
-                            isSelected ? 'ring-2 font-black shadow-xs' : 'opacity-90 hover:opacity-100'
+                          data-contrast={canvas.isLight ? 'dark-text' : undefined}
+                          className={`p-2.5 rounded-xl border flex flex-col items-center gap-1.5 active:scale-95 cursor-pointer ${
+                            isSelected ? 'ring-2 ring-amber-400 font-black shadow-md' : 'opacity-90 hover:opacity-100'
                           }`}
                           style={{
                             backgroundColor: canvas.surface,
-                            borderColor: isSelected ? currentPal.primary : isLight ? '#cbd5e1' : canvas.border,
-                            color: canvas.isLight ? '#0f172a' : '#ffffff'
+                            borderColor: isSelected ? '#f59e0b' : canvas.isLight ? '#0f172a' : '#334155',
                           }}
                         >
                           <div className="flex items-center gap-1.5">
                             <span
-                              className="w-3.5 h-3.5 rounded-full border border-black/20 shrink-0"
+                              className="w-3.5 h-3.5 rounded-full border border-black/40 shrink-0"
                               style={{ backgroundColor: canvas.bg }}
                             />
-                            <span className={`text-[10px] font-black truncate max-w-[95px] ${canvas.isLight ? 'text-slate-950' : 'text-white'}`}>
+                            <span
+                              className="text-[11px] font-black truncate max-w-[95px]"
+                              style={{ color: canvas.isLight ? '#020617' : '#ffffff' }}
+                            >
                               {canvas.name}
                             </span>
                           </div>
-                          <span className={`text-[9px] font-bold font-mono ${canvas.isLight ? 'text-slate-700' : 'text-slate-400'}`}>
+                          <span
+                            className="text-[10px] font-bold font-mono"
+                            style={{ color: canvas.isLight ? '#1e293b' : '#94a3b8' }}
+                          >
                             {canvas.isLight ? '☀️ Diurno' : '🌙 Nocturno'}
                           </span>
                         </button>
@@ -3960,15 +3967,17 @@ export default function TabletMobilePosPage() {
                   setIsLeftDrawerOpen(false);
                   setShowStreetAmbassadorModal(true);
                 }}
-                className={`w-full p-2.5 rounded-xl border flex items-center justify-between text-xs font-bold transition-all ${
+                className={`w-full p-2.5 rounded-xl border flex items-center justify-between text-xs font-bold active:scale-98 cursor-pointer ${
                   isLight ? 'bg-emerald-50 border-emerald-300 text-emerald-950' : 'bg-emerald-950/40 border-emerald-800 text-emerald-200'
                 }`}
               >
                 <div className="flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-emerald-600 animate-pulse" />
-                  <span className={isLight ? 'text-emerald-950 font-black' : 'text-emerald-200'}>Planes Comerciales ($15 / $25)</span>
+                  <Sparkles className="w-4 h-4 text-emerald-500 animate-pulse" />
+                  <span className={isLight ? 'text-emerald-950 font-black' : 'text-emerald-100 font-bold'}>Planes Comerciales ($15 / $25)</span>
                 </div>
-                <span className="text-[10px] text-emerald-700 font-mono font-bold bg-emerald-100 px-2 py-0.5 rounded-md">Oferta</span>
+                <span className={`text-[10px] font-mono font-black px-2 py-0.5 rounded-md ${
+                  isLight ? 'bg-emerald-200 text-emerald-950 border border-emerald-400' : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                }`}>Oferta</span>
               </button>
 
               {/* Presentación Comercial para Clientes */}
@@ -3978,15 +3987,17 @@ export default function TabletMobilePosPage() {
                   setIsLeftDrawerOpen(false);
                   setShowPresentationModal(true);
                 }}
-                className={`w-full p-2.5 rounded-xl border flex items-center justify-between text-xs font-bold transition-all cursor-pointer ${
+                className={`w-full p-2.5 rounded-xl border flex items-center justify-between text-xs font-bold active:scale-98 cursor-pointer ${
                   isLight ? 'bg-sky-50 border-sky-300 text-sky-950' : 'bg-sky-950/40 border-sky-800 text-sky-200'
                 }`}
               >
                 <div className="flex items-center gap-2">
-                  <Smartphone className="w-4 h-4 text-sky-600 animate-pulse" />
-                  <span className={isLight ? 'text-sky-950 font-black' : 'text-sky-200'}>Presentación & Tour (Sliders)</span>
+                  <Smartphone className="w-4 h-4 text-sky-500 animate-pulse" />
+                  <span className={isLight ? 'text-sky-950 font-black' : 'text-sky-100 font-bold'}>Presentación & Tour (Sliders)</span>
                 </div>
-                <span className="text-[10px] text-sky-700 font-mono font-bold bg-sky-100 px-2 py-0.5 rounded-md">Ver Demo ➔</span>
+                <span className={`text-[10px] font-mono font-black px-2 py-0.5 rounded-md ${
+                  isLight ? 'bg-sky-200 text-sky-950 border border-sky-400' : 'bg-sky-500/20 text-sky-300 border border-sky-500/30'
+                }`}>Ver Demo ➔</span>
               </button>
 
               {/* Licencia Oficial */}
@@ -3995,20 +4006,22 @@ export default function TabletMobilePosPage() {
                   setIsLeftDrawerOpen(false);
                   setShowLicenseModal(true);
                 }}
-                className={`w-full p-2.5 rounded-xl border flex items-center justify-between text-xs font-bold transition-all ${
-                  isLight ? 'bg-white hover:bg-slate-50 border-slate-300 text-slate-950 shadow-xs' : 'bg-slate-950 border-slate-800 text-slate-200'
+                className={`w-full p-2.5 rounded-xl border flex items-center justify-between text-xs font-bold active:scale-98 cursor-pointer ${
+                  isLight ? 'bg-white hover:bg-slate-50 border-slate-300 text-slate-950 shadow-xs' : 'bg-slate-900 border-slate-800 text-slate-200'
                 }`}
               >
                 <div className="flex items-center gap-2">
-                  <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                  <span className={isLight ? 'text-slate-950 font-black' : 'text-slate-100'}>Activar Clave de Licencia</span>
+                  <ShieldCheck className="w-4 h-4 text-emerald-500" />
+                  <span className={isLight ? 'text-slate-950 font-black' : 'text-slate-100 font-bold'}>Activar Clave de Licencia</span>
                 </div>
-                <span className="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-md font-mono font-bold">Oficial</span>
+                <span className={`text-[10px] px-2 py-0.5 rounded-md font-mono font-black ${
+                  isLight ? 'bg-emerald-200 text-emerald-950 border border-emerald-400' : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                }`}>Oficial</span>
               </button>
             </div>
 
             <div className={`pt-3 border-t text-center text-[10px] font-mono ${isLight ? 'border-slate-200 text-slate-600' : 'border-slate-800 text-slate-400'}`}>
-              KlikPOS v3.0.4 • Blanco & Grafito
+              KlikPOS v3.0.12 • Blanco & Grafito
             </div>
           </aside>
         </div>

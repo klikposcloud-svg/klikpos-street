@@ -65,6 +65,6 @@ master_public_key.txt
 **/android/.idea/
 **/android/*.iml
 **/android/app/*.iml
-dist-apk/dist-apk.lnk
-graphify-out/cache/
+graphify-out/
+temp-releases-sync/
 

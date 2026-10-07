@@ -2746,18 +2746,37 @@ html[data-canvas="obsidian"] #klikpos-street-main,
 }
 
 /* =========================================================================
-   VIEW TRANSITIONS API: TRANSICIÓN DINÁMICA ULTRA FLUIDA (60FPS GPU)
+   CAMBIO DE TEMA INSTANTÁNEO A 0MS (CERO RETARDO / LATENCIA CERO)
    ========================================================================= */
 ::view-transition-old(root),
 ::view-transition-new(root) {
-  animation-duration: 0.15s !important;
-  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1) !important;
+  animation-duration: 0s !important;
 }
 
-/* Transiciones instantáneas y reactivas sin retardo perceptible */
+/* Anular retardos de transición en cambio de tema (0ms inmediato) */
 #klikpos-street-root,
 #klikpos-street-main,
 #klikpos-street-header,
-#klikpos-street-root main > div {
-  transition: background-color 0.12s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.12s cubic-bezier(0.16, 1, 0.3, 1), color 0.12s ease-out;
+#klikpos-street-root main,
+#klikpos-street-root main > div,
+#klikpos-street-root aside,
+#klikpos-street-root nav {
+  transition: none !important;
+}
+
+/* =========================================================================
+   BLINDAJE DE ALTO CONTRASTE: TEXTO OSCURO NÍTIDO SOBRE FONDOS CLAROS/BLANCOS
+   ========================================================================= */
+.pos-dark-text,
+.pos-dark-text *,
+[data-contrast="dark-text"],
+[data-contrast="dark-text"] *,
+html.dark [data-contrast="dark-text"],
+html.dark [data-contrast="dark-text"] * {
+  color: #020617 !important;
+}
+
+html.dark [data-contrast="dark-text"] .text-subtle,
+html.dark [data-contrast="dark-text"] .text-secondary {
+  color: #334155 !important;
 }

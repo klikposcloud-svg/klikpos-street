@@ -31,6 +31,7 @@ interface PagoMovilSmartValidatorProps {
   setPagoMovilRefInput: (val: string) => void;
   onAutoConfirmSale?: () => void;
   primaryColor?: string;
+  onOpenConfig?: () => void;
 }
 
 interface WebhookPaymentItem {
@@ -53,7 +54,8 @@ export function PagoMovilSmartValidator({
   pagoMovilRefInput,
   setPagoMovilRefInput,
   onAutoConfirmSale,
-  primaryColor = '#10b981'
+  primaryColor = '#10b981',
+  onOpenConfig,
 }: PagoMovilSmartValidatorProps) {
   // Pestaña activa: 'qr' (QR Dinámico) | 'live' (Detector Webhook) | 'ocr' (Escanear Recibo)
   const [activeTab, setActiveTab] = useState<'qr' | 'live' | 'ocr'>('qr');
@@ -402,13 +404,46 @@ export function PagoMovilSmartValidator({
         </button>
       </div>
 
-      {/* ─── PESTAÑA 1: QR DINÁMICO INTERBANCARIO (SUDEBAN/BCV) ─── */}
+      {/* ─── PESTAÑA 1: QR OFICIAL DEL BANCO O QR DINÁMICO ─── */}
       {activeTab === 'qr' && (
         <div className="space-y-3">
+          {/* Alerta explicativa si NO hay QR oficial configurado */}
+          {!pagoMovilInfo?.qrImage && (
+            <div className="p-2.5 bg-amber-500/10 border border-amber-500/30 rounded-xl text-[11px] text-amber-800 dark:text-amber-200">
+              <div className="flex items-start justify-between gap-2">
+                <div className="space-y-0.5">
+                  <p className="font-bold flex items-center gap-1.5 text-amber-900 dark:text-amber-100">
+                    <AlertCircle className="w-3.5 h-3.5 shrink-0 text-amber-600 dark:text-amber-400" />
+                    <span>¿BDVApp no autocompleta los datos al escanear?</span>
+                  </p>
+                  <p className="text-[10px] text-slate-600 dark:text-slate-300 leading-snug">
+                    Las aplicaciones bancarias (BDVApp, Banesco, etc.) exigen su <strong>QR Oficial (Suiche 7B)</strong> para cargar cédula y teléfono automáticamente. Sube tu QR oficial en Ajustes o usa los botones de Copia Rápida abajo.
+                  </p>
+                </div>
+                {onOpenConfig && (
+                  <button
+                    type="button"
+                    onClick={onOpenConfig}
+                    className="px-2.5 py-1.5 text-[10px] font-black bg-amber-600 text-white rounded-lg hover:bg-amber-500 whitespace-nowrap shrink-0 shadow-xs active:scale-95 cursor-pointer"
+                  >
+                    Subir QR Oficial
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+
           <div className="flex flex-col sm:flex-row items-center gap-3 p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl">
-            {/* Visualización del QR */}
-            <div className="relative p-2 bg-white rounded-xl shadow-xs border border-slate-200 shrink-0">
-              {qrDataUrl ? (
+            {/* Visualización del QR: Oficial del Banco o Sintetizado */}
+            <div className="relative p-2 bg-white rounded-xl shadow-xs border border-slate-200 shrink-0 text-center">
+              {pagoMovilInfo?.qrImage ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={pagoMovilInfo.qrImage}
+                  alt="QR Oficial Banco"
+                  className="w-36 h-36 object-contain rounded-lg"
+                />
+              ) : qrDataUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={qrDataUrl}
@@ -420,9 +455,26 @@ export function PagoMovilSmartValidator({
                   <RefreshCw className="w-6 h-6 animate-spin text-slate-400" />
                 </div>
               )}
-              <div className="text-[9px] font-black text-center text-slate-600 uppercase mt-1 tracking-tighter">
-                Escanear con App Bancaria
-              </div>
+
+              {pagoMovilInfo?.qrImage ? (
+                <div className="mt-1 flex items-center justify-center gap-1 text-[9px] font-black text-emerald-700 uppercase tracking-tighter">
+                  <ShieldCheck className="w-3 h-3 text-emerald-600" />
+                  <span>QR Oficial {bankCode}</span>
+                  {onOpenConfig && (
+                    <button
+                      type="button"
+                      onClick={onOpenConfig}
+                      className="ml-1 text-[9px] text-slate-500 underline hover:text-slate-800 cursor-pointer"
+                    >
+                      (Cambiar)
+                    </button>
+                  )}
+                </div>
+              ) : (
+                <div className="text-[9px] font-black text-center text-slate-600 uppercase mt-1 tracking-tighter">
+                  Escanear con App Bancaria
+                </div>
+              )}
             </div>
 
             {/* Datos para Copiar / Transferir */}
@@ -435,7 +487,7 @@ export function PagoMovilSmartValidator({
                 <button
                   type="button"
                   onClick={() => handleCopy(safeBank, 'banco')}
-                  className="p-1 hover:bg-slate-200 dark:hover:bg-slate-800 rounded text-slate-500"
+                  className="p-1 hover:bg-slate-200 dark:hover:bg-slate-800 rounded text-slate-500 cursor-pointer"
                   title="Copiar Banco"
                 >
                   {copiedItem === 'banco' ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
@@ -450,7 +502,7 @@ export function PagoMovilSmartValidator({
                 <button
                   type="button"
                   onClick={() => handleCopy(cleanPhone, 'tel')}
-                  className="p-1 hover:bg-slate-200 dark:hover:bg-slate-800 rounded text-slate-500"
+                  className="p-1 hover:bg-slate-200 dark:hover:bg-slate-800 rounded text-slate-500 cursor-pointer"
                   title="Copiar Teléfono"
                 >
                   {copiedItem === 'tel' ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
@@ -465,7 +517,7 @@ export function PagoMovilSmartValidator({
                 <button
                   type="button"
                   onClick={() => handleCopy(cleanDoc, 'doc')}
-                  className="p-1 hover:bg-slate-200 dark:hover:bg-slate-800 rounded text-slate-500"
+                  className="p-1 hover:bg-slate-200 dark:hover:bg-slate-800 rounded text-slate-500 cursor-pointer"
                   title="Copiar Documento"
                 >
                   {copiedItem === 'doc' ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
@@ -480,7 +532,7 @@ export function PagoMovilSmartValidator({
                 <button
                   type="button"
                   onClick={() => handleCopy(safeTotalVES.toFixed(2), 'monto')}
-                  className="p-1 hover:bg-emerald-200 dark:hover:bg-emerald-900 rounded text-emerald-700 dark:text-emerald-400"
+                  className="p-1 hover:bg-emerald-200 dark:hover:bg-emerald-900 rounded text-emerald-700 dark:text-emerald-400 cursor-pointer"
                   title="Copiar Monto"
                 >
                   {copiedItem === 'monto' ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
@@ -494,7 +546,7 @@ export function PagoMovilSmartValidator({
             <button
               type="button"
               onClick={handleShareWhatsApp}
-              className="flex-1 py-2 px-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-black flex items-center justify-center gap-1.5 shadow-xs active:scale-98 transition-all"
+              className="flex-1 py-2 px-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-black flex items-center justify-center gap-1.5 shadow-xs active:scale-98 transition-all cursor-pointer"
             >
               <Share2 className="w-3.5 h-3.5" />
               <span>Enviar Datos por WhatsApp</span>
@@ -505,7 +557,7 @@ export function PagoMovilSmartValidator({
                 const fullText = `PAGO MÓVIL:\nBanco: ${safeBank}\nTel: ${cleanPhone}\nDoc: ${cleanDoc}\nTitular: ${safeOwner}\nMonto: Bs. ${safeTotalVES.toFixed(2)}`;
                 handleCopy(fullText, 'todos');
               }}
-              className="py-2 px-3 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-xl text-xs font-black flex items-center gap-1 transition-all"
+              className="py-2 px-3 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-xl text-xs font-black flex items-center gap-1 transition-all cursor-pointer"
             >
               <Copy className="w-3.5 h-3.5" />
               <span>{copiedItem === 'todos' ? '¡Copiado!' : 'Copiar Todo'}</span>

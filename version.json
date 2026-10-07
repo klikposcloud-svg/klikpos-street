@@ -1,14 +1,15 @@
 {
-  "version": "3.0.11",
+  "version": "3.0.12",
   "releaseDate": "2026-10-07",
-  "title": "KlikPOS Street Suite v3.0.11 - Blindaje Quirúrgico del Módulo de Cobro, QR Sudeban y PosErrorBoundary",
+  "title": "KlikPOS Street Suite v3.0.12 - Soporte Oficial QR Bancario Suiche 7B, Compresión Hardware y Temas 0ms",
   "notes": [
-    "Blindaje Total de la Pasarela de Cobro: Corrección defensiva en el generador de QR Sudeban y Pago Móvil Inteligente con valores seguros ante datos incompletos en el dispositivo.",
-    "Escudo PosErrorBoundary: Protección activa ante excepciones no capturadas en la pantalla de cobro para evitar la pantalla blanca de Next.js.",
-    "Fusión Segura de Configuración Local: Respaldo continuo de datos bancarios de Pago Móvil en memoria local sin sobrescrituras destructivas.",
-    "Visor de Cámara Directo en Pantalla: Captura integrada de productos con cambio de lente y decodificación directa por hardware con bajo uso de memoria RAM (< 1.5MB)."
+    "Soporte de QR Oficial Bancario (Suiche 7B / BDVenlínea): Carga de imagen del código QR oficial emitido por el Banco de Venezuela, Banesco o Bancamiga directamente en la configuración de Pago Móvil, permitiendo que la BDVApp y la banca nacional autocompleten cédula, teléfono y beneficiario al escanear.",
+    "Compresión de QR por Hardware: Subida segura de imágenes de QR procesada por hardware (createImageBitmap, RAM < 1.5MB) con cero desbordamiento de memoria (Anti-OOM).",
+    "Alerta Inteligente de Autocompletado Bancario: Guía interactiva en el POS que explica la necesidad del QR oficial Suiche 7B y ofrece botones de Copia Rápida en 1 toque (Teléfono, Cédula, Monto exacto y Copiar Todo).",
+    "Transición de Tema Instantánea (0ms): Eliminación total del retardo y saltos visuales al alternar entre modo oscuro y diurno en dispositivos móviles y tablets.",
+    "Contraste Visual Blindado: Corrección de botones de alto contraste en el cajón lateral con tipografía oscura pura (#020617) legible bajo luz solar directa."
   ],
-  "windowsUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.11/KlikPOS_Desktop_Full_Setup.exe",
-  "androidUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.11/KlikPOS_Movil_Full.apk",
+  "windowsUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.12/KlikPOS_Desktop_Full_Setup.exe",
+  "androidUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.12/KlikPOS_Movil_Full.apk",
   "mandatory": false
 }

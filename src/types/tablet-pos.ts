@@ -43,6 +43,7 @@ export interface PagoMovilInfo {
   phone: string;
   idDoc: string;
   ownerName: string;
+  qrImage?: string;
 }
 
 export interface MixedPaymentEntry {
