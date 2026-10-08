@@ -68,6 +68,7 @@ export type PaymentMethod =
   | 'cash_ves'
   | 'card_debit'
   | 'zelle'
+  | 'binance'
   | 'mixed';
 
 export type FulfillmentMode = 'local' | 'delivery_paid' | 'delivery_cod';

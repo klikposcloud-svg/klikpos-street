@@ -38,6 +38,7 @@ import {
   Tag,
   Palette,
   ShieldCheck,
+  Gift,
   CheckCircle,
   Building,
   User,
@@ -64,6 +65,7 @@ import {
 import LicenseActivationModal from '@/components/LicenseActivationModal';
 import VisualPacksModal from '@/components/marketplace/VisualPacksModal';
 import StreetAmbassadorLicenseModal from '@/components/licensing/StreetAmbassadorLicenseModal';
+import UnifiedDirectCheckout from '@/components/tablet-pos/UnifiedDirectCheckout';
 import StreetSalesBackupModal from '@/components/tablet-pos/StreetSalesBackupModal';
 import SaleReceiptModal, { orderToSaleTicket, localSaleToTicket } from '@/components/tablet-pos/SaleReceiptModal';
 import { evaluateTrialState, TrialState, registerTrialInstallation, reactivateTrialFor3Hours } from '@/lib/licensing/trial-manager';
@@ -248,6 +250,7 @@ export default function TabletMobilePosPage() {
   const [showQrModal, setShowQrModal] = useState(false);
   const [showVisualPacksModal, setShowVisualPacksModal] = useState(false);
   const [showStreetAmbassadorModal, setShowStreetAmbassadorModal] = useState(false);
+  const [ambassadorInitialTab, setAmbassadorInitialTab] = useState<'plans' | 'ambassador'>('plans');
   const userDismissedTrialModalRef = useRef(false);
   const [showPresentationModal, setShowPresentationModal] = useState(false);
   const [menuQrUrl, setMenuQrUrl] = useState('');
@@ -652,7 +655,6 @@ export default function TabletMobilePosPage() {
           setShowStreetAmbassadorModal(true);
         }
       } else {
-        setShowStreetAmbassadorModal(false);
         userDismissedTrialModalRef.current = false;
       }
     };
@@ -839,6 +841,7 @@ export default function TabletMobilePosPage() {
     cashVESReceived, setCashVESReceived,
     cardVoucherRef, setCardVoucherRef,
     zelleConfirmation, setZelleConfirmation,
+    binanceConfirmation, setBinanceConfirmation,
     copiedPmAlert,
     fulfillmentMode, setFulfillmentMode,
     selectedDriverId, setSelectedDriverId,
@@ -2952,922 +2955,37 @@ export default function TabletMobilePosPage() {
         {/* VISTA 5: PASARELA DE COBRO COMPLETA (CLIENTE + PAGO MÓVIL + VUELTO)      */}
         {/* ======================================================================= */}
         {activeTab === 'cobro' && (
-          <PosErrorBoundary fallbackTitle="Pasarela de Cobro KlikPOS" onReset={() => setActiveTab('menu')}>
-            <div className="max-w-xl mx-auto w-full space-y-4 flex-1 min-h-0 overflow-y-auto pb-44 px-2 scrollbar-none">
-              {/* Header del Totalizador con Calculadora de Vuelto en Vivo */}
-              <div className={`border rounded-3xl p-4 sm:p-5 text-center shadow-lg transition-all ${
-                isLight ? 'bg-white border-slate-200' : 'bg-slate-900 border-slate-800'
-              }`}>
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">
-                  Total a Liquidar ({totalItems} productos)
-                </span>
-                <div className="text-3xl sm:text-4xl font-black font-mono mt-1" style={{ color: currentPal.primary }}>
-                  ${(totalUSD ?? 0).toFixed(2)} USD
-                </div>
-                <div className="text-xs sm:text-sm font-mono font-bold text-slate-600 dark:text-slate-300 mt-0.5">
-                  Bs. {(totalVES ?? 0).toFixed(2)} (Tasa BCV: {(bcvRate ?? 871.37).toFixed(2)})
-                </div>
-
-              {/* CALCULADORA RÁPIDA DE VUELTO EN VIVO (VISIBILIDAD INMEDIATA) */}
-              <div className="mt-3 pt-3 border-t border-slate-200 dark:border-slate-800 text-left space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5 text-amber-500">
-                    <CircleDollarSign className="w-3.5 h-3.5 text-amber-400" />
-                    <span>Calculadora Rápida de Vuelto:</span>
-                  </span>
-                  <span className="text-[10px] font-mono text-slate-400">
-                    Toca con cuánto paga el cliente
-                  </span>
-                </div>
-
-                {/* Billetes de Dólares Rápidos */}
-                <div className="flex flex-wrap gap-1.5 items-center">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSelectedPaymentMethod('cash_usd');
-                      setCashUSDReceived(totalUSD);
-                    }}
-                    className={`px-2.5 py-1 rounded-lg text-xs font-black font-mono transition-all active:scale-95 cursor-pointer ${
-                      selectedPaymentMethod === 'cash_usd' && Math.abs(cashUSDReceived - totalUSD) < 0.01
-                        ? 'bg-emerald-500 text-slate-950 font-black shadow-xs'
-                        : isLight ? 'bg-slate-100 hover:bg-slate-200 text-slate-800' : 'bg-slate-800 hover:bg-slate-700 text-slate-200'
-                    }`}
-                  >
-                    Exacto (${totalUSD.toFixed(2)})
-                  </button>
-
-                  {[10, 20, 50, 100]
-                    .filter((b) => b >= Math.floor(totalUSD))
-                    .concat(
-                      [5, 10, 20, 50, 100].filter((b) => b < Math.floor(totalUSD)).slice(-1)
-                    )
-                    .filter((v, i, a) => a.indexOf(v) === i)
-                    .sort((a, b) => a - b)
-                    .map((bill) => (
-                      <button
-                        key={bill}
-                        type="button"
-                        onClick={() => {
-                          setSelectedPaymentMethod('cash_usd');
-                          setCashUSDReceived(bill);
-                        }}
-                        className={`px-2.5 py-1 rounded-lg text-xs font-black font-mono transition-all active:scale-95 cursor-pointer ${
-                          selectedPaymentMethod === 'cash_usd' && Math.abs(cashUSDReceived - bill) < 0.01
-                            ? 'bg-amber-500 text-slate-950 font-black shadow-xs'
-                            : isLight ? 'bg-slate-100 hover:bg-slate-200 text-slate-800' : 'bg-slate-800 hover:bg-slate-700 text-slate-200'
-                        }`}
-                      >
-                        ${bill}
-                      </button>
-                    ))}
-
-                  {/* Botón rápido Bolívares */}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSelectedPaymentMethod('cash_ves');
-                      setCashVESReceived(Math.ceil(totalVES));
-                    }}
-                    className={`px-2.5 py-1 rounded-lg text-xs font-black font-mono transition-all active:scale-95 cursor-pointer ${
-                      selectedPaymentMethod === 'cash_ves'
-                        ? 'bg-sky-500 text-slate-950 font-black shadow-xs'
-                        : isLight ? 'bg-sky-50 hover:bg-sky-100 text-sky-800 border border-sky-200' : 'bg-sky-950/60 hover:bg-sky-900/60 text-sky-300 border border-sky-800'
-                    }`}
-                  >
-                    En Bs.
-                  </button>
-                </div>
-
-                {/* CAJA DE VUELTO CALCULADO EN VIVO */}
-                {selectedPaymentMethod === 'cash_usd' && cashUSDReceived > 0 && (
-                  <div className={`p-2.5 rounded-xl border flex items-center justify-between transition-all ${
-                    vueltoUSD > 0.001
-                      ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-400 shadow-sm'
-                      : cashUSDReceived >= totalUSD - 0.01
-                      ? 'bg-sky-500/10 border-sky-500/30 text-sky-400'
-                      : 'bg-amber-500/10 border-amber-500/30 text-amber-400'
-                  }`}>
-                    <div className="flex items-center gap-2">
-                      <span className={`w-2.5 h-2.5 rounded-full ${vueltoUSD > 0.001 ? 'bg-emerald-400 animate-pulse' : 'bg-sky-400'}`} />
-                      <span className="text-xs font-black">
-                        {vueltoUSD > 0.001
-                          ? '💵 Vuelto a Entregar al Cliente:'
-                          : cashUSDReceived >= totalUSD - 0.01
-                          ? '✓ Pago Exacto (Sin Vuelto)'
-                          : '⚠️ Falta por pagar:'}
-                      </span>
-                    </div>
-                    <div className="text-right">
-                      <span className="text-sm font-mono font-black block">
-                        {vueltoUSD > 0.001
-                          ? `$${vueltoUSD.toFixed(2)} USD`
-                          : cashUSDReceived >= totalUSD - 0.01
-                          ? '$0.00 USD'
-                          : `$${(totalUSD - cashUSDReceived).toFixed(2)} USD`}
-                      </span>
-                      <span className="text-[10px] font-mono opacity-80 block">
-                        {vueltoUSD > 0.001
-                          ? `ó Bs. ${vueltoVESfromUSD.toFixed(2)}`
-                          : cashUSDReceived >= totalUSD - 0.01
-                          ? 'Bs. 0.00'
-                          : `ó Bs. ${((totalUSD - cashUSDReceived) * bcvRate).toFixed(2)}`}
-                      </span>
-                    </div>
-                  </div>
-                )}
-
-                {selectedPaymentMethod === 'cash_ves' && cashVESReceived > 0 && (
-                  <div className={`p-2.5 rounded-xl border flex items-center justify-between transition-all ${
-                    vueltoVESfromVES > 0.05
-                      ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-400 shadow-sm'
-                      : cashVESReceived >= totalVES - 0.05
-                      ? 'bg-sky-500/10 border-sky-500/30 text-sky-400'
-                      : 'bg-amber-500/10 border-amber-500/30 text-amber-400'
-                  }`}>
-                    <div className="flex items-center gap-2">
-                      <span className={`w-2.5 h-2.5 rounded-full ${vueltoVESfromVES > 0.05 ? 'bg-emerald-400 animate-pulse' : 'bg-sky-400'}`} />
-                      <span className="text-xs font-black">
-                        {vueltoVESfromVES > 0.05
-                          ? '💵 Vuelto a Entregar en Bolívares:'
-                          : cashVESReceived >= totalVES - 0.05
-                          ? '✓ Pago Exacto (Sin Vuelto)'
-                          : '⚠️ Falta por recibir:'}
-                      </span>
-                    </div>
-                    <div className="text-right">
-                      <span className="text-sm font-mono font-black block">
-                        {vueltoVESfromVES > 0.05
-                          ? `Bs. ${vueltoVESfromVES.toFixed(2)}`
-                          : cashVESReceived >= totalVES - 0.05
-                          ? 'Bs. 0.00'
-                          : `Bs. ${(totalVES - cashVESReceived).toFixed(2)}`}
-                      </span>
-                      <span className="text-[10px] font-mono opacity-80 block">
-                        {vueltoVESfromVES > 0.05 && `ó $${vueltoUSDfromVES.toFixed(2)} USD`}
-                      </span>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* SECCIÓN 1: MODALIDAD DE DESPACHO Y ENTREGA */}
-            <div className={`border rounded-2xl p-4 space-y-3 shadow-xs ${
-              isLight ? 'bg-white border-slate-200' : 'bg-slate-900 border-slate-800'
-            }`}>
-              <span className={`text-xs font-black uppercase tracking-wider block ${
-                isLight ? 'text-slate-900' : 'text-white'
-              }`}>
-                Modalidad de Entrega / Despacho:
-              </span>
-
-              <div className="grid grid-cols-3 gap-2">
-                {[
-                  { id: 'local', label: 'En Local / Mesa', desc: 'Consumo en salón o mostrador', icon: Store, color: 'text-emerald-500' },
-                  { id: 'delivery_paid', label: 'Delivery Pagado', desc: 'Cobrado previo al despacho', icon: Bike, color: 'text-sky-500' },
-                  { id: 'delivery_cod', label: 'Cobro en Destino', desc: 'El chofer cobra al entregar', icon: Truck, color: 'text-amber-500' },
-                ].map((mode) => {
-                  const Icon = mode.icon;
-                  const isSelected = fulfillmentMode === mode.id;
-                  return (
-                    <button
-                      key={mode.id}
-                      type="button"
-                      onClick={() => setFulfillmentMode(mode.id as any)}
-                      className={`p-2.5 rounded-xl border flex flex-col items-center text-center gap-1 transition-all active:scale-95 cursor-pointer ${
-                        isSelected
-                          ? isLight ? 'border-2 bg-slate-50 shadow-sm' : 'border-2 bg-[#0f172a] shadow-md'
-                          : isLight ? 'bg-slate-50/60 hover:bg-slate-100 border-slate-200' : 'bg-slate-950 hover:bg-slate-850 border-slate-800'
-                      }`}
-                      style={{
-                        borderColor: isSelected ? currentPal.primary : undefined,
-                      }}
-                    >
-                      <Icon className={`w-5 h-5 ${mode.color}`} />
-                      <span className={`text-[11px] font-black leading-tight ${isLight ? 'text-slate-900' : 'text-white'}`}>
-                        {mode.label}
-                      </span>
-                      <span className={`text-[9px] leading-tight ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
-                        {mode.desc}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Parámetros de Delivery si aplica */}
-              {fulfillmentMode !== 'local' && (
-                <div className={`p-3 rounded-xl border space-y-2.5 mt-2 ${
-                  isLight ? 'bg-slate-50 border-slate-200' : 'border-slate-800 bg-slate-950/80'
-                }`}>
-                  <div>
-                    <label className={`text-[10px] font-bold block mb-1 ${isLight ? 'text-slate-700' : 'text-slate-400'}`}>
-                      Asignar Motorizado / Chofer:
-                    </label>
-                    <select
-                      value={selectedDriverId}
-                      onChange={(e) => setSelectedDriverId(e.target.value)}
-                      className={`w-full px-3 py-2 rounded-xl text-xs font-bold border outline-none ${
-                        isLight ? 'bg-white border-slate-300 text-slate-900' : 'bg-slate-900 border-slate-700 text-white'
-                      }`}
-                    >
-                      <option value="">Por Asignar / Chofer Particular</option>
-                      {drivers.map((d) => (
-                        <option key={d.id} value={d.id}>
-                          {d.name} ({d.vehicle}) - {d.status}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className={`text-[10px] font-bold block mb-1 ${isLight ? 'text-slate-700' : 'text-slate-400'}`}>
-                      Dirección o Punto de Referencia:
-                    </label>
-                    <input
-                      type="text"
-                      placeholder={selectedCustomer?.address || 'Ej. Urb. Los Rosales, Calle 3, Casa #14'}
-                      value={deliveryAddressInput}
-                      onChange={(e) => setDeliveryAddressInput(e.target.value)}
-                      className={`w-full px-3 py-2 rounded-xl text-xs font-medium border outline-none ${
-                        isLight ? 'bg-white border-slate-300 text-slate-900' : 'bg-slate-900 border-slate-700 text-white'
-                      }`}
-                    />
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* SECCIÓN 2: DATOS DEL CLIENTE / FACTURACIÓN */}
-            <div className={`border rounded-2xl p-4 space-y-2.5 shadow-xs ${
-              isLight ? 'bg-white border-slate-200' : 'bg-slate-900 border-slate-800'
-            }`}>
-              <div className="flex items-center justify-between">
-                <div className={`flex items-center gap-1.5 text-xs font-black ${isLight ? 'text-slate-900' : 'text-white'}`}>
-                  <User className="w-4 h-4" style={{ color: currentPal.primary }} />
-                  <span>Datos del Cliente / Facturación</span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setShowCustomerModal(true)}
-                  className="text-xs font-black hover:underline flex items-center gap-1 active:scale-95 cursor-pointer"
-                  style={{ color: currentPal.primary }}
-                >
-                  <UserPlus className="w-3.5 h-3.5" />
-                  <span>Cambiar / + Nuevo</span>
-                </button>
-              </div>
-
-              <div className={`p-3 rounded-xl border flex items-center justify-between ${
-                isLight ? 'bg-slate-50 border-slate-200' : 'bg-slate-950 border-slate-800'
-              }`}>
-                <div>
-                  <h4 className={`text-xs font-black ${isLight ? 'text-slate-900' : 'text-white'}`}>
-                    {selectedCustomer?.name || 'Cliente Mostrador'}
-                  </h4>
-                  <div className={`flex gap-2 text-[10px] font-mono mt-0.5 ${isLight ? 'text-slate-600' : 'text-slate-500'}`}>
-                    <span>Doc: <b>{selectedCustomer?.docId || 'V-00000000'}</b></span>
-                    {selectedCustomer?.phone && <span>Tel: {selectedCustomer.phone}</span>}
-                  </div>
-                </div>
-                <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
-                  isLight ? 'bg-slate-200 text-slate-800' : 'bg-slate-800 text-slate-300'
-                }`}>
-                  Seleccionado
-                </span>
-              </div>
-            </div>
-
-            {/* SECCIÓN 3: SELECTOR DE MÉTODO DE PAGO */}
-            <div className={`border rounded-2xl p-4 space-y-3 shadow-xs ${
-              isLight ? 'bg-white border-slate-200' : 'bg-slate-900 border-slate-800'
-            }`}>
-              <div className="flex items-center justify-between">
-                <span className={`text-xs font-black uppercase tracking-wider block ${
-                  isLight ? 'text-slate-900' : 'text-white'
-                }`}>
-                  {fulfillmentMode === 'delivery_cod' ? 'Método Acordado en Destino:' : 'Selecciona Método de Pago:'}
-                </span>
-                {fulfillmentMode === 'delivery_cod' && (
-                  <span className="text-[9px] font-mono font-bold text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded">
-                    Por Cobrar en Destino
-                  </span>
-                )}
-              </div>
-
-              <div className="grid grid-cols-3 gap-2">
-                {[
-                  { id: 'pago_movil', label: 'Pago Móvil', icon: Phone, color: 'text-emerald-500' },
-                  { id: 'cash_usd', label: 'Efectivo $', icon: CircleDollarSign, color: 'text-amber-500' },
-                  { id: 'cash_ves', label: 'Efectivo Bs', icon: Wallet, color: 'text-sky-500' },
-                  { id: 'card_debit', label: 'Punto / Débito', icon: CreditCard, color: 'text-purple-500' },
-                  { id: 'zelle', label: 'Zelle', icon: Store, color: 'text-indigo-500' },
-                  { id: 'mixed', label: 'Pago Mixto', icon: ArrowLeftRight, color: 'text-teal-400' },
-                ].map((m) => {
-                  const Icon = m.icon;
-                  const isSelected = selectedPaymentMethod === m.id;
-                  return (
-                    <button
-                      key={m.id}
-                      type="button"
-                      onClick={() => setSelectedPaymentMethod(m.id as any)}
-                      className={`p-2.5 rounded-xl border flex flex-col items-center gap-1 transition-all active:scale-95 ${
-                        isSelected
-                          ? 'border-2 shadow-xs'
-                          : isLight ? 'bg-slate-50 hover:bg-slate-100 border-slate-200' : 'bg-slate-950 hover:bg-slate-850 border-slate-800'
-                      }`}
-                      style={{
-                        borderColor: isSelected ? currentPal.primary : undefined,
-                        backgroundColor: isSelected ? (isLight ? '#ffffff' : '#0f172a') : undefined
-                      }}
-                    >
-                      <Icon className={`w-5 h-5 ${m.color}`} />
-                      <span className="text-[11px] font-black" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
-                        {m.label}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* FORMULARIO DINÁMICO POR MÉTODO DE PAGO */}
-              {/* 1. PAGO MÓVIL CON VALIDACIÓN INTELIGENTE */}
-              {selectedPaymentMethod === 'pago_movil' && (
-                <PagoMovilSmartValidator
-                  isLight={isLight}
-                  totalVES={totalVES}
-                  totalUSD={totalUSD}
-                  bcvRate={bcvRate}
-                  pagoMovilInfo={pagoMovilInfo}
-                  pagoMovilRefInput={pagoMovilRefInput}
-                  setPagoMovilRefInput={setPagoMovilRefInput}
-                  onAutoConfirmSale={handleFinalizeSale}
-                  primaryColor={currentPal.primary}
-                  onOpenConfig={() => setShowPagoMovilModal(true)}
-                />
-              )}
-
-              {/* 2. EFECTIVO USD CON VUELTO EN VIVO */}
-              {selectedPaymentMethod === 'cash_usd' && (
-                <div className={`p-3.5 rounded-xl border space-y-3 ${
-                  isLight ? 'bg-slate-50 border-slate-200' : 'bg-slate-950 border-slate-800'
-                }`}>
-                  <div>
-                    <label className="block text-xs font-black mb-1" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
-                      Monto Recibido en Dólares ($):
-                    </label>
-                    <input
-                      type="text"
-                      inputMode="decimal"
-                      value={cashUSDReceived > 0 ? String(cashUSDReceived) : ''}
-                      onChange={(e) => {
-                        const clean = e.target.value.replace(',', '.');
-                        const parsed = parseFloat(clean);
-                        setCashUSDReceived(isNaN(parsed) ? 0 : parsed);
-                      }}
-                      placeholder={`Mínimo: $${totalUSD.toFixed(2)}`}
-                      className={`w-full px-3 py-2 rounded-xl text-sm font-mono font-black border outline-none ${
-                        isLight ? 'bg-white border-slate-300 text-slate-900 focus:border-slate-800' : 'bg-slate-900 border-slate-700 text-white'
-                      }`}
-                    />
-                  </div>
-
-                  {/* Alerta en Vivo si Falta Dinero */}
-                  {cashUSDReceived > 0 && cashUSDReceived < totalUSD - 0.01 && (
-                    <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-center gap-2">
-                      <AlertCircle className="w-4 h-4 text-amber-400 shrink-0" />
-                      <span>Falta por recibir: <b>${(totalUSD - cashUSDReceived).toFixed(2)} USD</b> (Bs. {((totalUSD - cashUSDReceived) * bcvRate).toFixed(2)})</span>
-                    </div>
-                  )}
-
-                  {/* Botones de Efectivo Rápido en Dólares */}
-                  <div className="flex flex-wrap gap-1.5 items-center">
-                    <button
-                      type="button"
-                      onClick={() => setCashUSDReceived(totalUSD)}
-                      className={`px-2.5 py-1 rounded-lg text-xs font-bold active:scale-95 cursor-pointer ${
-                        Math.abs(cashUSDReceived - totalUSD) < 0.01
-                          ? 'bg-emerald-500 text-slate-950 font-black'
-                          : 'bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200'
-                      }`}
-                    >
-                      Exacto (${totalUSD.toFixed(2)})
-                    </button>
-                    {[5, 10, 20, 50, 100].map((val) => (
-                      <button
-                        key={val}
-                        type="button"
-                        onClick={() => setCashUSDReceived(val)}
-                        className={`px-2.5 py-1 rounded-lg text-xs font-bold active:scale-95 cursor-pointer ${
-                          Math.abs(cashUSDReceived - val) < 0.01
-                            ? 'bg-amber-500 text-slate-950 font-black'
-                            : 'bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200'
-                        }`}
-                      >
-                        ${val}
-                      </button>
-                    ))}
-                  </div>
-
-                  {/* Cálculo de Vuelto en Vivo */}
-                  <div className={`p-3 rounded-xl border flex items-center justify-between ${
-                    vueltoUSD > 0.001 ? 'bg-emerald-500/15 border-emerald-500/40' : 'bg-slate-200/50 dark:bg-slate-900 border-slate-200 dark:border-slate-800'
-                  }`}>
-                    <span className="text-xs font-black flex items-center gap-1.5" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
-                      <CircleDollarSign className={`w-4 h-4 ${vueltoUSD > 0.001 ? 'text-emerald-400' : 'text-slate-400'}`} />
-                      <span>{vueltoUSD > 0.001 ? 'Vuelto / Cambio a Entregar:' : 'Vuelto (Sin cambio pendiente):'}</span>
-                    </span>
-                    <div className="text-right">
-                      <span className="text-base font-mono font-black text-emerald-600 dark:text-emerald-400 block">
-                        ${vueltoUSD.toFixed(2)} USD
-                      </span>
-                      <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400">
-                        ó Bs. {vueltoVESfromUSD.toFixed(2)}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* 3. EFECTIVO BOLÍVARES */}
-              {selectedPaymentMethod === 'cash_ves' && (
-                <div className={`p-3.5 rounded-xl border space-y-3 ${
-                  isLight ? 'bg-slate-50 border-slate-200' : 'bg-slate-950 border-slate-800'
-                }`}>
-                  <div>
-                    <label className="block text-xs font-black mb-1" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
-                      Monto Recibido en Bolívares (Bs.):
-                    </label>
-                    <input
-                      type="text"
-                      inputMode="decimal"
-                      value={cashVESReceived > 0 ? String(cashVESReceived) : ''}
-                      onChange={(e) => {
-                        const clean = e.target.value.replace(',', '.');
-                        const parsed = parseFloat(clean);
-                        setCashVESReceived(isNaN(parsed) ? 0 : parsed);
-                      }}
-                      placeholder={`Monto total: Bs. ${totalVES.toFixed(2)}`}
-                      className={`w-full px-3 py-2 rounded-xl text-sm font-mono font-black border outline-none ${
-                        isLight ? 'bg-white border-slate-300 text-slate-900 focus:border-slate-800' : 'bg-slate-900 border-slate-700 text-white'
-                      }`}
-                    />
-                  </div>
-
-                  {/* Alerta en Vivo si Falta Dinero */}
-                  {cashVESReceived > 0 && cashVESReceived < totalVES - 0.05 && (
-                    <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-center gap-2">
-                      <AlertCircle className="w-4 h-4 text-amber-400 shrink-0" />
-                      <span>Falta por recibir: <b>Bs. {(totalVES - cashVESReceived).toFixed(2)}</b> ($ {bcvRate > 0 ? ((totalVES - cashVESReceived) / bcvRate).toFixed(2) : '0.00'})</span>
-                    </div>
-                  )}
-
-                  {/* Botones de Efectivo Rápido en Bolívares */}
-                  <div className="flex flex-wrap gap-1.5 items-center">
-                    <button
-                      type="button"
-                      onClick={() => setCashVESReceived(Math.ceil(totalVES))}
-                      className={`px-2.5 py-1 rounded-lg text-xs font-bold active:scale-95 cursor-pointer ${
-                        Math.abs(cashVESReceived - Math.ceil(totalVES)) < 0.05
-                          ? 'bg-emerald-500 text-slate-950 font-black'
-                          : 'bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200'
-                      }`}
-                    >
-                      Exacto (Bs. {Math.ceil(totalVES).toLocaleString('es-VE')})
-                    </button>
-                    {[
-                      Math.ceil(totalVES / 500) * 500,
-                      Math.ceil(totalVES / 1000) * 1000,
-                      Math.ceil(totalVES / 5000) * 5000,
-                      Math.ceil(totalVES / 10000) * 10000,
-                    ]
-                      .filter((v, i, a) => v >= totalVES && a.indexOf(v) === i)
-                      .slice(0, 4)
-                      .map((val) => (
-                        <button
-                          key={val}
-                          type="button"
-                          onClick={() => setCashVESReceived(val)}
-                          className={`px-2.5 py-1 rounded-lg text-xs font-bold active:scale-95 cursor-pointer ${
-                            Math.abs(cashVESReceived - val) < 0.05
-                              ? 'bg-sky-500 text-slate-950 font-black'
-                              : 'bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200'
-                          }`}
-                        >
-                          Bs. {val.toLocaleString('es-VE')}
-                        </button>
-                      ))}
-                  </div>
-
-                  <div className={`p-3 rounded-xl border flex items-center justify-between ${
-                    vueltoVESfromVES > 0.05 ? 'bg-emerald-500/15 border-emerald-500/40' : 'bg-slate-200/50 dark:bg-slate-900 border-slate-200 dark:border-slate-800'
-                  }`}>
-                    <span className="text-xs font-black flex items-center gap-1.5" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
-                      <CircleDollarSign className={`w-4 h-4 ${vueltoVESfromVES > 0.05 ? 'text-emerald-400' : 'text-slate-400'}`} />
-                      <span>{vueltoVESfromVES > 0.05 ? 'Vuelto en Bolívares:' : 'Vuelto (Sin cambio pendiente):'}</span>
-                    </span>
-                    <div className="text-right">
-                      <span className="text-base font-mono font-black text-emerald-600 dark:text-emerald-400 block">
-                        Bs. {vueltoVESfromVES.toFixed(2)}
-                      </span>
-                      <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400">
-                        ó ${vueltoUSDfromVES.toFixed(2)} USD
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* 4. PUNTO DE VENTA / TARJETA */}
-              {selectedPaymentMethod === 'card_debit' && (
-                <div className={`p-3.5 rounded-xl border space-y-2 ${
-                  isLight ? 'bg-slate-50 border-slate-200' : 'bg-slate-950 border-slate-800'
-                }`}>
-                  <label className="block text-xs font-black" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
-                    N° Aprobación / Lote / Voucher:
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Ej: APROB-81726"
-                    value={cardVoucherRef}
-                    onChange={(e) => setCardVoucherRef(e.target.value)}
-                    className={`w-full px-3 py-2 rounded-xl text-xs font-mono font-bold border outline-none ${
-                      isLight ? 'bg-white border-slate-300 text-slate-900 focus:border-slate-800' : 'bg-slate-900 border-slate-700 text-white'
-                    }`}
-                  />
-                </div>
-              )}
-
-              {/* 5. ZELLE */}
-              {selectedPaymentMethod === 'zelle' && (
-                <div className={`p-3.5 rounded-xl border space-y-2 ${
-                  isLight ? 'bg-slate-50 border-slate-200' : 'bg-slate-950 border-slate-800'
-                }`}>
-                  <label className="block text-xs font-black" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
-                    Titular o Confirmación Zelle:
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Nombre del emisor o ID de transacción"
-                    value={zelleConfirmation}
-                    onChange={(e) => setZelleConfirmation(e.target.value)}
-                    className={`w-full px-3 py-2 rounded-xl text-xs font-mono font-bold border outline-none ${
-                      isLight ? 'bg-white border-slate-300 text-slate-900 focus:border-slate-800' : 'bg-slate-900 border-slate-700 text-white'
-                    }`}
-                  />
-                </div>
-              )}
-
-              {/* 6. PAGO MIXTO / MULTIMONEDA (COMBINADO CON CÁLCULO EN VIVO Y VALIDACIÓN ESTRICTA) */}
-              {selectedPaymentMethod === 'mixed' && (
-                <div className={`p-4 rounded-2xl border space-y-4 ${
-                  isLight ? 'bg-slate-50 border-slate-200 shadow-xs' : 'bg-slate-950/80 border-slate-800'
-                }`}>
-                  {/* Balance en Vivo de Pago Mixto */}
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className={`p-3 rounded-xl border ${
-                      isLight ? 'bg-white border-slate-200 shadow-xs' : 'bg-slate-900 border-slate-800'
-                    }`}>
-                      <span className={`text-[10px] font-bold uppercase tracking-wider block ${
-                        isLight ? 'text-slate-600' : 'text-slate-400'
-                      }`}>
-                        Total a Cubrir
-                      </span>
-                      <div className={`text-base font-black font-mono ${
-                        isLight ? 'text-slate-950' : 'text-white'
-                      }`}>
-                        ${totalUSD.toFixed(2)} USD
-                      </div>
-                      <span className={`text-[10px] font-mono ${
-                        isLight ? 'text-slate-500' : 'text-slate-400'
-                      }`}>
-                        Bs. {totalVES.toFixed(2)}
-                      </span>
-                    </div>
-
-                    <div className={`p-3 rounded-xl border ${
-                      isLight ? 'bg-white border-slate-200 shadow-xs' : 'bg-slate-900 border-slate-800'
-                    }`}>
-                      <span className={`text-[10px] font-bold uppercase tracking-wider block ${
-                        isLight ? 'text-emerald-700' : 'text-slate-400'
-                      }`}>
-                        Total Recibido
-                      </span>
-                      <div className={`text-base font-black font-mono ${
-                        isLight ? 'text-emerald-700' : 'text-emerald-400'
-                      }`}>
-                        ${mixedPaidUSD.toFixed(2)} USD
-                      </div>
-                      <span className={`text-[10px] font-mono ${
-                        isLight ? 'text-emerald-600' : 'text-emerald-300'
-                      }`}>
-                        Bs. {mixedPaidVES.toFixed(2)}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Estado en Vivo: Faltante o Vuelto */}
-                  {!isMixedComplete ? (
-                    <div className={`p-3 rounded-xl border flex items-center justify-between ${
-                      isLight ? 'bg-amber-50 border-amber-300 text-amber-950 shadow-xs' : 'bg-amber-500/10 border-amber-500/30 text-amber-300'
-                    }`}>
-                      <div className="flex items-center gap-2">
-                        <AlertCircle className={`w-5 h-5 shrink-0 ${isLight ? 'text-amber-700' : 'text-amber-400'}`} />
-                        <div>
-                          <strong className={`text-xs font-black block ${isLight ? 'text-amber-950' : 'text-amber-300'}`}>Falta por Completar:</strong>
-                          <span className={`text-[11px] font-medium ${isLight ? 'text-amber-900' : 'text-amber-200'}`}>El botón de cobro se habilitará al cubrir el monto</span>
-                        </div>
-                      </div>
-                      <div className="text-right font-mono">
-                        <div className={`text-sm font-black ${isLight ? 'text-amber-900' : 'text-amber-400'}`}>
-                          ${mixedPendingUSD.toFixed(2)} USD
-                        </div>
-                        <div className={`text-[10px] font-bold ${isLight ? 'text-amber-800' : 'text-amber-300'}`}>
-                          Bs. {mixedPendingVES.toFixed(2)}
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className={`p-3 rounded-xl border flex items-center justify-between ${
-                      isLight ? 'bg-emerald-50 border-emerald-300 text-emerald-950 shadow-xs' : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
-                    }`}>
-                      <div className="flex items-center gap-2">
-                        <CheckCircle2 className={`w-5 h-5 shrink-0 ${isLight ? 'text-emerald-700' : 'text-emerald-400'}`} />
-                        <div>
-                          <strong className={`text-xs font-black block ${isLight ? 'text-emerald-950' : 'text-emerald-300'}`}>¡Monto Total Cubierto!</strong>
-                          <span className={`text-[11px] font-medium ${isLight ? 'text-emerald-900' : 'text-emerald-200'}`}>
-                            {mixedChangeUSD > 0.01 ? 'Vuelto / Cambio a Entregar:' : 'Pago exacto completado'}
-                          </span>
-                        </div>
-                      </div>
-                      {mixedChangeUSD > 0.01 && (
-                        <div className="text-right font-mono">
-                          <div className={`text-sm font-black ${isLight ? 'text-emerald-800' : 'text-emerald-400'}`}>
-                            ${mixedChangeUSD.toFixed(2)} USD
-                          </div>
-                          <div className={`text-[10px] font-bold ${isLight ? 'text-emerald-700' : 'text-emerald-300'}`}>
-                            Bs. {mixedChangeVES.toFixed(2)}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Formulario para Agregar Abono / Pago Parcial */}
-                  <div className={`p-3.5 rounded-xl border space-y-3 ${
-                    isLight ? 'bg-white border-slate-300 shadow-sm' : 'bg-slate-900/90 border-slate-800'
-                  }`}>
-                    <span className={`text-xs font-black uppercase tracking-wider block ${
-                      isLight ? 'text-slate-900' : 'text-slate-300'
-                    }`}>
-                      + Agregar Abono a esta Cuenta:
-                    </span>
-
-                    {/* Selector de Método para el Abono */}
-                    <div className="grid grid-cols-3 sm:grid-cols-5 gap-1.5">
-                      {[
-                        { id: 'cash_usd', label: 'Efectivo $', cur: 'USD' as const },
-                        { id: 'cash_ves', label: 'Efectivo Bs', cur: 'VES' as const },
-                        { id: 'pago_movil', label: 'Pago Móvil', cur: 'VES' as const },
-                        { id: 'card_debit', label: 'Punto POS', cur: 'VES' as const },
-                        { id: 'zelle', label: 'Zelle', cur: 'USD' as const },
-                      ].map((item) => (
-                        <button
-                          key={item.id}
-                          type="button"
-                          onClick={() => {
-                            setMixedInputMethod(item.id as any);
-                            setMixedInputCurrency(item.cur);
-                          }}
-                          className={`p-2 rounded-lg text-[10px] font-black border transition-all text-center ${
-                            mixedInputMethod === item.id
-                              ? 'bg-amber-500 text-slate-950 border-amber-500 shadow-xs font-black'
-                              : isLight
-                                ? 'bg-slate-100 text-slate-800 border-slate-200 hover:bg-slate-200'
-                                : 'bg-slate-950 text-slate-300 border-slate-800 hover:bg-slate-850'
-                          }`}
-                        >
-                          {item.label}
-                        </button>
-                      ))}
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                      {/* Moneda */}
-                      <div>
-                        <label className={`text-[10px] font-bold block mb-1 ${
-                          isLight ? 'text-slate-800' : 'text-slate-400'
-                        }`}>
-                          Moneda:
-                        </label>
-                        <select
-                          value={mixedInputCurrency}
-                          onChange={(e) => setMixedInputCurrency(e.target.value as any)}
-                          className={`w-full px-3 py-2 rounded-xl text-xs font-mono font-black border-2 outline-none ${
-                            isLight
-                              ? 'bg-white border-slate-300 text-slate-950 shadow-xs focus:border-amber-500'
-                              : 'bg-slate-950 border-slate-700 text-white'
-                          }`}
-                        >
-                          <option value="USD">Dólares ($ USD)</option>
-                          <option value="VES">Bolívares (Bs. VES)</option>
-                        </select>
-                      </div>
-
-                      {/* Monto con botón Sugerir Faltante */}
-                      <div className="sm:col-span-2">
-                        <div className="flex items-center justify-between mb-1">
-                          <label className={`text-[10px] font-bold ${
-                            isLight ? 'text-slate-800' : 'text-slate-400'
-                          }`}>
-                            Monto Recibido ({mixedInputCurrency}):
-                          </label>
-                          {mixedPendingUSD > 0 && (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                if (mixedInputCurrency === 'USD') {
-                                  setMixedInputAmount(mixedPendingUSD.toFixed(2));
-                                } else {
-                                  setMixedInputAmount(mixedPendingVES.toFixed(2));
-                                }
-                              }}
-                              className={`text-[10px] font-black hover:underline active:scale-95 transition-all ${
-                                isLight ? 'text-amber-800 bg-amber-50 border border-amber-300 px-2 py-0.5 rounded-md hover:bg-amber-100' : 'text-amber-400'
-                              }`}
-                            >
-                              Sugerir Faltante ({mixedInputCurrency === 'USD' ? `$${mixedPendingUSD.toFixed(2)}` : `Bs. ${mixedPendingVES.toFixed(2)}`})
-                            </button>
-                          )}
-                        </div>
-                        {/* Caja de texto con alto contraste */}
-                        <input
-                          type="number"
-                          step="any"
-                          value={mixedInputAmount}
-                          onChange={(e) => setMixedInputAmount(e.target.value)}
-                          placeholder="0.00"
-                          className={`w-full px-3 py-2 rounded-xl text-base font-mono font-black border-2 outline-none transition-all ${
-                            isLight
-                              ? 'bg-white border-slate-400 text-slate-950 placeholder:text-slate-400 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 shadow-xs'
-                              : 'bg-slate-950 border-slate-700 text-white focus:border-amber-400'
-                          }`}
-                        />
-                      </div>
-                    </div>
-
-                    {/* Referencia opcional si aplica */}
-                    {(mixedInputMethod === 'pago_movil' || mixedInputMethod === 'card_debit' || mixedInputMethod === 'zelle') && (
-                      <div>
-                        <label className={`text-[10px] font-bold block mb-1 ${
-                          isLight ? 'text-slate-800' : 'text-slate-400'
-                        }`}>
-                          Referencia / Titular (Opcional):
-                        </label>
-                        <input
-                          type="text"
-                          value={mixedInputRef}
-                          onChange={(e) => setMixedInputRef(e.target.value)}
-                          placeholder="Ej: 4 últimos dígitos o titular"
-                          className={`w-full px-3 py-1.5 rounded-xl text-xs font-mono border-2 outline-none ${
-                            isLight
-                              ? 'bg-white border-slate-300 text-slate-950 placeholder:text-slate-400 focus:border-amber-500'
-                              : 'bg-slate-950 border-slate-700 text-white'
-                          }`}
-                        />
-                      </div>
-                    )}
-
-                    <button
-                      type="button"
-                      onClick={handleAddMixedPayment}
-                      disabled={!mixedInputAmount || parseFloat(mixedInputAmount) <= 0}
-                      className={`w-full py-2.5 rounded-xl font-black text-xs flex items-center justify-center gap-2 active:scale-98 transition-all shadow-md ${
-                        !mixedInputAmount || parseFloat(mixedInputAmount) <= 0
-                          ? isLight
-                            ? 'bg-slate-200 border border-slate-300 text-slate-400 cursor-not-allowed'
-                            : 'bg-emerald-950/90 border border-emerald-500/40 text-white cursor-not-allowed'
-                          : isLight
-                            ? 'bg-emerald-600 hover:bg-emerald-500 text-white cursor-pointer shadow-md'
-                            : 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 cursor-pointer shadow-lg shadow-emerald-500/25'
-                      }`}
-                      style={!isLight ? {
-                        color: (!mixedInputAmount || parseFloat(mixedInputAmount) <= 0) ? '#ffffff' : '#022c22',
-                        backgroundColor: (!mixedInputAmount || parseFloat(mixedInputAmount) <= 0) ? '#064e3b' : '#10b981'
-                      } : undefined}
-                    >
-                      <Plus className="w-4 h-4 stroke-[3]" />
-                      <span className="font-black tracking-wide">
-                        Registrar Abono a la Cuenta
-                      </span>
-                    </button>
-                  </div>
-
-                  {/* Lista de Abonos Registrados */}
-                  <div className="space-y-1.5">
-                    <span className={`text-[11px] font-black uppercase tracking-wider block ${
-                      isLight ? 'text-slate-800' : 'text-slate-400'
-                    }`}>
-                      Abonos Registrados ({mixedPayments.length}):
-                    </span>
-                    {mixedPayments.length === 0 ? (
-                      <div className={`p-3 rounded-xl border border-dashed text-center text-xs ${
-                        isLight ? 'bg-white border-slate-200 text-slate-500' : 'border-slate-800 text-slate-500'
-                      }`}>
-                        No hay abonos agregados. Utiliza el formulario superior para registrar pagos parciales.
-                      </div>
-                    ) : (
-                      <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
-                        {mixedPayments.map((p) => {
-                          const methodNames: Record<string, string> = {
-                            cash_usd: 'Efectivo $',
-                            cash_ves: 'Efectivo Bs',
-                            pago_movil: 'Pago Móvil',
-                            card_debit: 'Punto Débito',
-                            zelle: 'Zelle'
-                          };
-                          return (
-                            <div
-                              key={p.id}
-                              className={`p-2.5 rounded-xl border flex items-center justify-between ${
-                                isLight ? 'bg-white border-slate-200 text-slate-900 shadow-xs' : 'bg-slate-900 border-slate-800'
-                              }`}
-                            >
-                              <div className="flex items-center gap-2">
-                                <span className={`text-xs font-bold ${isLight ? 'text-slate-900' : 'text-slate-200'}`}>
-                                  {methodNames[p.method] || p.method}
-                                </span>
-                                {p.reference && (
-                                  <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded border ${
-                                    isLight ? 'bg-slate-100 text-slate-700 border-slate-300' : 'bg-slate-950 text-slate-400 border-slate-800'
-                                  }`}>
-                                    Ref: {p.reference}
-                                  </span>
-                                )}
-                              </div>
-                              <div className="flex items-center gap-3">
-                                <div className="text-right font-mono">
-                                  <span className={`text-xs font-black block ${
-                                    isLight ? 'text-emerald-700' : 'text-emerald-400'
-                                  }`}>
-                                    {p.currency === 'USD' ? `$${p.amount.toFixed(2)} USD` : `Bs. ${p.amount.toFixed(2)}`}
-                                  </span>
-                                  <span className={`text-[9px] ${
-                                    isLight ? 'text-slate-500' : 'text-slate-500'
-                                  }`}>
-                                    {p.currency === 'USD' ? `≈ Bs. ${p.amountVES.toFixed(2)}` : `≈ $${p.amountUSD.toFixed(2)} USD`}
-                                  </span>
-                                </div>
-                                <button
-                                  type="button"
-                                  onClick={() => handleRemoveMixedPayment(p.id)}
-                                  className="p-1 rounded-lg text-rose-500 hover:text-rose-700 hover:bg-rose-500/10 active:scale-90 transition-all cursor-pointer"
-                                  title="Eliminar este abono"
-                                >
-                                  <Trash2 className="w-3.5 h-3.5" />
-                                </button>
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* BOTÓN FINAL DE LIQUIDACIÓN Y GENERACIÓN DE TICKET (BLOQUEADO SI FALTA DINERO) */}
-            <button
-              type="button"
-              onClick={handleFinalizeSale}
-              disabled={cart.length === 0 || !isPaymentComplete}
-              className={`w-full py-4 text-white font-black text-sm rounded-2xl shadow-xl transition-all flex items-center justify-center gap-2 cursor-pointer ${
-                cart.length === 0 || !isPaymentComplete
-                  ? isLight
-                    ? 'opacity-80 cursor-not-allowed bg-slate-200 border border-slate-300 text-slate-500'
-                    : 'opacity-60 cursor-not-allowed bg-slate-800 border border-slate-700'
-                  : 'active:scale-98 shadow-emerald-500/20'
-              }`}
-              style={{ backgroundColor: (cart.length > 0 && isPaymentComplete) ? currentPal.primary : undefined }}
-            >
-              {cart.length === 0 ? (
-                <span>Comanda Vacía</span>
-              ) : !isPaymentComplete ? (
-                <div className={`flex items-center gap-2 ${isLight ? 'text-amber-900 font-black' : 'text-amber-300'}`}>
-                  <AlertCircle className={`w-5 h-5 shrink-0 ${isLight ? 'text-amber-700' : 'text-amber-400'}`} />
-                  <span>Falta Completar: ${(missingAmountUSD ?? 0).toFixed(2)} USD (Bs. ${(missingAmountVES ?? 0).toFixed(2)})</span>
-                </div>
-              ) : (
-                <>
-                  <CheckCircle2 className="w-5 h-5 text-white" />
-                  <span>Confirmar Venta y Generar Ticket</span>
-                </>
-              )}
-            </button>
+          <div className="flex-1 min-h-0 h-full overflow-y-auto scrollbar-none pb-36">
+            <PosErrorBoundary fallbackTitle="Pasarela de Cobro KlikPOS" onReset={() => setActiveTab('menu')}>
+              <UnifiedDirectCheckout
+                isLight={isLight}
+                totalUSD={totalUSD}
+                totalVES={totalVES}
+                bcvRate={bcvRate}
+                totalItems={totalItems}
+                primaryColor={currentPal.primary}
+                selectedCustomer={selectedCustomer}
+                onOpenCustomerModal={() => setShowCustomerModal(true)}
+                fulfillmentMode={fulfillmentMode}
+                setFulfillmentMode={setFulfillmentMode}
+                selectedDriverId={selectedDriverId}
+                setSelectedDriverId={setSelectedDriverId}
+                drivers={drivers}
+                deliveryAddressInput={deliveryAddressInput}
+                setDeliveryAddressInput={setDeliveryAddressInput}
+                selectedPaymentMethod={selectedPaymentMethod}
+                setSelectedPaymentMethod={setSelectedPaymentMethod}
+                setCashUSDReceived={setCashUSDReceived}
+                setCashVESReceived={setCashVESReceived}
+                setPagoMovilRefInput={setPagoMovilRefInput}
+                setCardVoucherRef={setCardVoucherRef}
+                setZelleConfirmation={setZelleConfirmation}
+                setBinanceConfirmation={setBinanceConfirmation}
+                mixedPayments={mixedPayments}
+                onFinalizeSale={handleFinalizeSale}
+              />
+            </PosErrorBoundary>
           </div>
-          </PosErrorBoundary>
         )}
         </div>
       </main>
@@ -4148,23 +3266,46 @@ export default function TabletMobilePosPage() {
                 </div>
               </div>
 
-              {/* Planes & Financiación Embajadores */}
+              {/* Planes Comerciales & Licencia Oficial */}
               <button
+                type="button"
                 onClick={() => {
-                  setIsLeftDrawerOpen(false);
+                  setAmbassadorInitialTab('plans');
                   setShowStreetAmbassadorModal(true);
+                  setIsLeftDrawerOpen(false);
+                }}
+                className={`w-full p-2.5 rounded-xl border flex items-center justify-between text-xs font-bold active:scale-98 cursor-pointer ${
+                  isLight ? 'bg-amber-50 border-amber-300 text-amber-950' : 'bg-amber-950/40 border-amber-800 text-amber-200'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4 text-amber-500 animate-pulse" />
+                  <span className={isLight ? 'text-amber-950 font-black' : 'text-amber-100 font-bold'}>Planes Comerciales ($15 / $25 / $50)</span>
+                </div>
+                <span className={`text-[10px] font-mono font-black px-2 py-0.5 rounded-md ${
+                  isLight ? 'bg-amber-200 text-amber-950 border border-amber-400' : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                }`}>Licencia</span>
+              </button>
+
+              {/* Programa de Embajadores & Referidos 100% Ilimitado */}
+              <button
+                type="button"
+                onClick={() => {
+                  setAmbassadorInitialTab('ambassador');
+                  setShowStreetAmbassadorModal(true);
+                  setIsLeftDrawerOpen(false);
                 }}
                 className={`w-full p-2.5 rounded-xl border flex items-center justify-between text-xs font-bold active:scale-98 cursor-pointer ${
                   isLight ? 'bg-emerald-50 border-emerald-300 text-emerald-950' : 'bg-emerald-950/40 border-emerald-800 text-emerald-200'
                 }`}
               >
                 <div className="flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-emerald-500 animate-pulse" />
-                  <span className={isLight ? 'text-emerald-950 font-black' : 'text-emerald-100 font-bold'}>Planes Comerciales ($15 / $25)</span>
+                  <Gift className="w-4 h-4 text-emerald-500" />
+                  <span className={isLight ? 'text-emerald-950 font-black' : 'text-emerald-100 font-bold'}>Embajador & Referidos ($5 USD c/u)</span>
                 </div>
                 <span className={`text-[10px] font-mono font-black px-2 py-0.5 rounded-md ${
                   isLight ? 'bg-emerald-200 text-emerald-950 border border-emerald-400' : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                }`}>Oferta</span>
+                }`}>Ilimitado</span>
               </button>
 
               {/* Presentación Comercial para Clientes */}
@@ -5084,6 +4225,7 @@ export default function TabletMobilePosPage() {
         primaryColor={currentPal.primary}
         storeName={companyInfo?.name || "KlikPOS Street Negocio"}
         rif={companyInfo?.rif || "STREET"}
+        initialTab={ambassadorInitialTab}
         onLicenseActivated={() => {
           userDismissedTrialModalRef.current = false;
           setShowStreetAmbassadorModal(false);

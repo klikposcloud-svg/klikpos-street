@@ -48,7 +48,7 @@ export interface PagoMovilInfo {
 
 export interface MixedPaymentEntry {
   id: string;
-  method: 'pago_movil' | 'cash_usd' | 'cash_ves' | 'card_debit' | 'zelle';
+  method: 'pago_movil' | 'cash_usd' | 'cash_ves' | 'card_debit' | 'zelle' | 'binance';
   currency: 'USD' | 'VES';
   amount: number;
   amountUSD: number;

@@ -1,14 +1,15 @@
 {
-  "version": "3.0.17",
-  "releaseDate": "2026-10-07",
-  "title": "KlikPOS Suite v3.0.17 - Certificación Limpia Google Play Protect, Eliminación de Servicio de Notificaciones y Máxima Compatibilidad",
+  "version": "3.0.18",
+  "releaseDate": "2026-10-08",
+  "title": "KlikPOS Suite v3.0.18 - Cobro Rápido Directo con Binance Pay, Visor Flotante de Vuelto, Planes con Respaldo Cloud y Embajador Firestore",
   "notes": [
-    "Certificación 100% Limpia ante Google Play Protect: Eliminación definitiva de BankNotificationListener y el permiso BIND_NOTIFICATION_LISTENER_SERVICE. Instalación directa sin bloqueos ni advertencias de app no instalada.",
-    "Compatibilidad Android Robusta (SDK 34): Ajuste de compilación para Android 14 y versiones previas, eliminando fallos en el instalador de paquetes del sistema operativo.",
-    "Preservación de Identidad Street Food: Logo oficial 'Klik' en Negro Pizarra (#0f172a), 'POS' y 'Street Food' en Rojo Enérgico (#ef4444) y cambio de tema instantáneo (0ms).",
-    "Cero Regresiones: Compresión por hardware de cámara (createImageBitmap) y persistencia de onboarding completamente blindados."
+    "Cobro Rápido Directo Rediseñado: Visor flotante con saldo restante y vuelto dinámico en verde esmeralda, eliminación de pasos innecesarios y soporte unificado para Pago Móvil, Efectivo $, Efectivo Bs, Punto, Zelle y Binance Pay (USDT).",
+    "Estabilidad de Planes y Programa de Embajador: Corrección de cierre prematuro de modal, conexión directa a Firestore para referidos ilimitados y liquidación a partir de 3 comercios ($15 USD) a las 48 horas.",
+    "Promoción de Respaldo en la Nube: 3 meses de KlikPOS Cloud gratis en plan lanzamiento ($5/mes posterior) y 24 meses de nube incluidos en Plan VIP $50.",
+    "Preservación 100% de Modos de Entrega: Soporte continuo para Local/Mesa, Delivery Pagado y Cobro en Destino (COD) con datos de repartidor y dirección.",
+    "Cero Regresiones y Seguridad: Compresión de imágenes por hardware intacta y paquete limpio certificado ante Google Play Protect."
   ],
-  "windowsUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.17/KlikPOS_Desktop_Full_Setup.exe",
-  "androidUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.17/KlikPOS_Movil_Full.apk",
+  "windowsUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.18/KlikPOS_Desktop_Full_Setup.exe",
+  "androidUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.18/KlikPOS_Movil_Full.apk",
   "mandatory": false
 }

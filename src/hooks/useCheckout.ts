@@ -35,6 +35,8 @@ export interface UseCheckoutReturn {
   setCardVoucherRef: (v: string) => void;
   zelleConfirmation: string;
   setZelleConfirmation: (v: string) => void;
+  binanceConfirmation: string;
+  setBinanceConfirmation: (v: string) => void;
   copiedPmAlert: boolean;
 
   // Fulfillment
@@ -114,6 +116,7 @@ export function useCheckout({
   const [cashVESReceived, setCashVESReceived] = useState(0);
   const [cardVoucherRef, setCardVoucherRef] = useState('');
   const [zelleConfirmation, setZelleConfirmation] = useState('');
+  const [binanceConfirmation, setBinanceConfirmation] = useState('');
   const [copiedPmAlert, setCopiedPmAlert] = useState(false);
 
   const [fulfillmentMode, setFulfillmentMode] = useState<FulfillmentMode>('local');
@@ -259,6 +262,8 @@ export function useCheckout({
       refNumber = cardVoucherRef || 'Lote-POS';
     } else if (selectedPaymentMethod === 'zelle') {
       refNumber = zelleConfirmation || 'Zelle-OK';
+    } else if (selectedPaymentMethod === 'binance') {
+      refNumber = binanceConfirmation || 'Binance-Pay-OK';
     }
 
     const chosenDriver = drivers.find((d) => d.id === selectedDriverId);
@@ -429,6 +434,8 @@ export function useCheckout({
     setCardVoucherRef,
     zelleConfirmation,
     setZelleConfirmation,
+    binanceConfirmation,
+    setBinanceConfirmation,
     copiedPmAlert,
     fulfillmentMode,
     setFulfillmentMode,
