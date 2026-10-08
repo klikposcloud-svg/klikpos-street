@@ -209,8 +209,15 @@ const playDigitalTapSound = () => {
 };
 
 export default function TabletMobilePosPage() {
-  // Splash desactivado para carga instantánea 0ms
-  const [showSplash] = useState(false);
+  // Splash loader dinámico para arranque oficial KlikPOS Street Food (1.4s)
+  const [showSplash, setShowSplash] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowSplash(false);
+    }, 1400);
+    return () => clearTimeout(timer);
+  }, []);
 
   // ─── Hooks Anti-Frankenstein ─────────────────────────────────────────────
 
@@ -560,6 +567,17 @@ export default function TabletMobilePosPage() {
       } else {
         setProducts(SAMPLE_PRODUCTS);
         localStorage.setItem('klikpos_tablet_products', JSON.stringify(SAMPLE_PRODUCTS));
+        
+        // Auto-Restauración Nube Inmediata para dispositivos reinstalados
+        cloudSyncService.pullTabletProducts().then(cloudProds => {
+          if (Array.isArray(cloudProds) && cloudProds.length > 0) {
+            console.log(`[CloudRestore] ¡Restaurados ${cloudProds.length} productos desde Firestore para esta máquina!`);
+            setProducts(cloudProds);
+            try { localStorage.setItem('klikpos_tablet_products', JSON.stringify(cloudProds)); } catch {}
+            setInventoryToast(`✅ ¡Catálogo restaurado desde la nube (${cloudProds.length} productos)!`);
+            setTimeout(() => setInventoryToast(null), 4000);
+          }
+        }).catch(() => {});
       }
 
       const savedDrivers = localStorage.getItem('klikpos_tablet_drivers');
@@ -749,8 +767,17 @@ export default function TabletMobilePosPage() {
     const nextThemeId: CanvasThemeId = targetThemeId || (isLight ? 'obsidian' : 'light-graphite');
 
     // Sincronización Inmediata a 0ms (Sin retardo, congelamiento ni desvanecimiento de View Transitions)
+    if (typeof document !== 'undefined') {
+      document.documentElement.classList.add('switching-theme');
+    }
     applyThemeTokens(nextThemeId);
     setCanvasTheme(nextThemeId);
+
+    if (typeof window !== 'undefined') {
+      requestAnimationFrame(() => {
+        document.documentElement.classList.remove('switching-theme');
+      });
+    }
   }, [isLight, applyThemeTokens]);
 
   // Blindaje Anti-Reinicio de Cámara: Persistir y recuperar estado de modal y borradores de inventario
@@ -945,6 +972,9 @@ export default function TabletMobilePosPage() {
         isActive: true,
         updatedAt: new Date().toISOString()
       } as any).catch(() => {});
+
+      // Sincronización Inmediata a la Nube (Respaldo bajo HWID determinista)
+      cloudSyncService.pushSingleProduct(newProd).catch(() => {});
     } catch (storageErr) {
       console.warn('Aviso guardando producto:', storageErr);
     }
@@ -975,7 +1005,11 @@ export default function TabletMobilePosPage() {
     if (!isNaN(val) && val > 0) {
       const updated = products.map(p => p.id === id ? { ...p, priceUSD: val } : p);
       setProducts(updated);
-      try { localStorage.setItem('klikpos_tablet_products', JSON.stringify(updated)); } catch {}
+      try { 
+        localStorage.setItem('klikpos_tablet_products', JSON.stringify(updated)); 
+        const pEdited = updated.find(p => p.id === id);
+        if (pEdited) cloudSyncService.pushSingleProduct(pEdited).catch(() => {});
+      } catch {}
     }
     setEditingPriceId(null);
   };
@@ -999,6 +1033,9 @@ export default function TabletMobilePosPage() {
         isActive: true,
         updatedAt: new Date().toISOString()
       } as any).catch(() => {});
+
+      // Sincronización Inmediata a la Nube
+      cloudSyncService.pushSingleProduct(editingProduct).catch(() => {});
     } catch {}
     setEditingProduct(null);
   };
@@ -1223,6 +1260,20 @@ export default function TabletMobilePosPage() {
         .anim-drawer-right {
           animation: drawerSlideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
+        /* Animaciones Oficiales Opción 3 (Minimalist Apple Bistro) */
+        @keyframes appleFadeIn {
+          0% { opacity: 0; transform: scale(0.92); letter-spacing: -0.06em; }
+          100% { opacity: 1; transform: scale(1); letter-spacing: -0.03em; }
+        }
+        @keyframes lineExpand {
+          0% { width: 0; opacity: 0; }
+          50% { opacity: 0.8; }
+          100% { width: 150px; opacity: 0.45; }
+        }
+        @keyframes textSlideUp {
+          0% { opacity: 0; transform: rotate(-2deg) translateY(18px); }
+          100% { opacity: 1; transform: rotate(-2deg) translateY(0); }
+        }
         /* Ocultar barras de desplazamiento visibles en toda la app manteniendo scroll fluido */
         ::-webkit-scrollbar {
           display: none !important;
@@ -1236,24 +1287,60 @@ export default function TabletMobilePosPage() {
         }
       `}</style>
 
-      {/* 0. Pantalla de Bienvenida / Splash Screen Animada Oficial */}
+      {/* 0. Pantalla de Bienvenida / Splash Loader Animado Oficial: Opción 3 (Minimalist Apple Bistro) */}
       {showSplash && (
-        <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#070a12] text-white select-none animate-out fade-out duration-300">
-          <div className="flex flex-col items-center gap-4 text-center p-6">
-            <div className="w-20 h-20 rounded-3xl bg-gradient-to-tr from-amber-500 to-amber-600 flex items-center justify-center shadow-2xl shadow-amber-500/30 ring-4 ring-amber-500/20 animate-pulse">
-              <LayoutGrid className="w-10 h-10 text-slate-950 stroke-[2.5]" />
+        <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#070a12] text-white select-none animate-in fade-in duration-200">
+          <div className="flex flex-col items-center justify-center text-center p-6 relative">
+            {/* Halo suave de ambientación */}
+            <div className="absolute w-80 h-80 rounded-full bg-gradient-to-tr from-red-500/10 via-amber-500/10 to-transparent blur-3xl pointer-events-none" />
+
+            {/* Logotipo Central con Animación Opción 3 (Apple Bistro) */}
+            <div className="flex flex-col items-center leading-none relative z-10">
+              <div 
+                className="flex items-baseline tracking-tight font-black text-5xl sm:text-6xl leading-none"
+                style={{
+                  animation: 'appleFadeIn 0.85s cubic-bezier(0.16, 1, 0.3, 1) forwards'
+                }}
+              >
+                <span 
+                  className="klikpos-brand-klik"
+                  style={{ 
+                    color: '#0f172a',
+                    WebkitTextStroke: '1.2px rgba(255, 255, 255, 0.45)',
+                    paintOrder: 'stroke fill',
+                    textShadow: 'none'
+                  }}
+                >
+                  Klik
+                </span>
+                <span className="font-black drop-shadow-md" style={{ color: '#ef4444' }}>POS</span>
+              </div>
+
+              <span 
+                className="klikpos-brand-street-food font-caveat text-[34px] sm:text-[42px] font-bold tracking-normal leading-none select-none whitespace-nowrap -mt-2 sm:-mt-3"
+                style={{ 
+                  fontFamily: "'Caveat', cursive, sans-serif",
+                  color: '#ef4444',
+                  transform: 'rotate(-2deg)',
+                  animation: 'textSlideUp 0.85s cubic-bezier(0.16, 1, 0.3, 1) 0.35s both',
+                  display: 'inline-block'
+                }}
+              >
+                Street Food
+              </span>
             </div>
-            <div className="space-y-1">
-              <h1 className="text-2xl sm:text-3xl font-black tracking-tight">
-                Klik<span className="text-amber-400">POS</span> <span className="text-[10px] sm:text-xs uppercase px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30 font-mono">Street v01</span>
-              </h1>
-              <p className="text-[11px] sm:text-xs text-slate-400 font-mono tracking-widest uppercase">
-                Sistema POS Autónomo Comercial
-              </p>
-            </div>
-            <div className="flex items-center gap-2 mt-2">
-              <div className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
-              <span className="text-[10px] font-mono text-slate-400">Iniciando módulos y catálogo...</span>
+
+            {/* Barra de progreso / loader minimalista */}
+            <div className="mt-8 flex flex-col items-center gap-2 relative z-10">
+              <div className="w-36 h-1 bg-slate-900 rounded-full overflow-hidden border border-white/10 p-0.5">
+                <div 
+                  className="h-full bg-gradient-to-r from-red-500 via-amber-400 to-amber-500 rounded-full animate-pulse" 
+                  style={{ width: '100%' }}
+                />
+              </div>
+              <span className="text-[10px] font-mono tracking-widest uppercase text-slate-400">
+                Iniciando Sistema POS...
+              </span>
             </div>
           </div>
         </div>
@@ -1277,13 +1364,11 @@ export default function TabletMobilePosPage() {
             <aside
               className="street-floating-docker w-14 rounded-[32px] py-4 px-1.5 flex flex-col items-center justify-between shadow-2xl border select-none shrink-0 min-h-[380px] z-50 backdrop-blur-xl transition-all"
               style={{
-                backgroundColor: isLight ? 'rgba(255, 255, 255, 0.94)' : '#090d16',
-                borderColor: isLight ? 'rgba(15, 23, 42, 0.14)' : 'rgba(255, 255, 255, 0.16)',
-                backdropFilter: 'blur(20px) saturate(180%)',
-                WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-                boxShadow: isLight
-                  ? '0 20px 45px -10px rgba(15, 23, 42, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 0 0 1px rgba(15, 23, 42, 0.08)'
-                  : '0 25px 60px -10px rgba(0, 0, 0, 0.95), inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.8)'
+                backgroundColor: 'rgba(11, 15, 25, 0.88)',
+                borderColor: 'rgba(255, 255, 255, 0.16)',
+                backdropFilter: 'blur(16px) saturate(180%)',
+                WebkitBackdropFilter: 'blur(16px) saturate(180%)',
+                boxShadow: '0 20px 45px -10px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.18), 0 0 0 1px rgba(0, 0, 0, 0.35)'
               }}
             >
               {/* Íconos Centrales de Acceso Directo con Contraste AAA y Micro-Fondos */}
@@ -1453,28 +1538,18 @@ export default function TabletMobilePosPage() {
                 </button>
               </div>
 
-              {/* Bottom: Alternar Lado (Izq/Der) y Colapsar */}
-              <div className={`flex flex-col items-center gap-2 pt-2 border-t shrink-0 w-full ${
-                isLight ? 'border-slate-200' : 'border-white/10'
-              }`}>
+              {/* Bottom: Alternar Lado (Izq/Der) y Colapsar - Espaciado holgado para que el divisor no esté pegado */}
+              <div className="flex flex-col items-center gap-2 mt-4 pt-3.5 border-t border-white/15 shrink-0 w-full">
                 <button
                   onClick={handleToggleDockSide}
-                  className={`w-9 h-9 rounded-xl flex items-center justify-center active:scale-90 transition-all cursor-pointer ${
-                    isLight
-                      ? 'text-slate-600 hover:text-amber-600 hover:bg-slate-100'
-                      : 'text-slate-300 hover:text-amber-300 hover:bg-white/10'
-                  }`}
+                  className="w-9 h-9 rounded-xl flex items-center justify-center active:scale-90 transition-all cursor-pointer text-slate-300 hover:text-amber-400 hover:bg-white/10"
                   title={dockSide === 'left' ? 'Mover Docker a la Derecha' : 'Mover Docker a la Izquierda'}
                 >
-                  <ArrowLeftRight className="w-4 h-4" />
+                  <ArrowLeftRight className="w-4 h-4 stroke-[2]" />
                 </button>
                 <button
                   onClick={() => setIsDockerOpen(false)}
-                  className={`w-9 h-9 rounded-xl flex items-center justify-center active:scale-90 transition-all cursor-pointer ${
-                    isLight
-                      ? 'text-rose-600 hover:text-rose-700 hover:bg-rose-50'
-                      : 'text-rose-400 hover:text-rose-300 hover:bg-rose-500/20'
-                  }`}
+                  className="w-9 h-9 rounded-xl flex items-center justify-center active:scale-90 transition-all cursor-pointer text-slate-300 hover:text-rose-400 hover:bg-white/10"
                   title="Minimizar Docker"
                 >
                   <X className="w-4 h-4 stroke-[2.5]" />
@@ -1493,7 +1568,7 @@ export default function TabletMobilePosPage() {
       {/* ========================================================================= */}
       <header
         id="klikpos-street-header"
-        className={`w-full h-[68px] px-4 sm:px-6 md:px-8 flex items-center border-b shrink-0 z-20 shadow-xs transition-colors duration-200 ${
+        className={`w-full h-14 px-3 sm:px-6 flex items-center justify-between border-b shrink-0 z-20 shadow-xs transition-colors duration-200 ${
           isLight ? 'border-slate-200 text-slate-900 bg-white' : 'border-slate-800/90 text-white bg-[#090d16]'
         }`}
         style={{
@@ -1502,53 +1577,72 @@ export default function TabletMobilePosPage() {
           color: isLight ? '#0f172a' : '#ffffff'
         }}
       >
-        <div className="w-full max-w-6xl mx-auto flex items-center justify-between">
-        {/* LADO IZQUIERDO: Logo KlikPOS Street + Acciones Principales */}
-        <div className="flex items-center gap-2">
-          {/* Logo KlikPOS Street Vector & Clean Branding */}
+        {/* LADO IZQUIERDO: Logo estilizado + Separador + Píldora BCV + Tema */}
+        <div className="flex items-center gap-2.5 sm:gap-3.5 shrink-0">
+          {/* Logo KlikPOS Street Food Limpio (Sin recuadro, integración pura en header) */}
           <div 
             onClick={() => setIsLeftDrawerOpen(true)}
-            className="flex flex-col leading-none select-none cursor-pointer group pr-0.5"
-            title="KlikPOS Street"
+            className="flex flex-col leading-none select-none cursor-pointer group shrink-0"
+            title="KlikPOS Street Food"
           >
-            <div className="flex items-baseline tracking-tight font-black text-lg">
-              <span className="klikpos-brand-klik" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>Klik</span>
-              <span style={{ color: currentPal.primary || '#f59e0b' }} className="transition-colors font-black">POS</span>
+            <div className="flex items-baseline font-black text-lg tracking-tight leading-none">
+              <span 
+                className="klikpos-brand-klik"
+                style={{ 
+                  color: '#0f172a',
+                  WebkitTextStroke: isLight ? '0px transparent' : '0.6px rgba(255, 255, 255, 0.45)',
+                  paintOrder: 'stroke fill',
+                  textShadow: 'none'
+                }}
+              >
+                Klik
+              </span>
+              <span className="font-black" style={{ color: '#ef4444' }}>POS</span>
             </div>
-            <span className="text-[9.5px] font-extrabold text-amber-400 tracking-wider text-right -mt-0.5">
-              Street
+            <span 
+              className="klikpos-brand-street-food font-caveat text-[13px] font-bold tracking-normal leading-none -mt-0.5 select-none whitespace-nowrap inline-block"
+              style={{ 
+                fontFamily: "'Caveat', cursive, sans-serif",
+                color: '#ef4444',
+                transform: 'rotate(-2deg)', 
+                transformOrigin: 'left center',
+                whiteSpace: 'nowrap'
+              }}
+            >
+              Street Food
             </span>
           </div>
-        </div>
 
-        {/* CENTRO: Pills Compactas y Espaciadas (BCV Optimizada + Sincronización + Tema) */}
-        <div className="flex items-center gap-2 sm:gap-2.5 mx-auto">
+          {/* Divisor vertical sutil */}
+          <div className="h-4 w-px bg-slate-200 dark:bg-slate-800 shrink-0" />
+
+          {/* Píldora BCV Compacta y Elegante */}
           {isBcvEditing ? (
             <div 
-              className="flex items-center gap-1 border px-2 py-0.5 rounded-full shadow-xs"
+              className="flex items-center gap-1 border px-2 py-0.5 rounded-full shadow-xs shrink-0"
               style={{
                 backgroundColor: isLight ? '#ffffff' : '#0f172a',
                 borderColor: isLight ? '#cbd5e1' : '#334155'
               }}
             >
-              <span className="text-[10px] font-mono font-bold text-slate-400">Bs.</span>
+              <span className="text-[9px] font-mono font-bold text-slate-400">Bs.</span>
               <input
                 type="number"
                 step="0.01"
                 value={customBcvInput}
                 onChange={(e) => setCustomBcvInput(e.target.value)}
-                className="w-14 text-xs font-mono font-black outline-none bg-transparent"
+                className="w-12 text-[11px] font-mono font-black outline-none bg-transparent"
                 style={{ color: isLight ? '#0f172a' : '#ffffff' }}
               />
               <button
                 onClick={handleSaveManualBcv}
-                className="px-1.5 py-0.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-full text-[9px] font-black cursor-pointer"
+                className="px-1.5 py-0.2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-full text-[8.5px] font-black cursor-pointer"
               >
                 ✓
               </button>
               <button
                 onClick={() => setIsBcvEditing(false)}
-                className="px-1 py-0.5 text-slate-400 hover:text-slate-600 text-[9px] cursor-pointer"
+                className="px-1 py-0.2 text-slate-400 hover:text-slate-600 text-[8.5px] cursor-pointer"
               >
                 ✕
               </button>
@@ -1556,7 +1650,7 @@ export default function TabletMobilePosPage() {
           ) : (
             <div
               onClick={() => setIsBcvEditing(true)}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border transition-all text-xs font-mono font-bold shadow-xs whitespace-nowrap cursor-pointer select-none active:scale-95"
+              className="flex items-center gap-1.5 px-2 py-0.5 rounded-full border transition-all text-xs font-mono font-bold shadow-xs whitespace-nowrap cursor-pointer select-none active:scale-95 shrink-0"
               style={{
                 backgroundColor: isLight ? '#ffffff' : '#0f172a',
                 borderColor: isLight ? '#cbd5e1' : '#1e293b',
@@ -1564,10 +1658,10 @@ export default function TabletMobilePosPage() {
               }}
               title="Toca para editar tasa BCV manualmente"
             >
-              <span className="text-[9.5px] font-black tracking-wider" style={{ color: isLight ? '#0284c7' : '#ffffff' }}>
-                BCV:
+              <span className="text-[8.5px] font-black px-1 py-0.2 rounded bg-sky-500/15 text-sky-600 dark:text-sky-400 tracking-tight uppercase">
+                BCV
               </span>
-              <span className="font-black text-[11px]" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
+              <span className="font-black text-[10.5px] font-mono tracking-tight" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
                 Bs. {bcvRate.toFixed(2)}
               </span>
               <button
@@ -1577,8 +1671,7 @@ export default function TabletMobilePosPage() {
                   fetchBcvRateAuto(true);
                 }}
                 disabled={isFetchingBcv}
-                className="p-0.5 hover:text-sky-300 transition-colors cursor-pointer"
-                style={{ color: isLight ? '#64748b' : '#ffffff' }}
+                className="p-0.5 hover:text-sky-400 text-slate-400 transition-colors cursor-pointer"
                 title="Actualizar tasa oficial BCV"
               >
                 <RefreshCw className={`w-2.5 h-2.5 ${isFetchingBcv ? 'animate-spin text-sky-400' : ''}`} />
@@ -1586,55 +1679,55 @@ export default function TabletMobilePosPage() {
             </div>
           )}
 
-          {/* Botón: Sincronizar Data (Visible en pantallas medianas/grandes para dar espacio al carrito en móvil) */}
-          <button
-            type="button"
-            onClick={() => setShowSyncModal(true)}
-            className="hidden md:flex items-center gap-1 px-2.5 py-1 rounded-full border border-sky-500/30 bg-sky-500/10 hover:bg-sky-500/20 text-sky-500 dark:text-sky-400 font-black text-[10.5px] transition-all active:scale-95 shadow-xs cursor-pointer select-none shrink-0"
-            title="Sincronizar Data (Tasa BCV, Ventas & Catálogo Cloud)"
-          >
-            <RefreshCw className="w-3 h-3 text-sky-500 dark:text-sky-400" />
-            <span>Sync</span>
-          </button>
-
-          {/* Botón Rápido de Cambio de Tema: Ultra Rápido y Fluido */}
+          {/* Botón Rápido de Cambio de Tema */}
           <button
             type="button"
             onClick={() => handleToggleTheme()}
-            className="w-7 h-7 rounded-full border transition-all active:scale-90 cursor-pointer shrink-0 flex items-center justify-center shadow-xs"
+            className="w-6 h-6 rounded-full border transition-all active:scale-90 cursor-pointer shrink-0 flex items-center justify-center shadow-xs"
             style={{
               backgroundColor: isLight ? '#ffffff' : '#0f172a',
               borderColor: isLight ? '#cbd5e1' : '#334155',
               color: isLight ? '#0f172a' : '#f59e0b'
             }}
-            title={isLight ? 'Cambiar a modo Obsidian Nocturno' : 'Cambiar a modo Blanco Grafito'}
+            title={isLight ? 'Cambiar a modo Nocturno' : 'Cambiar a modo Diurno'}
             aria-label="Alternar Tema Diurno/Nocturno"
           >
             {isLight ? (
-              <Moon className="w-3.5 h-3.5 text-slate-700" />
+              <Moon className="w-3 h-3 text-slate-700" />
             ) : (
-              <Sun className="w-3.5 h-3.5 text-amber-400" />
+              <Sun className="w-3 h-3 text-amber-400" />
             )}
           </button>
         </div>
 
-        {/* LADO DERECHO: Carrito / Comanda Activa (100% Protegido sin Cortes) */}
-        <div className="flex items-center gap-1.5 shrink-0 ml-1">
+        {/* LADO DERECHO: Acciones & Carrito / Comanda Activa (Holgado y Despejado) */}
+        <div className="flex items-center gap-2 shrink-0">
           {trialState?.isTrial && (
             <button
               type="button"
               onClick={() => setShowStreetAmbassadorModal(true)}
-              className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-500 dark:text-amber-400 rounded-lg text-[9.5px] sm:text-[10px] font-mono font-bold transition-all cursor-pointer shrink-0"
-              title="Prueba Comercial de 30 Minutos Activa. Toca para ver los 3 planes de activación comercial ($15 / $25 / $50)."
+              className="hidden sm:flex items-center gap-1 px-2 py-0.5 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-500 dark:text-amber-400 rounded-lg text-[9px] font-mono font-bold transition-all cursor-pointer shrink-0"
+              title="Prueba Comercial de 30 Minutos Activa"
             >
-              <Clock className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
+              <Clock className="w-3 h-3 text-amber-400 animate-pulse" />
               <span>Prueba: {trialState.formattedRemaining}</span>
             </button>
           )}
 
+          {/* Botón: Sincronizar Data */}
+          <button
+            type="button"
+            onClick={() => setShowSyncModal(true)}
+            className="hidden md:flex items-center gap-1 px-2 py-0.5 rounded-full border border-sky-500/30 bg-sky-500/10 hover:bg-sky-500/20 text-sky-500 dark:text-sky-400 font-bold text-[9.5px] transition-all active:scale-95 shadow-xs cursor-pointer select-none shrink-0"
+            title="Sincronizar Data (Tasa BCV, Ventas & Catálogo Cloud)"
+          >
+            <RefreshCw className="w-2.5 h-2.5 text-sky-500 dark:text-sky-400" />
+            <span>Sync</span>
+          </button>
+
           <button
             onClick={() => setIsRightDrawerOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-black text-xs transition-all duration-200 relative active:scale-95 shadow-md cursor-pointer shrink-0 whitespace-nowrap"
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl font-black text-xs transition-all duration-200 relative active:scale-95 shadow-md cursor-pointer shrink-0 whitespace-nowrap"
             style={{ 
               backgroundColor: currentPal.primary,
               color: '#ffffff'
@@ -1644,12 +1737,11 @@ export default function TabletMobilePosPage() {
             <ShoppingCart className="w-3.5 h-3.5 text-white shrink-0" />
             <span className="font-mono text-xs font-black shrink-0 text-white">${totalUSD.toFixed(2)}</span>
             {totalItems > 0 && (
-              <span className="bg-slate-950 text-white border border-white/20 text-[10px] font-mono font-black px-1.5 py-0.2 rounded-full shadow-xs anim-badge-spring shrink-0">
+              <span className="bg-slate-950 text-white border border-white/20 text-[9.5px] font-mono font-black px-1.5 py-0.2 rounded-full shadow-xs anim-badge-spring shrink-0">
                 {totalItems}
               </span>
             )}
           </button>
-        </div>
         </div>
       </header>
 
@@ -3429,29 +3521,47 @@ export default function TabletMobilePosPage() {
 
               {/* 6. PAGO MIXTO / MULTIMONEDA (COMBINADO CON CÁLCULO EN VIVO Y VALIDACIÓN ESTRICTA) */}
               {selectedPaymentMethod === 'mixed' && (
-                <div className="p-4 rounded-2xl border bg-slate-950/80 border-slate-800 space-y-4">
+                <div className={`p-4 rounded-2xl border space-y-4 ${
+                  isLight ? 'bg-slate-50 border-slate-200 shadow-xs' : 'bg-slate-950/80 border-slate-800'
+                }`}>
                   {/* Balance en Vivo de Pago Mixto */}
                   <div className="grid grid-cols-2 gap-2">
-                    <div className="p-3 rounded-xl bg-slate-900 border border-slate-800">
-                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                    <div className={`p-3 rounded-xl border ${
+                      isLight ? 'bg-white border-slate-200 shadow-xs' : 'bg-slate-900 border-slate-800'
+                    }`}>
+                      <span className={`text-[10px] font-bold uppercase tracking-wider block ${
+                        isLight ? 'text-slate-600' : 'text-slate-400'
+                      }`}>
                         Total a Cubrir
                       </span>
-                      <div className="text-base font-black font-mono text-white">
+                      <div className={`text-base font-black font-mono ${
+                        isLight ? 'text-slate-950' : 'text-white'
+                      }`}>
                         ${totalUSD.toFixed(2)} USD
                       </div>
-                      <span className="text-[10px] font-mono text-slate-400">
+                      <span className={`text-[10px] font-mono ${
+                        isLight ? 'text-slate-500' : 'text-slate-400'
+                      }`}>
                         Bs. {totalVES.toFixed(2)}
                       </span>
                     </div>
 
-                    <div className="p-3 rounded-xl bg-slate-900 border border-slate-800">
-                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                    <div className={`p-3 rounded-xl border ${
+                      isLight ? 'bg-white border-slate-200 shadow-xs' : 'bg-slate-900 border-slate-800'
+                    }`}>
+                      <span className={`text-[10px] font-bold uppercase tracking-wider block ${
+                        isLight ? 'text-emerald-700' : 'text-slate-400'
+                      }`}>
                         Total Recibido
                       </span>
-                      <div className="text-base font-black font-mono text-emerald-400">
+                      <div className={`text-base font-black font-mono ${
+                        isLight ? 'text-emerald-700' : 'text-emerald-400'
+                      }`}>
                         ${mixedPaidUSD.toFixed(2)} USD
                       </div>
-                      <span className="text-[10px] font-mono text-emerald-300">
+                      <span className={`text-[10px] font-mono ${
+                        isLight ? 'text-emerald-600' : 'text-emerald-300'
+                      }`}>
                         Bs. {mixedPaidVES.toFixed(2)}
                       </span>
                     </div>
@@ -3459,40 +3569,44 @@ export default function TabletMobilePosPage() {
 
                   {/* Estado en Vivo: Faltante o Vuelto */}
                   {!isMixedComplete ? (
-                    <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-between text-amber-300">
+                    <div className={`p-3 rounded-xl border flex items-center justify-between ${
+                      isLight ? 'bg-amber-50 border-amber-300 text-amber-950 shadow-xs' : 'bg-amber-500/10 border-amber-500/30 text-amber-300'
+                    }`}>
                       <div className="flex items-center gap-2">
-                        <AlertCircle className="w-5 h-5 text-amber-400 shrink-0" />
+                        <AlertCircle className={`w-5 h-5 shrink-0 ${isLight ? 'text-amber-700' : 'text-amber-400'}`} />
                         <div>
-                          <strong className="text-xs font-black block">Falta por Completar:</strong>
-                          <span className="text-[11px] text-amber-200">El botón de cobro se habilitará al cubrir el monto</span>
+                          <strong className={`text-xs font-black block ${isLight ? 'text-amber-950' : 'text-amber-300'}`}>Falta por Completar:</strong>
+                          <span className={`text-[11px] font-medium ${isLight ? 'text-amber-900' : 'text-amber-200'}`}>El botón de cobro se habilitará al cubrir el monto</span>
                         </div>
                       </div>
                       <div className="text-right font-mono">
-                        <div className="text-sm font-black text-amber-400">
+                        <div className={`text-sm font-black ${isLight ? 'text-amber-900' : 'text-amber-400'}`}>
                           ${mixedPendingUSD.toFixed(2)} USD
                         </div>
-                        <div className="text-[10px] text-amber-300">
+                        <div className={`text-[10px] font-bold ${isLight ? 'text-amber-800' : 'text-amber-300'}`}>
                           Bs. {mixedPendingVES.toFixed(2)}
                         </div>
                       </div>
                     </div>
                   ) : (
-                    <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-between text-emerald-300">
+                    <div className={`p-3 rounded-xl border flex items-center justify-between ${
+                      isLight ? 'bg-emerald-50 border-emerald-300 text-emerald-950 shadow-xs' : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
+                    }`}>
                       <div className="flex items-center gap-2">
-                        <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+                        <CheckCircle2 className={`w-5 h-5 shrink-0 ${isLight ? 'text-emerald-700' : 'text-emerald-400'}`} />
                         <div>
-                          <strong className="text-xs font-black block">¡Monto Total Cubierto!</strong>
-                          <span className="text-[11px] text-emerald-200">
+                          <strong className={`text-xs font-black block ${isLight ? 'text-emerald-950' : 'text-emerald-300'}`}>¡Monto Total Cubierto!</strong>
+                          <span className={`text-[11px] font-medium ${isLight ? 'text-emerald-900' : 'text-emerald-200'}`}>
                             {mixedChangeUSD > 0.01 ? 'Vuelto / Cambio a Entregar:' : 'Pago exacto completado'}
                           </span>
                         </div>
                       </div>
                       {mixedChangeUSD > 0.01 && (
                         <div className="text-right font-mono">
-                          <div className="text-sm font-black text-emerald-400">
+                          <div className={`text-sm font-black ${isLight ? 'text-emerald-800' : 'text-emerald-400'}`}>
                             ${mixedChangeUSD.toFixed(2)} USD
                           </div>
-                          <div className="text-[10px] text-emerald-300">
+                          <div className={`text-[10px] font-bold ${isLight ? 'text-emerald-700' : 'text-emerald-300'}`}>
                             Bs. {mixedChangeVES.toFixed(2)}
                           </div>
                         </div>
@@ -3501,8 +3615,12 @@ export default function TabletMobilePosPage() {
                   )}
 
                   {/* Formulario para Agregar Abono / Pago Parcial */}
-                  <div className="p-3.5 rounded-xl border border-slate-800 bg-slate-900/90 space-y-3">
-                    <span className="text-xs font-black uppercase tracking-wider text-slate-300 block">
+                  <div className={`p-3.5 rounded-xl border space-y-3 ${
+                    isLight ? 'bg-white border-slate-300 shadow-sm' : 'bg-slate-900/90 border-slate-800'
+                  }`}>
+                    <span className={`text-xs font-black uppercase tracking-wider block ${
+                      isLight ? 'text-slate-900' : 'text-slate-300'
+                    }`}>
                       + Agregar Abono a esta Cuenta:
                     </span>
 
@@ -3524,8 +3642,10 @@ export default function TabletMobilePosPage() {
                           }}
                           className={`p-2 rounded-lg text-[10px] font-black border transition-all text-center ${
                             mixedInputMethod === item.id
-                              ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-md font-bold'
-                              : 'bg-slate-950 text-slate-300 border-slate-800 hover:bg-slate-850'
+                              ? 'bg-amber-500 text-slate-950 border-amber-500 shadow-xs font-black'
+                              : isLight
+                                ? 'bg-slate-100 text-slate-800 border-slate-200 hover:bg-slate-200'
+                                : 'bg-slate-950 text-slate-300 border-slate-800 hover:bg-slate-850'
                           }`}
                         >
                           {item.label}
@@ -3536,13 +3656,19 @@ export default function TabletMobilePosPage() {
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                       {/* Moneda */}
                       <div>
-                        <label className="text-[10px] font-bold text-slate-400 block mb-1">
+                        <label className={`text-[10px] font-bold block mb-1 ${
+                          isLight ? 'text-slate-800' : 'text-slate-400'
+                        }`}>
                           Moneda:
                         </label>
                         <select
                           value={mixedInputCurrency}
                           onChange={(e) => setMixedInputCurrency(e.target.value as any)}
-                          className="w-full px-3 py-2 rounded-xl text-xs font-mono font-bold border outline-none bg-slate-950 border-slate-700 text-white"
+                          className={`w-full px-3 py-2 rounded-xl text-xs font-mono font-black border-2 outline-none ${
+                            isLight
+                              ? 'bg-white border-slate-300 text-slate-950 shadow-xs focus:border-amber-500'
+                              : 'bg-slate-950 border-slate-700 text-white'
+                          }`}
                         >
                           <option value="USD">Dólares ($ USD)</option>
                           <option value="VES">Bolívares (Bs. VES)</option>
@@ -3552,7 +3678,9 @@ export default function TabletMobilePosPage() {
                       {/* Monto con botón Sugerir Faltante */}
                       <div className="sm:col-span-2">
                         <div className="flex items-center justify-between mb-1">
-                          <label className="text-[10px] font-bold text-slate-400">
+                          <label className={`text-[10px] font-bold ${
+                            isLight ? 'text-slate-800' : 'text-slate-400'
+                          }`}>
                             Monto Recibido ({mixedInputCurrency}):
                           </label>
                           {mixedPendingUSD > 0 && (
@@ -3565,19 +3693,26 @@ export default function TabletMobilePosPage() {
                                   setMixedInputAmount(mixedPendingVES.toFixed(2));
                                 }
                               }}
-                              className="text-[10px] font-black text-amber-400 hover:underline active:scale-95"
+                              className={`text-[10px] font-black hover:underline active:scale-95 transition-all ${
+                                isLight ? 'text-amber-800 bg-amber-50 border border-amber-300 px-2 py-0.5 rounded-md hover:bg-amber-100' : 'text-amber-400'
+                              }`}
                             >
                               Sugerir Faltante ({mixedInputCurrency === 'USD' ? `$${mixedPendingUSD.toFixed(2)}` : `Bs. ${mixedPendingVES.toFixed(2)}`})
                             </button>
                           )}
                         </div>
+                        {/* Caja de texto con alto contraste */}
                         <input
                           type="number"
                           step="any"
                           value={mixedInputAmount}
                           onChange={(e) => setMixedInputAmount(e.target.value)}
                           placeholder="0.00"
-                          className="w-full px-3 py-2 rounded-xl text-sm font-mono font-black border outline-none bg-slate-950 border-slate-700 text-white focus:border-amber-400"
+                          className={`w-full px-3 py-2 rounded-xl text-base font-mono font-black border-2 outline-none transition-all ${
+                            isLight
+                              ? 'bg-white border-slate-400 text-slate-950 placeholder:text-slate-400 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 shadow-xs'
+                              : 'bg-slate-950 border-slate-700 text-white focus:border-amber-400'
+                          }`}
                         />
                       </div>
                     </div>
@@ -3585,7 +3720,9 @@ export default function TabletMobilePosPage() {
                     {/* Referencia opcional si aplica */}
                     {(mixedInputMethod === 'pago_movil' || mixedInputMethod === 'card_debit' || mixedInputMethod === 'zelle') && (
                       <div>
-                        <label className="text-[10px] font-bold text-slate-400 block mb-1">
+                        <label className={`text-[10px] font-bold block mb-1 ${
+                          isLight ? 'text-slate-800' : 'text-slate-400'
+                        }`}>
                           Referencia / Titular (Opcional):
                         </label>
                         <input
@@ -3593,7 +3730,11 @@ export default function TabletMobilePosPage() {
                           value={mixedInputRef}
                           onChange={(e) => setMixedInputRef(e.target.value)}
                           placeholder="Ej: 4 últimos dígitos o titular"
-                          className="w-full px-3 py-1.5 rounded-xl text-xs font-mono border outline-none bg-slate-950 border-slate-700 text-white"
+                          className={`w-full px-3 py-1.5 rounded-xl text-xs font-mono border-2 outline-none ${
+                            isLight
+                              ? 'bg-white border-slate-300 text-slate-950 placeholder:text-slate-400 focus:border-amber-500'
+                              : 'bg-slate-950 border-slate-700 text-white'
+                          }`}
                         />
                       </div>
                     )}
@@ -3604,16 +3745,20 @@ export default function TabletMobilePosPage() {
                       disabled={!mixedInputAmount || parseFloat(mixedInputAmount) <= 0}
                       className={`w-full py-2.5 rounded-xl font-black text-xs flex items-center justify-center gap-2 active:scale-98 transition-all shadow-md ${
                         !mixedInputAmount || parseFloat(mixedInputAmount) <= 0
-                          ? 'bg-emerald-950/90 border border-emerald-500/40 text-white cursor-not-allowed'
-                          : 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 cursor-pointer shadow-lg shadow-emerald-500/25'
+                          ? isLight
+                            ? 'bg-slate-200 border border-slate-300 text-slate-400 cursor-not-allowed'
+                            : 'bg-emerald-950/90 border border-emerald-500/40 text-white cursor-not-allowed'
+                          : isLight
+                            ? 'bg-emerald-600 hover:bg-emerald-500 text-white cursor-pointer shadow-md'
+                            : 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 cursor-pointer shadow-lg shadow-emerald-500/25'
                       }`}
-                      style={{
+                      style={!isLight ? {
                         color: (!mixedInputAmount || parseFloat(mixedInputAmount) <= 0) ? '#ffffff' : '#022c22',
                         backgroundColor: (!mixedInputAmount || parseFloat(mixedInputAmount) <= 0) ? '#064e3b' : '#10b981'
-                      }}
+                      } : undefined}
                     >
-                      <Plus className="w-4 h-4 stroke-[3]" style={{ color: (!mixedInputAmount || parseFloat(mixedInputAmount) <= 0) ? '#ffffff' : '#022c22' }} />
-                      <span className="font-black tracking-wide" style={{ color: (!mixedInputAmount || parseFloat(mixedInputAmount) <= 0) ? '#ffffff' : '#022c22' }}>
+                      <Plus className="w-4 h-4 stroke-[3]" />
+                      <span className="font-black tracking-wide">
                         Registrar Abono a la Cuenta
                       </span>
                     </button>
@@ -3621,11 +3766,15 @@ export default function TabletMobilePosPage() {
 
                   {/* Lista de Abonos Registrados */}
                   <div className="space-y-1.5">
-                    <span className="text-[11px] font-black uppercase tracking-wider text-slate-400 block">
+                    <span className={`text-[11px] font-black uppercase tracking-wider block ${
+                      isLight ? 'text-slate-800' : 'text-slate-400'
+                    }`}>
                       Abonos Registrados ({mixedPayments.length}):
                     </span>
                     {mixedPayments.length === 0 ? (
-                      <div className="p-3 rounded-xl border border-dashed border-slate-800 text-center text-xs text-slate-500">
+                      <div className={`p-3 rounded-xl border border-dashed text-center text-xs ${
+                        isLight ? 'bg-white border-slate-200 text-slate-500' : 'border-slate-800 text-slate-500'
+                      }`}>
                         No hay abonos agregados. Utiliza el formulario superior para registrar pagos parciales.
                       </div>
                     ) : (
@@ -3641,31 +3790,39 @@ export default function TabletMobilePosPage() {
                           return (
                             <div
                               key={p.id}
-                              className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between"
+                              className={`p-2.5 rounded-xl border flex items-center justify-between ${
+                                isLight ? 'bg-white border-slate-200 text-slate-900 shadow-xs' : 'bg-slate-900 border-slate-800'
+                              }`}
                             >
                               <div className="flex items-center gap-2">
-                                <span className="text-xs font-bold text-slate-200">
+                                <span className={`text-xs font-bold ${isLight ? 'text-slate-900' : 'text-slate-200'}`}>
                                   {methodNames[p.method] || p.method}
                                 </span>
                                 {p.reference && (
-                                  <span className="text-[10px] font-mono text-slate-400 bg-slate-950 px-1.5 py-0.5 rounded border border-slate-800">
+                                  <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded border ${
+                                    isLight ? 'bg-slate-100 text-slate-700 border-slate-300' : 'bg-slate-950 text-slate-400 border-slate-800'
+                                  }`}>
                                     Ref: {p.reference}
                                   </span>
                                 )}
                               </div>
                               <div className="flex items-center gap-3">
                                 <div className="text-right font-mono">
-                                  <span className="text-xs font-black text-emerald-400 block">
+                                  <span className={`text-xs font-black block ${
+                                    isLight ? 'text-emerald-700' : 'text-emerald-400'
+                                  }`}>
                                     {p.currency === 'USD' ? `$${p.amount.toFixed(2)} USD` : `Bs. ${p.amount.toFixed(2)}`}
                                   </span>
-                                  <span className="text-[9px] text-slate-500">
+                                  <span className={`text-[9px] ${
+                                    isLight ? 'text-slate-500' : 'text-slate-500'
+                                  }`}>
                                     {p.currency === 'USD' ? `≈ Bs. ${p.amountVES.toFixed(2)}` : `≈ $${p.amountUSD.toFixed(2)} USD`}
                                   </span>
                                 </div>
                                 <button
                                   type="button"
                                   onClick={() => handleRemoveMixedPayment(p.id)}
-                                  className="p-1 rounded-lg text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 active:scale-90 transition-all cursor-pointer"
+                                  className="p-1 rounded-lg text-rose-500 hover:text-rose-700 hover:bg-rose-500/10 active:scale-90 transition-all cursor-pointer"
                                   title="Eliminar este abono"
                                 >
                                   <Trash2 className="w-3.5 h-3.5" />
@@ -3688,7 +3845,9 @@ export default function TabletMobilePosPage() {
               disabled={cart.length === 0 || !isPaymentComplete}
               className={`w-full py-4 text-white font-black text-sm rounded-2xl shadow-xl transition-all flex items-center justify-center gap-2 cursor-pointer ${
                 cart.length === 0 || !isPaymentComplete
-                  ? 'opacity-60 cursor-not-allowed bg-slate-800 border border-slate-700'
+                  ? isLight
+                    ? 'opacity-80 cursor-not-allowed bg-slate-200 border border-slate-300 text-slate-500'
+                    : 'opacity-60 cursor-not-allowed bg-slate-800 border border-slate-700'
                   : 'active:scale-98 shadow-emerald-500/20'
               }`}
               style={{ backgroundColor: (cart.length > 0 && isPaymentComplete) ? currentPal.primary : undefined }}
@@ -3696,8 +3855,8 @@ export default function TabletMobilePosPage() {
               {cart.length === 0 ? (
                 <span>Comanda Vacía</span>
               ) : !isPaymentComplete ? (
-                <div className="flex items-center gap-2 text-amber-300">
-                  <AlertCircle className="w-5 h-5 text-amber-400 shrink-0" />
+                <div className={`flex items-center gap-2 ${isLight ? 'text-amber-900 font-black' : 'text-amber-300'}`}>
+                  <AlertCircle className={`w-5 h-5 shrink-0 ${isLight ? 'text-amber-700' : 'text-amber-400'}`} />
                   <span>Falta Completar: ${(missingAmountUSD ?? 0).toFixed(2)} USD (Bs. ${(missingAmountVES ?? 0).toFixed(2)})</span>
                 </div>
               ) : (
@@ -4730,32 +4889,42 @@ export default function TabletMobilePosPage() {
                     return (
                       <div
                         key={p.id}
-                        className={`p-3 flex items-center justify-between gap-3 transition-colors ${
+                        className={`p-3 flex items-center justify-between gap-2 sm:gap-3 transition-colors ${
                           isLight ? 'bg-white hover:bg-slate-50' : 'bg-slate-900 hover:bg-slate-850'
                         }`}
                       >
-                        <div className="flex items-center gap-3 min-w-0">
-                          {p.image && (
+                        <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
+                          {p.image ? (
                             <img
                               src={p.image}
                               alt={p.name}
                               className="w-10 h-10 rounded-xl object-cover border border-slate-200 dark:border-slate-800 shrink-0"
                             />
+                          ) : (
+                            <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center shrink-0 text-slate-400">
+                              <ImageIcon className="w-5 h-5 opacity-40" />
+                            </div>
                           )}
-                          <div className="min-w-0">
-                            <h4 className="text-xs font-black truncate" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
+                          <div className="min-w-0 flex-1">
+                            <h4 className="text-xs font-black truncate block" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
                               {p.name}
                             </h4>
-                            <div className="flex items-center gap-2 text-[10px] text-slate-400 font-mono">
-                              <span>SKU: {p.sku}</span>
-                              <span>•</span>
-                              <span className="text-slate-500 font-bold">{p.category}</span>
+                            <div className="flex items-center gap-1.5 text-[10px] text-slate-400 font-mono mt-0.5 min-w-0">
+                              {p.sku && (
+                                <span className="shrink-0 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 px-1 py-0.2 rounded text-[9px]">
+                                  SKU: {p.sku}
+                                </span>
+                              )}
+                              {p.sku && <span className="shrink-0 text-slate-300 dark:text-slate-600">•</span>}
+                              <span className="text-slate-500 font-bold truncate">
+                                {p.category}
+                              </span>
                             </div>
                           </div>
                         </div>
 
-                        {/* Precio con edición en vivo */}
-                        <div className="flex items-center gap-2 shrink-0">
+                        {/* Precio con edición en vivo y acciones (100% aislado sin solapamiento) */}
+                        <div className="flex items-center gap-1.5 shrink-0 ml-1.5 z-10">
                           {isEditing ? (
                             <div className="flex items-center gap-1">
                               <span className="text-xs font-mono font-bold">$</span>
@@ -4790,7 +4959,7 @@ export default function TabletMobilePosPage() {
                                 setEditingPriceId(p.id);
                                 setEditingPriceValue(String(p.priceUSD));
                               }}
-                              className="flex items-center gap-1 px-2.5 py-1 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-emerald-500 transition-colors"
+                              className="flex items-center gap-1 px-2 py-1 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-emerald-500 bg-emerald-50/50 dark:bg-emerald-950/20 transition-colors shadow-2xs"
                               title="Toca para editar precio"
                             >
                               <span className="text-xs font-mono font-black text-emerald-600 dark:text-emerald-400">
@@ -4803,7 +4972,7 @@ export default function TabletMobilePosPage() {
                           <button
                             type="button"
                             onClick={() => setEditingProduct({ ...p })}
-                            className="p-1.5 text-slate-400 hover:text-amber-400 rounded-lg hover:bg-slate-800 transition-colors"
+                            className="p-1.5 text-slate-400 hover:text-amber-500 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                             title="Editar detalles y foto del producto"
                           >
                             <Edit3 className="w-4 h-4" />
@@ -4812,7 +4981,7 @@ export default function TabletMobilePosPage() {
                           <button
                             type="button"
                             onClick={() => handleDeleteProduct(p.id)}
-                            className="p-1.5 text-slate-400 hover:text-rose-500 rounded-lg transition-colors"
+                            className="p-1.5 text-slate-400 hover:text-rose-500 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                             title="Eliminar producto"
                           >
                             <Trash2 className="w-4 h-4" />

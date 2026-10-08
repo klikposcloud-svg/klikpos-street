@@ -53,18 +53,37 @@ export const TabletPosHeader: React.FC<TabletPosHeaderProps> = ({
     >
       {/* LADO IZQUIERDO: Logo KlikPOS Street + Acciones Principales */}
       <div className="flex items-center gap-2">
-        {/* Logo KlikPOS Street Vector & Clean Branding */}
+        {/* Logo KlikPOS Street Food Limpio (Sin recuadro) */}
         <div 
           onClick={onOpenMenu}
-          className="flex flex-col leading-none select-none cursor-pointer group pr-0.5 shrink-0"
-          title="KlikPOS Street"
+          className="flex flex-col leading-none select-none cursor-pointer group shrink-0"
+          title="KlikPOS Street Food"
         >
-          <div className="flex items-baseline tracking-tight font-black text-lg">
-            <span style={{ color: isLight ? '#0f172a' : '#ffffff' }}>Klik</span>
-            <span className="text-amber-500 group-hover:text-amber-400 transition-colors">POS</span>
+          <div className="flex items-baseline font-black text-lg tracking-tight leading-none">
+            <span 
+              className="klikpos-brand-klik"
+              style={{ 
+                color: '#0f172a',
+                WebkitTextStroke: isLight ? '0px transparent' : '0.6px rgba(255, 255, 255, 0.45)',
+                paintOrder: 'stroke fill',
+                textShadow: 'none'
+              }}
+            >
+              Klik
+            </span>
+            <span className="font-black" style={{ color: '#ef4444' }}>POS</span>
           </div>
-          <span className="text-[9px] font-extrabold text-amber-500/95 tracking-widest text-right -mt-0.5">
-            Street
+          <span 
+            className="klikpos-brand-street-food font-caveat text-[13px] font-bold tracking-normal leading-none -mt-0.5 select-none whitespace-nowrap inline-block"
+            style={{ 
+              fontFamily: "'Caveat', cursive, sans-serif",
+              color: '#ef4444',
+              transform: 'rotate(-2deg)', 
+              transformOrigin: 'left center',
+              whiteSpace: 'nowrap'
+            }}
+          >
+            Street Food
           </span>
         </div>
 
@@ -98,27 +117,27 @@ export const TabletPosHeader: React.FC<TabletPosHeaderProps> = ({
         </div>
       </div>
 
-      {/* CENTRO: Badge Tasa BCV Oficial (Una Sola Línea) */}
+      {/* CENTRO: Badge Tasa BCV Oficial Compacta y Equilibrada */}
       <div className="flex items-center justify-center mx-1 shrink-0">
         {isBcvEditing ? (
-          <div className="flex items-center gap-1 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 px-2.5 py-1 rounded-xl shadow-xs">
-            <span className="text-[11px] font-mono font-bold text-slate-400">Bs.</span>
+          <div className="flex items-center gap-1 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 px-2 py-0.5 rounded-full shadow-xs">
+            <span className="text-[10px] font-mono font-bold text-slate-400">Bs.</span>
             <input
               type="number"
               step="0.01"
               value={customBcvInput}
               onChange={(e) => onChangeCustomBcv(e.target.value)}
-              className="w-16 text-xs font-mono font-black text-slate-900 dark:text-white bg-transparent outline-none"
+              className="w-14 text-xs font-mono font-black text-slate-900 dark:text-white bg-transparent outline-none"
             />
             <button
               onClick={onSaveManualBcv}
-              className="px-1.5 py-0.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-[10px] font-black cursor-pointer"
+              className="px-1.5 py-0.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-full text-[9px] font-black cursor-pointer"
             >
               ✓
             </button>
             <button
               onClick={onCancelBcvEdit}
-              className="px-1 py-0.5 text-slate-400 text-[10px] cursor-pointer"
+              className="px-1 py-0.5 text-slate-400 text-[9px] cursor-pointer"
             >
               ✕
             </button>
@@ -126,15 +145,17 @@ export const TabletPosHeader: React.FC<TabletPosHeaderProps> = ({
         ) : (
           <div
             onClick={onStartBcvEdit}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border transition-all text-xs font-mono font-bold shadow-xs whitespace-nowrap cursor-pointer select-none ${
+            className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full border transition-all text-xs font-mono font-bold shadow-xs whitespace-nowrap cursor-pointer select-none ${
               isLight
                 ? 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-900'
                 : 'bg-slate-900/90 hover:bg-slate-850 border-slate-800 text-slate-100'
             }`}
             title="Toca para editar tasa BCV manualmente"
           >
-            <span className="text-[10px] font-black text-sky-500 tracking-wider">BCV:</span>
-            <span className="font-black text-xs" style={{ color: isLight ? '#0f172a' : '#38bdf8' }}>
+            <span className="text-[9px] font-black px-1 py-0.2 rounded bg-sky-500/15 text-sky-600 dark:text-sky-400 tracking-tight">
+              BCV
+            </span>
+            <span className="font-black text-[11px] font-mono tracking-tight" style={{ color: isLight ? '#0f172a' : '#38bdf8' }}>
               Bs. {bcvRate.toFixed(2)}
             </span>
             <button
@@ -147,7 +168,7 @@ export const TabletPosHeader: React.FC<TabletPosHeaderProps> = ({
               className="p-0.5 hover:text-sky-400 text-slate-400 transition-colors cursor-pointer"
               title="Actualizar tasa desde DolarAPI"
             >
-              <RefreshCw className={`w-3 h-3 ${isFetchingBcv ? 'animate-spin text-sky-400' : ''}`} />
+              <RefreshCw className={`w-2.5 h-2.5 ${isFetchingBcv ? 'animate-spin text-sky-400' : ''}`} />
             </button>
           </div>
         )}

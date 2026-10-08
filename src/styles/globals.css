@@ -1,8 +1,12 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&family=Caveat:wght@600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap');
+.font-caveat {
+  font-family: 'Caveat', cursive, sans-serif;
+}
 
 :root,
 [data-theme="light"] {
@@ -2614,26 +2618,16 @@ textarea,
   width: 100%;
 }
 
-/* Docker flotante adaptativo: Obsidian Dark Blue en modo nocturno, Blanco Cristal en modo diurno */
-html:not(.light) aside.street-floating-docker,
-html:not([data-theme="light"]) aside.street-floating-docker,
-html.dark aside.street-floating-docker,
-html[data-theme="dark"] aside.street-floating-docker {
-  background-color: #090d16 !important;
+/* Docker flotante translúcido moderno: 88% de opacidad (10% menos sólido) con desenfoque suave y contraste fino */
+aside.street-floating-docker,
+.street-floating-docker {
+  background-color: rgba(11, 15, 25, 0.88) !important;
   background-image: none !important;
   border: 1px solid rgba(255, 255, 255, 0.16) !important;
   color: #f8fafc !important;
-  box-shadow: 0 25px 60px -10px rgba(0, 0, 0, 0.95), inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.8) !important;
-}
-
-html.light aside.street-floating-docker,
-html[data-theme="light"] aside.street-floating-docker,
-html[data-canvas="light-graphite"] aside.street-floating-docker {
-  background-color: rgba(255, 255, 255, 0.96) !important;
-  background-image: none !important;
-  border: 1px solid rgba(15, 23, 42, 0.15) !important;
-  color: #0f172a !important;
-  box-shadow: 0 20px 45px -10px rgba(15, 23, 42, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 0 0 1px rgba(15, 23, 42, 0.08) !important;
+  box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.18), 0 0 0 1px rgba(0, 0, 0, 0.35) !important;
+  backdrop-filter: blur(16px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
 }
 
 aside.street-floating-docker button,
@@ -2678,14 +2672,28 @@ html[data-canvas="light-graphite"] #klikpos-street-root header,
   max-width: 100% !important;
 }
 
-/* Logo "Klik" con visibilidad garantizada según modo */
-#klikpos-street-header .klikpos-brand-klik {
-  color: #ffffff !important;
+/* Logo "Klik" con paleta oficial invariable: Negro pizarra (#0f172a) con trazo nítido en modo oscuro */
+#klikpos-street-header .klikpos-brand-klik,
+header#klikpos-street-header .klikpos-brand-klik,
+html.dark #klikpos-street-header .klikpos-brand-klik {
+  color: #0f172a !important;
+  -webkit-text-stroke: 0.6px rgba(255, 255, 255, 0.45) !important;
+  paint-order: stroke fill !important;
+  text-shadow: none !important;
 }
 html.light #klikpos-street-header .klikpos-brand-klik,
 html[data-canvas="light-graphite"] #klikpos-street-header .klikpos-brand-klik,
 #klikpos-street-root.light-mode #klikpos-street-header .klikpos-brand-klik {
   color: #0f172a !important;
+  -webkit-text-stroke: 0px transparent !important;
+  text-shadow: none !important;
+}
+
+/* Subtítulo "Street Food" invariable en Rojo Enérgico (#ef4444) */
+#klikpos-street-header .klikpos-brand-street-food,
+header#klikpos-street-header .klikpos-brand-street-food,
+.klikpos-brand-street-food {
+  color: #ef4444 !important;
 }
 
 /* Asegurar que la pantalla abarque el 100% sin margen o marco de caja negra */
@@ -2754,6 +2762,10 @@ html[data-canvas="obsidian"] #klikpos-street-main,
 }
 
 /* Anular retardos de transición en cambio de tema (0ms inmediato) */
+html.switching-theme,
+html.switching-theme *,
+html.switching-theme *::before,
+html.switching-theme *::after,
 #klikpos-street-root,
 #klikpos-street-main,
 #klikpos-street-header,
@@ -2762,6 +2774,7 @@ html[data-canvas="obsidian"] #klikpos-street-main,
 #klikpos-street-root aside,
 #klikpos-street-root nav {
   transition: none !important;
+  animation-duration: 0s !important;
 }
 
 /* =========================================================================

@@ -126,7 +126,7 @@ export default function ProductImageSearchModal({
       }
     };
 
-    // 1. Intento API local si existe (Desktop / Dev / Móvil)
+    // 1. Intento API local / servidor (Bing Images HD + DuckDuckGo con expansión culinaria)
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 8000);
@@ -142,49 +142,36 @@ export default function ProductImageSearchModal({
       }
     } catch {}
 
-    // 2. Wikipedia Español (Artículos gastronómicos con fotos de alta calidad)
-    try {
-      const wpUrl = `https://es.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(clean)}&gsrlimit=20&prop=pageimages&pithumbsize=480&format=json&origin=*`;
-      const res = await fetch(wpUrl);
-      if (res.ok) {
-        const data = await res.json();
-        const pages = Object.values(data.query?.pages || {});
-        const wpItems: ImageResult[] = pages
-          .filter((p: any) => p.thumbnail?.source)
-          .map((p: any) => ({
-            title: p.title || clean,
-            url: p.thumbnail.source,
-            thumbnail: p.thumbnail.source,
-            source: 'Wikipedia'
-          }));
-        addResults(wpItems);
-      }
-    } catch {}
+    const EXCLUDED_COMMONS_PATTERNS = /\b(portrait|person|people|politician|statue|monument|tomb|cemetery|grave|church|castle|palace|mayor|flag|coat of arms|wappen|heraldry|map|karte|plan|building|street|ruins|bishop|president|general|soldier|author|actor|actress|judge|memorial|facade|cathedral|archaeological|bust|bronze)\b/i;
 
-    // 3. Wikimedia Commons (Filtrando fotos reales con límite ampliado a 40)
-    try {
-      const commonsUrl = `https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(clean)}&gsrlimit=40&gsrnamespace=6&prop=imageinfo&iiprop=url|thumburl&iiurlwidth=400&format=json&origin=*`;
-      const res = await fetch(commonsUrl);
-      if (res.ok) {
-        const data = await res.json();
-        const pages = Object.values(data.query?.pages || {});
-        const commItems: ImageResult[] = pages
-          .map((page: any) => {
-            const title = (page.title || '').toLowerCase();
-            const isImage = title.endsWith('.jpg') || title.endsWith('.jpeg') || title.endsWith('.png') || title.endsWith('.webp');
-            const info = page.imageinfo?.[0];
-            if (!isImage || (!info?.thumburl && !info?.url)) return null;
-            return {
-              title: (page.title || clean).replace(/^File:/i, '').replace(/\.[^.]+$/, ''),
-              url: info.thumburl || info.url,
-              thumbnail: info.thumburl || info.url,
-              source: 'Web Wikimedia'
-            };
-          })
-          .filter(Boolean) as ImageResult[];
-        addResults(commItems);
-      }
-    } catch {}
+    // 2. Fallback complementario solo si la API principal devolvió pocos resultados
+    if (foundResults.length < 15) {
+      // Wikimedia Commons filtrado
+      try {
+        const commonsUrl = `https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(clean + ' food')}&gsrlimit=25&gsrnamespace=6&prop=imageinfo&iiprop=url|thumburl&iiurlwidth=400&format=json&origin=*`;
+        const res = await fetch(commonsUrl);
+        if (res.ok) {
+          const data = await res.json();
+          const pages = Object.values(data.query?.pages || {});
+          const commItems: ImageResult[] = pages
+            .map((page: any) => {
+              const title = (page.title || '').toLowerCase();
+              if (EXCLUDED_COMMONS_PATTERNS.test(title)) return null;
+              const isImage = title.endsWith('.jpg') || title.endsWith('.jpeg') || title.endsWith('.png') || title.endsWith('.webp');
+              const info = page.imageinfo?.[0];
+              if (!isImage || (!info?.thumburl && !info?.url)) return null;
+              return {
+                title: (page.title || clean).replace(/^File:/i, '').replace(/\.[^.]+$/, ''),
+                url: info.thumburl || info.url,
+                thumbnail: info.thumburl || info.url,
+                source: 'Web HD'
+              };
+            })
+            .filter(Boolean) as ImageResult[];
+          addResults(commItems);
+        }
+      } catch {}
+    }
 
     // 4. Open Food Facts (Para códigos de barra y productos comerciales)
     try {
@@ -360,19 +347,19 @@ export default function ProductImageSearchModal({
           </button>
         </div>
 
-        {/* NAVEGACIÓN POR PESTAÑAS (ALTO CONTRASTE EXTERIOR) */}
-        <div className="flex border-b border-slate-700 bg-slate-950 shrink-0">
+        {/* NAVEGACIÓN POR PESTAÑAS (RESPONSIVE, SCROLLABLE & TEXTOS CONCISOS) */}
+        <div className="flex border-b border-slate-700 bg-slate-950 shrink-0 overflow-x-auto no-scrollbar scroll-smooth">
           <button
             type="button"
             onClick={() => setActiveTab('presets')}
-            className={`flex-1 py-3 px-2.5 text-xs font-black flex items-center justify-center gap-2 border-b-2 transition-all cursor-pointer ${
+            className={`flex-1 min-w-[95px] py-3 px-3 text-xs font-black flex items-center justify-center gap-1.5 border-b-2 transition-all cursor-pointer whitespace-nowrap ${
               activeTab === 'presets'
                 ? 'border-amber-400 text-amber-200 bg-amber-500/25 shadow-xs'
                 : 'border-transparent text-slate-300 hover:text-white hover:bg-slate-900'
             }`}
           >
             <Flame className="w-4 h-4 text-amber-400 shrink-0" />
-            <span className="truncate">Galería Street (16 HD)</span>
+            <span>Galería</span>
           </button>
 
           <button
@@ -381,27 +368,27 @@ export default function ProductImageSearchModal({
               setActiveTab('web');
               if (query && results.length === 0) performSearch(query);
             }}
-            className={`flex-1 py-3 px-2.5 text-xs font-black flex items-center justify-center gap-2 border-b-2 transition-all cursor-pointer ${
+            className={`flex-1 min-w-[95px] py-3 px-3 text-xs font-black flex items-center justify-center gap-1.5 border-b-2 transition-all cursor-pointer whitespace-nowrap ${
               activeTab === 'web'
                 ? 'border-sky-400 text-sky-100 bg-sky-600/30 shadow-xs'
                 : 'border-transparent text-slate-300 hover:text-white hover:bg-slate-900'
             }`}
           >
             <Globe className="w-4 h-4 text-sky-400 shrink-0" />
-            <span className="truncate">Búsqueda Web (+30 Fotos)</span>
+            <span>Web</span>
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab('url')}
-            className={`flex-1 py-3 px-2.5 text-xs font-black flex items-center justify-center gap-2 border-b-2 transition-all cursor-pointer ${
+            className={`flex-1 min-w-[95px] py-3 px-3 text-xs font-black flex items-center justify-center gap-1.5 border-b-2 transition-all cursor-pointer whitespace-nowrap ${
               activeTab === 'url'
                 ? 'border-emerald-400 text-emerald-100 bg-emerald-600/30 shadow-xs'
                 : 'border-transparent text-slate-300 hover:text-white hover:bg-slate-900'
             }`}
           >
             <LinkIcon className="w-4 h-4 text-emerald-400 shrink-0" />
-            <span className="truncate">URL Directa</span>
+            <span>URL</span>
           </button>
         </div>
 

@@ -36,26 +36,40 @@ export function getMachineHWID(): string {
   const nav = typeof navigator !== 'undefined' ? navigator : ({} as any);
   const scr = typeof window !== 'undefined' && window.screen ? window.screen : ({} as any);
 
+  // Obtener WebGL GPU renderer si está disponible en el WebView/Browser
+  let gpuRenderer = 'gpu_unknown';
+  try {
+    const canvas = document.createElement('canvas');
+    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+    if (gl) {
+      const debugInfo = (gl as any).getExtension('WEBGL_debug_renderer_info');
+      if (debugInfo) {
+        gpuRenderer = (gl as any).getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) || 'gpu_gl';
+      }
+    }
+  } catch {}
+
   const signals = [
     nav.userAgent || 'generic_user_agent',
     nav.platform || 'win32',
     nav.hardwareConcurrency || 4,
-    (scr.width || 1920) + 'x' + (scr.height || 1080) + 'x' + (scr.colorDepth || 24),
+    (scr.width || 1920) + 'x' + (scr.height || 1080) + 'x' + (scr.colorDepth || 24) + 'x' + (typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1),
     nav.language || 'es-VE',
     new Date().getTimezoneOffset(),
-    'VENEMATIC_DESKTOP_TAURI_WIN_SALT_99',
+    gpuRenderer,
+    'KLIKPOS_DETERMINISTIC_HARDWARE_SALT_2026',
   ].join('###');
 
   const part1 = fnv1a(signals + '_p1').toString(16).toUpperCase().padStart(8, '0');
   const part2 = fnv1a(signals + '_p2').toString(16).toUpperCase().padStart(8, '0');
+  const seedHash = fnv1a(signals + '_seed').toString(16).toUpperCase().padStart(4, '0');
 
-  // Si no hay semilla de instalación previa, generar una fija de 4 caracteres
-  const seed = Math.floor(1000 + Math.random() * 9000).toString(16).toUpperCase();
-
-  const hwid = `VN${seed.slice(0, 2)}-${part1.slice(0, 4)}-${part2.slice(0, 4)}-${part1.slice(4, 8)}`;
+  // Semilla fija 100% determinista ligada al hardware (sobrevive desinstalaciones completas)
+  const hwid = `VN${seedHash.slice(0, 2)}-${part1.slice(0, 4)}-${part2.slice(0, 4)}-${part1.slice(4, 8)}`;
 
   try {
     localStorage.setItem(HWID_STORAGE_KEY, hwid);
+    localStorage.setItem('klikpos_terminal_hwid', hwid);
   } catch {}
 
   return hwid;

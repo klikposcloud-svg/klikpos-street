@@ -13,6 +13,7 @@ import {
 } from 'firebase/firestore';
 import { db as firestoreDb, isFirebaseConfigured, getActiveFirebaseConfig } from './config';
 import { db as localDb, LocalSale, LocalProduct } from '@/lib/db';
+import { getMachineHWID } from '@/lib/licensing/hwid';
 
 export type SyncState = 'synced' | 'syncing' | 'offline' | 'unconfigured' | 'error';
 
@@ -38,6 +39,11 @@ class CloudSyncService {
       const savedHwid = localStorage.getItem('klikpos_terminal_hwid') || localStorage.getItem('venematic_terminal_hwid') || localStorage.getItem('venematic_store_id');
       if (savedHwid) {
         this.currentStoreId = savedHwid;
+      } else {
+        const hwid = getMachineHWID();
+        if (hwid && hwid.startsWith('VN')) {
+          this.currentStoreId = hwid;
+        }
       }
       this.initListeners();
     }
@@ -52,6 +58,11 @@ class CloudSyncService {
       const savedHwid = localStorage.getItem('klikpos_terminal_hwid') || localStorage.getItem('venematic_terminal_hwid') || localStorage.getItem('venematic_store_id');
       if (savedHwid) {
         this.currentStoreId = savedHwid;
+      } else {
+        const hwid = getMachineHWID();
+        if (hwid && hwid.startsWith('VN')) {
+          this.currentStoreId = hwid;
+        }
       }
     }
     return this.currentStoreId;
@@ -454,6 +465,106 @@ class CloudSyncService {
     } catch (error) {
       console.error('[CloudSync] Error descargando productos de Firestore:', error);
       return 0;
+    }
+  }
+
+  /**
+   * Sube o actualiza un producto individual de inmediato a Firestore bajo el HWID determinista
+   */
+  public async pushSingleProduct(prod: {
+    id?: string | number;
+    barcode?: string;
+    sku?: string;
+    name: string;
+    category?: string;
+    priceUSD: number;
+    costUSD?: number;
+    stock?: number;
+    minStock?: number;
+    unit?: string;
+    image?: string;
+    description?: string;
+    tag?: string;
+    prepTime?: string;
+    isActive?: boolean;
+    updatedAt?: string;
+  }): Promise<boolean> {
+    if (!isFirebaseConfigured() || (typeof navigator !== 'undefined' && !navigator.onLine)) {
+      return false;
+    }
+
+    try {
+      const storeId = this.getStoreId();
+      const docId = (prod.barcode || prod.sku || (prod.id ? String(prod.id) : `PROD-${Date.now()}`)).trim();
+      const prodRef = doc(firestoreDb, `stores/${storeId}/products`, docId);
+
+      await setDoc(
+        prodRef,
+        {
+          id: docId,
+          storeId: storeId,
+          barcode: prod.barcode || prod.sku || docId,
+          sku: prod.sku || prod.barcode || docId,
+          name: prod.name,
+          category: prod.category || 'General',
+          priceUSD: Number(prod.priceUSD) || 0,
+          costUSD: Number(prod.costUSD) || 0,
+          stock: prod.stock ?? 999,
+          minStock: prod.minStock || 0,
+          unit: prod.unit || 'UND',
+          image: prod.image || '',
+          description: prod.description || '',
+          tag: prod.tag || '',
+          prepTime: prod.prepTime || 'Inmediato',
+          updatedAt: prod.updatedAt || new Date().toISOString(),
+          isActive: prod.isActive ?? true,
+        },
+        { merge: true }
+      );
+      return true;
+    } catch (err) {
+      console.warn('[CloudSync] Aviso al subir producto a Firestore:', err);
+      return false;
+    }
+  }
+
+  /**
+   * Descarga todos los productos de este terminal directamente desde Firestore para Tablet POS
+   */
+  public async pullTabletProducts(): Promise<any[]> {
+    if (!isFirebaseConfigured() || (typeof navigator !== 'undefined' && !navigator.onLine)) {
+      return [];
+    }
+
+    try {
+      const storeId = this.getStoreId();
+      const colRef = collection(firestoreDb, `stores/${storeId}/products`);
+      const snapshot = await getDocs(colRef);
+
+      if (snapshot.empty) return [];
+
+      const prods: any[] = [];
+      for (const docSnap of snapshot.docs) {
+        const data = docSnap.data();
+        if (data && data.name) {
+          prods.push({
+            id: data.id || docSnap.id,
+            name: data.name,
+            category: data.category || 'General',
+            priceUSD: Number(data.priceUSD) || 0,
+            sku: data.sku || data.barcode || docSnap.id,
+            tag: data.tag || '⭐ Guardado',
+            prepTime: data.prepTime || 'Inmediato',
+            image: data.image || '/packs/comida-street/hamburguesa.png',
+            description: data.description || `${data.name} - Calidad garantizada.`,
+            stock: data.stock ?? 999,
+          });
+        }
+      }
+      return prods;
+    } catch (err) {
+      console.warn('[CloudSync] Aviso descargando productos para Tablet POS:', err);
+      return [];
     }
   }
 
