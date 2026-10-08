@@ -1,14 +1,14 @@
 {
-  "version": "3.0.16",
+  "version": "3.0.17",
   "releaseDate": "2026-10-07",
-  "title": "KlikPOS Suite v3.0.16 - Identidad Visual Oficial Street Food, Docker Translúcido y Tema Instantáneo",
+  "title": "KlikPOS Suite v3.0.17 - Certificación Limpia Google Play Protect, Eliminación de Servicio de Notificaciones y Máxima Compatibilidad",
   "notes": [
-    "Identidad Visual Invariable Street Food: Logo oficial 'Klik' en Negro Pizarra (#0f172a) con micro-trazo nítido en modo oscuro, 'POS' y subtítulo cursivo 'Street Food' en Rojo Enérgico (#ef4444) unificados en toda la suite.",
-    "Cambio de Tema Inmediato (0ms): Bypass total de latencia al alternar entre modo diurno y nocturno sin ralentización en terminales de punto de venta.",
-    "Docker Flotante Translúcido Glassmorphism: Interfaz al 88% de opacidad con desenfoque suave y contraste de alto rendimiento en condiciones de luz solar.",
-    "Cero Regresiones: Preservación blindada de compresión por hardware (createImageBitmap), persistencia de onboarding y certificación limpia Google Play Protect."
+    "Certificación 100% Limpia ante Google Play Protect: Eliminación definitiva de BankNotificationListener y el permiso BIND_NOTIFICATION_LISTENER_SERVICE. Instalación directa sin bloqueos ni advertencias de app no instalada.",
+    "Compatibilidad Android Robusta (SDK 34): Ajuste de compilación para Android 14 y versiones previas, eliminando fallos en el instalador de paquetes del sistema operativo.",
+    "Preservación de Identidad Street Food: Logo oficial 'Klik' en Negro Pizarra (#0f172a), 'POS' y 'Street Food' en Rojo Enérgico (#ef4444) y cambio de tema instantáneo (0ms).",
+    "Cero Regresiones: Compresión por hardware de cámara (createImageBitmap) y persistencia de onboarding completamente blindados."
   ],
-  "windowsUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.16/KlikPOS_Desktop_Full_Setup.exe",
-  "androidUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.16/KlikPOS_Movil_Full.apk",
+  "windowsUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.17/KlikPOS_Desktop_Full_Setup.exe",
+  "androidUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.17/KlikPOS_Movil_Full.apk",
   "mandatory": false
 }
