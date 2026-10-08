@@ -47,6 +47,7 @@ interface StreetAmbassadorLicenseModalProps {
   storeName?: string;
   rif?: string;
   initialTab?: 'plans' | 'ambassador';
+  isLocked?: boolean;
   onLicenseActivated?: () => void;
 }
 
@@ -57,6 +58,7 @@ export default function StreetAmbassadorLicenseModal({
   storeName = 'Mi Negocio',
   rif = 'Pendiente',
   initialTab = 'plans',
+  isLocked = false,
   onLicenseActivated,
 }: StreetAmbassadorLicenseModalProps) {
   const [activeTab, setActiveTab] = useState<'plans' | 'ambassador'>('plans');
@@ -180,7 +182,7 @@ export default function StreetAmbassadorLicenseModal({
       storeName: newRefStore.trim(),
       date: 'Hoy (Registrado)',
       status: 'paid',
-      planPaid: newRefPlan === 'cash' ? 'Contado $15' : 'Financiado $25',
+      planPaid: newRefPlan === 'cash' ? 'Contado $15' : 'Financiado $20',
       earnedAmount: 5.00,
     };
 
@@ -211,9 +213,9 @@ export default function StreetAmbassadorLicenseModal({
 
   const generateWhatsAppUrl = () => {
     const cleanHwid = hwid.trim().toUpperCase();
-    let modeText = 'Pago Único de Contado ($15 USD - Ahorro de $10)';
+    let modeText = 'Pago Único de Contado ($15 USD - Ahorro de $5)';
     if (paymentOption === 'credit') {
-      modeText = 'Plan Financiado a Crédito ($25 USD: $10 hoy + $15 a los 15 días)';
+      modeText = 'Plan Financiado a Crédito ($20 USD: $10 hoy + $10 a la quincena)';
     } else if (paymentOption === 'vip') {
       modeText = 'Plan Full VIP Blindado ($50 USD: $25 hoy + $25 a la quincena, con 24 meses de Respaldo Cloud)';
     }
@@ -282,9 +284,32 @@ export default function StreetAmbassadorLicenseModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/90 backdrop-blur-md select-none">
-      <div className="relative w-full max-w-2xl max-h-[92vh] rounded-3xl border border-slate-800 shadow-2xl flex flex-col overflow-hidden bg-[#070a12] text-slate-100">
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/90 backdrop-blur-md select-none"
+      onClick={isLocked ? undefined : onClose}
+    >
+      <div 
+        className="relative w-full max-w-2xl max-h-[92vh] rounded-3xl border border-slate-800 shadow-2xl flex flex-col overflow-hidden bg-[#070a12] text-slate-100"
+        onClick={(e) => e.stopPropagation()}
+      >
         
+        {/* BANNER DE BLOQUEO ESTRICTO TRAS 3 HORAS DE PRUEBA */}
+        {isLocked && (
+          <div className="mx-5 mt-4 p-3.5 rounded-2xl bg-rose-950/90 border-2 border-rose-500 shadow-xl flex items-start gap-3 text-rose-100 shrink-0">
+            <div className="w-8 h-8 rounded-xl bg-rose-500 text-white flex items-center justify-center shrink-0 shadow-md">
+              <Lock className="w-4 h-4 stroke-[2.5]" />
+            </div>
+            <div className="flex-1 text-xs">
+              <strong className="text-white font-black text-xs sm:text-sm block mb-0.5 uppercase tracking-wide">
+                🔒 Período de Evaluación de 3 Horas Finalizado
+              </strong>
+              <p className="text-rose-200 text-[11px] font-medium leading-relaxed">
+                Para continuar facturando y operando en tu negocio, activa tu licencia oficial seleccionando tu plan preferido a continuación. Tus productos, precios y ventas registradas están <strong className="text-white underline">100% seguros y respaldados</strong>.
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* CABECERA CON SELECTOR DE PESTAÑAS (PLANES vs EMBAJADORES) */}
         <div className="px-5 py-4 border-b border-slate-800 shrink-0 bg-[#090d16] space-y-3">
           <div className="flex items-center justify-between">
@@ -302,13 +327,15 @@ export default function StreetAmbassadorLicenseModal({
               </div>
             </div>
 
-            <button
-              onClick={onClose}
-              className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white transition-all active:scale-90 cursor-pointer"
-              title="Cerrar modal"
-            >
-              <X className="w-5 h-5 stroke-[2.5]" />
-            </button>
+            {!isLocked && (
+              <button
+                onClick={onClose}
+                className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white transition-all active:scale-90 cursor-pointer"
+                title="Cerrar modal"
+              >
+                <X className="w-5 h-5 stroke-[2.5]" />
+              </button>
+            )}
           </div>
 
           {/* SELECTOR DE PESTAÑAS ELEGANTES */}
@@ -430,11 +457,11 @@ export default function StreetAmbassadorLicenseModal({
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-xs font-black text-white">Financiado</span>
                       <span className="px-1.5 py-0.5 rounded text-[9px] font-black bg-sky-500/20 text-sky-400 border border-sky-500/30">
-                        A Crédito
+                        2 CUOTAS
                       </span>
                     </div>
-                    <div className="text-base font-black font-mono text-sky-400">$25 USD</div>
-                    <p className="text-[10px] text-slate-200 font-medium mt-1">$10 hoy + $15 en 15 días.</p>
+                    <div className="text-base font-black font-mono text-sky-400">$20 USD</div>
+                    <p className="text-[10px] text-slate-200 font-medium mt-1">$10 hoy + $10 a la quincena (15 días).</p>
                   </button>
 
                   <button
@@ -720,7 +747,7 @@ export default function StreetAmbassadorLicenseModal({
                           className="px-3 py-2 rounded-xl text-xs bg-slate-900 border border-slate-700 text-white outline-none"
                         >
                           <option value="cash">Plan Contado $15</option>
-                          <option value="credit">Plan Crédito $25</option>
+                          <option value="credit">Plan Crédito $20 ($10 hoy + $10 quincena)</option>
                         </select>
                         <button
                           type="submit"

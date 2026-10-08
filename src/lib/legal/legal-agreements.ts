@@ -67,6 +67,14 @@ Dicha interconexión se ejecuta de forma cifrada y confidencial, garantizando en
         title: '4. Alcance por Puesto / Estación de Trabajo (HWID)',
         content: `Cada licencia emitida se encuentra unívocamente vinculada a la huella criptográfica de hardware (Hardware ID / HWID) de la terminal registrada. La activación es intransferible entre diferentes computadores físicos. El intento de clonación de seriales o suplantación de identidad de hardware activará automáticamente los mecanismos de defensa tecnológica del sistema.`,
       },
+      {
+        title: '5. Protección de Marcas, Nombre Comercial y Prohibición Absoluta de Clonación (Anti-Cloning & Trademark Shield)',
+        content: `Quedan expresamente reservados todos los derechos de propiedad industrial, intelectual y de autor sobre la marca, nombre comercial, denominaciones y diseño de interfaz:
+a) Signos Distintivos y Nombre de la App: Las marcas y nombres comerciales "KLIKPOS", "KLIKPOS STREET", "KLIKPOS MÓVIL", "KLIKPOS CLOUD", así como sus logotipos, isotipos, lemas comerciales y diseño visual de interfaz (Trade Dress) son propiedad exclusiva e inalienable de EL PROVEEDOR. Queda terminantemente prohibido su uso, reproducción, imitación o registro no autorizado, tanto idéntico como confusamente similar.
+b) Prohibición Absoluta de Copia de Código y Clonación: Queda terminantemente prohibida la copia, clonación total o parcial, extracción de código fuente, scripts, bases de datos o binarios, así como la reempaquetación o distribución del software bajo esquemas de "marca blanca" (white-label) no licenciados por escrito.
+c) Acciones Penales y Resarcimiento por Daños: La violación a esta cláusula faculta a EL PROVEEDOR a solicitar de inmediato el bloqueo remoto de terminales, medidas cautelares de secuestro de equipos informáticos, demandas por competencia desleal y acusación penal tipificada en la Ley de Propiedad Industrial y la Ley sobre el Derecho de Autor.`,
+        highlight: true,
+      },
     ],
   },
 
@@ -126,20 +134,42 @@ Es responsabilidad exclusiva del comerciante dar estricto cumplimiento a las pro
         title: '2. Continuidad Operativa, Respaldo y Fluctuaciones Eléctricas',
         content: `El software está diseñado con tecnología Offline-First para garantizar la venta ininterrumpida aun sin internet. No obstante, EL LICENCIATARIO es responsable de conectar sus terminales a sistemas de alimentación ininterrumpida (UPS regulados) para proteger el hardware contra sobretensiones y apagones. El servicio de sincronización silenciosa (Silent Cloud Sync) actúa como mecanismo de respaldo de contingencia ante fallas de disco duro o contingencias físicas.`,
       },
+      {
+        title: '3. Planes Comerciales Financiados, Cuotas y Suspensión por Mora (General Legal MSA)',
+        content: `En caso de adquisiciones bajo planes de pago fraccionado, crédito o financiamiento (ej. $20 USD con inicial de $10 USD y saldo quincenal de $10 USD a los 15 días continuos):
+a) La falta de pago oportuno de la cuota vencida faculta de pleno derecho a EL PROVEEDOR para suspender inmediatamente el uso de la licencia y la emisión de ventas mediante el bloqueo criptográfico del software.
+b) EL LICENCIATARIO reconoce y acepta que dicha suspensión técnica constituye el ejercicio legítimo del derecho de retención y resolución contractual por mora, no dando lugar a reclamos por lucro cesante, interrupción comercial ni indemnización alguna.
+c) Tras la liquidación del saldo pendiente, la terminal será reactivada automáticamente sin pérdida de los datos históricos guardados en el equipo.`,
+        highlight: true,
+      },
+      {
+        title: '4. Limitación Extrema de Responsabilidad (Limitation of Liability)',
+        content: `EN LA MÁXIMA MEDIDA PERMITIDA POR LA LEY APLICABLE, EL PROVEEDOR NO SERÁ RESPONSABLE ANTE EL LICENCIATARIO NI ANTE TERCEROS POR DAÑOS INDIRECTOS, PUNITIVOS, INCIDENTALES, PÉRDIDA DE BENEFICIOS, LUCRO CESANTE, PÉRDIDA DE INGRESOS COMERCIALES, CORTE DE SUMINISTRO ELÉCTRICO, CAÍDAS DE TELECOMUNICACIONES O INTERNET, O PARALIZACIÓN DE OPERACIONES.
+La responsabilidad patrimonial total acumulada de EL PROVEEDOR derivada de cualquier controversia estará limitada, en todos los casos, al importe efectivamente pagado por EL LICENCIATARIO por concepto de la licencia en los últimos tres (3) meses.`,
+        highlight: true,
+      },
+      {
+        title: '5. Obligación de Indemnidad ante Terceros y Entes Públicos',
+        content: `EL LICENCIATARIO se compromete a defender, indemnizar y mantener indemne a EL PROVEEDOR, sus programadores, directores y distribuidores autorizados, frente a cualquier demanda, procedimiento, sanción fiscal, reclamo laboral o investigación tributaria originada por el uso indebido del software, omisión de deberes formales ante el SENIAT, adulteración de datos contables o incumplimiento de leyes de comercio.`,
+      },
     ],
   },
 
   privacy: {
     id: 'privacy',
-    title: 'Aviso de Privacidad y Soberanía de Datos Comerciales',
+    title: 'Aviso de Privacidad, Soberanía de Datos y Tratamiento Efímero (DPA)',
     shortTitle: 'Privacidad y Datos',
     badge: 'Protección de Datos',
-    lastUpdated: 'Septiembre 2026',
+    lastUpdated: 'Octubre 2026',
     sections: [
       {
         title: '1. Soberanía y Confidencialidad de la Información Comercial',
         content: `Toda la información correspondiente a balances de caja, montos de facturación interna, listas de proveedores y márgenes privados reside de manera local y encriptada en la base de datos de EL LICENCIATARIO. EL PROVEEDOR NO VENDE NI COMERCIALIZA datos privados ni registros financieros con terceros.`,
         highlight: true,
+      },
+      {
+        title: '2. Tratamiento Efímero de Conciliación Bancaria y SMS Pago Móvil',
+        content: `Para la conciliación automatizada de pagos móviles en dispositivos Android, la lectura de notificaciones bancarias se procesa de forma estrictamente local y en memoria volátil efímera (con purga automática cada 10 minutos). Ningún SMS, mensaje personal o dato de cuenta bancaria es transmitido ni almacenado en servidores externos de EL PROVEEDOR, preservando íntegramente la privacidad del titular del terminal.`,
       },
     ],
   },

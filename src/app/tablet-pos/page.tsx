@@ -2955,7 +2955,7 @@ export default function TabletMobilePosPage() {
         {/* VISTA 5: PASARELA DE COBRO COMPLETA (CLIENTE + PAGO MÓVIL + VUELTO)      */}
         {/* ======================================================================= */}
         {activeTab === 'cobro' && (
-          <div className="flex-1 min-h-0 h-full overflow-y-auto scrollbar-none pb-36">
+          <div className="flex-1 min-h-0 h-full flex flex-col overflow-hidden">
             <PosErrorBoundary fallbackTitle="Pasarela de Cobro KlikPOS" onReset={() => setActiveTab('menu')}>
               <UnifiedDirectCheckout
                 isLight={isLight}
@@ -2964,6 +2964,8 @@ export default function TabletMobilePosPage() {
                 bcvRate={bcvRate}
                 totalItems={totalItems}
                 primaryColor={currentPal.primary}
+                isTrialExpired={Boolean(trialState?.isExpired && !trialState?.isLicensed)}
+                onOpenLicenseModal={() => setShowStreetAmbassadorModal(true)}
                 selectedCustomer={selectedCustomer}
                 onOpenCustomerModal={() => setShowCustomerModal(true)}
                 fulfillmentMode={fulfillmentMode}
@@ -3280,7 +3282,7 @@ export default function TabletMobilePosPage() {
               >
                 <div className="flex items-center gap-2">
                   <ShieldCheck className="w-4 h-4 text-amber-500 animate-pulse" />
-                  <span className={isLight ? 'text-amber-950 font-black' : 'text-amber-100 font-bold'}>Planes Comerciales ($15 / $25 / $50)</span>
+                  <span className={isLight ? 'text-amber-950 font-black' : 'text-amber-100 font-bold'}>Planes Comerciales ($15 / $20 / $50)</span>
                 </div>
                 <span className={`text-[10px] font-mono font-black px-2 py-0.5 rounded-md ${
                   isLight ? 'bg-amber-200 text-amber-950 border border-amber-400' : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
@@ -4210,11 +4212,15 @@ export default function TabletMobilePosPage() {
       />
 
       {/* ========================================================================= */}
-      {/* 14B. MODAL DE PLANES COMERCIALES & EMBAJADORES ($15 / $25 / $50)          */}
+      {/* 14B. MODAL DE PLANES COMERCIALES & EMBAJADORES ($15 / $20 / $50)          */}
       {/* ========================================================================= */}
       <StreetAmbassadorLicenseModal
         isOpen={showStreetAmbassadorModal}
         onClose={() => {
+          if (trialState?.isExpired && !trialState?.isLicensed) {
+            // BLOQUEO ESTRICTO: NO SE PERMITE CERRAR SI LA PRUEBA ESTÁ EXPIRADA Y NO TIENE LICENCIA
+            return;
+          }
           setShowStreetAmbassadorModal(false);
           userDismissedTrialModalRef.current = true;
           try {
@@ -4226,6 +4232,7 @@ export default function TabletMobilePosPage() {
         storeName={companyInfo?.name || "KlikPOS Street Negocio"}
         rif={companyInfo?.rif || "STREET"}
         initialTab={ambassadorInitialTab}
+        isLocked={Boolean(trialState?.isExpired && !trialState?.isLicensed)}
         onLicenseActivated={() => {
           userDismissedTrialModalRef.current = false;
           setShowStreetAmbassadorModal(false);

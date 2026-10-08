@@ -1,11 +1,22 @@
 /**
- * MARCO LEGAL, CONTRATO DE LICENCIA DE USUARIO FINAL (EULA),
- * TÉRMINOS Y CONDICIONES Y POLÍTICA DE PRIVACIDAD
- * VENEMATIC POS / KLIKPOS / KLIKO
+ * MARCO LEGAL, CONTRATO DE PRESTACIÓN DE SERVICIOS TECNOLÓGICOS,
+ * LICENCIAMIENTO DE USUARIO FINAL (EULA), NORMAS ANTIPIRATERÍA Y TRATAMIENTO DE DATOS
+ * KLIKPOS ENTERPRISE / KLIKPOS CLOUD
+ * 
+ * Basado en la Legislación Venezolana:
+ * - Ley sobre el Derecho de Autor (Gaceta Oficial N° 4.638 Extraordinario)
+ * - Ley Especial contra los Delitos Informáticos (Gaceta Oficial N° 37.313)
+ * - Ley de Mensajes de Datos y Firmas Electrónicas (Gaceta Oficial N° 37.148)
+ * - Código de Comercio de Venezuela (Contratos de Servicios Mercantiles)
+ * 
+ * Y Convenios Internacionales:
+ * - Convenio de Berna para la Protección de las Obras Literarias y Artísticas
+ * - Tratado de la OMPI sobre Derecho de Autor (WIPO Copyright Treaty - WCT)
+ * - Digital Millennium Copyright Act (DMCA) - Protección contra Elusión Tecnológica
  */
 
 export interface LegalDocument {
-  id: 'eula' | 'terms' | 'privacy' | 'seniat_hardware';
+  id: 'eula' | 'terms' | 'privacy' | 'security_anti_piracy' | 'saas_service';
   title: string;
   shortTitle: string;
   badge: string;
@@ -20,96 +31,145 @@ export interface LegalDocument {
 export const LEGAL_DOCUMENTS: Record<string, LegalDocument> = {
   eula: {
     id: 'eula',
-    title: 'Contrato de Licencia de Uso de Software (EULA)',
+    title: 'Contrato de Licencia de Uso y Servicios Tecnológicos (EULA)',
     shortTitle: 'Licencia EULA',
     badge: 'Propiedad Intelectual',
     lastUpdated: 'Septiembre 2026',
     sections: [
       {
-        title: '1. Objeto y Naturaleza de la Licencia',
-        content: `El presente Contrato de Licencia de Usuario Final regula el uso del sistema comercial VENEMATIC POS (en adelante, "EL SOFTWARE"). Al instalar, registrar, ingresar clave de activación o utilizar EL SOFTWARE, el Comerciante o Empresa (en adelante, "EL LICENCIATARIO") acepta quedar expresamente vinculado por los presentes términos.
+        title: '1. Naturaleza del Contrato: Prestación de Servicio Tecnológico y Licencia de Uso (No Venta)',
+        content: `El presente instrumento regula la relación entre EL PROVEEDOR TECNOLÓGICO y el titular del establecimiento comercial o persona natural/jurídica (en adelante, "EL LICENCIATARIO / USUARIO").
+        
+SE DECLARA Y ESTIPULA DE FORMA EXPRESA E INEQUÍVOCA QUE BAJO NINGÚN CONCEPTO SE EFECTÚA LA VENTA, TRANSFERENCIA DE DOMINIO NI CESIÓN DE DERECHOS PATRIMONIALES DEL SOFTWARE O CÓDIGO FUENTE. 
 
-SE ESTIPULA DE MANERA TAJANTE QUE EL SOFTWARE NO SE VENDE, SE LICENCIA. EL LICENCIATARIO no adquiere derecho de propiedad, título de dominio ni copropiedad sobre el código fuente, diseño, arquitectura, marcas ni patentes del software, adquiriendo exclusivamente un derecho limitado, no exclusivo, intransferible y revocable de uso comercial en las condiciones aquí pactadas.`,
+El objeto contractual consiste única y exclusivamente en la PRESTACIÓN DE UN SERVICIO DIGITAL DE GESTIÓN COMERCIAL y el otorgamiento de una LICENCIA DE USO temporal, limitada, no exclusiva, intransferible y revocable para operar la plataforma KLIKPOS en los puestos de trabajo autorizados. EL PROVEEDOR conserva en todo momento la titularidad total de la propiedad intelectual, algoritmos, bases de datos y marcas registradas al amparo de la Ley sobre el Derecho de Autor y el Convenio de Berna.`,
         highlight: true,
       },
       {
-        title: '2. Restricciones Estrictas de Uso y Anti-Ingeniería Inversa',
-        content: `Queda terminantemente prohibido a EL LICENCIATARIO, sus empleados o terceros:
-a) Modificar, descompilar, realizar ingeniería inversa, desensamblar o intentar extraer el código fuente de EL SOFTWARE o cualquiera de sus módulos.
-b) Eludir, vulnerar o alterar los mecanismos de validación criptográfica, identificación de hardware (HWID) o control de seriales de activación.
-c) Alquilar, arrendar, sublicenciar, revender, redistribuir, ceder o compartir las credenciales de activación con terceros o computadores no autorizados.
-d) Utilizar el software para fines ilícitos o contrarios a las leyes vigentes de la República Bolivariana de Venezuela.`,
+        title: '2. Cláusula de Secreto Comercial y Protección del Ecosistema Omnicanal',
+        content: `EL LICENCIATARIO reconoce que la arquitectura interna del sistema, los mecanismos de sincronización en segundo plano (Silent Background Sync), los protocolos de enrutamiento omnicanal, los algoritmos de liquidación multimoneda y la red de interconexión con pasarelas y plataformas de pedidos digitales constituyen SECRETOS COMERCIALES E INDUSTRIALES (Trade Secrets) protegidos legalmente.
+        
+Queda terminantemente prohibido a EL LICENCIATARIO, sus dependientes, desarrolladores o terceros vinculados:
+a) Intentar replicar, clonar, reproducir o imitar la lógica de interconexión de pedidos o el modelo de red omnicanal de EL PROVEEDOR.
+b) Descompilar, desensamblar, interceptar tráfico de red de las API propietarias o realizar ingeniería inversa sobre el software.
+c) Divulgar a competidores directos o indirectos cualquier especificación técnica interna de la plataforma.
+
+Cualquier infracción a esta cláusula facultará a EL PROVEEDOR para iniciar inmediatamente las acciones penales tipificadas en la Ley Especial contra los Delitos Informáticos (Espionaje Informático, Revelación Indebida de Datos y Sabotaje) y demandas civiles por resarcimiento de daños y perjuicios comerciales.`,
         highlight: true,
       },
       {
-        title: '3. Alcance por Puesto / Estación de Trabajo (HWID)',
-        content: `Toda licencia comercial se encuentra vinculada a la huella criptográfica de hardware única (HWID) del equipo informático registrado. La activación es válida exclusivamente para el equipo autorizado. La migración a una nueva computadora requerirá la desautorización previa o la emisión de una nueva licencia según las políticas del LICENCIANTE.`,
+        title: '3. Interoperabilidad Segura con el Ecosistema de Pedidos y Delivery',
+        content: `Como parte del servicio de valor agregado para el comercio, EL SOFTWARE cuenta con capacidades de sincronización de catálogo de productos públicos, precios de venta y disponibilidad de inventario con el Ecosistema Digital de Enrutamiento de Pedidos de EL PROVEEDOR.
+        
+Dicha interconexión se ejecuta de forma cifrada y confidencial, garantizando en todo momento que los costos de adquisición, márgenes internos de ganancia, saldos de caja y datos contables privados NUNCA sean expuestos a terceros. EL LICENCIATARIO autoriza dicha interoperabilidad orientada al impulso y captación de ventas de su propio establecimiento comercial.`,
       },
       {
-        title: '4. Vigencia y Rescisión',
-        content: `La licencia mantendrá su vigencia según el plan contratado (Suscripción Periódica o Licencia Vitalicia de Explotación Comercial). El incumplimiento comprobado de las restricciones de propiedad intelectual o uso fraudulento conllevará la revocación inmediata del derecho de uso, sin perjuicio de las acciones civiles y penales amparadas en la Ley sobre el Derecho de Autor y la Ley Especial contra los Delitos Informáticos.`,
+        title: '4. Alcance por Puesto / Estación de Trabajo (HWID)',
+        content: `Cada licencia emitida se encuentra unívocamente vinculada a la huella criptográfica de hardware (Hardware ID / HWID) de la terminal registrada. La activación es intransferible entre diferentes computadores físicos. El intento de clonación de seriales o suplantación de identidad de hardware activará automáticamente los mecanismos de defensa tecnológica del sistema.`,
+      },
+      {
+        title: '5. Protección de Marcas, Nombre Comercial y Prohibición Absoluta de Clonación (Anti-Cloning & Trademark Shield)',
+        content: `Quedan expresamente reservados todos los derechos de propiedad industrial, intelectual y de autor sobre la marca, nombre comercial, denominaciones y diseño de interfaz:
+a) Signos Distintivos y Nombre de la App: Las marcas y nombres comerciales "KLIKPOS", "KLIKPOS STREET", "KLIKPOS MÓVIL", "KLIKPOS CLOUD", así como sus logotipos, isotipos, lemas comerciales y diseño visual de interfaz (Trade Dress) son propiedad exclusiva e inalienable de EL PROVEEDOR. Queda terminantemente prohibido su uso, reproducción, imitación o registro no autorizado, tanto idéntico como confusamente similar.
+b) Prohibición Absoluta de Copia de Código y Clonación: Queda terminantemente prohibida la copia, clonación total o parcial, extracción de código fuente, scripts, bases de datos o binarios, así como la reempaquetación o distribución del software bajo esquemas de "marca blanca" (white-label) no licenciados por escrito.
+c) Acciones Penales y Resarcimiento por Daños: La violación a esta cláusula faculta a EL PROVEEDOR a solicitar de inmediato el bloqueo remoto de terminales, medidas cautelares de secuestro de equipos informáticos, demandas por competencia desleal y acusación penal tipificada en la Ley de Propiedad Industrial y la Ley sobre el Derecho de Autor.`,
+        highlight: true,
+      },
+    ],
+  },
+
+  security_anti_piracy: {
+    id: 'security_anti_piracy',
+    title: 'Normativa de Seguridad, Anti-Piratería y Medidas Tecnológicas de Protección',
+    shortTitle: 'Seguridad & Anti-Piratería',
+    badge: 'Protección Criptográfica',
+    lastUpdated: 'Septiembre 2026',
+    sections: [
+      {
+        title: '1. Medidas Tecnológicas de Protección (TPM) y Anti-Tampering',
+        content: `De conformidad con los tratados internacionales de la OMPI y el marco legal sobre ciberseguridad, EL SOFTWARE incorpora Medidas Tecnológicas Efectivas de Protección Criptográfica (TPM), firmas digitales HMAC-SHA256 y detección activa de manipulación (Anti-Tampering).
+        
+Cualquier intento de:
+a) Alterar la fecha y hora del sistema operativo (Time-Tampering) con la intención de burlar los periodos de vigencia de las licencias;
+b) Modificar binarios compilados, inyectar librerías dinámicas o puentear la validación de activación;
+c) Ejecutar ataques de fuerza bruta contra el generador de claves o servicios de validación;
+
+Dará lugar al BLOQUEO INMEDIATO Y PREVENTIVO de la terminal y de la dirección IP de origen, con revocación automática del acceso a los servicios de sincronización en la nube, sin derecho a reembolso o indemnización alguna.`,
+        highlight: true,
+      },
+      {
+        title: '2. Monitoreo de Integridad y Telemetría de Ciberdefensa',
+        content: `A los fines exclusivos de salvaguardar la seguridad del ecosistema y prevenir la clonación no autorizada de licencias, el sistema emite señales periódicas de telemetría técnica que contienen:
+- Identificador de hardware (HWID anonimizado).
+- Dirección IP pública de conexión.
+- Versión de compilación del software.
+- Estado de integridad de la base de datos local.
+        
+El uso del software implica la aceptación expresa de estos mecanismos de auditoría técnica y prevención de fraude informático.`,
+      },
+      {
+        title: '3. Tipificación Penal y Acciones Legales',
+        content: `EL LICENCIATARIO queda advertido de que la comercialización, distribución no autorizada, descompilación o crackeo de este software constituye delito tipificado en los Artículos 6 (Acceso Indebido), 7 (Sabotaje o Daño a Sistemas), 9 (Acceso Indebido con Fin de Lucro) y 12 (Falsificación de Documentos Electrónicos) de la Ley Especial contra los Delitos Informáticos de Venezuela, con penas privativas de libertad de hasta 8 años de prisión, independientemente de las sanciones internacionales de extradición y bloqueo comercial.`,
+        highlight: true,
       },
     ],
   },
 
   terms: {
     id: 'terms',
-    title: 'Términos y Condiciones de Servicio y Uso',
-    shortTitle: 'Términos y Condiciones',
-    badge: 'Condiciones de Uso',
+    title: 'Términos de Servicio y Descargo de Responsabilidad Tributaria (SENIAT)',
+    shortTitle: 'Términos y SENIAT',
+    badge: 'Condiciones Operativas',
     lastUpdated: 'Septiembre 2026',
     sections: [
       {
-        title: '1. Herramienta Administrativa y Descargo de Responsabilidad Fiscal (SENIAT)',
-        content: `EL SOFTWARE es una herramienta tecnológica informática diseñada para el control administrativo, gestión de inventarios, estimación de costos, registro de cobros multimoneda y apoyo operativo en el punto de venta.
+        title: '1. Herramienta Administrativa y Descargo Fiscal (SENIAT)',
+        content: `EL SOFTWARE es una herramienta informática de gestión operativa, control de inventario, cálculo de costos y punto de venta. 
 
-EL SOFTWARE NO SUSTITUYE LAS OBLIGACIONES TRIBUTARIAS FORMALES DE EL LICENCIATARIO.
-Es responsabilidad legal exclusiva y directa de EL LICENCIATARIO verificar su régimen tributario ante el Servicio Nacional Integrado de Administración Aduanera y Tributaria (SENIAT) y disponer de los equipos fiscales homologados (máquinas fiscales, impresoras fiscales autorizadas o sistemas de facturación bajo providencias del SENIAT) cuando su condición de contribuyente ordinario o especial así lo exija.
-
-EL DESARROLLADOR NO ASUME RESPONSABILIDAD ALGUNA POR MULTAS, REPAROS, SANCIONES ADMINISTRATIVAS, CLAUSURAS O CIERRES FISCALES que las autoridades tributarias impongan a EL LICENCIATARIO por omisión en la emisión de facturas fiscales, falta de equipos homologados o uso indebido de comprobantes internos o notas de entrega.`,
+EL PROVEEDOR NO ES REPRESENTANTE FISCAL NI ASUME OBLIGACIONES TRIBUTARIAS DE EL LICENCIATARIO.
+Es responsabilidad exclusiva del comerciante dar estricto cumplimiento a las providencias administrativas del SENIAT relativas a máquinas fiscales homologadas, impresoras fiscales autorizadas o facturación electrónica según su condición de contribuyente. EL PROVEEDOR queda completamente exonerado de cualquier sanción, multa o clausura impuesta por entes tributarios al establecimiento.`,
         highlight: true,
       },
       {
-        title: '2. Continuidad Operativa, Fluctuaciones Eléctricas y Respaldo de Datos',
-        content: `EL SOFTWARE opera bajo una arquitectura On-Premise / Local. En consecuencia:
-a) EL LICENCIATARIO reconoce y acepta que las interrupciones operativas derivadas de fallas en el suministro eléctrico, fluctuaciones de voltaje (bajones), apagones, sobretensiones o averías en componentes físicos de hardware de la computadora del comercio escapan al control de EL DESARROLLADOR.
-b) Es obligación imperativa de EL LICENCIATARIO mantener conectado su equipo a un Sistema de Alimentación Ininterrumpida (UPS) regulado y realizar respaldos de base de datos periódicos mediante la herramienta nativa de copias de seguridad de EL SOFTWARE.
-c) EL DESARROLLADOR no responderá por lucro cesante, daño emergente, pérdida de ventas ni corrupción de ficheros ocasionada por cortes abruptos de energía en el establecimiento comercial.`,
+        title: '2. Continuidad Operativa, Respaldo y Fluctuaciones Eléctricas',
+        content: `El software está diseñado con tecnología Offline-First para garantizar la venta ininterrumpida aun sin internet. No obstante, EL LICENCIATARIO es responsable de conectar sus terminales a sistemas de alimentación ininterrumpida (UPS regulados) para proteger el hardware contra sobretensiones y apagones. El servicio de sincronización silenciosa (Silent Cloud Sync) actúa como mecanismo de respaldo de contingencia ante fallas de disco duro o contingencias físicas.`,
+      },
+      {
+        title: '3. Planes Comerciales Financiados, Cuotas y Suspensión por Mora (General Legal MSA)',
+        content: `En caso de adquisiciones bajo planes de pago fraccionado, crédito o financiamiento (ej. $20 USD con inicial de $10 USD y saldo quincenal de $10 USD a los 15 días continuos):
+a) La falta de pago oportuno de la cuota vencida faculta de pleno derecho a EL PROVEEDOR para suspender inmediatamente el uso de la licencia y la emisión de ventas mediante el bloqueo criptográfico del software.
+b) EL LICENCIATARIO reconoce y acepta que dicha suspensión técnica constituye el ejercicio legítimo del derecho de retención y resolución contractual por mora, no dando lugar a reclamos por lucro cesante, interrupción comercial ni indemnización alguna.
+c) Tras la liquidación del saldo pendiente, la terminal será reactivada automáticamente sin pérdida de los datos históricos guardados en el equipo.`,
         highlight: true,
       },
       {
-        title: '3. Compatibilidad con Periféricos y Hardware de Terceros',
-        content: `EL SOFTWARE interactúa con impresoras térmicas, balanzas comerciales de puerto serial/USB, escáneres de códigos de barras y gavetas de dinero mediante protocolos estándar del mercado. EL DESARROLLADOR no se hace responsable por incompatibilidades derivadas de controladores desactualizados, puertos físicos dañados, cables defectuosos o modificaciones al sistema operativo realizadas por terceros.`,
+        title: '4. Limitación Extrema de Responsabilidad (Limitation of Liability)',
+        content: `EN LA MÁXIMA MEDIDA PERMITIDA POR LA LEY APLICABLE, EL PROVEEDOR NO SERÁ RESPONSABLE ANTE EL LICENCIATARIO NI ANTE TERCEROS POR DAÑOS INDIRECTOS, PUNITIVOS, INCIDENTALES, PÉRDIDA DE BENEFICIOS, LUCRO CESANTE, PÉRDIDA DE INGRESOS COMERCIALES, CORTE DE SUMINISTRO ELÉCTRICO, CAÍDAS DE TELECOMUNICACIONES O INTERNET, O PARALIZACIÓN DE OPERACIONES.
+La responsabilidad patrimonial total acumulada de EL PROVEEDOR derivada de cualquier controversia estará limitada, en todos los casos, al importe efectivamente pagado por EL LICENCIATARIO por concepto de la licencia en los últimos tres (3) meses.`,
+        highlight: true,
+      },
+      {
+        title: '5. Obligación de Indemnidad ante Terceros y Entes Públicos',
+        content: `EL LICENCIATARIO se compromete a defender, indemnizar y mantener indemne a EL PROVEEDOR, sus programadores, directores y distribuidores autorizados, frente a cualquier demanda, procedimiento, sanción fiscal, reclamo laboral o investigación tributaria originada por el uso indebido del software, omisión de deberes formales ante el SENIAT, adulteración de datos contables o incumplimiento de leyes de comercio.`,
       },
     ],
   },
 
   privacy: {
     id: 'privacy',
-    title: 'Aviso de Privacidad y Tratamiento de Datos (DPA)',
+    title: 'Aviso de Privacidad, Soberanía de Datos y Tratamiento Efímero (DPA)',
     shortTitle: 'Privacidad y Datos',
     badge: 'Protección de Datos',
-    lastUpdated: 'Septiembre 2026',
+    lastUpdated: 'Octubre 2026',
     sections: [
       {
-        title: '1. Principio de Almacenamiento Local (Offline-First / On-Premise)',
-        content: `EL SOFTWARE está programado bajo un paradigma de almacenamiento local y soberanía de datos del comerciante. Toda la información transaccional, catálogo de productos, costos, márgenes de ganancia, balances de caja y registros de ventas residen almacenados en la base de datos local de la computadora de EL LICENCIATARIO.
-
-EL DESARROLLADOR NO ACCEDE, NO VENDE, NO TRANSFIERE NI COMERCIALIZA bajo ninguna circunstancia los datos comerciales de EL LICENCIATARIO con empresas de análisis, entes gubernamentales ni terceros.`,
+        title: '1. Soberanía y Confidencialidad de la Información Comercial',
+        content: `Toda la información correspondiente a balances de caja, montos de facturación interna, listas de proveedores y márgenes privados reside de manera local y encriptada en la base de datos de EL LICENCIATARIO. EL PROVEEDOR NO VENDE NI COMERCIALIZA datos privados ni registros financieros con terceros.`,
         highlight: true,
       },
       {
-        title: '2. Encargo de Tratamiento de Datos de Terceros (Clientes y Consumidores)',
-        content: `En los módulos de clientes, cuentas corrientes / créditos fiados, servicios de delivery y validación de Pago Móvil, EL SOFTWARE permite almacenar datos de personas naturales y jurídicas (Cédula/RIF, nombres, números de teléfono, direcciones).
-
-A los efectos de la Ley de Protección de Datos:
-a) EL LICENCIATARIO es el "Responsable del Fichero / Tratamiento", siendo el custodio directo y titular de la base de datos de sus clientes.
-b) EL SOFTWARE actúa meramente como la herramienta tecnológica que procesa y organiza dichos registros a solicitud del usuario.
-c) EL LICENCIATARIO garantiza que recaba dichos datos de conformidad con la ley aplicable y asume la responsabilidad de resguardar el acceso físico y lógico a su computadora.`,
-      },
-      {
-        title: '3. Telemetría y Soporte Técnico',
-        content: `Únicamente cuando EL LICENCIATARIO solicite de manera voluntaria asistencia técnica o soporte técnico remoto, podrá autorizar temporalmente la visualización de pantallas o el envío de registros de error (logs técnicos) con el único objetivo de resolver incidencias de software.`,
+        title: '2. Tratamiento Efímero de Conciliación Bancaria y SMS Pago Móvil',
+        content: `Para la conciliación automatizada de pagos móviles en dispositivos Android, la lectura de notificaciones bancarias se procesa de forma estrictamente local y en memoria volátil efímera (con purga automática cada 10 minutos). Ningún SMS, mensaje personal o dato de cuenta bancaria es transmitido ni almacenado en servidores externos de EL PROVEEDOR, preservando íntegramente la privacidad del titular del terminal.`,
       },
     ],
   },

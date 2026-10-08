@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KlikPOS Móvil Full - Estudio de 3 Interfaces de Usuario</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;700;900&family=JetBrains+Mono:wght@500;700;800;900&family=Plus+Jakarta+Sans:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #060913;
+      color: #f1f5f9;
+    }
+    .font-mono-num {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .font-digital {
+      font-family: 'Chakra Petch', monospace;
+    }
+    .glow-vfd {
+      text-shadow: 0 0 12px rgba(16, 185, 129, 0.7);
+    }
+    .glow-box-vfd {
+      box-shadow: 0 0 20px -5px rgba(16, 185, 129, 0.3), inset 0 0 10px rgba(16, 185, 129, 0.1);
+    }
+    .phone-frame {
+      width: 100%;
+      max-width: 390px;
+      height: 780px;
+      border-radius: 44px;
+      border: 10px solid #1e293b;
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.1);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      background-color: #090d16;
+    }
+    .notch {
+      width: 120px;
+      height: 22px;
+      background-color: #1e293b;
+      border-bottom-left-radius: 14px;
+      border-bottom-right-radius: 14px;
+      margin: 0 auto;
+      z-index: 50;
+    }
+  </style>
+</head>
+<body class="p-3 sm:p-6 min-h-screen">
+
+  <!-- CABECERA DE PLANIFICACIÓN ESTRATÉGICA -->
+  <header class="max-w-5xl mx-auto mb-6 text-center">
+    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold uppercase tracking-widest mb-3">
+      🚀 Laboratorio UI/UX • KlikPOS Móvil Full
+    </div>
+    <h1 class="text-3xl sm:text-4xl font-black tracking-tight text-white mb-2">
+      Planificación UI: <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-sky-400 to-amber-400">KlikPOS Móvil Full</span>
+    </h1>
+    <p class="text-slate-400 text-xs sm:text-sm max-w-2xl mx-auto">
+      La velocidad táctil de <strong>KlikPOS Street</strong> combinada con el motor completo de <strong>Móvil Full</strong>: Escáner de código de barras continuo, inventarios y ajustes de stock en vivo, cierres de caja (Corte X/Z) y libreta de clientes.
+    </p>
+
+    <!-- SELECTOR DE VARIACIÓN -->
+    <div class="flex flex-wrap items-center justify-center gap-2.5 mt-5">
+      <button onclick="switchLayout('A')" id="tab-A" class="px-4 py-2 rounded-2xl text-xs font-black transition-all bg-emerald-500 text-slate-950 shadow-lg scale-105">
+        📱 Variación A: Dock Inferior Street-Pro (Una Sola Mano)
+      </button>
+      <button onclick="switchLayout('B')" id="tab-B" class="px-4 py-2 rounded-2xl text-xs font-black transition-all bg-slate-800 text-slate-300 hover:text-white">
+        ⚡ Variación B: Command Center Grid (Retail & Pasillos)
+      </button>
+      <button onclick="switchLayout('C')" id="tab-C" class="px-4 py-2 rounded-2xl text-xs font-black transition-all bg-slate-800 text-slate-300 hover:text-white">
+        🔄 Variación C: Split-Screen Híbrido Plegable / Tablet
+      </button>
+    </div>
+  </header>
+
+  <!-- CONTENEDOR CENTRAL CON TELÉFONO INTERACTIVO -->
+  <div class="max-w-5xl mx-auto flex flex-col lg:flex-row items-center justify-center gap-8">
+    
+    <!-- TELÉFONO SIMULADO INTERACTIVO -->
+    <div class="phone-frame shrink-0">
+      <div class="notch"></div>
+
+      <!-- ===================================================================== -->
+      <!-- VARIACIÓN A: DOCK INFERIOR STREET-PRO (MOBILE-FIRST ONE-THUMB)        -->
+      <!-- ===================================================================== -->
+      <div id="layout-A" class="flex-1 flex flex-col h-full overflow-hidden">
+        
+        <!-- HEADER VFD MINI REGISTRADORA FIJA SUPERIOR -->
+        <div class="p-2.5 bg-[#050811] border-b border-slate-800 shrink-0">
+          <div class="flex items-center justify-between text-[10px] font-mono font-bold text-slate-400 mb-1 px-1">
+            <span class="flex items-center gap-1.5 text-emerald-400">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              KLIKPOS FULL • CAJA ACTIVA
+            </span>
+            <span>BCV: 42.00</span>
+          </div>
+
+          <!-- MINI PANTALLA VFD SUPERIOR -->
+          <div class="p-2 rounded-xl bg-[#03130d] border border-emerald-500/40 glow-box-vfd flex items-center justify-between">
+            <div>
+              <span class="text-[9px] font-mono text-emerald-400/80 uppercase font-black block">TOTAL VENTA</span>
+              <div class="text-2xl font-black font-digital text-emerald-300 glow-vfd leading-none mt-0.5">$18.50 <span class="text-xs">USD</span></div>
+            </div>
+            <div class="text-right">
+              <span class="text-[9px] font-mono text-emerald-400/80 block">3 Ítems en Carrito</span>
+              <span class="text-xs font-mono font-bold text-emerald-400">Bs. 777.00</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- CONTENIDO CAMBIABLE SEGÚN PESTAÑA DEL DOCK -->
+        <div id="view-A-content" class="flex-1 overflow-y-auto p-2.5 space-y-2.5">
+          
+          <!-- SUB-VISTA: VENTAS / CATÁLOGO -->
+          <div id="sub-A-sales" class="space-y-2.5">
+            <!-- Barra de búsqueda rápida con botón de escáner -->
+            <div class="flex items-center gap-2">
+              <div class="flex-1 relative">
+                <input type="text" placeholder="Buscar producto o código..." class="w-full pl-8 pr-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-xs text-white placeholder:text-slate-500 font-bold outline-none">
+                <span class="absolute left-2.5 top-2 text-slate-400 text-xs">🔍</span>
+              </div>
+              <button onclick="triggerFakeScan()" class="p-2 rounded-xl bg-emerald-500 text-slate-950 font-black text-xs flex items-center gap-1 shadow-md active:scale-95">
+                📷 <span>Escanear</span>
+              </button>
+            </div>
+
+            <!-- Banner Alerta de Escaneo Simulado -->
+            <div id="scan-alert" class="hidden p-2 rounded-xl bg-emerald-950/80 border border-emerald-400/60 text-[11px] text-emerald-200 flex items-center justify-between animate-bounce">
+              <span>⚡ ¡Código <b>7591032001</b> detectado! Harina PAN agregada.</span>
+              <span class="font-bold text-emerald-400">+ $1.20</span>
+            </div>
+
+            <!-- Catálogo Rápido de Productos -->
+            <div class="grid grid-cols-2 gap-2">
+              <div class="p-2.5 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-slate-700 active:scale-98 cursor-pointer">
+                <div class="text-2xl mb-1">🌽</div>
+                <div class="text-xs font-bold text-white truncate">Harina PAN 1kg</div>
+                <div class="flex items-center justify-between mt-1">
+                  <span class="text-xs font-mono font-black text-emerald-400">$1.20</span>
+                  <span class="text-[9px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 font-mono">Stock: 48</span>
+                </div>
+              </div>
+              <div class="p-2.5 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-slate-700 active:scale-98 cursor-pointer">
+                <div class="text-2xl mb-1">🥤</div>
+                <div class="text-xs font-bold text-white truncate">Coca Cola 1.5L</div>
+                <div class="flex items-center justify-between mt-1">
+                  <span class="text-xs font-mono font-black text-emerald-400">$2.50</span>
+                  <span class="text-[9px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 font-mono">Stock: 22</span>
+                </div>
+              </div>
+              <div class="p-2.5 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-slate-700 active:scale-98 cursor-pointer">
+                <div class="text-2xl mb-1">🧀</div>
+                <div class="text-xs font-bold text-white truncate">Queso Blanco Duro</div>
+                <div class="flex items-center justify-between mt-1">
+                  <span class="text-xs font-mono font-black text-emerald-400">$5.80</span>
+                  <span class="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 font-mono">Stock: 4.5kg</span>
+                </div>
+              </div>
+              <div class="p-2.5 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-slate-700 active:scale-98 cursor-pointer">
+                <div class="text-2xl mb-1">🍫</div>
+                <div class="text-xs font-bold text-white truncate">Toronto Paquete</div>
+                <div class="flex items-center justify-between mt-1">
+                  <span class="text-xs font-mono font-black text-emerald-400">$4.00</span>
+                  <span class="text-[9px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 font-mono">Stock: 15</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Botón de Cobro Rápido en Venta -->
+            <button class="w-full py-3 rounded-2xl bg-emerald-500 text-slate-950 font-black text-xs flex items-center justify-center gap-2 shadow-xl active:scale-98 mt-2">
+              <span>💳 Cobrar Orden • $18.50 USD</span>
+            </button>
+          </div>
+
+          <!-- SUB-VISTA: INVENTARIOS (OCULTA INICIALMENTE) -->
+          <div id="sub-A-stock" class="hidden space-y-2">
+            <div class="p-2.5 rounded-2xl bg-slate-900/90 border border-slate-800">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-black text-white">📦 Control de Inventario & Stock</span>
+                <span class="text-[10px] text-emerald-400 font-bold bg-emerald-950/60 px-2 py-0.5 rounded-full border border-emerald-500/30">142 Productos</span>
+              </div>
+              <div class="space-y-1.5 text-xs">
+                <div class="p-2 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between">
+                  <div>
+                    <div class="font-bold text-white">Harina PAN 1kg</div>
+                    <div class="text-[10px] text-slate-400 font-mono">Cód: 7591032001</div>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="font-mono font-bold text-emerald-400 text-sm">48 unid</span>
+                    <button class="w-6 h-6 rounded-lg bg-slate-800 text-white font-bold flex items-center justify-center">+</button>
+                  </div>
+                </div>
+                <div class="p-2 rounded-xl bg-slate-950 border border-amber-500/30 flex items-center justify-between">
+                  <div>
+                    <div class="font-bold text-amber-300">Arroz Primor 1kg</div>
+                    <div class="text-[10px] text-amber-400/80 font-mono">⚠️ Stock Bajo (Mín: 10)</div>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="font-mono font-bold text-amber-400 text-sm">3 unid</span>
+                    <button class="w-6 h-6 rounded-lg bg-amber-500 text-slate-950 font-bold flex items-center justify-center">+</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SUB-VISTA: CIERRE DE CAJA (OCULTA INICIALMENTE) -->
+          <div id="sub-A-cash" class="hidden space-y-2">
+            <div class="p-3 rounded-2xl bg-slate-900/90 border border-slate-800">
+              <span class="text-xs font-black text-white block mb-1">📊 Corte de Caja (Turno Actual)</span>
+              <p class="text-[10px] text-slate-400 mb-2">Apertura: 08:30 AM • Cajero: Principal</p>
+
+              <div class="space-y-1.5 text-xs font-mono">
+                <div class="flex justify-between p-1.5 rounded-lg bg-slate-950">
+                  <span class="text-slate-400">Efectivo USD:</span>
+                  <span class="font-bold text-emerald-400">$145.00</span>
+                </div>
+                <div class="flex justify-between p-1.5 rounded-lg bg-slate-950">
+                  <span class="text-slate-400">Pago Móvil (Bs):</span>
+                  <span class="font-bold text-sky-400">Bs. 8,420.00</span>
+                </div>
+                <div class="flex justify-between p-1.5 rounded-lg bg-slate-950">
+                  <span class="text-slate-400">Punto de Venta:</span>
+                  <span class="font-bold text-purple-400">Bs. 3,110.00</span>
+                </div>
+                <div class="flex justify-between p-1.5 rounded-lg bg-slate-950">
+                  <span class="text-slate-400">Total Facturado:</span>
+                  <span class="font-black text-white">$420.20 USD</span>
+                </div>
+              </div>
+
+              <button class="w-full py-2.5 mt-3 rounded-xl bg-amber-500 text-slate-950 font-black text-xs flex items-center justify-center gap-1.5">
+                🖨️ <span>Imprimir Cierre Z & Compartir</span>
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- DOCK INFERIOR ERGONÓMICO DE 4 BOTONES -->
+        <div class="p-2 bg-[#050811] border-t border-slate-800 flex items-center justify-around shrink-0">
+          <button onclick="setSubView('sales')" id="nav-sales" class="flex flex-col items-center gap-0.5 text-emerald-400 text-[10px] font-black">
+            <span class="text-lg">🛒</span>
+            <span>Ventas</span>
+          </button>
+          <button onclick="triggerFakeScan()" class="flex flex-col items-center justify-center -mt-5 w-12 h-12 rounded-full bg-emerald-500 text-slate-950 text-xl font-black shadow-lg shadow-emerald-500/30 active:scale-90 transition-transform">
+            📷
+          </button>
+          <button onclick="setSubView('stock')" id="nav-stock" class="flex flex-col items-center gap-0.5 text-slate-400 text-[10px] font-bold">
+            <span class="text-lg">📦</span>
+            <span>Stock</span>
+          </button>
+          <button onclick="setSubView('cash')" id="nav-cash" class="flex flex-col items-center gap-0.5 text-slate-400 text-[10px] font-bold">
+            <span class="text-lg">📊</span>
+            <span>Caja</span>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- ===================================================================== -->
+      <!-- VARIACIÓN B: COMMAND CENTER GRID (RETAIL & PASILLOS)                 -->
+      <!-- ===================================================================== -->
+      <div id="layout-B" class="hidden flex-1 flex flex-col h-full overflow-hidden p-3 space-y-3">
+        <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+          <div>
+            <h3 class="text-xs font-black text-white">KLIKPOS MÓVIL FULL</h3>
+            <span class="text-[10px] text-slate-400 font-mono">Modo: Bodega & Abasto</span>
+          </div>
+          <span class="px-2 py-0.5 rounded-full bg-sky-500/20 text-sky-300 font-bold text-[9px] border border-sky-400/30">Command Center</span>
+        </div>
+
+        <!-- KPI TÍTULOS GRANDES -->
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <div class="p-2.5 rounded-2xl bg-slate-900 border border-slate-800">
+            <span class="text-[9px] text-slate-400 font-bold block">VENTAS HOY</span>
+            <span class="text-lg font-mono font-black text-emerald-400">$340.50</span>
+          </div>
+          <div class="p-2.5 rounded-2xl bg-slate-900 border border-slate-800">
+            <span class="text-[9px] text-slate-400 font-bold block">ALERTAS STOCK</span>
+            <span class="text-lg font-mono font-black text-amber-400">4 Items</span>
+          </div>
+        </div>
+
+        <!-- MATRIZ DE MÓDULOS DE 4 CUADRANTES DE ALTO TACTO -->
+        <div class="grid grid-cols-2 gap-2.5 flex-1">
+          <div class="p-3 rounded-2xl bg-gradient-to-br from-emerald-950/60 to-slate-900 border border-emerald-500/40 flex flex-col justify-between active:scale-95 cursor-pointer">
+            <span class="text-3xl">🛒</span>
+            <div>
+              <span class="text-xs font-black text-white block">Punto de Venta</span>
+              <span class="text-[10px] text-emerald-300">Cobro rápido</span>
+            </div>
+          </div>
+          <div class="p-3 rounded-2xl bg-gradient-to-br from-sky-950/60 to-slate-900 border border-sky-500/40 flex flex-col justify-between active:scale-95 cursor-pointer">
+            <span class="text-3xl">📷</span>
+            <div>
+              <span class="text-xs font-black text-white block">Escáner Continuo</span>
+              <span class="text-[10px] text-sky-300">Lectura por cámara</span>
+            </div>
+          </div>
+          <div class="p-3 rounded-2xl bg-gradient-to-br from-purple-950/60 to-slate-900 border border-purple-500/40 flex flex-col justify-between active:scale-95 cursor-pointer">
+            <span class="text-3xl">📦</span>
+            <div>
+              <span class="text-xs font-black text-white block">Inventarios</span>
+              <span class="text-[10px] text-purple-300">Ajustes y fotos</span>
+            </div>
+          </div>
+          <div class="p-3 rounded-2xl bg-gradient-to-br from-amber-950/60 to-slate-900 border border-amber-500/40 flex flex-col justify-between active:scale-95 cursor-pointer">
+            <span class="text-3xl">📊</span>
+            <div>
+              <span class="text-xs font-black text-white block">Cierres de Caja</span>
+              <span class="text-[10px] text-amber-300">Corte X / Z</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-2.5 rounded-2xl bg-slate-900 border border-slate-800 text-[11px] text-slate-300 flex items-center justify-between">
+          <span>👥 Libreta de Clientes y Fiados</span>
+          <span class="text-emerald-400 font-bold">Ver lista →</span>
+        </div>
+      </div>
+
+      <!-- ===================================================================== -->
+      <!-- VARIACIÓN C: SPLIT-SCREEN HÍBRIDO PLEGABLE / TABLET                   -->
+      <!-- ===================================================================== -->
+      <div id="layout-C" class="hidden flex-1 flex flex-col h-full overflow-hidden p-2.5 space-y-2">
+        <div class="flex items-center justify-between pb-1.5 border-b border-slate-800 text-[10px] text-slate-400 font-mono">
+          <span>KLIKPOS PRO • HÍBRIDO ADAPTABLE</span>
+          <span class="text-purple-400 font-bold">Auto-Orientación</span>
+        </div>
+
+        <!-- PANEL SUPERIOR: ESCÁNER / CÁMARA O CARRITO EN VIVO -->
+        <div class="h-44 rounded-2xl bg-slate-950 border-2 border-dashed border-emerald-500/40 flex flex-col items-center justify-center text-center p-3 relative overflow-hidden">
+          <div class="w-full h-1 bg-emerald-500/60 shadow-[0_0_10px_#10b981] animate-pulse mb-3"></div>
+          <span class="text-2xl mb-1">📷</span>
+          <span class="text-xs font-black text-emerald-300">ÁREA DE ESCÁNER ACTIVA</span>
+          <p class="text-[10px] text-slate-400 mt-1 max-w-[200px]">Apunta al código de barras del producto para sumarlo automáticamente al ticket.</p>
+        </div>
+
+        <!-- PANEL INFERIOR: TICKET DINÁMICO EN TIEMPO REAL -->
+        <div class="flex-1 bg-slate-900/90 rounded-2xl border border-slate-800 p-2.5 flex flex-col justify-between">
+          <div>
+            <div class="flex justify-between text-xs font-black text-white pb-1.5 border-b border-slate-800 mb-2">
+              <span>Ticket de Venta #0042</span>
+              <span class="text-emerald-400 font-mono">$18.50 USD</span>
+            </div>
+            <div class="space-y-1 text-xs">
+              <div class="flex justify-between text-slate-300">
+                <span>1x Harina PAN 1kg</span>
+                <span class="font-mono text-white">$1.20</span>
+              </div>
+              <div class="flex justify-between text-slate-300">
+                <span>1x Coca Cola 1.5L</span>
+                <span class="font-mono text-white">$2.50</span>
+              </div>
+              <div class="flex justify-between text-slate-300">
+                <span>1x Queso Blanco (2.5kg)</span>
+                <span class="font-mono text-white">$14.80</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-800">
+            <button class="py-2.5 rounded-xl bg-slate-800 text-slate-200 font-bold text-xs">
+              📦 Ajustar Stock
+            </button>
+            <button class="py-2.5 rounded-xl bg-emerald-500 text-slate-950 font-black text-xs shadow-md">
+              💳 Cobrar Ahora
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- PANEL EXPLICATIVO Y ANÁLISIS TÉCNICO -->
+    <div class="flex-1 max-w-lg space-y-4">
+      <div class="p-5 rounded-3xl bg-slate-900/70 border border-slate-800 space-y-3">
+        <h2 class="text-lg font-black text-white flex items-center gap-2">
+          <span>🎯</span> ¿Cuál es la diferencia entre Street y Móvil Full?
+        </h2>
+        <div class="space-y-2 text-xs text-slate-300 leading-relaxed">
+          <p>
+            • <strong>KlikPOS Street:</strong> Creado para comida rápida, puestos ambulantes y cafeterías donde no se usa lector de código de barras sino botones grandes de fotos y combos.
+          </p>
+          <p>
+            • <strong>KlikPOS Móvil Full:</strong> Creado para <strong>bodegas, minimarkets, ferreterías, farmacias y comercios retail</strong> que necesitan pistolita o cámara para leer 200+ códigos de barra, controlar stock de almacén, gestionar clientes fiados y hacer cortes X y Z al final del turno.
+          </p>
+        </div>
+      </div>
+
+      <!-- DESCRIPCIÓN DE LAS 3 VARIACIONES -->
+      <div id="desc-A" class="p-5 rounded-3xl bg-emerald-950/40 border border-emerald-500/40 space-y-2">
+        <span class="text-xs font-black text-emerald-400 uppercase tracking-wider block">⭐ Opción A (Recomendada): Dock Inferior Street-Pro</span>
+        <p class="text-xs text-slate-200 leading-relaxed">
+          Mantiene la <strong>misma fluidez visual y velocidad de Street</strong>, pero añade un <strong>dock inferior ergonómico</strong> con acceso inmediato a:
+        </p>
+        <ul class="text-xs text-slate-300 space-y-1 pl-4 list-disc">
+          <li><strong>Botón central flotante de Escáner</strong> (un toque con el pulgar para encender la cámara y leer código).</li>
+          <li>Pestaña de <strong>Inventario y Stock</strong> con suma rápida de mercancía (+1, +6, +12).</li>
+          <li>Pestaña de <strong>Cierres de Caja</strong> con desglose multimoneda y botón para WhatsApp.</li>
+        </ul>
+      </div>
+
+      <div id="desc-B" class="hidden p-5 rounded-3xl bg-sky-950/40 border border-sky-500/40 space-y-2">
+        <span class="text-xs font-black text-sky-400 uppercase tracking-wider block">Opción B: Command Center Grid</span>
+        <p class="text-xs text-slate-200 leading-relaxed">
+          Diseñado para <strong>dueños y encargados de negocio</strong>. Al abrir la app, muestra un panel general con las ventas del día, alertas de bajo stock y 4 accesos directos gigantescos de alta precisión.
+        </p>
+      </div>
+
+      <div id="desc-C" class="hidden p-5 rounded-3xl bg-purple-950/40 border border-purple-500/40 space-y-2">
+        <span class="text-xs font-black text-purple-400 uppercase tracking-wider block">Opción C: Split-Screen Híbrido Plegable</span>
+        <p class="text-xs text-slate-200 leading-relaxed">
+          Diseñado para <strong>dispositivos plegables, tablets o teléfonos en horizontal</strong>. La pantalla se divide en dos: la mitad superior escanea sin parar y la mitad inferior construye el ticket en vivo.
+        </p>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    function switchLayout(variant) {
+      ['A', 'B', 'C'].forEach(v => {
+        const layout = document.getElementById(`layout-${v}`);
+        const tab = document.getElementById(`tab-${v}`);
+        const desc = document.getElementById(`desc-${v}`);
+
+        if (v === variant) {
+          layout.classList.remove('hidden');
+          desc.classList.remove('hidden');
+          tab.className = "px-4 py-2 rounded-2xl text-xs font-black transition-all bg-emerald-500 text-slate-950 shadow-lg scale-105";
+        } else {
+          layout.classList.add('hidden');
+          desc.classList.add('hidden');
+          tab.className = "px-4 py-2 rounded-2xl text-xs font-black transition-all bg-slate-800 text-slate-300 hover:text-white";
+        }
+      });
+    }
+
+    function setSubView(view) {
+      ['sales', 'stock', 'cash'].forEach(s => {
+        const content = document.getElementById(`sub-A-${s}`);
+        const nav = document.getElementById(`nav-${s}`);
+        if (s === view) {
+          content.classList.remove('hidden');
+          nav.className = "flex flex-col items-center gap-0.5 text-emerald-400 text-[10px] font-black";
+        } else {
+          content.classList.add('hidden');
+          nav.className = "flex flex-col items-center gap-0.5 text-slate-400 text-[10px] font-bold";
+        }
+      });
+    }
+
+    function triggerFakeScan() {
+      const alert = document.getElementById('scan-alert');
+      alert.classList.remove('hidden');
+      setTimeout(() => {
+        alert.classList.add('hidden');
+      }, 3500);
+    }
+  </script>
+</body>
+</html>

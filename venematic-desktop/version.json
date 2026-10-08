@@ -1,15 +1,14 @@
 {
-  "version": "3.0.18",
+  "version": "3.0.19",
   "releaseDate": "2026-10-08",
-  "title": "KlikPOS Suite v3.0.18 - Cobro Rápido Directo con Binance Pay, Visor Flotante de Vuelto, Planes con Respaldo Cloud y Embajador Firestore",
+  "title": "KlikPOS Suite v3.0.19 - Display de Caja Registradora VFD, Blindaje Legal Anti-Clonación y Packs de Imágenes en Móvil",
   "notes": [
-    "Cobro Rápido Directo Rediseñado: Visor flotante con saldo restante y vuelto dinámico en verde esmeralda, eliminación de pasos innecesarios y soporte unificado para Pago Móvil, Efectivo $, Efectivo Bs, Punto, Zelle y Binance Pay (USDT).",
-    "Estabilidad de Planes y Programa de Embajador: Corrección de cierre prematuro de modal, conexión directa a Firestore para referidos ilimitados y liquidación a partir de 3 comercios ($15 USD) a las 48 horas.",
-    "Promoción de Respaldo en la Nube: 3 meses de KlikPOS Cloud gratis en plan lanzamiento ($5/mes posterior) y 24 meses de nube incluidos en Plan VIP $50.",
-    "Preservación 100% de Modos de Entrega: Soporte continuo para Local/Mesa, Delivery Pagado y Cobro en Destino (COD) con datos de repartidor y dirección.",
-    "Cero Regresiones y Seguridad: Compresión de imágenes por hardware intacta y paquete limpio certificado ante Google Play Protect."
+    "Display de Caja Registradora VFD Neón Esmeralda: Panel superior fijo de alta visibilidad para cobro rápido con total de cuenta, vuelto en tiempo real y métodos de pago directo.",
+    "Blindaje Legal y Anti-Clonación: Inclusión de cláusula EULA contra clonación, copia de código o uso no autorizado de la marca KlikPOS, términos de suspensión por impago en licencias financiadas y DPA efímero de SMS bancarios.",
+    "Packs de Imágenes en Móvil y Cero Regresiones: Descarga directa de catálogos visuales por rubro con fotos oficiales listas con fondo blanco y compresión de fotos por hardware sin cuelgues OOM en Android.",
+    "Sincronización y Balanza Digital: Pesaje por kilo/gramos, control de stock en caliente y almacenamiento local 100% autónomo con IndexedDB."
   ],
-  "windowsUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.18/KlikPOS_Desktop_Full_Setup.exe",
-  "androidUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.18/KlikPOS_Movil_Full.apk",
+  "windowsUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.19/KlikPOS_Desktop_Full_Setup.exe",
+  "androidUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.19/KlikPOS_Movil_Full.apk",
   "mandatory": false
 }

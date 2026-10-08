@@ -52,7 +52,6 @@ export function getOrCreateTrialStartTime(): number {
       const now = Date.now();
       localStorage.setItem('klikpos_trial_start_ts', String(now));
       localStorage.setItem('klikpos_trial_extended_v309', 'true');
-      localStorage.setItem('klikpos_street_license_dismissed', 'true');
       localStorage.removeItem('venematic_trial15m_start');
       localStorage.removeItem('klikpos_trial_force_expired');
       return now;
@@ -63,7 +62,6 @@ export function getOrCreateTrialStartTime(): number {
       const now = Date.now();
       localStorage.setItem('klikpos_trial_start_ts', String(now));
       localStorage.setItem('klikpos_trial_extended_3h_v6', 'true');
-      localStorage.setItem('klikpos_street_license_dismissed', 'true');
       localStorage.removeItem('venematic_trial15m_start');
       return now;
     }
@@ -228,13 +226,13 @@ export function getWhatsAppActivationUrl(
 
   let planLabel = 'Plan Contado $15 USD (Vitalicio de por vida, sin mensualidades)';
   if (planOption === 'credit') {
-    planLabel = 'Plan Crédito $25 USD ($10 inicial + $15 en 15 días)';
+    planLabel = 'Plan Financiado $20 USD ($10 inicial hoy + $10 a la quincena)';
   } else if (planOption === 'vip') {
-    planLabel = 'Plan Vitalicio Pro $50 USD (Dividido en dos partes: 2 cuotas de $25 quincenal + Cloud 1 Año)';
+    planLabel = 'Plan Vitalicio Pro $50 USD (2 cuotas de $25 quincenal + 24 Meses Cloud)';
   }
 
   const message = 
-    `¡Hola KlikPOS! 🚀 He probado los 30 minutos de prueba en mi negocio y quiero activar mi licencia oficial.\n\n` +
+    `¡Hola KlikPOS! 🚀 He probado las 3 horas de prueba en mi negocio y quiero activar mi licencia oficial.\n\n` +
     `🏪 *Comercio / Negocio:* ${business}\n` +
     `📋 *RIF o Cédula:* ${docRif}\n` +
     `💻 *ID del Equipo (HWID):* \`${cleanHwid}\`\n` +

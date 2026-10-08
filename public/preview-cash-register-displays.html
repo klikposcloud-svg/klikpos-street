@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KlikPOS Street - 3 Variaciones de Display de Caja Registradora</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;700;900&family=JetBrains+Mono:wght@500;700;800;900&family=Plus+Jakarta+Sans:wght@600;800;900&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #050811;
+      color: #f1f5f9;
+    }
+    .font-digital {
+      font-family: 'Chakra Petch', 'JetBrains Mono', monospace;
+    }
+    .font-code {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .glow-green {
+      text-shadow: 0 0 12px rgba(16, 185, 129, 0.7), 0 0 24px rgba(16, 185, 129, 0.4);
+    }
+    .glow-amber {
+      text-shadow: 0 0 12px rgba(245, 158, 11, 0.7), 0 0 24px rgba(245, 158, 11, 0.4);
+    }
+    .glow-emerald-box {
+      box-shadow: 0 0 25px -5px rgba(16, 185, 129, 0.35), inset 0 0 15px rgba(16, 185, 129, 0.15);
+    }
+    .glow-amber-box {
+      box-shadow: 0 0 25px -5px rgba(245, 158, 11, 0.35), inset 0 0 15px rgba(245, 158, 11, 0.15);
+    }
+    .scanline {
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+      background-size: 100% 4px, 6px 100%;
+    }
+  </style>
+</head>
+<body class="p-4 sm:p-8 min-h-screen">
+
+  <!-- ENCABEZADO DE COMPARACIÓN -->
+  <header class="max-w-5xl mx-auto mb-8 text-center">
+    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-bold uppercase tracking-widest mb-3">
+      ⚡ Propuesta Quirúrgica de Diseño POS
+    </div>
+    <h1 class="text-3xl sm:text-4xl font-black tracking-tight text-white mb-2">
+      Panel Superior Fijo: <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-emerald-400 to-sky-400">Display de Caja Registradora</span>
+    </h1>
+    <p class="text-slate-400 text-sm max-w-2xl mx-auto">
+      Sustitución del modal flotante por una cabecera fija de alta presencia física en modo cobrar, con números gigantescos, visor de vuelto instantáneo y estética comercial.
+    </p>
+
+    <!-- SELECTOR DE VISTA -->
+    <div class="flex flex-wrap items-center justify-center gap-3 mt-6">
+      <button onclick="selectVariant(1)" id="btn-1" class="px-5 py-2.5 rounded-2xl text-xs font-black transition-all bg-emerald-500 text-slate-950 shadow-lg scale-105">
+        Opción 1: VFD Retro Neón Esmeralda
+      </button>
+      <button onclick="selectVariant(2)" id="btn-2" class="px-5 py-2.5 rounded-2xl text-xs font-black transition-all bg-slate-800 text-slate-300 hover:text-white">
+        Opción 2: Industrial Ámbar Solar
+      </button>
+      <button onclick="selectVariant(3)" id="btn-3" class="px-5 py-2.5 rounded-2xl text-xs font-black transition-all bg-slate-800 text-slate-300 hover:text-white">
+        Opción 3: OLED Titán Pro Contemporáneo
+      </button>
+    </div>
+  </header>
+
+  <!-- CONTENEDOR PRINCIPAL INTERACTIVO -->
+  <main class="max-w-4xl mx-auto space-y-10">
+
+    <!-- SIMULADOR DE ENTRADA DE DINERO -->
+    <div class="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <span class="text-xs font-bold text-slate-400">Total Orden:</span>
+        <span class="text-sm font-mono font-black text-white">$24.00 USD (Bs. 1,008.00)</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="text-xs font-bold text-slate-400">Simular Pago Recibido:</span>
+        <button onclick="setSimPaid(0)" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-800 text-slate-300 hover:bg-slate-700">$0 (Sin pagar)</button>
+        <button onclick="setSimPaid(14)" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-500/20 border border-amber-500/40 text-amber-300 hover:bg-amber-500/30">$14 (Falta)</button>
+        <button onclick="setSimPaid(24)" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-sky-500/20 border border-sky-500/40 text-sky-300 hover:bg-sky-500/30">$24 (Exacto)</button>
+        <button onclick="setSimPaid(30)" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 hover:bg-emerald-500/30">$30 (Vuelto $6)</button>
+        <button onclick="setSimPaid(50)" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-purple-500/20 border border-purple-500/40 text-purple-300 hover:bg-purple-500/30">$50 (Vuelto $26)</button>
+      </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- VARIACIÓN 1: VFD RETRO NEÓN ESMERALDA (ESTILO CASIO / SHARP COMERCIAL)    -->
+    <!-- ========================================================================= -->
+    <div id="variant-1" class="variant-card transition-all duration-300">
+      <div class="flex items-center justify-between mb-2 px-2">
+        <div class="flex items-center gap-2">
+          <span class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
+          <h2 class="text-base font-black text-white">Opción 1: Pantalla VFD Retro Neón Esmeralda</h2>
+        </div>
+        <span class="text-xs text-emerald-400 font-bold bg-emerald-950/80 px-2.5 py-0.5 rounded-full border border-emerald-500/30">
+          Alta Identidad de Caja Registradora Clásica
+        </span>
+      </div>
+
+      <!-- MARCO DE HARDWARE REGISTRADORA -->
+      <div class="rounded-3xl border-4 border-slate-800 bg-[#070b14] p-3 shadow-2xl relative overflow-hidden">
+        <!-- Textura de panel biselado superior -->
+        <div class="flex items-center justify-between px-3 py-1 mb-2 border-b border-slate-800/80 text-[10px] font-mono text-slate-500 font-black tracking-wider uppercase">
+          <div class="flex items-center gap-2">
+            <span class="inline-block w-2 h-2 rounded-full bg-emerald-400"></span>
+            <span>KLIKPOS REGISTER DISPLAY // MODEL VFD-2026</span>
+          </div>
+          <span>OPERATOR TERMINAL #01</span>
+        </div>
+
+        <!-- PANTALLA CRISTAL CON SCANLINES -->
+        <div class="rounded-2xl bg-[#03130d] border-2 border-emerald-500/40 p-4 sm:p-5 scanline glow-emerald-box">
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+            
+            <!-- TOTAL A PAGAR -->
+            <div class="md:col-span-6 border-b md:border-b-0 md:border-r border-emerald-500/20 pb-3 md:pb-0 md:pr-4">
+              <span class="text-[10px] font-black uppercase tracking-widest text-emerald-400/80 block font-digital">
+                ▶ TOTAL CUENTA (4 PRODUCTOS)
+              </span>
+              <div class="text-4xl sm:text-5xl font-black font-digital text-emerald-300 glow-green tracking-tight leading-none mt-1">
+                $24.00 <span class="text-lg text-emerald-400 font-bold">USD</span>
+              </div>
+              <div class="text-xs sm:text-sm font-mono font-bold text-emerald-400/90 mt-1">
+                Bs. 1,008.00 <span class="text-[10px] text-emerald-500/70">(TASA BCV: 42.00)</span>
+              </div>
+            </div>
+
+            <!-- VISOR DINÁMICO DE ESTADO / VUELTO -->
+            <div class="md:col-span-6 flex flex-col justify-center">
+              <div id="vfd-status-box" class="p-3 rounded-xl bg-emerald-950/60 border border-emerald-500/40">
+                <div class="flex items-center justify-between">
+                  <span id="vfd-status-title" class="text-[10px] font-black uppercase tracking-widest text-emerald-300 font-digital">
+                    ✓ VUELTO AL CLIENTE
+                  </span>
+                  <span id="vfd-paid-badge" class="text-[10px] font-mono text-emerald-400/80">Recibido: $30.00</span>
+                </div>
+                <div id="vfd-status-amount" class="text-3xl sm:text-4xl font-black font-digital text-emerald-200 glow-green tracking-tight leading-none mt-1">
+                  $6.00 <span class="text-sm font-bold text-emerald-300">USD</span>
+                </div>
+                <div id="vfd-status-ves" class="text-xs font-mono font-bold text-emerald-300 mt-0.5">
+                  Bs. 252.00
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+      <p class="text-xs text-slate-400 mt-2 px-2">
+        <strong>Ventajas:</strong> Aspecto inconfundible de caja registradora, genera confianza y sensación de cobro formal en cualquier cliente de calle.
+      </p>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- VARIACIÓN 2: INDUSTRIAL ÁMBAR SOLAR (ALTO CONTRASTE EXTERIOR)             -->
+    <!-- ========================================================================= -->
+    <div id="variant-2" class="variant-card hidden transition-all duration-300">
+      <div class="flex items-center justify-between mb-2 px-2">
+        <div class="flex items-center gap-2">
+          <span class="w-3 h-3 rounded-full bg-amber-500 animate-pulse"></span>
+          <h2 class="text-base font-black text-white">Opción 2: Industrial Ámbar Solar (Luz Diurna)</h2>
+        </div>
+        <span class="text-xs text-amber-400 font-bold bg-amber-950/80 px-2.5 py-0.5 rounded-full border border-amber-500/30">
+          Máxima Legibilidad Bajo el Sol
+        </span>
+      </div>
+
+      <!-- MARCO INDUSTRIAL ÁMBAR -->
+      <div class="rounded-3xl border-4 border-amber-950/80 bg-[#0e1017] p-3 shadow-2xl relative overflow-hidden">
+        <div class="flex items-center justify-between px-3 py-1 mb-2 border-b border-amber-900/30 text-[10px] font-mono text-amber-500/80 font-black tracking-wider uppercase">
+          <div class="flex items-center gap-2">
+            <span class="inline-block w-2 h-2 rounded-full bg-amber-400"></span>
+            <span>KLIKPOS INDUSTRIAL POS // HIGH-VISIBILITY DISPLAY</span>
+          </div>
+          <span>STREET FOOD READY</span>
+        </div>
+
+        <div class="rounded-2xl bg-[#141208] border-2 border-amber-500/50 p-4 sm:p-5 glow-amber-box">
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+            
+            <div class="md:col-span-7 border-b md:border-b-0 md:border-r border-amber-500/20 pb-3 md:pb-0 md:pr-4">
+              <span class="text-[10px] font-black uppercase tracking-widest text-amber-400 block font-code">
+                [ TOTAL COBRAR ]
+              </span>
+              <div class="text-4xl sm:text-5xl font-black font-code text-amber-300 glow-amber tracking-tight leading-none mt-1">
+                $24.00 <span class="text-lg text-amber-400 font-bold">USD</span>
+              </div>
+              <div class="text-xs sm:text-sm font-code font-bold text-amber-200 mt-1">
+                Bs. 1,008.00 <span class="text-[10px] text-amber-500">(BCV: 42.00)</span>
+              </div>
+            </div>
+
+            <div class="md:col-span-5 flex flex-col justify-center">
+              <div id="amber-status-box" class="p-3 rounded-xl bg-amber-950/60 border border-amber-500/40">
+                <div class="flex items-center justify-between">
+                  <span id="amber-status-title" class="text-[10px] font-black uppercase tracking-widest text-amber-300 font-code">
+                    💵 VUELTO A ENTREGAR
+                  </span>
+                  <span id="amber-paid-badge" class="text-[10px] font-code text-amber-400">Pago: $30.00</span>
+                </div>
+                <div id="amber-status-amount" class="text-3xl sm:text-4xl font-black font-code text-amber-200 glow-amber tracking-tight leading-none mt-1">
+                  $6.00 <span class="text-sm font-bold text-amber-300">USD</span>
+                </div>
+                <div id="amber-status-ves" class="text-xs font-code font-bold text-amber-200 mt-0.5">
+                  Bs. 252.00
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+      <p class="text-xs text-slate-400 mt-2 px-2">
+        <strong>Ventajas:</strong> El color ámbar fósforo es el estándar aeroespacial y automotriz para visualización al rayo del sol. Ideal para puestos callejeros abiertos.
+      </p>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- VARIACIÓN 3: OLED TITÁN CONTEMPORÁNEO (ESTILO SQUARE / CLOVER PRO)        -->
+    <!-- ========================================================================= -->
+    <div id="variant-3" class="variant-card hidden transition-all duration-300">
+      <div class="flex items-center justify-between mb-2 px-2">
+        <div class="flex items-center gap-2">
+          <span class="w-3 h-3 rounded-full bg-sky-400 animate-pulse"></span>
+          <h2 class="text-base font-black text-white">Opción 3: OLED Titán Pro Contemporáneo</h2>
+        </div>
+        <span class="text-xs text-sky-400 font-bold bg-sky-950/80 px-2.5 py-0.5 rounded-full border border-sky-500/30">
+          Minimalismo Premium de Última Generación
+        </span>
+      </div>
+
+      <!-- MARCO OLED NEGRO PROFUNDO -->
+      <div class="rounded-3xl border border-slate-700 bg-[#090d16] p-4 shadow-2xl relative overflow-hidden">
+        <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-800">
+          <div class="flex items-center gap-2">
+            <div class="w-2.5 h-2.5 rounded-full bg-emerald-500"></div>
+            <span class="text-xs font-black uppercase tracking-wider text-slate-300">Pantalla de Cobro Activa</span>
+          </div>
+          <span class="text-xs font-mono font-bold text-slate-400">4 Ítems • BCV: 42.00</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+          
+          <div class="md:col-span-6">
+            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-widest block">
+              Total de la Orden
+            </span>
+            <div class="text-4xl sm:text-5xl font-black font-mono text-white tracking-tight mt-0.5">
+              $24.00 <span class="text-base font-bold text-slate-400">USD</span>
+            </div>
+            <div class="text-sm font-mono font-bold text-slate-300 mt-1">
+              Bs. 1,008.00
+            </div>
+          </div>
+
+          <div class="md:col-span-6">
+            <div id="oled-status-box" class="p-4 rounded-2xl bg-emerald-500/10 border-2 border-emerald-500/50 shadow-lg">
+              <div class="flex items-center justify-between mb-1">
+                <span id="oled-status-title" class="text-[10px] font-black uppercase tracking-wider text-emerald-400">
+                  ✓ Vuelto al Cliente
+                </span>
+                <span id="oled-paid-badge" class="text-xs font-mono font-bold text-emerald-300">Recibido: $30.00</span>
+              </div>
+              <div id="oled-status-amount" class="text-3xl sm:text-4xl font-mono font-black text-emerald-300 tracking-tight leading-none">
+                $6.00 <span class="text-sm font-bold text-emerald-400">USD</span>
+              </div>
+              <div id="oled-status-ves" class="text-xs font-mono font-bold text-emerald-200 mt-1">
+                Bs. 252.00
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      <p class="text-xs text-slate-400 mt-2 px-2">
+        <strong>Ventajas:</strong> Aspecto sobrio, lujoso y moderno. Se fusiona perfectamente con el diseño de KlikPOS sin parecer retro, pero con números de impacto instantáneo.
+      </p>
+    </div>
+
+  </main>
+
+  <script>
+    let currentPaid = 30;
+    const totalUSD = 24.00;
+    const bcvRate = 42.00;
+
+    function selectVariant(num) {
+      for (let i = 1; i <= 3; i++) {
+        const card = document.getElementById(`variant-${i}`);
+        const btn = document.getElementById(`btn-${i}`);
+        if (i === num) {
+          card.classList.remove('hidden');
+          btn.className = "px-5 py-2.5 rounded-2xl text-xs font-black transition-all bg-emerald-500 text-slate-950 shadow-lg scale-105";
+        } else {
+          card.classList.add('hidden');
+          btn.className = "px-5 py-2.5 rounded-2xl text-xs font-black transition-all bg-slate-800 text-slate-300 hover:text-white";
+        }
+      }
+    }
+
+    function setSimPaid(amount) {
+      currentPaid = amount;
+      updateDisplays();
+    }
+
+    function updateDisplays() {
+      const remainingUSD = Math.max(0, totalUSD - currentPaid);
+      const changeUSD = Math.max(0, currentPaid - totalUSD);
+      const remainingVES = remainingUSD * bcvRate;
+      const changeVES = changeUSD * bcvRate;
+
+      // Actualizar VFD (Opción 1)
+      const vfdBox = document.getElementById('vfd-status-box');
+      const vfdTitle = document.getElementById('vfd-status-title');
+      const vfdBadge = document.getElementById('vfd-paid-badge');
+      const vfdAmount = document.getElementById('vfd-status-amount');
+      const vfdVes = document.getElementById('vfd-status-ves');
+
+      vfdBadge.textContent = `Recibido: $${currentPaid.toFixed(2)}`;
+
+      if (remainingUSD > 0) {
+        vfdBox.className = "p-3 rounded-xl bg-amber-950/60 border border-amber-500/50";
+        vfdTitle.className = "text-[10px] font-black uppercase tracking-widest text-amber-300 font-digital";
+        vfdTitle.textContent = "⚠️ FALTA POR PAGAR";
+        vfdAmount.className = "text-3xl sm:text-4xl font-black font-digital text-amber-300 glow-amber tracking-tight leading-none mt-1";
+        vfdAmount.innerHTML = `$${remainingUSD.toFixed(2)} <span class="text-sm font-bold text-amber-400">USD</span>`;
+        vfdVes.className = "text-xs font-mono font-bold text-amber-300 mt-0.5";
+        vfdVes.textContent = `Bs. ${remainingVES.toFixed(2)}`;
+      } else if (changeUSD > 0) {
+        vfdBox.className = "p-3 rounded-xl bg-emerald-950/60 border border-emerald-500/50";
+        vfdTitle.className = "text-[10px] font-black uppercase tracking-widest text-emerald-300 font-digital";
+        vfdTitle.textContent = "💵 VUELTO AL CLIENTE";
+        vfdAmount.className = "text-3xl sm:text-4xl font-black font-digital text-emerald-200 glow-green tracking-tight leading-none mt-1";
+        vfdAmount.innerHTML = `$${changeUSD.toFixed(2)} <span class="text-sm font-bold text-emerald-300">USD</span>`;
+        vfdVes.className = "text-xs font-mono font-bold text-emerald-300 mt-0.5";
+        vfdVes.textContent = `Bs. ${changeVES.toFixed(2)}`;
+      } else {
+        vfdBox.className = "p-3 rounded-xl bg-sky-950/60 border border-sky-500/50";
+        vfdTitle.className = "text-[10px] font-black uppercase tracking-widest text-sky-300 font-digital";
+        vfdTitle.textContent = "✓ CUENTA CUBIERTA EXACTA";
+        vfdAmount.className = "text-3xl sm:text-4xl font-black font-digital text-sky-200 tracking-tight leading-none mt-1";
+        vfdAmount.innerHTML = `$0.00 <span class="text-sm font-bold text-sky-300">USD</span>`;
+        vfdVes.className = "text-xs font-mono font-bold text-sky-300 mt-0.5";
+        vfdVes.textContent = `Sin vuelto pendiente`;
+      }
+
+      // Actualizar Ámbar (Opción 2)
+      const aBox = document.getElementById('amber-status-box');
+      const aTitle = document.getElementById('amber-status-title');
+      const aBadge = document.getElementById('amber-paid-badge');
+      const aAmount = document.getElementById('amber-status-amount');
+      const aVes = document.getElementById('amber-status-ves');
+
+      aBadge.textContent = `Pago: $${currentPaid.toFixed(2)}`;
+      if (remainingUSD > 0) {
+        aBox.className = "p-3 rounded-xl bg-red-950/60 border border-red-500/50";
+        aTitle.textContent = "⚠️ RESTANTE PENDIENTE";
+        aTitle.className = "text-[10px] font-black uppercase tracking-widest text-red-300 font-code";
+        aAmount.className = "text-3xl sm:text-4xl font-black font-code text-red-200 tracking-tight leading-none mt-1";
+        aAmount.innerHTML = `$${remainingUSD.toFixed(2)} <span class="text-sm font-bold text-red-300">USD</span>`;
+        aVes.textContent = `Bs. ${remainingVES.toFixed(2)}`;
+      } else if (changeUSD > 0) {
+        aBox.className = "p-3 rounded-xl bg-amber-950/60 border border-amber-500/50";
+        aTitle.textContent = "💵 VUELTO A ENTREGAR";
+        aTitle.className = "text-[10px] font-black uppercase tracking-widest text-amber-300 font-code";
+        aAmount.className = "text-3xl sm:text-4xl font-black font-code text-amber-200 glow-amber tracking-tight leading-none mt-1";
+        aAmount.innerHTML = `$${changeUSD.toFixed(2)} <span class="text-sm font-bold text-amber-300">USD</span>`;
+        aVes.textContent = `Bs. ${changeVES.toFixed(2)}`;
+      } else {
+        aBox.className = "p-3 rounded-xl bg-emerald-950/60 border border-emerald-500/50";
+        aTitle.textContent = "✓ CUENTA PAGADA EXACTA";
+        aTitle.className = "text-[10px] font-black uppercase tracking-widest text-emerald-300 font-code";
+        aAmount.className = "text-3xl sm:text-4xl font-black font-code text-emerald-200 tracking-tight leading-none mt-1";
+        aAmount.innerHTML = `$0.00 <span class="text-sm font-bold text-emerald-300">USD</span>`;
+        aVes.textContent = `Exacto`;
+      }
+
+      // Actualizar OLED (Opción 3)
+      const oBox = document.getElementById('oled-status-box');
+      const oTitle = document.getElementById('oled-status-title');
+      const oBadge = document.getElementById('oled-paid-badge');
+      const oAmount = document.getElementById('oled-status-amount');
+      const oVes = document.getElementById('oled-status-ves');
+
+      oBadge.textContent = `Recibido: $${currentPaid.toFixed(2)}`;
+      if (remainingUSD > 0) {
+        oBox.className = "p-4 rounded-2xl bg-amber-500/10 border-2 border-amber-500/50 shadow-lg";
+        oTitle.textContent = "⚠️ Falta por Pagar";
+        oTitle.className = "text-[10px] font-black uppercase tracking-wider text-amber-400";
+        oAmount.className = "text-3xl sm:text-4xl font-mono font-black text-amber-300 tracking-tight leading-none";
+        oAmount.innerHTML = `$${remainingUSD.toFixed(2)} <span class="text-sm font-bold text-amber-400">USD</span>`;
+        oVes.textContent = `Bs. ${remainingVES.toFixed(2)}`;
+      } else if (changeUSD > 0) {
+        oBox.className = "p-4 rounded-2xl bg-emerald-500/10 border-2 border-emerald-500/50 shadow-lg";
+        oTitle.textContent = "✓ Vuelto al Cliente";
+        oTitle.className = "text-[10px] font-black uppercase tracking-wider text-emerald-400";
+        oAmount.className = "text-3xl sm:text-4xl font-mono font-black text-emerald-300 tracking-tight leading-none";
+        oAmount.innerHTML = `$${changeUSD.toFixed(2)} <span class="text-sm font-bold text-emerald-400">USD</span>`;
+        oVes.textContent = `Bs. ${changeVES.toFixed(2)}`;
+      } else {
+        oBox.className = "p-4 rounded-2xl bg-sky-500/10 border-2 border-sky-500/50 shadow-lg";
+        oTitle.textContent = "✓ Cuenta Exacta";
+        oTitle.className = "text-[10px] font-black uppercase tracking-wider text-sky-400";
+        oAmount.className = "text-3xl sm:text-4xl font-mono font-black text-sky-300 tracking-tight leading-none";
+        oAmount.innerHTML = `$0.00 <span class="text-sm font-bold text-sky-400">USD</span>`;
+        oVes.textContent = `Sin vuelto pendiente`;
+      }
+    }
+  </script>
+</body>
+</html>

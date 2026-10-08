@@ -64,11 +64,13 @@ import {
   Server,
   Link2,
   Unlink,
+  Package,
 } from 'lucide-react';
 import { removeBackgroundToWhiteCanvas } from '@/lib/background-remover';
 import { Icon } from '@iconify/react';
 import { db } from '@/lib/db';
 import masterCatalogData from '@/lib/data/master-catalog.json';
+import VisualPacksModal from '@/components/marketplace/VisualPacksModal';
 
 interface ScannedHistoryItem {
   barcode: string;
@@ -560,8 +562,18 @@ export default function MobileScannerPage() {
   const [isInstallable, setIsInstallable] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
 
-  // Inventario Móvil en Vivo
-  const [inventoryList, setInventoryList] = useState<MobileCatalogItem[]>([]);
+  const [inventoryList, setInventoryList] = useState<MobileCatalogItem[]>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const cached = localStorage.getItem('venematic_offline_inventory');
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        }
+      } catch {}
+    }
+    return Array.isArray(masterCatalogData) ? (masterCatalogData as MobileCatalogItem[]) : [];
+  });
   const [inventorySearch, setInventorySearch] = useState('');
   const [inventoryBcvRate, setInventoryBcvRate] = useState(848.55);
   const [isLoadingInventory, setIsLoadingInventory] = useState(false);
@@ -594,6 +606,7 @@ export default function MobileScannerPage() {
 
   // Búsqueda de Imágenes en Google / Web para Móvil
   const [showGoogleImageModal, setShowGoogleImageModal] = useState(false);
+  const [showVisualPacksModal, setShowVisualPacksModal] = useState(false);
   const [googleImageQuery, setGoogleImageQuery] = useState('');
   const [googleImagesResults, setGoogleImagesResults] = useState<Array<{ title: string; url: string; thumbnail: string; source: string }>>([]);
   const [isSearchingGoogleImages, setIsSearchingGoogleImages] = useState(false);
@@ -1874,129 +1887,184 @@ export default function MobileScannerPage() {
     }
   }, [activeTab]);
 
-  // Handle Photo selection and compression with low memory footprint
-  const handlePhotoCapture = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  // Helper de compresión por hardware con memoria < 1.5MB (Anti-OOM)
+  const compressImageSafely = async (file: File, maxWidth = 400, quality = 0.80): Promise<string> => {
+    if (typeof window !== 'undefined' && 'createImageBitmap' in window) {
+      try {
+        let bitmap: ImageBitmap | null = null;
+        try {
+          bitmap = await createImageBitmap(file, {
+            resizeWidth: maxWidth,
+            resizeQuality: 'medium',
+          });
+        } catch {
+          bitmap = null;
+        }
 
-    try {
-      // Usar FileReader directo para evitar pérdida en móviles al cerrar/cambiar tabs
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const dataUrl = event.target?.result as string;
-        if (!dataUrl) return;
+        if (bitmap) {
+          let width = bitmap.width;
+          let height = bitmap.height;
+          if (width > maxWidth || height > maxWidth) {
+            if (width > height) {
+              height = Math.round((height * maxWidth) / width);
+              width = maxWidth;
+            } else {
+              width = Math.round((width * maxWidth) / height);
+              height = maxWidth;
+            }
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, width, height);
+            ctx.drawImage(bitmap, 0, 0, width, height);
+            bitmap.close();
+            return canvas.toDataURL('image/jpeg', quality);
+          }
+          bitmap.close();
+        }
+      } catch (e) {
+        console.warn('[ImageCompress] Fallback a createObjectURL:', e);
+      }
+    }
 
+    return new Promise((resolve, reject) => {
+      let objectUrl: string | null = null;
+      try {
+        objectUrl = URL.createObjectURL(file);
+      } catch {}
+
+      if (objectUrl) {
         const img = new Image();
         img.onload = () => {
           try {
-            const canvas = document.createElement('canvas');
-            const MAX_SIZE = 640;
-            let width = img.width;
-            let height = img.height;
-
-            if (width > height) {
-              if (width > MAX_SIZE) {
-                height = Math.round((height * MAX_SIZE) / width);
-                width = MAX_SIZE;
-              }
-            } else {
-              if (height > MAX_SIZE) {
-                width = Math.round((width * MAX_SIZE) / height);
-                height = MAX_SIZE;
+            let width = img.naturalWidth || img.width || 400;
+            let height = img.naturalHeight || img.height || 400;
+            if (width > maxWidth || height > maxWidth) {
+              if (width > height) {
+                height = Math.round((height * maxWidth) / width);
+                width = maxWidth;
+              } else {
+                width = Math.round((width * maxWidth) / height);
+                height = maxWidth;
               }
             }
-
+            const canvas = document.createElement('canvas');
             canvas.width = width;
             canvas.height = height;
             const ctx = canvas.getContext('2d');
             if (ctx) {
-              ctx.imageSmoothingEnabled = true;
-              ctx.imageSmoothingQuality = 'medium';
+              ctx.fillStyle = '#ffffff';
+              ctx.fillRect(0, 0, width, height);
               ctx.drawImage(img, 0, 0, width, height);
-              const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.80);
-              
-              // 1. Guardar en estado y persistir en localStorage de inmediato
-              setProdPhoto(compressedDataUrl);
-              try {
-                localStorage.setItem('venematic_last_photo', compressedDataUrl);
-              } catch {}
-
-              // 2. Auto-limpiar fondo a blanco puro
-              setIsEnhancingMobileBg(true);
-              removeBackgroundToWhiteCanvas(compressedDataUrl)
-                .then((enhanced) => {
-                  setProdPhoto(enhanced);
-                  try {
-                    localStorage.setItem('venematic_last_photo', enhanced);
-                  } catch {}
-
-                  // 3. ENVIAR FOTO MEJORADA A LA PC
-                  setIsSendingPhoto(true);
-                  return safeApiFetch('/api/scanner/upload-photo', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                      session: session || 'caja-1',
-                      image: enhanced,
-                      barcode: prodBarcode || undefined,
-                    }),
-                    keepalive: true,
-                  });
-                })
-                .then((res) => {
-                  if (res && res.ok) {
-                    playMobileBeep();
-                    if (typeof navigator !== 'undefined' && navigator.vibrate) {
-                      navigator.vibrate([100, 50, 100]);
-                    }
-                    setPhotoSentToast(true);
-                    setTimeout(() => setPhotoSentToast(false), 4000);
-                  }
-                })
-                .catch((err) => {
-                  console.error('Error auto-procesando foto:', err);
-                })
-                .finally(() => {
-                  setIsEnhancingMobileBg(false);
-                  setIsSendingPhoto(false);
-                });
-
-              // 4. Auto-reconocimiento con IA (Google Vision / Gemini) si está configurado
-              setIsAnalyzingMobileAI(true);
-              safeApiFetch('/api/vision/analyze-product', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ image: compressedDataUrl }),
-              })
-                .then((r) => r.json())
-                .then((json) => {
-                  if (json.success && json.data) {
-                    if (json.data.name && !prodName) setProdName(json.data.name);
-                    if (json.data.category) setProdCategory(json.data.category);
-                    if (json.data.barcode && !prodBarcode) setProdBarcode(json.data.barcode);
-                    if (json.data.suggestedPriceUSD && !prodPriceUSD) {
-                      setProdPriceUSD(json.data.suggestedPriceUSD.toString());
-                    }
-                    setAiDetectedToast(`¡Detectado: ${json.data.name || 'Producto'}!`);
-                    setTimeout(() => setAiDetectedToast(null), 4500);
-                  }
-                })
-                .catch(() => {})
-                .finally(() => {
-                  setIsAnalyzingMobileAI(false);
-                });
+              const dataUrl = canvas.toDataURL('image/jpeg', quality);
+              if (objectUrl) URL.revokeObjectURL(objectUrl);
+              resolve(dataUrl);
+              return;
             }
-          } catch (err) {
-            console.error('Error procesando imagen en canvas:', err);
-            alert('No se pudo procesar la imagen. Intenta tomarla de nuevo.');
-          }
+          } catch (err) {}
+          if (objectUrl) URL.revokeObjectURL(objectUrl);
+          reject(new Error('Canvas error'));
         };
-        img.src = dataUrl;
-      };
-      reader.readAsDataURL(file);
+        img.onerror = () => {
+          if (objectUrl) URL.revokeObjectURL(objectUrl);
+          reject(new Error('Image load error'));
+        };
+        img.src = objectUrl;
+      } else {
+        reject(new Error('No object URL'));
+      }
+    });
+  };
+
+  // Handle Photo selection and compression with low memory footprint (< 1.5MB)
+  const handlePhotoCapture = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const compressedDataUrl = await compressImageSafely(file, 400, 0.80);
+      setProdPhoto(compressedDataUrl);
+      try {
+        localStorage.setItem('venematic_last_photo', compressedDataUrl);
+      } catch {}
+
+      // 2. Auto-limpiar fondo a blanco puro
+      setIsEnhancingMobileBg(true);
+      removeBackgroundToWhiteCanvas(compressedDataUrl)
+        .then((enhanced) => {
+          setProdPhoto(enhanced);
+          try {
+            localStorage.setItem('venematic_last_photo', enhanced);
+          } catch {}
+
+          // 3. ENVIAR FOTO MEJORADA A LA PC
+          setIsSendingPhoto(true);
+          return safeApiFetch('/api/scanner/upload-photo', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              session: session || 'caja-1',
+              image: enhanced,
+              barcode: prodBarcode || undefined,
+            }),
+            keepalive: true,
+          });
+        })
+        .then((res) => {
+          if (res && res.ok) {
+            playMobileBeep();
+            if (typeof navigator !== 'undefined' && navigator.vibrate) {
+              navigator.vibrate([100, 50, 100]);
+            }
+            setPhotoSentToast(true);
+            setTimeout(() => setPhotoSentToast(false), 4000);
+          }
+        })
+        .catch((err) => {
+          console.error('Error auto-procesando foto:', err);
+        })
+        .finally(() => {
+          setIsEnhancingMobileBg(false);
+          setIsSendingPhoto(false);
+        });
+
+      // 4. Auto-reconocimiento con IA (Google Vision / Gemini) si está configurado
+      setIsAnalyzingMobileAI(true);
+      safeApiFetch('/api/vision/analyze-product', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: compressedDataUrl }),
+      })
+        .then((r) => r.json())
+        .then((json) => {
+          if (json.success && json.data) {
+            if (json.data.name && !prodName) setProdName(json.data.name);
+            if (json.data.category) setProdCategory(json.data.category);
+            if (json.data.barcode && !prodBarcode) setProdBarcode(json.data.barcode);
+            if (json.data.suggestedPriceUSD && !prodPriceUSD) {
+              setProdPriceUSD(json.data.suggestedPriceUSD.toString());
+            }
+            setAiDetectedToast(`¡Detectado: ${json.data.name || 'Producto'}!`);
+            setTimeout(() => setAiDetectedToast(null), 4500);
+          }
+        })
+        .catch(() => {})
+        .finally(() => {
+          setIsAnalyzingMobileAI(false);
+        });
     } catch (error) {
       console.error('Error al capturar foto:', error);
       alert('Error de memoria al capturar foto.');
+    } finally {
+      if (e.target) {
+        try {
+          e.target.value = '';
+        } catch {}
+      }
     }
   };
 
@@ -2178,23 +2246,72 @@ export default function MobileScannerPage() {
         </div>
       )}
 
-      {/* Subheader: Estado del Sistema Dual y Modo Activo */}
-      <div className="px-4 py-1.5 bg-slate-900 text-white flex items-center justify-between shadow-xs text-xs sticky top-12 z-30 shrink-0">
-        <div className="flex items-center gap-2">
+      {/* Subheader: Estado del Sistema Dual y Accesos Rápidos de Gestión */}
+      <div className="px-3 py-1.5 bg-slate-900 text-white flex items-center justify-between shadow-xs text-xs sticky top-12 z-30 shrink-0">
+        <div className="flex items-center gap-1.5">
           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
           <span className="font-extrabold text-xs uppercase tracking-wider text-slate-200">
-            {activeTab === 'pos' && '🛒 Punto de Venta Móvil'}
-            {activeTab === 'scale' && '⚖️ Balanza Digital Pesaje'}
-            {activeTab === 'gun' && '⚡ Pistola Escáner 60 FPS'}
-            {activeTab === 'create' && '📸 Captura Foto & IA'}
-            {activeTab === 'inventory' && '📦 Conteo de Stock & Pasillo'}
+            {activeTab === 'pos' && '🛒 POS Móvil'}
+            {activeTab === 'scale' && '⚖️ Balanza'}
+            {activeTab === 'gun' && '⚡ Escáner'}
+            {activeTab === 'create' && '📸 Captura IA'}
+            {activeTab === 'inventory' && '📦 Stock'}
           </span>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-mono text-slate-400">BCV:</span>
-          <span className="font-mono font-black text-xs text-emerald-400">
-            Bs. {inventoryBcvRate.toFixed(2)}
-          </span>
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            onClick={() => {
+              safeVibrate(20);
+              loadSavedSales();
+              setShowMobileSalesModal(true);
+            }}
+            className="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 active:scale-95 rounded-lg text-[11px] font-bold flex items-center gap-1 border border-slate-700 transition-all cursor-pointer"
+            title="Historial de Ventas y Tickets"
+          >
+            <Receipt className="w-3.5 h-3.5 text-sky-400" />
+            <span className="hidden xs:inline">Ventas</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              safeVibrate(20);
+              loadSavedCustomers();
+              setShowMobileCustomersModal(true);
+            }}
+            className="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 active:scale-95 rounded-lg text-[11px] font-bold flex items-center gap-1 border border-slate-700 transition-all cursor-pointer"
+            title="Clientes y Cuentas por Cobrar"
+          >
+            <Users className="w-3.5 h-3.5 text-amber-400" />
+            <span className="hidden xs:inline">Clientes</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              safeVibrate(20);
+              loadSavedSales();
+              setShowMobileClosureModal(true);
+            }}
+            className="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 active:scale-95 rounded-lg text-[11px] font-bold flex items-center gap-1 border border-slate-700 transition-all cursor-pointer"
+            title="Cierre de Caja Z / X"
+          >
+            <TrendingUp className="w-3.5 h-3.5 text-purple-400" />
+            <span className="hidden xs:inline">Cierre</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              safeVibrate(20);
+              setShowMobileSettingsModal(true);
+            }}
+            className="p-1 bg-slate-800 hover:bg-slate-700 text-slate-300 active:scale-95 rounded-lg border border-slate-700 transition-all cursor-pointer"
+            title="Configuración"
+          >
+            <Settings className="w-3.5 h-3.5" />
+          </button>
         </div>
       </div>
 
@@ -2399,49 +2516,71 @@ export default function MobileScannerPage() {
                         playMobileBeep();
                         addToMobileCart(p);
                       }}
-                      className="bg-white rounded-2xl p-2.5 border-2 border-slate-200/90 hover:border-emerald-500 shadow-xs hover:shadow-md flex flex-col justify-between cursor-pointer active:scale-95 transition-all group relative overflow-hidden"
+                      className="bg-white rounded-2xl border-2 border-slate-200/90 hover:border-amber-400 shadow-xs hover:shadow-md flex flex-col justify-between cursor-pointer active:scale-[0.96] transition-all group relative overflow-hidden select-none"
                     >
-                      {/* Badge de cantidad en carrito */}
-                      {inCart && (
-                        <div className="absolute top-2 right-2 z-10 w-6 h-6 rounded-full bg-emerald-600 text-white font-black text-xs flex items-center justify-center shadow-md animate-in zoom-in-50">
-                          {inCart.qty}
-                        </div>
-                      )}
-
-                      {/* Imagen o Icono */}
-                      <div className="w-full h-20 rounded-xl bg-slate-50 border border-slate-100 overflow-hidden flex items-center justify-center mb-1.5 shrink-0">
+                      {/* Imagen o Icono con Badges */}
+                      <div className="relative h-24 sm:h-28 w-full bg-slate-50 border-b border-slate-100 overflow-hidden flex items-center justify-center p-2 shrink-0">
                         {p.image ? (
-                          <img src={p.image} alt={p.name} className="w-full h-full object-contain p-1 group-hover:scale-105 transition-transform" />
+                          <img
+                            src={p.image}
+                            alt={p.name}
+                            className="w-full h-full object-contain drop-shadow-xs group-hover:scale-105 transition-transform duration-300"
+                            loading="lazy"
+                          />
                         ) : (
                           <div className="p-2 text-slate-700">
                             {getMobileProductIcon(p, idx % 2 === 0)}
                           </div>
                         )}
-                      </div>
 
-                      {/* Título */}
-                      <div className="min-w-0 flex-1">
-                        <h4 className="font-extrabold text-xs text-slate-900 line-clamp-2 leading-tight min-h-[30px]">
-                          {p.name}
-                        </h4>
-                        <span className="text-[9px] font-mono text-slate-400 block truncate mt-0.5">
+                        {/* Tag de Categoría */}
+                        <span className="absolute top-1.5 left-1.5 text-[8.5px] font-black bg-slate-950/90 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded-full shadow-xs truncate max-w-[85px]">
                           {p.category || 'General'}
                         </span>
+
+                        {/* Badge de cantidad en carrito estilo Street */}
+                        {inCart && (
+                          <span className="absolute top-1.5 right-1.5 text-slate-950 font-black font-mono text-[10.5px] w-5 h-5 rounded-full flex items-center justify-center shadow-md bg-amber-400 animate-in zoom-in-50">
+                            {inCart.qty}
+                          </span>
+                        )}
                       </div>
 
-                      {/* Precios & Botón + */}
-                      <div className="flex items-center justify-between pt-1.5 mt-1 border-t border-slate-100">
+                      {/* Título & Detalle */}
+                      <div className="p-2 flex-1 flex flex-col justify-between space-y-1">
                         <div>
-                          <span className="font-mono font-black text-xs sm:text-sm text-slate-900 block tabular-numbers leading-tight">
-                            ${p.priceUSD.toFixed(2)}
-                          </span>
-                          <span className="font-mono text-[9px] font-bold text-emerald-700 block tabular-numbers">
-                            Bs. {priceVES.toFixed(2)}
+                          <h4 className="font-black text-xs text-slate-950 line-clamp-1 leading-tight">
+                            {p.name}
+                          </h4>
+                          <span className="text-[9.5px] font-mono text-slate-400 block truncate mt-0.5">
+                            {p.barcode || 'Catálogo Móvil'}
                           </span>
                         </div>
 
-                        <div className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-300 flex items-center justify-center font-bold group-hover:bg-emerald-600 group-hover:text-white transition-colors">
-                          <Plus className="w-4 h-4" />
+                        {/* Precios & Botón Táctil de Adición */}
+                        <div className="flex items-center justify-between pt-1 border-t border-slate-100">
+                          <div>
+                            <span className="font-mono font-black text-xs sm:text-sm text-amber-500 block tabular-numbers leading-tight">
+                              ${p.priceUSD.toFixed(2)}
+                            </span>
+                            <span className="font-mono text-[9px] font-bold text-slate-500 block tabular-numbers">
+                              Bs. {priceVES.toFixed(2)}
+                            </span>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              safeVibrate(25);
+                              playMobileBeep();
+                              addToMobileCart(p);
+                            }}
+                            className="w-7 h-7 rounded-xl bg-amber-500 hover:bg-amber-400 active:scale-90 text-slate-950 flex items-center justify-center transition-all shadow-xs font-black cursor-pointer"
+                            title="Añadir a la venta"
+                          >
+                            <Plus className="w-4 h-4 stroke-[2.8]" />
+                          </button>
                         </div>
                       </div>
                     </div>
@@ -3757,11 +3896,21 @@ export default function MobileScannerPage() {
             <button
               type="button"
               onClick={handleSeedMasterCatalog}
-              className="py-2 px-3 bg-slate-900 hover:bg-slate-800 active:scale-95 text-cyan-300 border border-slate-700 rounded-xl font-black text-[11px] flex items-center gap-1.5 shrink-0 shadow-xs"
+              className="py-2 px-2.5 bg-slate-900 hover:bg-slate-800 active:scale-95 text-cyan-300 border border-slate-700 rounded-xl font-black text-[11px] flex items-center gap-1.5 shrink-0 shadow-xs"
               title="Cargar Catálogo Maestro con +130 productos venezolanos"
             >
               <PackagePlus className="w-3.5 h-3.5 text-cyan-400" />
               <span>+130 Catálogo</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setShowVisualPacksModal(true)}
+              className="py-2 px-2.5 bg-gradient-to-r from-sky-900 to-indigo-950 hover:from-sky-800 hover:to-indigo-900 active:scale-95 text-sky-200 border border-sky-600/40 rounded-xl font-black text-[11px] flex items-center gap-1.5 shrink-0 shadow-xs"
+              title="Descargar Packs de Imágenes por Catálogo"
+            >
+              <Package className="w-3.5 h-3.5 text-sky-400" />
+              <span>Packs Fotos</span>
             </button>
           </div>
 
@@ -4213,35 +4362,53 @@ export default function MobileScannerPage() {
                   )}
                 </div>
               ) : (
-                <div className="grid grid-cols-2 gap-2.5">
-                  <button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    className="h-36 border-2 border-dashed border-slate-300 hover:border-sky-500 hover:bg-sky-50/40 rounded-2xl flex flex-col items-center justify-center gap-1.5 text-slate-600 transition-colors active:scale-98 shadow-2xs"
-                  >
-                    <div className="w-10 h-10 rounded-full bg-sky-100 text-sky-700 flex items-center justify-center">
-                      <Camera className="w-5 h-5" />
-                    </div>
-                    <span className="text-xs font-bold text-slate-800">Tomar Foto</span>
-                    <span className="text-[10px] text-slate-400">Cámara o Galería</span>
-                  </button>
+                <>
+                  <div className="grid grid-cols-2 gap-2.5">
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="h-36 border-2 border-dashed border-slate-300 hover:border-sky-500 hover:bg-sky-50/40 rounded-2xl flex flex-col items-center justify-center gap-1.5 text-slate-600 transition-colors active:scale-98 shadow-2xs"
+                    >
+                      <div className="w-10 h-10 rounded-full bg-sky-100 text-sky-700 flex items-center justify-center">
+                        <Camera className="w-5 h-5" />
+                      </div>
+                      <span className="text-xs font-bold text-slate-800">Tomar Foto</span>
+                      <span className="text-[10px] text-slate-400">Cámara o Galería</span>
+                    </button>
 
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const q = (prodName || prodBarcode || '').trim();
-                      setGoogleImageQuery(q);
-                      handleSearchGoogleImages(q);
-                    }}
-                    className="h-36 border-2 border-dashed border-emerald-300 hover:border-emerald-500 hover:bg-emerald-50/40 rounded-2xl flex flex-col items-center justify-center gap-1.5 text-slate-600 transition-colors active:scale-98 shadow-2xs bg-emerald-50/30"
-                  >
-                    <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center">
-                      <Globe className="w-5 h-5" />
-                    </div>
-                    <span className="text-xs font-bold text-emerald-800">Buscar en Google</span>
-                    <span className="text-[10px] text-emerald-600 font-bold">1-Clic + Fondo Blanco</span>
-                  </button>
-                </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const q = (prodName || prodBarcode || '').trim();
+                        setGoogleImageQuery(q);
+                        handleSearchGoogleImages(q);
+                      }}
+                      className="h-36 border-2 border-dashed border-emerald-300 hover:border-emerald-500 hover:bg-emerald-50/40 rounded-2xl flex flex-col items-center justify-center gap-1.5 text-slate-600 transition-colors active:scale-98 shadow-2xs bg-emerald-50/30"
+                    >
+                      <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center">
+                        <Globe className="w-5 h-5" />
+                      </div>
+                      <span className="text-xs font-bold text-emerald-800">Buscar en Google</span>
+                      <span className="text-[10px] text-emerald-600 font-bold">1-Clic + Fondo Blanco</span>
+                    </button>
+                  </div>
+
+                  <div className="mt-2.5">
+                    <button
+                      type="button"
+                      onClick={() => setShowVisualPacksModal(true)}
+                      className="w-full py-2.5 px-3 bg-gradient-to-r from-sky-50 via-indigo-50/50 to-emerald-50 border-2 border-dashed border-sky-400 hover:border-sky-500 hover:bg-sky-50/80 rounded-2xl flex items-center justify-center gap-2.5 text-slate-800 transition-all active:scale-[0.98] shadow-2xs cursor-pointer"
+                    >
+                      <div className="w-8 h-8 rounded-full bg-sky-600 text-white flex items-center justify-center shadow-xs shrink-0">
+                        <Package className="w-4 h-4" />
+                      </div>
+                      <div className="text-left min-w-0">
+                        <span className="text-xs font-black text-slate-900 block leading-tight">📦 Descargar Packs de Imágenes por Catálogo</span>
+                        <span className="text-[10px] text-sky-700 font-semibold block leading-tight">Fotos oficiales listas con fondo blanco (Polar, Harina PAN, Lácteos, Víveres)</span>
+                      </div>
+                    </button>
+                  </div>
+                </>
               )}
             </div>
 
@@ -4716,81 +4883,7 @@ export default function MobileScannerPage() {
         </div>
       )}
 
-      {/* DOCKER FLOTANTE ERGONÓMICO ESTILO TABLET POS */}
-      <div className="fixed bottom-16 inset-x-2 z-40 flex justify-center pointer-events-auto">
-        <div className="bg-slate-900/95 backdrop-blur-md border border-slate-700/90 rounded-2xl px-2 py-1 shadow-2xl flex items-center gap-1">
-          <button
-            type="button"
-            onClick={() => {
-              safeVibrate(20);
-              setActiveTab('pos');
-            }}
-            className={`px-3 py-1.5 rounded-xl font-black text-xs flex items-center gap-1.5 transition-all active:scale-95 ${
-              activeTab === 'pos'
-                ? 'bg-emerald-600 text-white shadow-md'
-                : 'text-slate-300 hover:text-white hover:bg-slate-800'
-            }`}
-            title="Punto de Venta"
-          >
-            <ShoppingCart className="w-4 h-4 text-emerald-400" />
-            <span>POS</span>
-          </button>
 
-          <button
-            type="button"
-            onClick={() => {
-              safeVibrate(20);
-              loadSavedSales();
-              setShowMobileSalesModal(true);
-            }}
-            className="px-2.5 py-1.5 rounded-xl font-black text-xs flex items-center gap-1 text-slate-300 hover:text-white hover:bg-slate-800 transition-all active:scale-95"
-            title="Historial de Ventas y Tickets"
-          >
-            <Receipt className="w-4 h-4 text-sky-400" />
-            <span>Ventas</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              safeVibrate(20);
-              loadSavedCustomers();
-              setShowMobileCustomersModal(true);
-            }}
-            className="px-2.5 py-1.5 rounded-xl font-black text-xs flex items-center gap-1 text-slate-300 hover:text-white hover:bg-slate-800 transition-all active:scale-95"
-            title="Clientes y Cuentas por Cobrar"
-          >
-            <Users className="w-4 h-4 text-amber-400" />
-            <span>Clientes</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              safeVibrate(20);
-              loadSavedSales();
-              setShowMobileClosureModal(true);
-            }}
-            className="px-2.5 py-1.5 rounded-xl font-black text-xs flex items-center gap-1 text-slate-300 hover:text-white hover:bg-slate-800 transition-all active:scale-95"
-            title="Cierre de Caja Z / X"
-          >
-            <TrendingUp className="w-4 h-4 text-purple-400" />
-            <span>Cierre</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              safeVibrate(20);
-              setShowMobileSettingsModal(true);
-            }}
-            className="px-2 py-1.5 rounded-xl font-black text-xs flex items-center gap-1 text-slate-300 hover:text-white hover:bg-slate-800 transition-all active:scale-95"
-            title="Configuración"
-          >
-            <Settings className="w-4 h-4 text-slate-300" />
-          </button>
-        </div>
-      </div>
 
       {/* ========================================================================= */}
       {/* NAV INFERIOR FIJADO AL FONDO (NO FLOTANTE)                                */}
@@ -5767,6 +5860,26 @@ export default function MobileScannerPage() {
           </div>
         </div>
       )}
+
+      {/* Modal Oficial de Descarga de Packs de Imágenes por Catálogo */}
+      <VisualPacksModal
+        isOpen={showVisualPacksModal}
+        onClose={() => setShowVisualPacksModal(false)}
+        isLight={false}
+        primaryColor="#0284c7"
+        onPackImported={async () => {
+          try {
+            if (db.products) {
+              const all = await db.products.toArray();
+              if (all && all.length > 0) {
+                setInventoryList(all as any);
+              }
+            }
+          } catch (e) {
+            console.warn('Error refrescando catálogo tras importar pack:', e);
+          }
+        }}
+      />
     </div>
   );
 }

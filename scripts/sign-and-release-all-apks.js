@@ -462,11 +462,12 @@ function buildAdminApk() {
 }
 
 ensureKeystore();
-buildKeygenApk();
-buildMovilFullApk();
-buildMovilSateliteApk();
-buildStreetApk();
-buildAdminApk();
+const targetArg = (process.argv[2] || 'all').toLowerCase();
+if (targetArg === 'all' || targetArg === 'keygen') buildKeygenApk();
+if (targetArg === 'all' || targetArg === 'movil') buildMovilFullApk();
+if (targetArg === 'all' || targetArg === 'satelite') buildMovilSateliteApk();
+if (targetArg === 'all' || targetArg === 'street') buildStreetApk();
+if (targetArg === 'all' || targetArg === 'admin') buildAdminApk();
 
 console.log('\n===============================================================');
 console.log(' ¡LAS 5 APLICACIONES ANDROID RELEASE HAN SIDO GENERADAS!');
