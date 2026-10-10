@@ -93,6 +93,33 @@ try {
 </resources>`;
   fs.writeFileSync(stringsXml, streetStrings, 'utf8');
 
+  // Aplicar iconos diferenciados de KlikPOS Street (Rojo/Ámbar Street Food con badge STREET)
+  function copyDirRecursive(src, dest) {
+    if (!fs.existsSync(src)) return;
+    fs.mkdirSync(dest, { recursive: true });
+    for (const entry of fs.readdirSync(src, { withFileTypes: true })) {
+      const s = path.join(src, entry.name);
+      const d = path.join(dest, entry.name);
+      if (entry.isDirectory()) {
+        copyDirRecursive(s, d);
+      } else {
+        fs.copyFileSync(s, d);
+      }
+    }
+  }
+
+  const srcIconsDir = path.join(desktopDir, 'android-icons', 'street');
+  const resDir = path.join(androidDir, 'app', 'src', 'main', 'res');
+  if (fs.existsSync(srcIconsDir)) {
+    const bgSrc = path.join(srcIconsDir, 'values', 'ic_launcher_background.xml');
+    const bgDest = path.join(resDir, 'values', 'ic_launcher_background.xml');
+    if (fs.existsSync(bgSrc)) fs.copyFileSync(bgSrc, bgDest);
+    ['mipmap-mdpi', 'mipmap-hdpi', 'mipmap-xhdpi', 'mipmap-xxhdpi', 'mipmap-xxxhdpi'].forEach(d => {
+      copyDirRecursive(path.join(srcIconsDir, d), path.join(resDir, d));
+    });
+    console.log('✓ Iconos oficiales de KlikPOS Street (badge STREET) aplicados a res/');
+  }
+
   const tabletHtmlSrc = path.join(publicDir, 'tablet-pos.html');
   if (fs.existsSync(tabletHtmlSrc)) {
     fs.copyFileSync(tabletHtmlSrc, publicIndex);

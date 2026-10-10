@@ -1,14 +1,14 @@
 {
-  "version": "3.0.20",
+  "version": "3.0.21",
   "releaseDate": "2026-10-10",
-  "title": "KlikPOS Suite v3.0.20 - Pasarela de Cobro Táctil Adaptativa Dual (Modo Claro/Oscuro), Numpad In-App y Sidebar de Pago",
+  "title": "KlikPOS Suite v3.0.21 - Despeje Inferior en Cobro, Iconos Diferenciados por Edición y Cero Colisión Android",
   "notes": [
-    "Pasarela de Cobro Táctil Dual (Modo Claro y Oscuro): Interfaz de pago adaptativa que respeta el modo claro con fondos blancos y bordes nítidos, y modo oscuro con superficies de grafito sin saturación.",
-    "Teclado Numérico In-App Integrado: Teclado táctil completo (0-9, punto, DEL, AC) y montos rápidos sin disparar el teclado virtual del sistema operativo móvil.",
-    "Sidebar de Métodos de Pago y Cobro Exacto: Acceso lateral con 1 toque a Efectivo $, Pago Móvil, Punto de Venta, Zelle y Binance Pay con botón de pago exacto.",
-    "Visualización Jerárquica VFD: Total a pagar protagónico con tasa oficial BCV y píldora compacta de vuelto y saldo sin competencia visual."
+    "Despeje Completo del Botón de Cobro: Ajuste de padding inferior (pb-32 y margen de seguridad) y scroll desbloqueado en la pasarela de cobro para que el botón de confirmar venta o activar licencia flote holgadamente por encima de la barra inferior de navegación.",
+    "Iconos Exclusivos por Edición: Identidad visual inconfundible con badges integrados: KlikPOS Street (rojo/ámbar con badge STREET), KlikPOS Keygen (obsidian medianoche con K dorado y badge KEYGEN) y KlikPOS Móvil (azul con badge MOVIL).",
+    "Cero Colisiones de Paquetes en Android: Asignación garantizada de applicationId únicos (com.klikpos.street, com.klikpos.keygen, com.klikpos.movil) permitiendo instalar y usar todas las herramientas a la vez en el mismo celular.",
+    "Optimización de Teclado Numérico Táctil: Teclas numéricas compactas de alta precisión adaptadas ergonómicamente a cualquier pantalla móvil."
   ],
-  "windowsUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.20/KlikPOS_Desktop_Full_Setup.exe",
-  "androidUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.20/KlikPOS_Movil_Full.apk",
+  "windowsUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.21/KlikPOS_Desktop_Full_Setup.exe",
+  "androidUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.21/KlikPOS_Movil_Full.apk",
   "mandatory": false
 }

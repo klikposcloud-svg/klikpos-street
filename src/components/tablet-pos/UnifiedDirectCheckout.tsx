@@ -529,7 +529,7 @@ export default function UnifiedDirectCheckout({
       {/* ========================================================================= */}
       {/* 2. ÁREA PRINCIPAL: DISPLAY JERÁRQUICO + NUMPAD TÁCTIL + BOTÓN FINALIZAR   */}
       {/* ========================================================================= */}
-      <div className="flex-1 min-h-0 flex flex-col p-2 sm:p-3 overflow-y-auto scrollbar-none">
+      <div className="flex-1 min-h-0 flex flex-col p-2 sm:p-3 pb-32 sm:pb-36 md:pb-6 overflow-y-auto overscroll-contain touch-pan-y">
         <div className="max-w-xl mx-auto w-full flex-1 flex flex-col justify-between space-y-2">
 
           {/* --------------------------------------------------------------------- */}
@@ -807,7 +807,7 @@ export default function UnifiedDirectCheckout({
                     key={key}
                     type="button"
                     onClick={() => handleNumpadKey(key)}
-                    className={`h-10 sm:h-12 rounded-xl font-mono font-black text-lg transition-all active:scale-95 cursor-pointer flex items-center justify-center select-none shadow-sm ${
+                    className={`h-9 sm:h-11 rounded-xl font-mono font-black text-base sm:text-lg transition-all active:scale-95 cursor-pointer flex items-center justify-center select-none shadow-sm ${
                       isDel
                         ? isLight
                           ? 'bg-rose-100 hover:bg-rose-200 text-rose-700 border border-rose-300'
@@ -832,7 +832,7 @@ export default function UnifiedDirectCheckout({
               <button
                 type="button"
                 onClick={() => handleNumpadKey('AC')}
-                className={`h-9 sm:h-10 rounded-xl text-xs font-mono font-bold transition-all active:scale-95 border cursor-pointer ${
+                className={`h-8 sm:h-9 rounded-xl text-xs font-mono font-bold transition-all active:scale-95 border cursor-pointer ${
                   isLight
                     ? 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-300'
                     : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700'
@@ -843,7 +843,7 @@ export default function UnifiedDirectCheckout({
               <button
                 type="button"
                 onClick={() => handleFillExactRemaining(activeMethod)}
-                className={`h-9 sm:h-10 rounded-xl text-xs font-mono font-black transition-all active:scale-95 border cursor-pointer ${
+                className={`h-8 sm:h-9 rounded-xl text-xs font-mono font-black transition-all active:scale-95 border cursor-pointer ${
                   isLight
                     ? 'bg-amber-100 hover:bg-amber-200 text-amber-950 border-amber-300'
                     : 'bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40'
@@ -854,7 +854,7 @@ export default function UnifiedDirectCheckout({
               <button
                 type="button"
                 onClick={() => setActiveField('amount')}
-                className={`h-9 sm:h-10 rounded-xl text-xs font-mono font-black transition-all active:scale-95 flex items-center justify-center gap-1 shadow-sm cursor-pointer ${
+                className={`h-8 sm:h-9 rounded-xl text-xs font-mono font-black transition-all active:scale-95 flex items-center justify-center gap-1 shadow-sm cursor-pointer ${
                   isLight
                     ? 'bg-emerald-600 hover:bg-emerald-500 text-white'
                     : 'bg-emerald-500 hover:bg-emerald-400 text-slate-950'
@@ -909,6 +909,9 @@ export default function UnifiedDirectCheckout({
               )}
             </button>
           )}
+
+          {/* Margen de Separación Inferior Seguro para que el botón flote holgadamente sobre la barra */}
+          <div className="h-10 md:h-2 shrink-0" />
 
         </div>
       </div>
