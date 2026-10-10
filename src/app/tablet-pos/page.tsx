@@ -2376,17 +2376,17 @@ export default function TabletMobilePosPage() {
               </div>
 
               {/* SECCIONES PRINCIPALES: TODOS / LOCAL / DELIVERY (PESTAÑAS ESTILO APP MÓVIL) */}
-              <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pt-1">
+              <div className="flex items-center gap-2 overflow-x-auto scrollbar-none pt-1">
                 {/* Pestaña 1: Todos */}
                 <button
                   type="button"
                   onClick={() => setOrderFilterType('todos')}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-2xl text-xs sm:text-sm font-black transition-all cursor-pointer whitespace-nowrap border ${
+                  className={`shrink-0 flex items-center gap-2 px-4 py-2 rounded-2xl text-xs sm:text-sm font-black transition-all cursor-pointer whitespace-nowrap border ${
                     orderFilterType === 'todos'
                       ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-md scale-102'
                       : isLight
                         ? 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
-                        : 'bg-[#090d16] border-slate-800 text-slate-300 hover:bg-slate-800/60'
+                        : 'bg-slate-900 border-slate-800 text-slate-300 hover:bg-slate-800/80'
                   }`}
                 >
                   <ClipboardList className="w-4 h-4 shrink-0" />
@@ -2404,12 +2404,12 @@ export default function TabletMobilePosPage() {
                 <button
                   type="button"
                   onClick={() => setOrderFilterType('local')}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-2xl text-xs sm:text-sm font-black transition-all cursor-pointer whitespace-nowrap border ${
+                  className={`shrink-0 flex items-center gap-2 px-4 py-2 rounded-2xl text-xs sm:text-sm font-black transition-all cursor-pointer whitespace-nowrap border ${
                     orderFilterType === 'local'
                       ? 'bg-emerald-600 text-white border-emerald-500 shadow-md scale-102'
                       : isLight
                         ? 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
-                        : 'bg-[#090d16] border-slate-800 text-slate-300 hover:bg-slate-800/60'
+                        : 'bg-slate-900 border-slate-800 text-slate-300 hover:bg-slate-800/80'
                   }`}
                 >
                   <Store className="w-4 h-4 shrink-0" />
@@ -2427,12 +2427,12 @@ export default function TabletMobilePosPage() {
                 <button
                   type="button"
                   onClick={() => setOrderFilterType('delivery')}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-2xl text-xs sm:text-sm font-black transition-all cursor-pointer whitespace-nowrap border ${
+                  className={`shrink-0 flex items-center gap-2 px-4 py-2 rounded-2xl text-xs sm:text-sm font-black transition-all cursor-pointer whitespace-nowrap border ${
                     orderFilterType === 'delivery'
                       ? 'bg-purple-600 text-white border-purple-500 shadow-md scale-102'
                       : isLight
                         ? 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
-                        : 'bg-[#090d16] border-slate-800 text-slate-300 hover:bg-slate-800/60'
+                        : 'bg-slate-900 border-slate-800 text-slate-300 hover:bg-slate-800/80'
                   }`}
                 >
                   <Bike className="w-4 h-4 shrink-0" />
@@ -2449,7 +2449,7 @@ export default function TabletMobilePosPage() {
 
               {/* SUB-SECCIÓN: DESGLOSE DE COBRANZA EN CADA SECCIÓN */}
               <div className={`p-2.5 rounded-2xl border flex flex-wrap items-center justify-between gap-2 ${
-                isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#0c1220] border-slate-800'
+                isLight ? 'bg-slate-50 border-slate-200' : 'bg-slate-900/90 border-slate-800'
               }`}>
                 <div className="flex items-center gap-1.5 text-xs font-black">
                   <span className={isLight ? 'text-slate-600 uppercase text-[10px] tracking-wider' : 'text-slate-400 uppercase text-[10px] tracking-wider'}>
@@ -2466,10 +2466,10 @@ export default function TabletMobilePosPage() {
                       orderFilterPayment === 'todos'
                         ? isLight
                           ? 'bg-slate-900 text-white border-slate-900 shadow-xs'
-                          : 'bg-white text-slate-950 border-white shadow-xs'
+                          : 'bg-slate-800 text-white border-slate-600 shadow-sm ring-1 ring-slate-500/50'
                         : isLight
                           ? 'bg-white border-slate-300 text-slate-700 hover:bg-slate-100'
-                          : 'bg-slate-900 border-slate-700 text-slate-300 hover:bg-slate-800'
+                          : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200 hover:bg-slate-900'
                     }`}
                   >
                     💳 Todos los Pagos ({orders.filter(o => orderFilterType === 'todos' || (orderFilterType === 'delivery' ? o.type === 'delivery' : o.type !== 'delivery')).length})
@@ -2484,7 +2484,7 @@ export default function TabletMobilePosPage() {
                         ? 'bg-emerald-600 text-white border-emerald-500 shadow-xs'
                         : isLight
                           ? 'bg-white border-emerald-300 text-emerald-800 hover:bg-emerald-50'
-                          : 'bg-slate-900 border-emerald-500/30 text-emerald-400 hover:bg-emerald-950/30'
+                          : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
                     }`}
                   >
                     ✓ Pagados ({orders.filter(o => (orderFilterType === 'todos' || (orderFilterType === 'delivery' ? o.type === 'delivery' : o.type !== 'delivery')) && o.paymentStatus !== 'por_cobrar').length})
@@ -2499,17 +2499,17 @@ export default function TabletMobilePosPage() {
                         onClick={() => setOrderFilterPayment('por_cobrar')}
                         className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer border flex items-center gap-1.5 ${
                           orderFilterPayment === 'por_cobrar'
-                            ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-xs'
+                            ? 'bg-amber-600 text-white border-amber-500 shadow-xs'
                             : pendingCount > 0
                               ? isLight
                                 ? 'bg-amber-100 border-amber-300 text-amber-950 hover:bg-amber-200'
-                                : 'bg-amber-500/20 border-amber-500/40 text-amber-300 hover:bg-amber-500/30'
+                                : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
                               : isLight
                                 ? 'bg-white border-slate-300 text-slate-600 hover:bg-slate-100'
-                                : 'bg-slate-900 border-slate-700 text-slate-400 hover:bg-slate-800'
+                                : 'bg-slate-950 border-slate-800 text-slate-400 hover:bg-slate-800'
                         }`}
                       >
-                        <Clock className="w-3.5 h-3.5" />
+                        <Clock className="w-3.5 h-3.5 text-amber-500" />
                         <span>Por Cobrar ({pendingCount})</span>
                         {pendingCount > 0 && (
                           <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
@@ -2533,14 +2533,14 @@ export default function TabletMobilePosPage() {
               return (
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                   <div className={`p-2.5 rounded-xl border flex items-center justify-between ${
-                    isLight ? 'bg-emerald-50/80 border-emerald-200' : 'bg-emerald-950/20 border-emerald-500/30'
+                    isLight ? 'bg-emerald-50/80 border-emerald-200' : 'bg-slate-900/90 border-slate-800'
                   }`}>
                     <div className="flex items-center gap-2">
-                      <div className="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 flex items-center justify-center shrink-0">
+                      <div className="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center justify-center shrink-0">
                         <Store className="w-4 h-4" />
                       </div>
                       <div>
-                        <span className={`text-[9.5px] font-black uppercase tracking-wider block ${isLight ? 'text-emerald-800' : 'text-emerald-300'}`}>
+                        <span className={`text-[9.5px] font-black uppercase tracking-wider block ${isLight ? 'text-emerald-800' : 'text-slate-400'}`}>
                           Salón / Local
                         </span>
                         <span className={`text-sm font-black font-mono ${isLight ? 'text-slate-900' : 'text-white'}`}>
@@ -2549,21 +2549,21 @@ export default function TabletMobilePosPage() {
                       </div>
                     </div>
                     <span className={`text-[10px] font-mono px-2 py-0.5 rounded-md font-bold ${
-                      isLight ? 'bg-white text-emerald-800 border border-emerald-200' : 'bg-slate-900 text-emerald-300 border border-emerald-500/20'
+                      isLight ? 'bg-white text-emerald-800 border border-emerald-200' : 'bg-slate-950 text-slate-300 border border-slate-800'
                     }`}>
                       {localOrd.length} órdenes
                     </span>
                   </div>
 
                   <div className={`p-2.5 rounded-xl border flex items-center justify-between ${
-                    isLight ? 'bg-purple-50/80 border-purple-200' : 'bg-purple-950/20 border-purple-500/30'
+                    isLight ? 'bg-purple-50/80 border-purple-200' : 'bg-slate-900/90 border-slate-800'
                   }`}>
                     <div className="flex items-center gap-2">
-                      <div className="w-7 h-7 rounded-lg bg-purple-500/10 text-purple-600 border border-purple-500/20 flex items-center justify-center shrink-0">
+                      <div className="w-7 h-7 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20 flex items-center justify-center shrink-0">
                         <Bike className="w-4 h-4" />
                       </div>
                       <div>
-                        <span className={`text-[9.5px] font-black uppercase tracking-wider block ${isLight ? 'text-purple-800' : 'text-purple-300'}`}>
+                        <span className={`text-[9.5px] font-black uppercase tracking-wider block ${isLight ? 'text-purple-800' : 'text-slate-400'}`}>
                           Delivery
                         </span>
                         <span className={`text-sm font-black font-mono ${isLight ? 'text-slate-900' : 'text-white'}`}>
@@ -2572,38 +2572,38 @@ export default function TabletMobilePosPage() {
                       </div>
                     </div>
                     <span className={`text-[10px] font-mono px-2 py-0.5 rounded-md font-bold ${
-                      isLight ? 'bg-white text-purple-800 border border-purple-200' : 'bg-slate-900 text-purple-300 border border-purple-500/20'
+                      isLight ? 'bg-white text-purple-800 border border-purple-200' : 'bg-slate-950 text-slate-300 border border-slate-800'
                     }`}>
                       {delivOrd.length} envíos
                     </span>
                   </div>
 
                   <div className={`p-2.5 rounded-xl border flex items-center justify-between ${
-                    codOrd.length > 0
-                      ? isLight ? 'bg-amber-50/90 border-amber-300' : 'bg-amber-950/30 border-amber-500/40'
-                      : isLight ? 'bg-slate-50 border-slate-200' : 'bg-slate-900/60 border-slate-800'
+                    isLight
+                      ? codOrd.length > 0 ? 'bg-amber-50/90 border-amber-300' : 'bg-slate-50 border-slate-200'
+                      : 'bg-slate-900/90 border-slate-800'
                   }`}>
                     <div className="flex items-center gap-2">
-                      <div className="w-7 h-7 rounded-lg bg-amber-500/10 text-amber-600 border border-amber-500/20 flex items-center justify-center shrink-0">
+                      <div className="w-7 h-7 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 flex items-center justify-center shrink-0">
                         <Clock className="w-4 h-4" />
                       </div>
                       <div>
                         <span className={`text-[9.5px] font-black uppercase tracking-wider block ${
-                          codOrd.length > 0 ? (isLight ? 'text-amber-900' : 'text-amber-300') : (isLight ? 'text-slate-500' : 'text-slate-400')
+                          isLight ? (codOrd.length > 0 ? 'text-amber-900' : 'text-slate-500') : 'text-slate-400'
                         }`}>
                           Por Cobrar en Destino
                         </span>
                         <span className={`text-sm font-black font-mono ${
-                          codOrd.length > 0 ? (isLight ? 'text-amber-800' : 'text-amber-400') : (isLight ? 'text-slate-700' : 'text-slate-300')
+                          isLight ? (codOrd.length > 0 ? 'text-amber-800' : 'text-slate-700') : (codOrd.length > 0 ? 'text-amber-400' : 'text-white')
                         }`}>
                           ${codTotal.toFixed(2)}
                         </span>
                       </div>
                     </div>
                     <span className={`text-[10px] font-mono px-2 py-0.5 rounded-md font-bold ${
-                      codOrd.length > 0
-                        ? isLight ? 'bg-amber-100 text-amber-950 border border-amber-300' : 'bg-amber-500/20 text-amber-200 border border-amber-500/30'
-                        : isLight ? 'bg-slate-100 text-slate-500' : 'bg-slate-800 text-slate-400'
+                      isLight
+                        ? codOrd.length > 0 ? 'bg-amber-100 text-amber-950 border border-amber-300' : 'bg-slate-100 text-slate-500'
+                        : codOrd.length > 0 ? 'bg-amber-500/15 text-amber-300 border border-amber-500/30' : 'bg-slate-950 text-slate-400 border border-slate-800'
                     }`}>
                       {codOrd.length} pendientes
                     </span>
@@ -2651,10 +2651,10 @@ export default function TabletMobilePosPage() {
                               ? 'bg-white border-sky-400 shadow-sm'
                               : 'bg-slate-50 border-slate-200 opacity-95'
                             : isEnCola
-                            ? 'bg-[#0f172a] border-amber-500/40'
+                            ? 'bg-slate-900/90 border-amber-500/40'
                             : isListo
-                            ? 'bg-[#0f172a] border-sky-500/40'
-                            : 'bg-slate-900/80 border-slate-800 opacity-90'
+                            ? 'bg-slate-900/90 border-sky-500/40'
+                            : 'bg-slate-900/90 border-slate-800'
                         }`}
                       >
                         {/* Cabecera del Pedido */}
@@ -2666,8 +2666,8 @@ export default function TabletMobilePosPage() {
                               </span>
                               <span className={`text-[9.5px] font-black uppercase px-2 py-0.5 rounded-full ${
                                 isDelivery
-                                  ? isLight ? 'bg-purple-100 text-purple-950 border border-purple-400' : 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
-                                  : isLight ? 'bg-emerald-100 text-emerald-950 border border-emerald-400' : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                                  ? isLight ? 'bg-purple-100 text-purple-950 border border-purple-400' : 'bg-slate-950 text-purple-300 border border-purple-500/30'
+                                  : isLight ? 'bg-emerald-100 text-emerald-950 border border-emerald-400' : 'bg-slate-950 text-emerald-300 border border-emerald-500/30'
                               }`}>
                                 {isDelivery ? 'Delivery' : (ord.table || 'Local')}
                               </span>
@@ -2683,10 +2683,10 @@ export default function TabletMobilePosPage() {
                               {ord.customer?.name || 'Cliente'}
                             </span>
                             <div className="text-right">
-                              <span className={`font-mono font-black ${isLight ? 'text-amber-950' : 'text-amber-400'}`}>
+                              <span className={`font-mono font-black ${isLight ? 'text-amber-950' : 'text-white'}`}>
                                 ${ord.totalUSD.toFixed(2)}
                               </span>
-                              <span className={`text-[10px] font-mono font-bold block ${isLight ? 'text-slate-700' : 'text-slate-300'}`}>
+                              <span className={`text-[10px] font-mono font-bold block ${isLight ? 'text-slate-700' : 'text-slate-400'}`}>
                                 Bs. {(ord.totalUSD * bcvRate).toFixed(0)}
                               </span>
                             </div>
@@ -2694,13 +2694,13 @@ export default function TabletMobilePosPage() {
 
                           {/* Estado de Pago */}
                           <div className="flex items-center justify-between pt-0.5">
-                            <span className={`text-[10.5px] font-mono ${isLight ? 'text-slate-800 font-bold' : 'text-slate-300'}`}>
-                              Pago: <b className={isLight ? 'text-slate-950 font-black' : 'text-white'}>{ord.paymentMethod}</b>
+                            <span className={`text-[10.5px] font-mono ${isLight ? 'text-slate-800 font-bold' : 'text-slate-400'}`}>
+                              Pago: <b className={isLight ? 'text-slate-950 font-black' : 'text-slate-200'}>{ord.paymentMethod}</b>
                             </span>
                             <span className={`text-[9.5px] font-black px-2 py-0.5 rounded-md ${
                               isPendingPayment
-                                ? isLight ? 'bg-amber-100 text-amber-950 border border-amber-400' : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
-                                : isLight ? 'bg-emerald-100 text-emerald-950 border border-emerald-400' : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                                ? isLight ? 'bg-amber-100 text-amber-950 border border-amber-400' : 'bg-amber-950/40 text-amber-300 border border-amber-500/40'
+                                : isLight ? 'bg-emerald-100 text-emerald-950 border border-emerald-400' : 'bg-slate-950 text-emerald-300 border border-emerald-500/30'
                             }`}>
                               {isPendingPayment ? '⚠️ Por Cobrar en Destino' : '✓ Pagado'}
                             </span>
@@ -2709,12 +2709,12 @@ export default function TabletMobilePosPage() {
                           {/* Dirección / Motorizado si es Delivery */}
                           {isDelivery && (
                             <div className={`p-2 rounded-xl space-y-1 text-[10px] font-mono ${
-                              isLight ? 'bg-slate-100 border border-slate-200 text-slate-800' : 'bg-slate-950 border border-slate-800 text-slate-300'
+                              isLight ? 'bg-slate-100 border border-slate-200 text-slate-800' : 'bg-slate-950/80 border border-slate-800 text-slate-300'
                             }`}>
                               {ord.driverName && (
-                                <p className={`flex items-center gap-1 ${isLight ? 'text-purple-700' : 'text-purple-300'}`}>
-                                  <Bike className="w-3 h-3" />
-                                  <span>Chofer: <b>{ord.driverName}</b></span>
+                                <p className={`flex items-center gap-1 ${isLight ? 'text-purple-700' : 'text-slate-300'}`}>
+                                  <Bike className="w-3 h-3 text-purple-400" />
+                                  <span>Chofer: <b className="text-white">{ord.driverName}</b></span>
                                 </p>
                               )}
                               {ord.deliveryAddress && (
@@ -2734,7 +2734,7 @@ export default function TabletMobilePosPage() {
                               <div className={`truncate pr-2 ${isLight ? 'text-slate-900' : 'text-slate-200'}`}>
                                 <span className={`font-mono font-bold ${isLight ? 'text-amber-600' : 'text-amber-400'}`}>{it.qty}x</span> {it.name}
                                 {it.notes && (
-                                  <span className={`block text-[9.5px] italic font-sans pl-4 ${isLight ? 'text-amber-700' : 'text-amber-300'}`}>
+                                  <span className={`block text-[9.5px] italic font-sans pl-4 ${isLight ? 'text-amber-700' : 'text-amber-400/90'}`}>
                                     Nota: {it.notes}
                                   </span>
                                 )}
@@ -2752,7 +2752,7 @@ export default function TabletMobilePosPage() {
                             type="button"
                             onClick={() => setPreviewTicket(orderToSaleTicket(ord, bcvRate))}
                             className={`w-full py-1.5 rounded-xl text-xs font-bold transition-all active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer border ${
-                              isLight ? 'bg-amber-50 hover:bg-amber-100 text-amber-950 border-amber-300' : 'bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border-amber-500/30'
+                              isLight ? 'bg-amber-50 hover:bg-amber-100 text-amber-950 border-amber-300' : 'bg-slate-800/80 hover:bg-slate-750 text-slate-200 border-slate-750'
                             }`}
                             title="Previsualizar e Imprimir Ticket Térmico"
                           >

@@ -53,6 +53,99 @@ export function getOrCreateTrialStartTime(): number {
   }
 }
 
+export const TELEGRAM_BOT_TOKEN = '8699572842:AAHyw4tBMMC6YdqeGexrOqhQzNf2NdnH--M';
+export const TELEGRAM_CHAT_ID = '8681182877';
+
+/**
+ * Notifica a Telegram en tiempo real cuando un dispositivo instala o abre KlikPOS por primera vez
+ */
+export async function notifyTelegramInstallation(data: {
+  hwid: string;
+  edition: string;
+  storeName: string;
+  platform: string;
+  screen: string;
+  installedAt: string;
+}): Promise<boolean> {
+  if (typeof window === 'undefined') return false;
+  try {
+    const notifyKey = `klikpos_telemetry_notified_${data.hwid}`;
+    if (localStorage.getItem(notifyKey) === 'true') {
+      return true;
+    }
+
+    let devType = 'Dispositivo';
+    if (/android/i.test(data.platform)) devType = '📱 Android';
+    else if (/windows/i.test(data.platform)) devType = '💻 PC Windows';
+    else if (/iphone|ipad/i.test(data.platform)) devType = '📱 iOS';
+    else devType = '🌐 Web Client';
+
+    const editionName = data.edition === 'street'
+      ? 'KlikPOS Street Food'
+      : data.edition === 'movil'
+      ? 'KlikPOS Móvil Full'
+      : 'KlikPOS Suite Desktop';
+
+    const msg = [
+      `🎉 *¡NUEVA INSTALACIÓN KLIKPOS DETECTADA!*`,
+      `📦 *Edición:* ${editionName}`,
+      `🆔 *Terminal ID:* \`${data.hwid}\``,
+      `🏪 *Negocio:* ${data.storeName}`,
+      `⚙️ *Equipo:* ${devType}`,
+      `📐 *Pantalla:* ${data.screen}`,
+      `🕒 *Fecha:* ${new Date(data.installedAt).toLocaleString('es-VE')}`,
+      `⏳ *Período de Prueba:* 180 Minutos (3h) Iniciados`
+    ].join('\n');
+
+    const res = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: TELEGRAM_CHAT_ID,
+        text: msg,
+        parse_mode: 'Markdown'
+      })
+    });
+
+    if (res.ok) {
+      localStorage.setItem(notifyKey, 'true');
+      return true;
+    }
+    return false;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Registra la instalación en segundo plano y notifica a Telegram
+ */
+export async function registerTrialInstallation(
+  customHwid?: string,
+  storeName?: string,
+  rif?: string,
+  edition: string = 'street'
+): Promise<{ success: boolean; error?: string }> {
+  if (typeof window === 'undefined') return { success: false };
+  try {
+    const hwid = (customHwid || getMachineHWID()).trim().toUpperCase();
+    const startTime = getOrCreateTrialStartTime();
+
+    notifyTelegramInstallation({
+      hwid,
+      edition,
+      storeName: storeName || 'Mi Negocio',
+      platform: typeof navigator !== 'undefined' ? navigator.userAgent : 'Desconocido',
+      screen: typeof window !== 'undefined' ? `${window.innerWidth}x${window.innerHeight}` : 'Desconocido',
+      installedAt: new Date(startTime).toISOString()
+    }).catch(() => {});
+
+    return { success: true };
+  } catch (err: any) {
+    return { success: false, error: err?.message };
+  }
+}
+
 /**
  * Evalúa el estado actual de la prueba o licencia comercial
  */

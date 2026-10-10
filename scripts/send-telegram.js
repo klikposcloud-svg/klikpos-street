@@ -1,5 +1,5 @@
 const https = require('https');
-const TOKEN = '8909236915:AAF-fCVr19EFe0uidUBhVI_Is-Usc3DvGoA';
+const TOKEN = '8699572842:AAHyw4tBMMC6YdqeGexrOqhQzNf2NdnH--M';
 const CHAT_ID = '8681182877';
 
 function send(text) {

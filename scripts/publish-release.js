@@ -160,6 +160,11 @@ async function main() {
       contentType: 'application/vnd.android.package-archive'
     },
     {
+      filePath: path.join(rootDir, 'dist-apk', 'KlikPOS_Keygen.apk'),
+      fileName: 'KlikPOS_Keygen.apk',
+      contentType: 'application/vnd.android.package-archive'
+    },
+    {
       filePath: path.join(rootDir, 'dist-installer', 'KlikPOS_Desktop_Full_Setup.exe'),
       fileName: 'KlikPOS_Desktop_Full_Setup.exe',
       contentType: 'application/octet-stream'

@@ -15,12 +15,16 @@ import {
   CheckCircle2,
   AlertCircle,
   Coins,
-  RefreshCw,
   Trash2,
   ArrowRight,
-  ShieldCheck,
-  Check,
   Lock,
+  Delete,
+  Check,
+  ChevronDown,
+  ChevronUp,
+  Sparkles,
+  Calculator,
+  Hash,
 } from 'lucide-react';
 import type { Customer, Motorizado, MixedPaymentEntry } from '@/types/tablet-pos';
 import type { FulfillmentMode, PaymentMethod } from '@/lib/pos/cart-calculations';
@@ -64,6 +68,9 @@ interface UnifiedDirectCheckoutProps {
   onFinalizeSale: () => void;
 }
 
+type MethodTab = 'cash_usd' | 'pm' | 'card' | 'zelle' | 'cash_ves' | 'binance';
+type ActiveInputField = 'amount' | 'ref';
+
 export default function UnifiedDirectCheckout({
   isLight,
   totalUSD,
@@ -92,7 +99,11 @@ export default function UnifiedDirectCheckout({
   setBinanceConfirmation,
   onFinalizeSale,
 }: UnifiedDirectCheckoutProps) {
-  // Estados locales directos por método de pago
+  // Pestaña de método activo en el teclado virtual
+  const [activeMethod, setActiveMethod] = useState<MethodTab>('cash_usd');
+  const [activeField, setActiveField] = useState<ActiveInputField>('amount');
+
+  // Estados locales por método de pago
   const [pmAmountVES, setPmAmountVES] = useState<string>('');
   const [pmRef, setPmRef] = useState<string>('');
 
@@ -160,7 +171,6 @@ export default function UnifiedDirectCheckout({
     setCashUSDReceived(parsedCashUSD);
     setCashVESReceived(parsedCashVES);
 
-    // Detectar qué método se está usando prioritariamente
     const usedMethods: PaymentMethod[] = [];
     if (parsedPmVES > 0) usedMethods.push('pago_movil');
     if (parsedCashUSD > 0) usedMethods.push('cash_usd');
@@ -186,8 +196,8 @@ export default function UnifiedDirectCheckout({
     setSelectedPaymentMethod,
   ]);
 
-  // Helper para autocompletar el saldo restante en un método
-  const handleFillRemaining = (method: 'pm' | 'cash_usd' | 'cash_ves' | 'card' | 'zelle' | 'binance') => {
+  // Helper para autocompletar el saldo restante en un método en 1 SOLO TOQUE
+  const handleFillExactRemaining = (method: MethodTab) => {
     if (remainingUSD <= 0) return;
 
     if (method === 'cash_usd') {
@@ -209,6 +219,8 @@ export default function UnifiedDirectCheckout({
       const newAmount = (parsedCardVES + remainingVES).toFixed(2);
       setCardVES(newAmount);
     }
+    setActiveMethod(method);
+    setActiveField('amount');
   };
 
   const handleResetPayments = () => {
@@ -218,599 +230,689 @@ export default function UnifiedDirectCheckout({
     setCardVES('');
     setZelleUSD('');
     setBinanceUSDT('');
+    setPmRef('');
+    setCardRef('');
+    setZelleRef('');
+    setBinanceRef('');
   };
 
+  // Valor actual del campo activo del método seleccionado
+  const getCurrentFieldValue = (): string => {
+    if (activeField === 'ref') {
+      if (activeMethod === 'pm') return pmRef;
+      if (activeMethod === 'card') return cardRef;
+      if (activeMethod === 'zelle') return zelleRef;
+      if (activeMethod === 'binance') return binanceRef;
+      return '';
+    }
+    // Amount
+    if (activeMethod === 'cash_usd') return cashUSD;
+    if (activeMethod === 'pm') return pmAmountVES;
+    if (activeMethod === 'card') return cardVES;
+    if (activeMethod === 'zelle') return zelleUSD;
+    if (activeMethod === 'cash_ves') return cashVES;
+    if (activeMethod === 'binance') return binanceUSDT;
+    return '';
+  };
+
+  const setCurrentFieldValue = (val: string) => {
+    if (activeField === 'ref') {
+      if (activeMethod === 'pm') setPmRef(val);
+      else if (activeMethod === 'card') setCardRef(val);
+      else if (activeMethod === 'zelle') setZelleRef(val);
+      else if (activeMethod === 'binance') setBinanceRef(val);
+      return;
+    }
+
+    if (activeMethod === 'cash_usd') setCashUSD(val);
+    else if (activeMethod === 'pm') setPmAmountVES(val);
+    else if (activeMethod === 'card') setCardVES(val);
+    else if (activeMethod === 'zelle') setZelleUSD(val);
+    else if (activeMethod === 'cash_ves') setCashVES(val);
+    else if (activeMethod === 'binance') setBinanceUSDT(val);
+  };
+
+  // Manejo del Teclado Virtual In-App
+  const handleNumpadKey = (key: string) => {
+    const current = getCurrentFieldValue();
+
+    if (key === 'AC') {
+      setCurrentFieldValue('');
+      return;
+    }
+
+    if (key === 'DEL') {
+      if (current.length > 0) {
+        setCurrentFieldValue(current.slice(0, -1));
+      }
+      return;
+    }
+
+    if (key === '.') {
+      if (activeField === 'ref') return;
+      if (current.includes('.')) return;
+      setCurrentFieldValue(current === '' ? '0.' : current + '.');
+      return;
+    }
+
+    // Dígito 0-9
+    if (activeField === 'amount' && current.includes('.')) {
+      const decimals = current.split('.')[1];
+      if (decimals && decimals.length >= 2) return;
+    }
+
+    if (activeField === 'ref' && current.length >= 8) return;
+
+    if (current === '0' && key !== '.') {
+      setCurrentFieldValue(key);
+      return;
+    }
+
+    setCurrentFieldValue(current + key);
+  };
+
+  // Presets rápidos
+  const handleBillPreset = (bill: number) => {
+    setCashUSD(String(bill));
+    setActiveMethod('cash_usd');
+    setActiveField('amount');
+  };
+
+  const handleVesPreset = (amount: number) => {
+    setCashVES(String(amount));
+    setActiveMethod('cash_ves');
+    setActiveField('amount');
+  };
+
+  // Datos de los métodos para el Sidebar
+  const methodsList: {
+    id: MethodTab;
+    title: string;
+    currency: string;
+    icon: any;
+    color: string;
+    borderColor: string;
+    amount: number;
+    formatted: string;
+    hasRef: boolean;
+    refLabel?: string;
+    refValue?: string;
+  }[] = [
+    {
+      id: 'cash_usd',
+      title: 'Efectivo $',
+      currency: '$ USD',
+      icon: DollarSign,
+      color: isLight ? 'text-amber-600' : 'text-amber-400',
+      borderColor: 'border-amber-500',
+      amount: parsedCashUSD,
+      formatted: `$${parsedCashUSD.toFixed(2)}`,
+      hasRef: false,
+    },
+    {
+      id: 'pm',
+      title: 'Pago Móvil',
+      currency: 'Bs. VES',
+      icon: Phone,
+      color: isLight ? 'text-emerald-600' : 'text-emerald-400',
+      borderColor: 'border-emerald-500',
+      amount: parsedPmVES,
+      formatted: `Bs. ${parsedPmVES.toFixed(2)}`,
+      hasRef: true,
+      refLabel: 'Ref (4 dígitos)',
+      refValue: pmRef,
+    },
+    {
+      id: 'card',
+      title: 'Punto Débito',
+      currency: 'Bs. VES',
+      icon: CreditCard,
+      color: isLight ? 'text-purple-600' : 'text-purple-400',
+      borderColor: 'border-purple-500',
+      amount: parsedCardVES,
+      formatted: `Bs. ${parsedCardVES.toFixed(2)}`,
+      hasRef: true,
+      refLabel: 'Voucher/Lote',
+      refValue: cardRef,
+    },
+    {
+      id: 'zelle',
+      title: 'Zelle ($)',
+      currency: '$ USD',
+      icon: Building2,
+      color: isLight ? 'text-indigo-600' : 'text-indigo-400',
+      borderColor: 'border-indigo-500',
+      amount: parsedZelleUSD,
+      formatted: `$${parsedZelleUSD.toFixed(2)}`,
+      hasRef: true,
+      refLabel: 'Confirmación',
+      refValue: zelleRef,
+    },
+    {
+      id: 'cash_ves',
+      title: 'Efectivo Bs.',
+      currency: 'Bs. VES',
+      icon: Wallet,
+      color: isLight ? 'text-sky-600' : 'text-sky-400',
+      borderColor: 'border-sky-500',
+      amount: parsedCashVES,
+      formatted: `Bs. ${parsedCashVES.toFixed(2)}`,
+      hasRef: false,
+    },
+    {
+      id: 'binance',
+      title: 'Binance Pay',
+      currency: 'USDT',
+      icon: Coins,
+      color: isLight ? 'text-yellow-600' : 'text-yellow-400',
+      borderColor: 'border-yellow-500',
+      amount: parsedBinanceUSDT,
+      formatted: `${parsedBinanceUSDT.toFixed(2)} USDT`,
+      hasRef: true,
+      refLabel: 'Order/Pay ID',
+      refValue: binanceRef,
+    },
+  ];
+
+  const currentMethodObj = methodsList.find(m => m.id === activeMethod) || methodsList[0];
+
   return (
-    <div className="flex-1 min-h-0 h-full flex flex-col overflow-hidden w-full select-none">
+    <div className={`flex-1 min-h-0 h-full flex flex-col md:flex-row overflow-hidden w-full select-none ${
+      isLight ? 'bg-slate-50 text-slate-900' : 'bg-[#05070e] text-white'
+    }`}>
       
       {/* ========================================================================= */}
-      {/* 1. DISPLAY DE CAJA REGISTRADORA FIJO EN LA PARTE SUPERIOR (VFD NEÓN ESMERALDA) */}
+      {/* 1. SIDEBAR LATERAL DE MÉTODOS DE PAGO (ACCESO DIRECTO + PAGAR EXACTO)     */}
       {/* ========================================================================= */}
-      <div className="shrink-0 w-full z-30 border-b-4 border-slate-950 bg-[#060912] shadow-2xl p-2 sm:p-3">
-        <div className="max-w-2xl mx-auto">
-          {/* MARCO DE HARDWARE REGISTRADORA */}
-          <div className="rounded-2xl border-2 border-slate-800 bg-[#070b14] p-2.5 sm:p-3 shadow-2xl relative overflow-hidden">
-            
-            {/* LÍNEA DE ESTADO SUPERIOR DE TERMINAL */}
-            <div className="flex items-center justify-between px-2 py-0.5 mb-1.5 border-b border-slate-800/80 text-[10px] font-mono text-slate-500 font-black tracking-wider uppercase">
-              <div className="flex items-center gap-2">
-                <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span className="text-emerald-400/90 font-bold">KLIKPOS REGISTER // VFD-2026</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <span className="text-slate-400 font-bold">{totalItems} Ítems • BCV: {bcvRate.toFixed(2)}</span>
-                {totalPaidUSD > 0 && (
-                  <button
-                    type="button"
-                    onClick={handleResetPayments}
-                    className="px-2 py-0.5 rounded text-[9px] font-bold text-rose-400 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 transition-all active:scale-95 cursor-pointer flex items-center gap-1"
-                    title="Limpiar montos ingresados"
-                  >
-                    <Trash2 className="w-2.5 h-2.5" />
-                    <span>Limpiar</span>
-                  </button>
+      <div className={`shrink-0 w-full md:w-56 lg:w-60 border-b md:border-b-0 md:border-r p-2 md:p-3 flex md:flex-col gap-1.5 overflow-x-auto md:overflow-y-auto scrollbar-none z-20 ${
+        isLight ? 'bg-white border-slate-200' : 'bg-[#070b16] border-slate-800'
+      }`}>
+        
+        {/* Cabecera Sidebar en Desktop/Tablet */}
+        <div className={`hidden md:flex items-center justify-between pb-2 mb-1 border-b ${
+          isLight ? 'border-slate-200' : 'border-slate-800/80'
+        }`}>
+          <div className="flex items-center gap-1.5">
+            <Coins className="w-3.5 h-3.5 text-amber-500" />
+            <span className={`text-[10px] font-black uppercase tracking-wider ${
+              isLight ? 'text-slate-500' : 'text-slate-400'
+            }`}>
+              Métodos de Pago:
+            </span>
+          </div>
+          {totalPaidUSD > 0 && (
+            <button
+              type="button"
+              onClick={handleResetPayments}
+              className="text-[9px] font-bold text-rose-500 hover:text-rose-600 flex items-center gap-0.5 cursor-pointer"
+              title="Borrar abonos"
+            >
+              <Trash2 className="w-2.5 h-2.5" />
+              <span>Limpiar</span>
+            </button>
+          )}
+        </div>
+
+        {/* Lista de Botones de Método */}
+        {methodsList.map((m) => {
+          const Icon = m.icon;
+          const isSelected = activeMethod === m.id;
+          const hasAmount = m.amount > 0;
+
+          return (
+            <div
+              key={m.id}
+              onClick={() => {
+                setActiveMethod(m.id);
+                setActiveField('amount');
+              }}
+              className={`shrink-0 md:shrink w-36 md:w-full p-2 rounded-2xl border-2 transition-all cursor-pointer flex flex-col justify-between ${
+                isSelected
+                  ? isLight
+                    ? `${m.borderColor} bg-amber-50/90 shadow-md ring-2 ring-amber-500/20`
+                    : `${m.borderColor} bg-slate-800/90 shadow-lg ring-2 ring-emerald-500/20`
+                  : hasAmount
+                  ? isLight
+                    ? 'border-emerald-300 bg-emerald-50/60 shadow-xs'
+                    : 'border-emerald-500/40 bg-emerald-950/20'
+                  : isLight
+                    ? 'border-slate-200 bg-white hover:bg-slate-50 hover:border-slate-300'
+                    : 'border-slate-800/80 bg-slate-900/60 hover:bg-slate-800/50'
+              }`}
+            >
+              <div className="flex items-center justify-between gap-1 mb-1">
+                <div className="flex items-center gap-1.5 truncate">
+                  <Icon className={`w-4 h-4 shrink-0 ${m.color}`} />
+                  <span className={`text-xs font-black truncate ${
+                    isLight ? 'text-slate-900' : 'text-slate-100'
+                  }`}>{m.title}</span>
+                </div>
+                {hasAmount && (
+                  <span className={`text-[9px] font-black px-1.5 py-0.5 rounded-full shrink-0 font-mono ${
+                    isLight ? 'bg-emerald-100 text-emerald-800' : 'bg-emerald-500/20 text-emerald-300'
+                  }`}>
+                    {m.formatted}
+                  </span>
                 )}
               </div>
+
+              {/* Botón rápido: Pagar Exacto restante en 1 Toque */}
+              {remainingUSD > 0.01 ? (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleFillExactRemaining(m.id);
+                  }}
+                  className={`w-full py-1 px-1.5 rounded-xl text-[9px] font-black transition-all active:scale-95 shadow-sm flex items-center justify-center gap-1 cursor-pointer ${
+                    isSelected
+                      ? 'bg-amber-500 hover:bg-amber-400 text-slate-950 font-black'
+                      : isLight
+                      ? 'bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300'
+                      : 'bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700'
+                  }`}
+                >
+                  <span>⚡ Exacto {m.currency.startsWith('$') ? `$${remainingUSD.toFixed(2)}` : `Bs. ${remainingVES.toFixed(2)}`}</span>
+                </button>
+              ) : (
+                <div className={`text-[9px] font-mono font-bold text-center py-0.5 ${
+                  isLight ? 'text-emerald-700' : 'text-emerald-400/90'
+                }`}>
+                  {hasAmount ? '✓ Abonado' : '–'}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* ========================================================================= */}
+      {/* 2. ÁREA PRINCIPAL: DISPLAY JERÁRQUICO + NUMPAD TÁCTIL + BOTÓN FINALIZAR   */}
+      {/* ========================================================================= */}
+      <div className="flex-1 min-h-0 flex flex-col p-2 sm:p-3 overflow-y-auto scrollbar-none">
+        <div className="max-w-xl mx-auto w-full flex-1 flex flex-col justify-between space-y-2">
+
+          {/* --------------------------------------------------------------------- */}
+          {/* A. BARRA ULTRA-COMPACTA SUPERIOR: CLIENTE Y MODALIDAD DE ENTREGA      */}
+          {/* --------------------------------------------------------------------- */}
+          <div className={`flex items-center justify-between gap-2 p-1.5 px-2.5 rounded-xl border text-xs ${
+            isLight ? 'bg-white border-slate-200 shadow-xs' : 'bg-slate-900/80 border-slate-800'
+          }`}>
+            {/* Cliente */}
+            <div className="flex items-center gap-1.5 truncate">
+              <User className={`w-3.5 h-3.5 shrink-0 ${isLight ? 'text-slate-500' : 'text-slate-400'}`} />
+              <span className={`font-black truncate text-[11px] ${isLight ? 'text-slate-900' : 'text-slate-200'}`}>
+                {selectedCustomer?.name || 'Cliente Mostrador'}
+              </span>
+              <button
+                type="button"
+                onClick={onOpenCustomerModal}
+                className="text-[9px] font-bold text-amber-500 hover:underline shrink-0 ml-1 cursor-pointer"
+              >
+                Cambiar
+              </button>
             </div>
 
-            {/* PANTALLA CRISTAL VFD CON RESPLANDOR ESMERALDA */}
+            {/* Modalidad de Entrega */}
+            <div className="flex items-center gap-1 shrink-0">
+              {[
+                { id: 'local', label: 'Local', icon: Store },
+                { id: 'delivery_paid', label: 'Delivery', icon: Bike },
+                { id: 'delivery_cod', label: 'COD', icon: Truck },
+              ].map((m) => {
+                const isSel = fulfillmentMode === m.id;
+                return (
+                  <button
+                    key={m.id}
+                    type="button"
+                    onClick={() => setFulfillmentMode(m.id as any)}
+                    className={`px-2 py-0.5 rounded-lg text-[9px] font-bold transition-all cursor-pointer ${
+                      isSel
+                        ? 'bg-amber-500 text-slate-950 font-black shadow-xs'
+                        : isLight
+                        ? 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200'
+                        : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
+                    }`}
+                  >
+                    {m.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* --------------------------------------------------------------------- */}
+          {/* B. DISPLAY DE REGISTRADORA REDISEÑADO: JERÁRQUICO Y SIN COMPETENCIA   */}
+          {/* --------------------------------------------------------------------- */}
+          <div 
+            className={`rounded-2xl border-2 p-2.5 sm:p-3 text-center shadow-lg relative overflow-hidden ${
+              isLight
+                ? 'bg-white border-emerald-500/40 shadow-emerald-500/5'
+                : 'bg-[#03110b] border-emerald-500/50'
+            }`}
+            style={{
+              boxShadow: isLight
+                ? '0 4px 15px -2px rgba(16, 185, 129, 0.12)'
+                : '0 0 20px -5px rgba(16, 185, 129, 0.3), inset 0 0 12px rgba(16, 185, 129, 0.1)',
+            }}
+          >
+            {/* Título y Total Protagónico Supremo */}
+            <div className={`text-[10px] font-mono font-black uppercase tracking-widest mb-0.5 ${
+              isLight ? 'text-emerald-700' : 'text-emerald-400/80'
+            }`}>
+              TOTAL CUENTA
+            </div>
+            
             <div 
-              className="rounded-xl bg-[#03130d] border-2 border-emerald-500/50 p-3 sm:p-4"
+              className={`text-3xl sm:text-4xl lg:text-5xl font-black font-mono tracking-tight leading-none ${
+                isLight ? 'text-emerald-600' : 'text-emerald-300'
+              }`}
               style={{
-                boxShadow: '0 0 25px -5px rgba(16, 185, 129, 0.35), inset 0 0 15px rgba(16, 185, 129, 0.15)',
+                textShadow: isLight ? undefined : '0 0 14px rgba(16, 185, 129, 0.7)',
               }}
             >
-              <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center">
-                
-                {/* LADO IZQUIERDO: TOTAL CUENTA */}
-                <div className="sm:col-span-6 border-b sm:border-b-0 sm:border-r border-emerald-500/20 pb-2.5 sm:pb-0 sm:pr-3">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-emerald-400/80 block font-mono">
-                    ▶ TOTAL CUENTA
-                  </span>
-                  <div 
-                    className="text-3xl sm:text-4xl lg:text-5xl font-black font-mono text-emerald-300 tracking-tight leading-none mt-1"
-                    style={{ textShadow: '0 0 12px rgba(16, 185, 129, 0.7), 0 0 24px rgba(16, 185, 129, 0.4)' }}
-                  >
-                    ${totalUSD.toFixed(2)} <span className="text-sm font-bold text-emerald-400">USD</span>
-                  </div>
-                  <div className="text-xs sm:text-sm font-mono font-bold text-emerald-400/90 mt-1">
-                    Bs. {totalVES.toFixed(2)}
-                  </div>
-                </div>
+              ${totalUSD.toFixed(2)} <span className={`text-sm font-bold ${isLight ? 'text-emerald-700' : 'text-emerald-400'}`}>USD</span>
+            </div>
 
-                {/* LADO DERECHO: VISOR DINÁMICO DE ESTADO / VUELTO */}
-                <div className="sm:col-span-6 flex flex-col justify-center">
-                  {isCOD ? (
-                    <div className="p-2.5 rounded-xl bg-amber-950/60 border border-amber-500/40">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-black uppercase tracking-widest text-amber-300 font-mono">
-                          🚚 COBRO EN DESTINO
-                        </span>
-                        <span className="text-[10px] font-mono text-amber-400/80 font-bold">COD ACTIVO</span>
-                      </div>
-                      <div className="text-xl sm:text-2xl font-black font-mono text-amber-300 tracking-tight leading-none mt-1">
-                        ${totalUSD.toFixed(2)} <span className="text-xs font-bold text-amber-400">USD</span>
-                      </div>
-                      <div className="text-[11px] font-mono font-bold text-amber-400/90 mt-0.5">
-                        Chofer cobra al entregar
-                      </div>
-                    </div>
-                  ) : remainingUSD > 0.009 ? (
-                    <div 
-                      className="p-2.5 rounded-xl bg-amber-950/70 border-2 border-amber-500/60"
-                      style={{ boxShadow: '0 0 15px -3px rgba(245, 158, 11, 0.3)' }}
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-black uppercase tracking-widest text-amber-300 font-mono flex items-center gap-1">
-                          <AlertCircle className="w-3 h-3 text-amber-400" />
-                          <span>FALTA POR PAGAR</span>
-                        </span>
-                        <span className="text-[10px] font-mono text-amber-400/80 font-bold">
-                          Recibido: ${totalPaidUSD.toFixed(2)}
-                        </span>
-                      </div>
-                      <div 
-                        className="text-2xl sm:text-3xl lg:text-4xl font-black font-mono text-amber-300 tracking-tight leading-none mt-1"
-                        style={{ textShadow: '0 0 12px rgba(245, 158, 11, 0.7)' }}
-                      >
-                        ${remainingUSD.toFixed(2)} <span className="text-xs font-bold text-amber-400">USD</span>
-                      </div>
-                      <div className="text-xs font-mono font-bold text-amber-300 mt-0.5">
-                        Bs. {remainingVES.toFixed(2)}
-                      </div>
-                    </div>
-                  ) : changeUSD > 0.009 ? (
-                    <div 
-                      className="p-2.5 rounded-xl bg-emerald-950/70 border-2 border-emerald-400/70"
-                      style={{ boxShadow: '0 0 18px -2px rgba(16, 185, 129, 0.4)' }}
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-black uppercase tracking-widest text-emerald-300 font-mono flex items-center gap-1">
-                          <CheckCircle2 className="w-3 h-3 text-emerald-400 animate-pulse" />
-                          <span>💵 VUELTO AL CLIENTE</span>
-                        </span>
-                        <span className="text-[10px] font-mono text-emerald-400 font-bold">
-                          Recibido: ${totalPaidUSD.toFixed(2)}
-                        </span>
-                      </div>
-                      <div 
-                        className="text-2xl sm:text-3xl lg:text-4xl font-black font-mono text-emerald-200 tracking-tight leading-none mt-1"
-                        style={{ textShadow: '0 0 14px rgba(52, 211, 153, 0.9)' }}
-                      >
-                        ${changeUSD.toFixed(2)} <span className="text-xs font-bold text-emerald-300">USD</span>
-                      </div>
-                      <div className="text-xs font-mono font-bold text-emerald-300 mt-0.5">
-                        Bs. {changeVES.toFixed(2)}
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="p-2.5 rounded-xl bg-emerald-950/40 border border-emerald-500/40">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-black uppercase tracking-widest text-emerald-300 font-mono">
-                          ✓ CUENTA CUBIERTA
-                        </span>
-                        <span className="text-[10px] font-mono text-emerald-400/80 font-bold">
-                          Recibido: ${totalPaidUSD.toFixed(2)}
-                        </span>
-                      </div>
-                      <div className="text-2xl sm:text-3xl font-black font-mono text-emerald-300 tracking-tight leading-none mt-1">
-                        $0.00 <span className="text-xs font-bold text-emerald-400">USD</span>
-                      </div>
-                      <div className="text-[11px] font-mono font-bold text-emerald-400/90 mt-0.5">
-                        Pago exacto sin vuelto
-                      </div>
-                    </div>
+            <div className={`text-xs font-mono font-bold mt-1 ${
+              isLight ? 'text-slate-700' : 'text-emerald-400/90'
+            }`}>
+              Bs. {totalVES.toFixed(2)} <span className="text-[10px] text-slate-500 font-normal">• Tasa: {bcvRate.toFixed(2)}</span>
+            </div>
+
+            {/* PÍLDORA SUBORDINADA DE ESTADO / VUELTO (NO COMPITE CON EL TOTAL) */}
+            <div className={`mt-2 pt-2 border-t flex items-center justify-center ${
+              isLight ? 'border-slate-200' : 'border-emerald-500/20'
+            }`}>
+              {isCOD ? (
+                <span className={`px-3 py-1 rounded-full text-xs font-mono font-bold inline-flex items-center gap-1.5 shadow-sm ${
+                  isLight ? 'bg-amber-100 border border-amber-300 text-amber-950' : 'bg-amber-500/15 border border-amber-500/40 text-amber-300'
+                }`}>
+                  <Truck className="w-3.5 h-3.5 text-amber-500" />
+                  <span>Cobro en Destino (COD) • Chofer cobra al entregar</span>
+                </span>
+              ) : remainingUSD > 0.009 ? (
+                <span className={`px-3 py-1 rounded-full text-xs font-mono font-black inline-flex items-center gap-1.5 shadow-sm ${
+                  isLight ? 'bg-amber-100 border border-amber-300 text-amber-950' : 'bg-amber-950/80 border border-amber-500/50 text-amber-300'
+                }`}>
+                  <AlertCircle className="w-3.5 h-3.5 text-amber-500" />
+                  <span>Falta: ${remainingUSD.toFixed(2)} USD (Bs. {remainingVES.toFixed(2)})</span>
+                  <span className={`text-[10px] font-normal ${isLight ? 'text-amber-800' : 'text-amber-400/80'}`}>• Recibido: ${totalPaidUSD.toFixed(2)}</span>
+                </span>
+              ) : changeUSD > 0.009 ? (
+                <span className={`px-3.5 py-1 rounded-full text-xs sm:text-sm font-mono font-black inline-flex items-center gap-1.5 shadow-md ${
+                  isLight ? 'bg-emerald-100 border-2 border-emerald-500 text-emerald-950' : 'bg-emerald-950/90 border-2 border-emerald-400 text-emerald-200'
+                }`}>
+                  <CheckCircle2 className="w-4 h-4 text-emerald-500 animate-pulse" />
+                  <span>VUELTO: ${changeUSD.toFixed(2)} USD (Bs. {changeVES.toFixed(2)})</span>
+                </span>
+              ) : (
+                <span className={`px-3 py-0.5 rounded-full text-xs font-mono font-bold inline-flex items-center gap-1 ${
+                  isLight ? 'bg-emerald-100 border border-emerald-300 text-emerald-800' : 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400'
+                }`}>
+                  <Check className="w-3.5 h-3.5" />
+                  <span>Cuenta cubierta (Pago Exacto)</span>
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* --------------------------------------------------------------------- */}
+          {/* C. VISOR DE MÉTODO SELECCIONADO + MONTO DIGITADO                      */}
+          {/* --------------------------------------------------------------------- */}
+          <div className={`p-2.5 rounded-2xl border-2 shadow-md space-y-1.5 ${
+            isLight
+              ? `bg-white ${currentMethodObj.borderColor}`
+              : `bg-[#080d19] ${currentMethodObj.borderColor}`
+          }`}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5">
+                {React.createElement(currentMethodObj.icon, { className: `w-4 h-4 ${currentMethodObj.color}` })}
+                <span className={`text-xs font-black ${isLight ? 'text-slate-900' : 'text-white'}`}>{currentMethodObj.title}</span>
+                <span className={`text-[10px] font-mono ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>({currentMethodObj.currency})</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => handleFillExactRemaining(activeMethod)}
+                className={`px-2 py-0.5 rounded-lg border text-[10px] font-mono font-bold active:scale-95 cursor-pointer ${
+                  isLight
+                    ? 'bg-emerald-100 text-emerald-800 border-emerald-300 hover:bg-emerald-200'
+                    : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30 hover:bg-emerald-500/30'
+                }`}
+              >
+                ⚡ Pagar Restante
+              </button>
+            </div>
+
+            {/* Display del Monto que se está digitando (READONLY para no abrir teclado OS) */}
+            <div 
+              onClick={() => setActiveField('amount')}
+              className={`p-2 rounded-xl border-2 transition-all cursor-pointer flex items-center justify-between ${
+                activeField === 'amount'
+                  ? isLight
+                    ? 'border-emerald-500 bg-emerald-50/50 ring-2 ring-emerald-500/20'
+                    : 'border-emerald-500 bg-[#04120a] ring-2 ring-emerald-500/20'
+                  : isLight
+                    ? 'border-slate-200 bg-slate-50'
+                    : 'border-slate-800 bg-slate-950'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <span className={`text-xs font-mono font-bold ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>Monto:</span>
+                <div className={`text-2xl sm:text-3xl font-black font-mono tracking-wider ${
+                  isLight ? 'text-emerald-700' : 'text-emerald-300'
+                }`}>
+                  {getCurrentFieldValue() || '0.00'}
+                  {activeField === 'amount' && (
+                    <span className="inline-block w-2 h-5 bg-emerald-500 ml-1 animate-pulse align-middle"></span>
                   )}
                 </div>
-
               </div>
+
+              <span className={`text-[9px] font-mono ${isLight ? 'text-slate-500 font-bold' : 'text-slate-400'}`}>
+                {activeMethod === 'cash_usd' || activeMethod === 'zelle' || activeMethod === 'binance'
+                  ? `≈ Bs. ${((parseFloat(getCurrentFieldValue()) || 0) * bcvRate).toFixed(2)}`
+                  : `≈ $${((parseFloat(getCurrentFieldValue()) || 0) / (bcvRate || 1)).toFixed(2)} USD`}
+              </span>
             </div>
 
-          </div>
-        </div>
-      </div>
-
-      {/* ========================================================================= */}
-      {/* 2. CONTENIDO SCROLLEABLE INFERIOR (MÉTODOS, ENTREGA, CLIENTE, BOTÓN)      */}
-      {/* ========================================================================= */}
-      <div className="flex-1 min-h-0 overflow-y-auto scrollbar-none pb-48 px-2 sm:px-4 pt-3">
-        <div className="max-w-xl mx-auto w-full space-y-4">
-
-      {/* ========================================================================= */}
-      {/* 2. MODALIDAD DE ENTREGA / DESPACHO (100% PRESERVADA)                       */}
-      {/* ========================================================================= */}
-      <div className={`p-4 rounded-3xl border shadow-sm space-y-3 ${
-        isLight ? 'bg-white border-slate-200' : 'bg-slate-900/90 border-slate-800 text-white'
-      }`}>
-        <span className="text-xs font-black uppercase tracking-wider block text-slate-400">
-          Modalidad de Entrega / Despacho:
-        </span>
-
-        <div className="grid grid-cols-3 gap-2">
-          {[
-            { id: 'local', label: 'En Local / Mesa', desc: 'Consumo en salón', icon: Store, color: 'text-emerald-500' },
-            { id: 'delivery_paid', label: 'Delivery Pagado', desc: 'Cobro previo', icon: Bike, color: 'text-sky-500' },
-            { id: 'delivery_cod', label: 'Cobro en Destino', desc: 'Chofer cobra', icon: Truck, color: 'text-amber-500' },
-          ].map((mode) => {
-            const Icon = mode.icon;
-            const isSelected = fulfillmentMode === mode.id;
-            return (
-              <button
-                key={mode.id}
-                type="button"
-                onClick={() => setFulfillmentMode(mode.id as any)}
-                className={`p-2.5 rounded-2xl border flex flex-col items-center text-center gap-1 transition-all active:scale-95 cursor-pointer ${
-                  isSelected
+            {/* Fila de Referencia (si aplica) */}
+            {currentMethodObj.hasRef && (
+              <div 
+                onClick={() => setActiveField('ref')}
+                className={`p-1.5 px-2 rounded-xl border transition-all cursor-pointer flex items-center justify-between text-xs ${
+                  activeField === 'ref'
                     ? isLight
-                      ? 'border-2 bg-amber-50/50 border-amber-500 shadow-sm'
-                      : 'border-2 bg-slate-800 border-amber-500 shadow-md'
+                      ? 'border-sky-500 bg-sky-50 ring-1 ring-sky-500'
+                      : 'border-sky-500 bg-sky-950/30 ring-1 ring-sky-500'
                     : isLight
-                    ? 'bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-700'
-                    : 'bg-slate-950 hover:bg-slate-850 border-slate-800 text-slate-300'
+                      ? 'border-slate-200 bg-slate-50'
+                      : 'border-slate-800 bg-slate-950/60'
                 }`}
               >
-                <Icon className={`w-5 h-5 ${mode.color}`} />
-                <span className="text-[11px] font-black leading-tight block">{mode.label}</span>
-                <span className="text-[9px] opacity-70 leading-tight block">{mode.desc}</span>
-              </button>
-            );
-          })}
-        </div>
+                <div className="flex items-center gap-1.5">
+                  <Hash className="w-3.5 h-3.5 text-sky-500" />
+                  <span className={`text-[10px] font-bold ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>{currentMethodObj.refLabel}:</span>
+                  <span className={`font-mono font-black ${isLight ? 'text-sky-800' : 'text-sky-300'}`}>
+                    {currentMethodObj.refValue || 'Sin ref'}
+                    {activeField === 'ref' && (
+                      <span className="inline-block w-1.5 h-3.5 bg-sky-500 ml-1 animate-pulse"></span>
+                    )}
+                  </span>
+                </div>
+                <span className="text-[9px] font-bold text-sky-500">
+                  {activeField === 'ref' ? '● Digitando' : 'Toca para ref'}
+                </span>
+              </div>
+            )}
 
-        {/* Parámetros de Motorizado y Dirección si es Delivery */}
-        {fulfillmentMode !== 'local' && (
-          <div className={`p-3 rounded-2xl border space-y-2 mt-2 ${
-            isLight ? 'bg-slate-50 border-slate-200' : 'bg-slate-950 border-slate-800'
-          }`}>
-            <div>
-              <label className="text-[10px] font-bold text-slate-400 block mb-1">
-                Motorizado / Chofer Asignado:
-              </label>
-              <select
-                value={selectedDriverId}
-                onChange={(e) => setSelectedDriverId(e.target.value)}
-                className={`w-full px-3 py-2 rounded-xl text-xs font-bold border outline-none ${
-                  isLight ? 'bg-white border-slate-300 text-slate-900' : 'bg-slate-900 border-slate-700 text-white'
-                }`}
-              >
-                <option value="">Por Asignar / Chofer Particular</option>
-                {drivers.map((d) => (
-                  <option key={d.id} value={d.id}>
-                    {d.name} ({d.vehicle}) - {d.status}
-                  </option>
+            {/* Accesos rápidos de Billetes en USD */}
+            {activeMethod === 'cash_usd' && (
+              <div className="flex items-center gap-1 pt-0.5">
+                {[5, 10, 20, 50, 100].map((bill) => (
+                  <button
+                    key={bill}
+                    type="button"
+                    onClick={() => handleBillPreset(bill)}
+                    className={`flex-1 py-1 rounded-xl text-xs font-mono font-black transition-all active:scale-95 border cursor-pointer ${
+                      isLight
+                        ? 'bg-slate-100 hover:bg-slate-200 text-slate-800 border-slate-300'
+                        : 'bg-slate-800 hover:bg-slate-700 text-white border-slate-700'
+                    }`}
+                  >
+                    ${bill}
+                  </button>
                 ))}
-              </select>
+              </div>
+            )}
+
+            {/* Accesos rápidos de Billetes en Bs */}
+            {activeMethod === 'cash_ves' && (
+              <div className="flex items-center gap-1 pt-0.5">
+                {[50, 100, 200, 500, 1000].map((amt) => (
+                  <button
+                    key={amt}
+                    type="button"
+                    onClick={() => handleVesPreset(amt)}
+                    className={`flex-1 py-1 rounded-xl text-[11px] font-mono font-black transition-all active:scale-95 border cursor-pointer ${
+                      isLight
+                        ? 'bg-slate-100 hover:bg-slate-200 text-slate-800 border-slate-300'
+                        : 'bg-slate-800 hover:bg-slate-700 text-white border-slate-700'
+                    }`}
+                  >
+                    {amt}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* --------------------------------------------------------------------- */}
+          {/* D. TECLADO NUMÉRICO TÁCTIL (GRID COMPACTO CON TECLAS CÓMODAS)         */}
+          {/* --------------------------------------------------------------------- */}
+          <div className={`p-2 sm:p-2.5 rounded-2xl border ${
+            isLight ? 'bg-white border-slate-200 shadow-sm' : 'bg-slate-900/90 border-slate-800'
+          }`}>
+            <div className="grid grid-cols-3 gap-1.5">
+              {[
+                '1', '2', '3',
+                '4', '5', '6',
+                '7', '8', '9',
+                '.', '0', 'DEL'
+              ].map((key) => {
+                const isDel = key === 'DEL';
+                const isDot = key === '.';
+                return (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => handleNumpadKey(key)}
+                    className={`h-10 sm:h-12 rounded-xl font-mono font-black text-lg transition-all active:scale-95 cursor-pointer flex items-center justify-center select-none shadow-sm ${
+                      isDel
+                        ? isLight
+                          ? 'bg-rose-100 hover:bg-rose-200 text-rose-700 border border-rose-300'
+                          : 'bg-rose-950/60 hover:bg-rose-900 text-rose-300 border border-rose-800/50'
+                        : isDot
+                        ? isLight
+                          ? 'bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300'
+                          : 'bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700'
+                        : isLight
+                        ? 'bg-slate-50 hover:bg-slate-100 text-slate-900 border border-slate-200 active:bg-slate-200'
+                        : 'bg-slate-950 hover:bg-slate-850 text-white border border-slate-800 hover:border-slate-600'
+                    }`}
+                  >
+                    {isDel ? <Delete className="w-4 h-4 text-rose-500" /> : key}
+                  </button>
+                );
+              })}
             </div>
 
-            <div>
-              <label className="text-[10px] font-bold text-slate-400 block mb-1">
-                Dirección de Entrega:
-              </label>
-              <input
-                type="text"
-                placeholder={selectedCustomer?.address || 'Ej. Calle 5, Casa #12'}
-                value={deliveryAddressInput}
-                onChange={(e) => setDeliveryAddressInput(e.target.value)}
-                className={`w-full px-3 py-2 rounded-xl text-xs font-medium border outline-none ${
-                  isLight ? 'bg-white border-slate-300 text-slate-900' : 'bg-slate-900 border-slate-700 text-white'
+            {/* Fila inferior rápida: Limpiar, Pagar Exacto, Listo */}
+            <div className="grid grid-cols-3 gap-1.5 mt-1.5">
+              <button
+                type="button"
+                onClick={() => handleNumpadKey('AC')}
+                className={`h-9 sm:h-10 rounded-xl text-xs font-mono font-bold transition-all active:scale-95 border cursor-pointer ${
+                  isLight
+                    ? 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-300'
+                    : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700'
                 }`}
-              />
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* ========================================================================= */}
-      {/* 3. DATOS DEL CLIENTE / FACTURACIÓN (100% PRESERVADOS)                     */}
-      {/* ========================================================================= */}
-      <div className={`p-3.5 rounded-3xl border shadow-sm flex items-center justify-between ${
-        isLight ? 'bg-white border-slate-200' : 'bg-slate-900/90 border-slate-800 text-white'
-      }`}>
-        <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl bg-slate-800 text-slate-300 flex items-center justify-center shrink-0">
-            <User className="w-4 h-4" />
-          </div>
-          <div>
-            <h4 className="text-xs font-black">{selectedCustomer?.name || 'Cliente Mostrador'}</h4>
-            <span className="text-[10px] font-mono text-slate-400 block">
-              Doc: {selectedCustomer?.docId || 'V-00000000'} {selectedCustomer?.phone && `• Tel: ${selectedCustomer.phone}`}
-            </span>
-          </div>
-        </div>
-
-        <button
-          type="button"
-          onClick={onOpenCustomerModal}
-          className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold transition-all active:scale-95 cursor-pointer flex items-center gap-1"
-        >
-          <UserPlus className="w-3.5 h-3.5" />
-          <span>Cambiar</span>
-        </button>
-      </div>
-
-      {/* ========================================================================= */}
-      {/* 4. RECUADRO UNIFICADO DE MÉTODOS DE PAGO CON RESTA EN VIVO               */}
-      {/* ========================================================================= */}
-      <div className={`p-4 sm:p-5 rounded-3xl border shadow-lg space-y-4 ${
-        isLight ? 'bg-white border-slate-200' : 'bg-[#090d16] border-slate-800 text-white'
-      }`}>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Coins className="w-4 h-4 text-amber-500" />
-            <h3 className="text-xs font-black uppercase tracking-wider">
-              Opciones de Pago Directo:
-            </h3>
-          </div>
-          <span className="text-[10px] text-slate-400 font-medium">
-            Ingresa montos aleatoriamente en cualquier método
-          </span>
-        </div>
-
-        {/* 1. PAGO MÓVIL (SIN QR, DIRECTO CON RESTA DINÁMICA) */}
-        <div className={`p-3.5 rounded-2xl border transition-all ${
-          parsedPmVES > 0
-            ? 'border-emerald-500/50 bg-emerald-950/20 shadow-sm'
-            : isLight ? 'bg-slate-50 border-slate-200' : 'bg-slate-950 border-slate-800'
-        }`}>
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-2">
-              <Phone className="w-4 h-4 text-emerald-400" />
-              <span className="text-xs font-black">📱 Pago Móvil (Bs.)</span>
-            </div>
-            {remainingUSD > 0.01 && (
+              >
+                AC Limpiar
+              </button>
               <button
                 type="button"
-                onClick={() => handleFillRemaining('pm')}
-                className="px-2 py-0.5 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-mono font-bold hover:bg-emerald-500/30 active:scale-95 cursor-pointer"
+                onClick={() => handleFillExactRemaining(activeMethod)}
+                className={`h-9 sm:h-10 rounded-xl text-xs font-mono font-black transition-all active:scale-95 border cursor-pointer ${
+                  isLight
+                    ? 'bg-amber-100 hover:bg-amber-200 text-amber-950 border-amber-300'
+                    : 'bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40'
+                }`}
               >
-                ⚡ Restante (Bs. {remainingVES.toFixed(2)})
+                ⚡ Exacto
               </button>
-            )}
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            <div>
-              <label className="text-[9px] font-bold text-slate-400 block mb-0.5">Monto en Bolívares (Bs):</label>
-              <input
-                type="text"
-                inputMode="decimal"
-                placeholder="0.00"
-                value={pmAmountVES}
-                onChange={(e) => setPmAmountVES(e.target.value.replace(',', '.'))}
-                className="w-full px-3 py-2 rounded-xl text-xs sm:text-sm font-mono font-black bg-white text-slate-950 border-2 border-slate-300 outline-none focus:border-emerald-500 shadow-inner"
-              />
-            </div>
-            <div>
-              <label className="text-[9px] font-bold text-slate-400 block mb-0.5">N° Referencia (4 dígitos opcional):</label>
-              <input
-                type="text"
-                placeholder="Ej. 4581"
-                maxLength={8}
-                value={pmRef}
-                onChange={(e) => setPmRef(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl text-xs sm:text-sm font-mono font-bold bg-white text-slate-950 border-2 border-slate-300 outline-none focus:border-emerald-500 shadow-inner"
-              />
-            </div>
-          </div>
-          {parsedPmVES > 0 && (
-            <span className="text-[10px] font-mono text-emerald-400 block mt-1">
-              ≈ ${(parsedPmVES / bcvRate).toFixed(2)} USD abonados
-            </span>
-          )}
-        </div>
-
-        {/* 2. EFECTIVO DÓLARES (USD) CON BILLETES RÁPIDOS */}
-        <div className={`p-3.5 rounded-2xl border transition-all ${
-          parsedCashUSD > 0
-            ? 'border-amber-500/50 bg-amber-950/20 shadow-sm'
-            : isLight ? 'bg-slate-50 border-slate-200' : 'bg-slate-950 border-slate-800'
-        }`}>
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-2">
-              <DollarSign className="w-4 h-4 text-amber-400" />
-              <span className="text-xs font-black">💵 Efectivo Dólares ($ USD)</span>
-            </div>
-            {remainingUSD > 0.01 && (
               <button
                 type="button"
-                onClick={() => handleFillRemaining('cash_usd')}
-                className="px-2 py-0.5 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] font-mono font-bold hover:bg-amber-500/30 active:scale-95 cursor-pointer"
+                onClick={() => setActiveField('amount')}
+                className={`h-9 sm:h-10 rounded-xl text-xs font-mono font-black transition-all active:scale-95 flex items-center justify-center gap-1 shadow-sm cursor-pointer ${
+                  isLight
+                    ? 'bg-emerald-600 hover:bg-emerald-500 text-white'
+                    : 'bg-emerald-500 hover:bg-emerald-400 text-slate-950'
+                }`}
               >
-                ⚡ Exacto (${remainingUSD.toFixed(2)})
+                <Check className="w-3.5 h-3.5" />
+                <span>Listo</span>
               </button>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <input
-              type="text"
-              inputMode="decimal"
-              placeholder={`Monto Recibido en $ (Ej. ${totalUSD.toFixed(2)})`}
-              value={cashUSD}
-              onChange={(e) => setCashUSD(e.target.value.replace(',', '.'))}
-              className="w-full px-3 py-2 rounded-xl text-xs sm:text-sm font-mono font-black bg-white text-slate-950 border-2 border-slate-300 outline-none focus:border-amber-500 shadow-inner"
-            />
-
-            {/* Atajos de Billetes Rápidos */}
-            <div className="flex flex-wrap gap-1.5 items-center">
-              <span className="text-[10px] font-bold text-slate-400 mr-1">Billetes:</span>
-              {[5, 10, 20, 50, 100].map((bill) => (
-                <button
-                  key={bill}
-                  type="button"
-                  onClick={() => setCashUSD(String(bill))}
-                  className="px-2.5 py-1 rounded-lg text-xs font-mono font-black bg-slate-800 hover:bg-slate-700 text-white transition-all active:scale-95 cursor-pointer border border-slate-700"
-                >
-                  ${bill}
-                </button>
-              ))}
             </div>
           </div>
-        </div>
 
-        {/* 3. EFECTIVO BOLÍVARES (VES) */}
-        <div className={`p-3.5 rounded-2xl border transition-all ${
-          parsedCashVES > 0
-            ? 'border-sky-500/50 bg-sky-950/20 shadow-sm'
-            : isLight ? 'bg-slate-50 border-slate-200' : 'bg-slate-950 border-slate-800'
-        }`}>
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-2">
-              <Wallet className="w-4 h-4 text-sky-400" />
-              <span className="text-xs font-black">🇻🇪 Efectivo Bolívares (Bs.)</span>
-            </div>
-            {remainingUSD > 0.01 && (
-              <button
-                type="button"
-                onClick={() => handleFillRemaining('cash_ves')}
-                className="px-2 py-0.5 rounded-lg bg-sky-500/20 text-sky-300 border border-sky-500/30 text-[10px] font-mono font-bold hover:bg-sky-500/30 active:scale-95 cursor-pointer"
-              >
-                ⚡ Restante (Bs. {remainingVES.toFixed(2)})
-              </button>
-            )}
-          </div>
-
-          <input
-            type="text"
-            inputMode="decimal"
-            placeholder="Monto Recibido en Bs."
-            value={cashVES}
-            onChange={(e) => setCashVES(e.target.value.replace(',', '.'))}
-            className="w-full px-3 py-2 rounded-xl text-xs sm:text-sm font-mono font-black bg-white text-slate-950 border-2 border-slate-300 outline-none focus:border-sky-500 shadow-inner"
-          />
-        </div>
-
-        {/* 4. PUNTO / TARJETA DE DÉBITO */}
-        <div className={`p-3.5 rounded-2xl border transition-all ${
-          parsedCardVES > 0
-            ? 'border-purple-500/50 bg-purple-950/20 shadow-sm'
-            : isLight ? 'bg-slate-50 border-slate-200' : 'bg-slate-950 border-slate-800'
-        }`}>
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-2">
-              <CreditCard className="w-4 h-4 text-purple-400" />
-              <span className="text-xs font-black">💳 Punto / Tarjeta Débito</span>
-            </div>
-            {remainingUSD > 0.01 && (
-              <button
-                type="button"
-                onClick={() => handleFillRemaining('card')}
-                className="px-2 py-0.5 rounded-lg bg-purple-500/20 text-purple-300 border border-purple-500/30 text-[10px] font-mono font-bold hover:bg-purple-500/30 active:scale-95 cursor-pointer"
-              >
-                ⚡ Restante (Bs. {remainingVES.toFixed(2)})
-              </button>
-            )}
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            <input
-              type="text"
-              inputMode="decimal"
-              placeholder="Monto Cobrado en Bs."
-              value={cardVES}
-              onChange={(e) => setCardVES(e.target.value.replace(',', '.'))}
-              className="w-full px-3 py-2 rounded-xl text-xs sm:text-sm font-mono font-black bg-white text-slate-950 border-2 border-slate-300 outline-none focus:border-purple-500 shadow-inner"
-            />
-            <input
-              type="text"
-              placeholder="N° Voucher / Lote (Opcional)"
-              value={cardRef}
-              onChange={(e) => setCardRef(e.target.value)}
-              className="w-full px-3 py-2 rounded-xl text-xs sm:text-sm font-mono font-bold bg-white text-slate-950 border-2 border-slate-300 outline-none focus:border-purple-500 shadow-inner"
-            />
-          </div>
-        </div>
-
-        {/* 5. ZELLE */}
-        <div className={`p-3.5 rounded-2xl border transition-all ${
-          parsedZelleUSD > 0
-            ? 'border-indigo-500/50 bg-indigo-950/20 shadow-sm'
-            : isLight ? 'bg-slate-50 border-slate-200' : 'bg-slate-950 border-slate-800'
-        }`}>
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-2">
-              <Building2 className="w-4 h-4 text-indigo-400" />
-              <span className="text-xs font-black">🌐 Zelle ($ USD)</span>
-            </div>
-            {remainingUSD > 0.01 && (
-              <button
-                type="button"
-                onClick={() => handleFillRemaining('zelle')}
-                className="px-2 py-0.5 rounded-lg bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[10px] font-mono font-bold hover:bg-indigo-500/30 active:scale-95 cursor-pointer"
-              >
-                ⚡ Restante (${remainingUSD.toFixed(2)})
-              </button>
-            )}
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            <input
-              type="text"
-              inputMode="decimal"
-              placeholder="Monto en $ USD"
-              value={zelleUSD}
-              onChange={(e) => setZelleUSD(e.target.value.replace(',', '.'))}
-              className="w-full px-3 py-2 rounded-xl text-xs sm:text-sm font-mono font-black bg-white text-slate-950 border-2 border-slate-300 outline-none focus:border-indigo-500 shadow-inner"
-            />
-            <input
-              type="text"
-              placeholder="Titular / Confirmación"
-              value={zelleRef}
-              onChange={(e) => setZelleRef(e.target.value)}
-              className="w-full px-3 py-2 rounded-xl text-xs sm:text-sm font-mono font-bold bg-white text-slate-950 border-2 border-slate-300 outline-none focus:border-indigo-500 shadow-inner"
-            />
-          </div>
-        </div>
-
-        {/* 6. BINANCE PAY (USDT) */}
-        <div className={`p-3.5 rounded-2xl border transition-all ${
-          parsedBinanceUSDT > 0
-            ? 'border-yellow-500/50 bg-yellow-950/20 shadow-sm'
-            : isLight ? 'bg-slate-50 border-slate-200' : 'bg-slate-950 border-slate-800'
-        }`}>
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-2">
-              <span className="w-4 h-4 rounded-full bg-yellow-500 text-slate-950 text-[10px] font-black flex items-center justify-center">
-                B
-              </span>
-              <span className="text-xs font-black">🟡 Binance Pay (USDT)</span>
-            </div>
-            {remainingUSD > 0.01 && (
-              <button
-                type="button"
-                onClick={() => handleFillRemaining('binance')}
-                className="px-2 py-0.5 rounded-lg bg-yellow-500/20 text-yellow-300 border border-yellow-500/30 text-[10px] font-mono font-bold hover:bg-yellow-500/30 active:scale-95 cursor-pointer"
-              >
-                ⚡ Restante ({remainingUSD.toFixed(2)} USDT)
-              </button>
-            )}
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            <input
-              type="text"
-              inputMode="decimal"
-              placeholder="Monto en USDT"
-              value={binanceUSDT}
-              onChange={(e) => setBinanceUSDT(e.target.value.replace(',', '.'))}
-              className="w-full px-3 py-2 rounded-xl text-xs sm:text-sm font-mono font-black bg-white text-slate-950 border-2 border-slate-300 outline-none focus:border-yellow-500 shadow-inner"
-            />
-            <input
-              type="text"
-              placeholder="Order ID / Pay ID (Opcional)"
-              value={binanceRef}
-              onChange={(e) => setBinanceRef(e.target.value)}
-              className="w-full px-3 py-2 rounded-xl text-xs sm:text-sm font-mono font-bold bg-white text-slate-950 border-2 border-slate-300 outline-none focus:border-yellow-500 shadow-inner"
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* ========================================================================= */}
-      {/* 5. BOTÓN PRINCIPAL DE LIQUIDACIÓN Y GENERACIÓN DE TICKET                  */}
-      {/* ========================================================================= */}
-      {isTrialExpired ? (
-        <button
-          type="button"
-          onClick={onOpenLicenseModal}
-          className="w-full py-4 text-white font-black text-sm rounded-2xl shadow-xl transition-all flex items-center justify-center gap-2 cursor-pointer bg-rose-600 hover:bg-rose-500 active:scale-98 border-2 border-rose-400"
-        >
-          <Lock className="w-5 h-5 text-white" />
-          <span>🔒 Prueba de 3 Horas Finalizada - Activar Licencia para Facturar</span>
-        </button>
-      ) : (
-        <button
-          type="button"
-          onClick={onFinalizeSale}
-          disabled={!isCovered}
-          className={`w-full py-4 text-white font-black text-sm rounded-2xl shadow-xl transition-all flex items-center justify-center gap-2 cursor-pointer ${
-            !isCovered
-              ? isLight
-                ? 'opacity-80 cursor-not-allowed bg-slate-200 border border-slate-300 text-slate-500'
-                : 'opacity-60 cursor-not-allowed bg-slate-800 border border-slate-700'
-              : 'active:scale-98 shadow-emerald-500/25 bg-emerald-600 hover:bg-emerald-500'
-          }`}
-          style={{
-            backgroundColor: isCovered ? '#10b981' : undefined,
-          }}
-        >
-          {!isCovered ? (
-            <div className="flex items-center gap-2 text-amber-300 font-bold">
-              <AlertCircle className="w-5 h-5 shrink-0" />
-              <span>Falta por pagar: ${remainingUSD.toFixed(2)} USD (Bs. {remainingVES.toFixed(2)})</span>
-            </div>
+          {/* --------------------------------------------------------------------- */}
+          {/* E. BOTÓN PRINCIPAL DE CONFIRMACIÓN Y EMISIÓN DE TICKET                */}
+          {/* --------------------------------------------------------------------- */}
+          {isTrialExpired ? (
+            <button
+              type="button"
+              onClick={onOpenLicenseModal}
+              className="w-full py-3.5 text-white font-black text-xs sm:text-sm rounded-xl shadow-xl transition-all flex items-center justify-center gap-2 cursor-pointer bg-rose-600 hover:bg-rose-500 active:scale-98 border-2 border-rose-400"
+            >
+              <Lock className="w-4 h-4 text-white" />
+              <span>🔒 Prueba Finalizada - Activar Licencia</span>
+            </button>
           ) : (
-            <>
-              <CheckCircle2 className="w-5 h-5 text-slate-950" />
-              <span className="text-slate-950 font-black">
-                {isCOD ? 'Confirmar Pedido y Despachar (Cobro en Destino)' : 'Confirmar Venta y Generar Ticket'}
-              </span>
-            </>
+            <button
+              type="button"
+              onClick={onFinalizeSale}
+              disabled={!isCovered}
+              className={`w-full py-3.5 text-white font-black text-xs sm:text-sm rounded-xl shadow-xl transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                !isCovered
+                  ? isLight
+                    ? 'opacity-80 cursor-not-allowed bg-slate-200 border border-slate-300 text-slate-500'
+                    : 'opacity-60 cursor-not-allowed bg-slate-800 border border-slate-700'
+                  : 'active:scale-98 shadow-emerald-500/25 bg-emerald-600 hover:bg-emerald-500'
+              }`}
+              style={{
+                backgroundColor: isCovered ? '#10b981' : undefined,
+              }}
+            >
+              {!isCovered ? (
+                <div className={`flex items-center gap-2 font-bold ${isLight ? 'text-amber-800' : 'text-amber-300'}`}>
+                  <AlertCircle className="w-4 h-4 shrink-0 text-amber-500" />
+                  <span>Falta: ${remainingUSD.toFixed(2)} USD (Bs. {remainingVES.toFixed(2)})</span>
+                </div>
+              ) : (
+                <>
+                  <CheckCircle2 className="w-5 h-5 text-slate-950" />
+                  <span className="text-slate-950 font-black text-sm sm:text-base">
+                    {isCOD ? 'Confirmar y Despachar (COD)' : '✓ Confirmar Venta y Generar Ticket'}
+                  </span>
+                </>
+              )}
+            </button>
           )}
-        </button>
-      )}
+
         </div>
       </div>
+
     </div>
   );
 }

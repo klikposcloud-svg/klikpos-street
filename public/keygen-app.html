@@ -545,9 +545,10 @@
             <span class="hint">Ediciones 2026</span>
           </label>
           <select id="plan" onchange="updatePlanDesc()">
-            <option value="contado_15" selected>⭐ Plan Contado Street ($15 USD - Permanente)</option>
-            <option value="credito_25">💳 Plan Financiado ($25 USD: $10 hoy + $15 en 15 días)</option>
-            <option value="vip_50">👑 Plan Full VIP Blindado ($50 USD - Permanente + 1 Año Cloud)</option>
+            <option value="street_contado" selected>⭐ Plan 1: Contado Street ($15 USD - Permanente)</option>
+            <option value="street_credito">💳 Plan 2: Financiado Street ($20 USD: $10 hoy + $10 en 15 días)</option>
+            <option value="street_vip">👑 Plan 3: Completo Vitalicio Pro ($50 USD - Permanente + Cloud)</option>
+            <option value="promo_6m">🚀 Promo 6 Meses con Nube ($35 USD)</option>
             <option value="cloud_monthly">☁️ Seguro Cloud Antirrobo ($5 USD/mes - 30 Días)</option>
             <option value="trial_15m">⏱️ Prueba Flash - 15 Minutos (Evaluación)</option>
             <option value="demo">Demo Gratuita (15 Días)</option>
@@ -556,7 +557,7 @@
           </select>
           <div id="plan-desc-box" class="plan-info-box">
             <span class="tag">PLAN SELECCIONADO:</span>
-            <span id="plan-desc-text">Licencia PERMANENTE de por vida sin mensualidades. Ahorro de $10 USD sobre precio regular ($25). Facturación offline, tasa BCV y catálogos.</span>
+            <span id="plan-desc-text">Licencia PERMANENTE de por vida sin mensualidades. Facturación offline 100%, tasa BCV, reportes y catálogos.</span>
           </div>
         </div>
 
@@ -616,14 +617,18 @@
     const MASTER_SIGNING_SALT = 'VENEMATIC_SEC_SALT_2026_AIVYNTRAX_PRO_POS_V2';
 
     const PLAN_CONFIG = {
-      contado_15:    { prefix: 'STR', label: '⭐ Plan Contado Street ($15 USD)', desc: 'Licencia PERMANENTE de por vida sin mensualidades. Ahorro de $10 USD sobre precio regular ($25). Facturación offline, tasa BCV y catálogos.', days: null },
-      credito_25:    { prefix: 'PTT', label: '💳 Plan Financiado ($25 USD: $10 hoy + $15 en 15 días)', desc: 'Cuota inicial de $10 USD (30 días de operación). Al pagar la 2da cuota de $15 se entrega la clave vitalicia.', days: 30 },
-      vip_50:        { prefix: 'PRO', label: '👑 Plan Full VIP Blindado ($50 USD)', desc: 'Licencia PERMANENTE de por vida + 1 año completo de Seguro Cloud Antirrobo y Backup + Personalización de Marca.', days: null },
-      cloud_monthly: { prefix: 'CLD', label: '☁️ Seguro Cloud Antirrobo ($5 USD/mes)', desc: '30 días de respaldo automático y recuperación instantánea en caso de pérdida o daño del teléfono.', days: 30 },
-      trial_15m:     { prefix: 'T15', label: '⏱️ Prueba Flash (15 Minutos)', desc: '15 minutos exactos desde la activación. Despliega modal de compra.', days: '15m' },
-      demo:          { prefix: 'DMO', label: 'Demo Gratuita (15 Días)', desc: '15 días de prueba para demostración a nuevos comercios.', days: 15 },
-      anual:         { prefix: 'ANL', label: 'Anual (365 Días)', desc: 'Renovación anual de 365 días.', days: 365 },
-      vitalicia:     { prefix: 'VIT', label: 'Vitalicia Legacy', desc: 'Licencia permanente perpetua.', days: null }
+      street_contado: { planInternal: 'starter_full',  prefix: 'STR', label: '⭐ Plan 1: Contado Street ($15 USD)', desc: 'Licencia PERMANENTE de por vida sin mensualidades. Facturación offline 100%, tasa BCV y catálogos.', days: null },
+      street_credito: { planInternal: 'starter_trial', prefix: 'STT', label: '💳 Plan 2: Financiado Street ($20 USD: $10 hoy + $10 en 15 días)', desc: '1ra Cuota de $10 USD (15 días de vigencia). Al pagar la 2da cuota de $10 se emite la clave vitalicia definitiva.', days: 15 },
+      street_vip:     { planInternal: 'pro_full',      prefix: 'PRO', label: '👑 Plan 3: Completo Vitalicio Pro ($50 USD)', desc: 'Licencia PERMANENTE Completa de por vida + Balanza Digital, Soporte Prioritario y Seguro Cloud Antirrobo.', days: null },
+      contado_15:     { planInternal: 'starter_full',  prefix: 'STR', label: '⭐ Plan 1: Contado Street ($15 USD)', desc: 'Licencia PERMANENTE de por vida sin mensualidades. Facturación offline 100%, tasa BCV y catálogos.', days: null },
+      credito_25:     { planInternal: 'starter_trial', prefix: 'STT', label: '💳 Plan 2: Financiado ($20 USD: $10 hoy + $10 en 15 días)', desc: '1ra Cuota de $10 USD (15 días de operación). Al pagar la 2da cuota se entrega la clave vitalicia.', days: 15 },
+      vip_50:         { planInternal: 'pro_full',      prefix: 'PRO', label: '👑 Plan 3: Completo Vitalicio Pro ($50 USD)', desc: 'Licencia PERMANENTE Completa de por vida + Balanza Digital, Soporte y Seguro Cloud.', days: null },
+      promo_6m:       { planInternal: 'promo_6m',      prefix: 'PRM', label: '🚀 Promo 6 Meses con Nube ($35 USD)', desc: '180 días (6 meses) con sincronización en la nube y respaldo automático.', days: 180 },
+      cloud_monthly:  { planInternal: 'cloud_monthly', prefix: 'CLD', label: '☁️ Seguro Cloud Antirrobo ($5 USD/mes)', desc: '30 días de respaldo automático y recuperación instantánea en caso de pérdida o daño del teléfono.', days: 30 },
+      trial_15m:      { planInternal: 'trial_15m',     prefix: 'T15', label: '⏱️ Prueba Flash (15 Minutos)', desc: '15 minutos exactos desde la activación. Despliega modal de compra.', days: '15m' },
+      demo:           { planInternal: 'demo',          prefix: 'DMO', label: 'Demo Gratuita (15 Días)', desc: '15 días de prueba para demostración a nuevos comercios.', days: 15 },
+      anual:          { planInternal: 'anual',         prefix: 'ANL', label: 'Anual (365 Días)', desc: 'Renovación anual de 365 días.', days: 365 },
+      vitalicia:      { planInternal: 'vitalicia',     prefix: 'VIT', label: 'Vitalicia Legacy', desc: 'Licencia permanente perpetua.', days: null }
     };
 
     function updatePlanDesc() {
@@ -643,7 +648,7 @@
     }
 
     async function generateLicenseKeyAsync(hwid, rif, plan) {
-      const cfg = PLAN_CONFIG[plan] || PLAN_CONFIG['demo'];
+      const cfg = PLAN_CONFIG[plan] || PLAN_CONFIG['street_contado'];
       let expires;
       let expCode;
 
@@ -663,7 +668,8 @@
 
       const cleanHwid = hwid.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
       const cleanRif = rif.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
-      const payloadStr = `${cleanHwid}#${cleanRif}#${plan}#${expires}#${MASTER_SIGNING_SALT}`;
+      const planForPayload = cfg.planInternal || plan;
+      const payloadStr = `${cleanHwid}#${cleanRif}#${planForPayload}#${expires}#${MASTER_SIGNING_SALT}`;
       const fullHash = await sha256Hex(payloadStr);
       const sig = `${fullHash.slice(0,4)}-${fullHash.slice(4,8)}-${fullHash.slice(8,12)}-${fullHash.slice(12,16)}`;
 

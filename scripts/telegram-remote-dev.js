@@ -5,8 +5,63 @@ const https = require('https');
 const fs = require('fs');
 const path = require('path');
 const { exec } = require('child_process');
+const crypto = require('crypto');
 
-const TOKEN = '8909236915:AAF-fCVr19EFe0uidUBhVI_Is-Usc3DvGoA';
+const MASTER_SIGNING_SALT = 'VENEMATIC_SEC_SALT_2026_AIVYNTRAX_PRO_POS_V2';
+
+const PLAN_CONFIG = {
+  street_contado: { planInternal: 'starter_full',  prefix: 'STR', label: '⭐ Plan 1: Contado Street ($15 USD) - Permanente', days: null },
+  street_credito: { planInternal: 'starter_trial', prefix: 'STT', label: '💳 Plan 2: Financiado Street ($20 USD) - 1ra Cuota $10 (15 días)', days: 15 },
+  street_vip:     { planInternal: 'pro_full',      prefix: 'PRO', label: '👑 Plan 3: Completo Vitalicio Pro ($50 USD)', days: null },
+  contado_15:     { planInternal: 'starter_full',  prefix: 'STR', label: '⭐ Plan 1: Contado Street ($15 USD) - Permanente', days: null },
+  credito_20:     { planInternal: 'starter_trial', prefix: 'STT', label: '💳 Plan 2: Financiado Street ($20 USD) - 1ra Cuota $10 (15 días)', days: 15 },
+  vip_50:         { planInternal: 'pro_full',      prefix: 'PRO', label: '👑 Plan 3: Completo Vitalicio Pro ($50 USD)', days: null },
+  promo_6m:       { planInternal: 'promo_6m',      prefix: 'PRM', label: 'Promo 6 Meses con Nube ($35)', days: 180 },
+  basico_local:   { planInternal: 'basico_local',  prefix: 'BAS', label: 'Basico Local - PERMANENTE ($40)', days: null },
+  pro_full:       { planInternal: 'pro_full',      prefix: 'PRO', label: 'Pro Full Empresarial - PERMANENTE ($75)', days: null },
+  demo:           { planInternal: 'demo',          prefix: 'DMO', label: 'Demo Evaluacion (15 dias)', days: 15 },
+  vitalicia:      { planInternal: 'vitalicia',     prefix: 'VIT', label: 'Vitalicia Permanente', days: null },
+};
+
+function computeSignature(hwid, rif, plan, expiresAt) {
+  const cleanHwid = hwid.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+  const cleanRif  = rif.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+  const payloadStr = `${cleanHwid}#${cleanRif}#${plan}#${expiresAt}#${MASTER_SIGNING_SALT}`;
+  const fullHash = crypto.createHash('sha256').update(payloadStr, 'utf8').digest('hex').toUpperCase();
+  return `${fullHash.slice(0,4)}-${fullHash.slice(4,8)}-${fullHash.slice(8,12)}-${fullHash.slice(12,16)}`;
+}
+
+function generateLicenseKey(hwid, rif, plan) {
+  let mappedPlan = plan;
+  if (plan === '1' || plan === 'plan1' || plan === 'contado' || plan === '15') mappedPlan = 'street_contado';
+  else if (plan === '2' || plan === 'plan2' || plan === 'credito' || plan === 'financiado' || plan === '10' || plan === '20') mappedPlan = 'street_credito';
+  else if (plan === '3' || plan === 'plan3' || plan === 'vip' || plan === '50') mappedPlan = 'street_vip';
+
+  const cfg = PLAN_CONFIG[mappedPlan] || PLAN_CONFIG['street_contado'];
+  let expires;
+  let expCode;
+
+  if (cfg.days === null) {
+    expires = 'NEVER';
+    expCode = 'PERP';
+  } else {
+    const d = new Date(Date.now() + cfg.days * 86400000);
+    const yy = d.getFullYear().toString().slice(2);
+    const mm = (d.getMonth() + 1).toString().padStart(2, '0');
+    expires = `20${yy}-${mm}-28`;
+    expCode = `${yy}${mm}`;
+  }
+
+  const planForSig = cfg.planInternal || mappedPlan;
+  const sig = computeSignature(hwid, rif || 'V-PENDIENTE', planForSig, expires);
+  return {
+    key: `VNK-${cfg.prefix}-${expCode}-${sig}`,
+    label: cfg.label,
+    expires
+  };
+}
+
+const TOKEN = '8699572842:AAHyw4tBMMC6YdqeGexrOqhQzNf2NdnH--M';
 const BASE_URL = `https://api.telegram.org/bot${TOKEN}`;
 
 const WORKSPACE_ROOT = path.resolve(__dirname, '..');
@@ -20,12 +75,35 @@ if (!fs.existsSync(AUDIOS_DIR)) fs.mkdirSync(AUDIOS_DIR, { recursive: true });
 
 let lastUpdateId = 0;
 let isPolling = false;
+let lastPollTime = Date.now();
 
-// Helper to make Telegram API requests
+// Helper to make Telegram API requests with anti-hang watchdog
 function telegramRequest(method, payload = {}) {
   return new Promise((resolve, reject) => {
+    let finished = false;
     const data = JSON.stringify(payload);
     const url = new URL(`${BASE_URL}/${method}`);
+
+    const safeReject = (err) => {
+      if (!finished) {
+        finished = true;
+        clearTimeout(timer);
+        reject(err);
+      }
+    };
+
+    const safeResolve = (val) => {
+      if (!finished) {
+        finished = true;
+        clearTimeout(timer);
+        resolve(val);
+      }
+    };
+
+    const timer = setTimeout(() => {
+      try { req.destroy(new Error('Watchdog timeout')); } catch {}
+      safeReject(new Error('Telegram request timeout (watchdog)'));
+    }, 40000);
 
     const req = https.request(url, {
       method: 'POST',
@@ -33,26 +111,22 @@ function telegramRequest(method, payload = {}) {
         'Content-Type': 'application/json',
         'Content-Length': Buffer.byteLength(data),
       },
-      timeout: 60000,
+      agent: false, // Evita conexiones socket zombis en Windows
     }, (res) => {
       let body = '';
       res.on('data', chunk => body += chunk);
       res.on('end', () => {
         try {
           const parsed = JSON.parse(body);
-          resolve(parsed);
+          safeResolve(parsed);
         } catch (e) {
-          resolve({ ok: false, error: e.message, raw: body });
+          safeResolve({ ok: false, error: e.message, raw: body });
         }
       });
+      res.on('error', safeReject);
     });
 
-    req.on('error', reject);
-    req.on('timeout', () => {
-      req.destroy();
-      reject(new Error('Request timeout'));
-    });
-
+    req.on('error', safeReject);
     req.write(data);
     req.end();
   });
@@ -227,6 +301,171 @@ async function handleMessage(msg) {
       return;
     }
 
+    if (text === '/help') {
+      await sendMessage(chatId,
+        `📋 *CENTRO DE MANDO KLIKPOS - COMANDOS DISPONIBLES:*\n\n` +
+        `🔑 \`/licencia <HWID> [Nombre] [1|2|3]\`\n` +
+        `Genera licencia oficial y enlace WhatsApp 1-tap.\n` +
+        `• 1: Contado Street ($15 permanente)\n` +
+        `• 2: Financiado Street ($10 cuota inicial)\n` +
+        `• 3: Vitalicio Pro ($50 completo)\n` +
+        `_Ejemplo: \`/licencia ANDR-48F1-2B88 Juan 1\`_\n\n` +
+        `⛔ \`/suspender <HWID> [Motivo]\` - Desactiva/bloquea remotamente una terminal activa.\n` +
+        `✅ \`/reactivar <HWID>\` - Desbloquea y reactiva una terminal suspendida.\n\n` +
+        `📊 \`/status\` - Ver estado del proyecto y git en tu PC.\n` +
+        `🧪 \`/check\` - Ejecutar verificación TypeScript.\n` +
+        `🚀 \`/release\` - Compilar y publicar release en GitHub y OTA.\n` +
+        `📸 *Mandar fotos:* Se descargan a tu PC para revisión de la IA.\n` +
+        `🎙️ *Mandar audio:* Se guarda la nota de voz en tu PC.`
+      );
+      return;
+    }
+
+    if (text.startsWith('/suspender') || text.startsWith('/desactivar') || text.startsWith('/bloquear')) {
+      const parts = text.split(/\s+/);
+      const hwid = parts[1];
+      const motivo = parts.slice(2).join(' ') || 'Falta de pago de cuota o mora';
+
+      if (!hwid) {
+        await sendMessage(chatId, `⚠️ *Uso:* \`/suspender <HWID> [Motivo]\`\n\nEjemplo:\n\`/suspender ANDR-48F1-2B88 Pago cuota 2 vencido\``);
+        return;
+      }
+
+      await sendMessage(chatId, `⏳ *Suspendiendo terminal ${hwid} en la nube...*`);
+      try {
+        const cleanHwid = hwid.trim().toUpperCase();
+        const url = `https://firestore.googleapis.com/v1/projects/klikpos-cloud/databases/(default)/documents/pos_installations/${cleanHwid}?updateMask.fieldPaths=status&updateMask.fieldPaths=suspensionReason&key=AIzaSyDT26ff7t-W5WZKZktPWLZ_D79QHGh6sEg`;
+        const postData = JSON.stringify({
+          fields: {
+            status: { stringValue: 'suspended' },
+            suspensionReason: { stringValue: motivo }
+          }
+        });
+
+        const req = https.request(url, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'Content-Length': Buffer.byteLength(postData),
+          }
+        }, (res) => {
+          if (res.statusCode === 200) {
+            sendMessage(chatId,
+              `⛔ *¡TERMINAL SUSPENDIDA EXITOSAMENTE!*\n\n` +
+              `🆔 *HWID:* \`${cleanHwid}\`\n` +
+              `📋 *Motivo:* ${motivo}\n\n` +
+              `🔒 *Efecto:* Apenas el dispositivo tenga conexión a internet, la aplicación revocará su licencia local y bloqueará el acceso al POS.\n\n` +
+              `_Para reactivarla cuando paguen: \`/reactivar ${cleanHwid}\`_`
+            );
+          } else {
+            sendMessage(chatId, `⚠️ Error en Firestore (código ${res.statusCode}). Verifique el HWID.`);
+          }
+        });
+        req.on('error', (e) => sendMessage(chatId, `❌ Error de red: ${e.message}`));
+        req.write(postData);
+        req.end();
+      } catch (err) {
+        await sendMessage(chatId, `❌ Error: ${err.message}`);
+      }
+      return;
+    }
+
+    if (text.startsWith('/reactivar') || text.startsWith('/desbloquear')) {
+      const parts = text.split(/\s+/);
+      const hwid = parts[1];
+
+      if (!hwid) {
+        await sendMessage(chatId, `⚠️ *Uso:* \`/reactivar <HWID>\``);
+        return;
+      }
+
+      await sendMessage(chatId, `⏳ *Reactivando terminal ${hwid} en la nube...*`);
+      try {
+        const cleanHwid = hwid.trim().toUpperCase();
+        const url = `https://firestore.googleapis.com/v1/projects/klikpos-cloud/databases/(default)/documents/pos_installations/${cleanHwid}?updateMask.fieldPaths=status&updateMask.fieldPaths=suspensionReason&key=AIzaSyDT26ff7t-W5WZKZktPWLZ_D79QHGh6sEg`;
+        const postData = JSON.stringify({
+          fields: {
+            status: { stringValue: 'active' },
+            suspensionReason: { stringValue: '' }
+          }
+        });
+
+        const req = https.request(url, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'Content-Length': Buffer.byteLength(postData),
+          }
+        }, (res) => {
+          if (res.statusCode === 200) {
+            sendMessage(chatId,
+              `✅ *¡TERMINAL REACTIVADA CON ÉXITO!*\n\n` +
+              `🆔 *HWID:* \`${cleanHwid}\`\n` +
+              `🟢 *Estado:* ACTIVO\n\n` +
+              `El bloqueo remoto ha sido retirado. El cliente ya puede seguir facturando normalmente.`
+            );
+          } else {
+            sendMessage(chatId, `⚠️ Error reactivando en Firestore (código ${res.statusCode}).`);
+          }
+        });
+        req.on('error', (e) => sendMessage(chatId, `❌ Error de red: ${e.message}`));
+        req.write(postData);
+        req.end();
+      } catch (err) {
+        await sendMessage(chatId, `❌ Error: ${err.message}`);
+      }
+      return;
+    }
+
+    if (text.startsWith('/licencia') || text.startsWith('/activar')) {
+      const parts = text.split(/\s+/);
+      const hwid = parts[1];
+      const clientName = parts[2] || 'Cliente';
+      const plan = parts[3] || 'promo_6m';
+
+      if (!hwid) {
+        await sendMessage(chatId,
+          `⚠️ *Formato incorrecto.*\n\n` +
+          `Uso: \`/licencia <HWID> [Nombre] [Plan]\`\n\n` +
+          `*Planes disponibles:*\n` +
+          `• \`promo_6m\` (Promo 6 Meses con Nube $35)\n` +
+          `• \`basico_local\` (Básico Permanente $40)\n` +
+          `• \`pro_full\` (Pro Full Permanente $75)\n` +
+          `• \`pro_trial\` (Crédito Pro 1ra cuota $37.50)\n` +
+          `• \`starter_full\` (Starter Permanente $50)\n` +
+          `• \`demo\` (Evaluación 15 días)\n\n` +
+          `*Ejemplo:*\n\`/licencia ANDR-48F1-2B88 BodegaElSol promo_6m\``
+        );
+        return;
+      }
+
+      try {
+        const result = generateLicenseKey(hwid, 'V-CLIENTE', plan);
+        const waMsg = encodeURIComponent(
+          `¡Hola ${clientName}! 🚀 Tu licencia oficial de KlikPOS ha sido activada con éxito.\n\n` +
+          `🔑 *Clave de Activación:* ${result.key}\n` +
+          `💻 *ID Terminal:* ${hwid}\n` +
+          `📦 *Plan:* ${result.label}\n` +
+          `⏳ *Vence:* ${result.expires}\n\n` +
+          `Para activarlo: Abre KlikPOS > Menú > Activar Licencia > Pega la clave y presiona Activar. ¡Gracias por tu compra!`
+        );
+        const waUrl = `https://wa.me/?text=${waMsg}`;
+
+        await sendMessage(chatId,
+          `🎉 *¡LICENCIA CRIPTOGRÁFICA GENERADA!*\n\n` +
+          `👤 *Cliente:* ${clientName}\n` +
+          `💻 *Terminal (HWID):* \`${hwid}\`\n` +
+          `📦 *Plan:* ${result.label}\n` +
+          `⏳ *Vence:* ${result.expires}\n\n` +
+          `🔑 *Clave Oficial:*\n\`${result.key}\`\n\n` +
+          `📲 [👉 TOCAR AQUÍ PARA ENVIAR POR WHATSAPP](${waUrl})`
+        );
+      } catch (err) {
+        await sendMessage(chatId, `❌ Error generando clave: ${err.message}`);
+      }
+      return;
+    }
+
     // Texto libre (Instrucción de desarrollo)
     fs.appendFileSync(LOG_FILE, `[${new Date().toLocaleTimeString()}] INSTRUCCION: ${text}\n`);
     await sendMessage(chatId, 
@@ -236,19 +475,31 @@ async function handleMessage(msg) {
   }
 }
 
-// Long-polling loop
+// Watchdog de reconexión continua: si la conexión se congela más de 50s, reactiva el bucle
+setInterval(() => {
+  if (Date.now() - lastPollTime > 50000) {
+    console.warn(`[Watchdog Telegram] Reconectando bucle de polling (inactivo > 50s)...`);
+    isPolling = false;
+    pollUpdates();
+  }
+}, 15000);
+
+// Long-polling loop anti-bloqueo
 async function pollUpdates() {
   if (isPolling) return;
   isPolling = true;
+  lastPollTime = Date.now();
 
   try {
     const res = await telegramRequest('getUpdates', {
       offset: lastUpdateId + 1,
-      timeout: 30,
+      timeout: 25,
       allowed_updates: ['message'],
     });
 
-    if (res.ok && Array.isArray(res.result)) {
+    lastPollTime = Date.now();
+
+    if (res && res.ok && Array.isArray(res.result)) {
       for (const update of res.result) {
         lastUpdateId = update.update_id;
         if (update.message) {
@@ -258,17 +509,29 @@ async function pollUpdates() {
     }
   } catch (err) {
     console.error(`[Telegram Polling Error]:`, err.message);
-    // Esperar 3 segundos antes de reintentar si hay error de red
-    await new Promise(r => setTimeout(r, 3000));
+    await new Promise(r => setTimeout(r, 2500));
   } finally {
     isPolling = false;
-    setImmediate(pollUpdates);
+    lastPollTime = Date.now();
+    setTimeout(pollUpdates, 300);
   }
 }
+
+// Protección contra caídas silenciosas
+process.on('uncaughtException', (err) => {
+  console.error('[Telegram Bridge] Excepción no controlada capturada (proceso preservado):', err.message);
+  isPolling = false;
+  setTimeout(pollUpdates, 2000);
+});
+
+process.on('unhandledRejection', (reason) => {
+  console.error('[Telegram Bridge] Rechazo no controlado capturado (proceso preservado):', reason);
+});
 
 console.log(`====================================================`);
 console.log(`🤖 KlikPOS Telegram Remote Bridge ACTIVO`);
 console.log(`📁 Carpeta de capturas: ${CAPTURAS_DIR}`);
+console.log(`🛡️ Watchdog de reconexión automática activado`);
 console.log(`====================================================`);
 
 pollUpdates();

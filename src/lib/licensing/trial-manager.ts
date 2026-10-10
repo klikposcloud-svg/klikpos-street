@@ -9,7 +9,7 @@
 import { getStoredLicenseStatus } from './license-crypto';
 import { getMachineHWID } from './hwid';
 import { db as firestoreDb } from '@/lib/firebase/config';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
 
 export const TRIAL_DURATION_MS = 3 * 60 * 60 * 1000; // 3 Horas de Evaluación Gratuita (180 minutos)
 export const OFFICIAL_WHATSAPP_PHONE = '584248298026'; // +58 424 829 8026
@@ -81,13 +81,79 @@ export function getOrCreateTrialStartTime(): number {
   }
 }
 
+export const TELEGRAM_BOT_TOKEN = '8699572842:AAHyw4tBMMC6YdqeGexrOqhQzNf2NdnH--M';
+export const TELEGRAM_CHAT_ID = '8681182877';
+
 /**
- * Registra la instalación y el inicio del trial de 3 horas en Firestore
+ * Notifica a Telegram en tiempo real cuando un dispositivo instala o abre KlikPOS por primera vez
+ */
+export async function notifyTelegramInstallation(data: {
+  hwid: string;
+  edition: string;
+  storeName: string;
+  platform: string;
+  screen: string;
+  installedAt: string;
+}): Promise<boolean> {
+  if (typeof window === 'undefined') return false;
+  try {
+    const notifyKey = `klikpos_telemetry_notified_${data.hwid}`;
+    if (localStorage.getItem(notifyKey) === 'true') {
+      return true; // Ya notificado previamente
+    }
+
+    let devType = 'Dispositivo';
+    if (/android/i.test(data.platform)) devType = '📱 Android';
+    else if (/windows/i.test(data.platform)) devType = '💻 PC Windows';
+    else if (/iphone|ipad/i.test(data.platform)) devType = '📱 iOS';
+    else devType = '🌐 Web Client';
+
+    const editionName = data.edition === 'street'
+      ? 'KlikPOS Street Food'
+      : data.edition === 'movil'
+      ? 'KlikPOS Móvil Full'
+      : 'KlikPOS Suite Desktop';
+
+    const msg = [
+      `🎉 *¡NUEVA INSTALACIÓN KLIKPOS DETECTADA!*`,
+      `📦 *Edición:* ${editionName}`,
+      `🆔 *Terminal ID:* \`${data.hwid}\``,
+      `🏪 *Negocio:* ${data.storeName}`,
+      `⚙️ *Equipo:* ${devType}`,
+      `📐 *Pantalla:* ${data.screen}`,
+      `🕒 *Fecha:* ${new Date(data.installedAt).toLocaleString('es-VE')}`,
+      `⏳ *Período de Prueba:* 180 Minutos (3h) Iniciados`
+    ].join('\n');
+
+    const res = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: TELEGRAM_CHAT_ID,
+        text: msg,
+        parse_mode: 'Markdown'
+      })
+    });
+
+    if (res.ok) {
+      localStorage.setItem(notifyKey, 'true');
+      return true;
+    }
+    return false;
+  } catch {
+    // Modo offline silencioso - se reintentará en la siguiente apertura cuando tenga conexión
+    return false;
+  }
+}
+
+/**
+ * Registra la instalación y el inicio del trial de 3 horas en Firestore y notifica a Telegram
  */
 export async function registerTrialInstallation(
   customHwid?: string,
   storeName?: string,
-  rif?: string
+  rif?: string,
+  edition: string = 'street'
 ): Promise<{ success: boolean; error?: string }> {
   if (typeof window === 'undefined') return { success: false };
 
@@ -98,7 +164,7 @@ export async function registerTrialInstallation(
 
     const payload = {
       hwid,
-      edition: 'street',
+      edition,
       storeName: storeName || 'Mi Negocio',
       rif: rif || 'Pendiente',
       installedAt: new Date(startTime).toISOString(),
@@ -110,8 +176,31 @@ export async function registerTrialInstallation(
       lastSeenAt: new Date().toISOString()
     };
 
+    // Disparar notificación en segundo plano a Telegram sin bloquear el POS
+    notifyTelegramInstallation({
+      hwid,
+      edition,
+      storeName: payload.storeName,
+      platform: payload.platform,
+      screen: payload.screen,
+      installedAt: payload.installedAt
+    }).catch(() => {});
+
     if (firestoreDb) {
       const docRef = doc(firestoreDb, 'pos_installations', hwid);
+      try {
+        const snap = await getDoc(docRef);
+        if (snap.exists()) {
+          const remoteData = snap.data();
+          if (remoteData?.status === 'suspended' || remoteData?.status === 'revoked' || remoteData?.isSuspended === true) {
+            localStorage.setItem('klikpos_license_revoked', 'true');
+            localStorage.removeItem('venematic_activated_license_payload');
+          } else if (remoteData?.status === 'active' || remoteData?.status === 'trial_active') {
+            localStorage.removeItem('klikpos_license_revoked');
+          }
+        }
+      } catch {}
+
       await setDoc(docRef, payload, { merge: true });
       try { localStorage.setItem('klikpos_trial_synced_firestore', 'true'); } catch {}
       return { success: true };
@@ -142,10 +231,25 @@ export function evaluateTrialState(): TrialState {
   }
 
   try {
+    // 0. Si la licencia fue suspendida o revocada remotamente por falta de pago
+    const isRevoked = localStorage.getItem('klikpos_license_revoked') === 'true';
+    if (isRevoked) {
+      return {
+        isLicensed: false,
+        isTrial: false,
+        isExpired: true,
+        canOperate: false,
+        remainingMs: 0,
+        remainingMinutes: 0,
+        remainingSeconds: 0,
+        formattedRemaining: 'Licencia Suspendida',
+      };
+    }
+
     const hwid = getMachineHWID();
     const licenseStatus = getStoredLicenseStatus(hwid);
 
-    // 1. Si el usuario ya activó su licencia comercial formal (Contado $15, Crédito $25 o VIP $50)
+    // 1. Si el usuario ya activó su licencia comercial formal (Contado $15, Crédito $20 o VIP $50)
     if (licenseStatus.status === 'active') {
       return {
         isLicensed: true,

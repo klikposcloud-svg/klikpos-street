@@ -4,6 +4,9 @@ import readline from 'readline';
 const MASTER_SIGNING_SALT = 'VENEMATIC_SEC_SALT_2026_AIVYNTRAX_PRO_POS_V2';
 
 const PLAN_CONFIG = {
+  street_contado: { planInternal: 'starter_full',  prefix: 'STR', label: '⭐ Plan 1: Contado Street ($15 USD) - Permanente', desc: 'Licencia PERMANENTE de por vida sin mensualidades ($15)', days: null },
+  street_credito: { planInternal: 'starter_trial', prefix: 'STT', label: '💳 Plan 2: Financiado Street ($20 USD) - $10 inicial (15 dias)', desc: '1ra Cuota $10 (15 dias). Al pagar los otros $10 se emite clave permanente', days: 15 },
+  street_vip:     { planInternal: 'pro_full',      prefix: 'PRO', label: '👑 Plan 3: Completo Vitalicio Pro ($50 USD)', desc: 'Licencia PERMANENTE Completa con Balanza, Nube y Soporte', days: null },
   promo_6m:      { prefix: 'PRM', label: '⭐ Promo Lanzamiento - 6 Meses con Nube ($35)', desc: '180 dias (6 meses) con nube y configs', days: 180 },
   basico_local:  { prefix: 'BAS', label: 'Basico Local - PERMANENTE ($40)',               desc: 'PERMANENTE sin mensualidades ($0 servidores)', days: null },
   pro_full:      { prefix: 'PRO', label: 'Pro Full Empresarial - PERMANENTE ($75)',       desc: 'PERMANENTE con Balanza, Nube y Pago Movil', days: null },
@@ -44,7 +47,8 @@ export function generateLicenseKey(hwid, rif, plan, expiresAtDateStr) {
     expCode = `${yy}${mm}`;
   }
 
-  const sig = computeSignature(hwid, rif, plan, expires);
+  const planInternal = cfg.planInternal || plan;
+  const sig = computeSignature(hwid, rif, planInternal, expires);
   return `VNK-${cfg.prefix}-${expCode}-${sig}`;
 }
 

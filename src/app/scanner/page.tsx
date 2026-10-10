@@ -71,6 +71,7 @@ import { Icon } from '@iconify/react';
 import { db } from '@/lib/db';
 import masterCatalogData from '@/lib/data/master-catalog.json';
 import VisualPacksModal from '@/components/marketplace/VisualPacksModal';
+import { registerTrialInstallation } from '@/lib/licensing/trial-manager';
 
 interface ScannedHistoryItem {
   barcode: string;
@@ -511,6 +512,9 @@ export default function MobileScannerPage() {
   const [mobilePaletteMode, setMobilePaletteMode] = useState<'category' | 'mono'>('category');
 
   useEffect(() => {
+    try {
+      registerTrialInstallation(undefined, undefined, undefined, 'movil').catch(() => {});
+    } catch {}
     try {
       const saved = localStorage.getItem('klikpos_mobile_palette');
       if (saved === 'category' || saved === 'mono') {

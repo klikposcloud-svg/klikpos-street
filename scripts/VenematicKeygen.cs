@@ -312,6 +312,9 @@ namespace VenematicKeygen
             // Populate Plans
             plans = new List<PlanItem>
             {
+                new PlanItem { Code = "starter_full",  Prefix = "STR", Name = "⭐ Plan 1: KlikPOS Street Contado (Permanente)", Price = "$15.00", Days = null },
+                new PlanItem { Code = "starter_trial", Prefix = "STT", Name = "💳 Plan 2: Financiado Street ($20) - Cuota 1 ($10/15d)", Price = "$10.00", Days = 15 },
+                new PlanItem { Code = "pro_full",      Prefix = "PRO", Name = "👑 Plan 3: Completo Vitalicio Pro (+Cloud)", Price = "$50.00", Days = null },
                 new PlanItem { Code = "starter_trial", Prefix = "STT", Name = "Starter - 1ra Cuota (30 días de acceso)", Price = "$25.00", Days = 30 },
                 new PlanItem { Code = "starter_full",  Prefix = "STR", Name = "Starter - Licencia Completa Permanente", Price = "$50.00", Days = null },
                 new PlanItem { Code = "pro_trial",     Prefix = "PTT", Name = "Pro Master - 1ra Cuota (30 días de acceso)", Price = "$37.50", Days = 30 },
