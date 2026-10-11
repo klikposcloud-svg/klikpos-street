@@ -68,7 +68,7 @@ import StreetAmbassadorLicenseModal from '@/components/licensing/StreetAmbassado
 import UnifiedDirectCheckout from '@/components/tablet-pos/UnifiedDirectCheckout';
 import StreetSalesBackupModal from '@/components/tablet-pos/StreetSalesBackupModal';
 import SaleReceiptModal, { orderToSaleTicket, localSaleToTicket } from '@/components/tablet-pos/SaleReceiptModal';
-import { evaluateTrialState, TrialState, registerTrialInstallation, reactivateTrialFor3Hours } from '@/lib/licensing/trial-manager';
+import { evaluateTrialState, TrialState, registerTrialInstallation } from '@/lib/licensing/trial-manager';
 import { db } from '@/lib/db';
 import { TabletPosBottomNav } from '@/components/tablet-pos/TabletPosBottomNav';
 import { StreetAutoUpdater } from '@/components/tablet-pos/StreetAutoUpdater';

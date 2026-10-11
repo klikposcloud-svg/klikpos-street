@@ -23,6 +23,22 @@ const NOTES = Array.isArray(manifest.notes)
   ? `### Novedades en KlikPOS Enterprise ${TAG}:\n` + manifest.notes.map(n => `- ${n}`).join('\n')
   : (manifest.notes || `Lanzamiento de ${TAG}`);
 
+async function fetchWithRetry(url, options = {}, retries = 4, timeoutMs = 60000) {
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
+      const res = await fetch(url, { ...options, signal: controller.signal });
+      clearTimeout(timer);
+      return res;
+    } catch (err) {
+      console.warn(` [!] Intento ${attempt}/${retries} falló (${err.message}). ${attempt < retries ? 'Reintentando en 3s...' : ''}`);
+      if (attempt === retries) throw err;
+      await new Promise(r => setTimeout(r, 3000));
+    }
+  }
+}
+
 async function main() {
   console.log(`[1/5] Sincronizando repositorio klikpos-releases hacia GitHub...`);
   const releasesDir = path.join(rootDir, 'klikpos-releases');
@@ -44,14 +60,14 @@ async function main() {
   
   // 1. Obtener o crear Release
   let release;
-  const listRes = await fetch(`https://api.github.com/repos/${REPO}/releases`, {
+  const listRes = await fetchWithRetry(`https://api.github.com/repos/${REPO}/releases`, {
     headers: { Authorization: `token ${TOKEN}`, 'User-Agent': 'KlikPOS-Publisher' }
   });
   const releases = await listRes.json();
   release = releases.find(r => r.tag_name === TAG);
 
   if (!release) {
-    const createRes = await fetch(`https://api.github.com/repos/${REPO}/releases`, {
+    const createRes = await fetchWithRetry(`https://api.github.com/repos/${REPO}/releases`, {
       method: 'POST',
       headers: {
         Authorization: `token ${TOKEN}`,
@@ -141,17 +157,17 @@ async function uploadAsset(release, filePath, fileName, contentType) {
     const existing = release.assets.find(a => a.name === fileName);
     if (existing) {
       console.log(`Eliminando asset previo ${fileName} (ID: ${existing.id})...`);
-      await fetch(`https://api.github.com/repos/${REPO}/releases/assets/${existing.id}`, {
+      await fetchWithRetry(`https://api.github.com/repos/${REPO}/releases/assets/${existing.id}`, {
         method: 'DELETE',
         headers: { Authorization: `token ${TOKEN}`, 'User-Agent': 'KlikPOS-Publisher' }
-      });
+      }, 3, 30000);
     }
   }
 
   const uploadUrl = release.upload_url.replace(/\{.*\}/, `?name=${encodeURIComponent(fileName)}`);
   const fileBuffer = fs.readFileSync(filePath);
 
-  const res = await fetch(uploadUrl, {
+  const res = await fetchWithRetry(uploadUrl, {
     method: 'POST',
     headers: {
       Authorization: `token ${TOKEN}`,
@@ -160,7 +176,7 @@ async function uploadAsset(release, filePath, fileName, contentType) {
       'Content-Length': fileBuffer.length
     },
     body: fileBuffer
-  });
+  }, 4, 180000);
 
   const data = await res.json();
   if (data.id) {
