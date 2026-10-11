@@ -846,7 +846,7 @@ export default function TabletMobilePosPage() {
     fulfillmentMode, setFulfillmentMode,
     selectedDriverId, setSelectedDriverId,
     deliveryAddressInput, setDeliveryAddressInput,
-    mixedPayments, mixedInputMethod, setMixedInputMethod,
+    mixedPayments, setMixedPayments, mixedInputMethod, setMixedInputMethod,
     mixedInputCurrency, setMixedInputCurrency,
     mixedInputAmount, setMixedInputAmount,
     mixedInputRef, setMixedInputRef,
@@ -2984,6 +2984,7 @@ export default function TabletMobilePosPage() {
                 setZelleConfirmation={setZelleConfirmation}
                 setBinanceConfirmation={setBinanceConfirmation}
                 mixedPayments={mixedPayments}
+                setMixedPayments={setMixedPayments}
                 onFinalizeSale={handleFinalizeSale}
               />
             </PosErrorBoundary>
