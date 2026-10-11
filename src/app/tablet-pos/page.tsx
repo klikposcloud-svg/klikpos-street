@@ -2391,11 +2391,14 @@ export default function TabletMobilePosPage() {
                 >
                   <ClipboardList className="w-4 h-4 shrink-0" />
                   <span>Todos los Pedidos</span>
-                  <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-black ${
-                    orderFilterType === 'todos'
-                      ? 'bg-slate-950 text-amber-400'
-                      : isLight ? 'bg-slate-100 text-slate-700' : 'bg-slate-800 text-slate-300'
-                  }`}>
+                  <span
+                    className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-black ${
+                      orderFilterType === 'todos'
+                        ? 'bg-slate-950 text-white shadow-xs'
+                        : isLight ? 'bg-slate-100 text-slate-800 border border-slate-200/80' : 'bg-slate-800 text-slate-200'
+                    }`}
+                    style={orderFilterType === 'todos' ? { color: '#ffffff', backgroundColor: '#020617' } : undefined}
+                  >
                     {orders.length}
                   </span>
                 </button>
@@ -2414,11 +2417,14 @@ export default function TabletMobilePosPage() {
                 >
                   <Store className="w-4 h-4 shrink-0" />
                   <span>Local / Salón</span>
-                  <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-black ${
-                    orderFilterType === 'local'
-                      ? 'bg-emerald-950 text-emerald-200'
-                      : isLight ? 'bg-slate-100 text-slate-700' : 'bg-slate-800 text-slate-300'
-                  }`}>
+                  <span
+                    className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-black ${
+                      orderFilterType === 'local'
+                        ? 'bg-emerald-950 text-white shadow-xs'
+                        : isLight ? 'bg-slate-100 text-slate-800 border border-slate-200/80' : 'bg-slate-800 text-slate-200'
+                    }`}
+                    style={orderFilterType === 'local' ? { color: '#ffffff', backgroundColor: '#064e3b' } : undefined}
+                  >
                     {orders.filter(o => o.type !== 'delivery').length}
                   </span>
                 </button>
@@ -2437,11 +2443,14 @@ export default function TabletMobilePosPage() {
                 >
                   <Bike className="w-4 h-4 shrink-0" />
                   <span>Delivery / Despachos</span>
-                  <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-black ${
-                    orderFilterType === 'delivery'
-                      ? 'bg-purple-950 text-purple-200'
-                      : isLight ? 'bg-slate-100 text-slate-700' : 'bg-slate-800 text-slate-300'
-                  }`}>
+                  <span
+                    className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-black ${
+                      orderFilterType === 'delivery'
+                        ? 'bg-purple-950 text-white shadow-xs'
+                        : isLight ? 'bg-slate-100 text-slate-800 border border-slate-200/80' : 'bg-slate-800 text-slate-200'
+                    }`}
+                    style={orderFilterType === 'delivery' ? { color: '#ffffff', backgroundColor: '#3b0764' } : undefined}
+                  >
                     {orders.filter(o => o.type === 'delivery').length}
                   </span>
                 </button>

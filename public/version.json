@@ -1,14 +1,13 @@
 {
-  "version": "3.0.21",
-  "releaseDate": "2026-10-10",
-  "title": "KlikPOS Suite v3.0.21 - Despeje Inferior en Cobro, Iconos Diferenciados por Edición y Cero Colisión Android",
+  "version": "3.0.22",
+  "releaseDate": "2026-10-11",
+  "title": "KlikPOS Suite v3.0.22 - Corrección de Contraste en Insignias y Máxima Legibilidad Exterior",
   "notes": [
-    "Despeje Completo del Botón de Cobro: Ajuste de padding inferior (pb-32 y margen de seguridad) y scroll desbloqueado en la pasarela de cobro para que el botón de confirmar venta o activar licencia flote holgadamente por encima de la barra inferior de navegación.",
-    "Iconos Exclusivos por Edición: Identidad visual inconfundible con badges integrados: KlikPOS Street (rojo/ámbar con badge STREET), KlikPOS Keygen (obsidian medianoche con K dorado y badge KEYGEN) y KlikPOS Móvil (azul con badge MOVIL).",
-    "Cero Colisiones de Paquetes en Android: Asignación garantizada de applicationId únicos (com.klikpos.street, com.klikpos.keygen, com.klikpos.movil) permitiendo instalar y usar todas las herramientas a la vez en el mismo celular.",
-    "Optimización de Teclado Numérico Táctil: Teclas numéricas compactas de alta precisión adaptadas ergonómicamente a cualquier pantalla móvil."
+    "Insignias de Alto Contraste en Pestañas: Conteo de pedidos con indicador en blanco puro (#ffffff) sobre píldora profunda (ratio 21:1 WCAG AAA) en 'Todos los Pedidos', 'Local' y 'Delivery', asegurando máxima legibilidad bajo sol directo.",
+    "Blindaje de Cascada CSS: Protección contra herencia de color en botones con estados dinámicos.",
+    "Compilación Integral de Instaladores y APKs: Distribución sincronizada para Desktop Windows, Android Street y Móvil Full."
   ],
-  "windowsUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.21/KlikPOS_Desktop_Full_Setup.exe",
-  "androidUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.21/KlikPOS_Movil_Full.apk",
+  "windowsUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.22/KlikPOS_Desktop_Full_Setup.exe",
+  "androidUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.22/KlikPOS_Movil_Full.apk",
   "mandatory": false
 }
