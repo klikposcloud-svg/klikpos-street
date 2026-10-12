@@ -3005,7 +3005,10 @@ export default function TabletMobilePosPage() {
       {/* ========================================================================= */}
       {/* 4. AUTO-ACTUALIZADOR SILENCIOSO Y EN VIVO PARA KLIKPOS STREET             */}
       {/* ========================================================================= */}
-      <StreetAutoUpdater />
+      <StreetAutoUpdater
+        isLight={isLight}
+        onOpenFullModal={() => setShowUpdateModal(true)}
+      />
 
       {/* ========================================================================= */}
       {/* 5. NAV BAR INFERIOR FIJA CON SILUETA LÍQUIDA SVG & HERO COBRO (DEF)      */}
@@ -4342,6 +4345,7 @@ export default function TabletMobilePosPage() {
       <SoftwareUpdateModal
         isOpen={showUpdateModal}
         onClose={() => setShowUpdateModal(false)}
+        isLight={isLight}
       />
 
       {/* ========================================================================= */}

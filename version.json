@@ -1,13 +1,14 @@
 {
-  "version": "3.0.23",
+  "version": "3.0.24",
   "releaseDate": "2026-10-11",
-  "title": "KlikPOS Suite v3.0.23 - Blindaje de Modo Evaluación y Activación Estricta por Keygen",
+  "title": "KlikPOS Suite v3.0.24 - Alto Contraste en Verificación y Modal Sutil de Actualización",
   "notes": [
-    "Blindaje de Evaluación: Eliminado el botón de reactivación libre de 3 horas en el modal de licencias, canalizando de forma estricta la continuidad operativa mediante claves oficiales generadas por el Keygen.",
-    "Insignias de Alto Contraste en Pestañas: Conteo de pedidos con indicador en blanco puro (#ffffff) sobre píldora profunda (ratio 21:1 WCAG AAA) para máxima legibilidad exterior.",
-    "Compilación Integral de Instaladores y APKs: Distribución sincronizada para Desktop Windows, Android Street y Móvil Full."
+    "Alto Contraste Exterior en Verificación: Rediseño de la cabecera y tarjeta de versiones en el Centro de Actualizaciones con fondos oscuros profundos y tarjetas sólidas (ratio WCAG AAA > 12:1), eliminando el efecto lavado o blanco.",
+    "Aviso Sutil de Actualización OTA: Modal flotante no invasivo que alerta con 1 toque al operador cuando hay una nueva versión lista para descargar (APK/Setup) sin bloquear ventas ni la pantalla.",
+    "Soporte Adaptativo Dual: Compatibilidad plena con temas oscuro y claro (isLight) en modales de actualización.",
+    "Distribución Oficial Unificada: Compilaciones sincronizadas para Android Street, Móvil Autónomo y Desktop Windows."
   ],
-  "windowsUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.23/KlikPOS_Desktop_Full_Setup.exe",
-  "androidUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.23/KlikPOS_Movil_Full.apk",
+  "windowsUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.24/KlikPOS_Desktop_Full_Setup.exe",
+  "androidUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.24/KlikPOS_Movil_Full.apk",
   "mandatory": false
 }

@@ -7,6 +7,7 @@ interface SoftwareUpdateModalProps {
   isOpen: boolean;
   onClose: () => void;
   currentVersion?: string;
+  isLight?: boolean;
 }
 
 interface GithubReleaseInfo {
@@ -27,7 +28,8 @@ import { CURRENT_VERSION } from '@/lib/services/update-service';
 export const SoftwareUpdateModal: React.FC<SoftwareUpdateModalProps> = ({
   isOpen,
   onClose,
-  currentVersion: propVersion
+  currentVersion: propVersion,
+  isLight = false
 }) => {
   const currentVersion = propVersion || (typeof window !== 'undefined' ? localStorage.getItem('klikpos_applied_pwa_version') : null) || `v${CURRENT_VERSION}`;
   const [isLoading, setIsLoading] = useState(true);
@@ -122,115 +124,215 @@ export const SoftwareUpdateModal: React.FC<SoftwareUpdateModalProps> = ({
   const exeUrl = exeAsset?.browser_download_url || 'https://github.com/klikposcloud-svg/klikpos-releases/releases/latest/download/KlikPOS_Desktop_Full_Setup.exe';
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="relative w-full max-w-xl rounded-3xl border border-slate-700 bg-[#0b101b] text-white shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-        {/* HEADER */}
-        <header className="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-900/60">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-slate-950 font-black shadow-lg">
-              <Sparkles className="w-5 h-5 text-slate-950" />
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className={`relative w-full max-w-xl rounded-3xl border shadow-2xl overflow-hidden flex flex-col max-h-[92vh] ${
+        isLight
+          ? 'bg-white border-slate-300 text-slate-900'
+          : 'bg-[#080d1a] border-slate-700 text-white'
+      }`}>
+        {/* HEADER DE ALTO CONTRASTE */}
+        <header className={`px-6 py-4.5 border-b flex items-center justify-between ${
+          isLight
+            ? 'bg-slate-100 border-slate-300'
+            : 'bg-[#030610] border-slate-800'
+        }`}>
+          <div className="flex items-center gap-3.5">
+            <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-slate-950 font-black shadow-lg shadow-amber-500/20 shrink-0">
+              <Sparkles className="w-5 h-5 text-slate-950 stroke-[2.5]" />
             </div>
             <div>
-              <h3 className="text-base font-black tracking-tight text-white">
+              <h3 className={`text-base font-black tracking-tight ${
+                isLight ? 'text-slate-950' : 'text-white'
+              }`}>
                 Centro de Actualizaciones
               </h3>
-              <p className="text-xs text-slate-400">
-                Canal Oficial de Distribución y Mantenimiento
+              <p className={`text-xs font-semibold ${
+                isLight ? 'text-slate-700' : 'text-slate-300'
+              }`}>
+                Canal Oficial de Distribución y Mantenimiento KlikPOS Cloud
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+            className={`p-2.5 rounded-2xl transition-all cursor-pointer ${
+              isLight
+                ? 'text-slate-600 hover:text-slate-950 hover:bg-slate-200'
+                : 'text-slate-300 hover:text-white hover:bg-slate-800'
+            }`}
+            title="Cerrar ventana"
           >
-            <X className="w-5 h-5" />
+            <X className="w-5 h-5 stroke-[2.5]" />
           </button>
         </header>
 
         {/* BODY */}
         <div className="p-6 overflow-y-auto space-y-5 flex-1">
-          {/* Tarjeta de Versiones Simplificada */}
-          <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 flex items-center justify-between">
-            <div>
-              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
-                Versión del Sistema
+          {/* Tarjeta de Versiones con Máximo Contraste (Cero efecto todo blanco) */}
+          <div className={`p-4 rounded-2xl border-2 flex items-center justify-between gap-4 shadow-sm ${
+            isLight
+              ? 'bg-slate-50 border-slate-300'
+              : 'bg-[#02050e] border-slate-700'
+          }`}>
+            <div className="min-w-0">
+              <span className={`text-xs font-black uppercase tracking-wider block mb-1.5 ${
+                isLight ? 'text-slate-800' : 'text-slate-300'
+              }`}>
+                Versión Instalada
               </span>
-              <span className="text-lg font-black font-mono text-amber-400">
-                {currentVersion}
-              </span>
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl font-mono font-black text-sm sm:text-base bg-amber-400 text-slate-950 border-2 border-amber-300 shadow-sm">
+                <span className="w-2 h-2 rounded-full bg-slate-950 animate-pulse shrink-0" />
+                <span>{currentVersion}</span>
+              </div>
             </div>
-            <div className="text-right">
-              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
-                Última Versión
+
+            <div className="text-right min-w-0">
+              <span className={`text-xs font-black uppercase tracking-wider block mb-1.5 ${
+                isLight ? 'text-slate-800' : 'text-slate-300'
+              }`}>
+                Última en la Nube
               </span>
-              <span className="text-lg font-black font-mono text-emerald-400">
-                {isLoading ? 'Verificando...' : (releaseInfo?.tag_name || currentVersion)}
-              </span>
+              <div className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl font-mono font-black text-sm sm:text-base ${
+                isLoading
+                  ? (isLight ? 'bg-slate-200 text-slate-700 border-2 border-slate-300 animate-pulse' : 'bg-slate-800 text-slate-200 border-2 border-slate-700 animate-pulse')
+                  : hasUpdate
+                  ? 'bg-emerald-400 text-slate-950 border-2 border-emerald-300 shadow-sm'
+                  : 'bg-emerald-500 text-white border-2 border-emerald-400 shadow-sm'
+              }`}>
+                {!isLoading && <span className={`w-2 h-2 rounded-full ${hasUpdate ? 'bg-slate-950' : 'bg-white'} shrink-0`} />}
+                <span>{isLoading ? 'Verificando...' : (releaseInfo?.tag_name || currentVersion)}</span>
+              </div>
             </div>
           </div>
 
           {/* Estado de la Actualización */}
           {isLoading ? (
-            <div className="p-6 flex flex-col items-center justify-center text-center space-y-2">
-              <RefreshCw className="w-8 h-8 text-amber-400 animate-spin" />
-              <p className="text-sm font-bold text-slate-300">Verificando actualizaciones en KlikPOS Cloud...</p>
+            <div className={`p-6 rounded-2xl border-2 flex flex-col items-center justify-center text-center space-y-2.5 shadow-sm ${
+              isLight ? 'bg-amber-50/60 border-amber-200' : 'bg-[#040814] border-slate-800'
+            }`}>
+              <RefreshCw className="w-8 h-8 text-amber-500 animate-spin" />
+              <p className={`text-sm font-black ${
+                isLight ? 'text-slate-950' : 'text-white'
+              }`}>
+                Verificando actualizaciones en KlikPOS Cloud...
+              </p>
+              <span className={`text-xs font-semibold ${
+                isLight ? 'text-slate-600' : 'text-slate-300'
+              }`}>
+                Consultando el canal oficial GitHub Releases API
+              </span>
             </div>
           ) : errorMsg ? (
-            <div className="p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center gap-3 text-rose-300 text-xs">
-              <AlertCircle className="w-5 h-5 shrink-0 text-rose-400" />
-              <span>Aviso: Sin conexión con KlikPOS Cloud para verificar actualizaciones.</span>
+            <div className={`p-4 rounded-2xl border-2 flex items-start gap-3.5 shadow-sm ${
+              isLight
+                ? 'bg-rose-50 border-rose-300 text-rose-950'
+                : 'bg-rose-950/70 border-rose-500/60 text-rose-200'
+            }`}>
+              <div className="p-2 rounded-xl bg-rose-500 text-white shrink-0 shadow-md">
+                <AlertCircle className="w-5 h-5 stroke-[2.5]" />
+              </div>
+              <div className="min-w-0">
+                <strong className={`font-black text-sm block ${
+                  isLight ? 'text-rose-950' : 'text-rose-300'
+                }`}>
+                  Aviso de Conexión
+                </strong>
+                <p className={`text-xs mt-0.5 leading-snug font-medium ${
+                  isLight ? 'text-rose-900' : 'text-slate-200'
+                }`}>
+                  {errorMsg}
+                </p>
+              </div>
             </div>
           ) : hasUpdate ? (
-            <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center gap-3 text-amber-300 text-xs animate-pulse">
-              <Sparkles className="w-5 h-5 shrink-0 text-amber-400" />
-              <div>
-                <strong className="font-black block">¡Nueva versión oficial disponible!</strong>
-                <span>Puedes descargar e instalar la actualización directamente sin perder tu configuración.</span>
+            <div className={`p-4 rounded-2xl border-2 flex items-start gap-3.5 shadow-sm ${
+              isLight
+                ? 'bg-amber-50 border-amber-400 text-amber-950'
+                : 'bg-amber-950/70 border-amber-400 text-amber-100'
+            }`}>
+              <div className="p-2 rounded-xl bg-amber-500 text-slate-950 shrink-0 shadow-md">
+                <Sparkles className="w-5 h-5 stroke-[2.5]" />
+              </div>
+              <div className="min-w-0">
+                <strong className={`font-black text-sm block ${
+                  isLight ? 'text-amber-950' : 'text-amber-300'
+                }`}>
+                  ¡Nueva versión oficial disponible!
+                </strong>
+                <p className={`text-xs mt-0.5 leading-snug font-medium ${
+                  isLight ? 'text-amber-900' : 'text-slate-200'
+                }`}>
+                  Puedes descargar e instalar la actualización directamente. Tu catálogo, ventas y configuración se conservan al 100%.
+                </p>
               </div>
             </div>
           ) : (
-            <div className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center gap-3 text-emerald-300 text-xs">
-              <CheckCircle2 className="w-5 h-5 shrink-0 text-emerald-400" />
-              <div>
-                <strong className="font-black block">¡Tienes la versión oficial más reciente!</strong>
-                <span>Tu terminal cuenta con las últimas optimizaciones y seguridad.</span>
+            <div className={`p-4 rounded-2xl border-2 flex items-start gap-3.5 shadow-sm ${
+              isLight
+                ? 'bg-emerald-50 border-emerald-400 text-emerald-950'
+                : 'bg-emerald-950/70 border-emerald-400 text-emerald-100'
+            }`}>
+              <div className="p-2 rounded-xl bg-emerald-500 text-slate-950 shrink-0 shadow-md">
+                <CheckCircle2 className="w-5 h-5 stroke-[2.5]" />
+              </div>
+              <div className="min-w-0">
+                <strong className={`font-black text-sm block ${
+                  isLight ? 'text-emerald-950' : 'text-emerald-300'
+                }`}>
+                  ¡Tienes la versión oficial más reciente!
+                </strong>
+                <p className={`text-xs mt-0.5 leading-snug font-medium ${
+                  isLight ? 'text-emerald-900' : 'text-slate-200'
+                }`}>
+                  Tu terminal cuenta con las últimas optimizaciones de rendimiento exterior, cálculo BCV y blindaje de licencias.
+                </p>
               </div>
             </div>
           )}
 
           {/* Notas de la Versión / Changelog */}
           {releaseInfo?.body && (
-            <div className="space-y-1.5">
-              <h4 className="text-xs font-black uppercase tracking-wider text-slate-400">
+            <div className="space-y-2">
+              <h4 className={`text-xs font-black uppercase tracking-wider ${
+                isLight ? 'text-slate-800' : 'text-slate-300'
+              }`}>
                 Novedades y Registro de Cambios:
               </h4>
-              <div className="p-3.5 rounded-2xl bg-slate-950/70 border border-slate-800 text-xs text-slate-300 font-sans leading-relaxed max-h-40 overflow-y-auto whitespace-pre-wrap">
+              <div className={`p-4 rounded-2xl border-2 text-xs font-sans leading-relaxed max-h-36 overflow-y-auto whitespace-pre-wrap ${
+                isLight
+                  ? 'bg-slate-100 border-slate-300 text-slate-900 font-medium'
+                  : 'bg-[#02050e] border-slate-700 text-slate-100 font-normal'
+              }`}>
                 {releaseInfo.body}
               </div>
             </div>
           )}
 
           {/* Botones de Descarga Directa */}
-          <div className="space-y-2 pt-2">
-            <h4 className="text-xs font-black uppercase tracking-wider text-slate-400">
+          <div className="space-y-2.5 pt-1">
+            <h4 className={`text-xs font-black uppercase tracking-wider ${
+              isLight ? 'text-slate-800' : 'text-slate-300'
+            }`}>
               Descargas Oficiales desde KlikPOS Cloud:
             </h4>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {/* Botón APK */}
               <a
                 href={apkUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-3 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs flex items-center justify-between shadow-lg transition-all active:scale-95"
+                className="p-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs flex items-center justify-between shadow-lg shadow-emerald-900/30 transition-all active:scale-95 cursor-pointer"
               >
-                <div className="flex items-center gap-2.5">
-                  <Smartphone className="w-5 h-5 text-white" />
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
+                    <Smartphone className="w-5 h-5 text-white" />
+                  </div>
                   <div className="text-left">
-                    <span className="block leading-tight">Descargar APK</span>
-                    <span className="text-[10px] text-emerald-200 font-normal">Para Tablets y Teléfonos Android</span>
+                    <span className="block leading-tight text-white font-black">Descargar APK</span>
+                    <span className="text-[10.5px] text-emerald-100 font-medium">Tablets y Teléfonos Android</span>
                   </div>
                 </div>
-                <Download className="w-4 h-4 shrink-0 text-white" />
+                <Download className="w-5 h-5 shrink-0 text-white stroke-[2.5]" />
               </a>
 
               {/* Botón Windows EXE */}
@@ -238,38 +340,47 @@ export const SoftwareUpdateModal: React.FC<SoftwareUpdateModalProps> = ({
                 href={exeUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-3 rounded-2xl bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white font-black text-xs flex items-center justify-between shadow-lg transition-all active:scale-95"
+                className="p-3.5 rounded-2xl bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white font-black text-xs flex items-center justify-between shadow-lg shadow-sky-900/30 transition-all active:scale-95 cursor-pointer"
               >
-                <div className="flex items-center gap-2.5">
-                  <Monitor className="w-5 h-5 text-white" />
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
+                    <Monitor className="w-5 h-5 text-white" />
+                  </div>
                   <div className="text-left">
-                    <span className="block leading-tight">Instalador Windows</span>
-                    <span className="text-[10px] text-sky-200 font-normal">Setup .EXE Desatendido</span>
+                    <span className="block leading-tight text-white font-black">Instalador Windows</span>
+                    <span className="text-[10.5px] text-sky-100 font-medium">Setup .EXE Desatendido PC</span>
                   </div>
                 </div>
-                <Download className="w-4 h-4 shrink-0 text-white" />
+                <Download className="w-5 h-5 shrink-0 text-white stroke-[2.5]" />
               </a>
             </div>
           </div>
         </div>
 
         {/* FOOTER */}
-        <footer className="px-6 py-3.5 border-t border-slate-800 bg-slate-900/60 flex items-center justify-between">
+        <footer className={`px-6 py-4 border-t flex items-center justify-between ${
+          isLight ? 'bg-slate-100 border-slate-300' : 'bg-[#030610] border-slate-800'
+        }`}>
           <button
             onClick={handleHotReload}
             disabled={isHotReloading}
-            className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition-all flex items-center gap-2 active:scale-95 disabled:opacity-50"
+            className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 active:scale-95 disabled:opacity-50 cursor-pointer ${
+              isLight
+                ? 'bg-slate-200 hover:bg-slate-300 text-slate-900'
+                : 'bg-slate-800 hover:bg-slate-700 text-slate-200'
+            }`}
             title="Recargar memoria caché y código local"
           >
-            <RefreshCw className={`w-3.5 h-3.5 text-amber-400 ${isHotReloading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-4 h-4 text-amber-400 ${isHotReloading ? 'animate-spin' : ''}`} />
             <span>{isHotReloading ? 'Purgando Caché...' : 'Recargar App en Caliente'}</span>
           </button>
 
           <button
             onClick={checkForUpdates}
-            className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-black transition-all flex items-center gap-1.5 active:scale-95 shadow-md"
+            disabled={isLoading}
+            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 text-xs font-black transition-all flex items-center gap-2 active:scale-95 shadow-md shadow-amber-500/20 cursor-pointer disabled:opacity-50"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
             <span>Verificar de Nuevo</span>
           </button>
         </footer>

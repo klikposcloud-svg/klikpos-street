@@ -5140,7 +5140,11 @@ export default function TabletMobilePosPage() {
       <SoftwareUpdateModal
         isOpen={showUpdateModal}
         onClose={() => setShowUpdateModal(false)}
-        currentVersion="v1.0.0"
+        isLight={isLight}
+      />
+      <StreetAutoUpdater
+        isLight={isLight}
+        onOpenFullModal={() => setShowUpdateModal(true)}
       />
 
       {/* ========================================================================= */}
