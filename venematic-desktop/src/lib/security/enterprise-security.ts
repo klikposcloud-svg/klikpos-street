@@ -232,6 +232,7 @@ export function checkLockout(contextKey: string): LockoutStatus {
   // Verificación anti-manipulación del localStorage
   const expectedSig = signLockoutRecord(record);
   if (record.signature !== expectedSig) {
+    // Si alguien intentó editar el timestamp en localStorage, se le aplica penalización máxima
     return {
       isLocked: true,
       remainingSeconds: 300,
@@ -278,6 +279,11 @@ export function recordAuthFailure(contextKey: string): LockoutStatus {
   const newTotal = current.totalFailures + 1;
   let penaltySeconds = 0;
 
+  // Política Bancaria Progresiva:
+  // 1-2 fallos: advertencia
+  // 3 fallos: 30 segundos
+  // 4 fallos: 60 segundos
+  // 5+ fallos: 300 segundos (5 minutos)
   if (newAttempts === 3) {
     penaltySeconds = 30;
   } else if (newAttempts === 4) {
@@ -299,6 +305,7 @@ export function recordAuthFailure(contextKey: string): LockoutStatus {
   map[contextKey] = updatedRecord;
   saveLockoutMap(map);
 
+  // Registrar en la Bitácora de Auditoría Inmutable
   logSecurityEvent({
     eventType: penaltySeconds > 0 ? 'ACCOUNT_LOCKED' : 'AUTH_FAILURE',
     user: contextKey,
@@ -366,6 +373,7 @@ export function triggerDuressSilentAlarm(contextKey: string, details?: any): voi
     },
   });
 
+  // Si existe soporte de notificación silenciosa o evento custom
   if (typeof window !== 'undefined') {
     window.dispatchEvent(
       new CustomEvent('klikpos:duress_alert', {
@@ -465,6 +473,7 @@ export function logSecurityEvent(params: {
 
   logs.push(newEntry);
 
+  // Mantener los últimos 1000 eventos para no sobrecargar el almacenamiento local
   const trimmed = logs.length > 1000 ? logs.slice(-1000) : logs;
   if (typeof window !== 'undefined') {
     try {
@@ -475,6 +484,10 @@ export function logSecurityEvent(params: {
   return newEntry;
 }
 
+/**
+ * Valida la integridad criptográfica de toda la cadena de auditoría (Audit Log Integrity Verifier)
+ * Comprueba que ningún registro haya sido alterado, inyectado o eliminado manualmente.
+ */
 export function verifyAuditChainIntegrity(): {
   isValid: boolean;
   totalEntries: number;
@@ -525,6 +538,9 @@ export function verifyAuditChainIntegrity(): {
 // 5. TECLADO ALEATORIO ANTI-SHOULDER SURFING
 // ============================================================================
 
+/**
+ * Retorna los dígitos del 0 al 9 en orden aleatorio criptográfico
+ */
 export function getScrambledKeypad(): string[] {
   const digits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
   for (let i = digits.length - 1; i > 0; i--) {
@@ -545,6 +561,9 @@ export function getScrambledKeypad(): string[] {
 // 6. DETECTOR BIOMÉTRICO (WEBAUTHN / BIOMETRIC PROMPT)
 // ============================================================================
 
+/**
+ * Verifica si el hardware actual admite autenticación biométrica (Huella / TouchID / Windows Hello)
+ */
 export async function isBiometricAvailable(): Promise<boolean> {
   if (typeof window === 'undefined' || !window.PublicKeyCredential) {
     return false;

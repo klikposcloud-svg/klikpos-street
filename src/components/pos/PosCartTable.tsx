@@ -116,10 +116,10 @@ export default function PosCartTable({
                   }`}
                 >
                   <div className="min-w-0 flex-1">
-                    <p className="font-bold text-xs text-slate-900 dark:text-slate-100 truncate">
+                    <p className="font-bold text-xs text-slate-900 dark:text-white truncate">
                       {item.name}
                     </p>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400 font-mono">
+                    <p className="text-[11px] text-slate-500 dark:text-slate-300 font-mono">
                       ${item.priceUSD.toFixed(2)} c/u × {item.qty}
                     </p>
                   </div>
@@ -135,7 +135,7 @@ export default function PosCartTable({
                     >
                       -
                     </button>
-                    <span className="w-7 text-center font-mono font-bold text-xs tabular-numbers text-slate-900 dark:text-white">
+                    <span className="w-7 text-center font-mono font-black text-xs tabular-numbers text-slate-900 dark:text-white">
                       {item.qty}
                     </span>
                     <button
@@ -151,10 +151,10 @@ export default function PosCartTable({
 
                   {/* Total por línea */}
                   <div className="text-right min-w-[75px]">
-                    <span className="text-xs font-mono font-black text-slate-900 dark:text-slate-100 block tabular-numbers">
+                    <span className="text-xs font-mono font-black text-slate-900 dark:text-emerald-300 block tabular-numbers">
                       {formatVES(item.totalUSD * bcvRate)}
                     </span>
-                    <span className="text-[10px] font-mono text-slate-500 dark:text-slate-400 block tabular-numbers">
+                    <span className="text-[10px] font-mono text-slate-500 dark:text-slate-300 block tabular-numbers">
                       ${item.totalUSD.toFixed(2)}
                     </span>
                   </div>
@@ -204,7 +204,7 @@ export default function PosCartTable({
                 <span className="text-xl sm:text-2xl font-black font-sans text-emerald-700 dark:text-emerald-400 tracking-tight tabular-numbers break-all leading-tight">
                   {formatVES(totalVES)}
                 </span>
-                <span className="text-sm sm:text-base font-black font-mono text-slate-900 dark:text-white shrink-0">
+                <span className="text-sm sm:text-base font-black font-mono text-slate-900 dark:!text-white shrink-0">
                   {formatUSD(totalUSD)}
                 </span>
               </div>

@@ -164,7 +164,7 @@ export default function PosActionButtonsBar({
           </div>
         </button>
 
-        {/* 3. Botón Grande: Balanza Digital / Manual */}
+                {/* 3. Bot�n Grande: Balanza Digital / Manual (Alto Contraste Blanco en Oscuro / Celeste en Claro) */}
         <button
           type="button"
           onClick={onOpenManualWeightModal}
@@ -175,23 +175,17 @@ export default function PosActionButtonsBar({
           }`}
           title="Balanza: Clic para pesar producto o ingresar peso manual"
         >
-          <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border ${
-            scaleConnected || scaleReading.weight > 0
-              ? 'bg-white/20 text-white border-white/30'
-              : 'bg-sky-50 dark:bg-slate-700 text-sky-700 dark:text-sky-300 border-sky-200 dark:border-slate-600'
-          }`}>
-            <Scale className={`w-5 h-5 ${scaleConnected || scaleReading.weight > 0 ? 'text-white' : 'text-sky-700 dark:text-sky-300'}`} />
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border bg-sky-50 dark:bg-white/20 text-sky-700 dark:text-white border-sky-200 dark:border-white/30">
+            <Scale className="w-5 h-5 text-sky-700 dark:text-white" style={{ stroke: 'currentColor' }} />
           </div>
           <div className="flex flex-col justify-center text-left leading-tight min-w-0">
             <span
               className={`text-xs font-black tracking-tight truncate ${scaleConnected || scaleReading.weight > 0 ? '!text-white' : 'text-slate-900 dark:text-white'}`}
-              style={scaleConnected || scaleReading.weight > 0 ? { color: '#ffffff' } : undefined}
             >
               {scaleReading.weight > 0 ? `${scaleReading.weight.toFixed(3)} kg` : 'Balanza (kg)'}
             </span>
             <span
-              className={`text-[10.5px] font-bold truncate ${scaleConnected || scaleReading.weight > 0 ? '!text-sky-100' : 'text-slate-500 dark:text-slate-300'}`}
-              style={scaleConnected || scaleReading.weight > 0 ? { color: '#e0f2fe' } : undefined}
+              className={`text-[10.5px] font-bold truncate ${scaleConnected || scaleReading.weight > 0 ? '!text-sky-100' : 'text-slate-500 dark:text-white/80'}`}
             >
               {scaleReading.weight > 0 ? 'Peso en vivo' : 'Pesar Producto'}
             </span>

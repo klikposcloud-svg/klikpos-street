@@ -19,6 +19,7 @@ import PosQuickAccessSlider from '@/components/pos/PosQuickAccessSlider';
 import PosFunctionKeysBar from '@/components/pos/PosFunctionKeysBar';
 import PosProductGrid, { PosViewMode } from '@/components/pos/PosProductGrid';
 import PosCartTable from '@/components/pos/PosCartTable';
+import PosBottomCompactDock from '@/components/pos/PosBottomCompactDock';
 import PosTouchKeypad from '@/components/pos/PosTouchKeypad';
 import PosPaymentModal from '@/components/pos/PosPaymentModal';
 import PosReceiptModal from '@/components/pos/PosReceiptModal';
@@ -30,6 +31,7 @@ import IconSelectorModal from '@/components/pos/IconSelectorModal';
 
 import {
   Search,
+  Columns2,
   Scale,
   Banknote,
   CheckCircle2,
@@ -83,6 +85,25 @@ export default function DesktopPosPage() {
       localStorage.setItem('klikpos_pos_view_mode', mode);
     }
   };
+
+  
+  // Modo de vista simplificada a pantalla completa (Mostrador Rápido)
+  const [isSimplifiedView, setIsSimplifiedView] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('klikpos_pos_simplified_view') === 'true';
+    }
+    return false;
+  });
+
+  const toggleSimplifiedView = useCallback(() => {
+    setIsSimplifiedView((prev) => {
+      const next = !prev;
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('klikpos_pos_simplified_view', String(next));
+      }
+      return next;
+    });
+  }, []);
 
   // Slider de accesos directos
   const [customSliderIds, setCustomSliderIds] = useState<number[]>([]);
@@ -594,10 +615,26 @@ export default function DesktopPosPage() {
             >
               <Banknote className="w-3.5 h-3.5" />
             </button>
+            <button
+              type="button"
+              onClick={toggleSimplifiedView}
+              title={isSimplifiedView ? 'Volver a vista clásica con ticket lateral' : 'Vista simplificada a pantalla completa'}
+              className={`px-2.5 py-1 rounded-lg text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer border shadow-2xs ${
+                isSimplifiedView
+                  ? 'bg-cyan-50 hover:bg-cyan-100 text-cyan-900 border-cyan-300 dark:bg-cyan-950 dark:text-cyan-300 dark:border-cyan-700'
+                  : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700'
+              }`}
+            >
+              <Columns2 className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400" />
+              <span className="hidden sm:inline font-mono text-[11px]">
+                {isSimplifiedView ? 'Vista Clásica' : 'Vista Simplificada'}
+              </span>
+            </button>
           </div>
         </div>
 
         {/* BOTONES DE ACCIÓN RÁPIDA */}
+        {!isSimplifiedView && (
         <PosActionButtonsBar
           posViewMode={posViewMode}
           phoneConnected={hardware.phoneConnected}
@@ -614,6 +651,7 @@ export default function DesktopPosPage() {
             setShowCashShiftModal(true);
           }}
         />
+        )}
 
         {/* BANDEJA DOCK: ACCESOS RÁPIDOS Y FAVORITOS */}
         {posViewMode !== 'touch' && !searchQuery.trim() && sliderProducts.length > 0 && posViewMode !== 'fastfood' && (
@@ -648,7 +686,23 @@ export default function DesktopPosPage() {
         />
 
         {/* BARRA INDUSTRIAL DE ATAJOS F2-F12 */}
-        <PosFunctionKeysBar
+        {isSimplifiedView ? (
+          <PosBottomCompactDock
+            cart={cartHook.cart}
+            totalUSD={cartHook.totalUSD}
+            totalVES={cartHook.totalVES}
+            bcvRate={bcvRate}
+            onOpenPaymentModal={() => {
+              if (cartHook.cart.length > 0) openPaymentModal();
+              else showToast('Agrega productos al carrito antes de cobrar (F12)', 'error');
+            }}
+            onClearCart={cartHook.clearCart}
+            onUpdateQty={cartHook.updateItemQty}
+            onRemoveItem={cartHook.removeItem}
+            onToggleSimplifiedView={toggleSimplifiedView}
+          />
+        ) : (
+          <PosFunctionKeysBar
           primaryCurrency={primaryCurrency}
           numpadMode={numpadMode}
           cartLength={cartHook.cart.length}
@@ -676,11 +730,13 @@ export default function DesktopPosPage() {
           }}
           onShowToast={showToast}
         />
+        )}
       </div>
 
       {/* ========================================================================= */}
       {/* COLUMNA DERECHA: TICKET DE VENTA Y TECLADO TÁCTIL NUMÉRICO                */}
       {/* ========================================================================= */}
+      {!isSimplifiedView && (
       <div className="w-[380px] lg:w-[410px] xl:w-[430px] h-full max-h-full min-h-0 flex flex-col gap-2.5 shrink-0 overflow-hidden">
         <PosCartTable
           rightPanelTab={rightPanelTab}
@@ -706,6 +762,7 @@ export default function DesktopPosPage() {
           onNumpadApply={handleNumpadApply}
         />
       </div>
+      )}
 
       {/* ========================================================================= */}
       {/* MODALES DEL SISTEMA                                                       */}

@@ -1,4 +1,4 @@
-$ErrorActionPreference = "Stop"
+﻿$ErrorActionPreference = "Stop"
 
 $root = "c:\Users\pcpro\OneDrive\Documents\venematic-master\venematic-master"
 $androidDir = "$root\venematic-desktop\android"
@@ -37,6 +37,7 @@ try {
     # Copiar index
     New-Item -ItemType Directory -Force -Path "$androidDir\app\src\main\assets\public" | Out-Null
     Copy-Item "$root\public\keygen-app.html" $publicIndex -Force
+    Copy-Item "$root\venematic-desktop\android-icons\keygen\*" "$androidDir\app\src\main\res" -Recurse -Force
 
     Write-Host "[3/5] Compilando con Gradle (assembleDebug)..." -ForegroundColor Yellow
     Set-Location $androidDir
@@ -82,3 +83,4 @@ try {
     Remove-Item $bakDir -Recurse -Force -ErrorAction SilentlyContinue
     Set-Location $root
 }
+

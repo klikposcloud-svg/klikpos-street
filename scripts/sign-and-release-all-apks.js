@@ -65,6 +65,17 @@ function cleanGradleBuild() {
   } catch (e) {}
 }
 
+function applyEditionIcons(editionKey) {
+  const src = path.join(root, 'venematic-desktop', 'android-icons', editionKey);
+  const destRes = path.join(androidDir, 'app', 'src', 'main', 'res');
+  if (fs.existsSync(src)) {
+    fs.cpSync(src, destRes, { recursive: true, force: true });
+    console.log('  [✓] Iconos oficiales de edicion "' + editionKey + '" copiados a res/');
+  } else {
+    console.warn('  [!] Advertencia: No existe directorio de iconos para "' + editionKey + '"');
+  }
+}
+
 function syncAssetsBase() {
   console.log('Sincronizando assets estáticos de Next.js...');
   execSync(`node "${path.join(root, 'scripts', 'enhance-and-rebrand-mobile.js')}"`, { stdio: 'inherit' });
@@ -131,6 +142,7 @@ function buildKeygenApk() {
     fs.mkdirSync(publicDir, { recursive: true });
     fs.copyFileSync(path.join(root, 'public', 'keygen-app.html'), publicIndex);
 
+    applyEditionIcons('keygen');
     console.log('Ejecutando Gradle assembleRelease para Keygen...');
     execSync('cmd.exe /c ".\\gradlew.bat assembleRelease --no-daemon"', {
       cwd: androidDir,
@@ -202,6 +214,7 @@ function buildMovilFullApk() {
       fs.copyFileSync(scannerHtmlSrc, publicIndex);
     }
 
+    applyEditionIcons('movil');
     console.log('Ejecutando Gradle assembleRelease para KlikPOS Móvil Full (Retail Scanner + Balanza + Firestore)...');
     execSync('cmd.exe /c ".\\gradlew.bat assembleRelease --no-daemon"', {
       cwd: androidDir,
@@ -278,6 +291,7 @@ function buildMovilSateliteApk() {
       fs.copyFileSync(scannerHtmlSrc, publicIndex);
     }
 
+    applyEditionIcons('movil');
     console.log('Ejecutando Gradle assembleRelease para KlikPOS Satélite...');
     execSync('cmd.exe /c ".\\gradlew.bat assembleRelease --no-daemon"', {
       cwd: androidDir,
@@ -352,6 +366,7 @@ function buildStreetApk() {
       fs.copyFileSync(tabletHtmlSrc, publicIndex);
     }
 
+    applyEditionIcons('street');
     console.log('Ejecutando Gradle assembleRelease para KlikPOS Street...');
     execSync('cmd.exe /c ".\\gradlew.bat assembleRelease --no-daemon"', {
       cwd: androidDir,

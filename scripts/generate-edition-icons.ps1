@@ -34,23 +34,23 @@ $editions = @(
     },
     @{
         Key = "keygen"
-        Title = "KEYGEN"
-        BgColor = [System.Drawing.Color]::FromArgb(255, 15, 12, 32)     # Midnight Obsidian (#0f0c20)
-        AdaptiveBgHex = "#0F0C20"
-        KColor = [System.Drawing.Color]::FromArgb(255, 245, 158, 11)   # Oro Brillante (#f59e0b)
-        BadgeBg = [System.Drawing.Color]::FromArgb(255, 217, 119, 6)    # Ambar Oro (#d97706)
-        BadgeText = [System.Drawing.Color]::FromArgb(255, 15, 12, 32)   # Texto oscuro
-        BorderColor = [System.Drawing.Color]::FromArgb(255, 180, 83, 9)
+        Title = "KEY"
+        BgColor = [System.Drawing.Color]::FromArgb(255, 255, 255, 255)
+        AdaptiveBgHex = "#FFFFFF"
+        KColor = [System.Drawing.Color]::FromArgb(255, 16, 185, 129)     # Verde Esmeralda (#10b981)
+        BadgeBg = [System.Drawing.Color]::FromArgb(255, 5, 150, 105)     # Verde Intenso (#059669)
+        BadgeText = [System.Drawing.Color]::White
+        BorderColor = [System.Drawing.Color]::FromArgb(255, 167, 243, 208)
     },
     @{
         Key = "movil"
         Title = "MOVIL"
         BgColor = [System.Drawing.Color]::FromArgb(255, 255, 255, 255)
         AdaptiveBgHex = "#FFFFFF"
-        KColor = [System.Drawing.Color]::FromArgb(255, 2, 132, 199)     # Azul Electrico (#0284c7)
-        BadgeBg = [System.Drawing.Color]::FromArgb(255, 3, 105, 161)    # Azul Marino (#0369a1)
+        KColor = [System.Drawing.Color]::FromArgb(255, 51, 65, 85)       # Gris Grafito (#334155)
+        BadgeBg = [System.Drawing.Color]::FromArgb(255, 30, 41, 59)      # Grafito Profundo (#1e293b)
         BadgeText = [System.Drawing.Color]::White
-        BorderColor = [System.Drawing.Color]::FromArgb(255, 186, 230, 253)
+        BorderColor = [System.Drawing.Color]::FromArgb(255, 203, 213, 225)
     }
 )
 

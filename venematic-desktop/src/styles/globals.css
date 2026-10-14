@@ -2519,7 +2519,7 @@ html[data-theme="dark"] .pos-white-card h3,
 html[data-theme="dark"] .pos-white-card h4,
 html[data-theme="dark"] .pos-white-card .text-slate-900,
 html[data-theme="dark"] .pos-white-card .text-slate-950 {
-  color: #0f172a !important;
+  color: #ffffff !important;
 }
 
 /* ==========================================================================
@@ -2760,4 +2760,29 @@ html[data-canvas="obsidian"] #klikpos-street-main,
 #klikpos-street-header,
 #klikpos-street-root main > div {
   transition: background-color 0.12s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.12s cubic-bezier(0.16, 1, 0.3, 1), color 0.12s ease-out;
+}
+/* ========================================================================= */
+/* ALTO CONTRASTE REFORZADO: ICONOS EN BOTONES DE BALANZA Y ACCION           */
+/* ========================================================================= */
+button[class*="bg-sky-600"] svg,
+button[class*="bg-sky-700"] svg,
+button[class*="bg-sky-800"] svg,
+button.bg-sky-600 svg,
+button.bg-sky-700 svg,
+.btn-brand svg,
+[class*="bg-[#0e4f5a]"] button svg,
+[class*="bg-[#0e4f5a]"] svg.text-white {
+  stroke: #ffffff !important;
+  color: #ffffff !important;
+}
+
+/* REGLA DEFINITIVA PARA ICONO DE BALANZA: NUNCA AZUL OSCURO EN FONDOS OSCUROS/TEAL */
+html.dark button[title*="Balanza"] svg,
+html[data-theme="dark"] button[title*="Balanza"] svg,
+html[data-theme="glass"] button[title*="Balanza"] svg,
+button.bg-slate-800 svg,
+button[class*="bg-sky-600"] svg,
+button.text-white svg {
+  stroke: #ffffff !important;
+  color: #ffffff !important;
 }
