@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { db, LocalSale, LocalCashShift, LocalProduct } from '@/lib/db';
+import { db, LocalSale, LocalCashShift, LocalProduct, CashMovement } from '@/lib/db';
+import FiscalCorteSheetModal from '@/components/fiscal/FiscalCorteSheetModal';
 import { formatUSD, formatVES, formatDateShort } from '@/lib/formatters';
 import {
   Printer,
@@ -85,6 +86,9 @@ export default function DesktopReportsPage() {
   const [printReportType, setPrintReportType] = useState<'X' | 'Z' | null>(null);
   const [isMounted, setIsMounted] = useState(false);
   const [printDateTime, setPrintDateTime] = useState('');
+  const [movements, setMovements] = useState<CashMovement[]>([]);
+  const [showFiscalSheetModal, setShowFiscalSheetModal] = useState<boolean>(false);
+  const [fiscalSheetReportType, setFiscalSheetReportType] = useState<'X' | 'Z'>('X');
 
   const loadData = async () => {
     const allSales = await db.sales.reverse().toArray();
@@ -98,6 +102,9 @@ export default function DesktopReportsPage() {
 
     const pastShifts = await db.cashShifts.where('status').equals('closed').reverse().toArray();
     setClosedShifts(pastShifts);
+
+    const allMovs = await db.cashMovements.toArray();
+    setMovements(allMovs);
 
     const bcv = await db.settings.get('bcv_rate');
     if (bcv && bcv.value) setBcvRate(Number(bcv.value));
@@ -138,6 +145,17 @@ export default function DesktopReportsPage() {
       return saleTime >= openTime && saleTime <= closeTime;
     });
   }, [sales, activeShiftData]);
+
+  // Movimientos de caja del turno (Salidas/Proveedores y Entradas)
+  const shiftMovements = useMemo(() => {
+    if (!activeShiftData) return movements;
+    const openTime = new Date(activeShiftData.openedAt).getTime();
+    const closeTime = activeShiftData.closedAt ? new Date(activeShiftData.closedAt).getTime() : Infinity;
+    return movements.filter((m) => {
+      const mTime = new Date(m.timestamp).getTime();
+      return mTime >= openTime && mTime <= closeTime;
+    });
+  }, [movements, activeShiftData]);
 
   // Cálculos financieros del turno
   const totalSalesUSD = useMemo(() => shiftSales.reduce((acc, s) => acc + (s.totalUSD || 0), 0), [shiftSales]);
@@ -408,18 +426,31 @@ export default function DesktopReportsPage() {
           </div>
 
           <button
+            onClick={() => {
+              setFiscalSheetReportType(selectedShiftId === 'current' ? 'X' : 'Z');
+              setShowFiscalSheetModal(true);
+            }}
+            className="px-3.5 py-2 bg-indigo-700 hover:bg-indigo-800 text-white font-black text-xs rounded-xl shadow-xs flex items-center gap-1.5 transition-all cursor-pointer"
+            title="Previsualizar e imprimir Reporte Fiscal en Hoja Carta / A4 para el SENIAT y Contador"
+            style={{ color: '#ffffff' }}
+          >
+            <FileText className="w-3.5 h-3.5 text-white" />
+            <span>Hoja Carta SENIAT</span>
+          </button>
+
+          <button
             onClick={() => triggerPrintCorte('X')}
-            className="px-3.5 py-2 bg-sky-700 hover:bg-sky-800 text-white font-black text-xs rounded-xl shadow-xs flex items-center gap-1.5 transition-all"
-            title="Imprimir resumen de caja sin cerrar el turno"
+            className="px-3.5 py-2 bg-sky-700 hover:bg-sky-800 text-white font-black text-xs rounded-xl shadow-xs flex items-center gap-1.5 transition-all cursor-pointer"
+            title="Imprimir ticket de caja sin cerrar el turno"
           >
             <Printer className="w-3.5 h-3.5" />
-            <span>Imprimir Corte X</span>
+            <span>Imprimir Ticket X</span>
           </button>
 
           {selectedShiftId === 'current' && (
             <button
               onClick={handleCorteZ}
-              className="px-3.5 py-2 bg-rose-700 hover:bg-rose-800 text-white font-black text-xs rounded-xl shadow-xs flex items-center gap-1.5 transition-all"
+              className="px-3.5 py-2 bg-rose-700 hover:bg-rose-800 text-white font-black text-xs rounded-xl shadow-xs flex items-center gap-1.5 transition-all cursor-pointer"
               title="Cerrar el turno de forma definitiva y abrir uno nuevo"
             >
               <CheckCircle2 className="w-3.5 h-3.5" />
@@ -1587,6 +1618,28 @@ export default function DesktopReportsPage() {
           <p className="pt-2 font-bold">KLIKPOS ENTERPRISE · Sistema de Ventas</p>
         </div>
       </div>
+
+      {/* MODAL DE REPORTE CONTABLE Y FISCAL EN HOJA CARTA / A4 (SENIAT) */}
+      <FiscalCorteSheetModal
+        isOpen={showFiscalSheetModal}
+        onClose={() => setShowFiscalSheetModal(false)}
+        reportType={fiscalSheetReportType}
+        storeInfo={storeInfo}
+        shiftData={{
+          id: activeShiftData?.id || (selectedShiftId === 'current' ? '1' : selectedShiftId),
+          cashierName: activeShiftData?.cashierName || 'Caja Principal',
+          openedAt: activeShiftData?.openedAt,
+          closedAt: activeShiftData?.closedAt,
+          initialCashUSD: activeShiftData?.initialCashUSD || 0,
+          initialCashVES: activeShiftData?.initialCashVES || 0,
+        }}
+        bcvRate={bcvRate}
+        sales={shiftSales}
+        movements={shiftMovements}
+        denominations={activeShiftData?.finalDenominations}
+        countedUSD={activeShiftData?.actualCashUSD}
+        countedVES={activeShiftData?.actualCashVES}
+      />
     </div>
   );
 }

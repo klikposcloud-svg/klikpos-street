@@ -30,6 +30,7 @@ import {
   ChevronRight,
   TrendingUp,
 } from 'lucide-react';
+import FiscalCorteSheetModal from '@/components/fiscal/FiscalCorteSheetModal';
 
 export interface CashShiftModalProps {
   isOpen: boolean;
@@ -89,6 +90,7 @@ export default function CashShiftModal({
 
   // Vista previa de impresión
   const [showPrintPreview, setShowPrintPreview] = useState<boolean>(false);
+  const [showFiscalSheetModal, setShowFiscalSheetModal] = useState<boolean>(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -472,15 +474,27 @@ export default function CashShiftModal({
                     </p>
                   </div>
                 </div>
-                <button
-                  type="button"
-                  onClick={handlePrintReceipt}
-                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold flex items-center gap-2 shadow-xs cursor-pointer"
-                  style={{ color: '#ffffff' }}
-                >
-                  <Printer className="w-4 h-4 text-white" />
-                  Imprimir Ticket
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowFiscalSheetModal(true)}
+                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold flex items-center gap-2 shadow-xs cursor-pointer text-xs"
+                    style={{ color: '#ffffff' }}
+                    title="Previsualizar e imprimir en Hoja Carta / A4 formato SENIAT"
+                  >
+                    <FileText className="w-4 h-4 text-white" />
+                    <span>Hoja Carta SENIAT</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handlePrintReceipt}
+                    className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold flex items-center gap-2 shadow-xs cursor-pointer text-xs"
+                    style={{ color: '#ffffff' }}
+                  >
+                    <Printer className="w-4 h-4 text-white" />
+                    Imprimir Ticket
+                  </button>
+                </div>
               </div>
 
               {/* Formato de Ticket Térmico 80mm */}
@@ -850,12 +864,22 @@ export default function CashShiftModal({
                   </button>
                   <button
                     type="button"
+                    onClick={() => setShowFiscalSheetModal(true)}
+                    className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow-xs"
+                    style={{ color: '#ffffff' }}
+                    title="Previsualizar e imprimir en Hoja Carta / A4 formato SENIAT"
+                  >
+                    <FileText className="w-4 h-4 text-white" />
+                    <span>Hoja Carta SENIAT</span>
+                  </button>
+                  <button
+                    type="button"
                     onClick={() => window.print()}
                     className="px-4 py-2.5 bg-sky-600 hover:bg-sky-500 text-white rounded-xl font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow-xs"
                     style={{ color: '#ffffff' }}
                   >
                     <Printer className="w-4 h-4 text-white" />
-                    Imprimir Corte X
+                    Imprimir Ticket
                   </button>
                 </div>
                 <div className="flex gap-2">
@@ -1226,6 +1250,28 @@ export default function CashShiftModal({
 
         </div>
       </div>
+
+      {/* Modal de Hoja Completa Carta / A4 SENIAT */}
+      <FiscalCorteSheetModal
+        isOpen={showFiscalSheetModal}
+        onClose={() => setShowFiscalSheetModal(false)}
+        reportType={mode === 'view_x' ? 'X' : 'Z'}
+        storeInfo={storeInfo}
+        shiftData={{
+          id: activeShift?.id || '1',
+          cashierName: activeShift?.cashierName || cashierName,
+          openedAt: activeShift?.openedAt,
+          closedAt: mode === 'close' || showPrintPreview ? new Date().toISOString() : undefined,
+          initialCashUSD: activeShift?.initialCashUSD || 0,
+          initialCashVES: activeShift?.initialCashVES || 0,
+        }}
+        bcvRate={bcvRate}
+        sales={salesInShift}
+        movements={movementsInShift}
+        denominations={denominations}
+        countedUSD={countedUSD}
+        countedVES={countedVES}
+      />
     </div>
   );
 }

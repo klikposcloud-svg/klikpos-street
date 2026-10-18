@@ -625,13 +625,58 @@ body {
   #seniat-receipt, #seniat-receipt *,
   #corte-receipt, #corte-receipt *,
   .print-corte, .print-corte *,
-  .print-area, .print-area * {
+  .print-area, .print-area *,
+  #corte-sheet-letter, #corte-sheet-letter *,
+  .print-sheet-letter, .print-sheet-letter * {
     visibility: visible !important;
     color: #000000 !important;
     text-shadow: none !important;
     -webkit-font-smoothing: none !important;
     -moz-osx-font-smoothing: unset !important;
     text-rendering: geometricPrecision !important;
+  }
+
+  /* ========================================================================= */
+  /* IMPRESIÓN EN HOJA CARTA / A4 (FORMATO CONTABLE & FISCAL SENIAT)           */
+  /* ========================================================================= */
+  html[data-print-format="sheet"] @page {
+    size: letter portrait;
+    margin: 8mm 10mm 8mm 10mm;
+  }
+
+  html[data-print-format="sheet"] body {
+    background: #ffffff !important;
+  }
+
+  html[data-print-format="sheet"] #corte-sheet-letter,
+  html[data-print-format="sheet"] .print-sheet-letter {
+    display: block !important;
+    visibility: visible !important;
+    position: static !important;
+    width: 100% !important;
+    max-width: 216mm !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+    page-break-after: auto !important;
+    break-after: auto !important;
+  }
+
+  html[data-print-format="sheet"] #thermal-receipt,
+  html[data-print-format="sheet"] #seniat-receipt,
+  html[data-print-format="sheet"] #corte-receipt,
+  html[data-print-format="sheet"] .print-corte,
+  html[data-print-format="sheet"] .print-area {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  html:not([data-print-format="sheet"]) #corte-sheet-letter,
+  html:not([data-print-format="sheet"]) .print-sheet-letter {
+    display: none !important;
+    visibility: hidden !important;
   }
 
   #thermal-receipt, #seniat-receipt, #corte-receipt, .print-corte, .print-area {
