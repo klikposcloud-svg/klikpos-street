@@ -785,6 +785,12 @@ export function applyBrandingToDOM(config: BrandingConfig, forceTheme?: 'light' 
   const palette = THEME_PALETTES.find((p) => p.id === config.paletteId) || THEME_PALETTES[0];
   const root = document.documentElement;
 
+  // Activar modo de cambio instantáneo a 0ms (sin retardo ni interpolación lenta)
+  root.classList.add('switching-theme');
+  if (typeof document !== 'undefined' && document.body) {
+    document.body.classList.add('switching-theme');
+  }
+
   // Determinar tema con máxima prioridad a forceTheme
   let activeTheme: ThemeMode = 'light';
   if (forceTheme) {
@@ -1001,6 +1007,14 @@ export function applyBrandingToDOM(config: BrandingConfig, forceTheme?: 'light' 
   // Trigger event for listeners
   window.dispatchEvent(new CustomEvent('venematic:branding_updated', { detail: config }));
   window.dispatchEvent(new CustomEvent('venematic:theme_changed', { detail: activeTheme }));
+
+  // Restaurar comportamiento en el siguiente ciclo sin bloqueo
+  requestAnimationFrame(() => {
+    root.classList.remove('switching-theme');
+    if (typeof document !== 'undefined' && document.body) {
+      document.body.classList.remove('switching-theme');
+    }
+  });
 }
 
 /**

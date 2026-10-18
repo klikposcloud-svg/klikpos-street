@@ -115,7 +115,7 @@ export default function HomePage() {
       </div>
 
       <p className="absolute bottom-7 text-[11px] text-slate-400 font-bold tracking-wider uppercase">
-        v2.0 · Modo Blanco Profesional
+        v3.0.24 · KlikPOS Enterprise Suite
       </p>
     </div>
   );

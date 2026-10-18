@@ -558,6 +558,7 @@ export default function DesktopPosPage() {
             <button
               type="button"
               onClick={handleManualCloudSync}
+              suppressHydrationWarning
               title={`Sincronización en Tiempo Real con App Móvil / Firestore (${cloudStatus.storeId || terminalHwid}). Clic para forzar actualización ahora.`}
               className={`px-2.5 py-1 rounded-lg text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer border shadow-2xs ${
                 cloudStatus.state === 'syncing' || isManualSyncing
@@ -568,12 +569,13 @@ export default function DesktopPosPage() {
               }`}
             >
               <Cloud className={`w-3.5 h-3.5 ${cloudStatus.state === 'syncing' || isManualSyncing ? 'text-sky-600 animate-spin' : 'text-indigo-600'}`} />
-              <span className="hidden md:inline font-mono text-[11px]">
+              <span className="hidden md:inline font-mono text-[11px]" suppressHydrationWarning>
                 {cloudStatus.state === 'syncing' || isManualSyncing
                   ? 'Sincronizando...'
                   : `Nube: ${(cloudStatus.storeId || terminalHwid).slice(0, 14)}`}
               </span>
               <span
+                suppressHydrationWarning
                 className={`w-2 h-2 rounded-full shrink-0 ${
                   cloudStatus.state === 'synced' ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'
                 }`}

@@ -2761,11 +2761,15 @@ html[data-canvas="obsidian"] #klikpos-street-main,
   animation-duration: 0s !important;
 }
 
-/* Anular retardos de transición en cambio de tema (0ms inmediato) */
+/* Anular retardos de transición en cambio de tema (0ms inmediato en todo el árbol DOM) */
 html.switching-theme,
 html.switching-theme *,
 html.switching-theme *::before,
 html.switching-theme *::after,
+body.switching-theme,
+body.switching-theme *,
+body.switching-theme *::before,
+body.switching-theme *::after,
 #klikpos-street-root,
 #klikpos-street-main,
 #klikpos-street-header,

@@ -2746,20 +2746,31 @@ html[data-canvas="obsidian"] #klikpos-street-main,
 }
 
 /* =========================================================================
-   VIEW TRANSITIONS API: TRANSICIÓN DINÁMICA ULTRA FLUIDA (60FPS GPU)
+   CAMBIO DE TEMA INSTANTÁNEO A 0MS (CERO RETARDO / LATENCIA CERO)
    ========================================================================= */
 ::view-transition-old(root),
 ::view-transition-new(root) {
-  animation-duration: 0.15s !important;
-  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1) !important;
+  animation-duration: 0s !important;
 }
 
-/* Transiciones instantáneas y reactivas sin retardo perceptible */
+/* Anular retardos de transición en cambio de tema (0ms inmediato en todo el árbol DOM) */
+html.switching-theme,
+html.switching-theme *,
+html.switching-theme *::before,
+html.switching-theme *::after,
+body.switching-theme,
+body.switching-theme *,
+body.switching-theme *::before,
+body.switching-theme *::after,
 #klikpos-street-root,
 #klikpos-street-main,
 #klikpos-street-header,
-#klikpos-street-root main > div {
-  transition: background-color 0.12s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.12s cubic-bezier(0.16, 1, 0.3, 1), color 0.12s ease-out;
+#klikpos-street-root main,
+#klikpos-street-root main > div,
+#klikpos-street-root aside,
+#klikpos-street-root nav {
+  transition: none !important;
+  animation-duration: 0s !important;
 }
 /* ========================================================================= */
 /* ALTO CONTRASTE REFORZADO: ICONOS EN BOTONES DE BALANZA Y ACCION           */
