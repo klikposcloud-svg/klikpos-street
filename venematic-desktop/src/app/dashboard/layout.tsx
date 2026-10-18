@@ -130,22 +130,8 @@ export default function DesktopDashboardLayout({
   const [phoneConnected, setPhoneConnected] = useState<boolean>(false);
   const [phoneDeviceName, setPhoneDeviceName] = useState<string>('');
   const [currentTime, setCurrentTime] = useState('');
-  const [clockDate, setClockDate] = useState<string>(() => {
-    try {
-      const now = new Date();
-      const d = now.toLocaleDateString('es-VE', { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' });
-      return d.charAt(0).toUpperCase() + d.slice(1);
-    } catch {
-      return '';
-    }
-  });
-  const [clockTime, setClockTime] = useState<string>(() => {
-    try {
-      return new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
-    } catch {
-      return '';
-    }
-  });
+  const [clockDate, setClockDate] = useState<string>('');
+  const [clockTime, setClockTime] = useState<string>('');
   const [isScreenLocked, setIsScreenLocked] = useState(false);
   const [isLoginDismissed, setIsLoginDismissed] = useState(false);
   const [activeRubroInfo, setActiveRubroInfo] = useState<{ id: string; name: string; icon: string }>({
@@ -214,7 +200,6 @@ export default function DesktopDashboardLayout({
       });
       setClockTime(timeFormatted);
       setCurrentTime(`${capitalizedDate} ${timeFormatted}`);
-      console.log('UPDATE CLOCK EXECUTED:', capitalizedDate, timeFormatted);
     };
     updateClock();
     const timer = setInterval(updateClock, 1000);
@@ -886,9 +871,9 @@ export default function DesktopDashboardLayout({
             title="Fecha y hora oficial del sistema"
           >
             <Clock className="w-3.5 h-3.5 opacity-80 shrink-0" style={{ color: (currentTheme === 'dark' || currentTheme === 'glass') ? '#7dd3fc' : '#0369a1' }} />
-            <span style={{ color: (currentTheme === 'dark' || currentTheme === 'glass') ? '#e2e8f0' : '#0f172a' }}>{clockDate || 'Cargando...'}</span>
+            <span suppressHydrationWarning style={{ color: (currentTheme === 'dark' || currentTheme === 'glass') ? '#e2e8f0' : '#0f172a' }}>{clockDate || 'Cargando...'}</span>
             <span style={{ color: (currentTheme === 'dark' || currentTheme === 'glass') ? '#64748b' : '#94a3b8' }}>|</span>
-            <span className="font-black tabular-numbers tracking-wide" style={{ color: (currentTheme === 'dark' || currentTheme === 'glass') ? '#ffffff' : '#000000' }}>{clockTime || '--:--:--'}</span>
+            <span suppressHydrationWarning className="font-black tabular-numbers tracking-wide" style={{ color: (currentTheme === 'dark' || currentTheme === 'glass') ? '#ffffff' : '#000000' }}>{clockTime || '--:--:--'}</span>
           </div>
         </div>
       </header>

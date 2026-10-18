@@ -95,7 +95,11 @@ export default function LiveTablesPage() {
   const [activeZone, setActiveZone] = useState<'all' | 'salon' | 'terraza' | 'barra' | 'vip'>('all');
   const [selectedTable, setSelectedTable] = useState<LiveTable | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
-  const [lastSyncTime, setLastSyncTime] = useState<string>(new Date().toLocaleTimeString());
+  const [lastSyncTime, setLastSyncTime] = useState<string>('');
+
+  useEffect(() => {
+    setLastSyncTime(new Date().toLocaleTimeString());
+  }, []);
 
   // Listen to KlikMenu BroadcastChannel
   useEffect(() => {
@@ -237,7 +241,7 @@ export default function LiveTablesPage() {
             className="px-3.5 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-bold flex items-center gap-2 transition"
           >
             <RefreshCw className={`w-4 h-4 text-slate-500 ${isSyncing ? 'animate-spin' : ''}`} />
-            <span>Última Sync: {lastSyncTime}</span>
+            <span suppressHydrationWarning>Última Sync: {lastSyncTime || 'Sincronizado'}</span>
           </button>
 
           <a
