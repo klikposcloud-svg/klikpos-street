@@ -1,14 +1,14 @@
 {
-  "version": "3.0.24",
-  "releaseDate": "2026-10-11",
-  "title": "KlikPOS Suite v3.0.24 - Alto Contraste en Verificación y Modal Sutil de Actualización",
+  "version": "3.0.25",
+  "releaseDate": "2026-10-18",
+  "title": "KlikPOS Suite v3.0.25 - Rebranding Klikpos Cloud, Alto Contraste WCAG AAA y Ergonomía POS",
   "notes": [
-    "Alto Contraste Exterior en Verificación: Rediseño de la cabecera y tarjeta de versiones en el Centro de Actualizaciones con fondos oscuros profundos y tarjetas sólidas (ratio WCAG AAA > 12:1), eliminando el efecto lavado o blanco.",
-    "Aviso Sutil de Actualización OTA: Modal flotante no invasivo que alerta con 1 toque al operador cuando hay una nueva versión lista para descargar (APK/Setup) sin bloquear ventas ni la pantalla.",
-    "Soporte Adaptativo Dual: Compatibilidad plena con temas oscuro y claro (isLight) en modales de actualización.",
-    "Distribución Oficial Unificada: Compilaciones sincronizadas para Android Street, Móvil Autónomo y Desktop Windows."
+    "Rebranding Oficial a Klikpos Cloud: Sincronización en la nube renombrada y unificada bajo la marca maestra Klikpos Cloud.",
+    "Corrección de Contraste WCAG AAA en Licenciamiento: Botón y enlaces de WhatsApp con fondo blanco blindado y tipografía oscura profunda (#0f172a, ratio 18.7:1), eliminando texto blanco sobre blanco.",
+    "Optimización Ergonómica de Catálogo POS: Contenedores con auto-fill responsivo de 6 a 8 columnas e imágenes completas centradas con ajuste contain, maximizando la visibilidad de productos.",
+    "Barra de Acciones Compacta: Reducción de altura a 30px en barra superior para aprovechar el espacio vertical de venta."
   ],
-  "windowsUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.24/KlikPOS_Desktop_Full_Setup.exe",
-  "androidUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.24/KlikPOS_Movil_Full.apk",
+  "windowsUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.25/KlikPOS_Desktop_Full_Setup.exe",
+  "androidUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.25/KlikPOS_Movil_Full.apk",
   "mandatory": false
 }
