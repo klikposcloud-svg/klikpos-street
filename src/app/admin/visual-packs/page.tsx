@@ -222,8 +222,8 @@ export default function AdminVisualPacksPage() {
       await loadCloudPacks();
       setTimeout(() => setSaveSuccess(false), 4000);
     } catch (err) {
-      console.error('Error guardando paquete en Firestore:', err);
-      alert('No se pudo guardar en Firestore. Verifica la conexión y permisos.');
+      console.error('Error guardando paquete en Klikpos Cloud:', err);
+      alert('No se pudo guardar en Klikpos Cloud. Verifica la conexión y permisos.');
     } finally {
       setIsSaving(false);
     }
@@ -304,7 +304,7 @@ export default function AdminVisualPacksPage() {
           <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center gap-3 animate-in fade-in">
             <CheckCircle2 className="w-5 h-5 shrink-0" />
             <span className="text-xs font-bold">
-              ¡Paquete publicado exitosamente en Firestore! Ahora todos tus clientes pueden descargarlo desde su POS.
+              ¡Paquete publicado exitosamente en Klikpos Cloud! Ahora todos tus clientes pueden descargarlo desde su POS.
             </span>
           </div>
         )}
@@ -393,7 +393,7 @@ export default function AdminVisualPacksPage() {
                   </div>
                   <div>
                     <h2 className="text-base font-black text-white">Crear y Publicar Paquete Visual Cloud</h2>
-                    <p className="text-xs text-slate-400">El paquete se sincronizará automáticamente en Firestore.</p>
+                    <p className="text-xs text-slate-400">El paquete se sincronizará automáticamente en Klikpos Cloud.</p>
                   </div>
                 </div>
                 <button
@@ -677,7 +677,7 @@ export default function AdminVisualPacksPage() {
                     className="px-6 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 disabled:opacity-50 text-white text-xs font-black flex items-center gap-2 shadow-lg active:scale-95 transition-all"
                   >
                     {isSaving ? <RefreshCw className="w-4 h-4 animate-spin" /> : <UploadCloud className="w-4 h-4" />}
-                    <span>{isSaving ? 'Publicando en Firestore...' : 'Publicar Paquete en la Nube'}</span>
+                    <span>{isSaving ? 'Publicando en Klikpos Cloud...' : 'Publicar Paquete en la Nube'}</span>
                   </button>
                 </div>
               </form>

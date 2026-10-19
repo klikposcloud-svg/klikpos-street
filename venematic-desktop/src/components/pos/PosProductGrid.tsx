@@ -16,6 +16,7 @@ import {
   UtensilsCrossed,
   Sparkles,
   Package,
+  Maximize2,
 } from 'lucide-react';
 
 export type PosViewMode = 'grid' | 'list' | 'touch' | 'fastfood' | 'capsule';
@@ -33,6 +34,7 @@ interface PosProductGridProps {
   showImages: boolean;
   onAddToCart: (p: LocalProduct, qty?: number) => void;
   onOpenIconSelector: (p: LocalProduct) => void;
+  isSimplifiedView?: boolean;
 }
 
 export default function PosProductGrid({
@@ -48,7 +50,23 @@ export default function PosProductGrid({
   showImages,
   onAddToCart,
   onOpenIconSelector,
+  isSimplifiedView = false,
 }: PosProductGridProps) {
+  const [imageFitMode, setImageFitMode] = React.useState<'contain' | 'cover'>(() => {
+    if (typeof window !== 'undefined') {
+      return (localStorage.getItem('klikpos_image_fit_mode') as 'contain' | 'cover') || 'contain';
+    }
+    return 'contain';
+  });
+
+  const toggleImageFit = () => {
+    const nextMode = imageFitMode === 'contain' ? 'cover' : 'contain';
+    setImageFitMode(nextMode);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('klikpos_image_fit_mode', nextMode);
+    }
+  };
+
   return (
     <>
       {/* ========================================================================= */}
@@ -84,98 +102,115 @@ export default function PosProductGrid({
           {filteredProducts.length} producto{filteredProducts.length === 1 ? '' : 's'}
         </span>
 
-        <div className="flex items-center gap-1 p-0.5 bg-slate-100 dark:bg-slate-800/90 rounded-xl border border-slate-200 dark:border-slate-700/80 select-none shadow-2xs">
+        <div className="flex items-center gap-1.5">
+          {/* Botón Fit / Cover para que las fotos de empaques se vean completas */}
           <button
             type="button"
-            onClick={() => onSetPosViewMode('grid')}
-            className={`flex items-center gap-1 px-2 py-0.5 rounded-lg text-[11px] font-black transition-all cursor-pointer ${
-              posViewMode === 'grid'
-                ? 'bg-sky-600 text-white shadow-2xs'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+            onClick={toggleImageFit}
+            className={`flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10.5px] font-bold transition-all cursor-pointer border shadow-2xs ${
+              imageFitMode === 'contain'
+                ? 'bg-sky-50 dark:bg-sky-950/50 text-sky-700 dark:text-sky-300 border-sky-300 dark:border-sky-700'
+                : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50'
             }`}
-            title="Vista de Cuadrícula Visual con Imágenes"
+            title={imageFitMode === 'contain' ? 'Modo Ajuste (Fit): El producto se ve completo sin recortar' : 'Modo Relleno (Cover): La foto llena el marco'}
           >
-            <LayoutGrid className="w-3 h-3" />
-            <span>Cuadrícula</span>
+            <Maximize2 className="w-3 h-3 text-sky-600 dark:text-sky-400" />
+            <span>{imageFitMode === 'contain' ? 'Ajustar (Fit)' : 'Llenar (Cover)'}</span>
           </button>
 
-          {isPosViewAllowed('list') && (
+          <div className="flex items-center gap-1 p-0.5 bg-slate-100 dark:bg-slate-800/90 rounded-xl border border-slate-200 dark:border-slate-700/80 select-none shadow-2xs">
             <button
               type="button"
-              onClick={() => onSetPosViewMode('list')}
+              onClick={() => onSetPosViewMode('grid')}
               className={`flex items-center gap-1 px-2 py-0.5 rounded-lg text-[11px] font-black transition-all cursor-pointer ${
-                posViewMode === 'list'
-                  ? 'bg-emerald-600 text-white shadow-2xs'
+                posViewMode === 'grid'
+                  ? 'bg-sky-600 text-white shadow-2xs'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
-              title="Vista en Lista Compacta de Alta Densidad"
+              title="Vista de Cuadrícula Visual con Imágenes"
             >
-              <List className="w-3 h-3" />
-              <span>Lista</span>
+              <LayoutGrid className="w-3 h-3" />
+              <span>Cuadrícula</span>
             </button>
-          )}
 
-          {isPosViewAllowed('touch') && (
-            <button
-              type="button"
-              onClick={() => onSetPosViewMode('touch')}
-              className={`flex items-center gap-1 px-2 py-0.5 rounded-lg text-[11px] font-black transition-all cursor-pointer ${
-                posViewMode === 'touch'
-                  ? 'bg-amber-500 text-slate-950 shadow-2xs font-black'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-              }`}
-              title="Tema Kiosco Minimalista (Iconos Fill/Outline alternados)"
-            >
-              <Coffee className="w-3 h-3" />
-              <span>Minimalista</span>
-            </button>
-          )}
+            {isPosViewAllowed('list') && (
+              <button
+                type="button"
+                onClick={() => onSetPosViewMode('list')}
+                className={`flex items-center gap-1 px-2 py-0.5 rounded-lg text-[11px] font-black transition-all cursor-pointer ${
+                  posViewMode === 'list'
+                    ? 'bg-emerald-600 text-white shadow-2xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                }`}
+                title="Vista en Lista Compacta de Alta Densidad"
+              >
+                <List className="w-3 h-3" />
+                <span>Lista</span>
+              </button>
+            )}
 
-          {isPosViewAllowed('touch') && posViewMode === 'touch' && (
-            <button
-              type="button"
-              onClick={onToggleMinimalistPalette}
-              className="flex items-center gap-1 px-2 py-0.5 rounded-lg text-[11px] font-bold transition-all cursor-pointer bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 border border-slate-300 dark:border-slate-600 hover:bg-slate-50 shadow-2xs"
-              title="Alternar entre Colores por Categoría y Escala Monocromática Minimalista"
-            >
-              <Palette className="w-3 h-3 text-sky-600 dark:text-sky-400" />
-              <span>
-                {minimalistColorPalette === 'category' ? '🎨 Rubro' : '🔘 Mono'}
-              </span>
-            </button>
-          )}
+            {isPosViewAllowed('touch') && (
+              <button
+                type="button"
+                onClick={() => onSetPosViewMode('touch')}
+                className={`flex items-center gap-1 px-2 py-0.5 rounded-lg text-[11px] font-black transition-all cursor-pointer ${
+                  posViewMode === 'touch'
+                    ? 'bg-amber-500 text-slate-950 shadow-2xs font-black'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                }`}
+                title="Tema Kiosco Minimalista (Iconos Fill/Outline alternados)"
+              >
+                <Coffee className="w-3 h-3" />
+                <span>Minimalista</span>
+              </button>
+            )}
 
-          {isPosViewAllowed('capsule') && (
-            <button
-              type="button"
-              onClick={() => onSetPosViewMode('fastfood')}
-              className={`flex items-center gap-1 px-2 py-0.5 rounded-lg text-[11px] font-black transition-all cursor-pointer ${
-                posViewMode === 'fastfood'
-                  ? 'bg-amber-500 text-slate-950 shadow-2xs font-black'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-              }`}
-              title="Modo Comida Rápida / Fast Food (Cuadrícula Táctil 3x3)"
-            >
-              <UtensilsCrossed className="w-3 h-3" />
-              <span>Comida Rápida</span>
-            </button>
-          )}
+            {isPosViewAllowed('touch') && posViewMode === 'touch' && (
+              <button
+                type="button"
+                onClick={onToggleMinimalistPalette}
+                className="flex items-center gap-1 px-2 py-0.5 rounded-lg text-[11px] font-bold transition-all cursor-pointer bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 border border-slate-300 dark:border-slate-600 hover:bg-slate-50 shadow-2xs"
+                title="Alternar entre Colores por Categoría y Escala Monocromática Minimalista"
+              >
+                <Palette className="w-3 h-3 text-sky-600 dark:text-sky-400" />
+                <span>
+                  {minimalistColorPalette === 'category' ? '🎨 Rubro' : '🔘 Mono'}
+                </span>
+              </button>
+            )}
 
-          {isPosViewAllowed('capsule') && (
-            <button
-              type="button"
-              onClick={() => onSetPosViewMode('capsule')}
-              className={`flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-[11px] font-black transition-all cursor-pointer ${
-                posViewMode === 'capsule'
-                  ? 'bg-gradient-to-r from-amber-600 to-orange-600 text-white shadow-2xs'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-              }`}
-              title="Vista Gourmet en Cápsulas Horizontales (Estilo Bodegón & Glassmorphism)"
-            >
-              <Sparkles className="w-3 h-3 text-amber-300" />
-              <span>Gourmet</span>
-            </button>
-          )}
+            {isPosViewAllowed('capsule') && (
+              <button
+                type="button"
+                onClick={() => onSetPosViewMode('fastfood')}
+                className={`flex items-center gap-1 px-2 py-0.5 rounded-lg text-[11px] font-black transition-all cursor-pointer ${
+                  posViewMode === 'fastfood'
+                    ? 'bg-amber-500 text-slate-950 shadow-2xs font-black'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                }`}
+                title="Modo Comida Rápida / Fast Food (Cuadrícula Táctil 3x3)"
+              >
+                <UtensilsCrossed className="w-3 h-3" />
+                <span>Comida Rápida</span>
+              </button>
+            )}
+
+            {isPosViewAllowed('capsule') && (
+              <button
+                type="button"
+                onClick={() => onSetPosViewMode('capsule')}
+                className={`flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-[11px] font-black transition-all cursor-pointer ${
+                  posViewMode === 'capsule'
+                    ? 'bg-gradient-to-r from-amber-600 to-orange-600 text-white shadow-2xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                }`}
+                title="Vista Gourmet en Cápsulas Horizontales (Estilo Bodegón & Glassmorphism)"
+              >
+                <Sparkles className="w-3 h-3 text-amber-300" />
+                <span>Gourmet</span>
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
@@ -185,7 +220,18 @@ export default function PosProductGrid({
       <div className="flex-1 overflow-y-auto pr-1">
         {/* MODO 1: CUADRÍCULA VISUAL (GRID) */}
         {posViewMode === 'grid' && (
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4 gap-3 content-start">
+          <div
+            className={`grid gap-2 sm:gap-2.5 content-start ${
+              isSimplifiedView
+                ? ''
+                : 'grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4'
+            }`}
+            style={
+              isSimplifiedView
+                ? { gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))' }
+                : undefined
+            }
+          >
             {filteredProducts.map((p) => {
               const isLowStock = p.stock <= p.minStock;
               const isFixed = p.isFixedPriceVES && p.fixedPriceVES;
@@ -195,54 +241,55 @@ export default function PosProductGrid({
                 <div
                   key={p.id}
                   onClick={() => onAddToCart(p, 1)}
-                  className="pos-white-card bg-white rounded-2xl border-2 border-slate-300 dark:border-slate-700/80 shadow-[0_2px_8px_rgba(0,0,0,0.06)] hover:shadow-md hover:border-slate-400 dark:hover:border-slate-500 transition-all active:scale-[0.98] cursor-pointer flex flex-col justify-between group select-none p-3"
+                  className="bg-white dark:bg-slate-800 rounded-2xl border-2 border-slate-200/90 dark:border-slate-700/80 shadow-2xs hover:shadow-md hover:border-sky-500 dark:hover:border-sky-400 transition-all active:scale-[0.98] cursor-pointer flex flex-col justify-between group select-none p-3"
                 >
-                  <div className="flex items-center justify-between gap-1.5 w-full mb-1.5">
-                    <span className="font-mono text-[10px] font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200 truncate">
+                  <div className="flex items-center justify-between gap-1 w-full mb-1">
+                    <span className="font-mono text-[9.5px] font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md border border-slate-200 dark:border-slate-700 truncate">
                       {p.barcode ? (p.barcode.length > 4 ? p.barcode.slice(-4) : p.barcode) : '759...'}
                     </span>
                     <div className="flex items-center gap-1">
                       {isFixed && (
-                        <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-amber-500 text-white shrink-0 shadow-2xs">
-                          🔒 Fijo Bs.
+                        <span className="text-[8.5px] font-black px-1.5 py-0.5 rounded bg-amber-500 text-white shrink-0 shadow-2xs">
+                          🔒 Fijo
                         </span>
                       )}
-                      <span className={`text-[9.5px] font-black px-2 py-0.5 rounded-md text-white uppercase tracking-wider shrink-0 truncate max-w-[120px] ${getCategoryBadgeColor(p.category)}`}>
+                      <span className={`text-[9px] font-black px-2 py-0.5 rounded-md text-white uppercase tracking-wider shrink-0 truncate max-w-[110px] ${getCategoryBadgeColor(p.category)}`}>
                         {p.category}
                       </span>
                     </div>
                   </div>
 
-                  <h4 className="font-black text-[13px] text-slate-900 leading-snug my-1 line-clamp-2 min-h-[36px] flex items-center" title={p.name}>
+                  <h4 className="font-bold text-[13px] text-slate-900 dark:text-white leading-tight my-1 line-clamp-2 min-h-[36px] flex items-center" title={p.name}>
                     {p.name}
                   </h4>
 
-                  <div className="w-full h-24 sm:h-28 rounded-xl bg-slate-50 overflow-hidden relative border border-slate-200/80 mb-2">
+                  {/* Contenedor Proporcional y Centrado (No Alargado) */}
+                  <div className="w-full h-32 sm:h-36 rounded-xl bg-slate-50/80 dark:bg-slate-900/60 overflow-hidden relative border border-slate-200/70 dark:border-slate-800 my-1.5 p-2 flex items-center justify-center">
                     {p.image && showImages ? (
                       <img
                         src={p.image}
                         alt={p.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                        className={`max-h-full max-w-full ${imageFitMode === 'contain' ? 'object-contain object-center' : 'w-full h-full object-cover'} group-hover:scale-105 transition-transform duration-200 drop-shadow-xs`}
                         loading="lazy"
                       />
                     ) : (
-                      <div className="w-full h-full flex flex-col items-center justify-center text-slate-300">
+                      <div className="w-full h-full flex flex-col items-center justify-center text-slate-300 dark:text-slate-600">
                         <Package className="w-8 h-8 stroke-1" />
                       </div>
                     )}
                   </div>
 
-                  <div className="flex items-end justify-between gap-1.5 pt-1 mt-auto border-t border-slate-100">
+                  <div className="flex items-end justify-between gap-1 pt-1.5 mt-auto border-t border-slate-100 dark:border-slate-800">
                     <div className="leading-tight flex flex-col">
-                      <span className="text-[14.5px] sm:text-[15.5px] font-black font-sans text-slate-950 tabular-numbers leading-tight">
+                      <span className="text-[14px] sm:text-[15px] font-black font-sans text-slate-950 dark:text-white tabular-numbers leading-tight">
                         {formatVES(displayVES)}
                       </span>
-                      <span className="text-[11px] text-slate-600 font-bold mt-0.5">
+                      <span className="text-[11px] text-slate-500 dark:text-slate-400 font-semibold leading-tight mt-0.5">
                         ${displayUSD.toFixed(2)}
                       </span>
                     </div>
 
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border border-slate-200 bg-slate-100 text-slate-800 shrink-0 flex items-center gap-1.5">
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 shrink-0 flex items-center gap-1.5">
                       <span className={`w-2 h-2 rounded-full ${isLowStock ? 'bg-rose-500 animate-pulse' : 'bg-emerald-500'} shrink-0`} />
                       <span>{p.stock}</span>
                     </span>
@@ -265,21 +312,21 @@ export default function PosProductGrid({
                 <div
                   key={p.id}
                   onClick={() => onAddToCart(p, 1)}
-                  className="pos-white-card bg-white hover:bg-sky-50/50 border-2 border-slate-200/90 dark:border-sky-500/20 rounded-xl px-3 py-2 flex items-center justify-between gap-3 shadow-xs hover:shadow-sm transition-all cursor-pointer group select-none active:scale-[0.99]"
+                  className="bg-white hover:bg-sky-50/50 dark:bg-slate-800 dark:hover:bg-slate-750 border-2 border-slate-200/90 dark:border-slate-700/80 rounded-xl px-3 py-2 flex items-center justify-between gap-3 shadow-xs hover:shadow-sm transition-all cursor-pointer group select-none active:scale-[0.99]"
                 >
                   {/* Miniatura / Ícono + Nombre + SKU */}
                   <div className="flex items-center gap-3 min-w-0 flex-1">
-                    <div className="w-10 h-10 rounded-lg bg-slate-50 border border-slate-200 overflow-hidden shrink-0 flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 overflow-hidden shrink-0 flex items-center justify-center p-0.5">
                       {p.image && showImages ? (
-                        <img src={p.image} alt={p.name} className="w-full h-full object-cover" loading="lazy" />
+                        <img src={p.image} alt={p.name} className="w-full h-full object-contain" loading="lazy" />
                       ) : (
-                        <Package className="w-5 h-5 text-slate-400 stroke-1" />
+                        <Package className="w-5 h-5 text-slate-400 dark:text-slate-500 stroke-1" />
                       )}
                     </div>
 
                     <div className="min-w-0 flex-1 leading-tight">
                       <div className="flex items-center gap-2">
-                        <span className="font-bold text-xs sm:text-[13px] text-slate-900 truncate" title={p.name}>
+                        <span className="font-bold text-xs sm:text-[13px] text-slate-900 dark:text-white truncate" title={p.name}>
                           {p.name}
                         </span>
                         {isFixed && (
@@ -291,24 +338,24 @@ export default function PosProductGrid({
                           {p.category}
                         </span>
                       </div>
-                      <span className="font-mono text-[10px] text-slate-400 mt-0.5 block">
+                      <span className="font-mono text-[10px] text-slate-400 dark:text-slate-400 mt-0.5 block">
                         SKU: {p.barcode || '759...'} {(p.unit === 'kg' || (p as any).isWeighable) && '• ⚖️ Pesable'}
                       </span>
                     </div>
                   </div>
 
                   {/* Stock */}
-                  <span className="text-[10.5px] font-bold px-2.5 py-1 rounded-full border border-slate-200 bg-slate-50 text-slate-700 shrink-0 flex items-center gap-1.5">
+                  <span className="text-[10.5px] font-bold px-2.5 py-1 rounded-full border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-700 text-slate-700 dark:text-slate-200 shrink-0 flex items-center gap-1.5">
                     <span className={`w-2 h-2 rounded-full ${isLowStock ? 'bg-rose-500 animate-pulse' : 'bg-emerald-500'} shrink-0`} />
                     <span>{p.stock} {p.unit === 'kg' || (p as any).isWeighable ? 'kg' : 'uds'}</span>
                   </span>
 
                   {/* Precios duales */}
                   <div className="text-right leading-tight min-w-[110px] shrink-0">
-                    <span className="font-black text-sm text-slate-950 tabular-numbers block">
+                    <span className="font-black text-sm text-slate-950 dark:text-white tabular-numbers block">
                       {formatVES(displayVES)}
                     </span>
-                    <span className="text-[11px] text-slate-500 font-semibold block">
+                    <span className="text-[11px] text-slate-500 dark:text-slate-400 font-semibold block">
                       ${displayUSD.toFixed(2)}
                     </span>
                   </div>
@@ -328,7 +375,18 @@ export default function PosProductGrid({
 
         {/* MODO 3: TÁCTIL MINIMALISTA / KIOSCO */}
         {posViewMode === 'touch' && (
-          <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4 gap-4 xl:gap-5 content-start h-full py-2 pb-24">
+          <div
+            className={`grid gap-4 xl:gap-5 content-start h-full py-2 pb-24 ${
+              isSimplifiedView
+                ? ''
+                : 'grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4'
+            }`}
+            style={
+              isSimplifiedView
+                ? { gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))' }
+                : undefined
+            }
+          >
             {filteredProducts.map((p) => {
               const isLowStock = p.stock <= p.minStock;
               const isFixed = p.isFixedPriceVES && p.fixedPriceVES;
@@ -399,7 +457,18 @@ export default function PosProductGrid({
 
         {/* MODO 4: COMIDA RÁPIDA / FAST FOOD */}
         {posViewMode === 'fastfood' && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-3 gap-4 xl:gap-5 content-start pt-2">
+          <div
+            className={`grid gap-4 xl:gap-5 content-start pt-2 ${
+              isSimplifiedView
+                ? ''
+                : 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-3'
+            }`}
+            style={
+              isSimplifiedView
+                ? { gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))' }
+                : undefined
+            }
+          >
             {filteredProducts.map((p) => {
               const isLowStock = p.stock <= p.minStock;
               const isFixed = p.isFixedPriceVES && p.fixedPriceVES;
@@ -472,7 +541,18 @@ export default function PosProductGrid({
 
         {/* MODO 5: CÁPSULAS HORIZONTALES GOURMET */}
         {posViewMode === 'capsule' && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-2 gap-4 xl:gap-5 content-start pt-1">
+          <div
+            className={`grid gap-4 xl:gap-5 content-start pt-1 ${
+              isSimplifiedView
+                ? ''
+                : 'grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-2'
+            }`}
+            style={
+              isSimplifiedView
+                ? { gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))' }
+                : undefined
+            }
+          >
             {filteredProducts.map((p) => {
               const isLowStock = p.stock <= p.minStock;
               const isFixed = p.isFixedPriceVES && p.fixedPriceVES;

@@ -116,7 +116,7 @@ export default function CloudSyncWidget() {
             type="button"
             onClick={() => setModalOpen(true)}
             className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-300 text-emerald-700 hover:bg-emerald-100 transition-all text-xs font-semibold shadow-2xs"
-            title="Nube Firestore sincronizada"
+            title="Klikpos Cloud sincronizada"
           >
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
             <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
@@ -129,7 +129,7 @@ export default function CloudSyncWidget() {
             type="button"
             onClick={() => setModalOpen(true)}
             className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-indigo-50 border border-indigo-300 text-indigo-700 hover:bg-indigo-100 transition-all text-xs font-semibold shadow-2xs"
-            title="Sincronizando con Firestore..."
+            title="Sincronizando con Klikpos Cloud..."
           >
             <RefreshCw className="w-3.5 h-3.5 animate-spin text-indigo-600" />
             <span className="hidden sm:inline">Sincronizando...</span>
@@ -166,7 +166,7 @@ export default function CloudSyncWidget() {
             type="button"
             onClick={() => setModalOpen(true)}
             className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 border border-slate-300 text-slate-600 hover:bg-slate-200 transition-all text-xs font-medium"
-            title="Conectar con Google Cloud Firestore"
+            title="Conectar con Klikpos Cloud"
           >
             <Cloud className="w-3.5 h-3.5 text-slate-500" />
             <span className="hidden sm:inline">Conectar Nube</span>
@@ -179,7 +179,7 @@ export default function CloudSyncWidget() {
     <>
       {renderBadge()}
 
-      {/* Modal de Control y Configuración de Firestore */}
+      {/* Modal de Control y Configuración de Klikpos Cloud */}
       {modalOpen && (
         <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-xs flex items-center justify-center p-4 select-none">
           <div className="bg-white rounded-3xl shadow-2xl border border-slate-200 w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh] animate-in fade-in zoom-in-95">
@@ -191,7 +191,7 @@ export default function CloudSyncWidget() {
                 </div>
                 <div>
                   <h3 className="font-extrabold text-base text-white flex items-center gap-2">
-                    <span>Google Cloud Firestore</span>
+                    <span>Klikpos Cloud</span>
                     <span className="text-[10px] bg-indigo-500/30 text-indigo-200 px-2 py-0.5 rounded-full font-mono border border-indigo-400/20">
                       Sync v2.0
                     </span>
@@ -259,12 +259,12 @@ export default function CloudSyncWidget() {
                 )}
               </div>
 
-              {/* Formulario de Configuración de Firebase Console */}
+              {/* Formulario de Configuración de Klikpos Cloud */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <h4 className="text-xs font-extrabold text-slate-800 flex items-center gap-1.5 uppercase tracking-wider">
                     <Settings2 className="w-3.5 h-3.5 text-indigo-600" />
-                    <span>Credenciales de Firebase Console</span>
+                    <span>Credenciales de Klikpos Cloud</span>
                   </h4>
                   {isFirebaseConfigured() && (
                     <button
@@ -278,9 +278,7 @@ export default function CloudSyncWidget() {
                 </div>
 
                 <p className="text-xs text-slate-600 leading-relaxed">
-                  Para conectar esta terminal a tu base de datos en la nube, ve a{' '}
-                  <span className="font-semibold text-slate-800">Firebase Console ➔ Configuración del Proyecto ➔ General</span>,
-                  copia el objeto <code className="bg-slate-100 text-indigo-600 px-1 py-0.5 rounded text-[11px]">firebaseConfig</code> y pégalo abajo:
+                  Para conectar esta terminal a tu base de datos en la nube, ingresa tus credenciales de Klikpos Cloud o el objeto de configuración JSON:
                 </p>
 
                 <form onSubmit={handleSaveJsonConfig} className="space-y-3">

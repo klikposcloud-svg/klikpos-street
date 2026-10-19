@@ -79,7 +79,7 @@ export default function CloudSyncSettingsCard() {
       });
 
       setShowConfigBox(false);
-      setSyncResult('✓ Credenciales de Firebase guardadas. Conectando...');
+      setSyncResult('✓ Credenciales de Klikpos Cloud guardadas. Conectando...');
       cloudSyncService.syncAll();
       setTimeout(() => setSyncResult(null), 4000);
     } catch (err: any) {
@@ -92,7 +92,7 @@ export default function CloudSyncSettingsCard() {
       <div className="flex items-center justify-between border-b border-slate-200 pb-2">
         <h3 className="font-bold text-xs uppercase tracking-wider text-slate-700 flex items-center gap-2">
           <Database className="w-4 h-4 text-indigo-600" />
-          <span>Sincronización en la Nube (Google Cloud Firestore)</span>
+          <span>Sincronización en la Nube (Klikpos Cloud)</span>
         </h3>
         <span
           className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1.5 ${
@@ -120,8 +120,8 @@ export default function CloudSyncSettingsCard() {
       </div>
 
       <p className="text-xs text-slate-600 leading-relaxed">
-        Respalda automáticamente todas las ventas y el catálogo de productos en tu proyecto de{' '}
-        <strong>Google Cloud Firestore</strong>. Permite al dueño consultar ventas desde su celular y alimentar la tienda web y app de delivery.
+        Respalda automáticamente todas las ventas y el catálogo de productos en tu cuenta de{' '}
+        <strong>Klikpos Cloud</strong>. Permite al dueño consultar ventas desde su celular y alimentar la tienda web y app de delivery.
       </p>
 
       <div className="grid grid-cols-2 gap-3 p-3 bg-slate-50 border border-slate-200 rounded-lg text-xs">

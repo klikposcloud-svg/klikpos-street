@@ -48,7 +48,7 @@ export default function PosBottomCompactDock({
 
   return (
     <>
-      {/* DRAWER FLOTANTE PARA REVISAR O EDITAR ÃTEMS DEL TICKET */}
+      {/* DRAWER FLOTANTE PARA REVISAR O EDITAR ÍTEMS DEL TICKET */}
       {isDrawerOpen && (
         <div 
           className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex justify-end animate-in fade-in duration-200"
@@ -63,7 +63,7 @@ export default function PosBottomCompactDock({
               <div className="flex items-center gap-2">
                 <ShoppingCart className="w-5 h-5 text-blue-600" />
                 <h3 className="font-black text-sm uppercase text-slate-900 dark:text-white font-mono">
-                  Ticket Actual ({totalItemsCount} Ã­tems)
+                  Ticket Actual ({totalItemsCount} ítems)
                 </h3>
               </div>
               <div className="flex items-center gap-2">
@@ -93,7 +93,7 @@ export default function PosBottomCompactDock({
               {cart.length === 0 ? (
                 <div className="h-full flex flex-col items-center justify-center text-slate-400 text-xs font-mono">
                   <ShoppingCart className="w-10 h-10 mb-2 opacity-30" />
-                  <span>Ticket vacÃ­o. Toca un producto para agregar.</span>
+                  <span>Ticket vacío. Toca un producto para agregar.</span>
                 </div>
               ) : (
                 cart.map((item) => (
@@ -107,7 +107,7 @@ export default function PosBottomCompactDock({
                       </h4>
                       <div className="text-[11px] text-slate-500 flex items-center gap-2 mt-0.5">
                         <span>${item.priceUSD.toFixed(2)} c/u</span>
-                        <span>â€¢</span>
+                        <span>•</span>
                         <span>{formatVES(item.priceUSD * bcvRate)}</span>
                       </div>
                     </div>
@@ -139,7 +139,7 @@ export default function PosBottomCompactDock({
                       </button>
                     </div>
 
-                    {/* Subtotal del Ã­tem */}
+                    {/* Subtotal del ítem */}
                     <div className="text-right shrink-0 min-w-[65px]">
                       <div className="font-black text-slate-900 dark:text-white">
                         ${(item.priceUSD * (item.qty || item.quantity || 1)).toFixed(2)}
@@ -191,11 +191,11 @@ export default function PosBottomCompactDock({
       )}
 
       {/* ========================================================================= */}
-      {/* BARRA INFERIOR COMPACTA DOCK: ESTILO MOSTRADOR RÃPIDO                     */}
+      {/* BARRA INFERIOR COMPACTA DOCK: ESTILO MOSTRADOR RÁPIDO                     */}
       {/* ========================================================================= */}
       <div className="w-full shrink-0 bg-slate-950 text-white border-t border-slate-800 shadow-2xl px-4 py-2.5 rounded-2xl flex flex-wrap items-center justify-between gap-3 font-mono z-30 select-none">
         
-        {/* LADO IZQUIERDO: SWITCH DE MODO + BOTÃ“N DEL TICKET */}
+        {/* LADO IZQUIERDO: SWITCH DE MODO + BOTÓN DEL TICKET */}
         <div className="flex items-center gap-2.5">
           <button
             type="button"
@@ -204,7 +204,7 @@ export default function PosBottomCompactDock({
             title="Volver a la vista tradicional de 2 columnas"
           >
             <Columns2 className="w-3.5 h-3.5 text-cyan-400" />
-            <span className="hidden sm:inline font-bold">Vista ClÃ¡sica</span>
+            <span className="hidden sm:inline font-bold">Vista Clásica</span>
           </button>
 
           <button
@@ -214,7 +214,7 @@ export default function PosBottomCompactDock({
           >
             <ShoppingCart className="w-4 h-4 text-cyan-400" />
             <span className="font-black text-sm">{totalItemsCount}</span>
-            <span className="text-slate-400 text-xs hidden sm:inline">artÃ­culos</span>
+            <span className="text-slate-400 text-xs hidden sm:inline">artículos</span>
             {cart.length > 0 && (
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
             )}
@@ -252,7 +252,7 @@ export default function PosBottomCompactDock({
           </div>
         </div>
 
-        {/* LADO DERECHO: BOTÃ“N PRINCIPAL DE COBRO */}
+        {/* LADO DERECHO: BOTÓN PRINCIPAL DE COBRO */}
         <div>
           <button
             type="button"

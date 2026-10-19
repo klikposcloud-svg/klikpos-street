@@ -211,7 +211,7 @@ export default function LicenseActivationModal({ isOpen, onClose, onSuccess, isT
 
     setIsRestoring(true);
     setErrorMsg(null);
-    setSuccessMsg('Conectando con Firestore para recuperar su negocio...');
+    setSuccessMsg('Conectando con Klikpos Cloud para recuperar su negocio...');
 
     try {
       const res = await cloudSyncService.restoreUserAndConfig(searchKey);

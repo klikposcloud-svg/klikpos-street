@@ -62,11 +62,18 @@ export interface SupplierInvoiceRecord {
   supplierName: string;
   supplierRif: string;
   invoiceNumber: string;
+  controlNumber?: string; // Número de control SENIAT (ej: 00-123456)
   dateIssued: string; // YYYY-MM-DD
   dueDate: string;    // YYYY-MM-DD
   totalAmountUSD: number;
   remainingAmountUSD: number;
   bcvRate: number;
+  taxExemptUSD?: number;   // Monto exento de IVA en USD
+  taxableBaseUSD?: number; // Base imponible gravada en USD
+  taxRate?: number;        // Alícuota IVA (16%)
+  taxUSD?: number;         // Crédito Fiscal IVA en USD
+  retentionIVAUSD?: number; // IVA retenido al proveedor en USD
+  retentionReceiptNumber?: string; // Número de comprobante de retención
   status: 'pendiente' | 'parcial' | 'pagada' | 'vencida';
   itemsCount: number;
   notes?: string;

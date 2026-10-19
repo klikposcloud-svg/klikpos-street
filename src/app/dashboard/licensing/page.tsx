@@ -286,7 +286,7 @@ export default function LicensingInformationPage() {
                 <button
                   type="button"
                   onClick={handleCopyHwid}
-                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-700 dark:text-slate-200 text-[11px] font-mono font-bold transition-all cursor-pointer"
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-900 dark:text-slate-100 text-[11px] font-mono font-bold transition-all cursor-pointer border border-slate-200 dark:border-slate-600"
                   title="Copiar ID de Terminal para Keygen"
                 >
                   <Copy className="w-3.5 h-3.5 text-indigo-500" />
@@ -297,7 +297,7 @@ export default function LicensingInformationPage() {
                 <button
                   type="button"
                   onClick={handleCopyRif}
-                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-700 dark:text-slate-200 text-[11px] font-mono font-bold transition-all cursor-pointer"
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-900 dark:text-slate-100 text-[11px] font-mono font-bold transition-all cursor-pointer border border-slate-200 dark:border-slate-600"
                   title="Copiar RIF del Comercio"
                 >
                   <Copy className="w-3.5 h-3.5 text-emerald-500" />
@@ -378,7 +378,7 @@ export default function LicensingInformationPage() {
           </div>
 
           {/* Módulo B: Botón Directo Soporte / Ventas WhatsApp (4 Columnas) */}
-          <div className="lg:col-span-4 bg-gradient-to-br from-emerald-600 to-teal-700 text-white rounded-3xl p-5 shadow-xs flex flex-col justify-between">
+          <div className="lg:col-span-4 bg-gradient-to-br from-emerald-600 to-teal-700 rounded-3xl p-5 shadow-xs flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between gap-2 mb-1">
                 <span className="text-[9.5px] font-black uppercase tracking-widest text-emerald-200">
@@ -400,10 +400,16 @@ export default function LicensingInformationPage() {
               href={getWhatsAppUpgradeUrl()}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-3 w-full py-2.5 px-4 rounded-xl bg-white hover:bg-emerald-50 text-slate-900 font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-xs transition-all active:scale-95 cursor-pointer"
+              style={{ backgroundColor: '#ffffff', color: '#0f172a', WebkitTextFillColor: '#0f172a' }}
+              className="mt-3 w-full py-2.5 px-4 rounded-xl bg-white hover:bg-slate-100 font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-xs transition-all active:scale-95 cursor-pointer border border-emerald-200"
             >
-              <MessageCircle className="w-4.5 h-4.5 text-emerald-600" />
-              <span className="font-extrabold text-slate-900">WhatsApp: +58 424-8298026</span>
+              <MessageCircle className="w-4.5 h-4.5 text-emerald-600 shrink-0" />
+              <span
+                style={{ color: '#0f172a', WebkitTextFillColor: '#0f172a' }}
+                className="font-black text-[12px] tracking-wide text-slate-900"
+              >
+                WhatsApp: +58 424-8298026
+              </span>
             </a>
           </div>
         </div>

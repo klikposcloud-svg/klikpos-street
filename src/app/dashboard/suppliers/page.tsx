@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Truck,
   Building2,
@@ -16,18 +16,42 @@ import {
   Receipt,
   X,
   Clock,
-  ArrowDownLeft
+  ArrowDownLeft,
+  BookOpen,
+  Printer,
+  Download,
+  FileText,
 } from 'lucide-react';
 import { FeatureGate } from '@/components/FeatureGate';
+import { db } from '@/lib/db';
 import { financialDB, SupplierRecord, SupplierInvoiceRecord } from '@/lib/db/financial-db';
+import {
+  buildSeniatPurchasesBook,
+  exportSeniatPurchasesBookToCSV,
+} from '@/lib/fiscal/seniat-purchases-book';
+import FiscalPurchasesSheetModal from '@/components/fiscal/FiscalPurchasesSheetModal';
 
 export default function SuppliersPage() {
   const [suppliers, setSuppliers] = useState<SupplierRecord[]>([]);
   const [invoices, setInvoices] = useState<SupplierInvoiceRecord[]>([]);
   const [bcvRate, setBcvRate] = useState<number>(45.50);
-  const [activeTab, setActiveTab] = useState<'invoices' | 'directory'>('invoices');
+  const [activeTab, setActiveTab] = useState<'invoices' | 'directory' | 'seniat_purchases_book'>('invoices');
   const [searchTerm, setSearchTerm] = useState('');
   
+  // Fiscal state para el Libro de Compras SENIAT
+  const [purchasesPeriod, setPurchasesPeriod] = useState<'current_month' | 'all' | 'custom'>('current_month');
+  const [purchasesCustomMonth, setPurchasesCustomMonth] = useState<string>(() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+  });
+  const [showPurchasesSheetModal, setShowPurchasesSheetModal] = useState(false);
+  const [storeInfo, setStoreInfo] = useState({
+    name: 'KLIKPOS ENTERPRISE',
+    rif: 'J-50000000-0',
+    phone: '',
+    address: 'Venezuela',
+  });
+
   // Modals
   const [showNewSupplierModal, setShowNewSupplierModal] = useState(false);
   const [showNewInvoiceModal, setShowNewInvoiceModal] = useState(false);
@@ -47,12 +71,20 @@ export default function SuppliersPage() {
   const [supCategory, setSupCategory] = useState('Alimentos y Bebidas');
   const [supCreditDays, setSupCreditDays] = useState('15');
 
-  // Form State: New Invoice
+  // Form State: New Invoice (con campos tributarios SENIAT)
   const [invSupplierId, setInvSupplierId] = useState('');
   const [invNumber, setInvNumber] = useState('');
+  const [invControlNumber, setInvControlNumber] = useState('');
   const [invAmountUSD, setInvAmountUSD] = useState('');
   const [invDueDate, setInvDueDate] = useState('');
   const [invNotes, setInvNotes] = useState('');
+  const [invIsExempt, setInvIsExempt] = useState(false);
+  const [invTaxExemptUSD, setInvTaxExemptUSD] = useState('');
+  const [invTaxableBaseUSD, setInvTaxableBaseUSD] = useState('');
+  const [invTaxUSD, setInvTaxUSD] = useState('');
+  const [invApplyRetention, setInvApplyRetention] = useState(false);
+  const [invRetentionRate, setInvRetentionRate] = useState<75 | 100>(75);
+  const [invRetentionReceiptNumber, setInvRetentionReceiptNumber] = useState('');
 
   useEffect(() => {
     loadData();

@@ -153,8 +153,8 @@ body[data-canvas="light-graphite"] {
 }
 
 [data-theme="dark"] .pos-white-card {
-  background-color: #ffffff !important;
-  color: #0f172a !important;
+  background-color: #1e293b !important;
+  color: #f8fafc !important;
 }
 
 /* Â§17.3 Tema Glass (Glassmorphism Regulado) */
@@ -329,6 +329,17 @@ html[data-theme="light"] .text-slate-800,
 html[data-ui-style="industrial"] .text-slate-800,
 html:not(.dark) .text-slate-800 {
   color: #0f172a !important;
+  -webkit-text-fill-color: #0f172a !important;
+}
+
+/* Blindaje de texto oscuro: Protege cualquier texto oscuro de heredar -webkit-text-fill-color blanco */
+.text-slate-900,
+.text-slate-950,
+.text-slate-800,
+[class~="text-slate-900"],
+[class~="text-slate-950"],
+[class~="text-slate-800"] {
+  -webkit-text-fill-color: currentColor !important;
 }
 
 /* ========================================================================= */
@@ -2517,7 +2528,7 @@ html:not([data-theme="glass"]):not(.dark) .inventory-capsule-row:hover {
   transform: translateY(-1px);
 }
 
-/* Estilo Oscuro ClÃ¡sico para CÃ¡psulas */
+/* Estilo Oscuro Clásico para Cápsulas */
 html[data-theme="dark"]:not([data-theme="glass"]) .inventory-capsule-row {
   background-color: #141f2e;
   border: 1px solid #233348;
@@ -2548,16 +2559,16 @@ html.theme-glass .inventory-capsule-row:hover {
 }
 
 /* ==========================================================================
-   SALVAGUARDA SUPREMA: CONTRASTE INVERSO EN MODO OSCURO
-   Lienzo Azul Marino Profundo (#0a192f) con Tarjetas Blancas (#ffffff)
+   SALVAGUARDA SUPREMA: MODO OSCURO DE ALTO CONTRASTE (WCAG AAA >= 7:1)
+   Tarjetas en Gris Pizarra Oscuro (#1e293b) con Textos Blanco Nítido (#ffffff)
    ========================================================================== */
 html.dark .pos-white-card,
 html[data-theme="dark"] .pos-white-card,
 [data-theme="dark"] .pos-white-card {
-  background-color: #ffffff !important;
-  background: #ffffff !important;
-  color: #0f172a !important;
-  border-color: rgba(226, 232, 240, 0.9) !important;
+  background-color: #1e293b !important;
+  background: #1e293b !important;
+  color: #f8fafc !important;
+  border-color: #334155 !important;
 }
 
 html.dark .pos-white-card h3,

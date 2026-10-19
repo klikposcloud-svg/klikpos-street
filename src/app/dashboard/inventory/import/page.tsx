@@ -618,7 +618,7 @@ export default function ImportPage() {
             <h2 className="text-xl font-bold text-slate-800 dark:text-white mb-2">Importando productos...</h2>
             <p className="text-sm text-slate-500 dark:text-slate-400">
               Guardando {validProducts.length} productos en IndexedDB
-              {navigator.onLine ? ' y sincronizando con Firestore' : ' (modo offline)'}
+              {navigator.onLine ? ' y sincronizando con Klikpos Cloud' : ' (modo offline)'}
             </p>
           </div>
         )}
@@ -658,7 +658,7 @@ export default function ImportPage() {
 
             {importStats.errors.length > 0 && (
               <div className="card border-red-200 dark:border-red-800">
-                <h3 className="text-sm font-bold text-red-700 dark:text-red-400 mb-2">Errores de Sincronización Firestore</h3>
+                <h3 className="text-sm font-bold text-red-700 dark:text-red-400 mb-2">Errores de Sincronización Klikpos Cloud</h3>
                 <div className="max-h-32 overflow-y-auto scrollbar-thin space-y-1">
                   {importStats.errors.map((err, i) => (
                     <div key={i} className="text-xs text-red-600 dark:text-red-400">{err}</div>

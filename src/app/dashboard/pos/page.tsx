@@ -156,7 +156,7 @@ export default function DesktopPosPage() {
 
   const handleManualCloudSync = async () => {
     setIsManualSyncing(true);
-    showToast('☁️ Sincronizando con Google Cloud Firestore...', 'info');
+    showToast('☁️ Sincronizando con Klikpos Cloud...', 'info');
     try {
       const res = await cloudSyncService.syncAll();
       showToast(`✓ Nube actualizada: ${res.sales} ventas y tasa BCV Bs. ${bcvRate.toFixed(2)} sincronizadas`, 'success');
@@ -559,7 +559,7 @@ export default function DesktopPosPage() {
               type="button"
               onClick={handleManualCloudSync}
               suppressHydrationWarning
-              title={`Sincronización en Tiempo Real con App Móvil / Firestore (${cloudStatus.storeId || terminalHwid}). Clic para forzar actualización ahora.`}
+              title={`Sincronización en Tiempo Real con App Móvil / Klikpos Cloud (${cloudStatus.storeId || terminalHwid}). Clic para forzar actualización ahora.`}
               className={`px-2.5 py-1 rounded-lg text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer border shadow-2xs ${
                 cloudStatus.state === 'syncing' || isManualSyncing
                   ? 'bg-sky-50 text-sky-800 border-sky-300 animate-pulse dark:bg-sky-950 dark:text-sky-300 dark:border-sky-700'
@@ -685,6 +685,7 @@ export default function DesktopPosPage() {
             setIconSelectorProduct(p);
             setShowIconSelector(true);
           }}
+          isSimplifiedView={isSimplifiedView}
         />
 
         {/* BARRA INDUSTRIAL DE ATAJOS F2-F12 */}

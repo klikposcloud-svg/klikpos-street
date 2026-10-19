@@ -386,12 +386,12 @@ export default function StreetSalesBackupModal({
   // Respaldo en la nube / Sincronización silenciosa con Firestore
   const handleCloudSync = async () => {
     setCloudSyncStatus('syncing');
-    setBackupStatusMsg('Conectando con Firestore y respaldando datos...');
+    setBackupStatusMsg('Conectando con Klikpos Cloud y respaldando datos...');
     try {
       const result = await cloudSyncService.syncAll();
       playSuccessChime();
       setCloudSyncStatus('synced');
-      setBackupStatusMsg(`¡Sincronización Cloud Exitosa! ${result.sales} ventas y ${result.productsUploaded} productos respaldados en Firestore.`);
+      setBackupStatusMsg(`¡Sincronización Cloud Exitosa! ${result.sales} ventas y ${result.productsUploaded} productos respaldados en Klikpos Cloud.`);
     } catch (err: any) {
       console.warn('[StreetBackup] Error en sync cloud:', err);
       setCloudSyncStatus('idle');
@@ -1346,7 +1346,7 @@ export default function StreetSalesBackupModal({
                     Centro de Seguridad & Copias de Respaldo KlikPOS
                   </h4>
                   <p className="text-[11px] leading-relaxed">
-                    Tus ventas están 100% resguardadas localmente en este equipo. Puedes descargar copias de seguridad en formato JSON (se guardan automáticamente en tu carpeta <strong className="text-sky-600 dark:text-sky-400">Descargas / Downloads</strong>) para llevarlas a otra tablet o PC, o sincronizar directamente con la nube de Firestore.
+                    Tus ventas están 100% resguardadas localmente en este equipo. Puedes descargar copias de seguridad en formato JSON (se guardan automáticamente en tu carpeta <strong className="text-sky-600 dark:text-sky-400">Descargas / Downloads</strong>) para llevarlas a otra tablet o PC, o sincronizar directamente con Klikpos Cloud.
                   </p>
                 </div>
               </div>
@@ -1445,7 +1445,7 @@ export default function StreetSalesBackupModal({
                     }`}
                   >
                     <Cloud className={`w-4 h-4 ${cloudSyncStatus === 'syncing' ? 'animate-spin text-amber-400' : ''}`} />
-                    <span>{cloudSyncStatus === 'syncing' ? 'Sincronizando con Firestore...' : 'Sincronizar Ahora'}</span>
+                    <span>{cloudSyncStatus === 'syncing' ? 'Sincronizando con Klikpos Cloud...' : 'Sincronizar Ahora'}</span>
                   </button>
                 </div>
               </div>
