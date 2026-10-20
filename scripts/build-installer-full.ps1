@@ -123,12 +123,18 @@ Write-Host "`n[5/7] Sincronizando copias de compatibilidad..." -ForegroundColor 
 $distRoot = Join-Path $rootDir "dist-installer"
 $eliteExe = Join-Path $eliteFolder "KlikPOS_Elite_Setup.exe"
 
+Copy-Item $eliteExe (Join-Path $distRoot "Kliko-POS-Enterprise-Setup-v$version.exe") -Force
+Copy-Item $eliteExe (Join-Path $distRoot "Kliko_Desktop_Full_Setup.exe") -Force
 Copy-Item $eliteExe (Join-Path $distRoot "KlikPOS-Enterprise-Setup-v$version.exe") -Force
 Copy-Item $eliteExe (Join-Path $distRoot "KlikPOS_Desktop_Full_Setup.exe") -Force
 Copy-Item $eliteExe (Join-Path $distRoot "KlikPOS-Enterprise-Setup-v2.4.0.exe") -Force
 
-$combo2 = Join-Path $rootDir "DISTRIBUCION_KLIKPOS\02_Combo_Empresarial_Full\KlikPOS_Desktop_Full_Setup.exe"
-if (Test-Path (Split-Path $combo2)) { Copy-Item $eliteExe $combo2 -Force }
+$combo2Kliko = Join-Path $rootDir "DISTRIBUCION_KLIKPOS\02_Combo_Empresarial_Full\Kliko_Desktop_Full_Setup.exe"
+$combo2Legacy = Join-Path $rootDir "DISTRIBUCION_KLIKPOS\02_Combo_Empresarial_Full\KlikPOS_Desktop_Full_Setup.exe"
+if (Test-Path (Split-Path $combo2Kliko)) { 
+    Copy-Item $eliteExe $combo2Kliko -Force 
+    Copy-Item $eliteExe $combo2Legacy -Force 
+}
 
 # 6. Calcular Hashes SHA256 de todas las ediciones
 Write-Host "[6/7] Calculando SHA-256 universal..." -ForegroundColor Yellow

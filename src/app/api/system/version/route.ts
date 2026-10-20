@@ -8,10 +8,10 @@ export async function GET() {
   return NextResponse.json({
     version,
     releaseDate: manifest.releaseDate || new Date().toISOString().split('T')[0],
-    title: manifest.title || `KlikPOS Enterprise v${version}`,
-    system: 'KlikPOS Cloud & Desktop Enterprise',
+    title: manifest.title || `Kliko POS Enterprise v${version}`,
+    system: 'Kliko Cloud & Desktop Enterprise',
     notes: manifest.notes || [],
-    windowsUrl: manifest.windowsUrl || `https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v${version}/KlikPOS_Desktop_Full_Setup.exe`,
+    windowsUrl: manifest.windowsUrl || `https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v${version}/Kliko_Desktop_Full_Setup.exe`,
     androidUrl: manifest.androidUrl || `https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v${version}/KlikPOS_Movil_Full.apk`,
     mandatory: manifest.mandatory ?? false,
   });

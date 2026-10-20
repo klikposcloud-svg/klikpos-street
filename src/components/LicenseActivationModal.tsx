@@ -119,8 +119,8 @@ export default function LicenseActivationModal({ isOpen, onClose, onSuccess, isT
     const next = devClicks + 1;
     if (next >= 5) {
       setDevClicks(0);
-      const pin = window.prompt('Ingrese PIN Maestro de Desarrollador KlikPOS:');
-      if (pin === 'KLIK-2026-DEV' || pin === 'VNMT-2026-DEV' || pin === 'klikpos2026' || pin === 'venematic2026') {
+      const pin = window.prompt('Ingrese PIN Maestro de Desarrollador Kliko:');
+      if (pin === 'KLIK-2026-DEV' || pin === 'VNMT-2026-DEV' || pin === 'klikpos2026' || pin === 'venematic2026' || pin === 'kliko2026') {
         setDeveloperUnlocked(true);
         setShowKeygenTab(true);
       } else if (pin !== null) {
@@ -187,7 +187,7 @@ export default function LicenseActivationModal({ isOpen, onClose, onSuccess, isT
       storeName: storeName.trim(),
       productKey: productKey.trim().toUpperCase(),
       plan: verification.plan || 'vitalicia',
-      appVersion: 'KlikPOS Desktop / Web',
+      appVersion: 'Kliko POS Desktop / Web',
     }).then(res => {
       if (res.success) {
         console.log('[Licensing] Terminal y configuración respaldadas en Firestore.');
@@ -211,7 +211,7 @@ export default function LicenseActivationModal({ isOpen, onClose, onSuccess, isT
 
     setIsRestoring(true);
     setErrorMsg(null);
-    setSuccessMsg('Conectando con Klikpos Cloud para recuperar su negocio...');
+    setSuccessMsg('Conectando con Kliko Cloud para recuperar su negocio...');
 
     try {
       const res = await cloudSyncService.restoreUserAndConfig(searchKey);
@@ -250,7 +250,7 @@ export default function LicenseActivationModal({ isOpen, onClose, onSuccess, isT
             <div
               onClick={handleBadgeClick}
               className="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400 shadow-inner cursor-pointer"
-              title="KlikPOS Security"
+              title="Kliko Security"
             >
               <ShieldCheck className="w-6 h-6 stroke-[2.5]" />
             </div>

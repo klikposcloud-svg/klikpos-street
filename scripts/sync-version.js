@@ -27,7 +27,7 @@ if (!version || !/^\d+\.\d+\.\d+/.test(version)) {
 
 manifest.version = version;
 manifest.releaseDate = manifest.releaseDate || new Date().toISOString().split('T')[0];
-manifest.windowsUrl = `https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v${version}/KlikPOS_Desktop_Full_Setup.exe`;
+manifest.windowsUrl = `https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v${version}/Kliko_Desktop_Full_Setup.exe`;
 manifest.androidUrl = `https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v${version}/KlikPOS_Movil_Full.apk`;
 
 const manifestStr = JSON.stringify(manifest, null, 2) + '\n';
@@ -102,7 +102,7 @@ if (fs.existsSync(desktopDir)) {
   if (fs.existsSync(issPath)) {
     let issContent = fs.readFileSync(issPath, 'utf8');
     issContent = issContent.replace(/^AppVersion=.*/m, `AppVersion=${version}`);
-    issContent = issContent.replace(/^OutputBaseFilename=.*/m, `OutputBaseFilename=KlikPOS-Enterprise-Setup-v${version}`);
+    issContent = issContent.replace(/^OutputBaseFilename=.*/m, `OutputBaseFilename=Kliko-POS-Enterprise-Setup-v${version}`);
     fs.writeFileSync(issPath, issContent, 'utf8');
     console.log(' [✓] venematic-desktop/installer.iss');
   }

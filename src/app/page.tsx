@@ -87,14 +87,14 @@ export default function HomePage() {
         <div className="p-4 rounded-3xl bg-white border border-slate-200/90 shadow-lg flex items-center justify-center transition-transform hover:scale-105">
           <img
             src="/brand/klikpos-logo-dark.png"
-            alt="KLIK POS"
+            alt="KLIKO POS"
             className="h-12 sm:h-14 w-auto object-contain"
           />
         </div>
 
         <div className="text-center">
           <h1 className="text-2xl font-black text-slate-900 tracking-tight">
-            KLIK-POS
+            KLIKO POS
           </h1>
           <p className="text-[11px] font-bold text-slate-500 tracking-widest uppercase mt-1">
             Punto de Venta Profesional · Terminal Local
@@ -115,7 +115,7 @@ export default function HomePage() {
       </div>
 
       <p className="absolute bottom-7 text-[11px] text-slate-400 font-bold tracking-wider uppercase">
-        v3.0.24 · KlikPOS Enterprise Suite
+        v3.0.25 · Kliko Enterprise Suite
       </p>
     </div>
   );

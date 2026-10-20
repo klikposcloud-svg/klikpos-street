@@ -166,7 +166,7 @@ export default function CreditsPage() {
     const pendingBs = (credit.remainingAmountUSD * bcvRate).toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     const pendingUSD = credit.remainingAmountUSD.toFixed(2);
     
-    const message = `👋 Hola estimado(a) *${credit.customerName}*,\n\nLe saludamos cordialmente de *KlikPOS*. Le recordamos amablemente su estado de cuenta pendiente:\n\n📄 *Ticket/Factura:* ${credit.ticketNumber}\n💰 *Saldo Pendiente:* $${pendingUSD} USD (o Bs. ${pendingBs} a Tasa BCV: ${bcvRate.toFixed(2)})\n📅 *Vencimiento:* ${credit.dueDate}\n\nPuede abonar vía Pago Móvil, Zelle o en efectivo en nuestra tienda. ¡Muchas gracias por su preferencia! ✨`;
+    const message = `👋 Hola estimado(a) *${credit.customerName}*,\n\nLe saludamos cordialmente de *Kliko POS*. Le recordamos amablemente su estado de cuenta pendiente:\n\n📄 *Ticket/Factura:* ${credit.ticketNumber}\n💰 *Saldo Pendiente:* $${pendingUSD} USD (o Bs. ${pendingBs} a Tasa BCV: ${bcvRate.toFixed(2)})\n📅 *Vencimiento:* ${credit.dueDate}\n\nPuede abonar vía Pago Móvil, Zelle o en efectivo en nuestra tienda. ¡Muchas gracias por su preferencia! ✨`;
 
     const encoded = encodeURIComponent(message);
     window.open(`https://wa.me/${formattedPhone}?text=${encoded}`, '_blank');

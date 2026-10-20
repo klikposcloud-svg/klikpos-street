@@ -26,7 +26,7 @@ export default function CashierShiftSalesPage() {
   const [filterPayment, setFilterPayment] = useState<string>('all');
   const [selectedSaleForView, setSelectedSaleForView] = useState<LocalSale | null>(null);
   const [storeInfo, setStoreInfo] = useState({
-    name: 'KLIKPOS ENTERPRISE',
+    name: 'KLIKO POS ENTERPRISE',
     rif: 'J-50000000-0',
     address: 'Venezuela',
   });
@@ -726,7 +726,7 @@ export default function CashierShiftSalesPage() {
 
           <div className="text-center pt-2 space-y-0.5 text-[9px]">
             <p>*** REIMPRESIÓN HISTÓRICA ***</p>
-            <p className="font-bold">KLIKPOS ENTERPRISE · Sistema de Ventas</p>
+            <p className="font-bold">KLIKO POS ENTERPRISE · Sistema de Ventas</p>
           </div>
         </div>
       )}

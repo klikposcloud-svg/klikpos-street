@@ -3,7 +3,7 @@ import '@/styles/globals.css';
 import { AuthProvider } from '@/context/AuthContext';
 
 export const metadata: Metadata = {
-  title: 'KlikPOS Enterprise - Terminal Comercial y Facturación',
+  title: 'Kliko POS Enterprise - Terminal Comercial y Facturación',
   description: 'Sistema Inteligente de Punto de Venta y Facturación Local y Offline',
 };
 

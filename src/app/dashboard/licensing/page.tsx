@@ -133,7 +133,7 @@ export default function LicensingInformationPage() {
           edition: newEdition,
           expiresAt,
           issuedAt: new Date().toISOString(),
-          companyName: 'KlikPOS Comercio Oficial',
+          companyName: 'Kliko Comercio Oficial',
           signature: cleanKey,
         };
         localStorage.setItem('klikpos_enterprise_license_payload', JSON.stringify(enterpriseLic));
@@ -161,7 +161,7 @@ export default function LicensingInformationPage() {
   const getWhatsAppUpgradeUrl = () => {
     const currentName = EDITION_DEFINITIONS[activeEdition]?.name || activeEdition;
     const message = encodeURIComponent(
-      `¡Hola! Deseo consultar información o solicitar la activación de mi licencia KlikPOS.\n\n` +
+      `¡Hola! Deseo consultar información o solicitar la activación de mi licencia Kliko POS.\n\n` +
       `*ID de Terminal (HWID):* ${terminalHwid}\n` +
       `*Plan Instalado:* ${currentName}\n` +
       `*Versión:* v3.0.0 Oficial`
@@ -175,7 +175,7 @@ export default function LicensingInformationPage() {
   const PLANS_COMPARISON = [
     {
       id: 'KLIKPOS_LITE',
-      name: 'KlikPOS Lite',
+      name: 'Kliko POS Lite',
       subtitle: 'Comercio esencial, bodegas y ventas de mostrador',
       badge: 'LITE • GRATIS',
       badgeColor: 'bg-slate-700 text-white',
@@ -192,7 +192,7 @@ export default function LicensingInformationPage() {
     },
     {
       id: 'KLIKPOS_PRO',
-      name: 'KlikPOS Pro',
+      name: 'Kliko POS Pro',
       subtitle: 'Minimarkets, tiendas y comercios en crecimiento',
       badge: 'MÁS POPULAR',
       badgeColor: 'bg-indigo-600 text-white',
@@ -209,7 +209,7 @@ export default function LicensingInformationPage() {
     },
     {
       id: 'KLIKPOS_ELITE',
-      name: 'KlikPOS Elite',
+      name: 'Kliko POS Elite',
       subtitle: 'Restaurantes, gastronomía, franquicias y cadenas',
       badge: 'TODO DESBLOQUEADO',
       badgeColor: 'bg-gradient-to-r from-amber-500 to-orange-600 text-white',
@@ -238,7 +238,7 @@ export default function LicensingInformationPage() {
             </span>
             <div>
               <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">
-                Planes & Ediciones KlikPOS
+                Planes & Ediciones Kliko POS
               </h1>
               <p className="text-xs text-slate-600 dark:text-slate-300 font-medium mt-0.5">
                 Conoce nuestras ediciones disponibles y potencia tu comercio con la versión ideal.

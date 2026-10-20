@@ -266,7 +266,7 @@ class UpdateService {
       await this.applyPwaUpdate(manifest.version);
       return {
         success: true,
-        message: '¡Actualización instalada automáticamente! Reiniciando KlikPOS...',
+        message: '¡Actualización instalada automáticamente! Reiniciando Kliko POS...',
       };
     } catch (err: any) {
       console.warn('[Desktop Silent Update Fallback to PWA]', err);

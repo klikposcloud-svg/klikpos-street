@@ -1067,7 +1067,7 @@ export default function DesktopSettingsPage() {
                   className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-black flex items-center gap-2 shadow-xs transition-all"
                 >
                   <Store className="w-4 h-4" />
-                  <span>Ver en KlikPOS Street</span>
+                  <span>Ver en Kliko Street</span>
                 </Link>
               </div>
             </div>
@@ -2157,7 +2157,7 @@ function SoftwareUpdatesSection() {
             </h4>
             <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10.5px] font-bold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span>Servicio Oficial KlikPOS Cloud Activo</span>
+              <span>Servicio Oficial Kliko Cloud Activo</span>
             </span>
           </div>
 
@@ -2218,7 +2218,7 @@ function SoftwareUpdatesSection() {
                 </span>
               </div>
               <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                Conexión segura y certificada contra los servidores oficiales de KlikPOS Cloud Enterprise con integridad verificada.
+                Conexión segura y certificada contra los servidores oficiales de Kliko Cloud Enterprise con integridad verificada.
               </p>
             </div>
           </div>

@@ -269,7 +269,7 @@ export default function InteractivePresentationModal({
                 </h2>
 
                 <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-medium">
-                  KlikPOS sincroniza la tasa oficial del BCV y calcula al instante los montos exactos en Dólares y Bolívares.
+                  Kliko sincroniza la tasa oficial del BCV y calcula al instante los montos exactos en Dólares y Bolívares.
                 </p>
               </div>
 

@@ -380,12 +380,12 @@ export default function DeliveryDashboardPage() {
           <div className="pt-4 border-t border-slate-100 dark:border-slate-700 text-xs text-slate-500 space-y-2">
             <p>¿Aún no tienes tu clave de activación?</p>
             <a
-              href="https://wa.me/584141234567?text=Hola,%20quisiera%20activar%20la%20mensualidad%20del%20m%C3%B3dulo%20de%20Delivery%20en%20KlikPOS"
+              href="https://wa.me/584141234567?text=Hola,%20quisiera%20activar%20la%20mensualidad%20del%20m%C3%B3dulo%20de%20Delivery%20en%20Kliko"
               target="_blank"
               rel="noreferrer"
               className="inline-flex items-center gap-1.5 font-bold text-emerald-600 hover:underline"
             >
-              <span>Contactar a Soporte KlikPOS por WhatsApp</span>
+              <span>Contactar a Soporte Kliko por WhatsApp</span>
               <span>→</span>
             </a>
           </div>

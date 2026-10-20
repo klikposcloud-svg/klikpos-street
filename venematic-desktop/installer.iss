@@ -1,32 +1,32 @@
 #ifndef AppName
-  #define AppName "KlikPOS Enterprise"
+  #define AppName "Kliko POS Enterprise"
 #endif
 #ifndef AppEdition
-  #define AppEdition "KLIKPOS_ELITE"
+  #define AppEdition "KLIKO_ELITE"
 #endif
 #ifndef AppVersion
   #define AppVersion "3.0.1"
 #endif
 #ifndef OutputBaseFilename
-  #define OutputBaseFilename "KlikPOS-Enterprise-Setup-v3.0.1"
+  #define OutputBaseFilename "Kliko-POS-Enterprise-Setup-v3.0.1"
 #endif
 
 [Setup]
 AppName={#AppName}
 AppVersion=3.0.25
-AppPublisher=KlikPOS Cloud
+AppPublisher=Kliko Cloud
 AppPublisherURL=https://klikposcloud.com
 AppSupportURL=https://klikposcloud.com
 AppUpdatesURL=https://klikposcloud.com
 VersionInfoVersion=3.0.1.0
-VersionInfoCompany=KlikPOS Cloud
+VersionInfoCompany=Kliko Cloud
 VersionInfoDescription={#AppName} Setup
 VersionInfoProductName={#AppName}
 VersionInfoProductVersion=3.0.1.0
 DefaultDirName={autopf}\{#AppName}
 DefaultGroupName={#AppName}
 OutputDir=c:\Users\pcpro\OneDrive\Documents\venematic-master\venematic-master\venematic-desktop\dist-installer
-OutputBaseFilename=KlikPOS-Enterprise-Setup-v3.0.25
+OutputBaseFilename=Kliko-POS-Enterprise-Setup-v3.0.25
 Compression=lzma2/max
 SolidCompression=yes
 WizardStyle=modern

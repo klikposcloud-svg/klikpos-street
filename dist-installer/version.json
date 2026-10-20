@@ -8,7 +8,7 @@
     "Optimización Ergonómica de Catálogo POS: Contenedores con auto-fill responsivo de 6 a 8 columnas e imágenes completas centradas con ajuste contain, maximizando la visibilidad de productos.",
     "Barra de Acciones Compacta: Reducción de altura a 30px en barra superior para aprovechar el espacio vertical de venta."
   ],
-  "windowsUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.25/KlikPOS_Desktop_Full_Setup.exe",
+  "windowsUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.25/Kliko_Desktop_Full_Setup.exe",
   "androidUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.25/KlikPOS_Movil_Full.apk",
   "mandatory": false
 }

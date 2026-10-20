@@ -46,7 +46,7 @@ export default function SuppliersPage() {
   });
   const [showPurchasesSheetModal, setShowPurchasesSheetModal] = useState(false);
   const [storeInfo, setStoreInfo] = useState({
-    name: 'KLIKPOS ENTERPRISE',
+    name: 'KLIKO POS ENTERPRISE',
     rif: 'J-50000000-0',
     phone: '',
     address: 'Venezuela',

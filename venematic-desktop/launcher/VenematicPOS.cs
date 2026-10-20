@@ -47,7 +47,7 @@ namespace KlikPOS
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show("Error iniciando el motor local de KlikPOS:\n" + ex.Message, "KlikPOS Enterprise", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show("Error iniciando el motor local de Kliko POS:\n" + ex.Message, "Kliko POS Enterprise", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         return;
                     }
 
@@ -60,7 +60,7 @@ namespace KlikPOS
                 }
                 else
                 {
-                    MessageBox.Show("No se encontró el ejecutable del servidor o motor Node integrado.\nRuta buscada: " + nodePath, "KlikPOS Enterprise - Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("No se encontró el ejecutable del servidor o motor Node integrado.\nRuta buscada: " + nodePath, "Kliko POS Enterprise - Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
             }

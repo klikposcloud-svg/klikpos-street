@@ -37,7 +37,7 @@ const NAV_ITEMS: NavItem[] = [
   },
   {
     key: 'mesas',
-    label: 'KlikMenu Mesas',
+    label: 'Kliko Menú Mesas',
     href: '/dashboard/mesas',
     shortcut: 'F11',
     icon: <UtensilsCrossed className="w-5 h-5" />,
@@ -675,7 +675,7 @@ export default function DesktopDashboardLayout({
                 backgroundColor: (currentTheme === 'dark' || currentTheme === 'glass') ? '#ffffff' : 'var(--brand-primary, #0f172a)',
               }}
               onClick={() => router.push('/dashboard/pos')}
-              title="KlikPOS Cloud"
+              title="Kliko POS"
             />
           </div>
           <span className="h-7 w-px bg-slate-200 dark:bg-slate-700 shrink-0" />

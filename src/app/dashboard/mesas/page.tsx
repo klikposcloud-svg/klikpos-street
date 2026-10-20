@@ -195,7 +195,7 @@ export default function LiveTablesPage() {
         <div class="bold" style="font-size:15px; margin-bottom:8px;">PLATILLOS / PEDIDO:</div>
         ${itemsHtml}
         <div class="hr"></div>
-        <div class="center" style="font-size:12px;">KlikMenu &bull; KlikPOS Sync</div>
+        <div class="center" style="font-size:12px;">Kliko Menú &bull; Kliko POS Sync</div>
         <script>window.print();</script>
       </body>
       </html>

@@ -94,6 +94,7 @@ async function main() {
 
   // 2. Subir binarios Windows Oficiales desde 'KlikPOS Release'
   const windowsAssets = [
+    { name: 'Kliko_Desktop_Full_Setup.exe', relPath: 'KlikPOS Release/03_KlikPOS_Elite_Desktop/KlikPOS_Elite_Setup.exe' },
     { name: 'KlikPOS_Lite_Setup.exe', relPath: 'KlikPOS Release/01_KlikPOS_Lite_Desktop/KlikPOS_Lite_Setup.exe' },
     { name: 'KlikPOS_Pro_Setup.exe', relPath: 'KlikPOS Release/02_KlikPOS_Pro_Desktop/KlikPOS_Pro_Setup.exe' },
     { name: 'KlikPOS_Elite_Setup.exe', relPath: 'KlikPOS Release/03_KlikPOS_Elite_Desktop/KlikPOS_Elite_Setup.exe' },

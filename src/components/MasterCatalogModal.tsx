@@ -104,7 +104,7 @@ export default function MasterCatalogModal({ isOpen, onClose, onSuccess }: Maste
         }
       });
 
-      setStatusMessage('Sincronizando catálogo con KlikPOS Cloud (Firebase)...');
+      setStatusMessage('Sincronizando catálogo con Kliko Cloud (Firebase)...');
       // Subida automática a Firebase
       cloudSyncService.pushProductsToCloud().catch(() => {});
 
@@ -147,7 +147,7 @@ export default function MasterCatalogModal({ isOpen, onClose, onSuccess }: Maste
             </span>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="text-xl font-black tracking-tight">Catálogo Maestro KlikPOS</h3>
+                <h3 className="text-xl font-black tracking-tight">Catálogo Maestro Kliko</h3>
                 <span className="px-2.5 py-0.5 rounded-full bg-amber-400 text-slate-950 font-black text-[11px] uppercase tracking-wider shadow-xs">
                   +120 Productos
                 </span>

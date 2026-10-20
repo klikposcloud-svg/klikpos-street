@@ -286,7 +286,7 @@ export default function FiscalPurchasesSheetModal({
 
             {/* Pie de página legal */}
             <div className="mt-8 pt-2 border-t border-slate-200 flex justify-between items-center text-[9px] text-slate-500 font-mono">
-              <span>KlikPOS Enterprise Fiscal Engine • Providencias SENIAT SNAT/2011/00071 y Art. 75 Ley del IVA</span>
+              <span>Kliko POS Enterprise Fiscal Engine • Providencias SENIAT SNAT/2011/00071 y Art. 75 Ley del IVA</span>
               <span>Conservar físicamente durante 10 años en el establecimiento comercial</span>
             </div>
           </div>

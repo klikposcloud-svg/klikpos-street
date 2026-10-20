@@ -86,11 +86,11 @@ export default function AutoUpdateModal() {
 
       if (currentHHmm === targetTime && lastScheduledCheckRef.current !== checkKey) {
         lastScheduledCheckRef.current = checkKey;
-        console.log(`[KlikPOS Scheduler] Ejecutando verificación programada (${targetTime})...`);
+        console.log(`[Kliko Scheduler] Ejecutando verificación programada (${targetTime})...`);
         const res = await updateService.checkForUpdates();
         if (res.hasUpdate && res.latestManifest) {
           if (cfg.autoApplySilently) {
-            console.log(`[KlikPOS Scheduler] Aplicando actualización programada silenciosa v${res.latestManifest.version}...`);
+            console.log(`[Kliko Scheduler] Aplicando actualización programada silenciosa v${res.latestManifest.version}...`);
             updateService.applyPwaUpdate();
           } else {
             setManifest(res.latestManifest);
@@ -186,7 +186,7 @@ export default function AutoUpdateModal() {
                 ¡Nueva Versión Disponible!
               </span>
               <h2 className="text-xl font-black tracking-tight text-white mt-0.5">
-                KlikPOS Enterprise v{manifest.version}
+                Kliko POS Enterprise v{manifest.version}
               </h2>
             </div>
           </div>

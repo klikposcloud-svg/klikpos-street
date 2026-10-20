@@ -1514,7 +1514,7 @@ export default function DesktopReportsPage() {
 
           <div className="text-center pt-2 space-y-0.5 text-[9px]">
             <p>*** COPIA DE AUDITORÍA REPORTE ***</p>
-            <p>KLIKPOS ENTERPRISE · Sistema de Ventas</p>
+            <p>KLIKO POS ENTERPRISE · Sistema de Ventas</p>
           </div>
         </div>
       )}
@@ -1615,7 +1615,7 @@ export default function DesktopReportsPage() {
         <div className="text-center pt-3 space-y-2 text-[10px]">
           <p>Firma Cajero: ___________________</p>
           <p>Firma Supervisor: ___________________</p>
-          <p className="pt-2 font-bold">KLIKPOS ENTERPRISE · Sistema de Ventas</p>
+          <p className="pt-2 font-bold">KLIKO POS ENTERPRISE · Sistema de Ventas</p>
         </div>
       </div>
 

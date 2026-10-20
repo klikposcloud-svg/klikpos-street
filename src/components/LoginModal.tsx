@@ -78,7 +78,7 @@ export default function LoginModal({ isOpen, onSuccess, onClose }: LoginModalPro
         {/* Cabecera con Marca */}
         <div className="bg-gradient-to-r from-sky-950 via-slate-900 to-indigo-950 p-6 text-center relative border-b border-indigo-900/50">
           <div className="flex items-center justify-center mb-2">
-            <img src="/brand/klikpos-logo-white.png" alt="KLIK POS" className="h-10 w-auto object-contain drop-shadow-md" />
+            <img src="/brand/klikpos-logo-white.png" alt="KLIKO POS" className="h-10 w-auto object-contain drop-shadow-md" />
           </div>
           <p className="text-xs font-semibold text-slate-300 mt-1">
             Identifíquese con sus credenciales de seguridad para operar

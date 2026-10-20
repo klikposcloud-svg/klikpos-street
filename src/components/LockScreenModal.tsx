@@ -181,7 +181,7 @@ export default function LockScreenModal({ isOpen, onUnlock }: LockScreenModalPro
             <LogOut className="w-3.5 h-3.5" />
             <span>Cerrar Sesión</span>
           </button>
-          <span className="text-[10px] text-slate-400 font-medium flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block"></span>Bloqueo Seguro KlikPOS</span>
+          <span className="text-[10px] text-slate-400 font-medium flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block"></span>Bloqueo Seguro Kliko</span>
         </div>
       </div>
     </div>
