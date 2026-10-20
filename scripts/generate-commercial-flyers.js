@@ -129,7 +129,7 @@ async function generateCommercialFlyers() {
   </head>
   <body>
     <div class="card">
-      <span class="badge">🌭 KlikPOS Street - Comida Rápida & Puestos</span>
+      <span class="badge">🌭 Kliko Street - Comida Rápida & Puestos</span>
       <h1>EL PUNTO DE VENTA EN TU CELULAR <span class="highlight">CON EL NOMBRE DE TU NEGOCIO</span></h1>
       <p>Diseñado para puestos de perros calientes, hamburguesas, pepitos, comida rápida y ambulantes. <strong>100% en tu teléfono Android, sin necesidad de computadoras.</strong></p>
 

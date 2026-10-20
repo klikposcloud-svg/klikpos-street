@@ -110,12 +110,13 @@ async function main() {
 
   // 3. Subir APKs Android Oficiales desde 'KlikPOS Release'
   const androidAssets = [
+    { name: 'Kliko_Street.apk', relPath: 'KlikPOS Release/04_Apps_Moviles_Android/Kliko_Street.apk' },
+    { name: 'KlikPOS_Street.apk', relPath: 'KlikPOS Release/04_Apps_Moviles_Android/KlikPOS_Street.apk' },
+    { name: 'KlikPOS_Tablet_Standalone_Mesas.apk', relPath: 'KlikPOS Release/04_Apps_Moviles_Android/KlikPOS_Street.apk' },
     { name: 'KlikPOS_Movil.apk', relPath: 'KlikPOS Release/04_Apps_Moviles_Android/KlikPOS_Movil.apk' },
     { name: 'KlikPOS_Movil_Full.apk', relPath: 'KlikPOS Release/04_Apps_Moviles_Android/KlikPOS_Movil.apk' },
     { name: 'KlikPOS_Satelite.apk', relPath: 'KlikPOS Release/04_Apps_Moviles_Android/KlikPOS_Satelite.apk' },
     { name: 'KlikPOS_Movil_Satelite.apk', relPath: 'KlikPOS Release/04_Apps_Moviles_Android/KlikPOS_Satelite.apk' },
-    { name: 'KlikPOS_Street.apk', relPath: 'KlikPOS Release/04_Apps_Moviles_Android/KlikPOS_Street.apk' },
-    { name: 'KlikPOS_Tablet_Standalone_Mesas.apk', relPath: 'KlikPOS Release/04_Apps_Moviles_Android/KlikPOS_Street.apk' },
     { name: 'KlikAdmin.apk', relPath: 'KlikPOS Release/04_Apps_Moviles_Android/KlikAdmin.apk' },
     { name: 'KlikPOS_Keygen.apk', relPath: 'KlikPOS Release/00_Herramientas_Desarrollador/KlikPOS_Keygen.apk' }
   ];

@@ -175,7 +175,7 @@ export const TabletPosToolsDock: React.FC<TabletPosToolsDockProps> = ({
                 if (onOpenSoftwareUpdate) onOpenSoftwareUpdate();
               }}
               className="w-10 h-10 rounded-xl flex items-center justify-center text-white bg-amber-500 border border-amber-300 hover:bg-amber-400 hover:scale-110 active:scale-95 transition-all shadow-md cursor-pointer group"
-              title="Actualizar Software (KlikPOS Cloud)"
+              title="Actualizar Software (Kliko Cloud)"
             >
               <Sparkles className="w-5 h-5 stroke-[2.4]" />
             </button>

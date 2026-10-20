@@ -2728,18 +2728,24 @@ html[data-canvas="light-graphite"] #klikpos-street-root header,
   max-width: 100% !important;
 }
 
-/* Logo "Klik" con paleta oficial invariable: Negro pizarra (#0f172a) con trazo nítido en modo oscuro */
+/* Logo "Kliko" con paleta oficial invariable: Negro pizarra (#0f172a) con trazo nítido en modo oscuro */
 #klikpos-street-header .klikpos-brand-klik,
+#klikpos-street-header .kliko-brand-kliko,
 header#klikpos-street-header .klikpos-brand-klik,
-html.dark #klikpos-street-header .klikpos-brand-klik {
+header#klikpos-street-header .kliko-brand-kliko,
+html.dark #klikpos-street-header .klikpos-brand-klik,
+html.dark #klikpos-street-header .kliko-brand-kliko {
   color: #0f172a !important;
   -webkit-text-stroke: 0.6px rgba(255, 255, 255, 0.45) !important;
   paint-order: stroke fill !important;
   text-shadow: none !important;
 }
 html.light #klikpos-street-header .klikpos-brand-klik,
+html.light #klikpos-street-header .kliko-brand-kliko,
 html[data-canvas="light-graphite"] #klikpos-street-header .klikpos-brand-klik,
-#klikpos-street-root.light-mode #klikpos-street-header .klikpos-brand-klik {
+html[data-canvas="light-graphite"] #klikpos-street-header .kliko-brand-kliko,
+#klikpos-street-root.light-mode #klikpos-street-header .klikpos-brand-klik,
+#klikpos-street-root.light-mode #klikpos-street-header .kliko-brand-kliko {
   color: #0f172a !important;
   -webkit-text-stroke: 0px transparent !important;
   text-shadow: none !important;
@@ -2747,8 +2753,11 @@ html[data-canvas="light-graphite"] #klikpos-street-header .klikpos-brand-klik,
 
 /* Subtítulo "Street Food" invariable en Rojo Enérgico (#ef4444) */
 #klikpos-street-header .klikpos-brand-street-food,
+#klikpos-street-header .kliko-brand-street-food,
 header#klikpos-street-header .klikpos-brand-street-food,
-.klikpos-brand-street-food {
+header#klikpos-street-header .kliko-brand-street-food,
+.klikpos-brand-street-food,
+.kliko-brand-street-food {
   color: #ef4444 !important;
 }
 

@@ -86,10 +86,10 @@ try {
 
   const streetStrings = `<?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">KlikPOS Street</string>
-    <string name="title_activity_main">KlikPOS Street</string>
-    <string name="package_name">com.klikpos.street</string>
-    <string name="custom_url_scheme">com.klikpos.street</string>
+    <string name="app_name">Kliko Street</string>
+    <string name="title_activity_main">Kliko Street</string>
+    <string name="package_name">com.kliko.street</string>
+    <string name="custom_url_scheme">com.kliko.street</string>
 </resources>`;
   fs.writeFileSync(stringsXml, streetStrings, 'utf8');
 
@@ -139,15 +139,17 @@ try {
   execSync(`cmd.exe /c ""${apksignerBat}" verify --verbose "${signedStreetApk}""`, { stdio: 'inherit' });
 
   const apkTargets = [
+    path.join(distApkDir, 'Kliko_Street.apk'),
+    path.join(distApkDir, `Kliko_Street_v${currentVersion}.apk`),
     path.join(distApkDir, 'KlikPOS_Street.apk'),
     path.join(distApkDir, `KlikPOS_Street_v${currentVersion}.apk`),
-    path.join(distApkDir, 'KlikPOS_Street_v1.0.apk'),
+    path.join(releaseMobile, 'Kliko_Street.apk'),
+    path.join(releaseMobile, `Kliko_Street_v${currentVersion}.apk`),
     path.join(releaseMobile, 'KlikPOS_Street.apk'),
-    path.join(releaseMobile, `KlikPOS_Street_v${currentVersion}.apk`),
-    path.join(releaseMobile, 'KlikPOS_Street_v1.0.apk'),
     path.join(releaseMobile, 'KlikPOS_Tablet_Standalone.apk'),
+    path.join(combo3Mesas, 'Kliko_Street.apk'),
     path.join(combo3Mesas, 'KlikPOS_Street.apk'),
-    path.join(combo3Mesas, `KlikPOS_Street_v${currentVersion}.apk`),
+    path.join(distFolder, 'Kliko_Street.apk'),
     path.join(distFolder, 'KlikPOS_Street.apk')
   ];
 
@@ -156,7 +158,7 @@ try {
     console.log('  [✓ APK Copiado]: ' + target);
   }
 
-  console.log(`>>> ¡APK KLIKPOS STREET v${currentVersion} GENERADA CON ÉXITO!`);
+  console.log(`>>> ¡APK KLIKO STREET v${currentVersion} GENERADA CON ÉXITO!`);
 
 } finally {
   fs.writeFileSync(appGradle, bakGradle, 'utf8');

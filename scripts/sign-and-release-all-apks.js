@@ -354,10 +354,10 @@ function buildStreetApk() {
 
     const streetStrings = `<?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">KlikPOS Street</string>
-    <string name="title_activity_main">KlikPOS Street</string>
-    <string name="package_name">com.klikpos.street</string>
-    <string name="custom_url_scheme">com.klikpos.street</string>
+    <string name="app_name">Kliko Street</string>
+    <string name="title_activity_main">Kliko Street</string>
+    <string name="package_name">com.kliko.street</string>
+    <string name="custom_url_scheme">com.kliko.street</string>
 </resources>`;
     fs.writeFileSync(stringsXml, streetStrings, 'utf8');
 
@@ -375,18 +375,23 @@ function buildStreetApk() {
     });
 
     const rawApk = path.join(androidDir, 'app', 'build', 'outputs', 'apk', 'release', 'app-release.apk');
-    const signedStreetApk = path.join(distDir, 'KlikPOS_Street.apk');
+    const signedStreetApk = path.join(distDir, 'Kliko_Street.apk');
 
     fs.copyFileSync(rawApk, signedStreetApk);
     verifyApk(signedStreetApk);
 
     const targets = [
+      path.join(releaseMobile, 'Kliko_Street.apk'),
       path.join(releaseMobile, 'KlikPOS_Street.apk'),
       path.join(releaseMobile, 'KlikPOS_Tablet_Standalone.apk'),
+      path.join(distDir, 'KlikPOS_Street.apk'),
       path.join(distDir, 'KlikPOS_Tablet_Standalone.apk'),
+      path.join(combo3Folder, 'Kliko_Street.apk'),
       path.join(combo3Folder, 'KlikPOS_Tablet_Standalone.apk'),
+      path.join(combo3Mesas, 'Kliko_Street.apk'),
       path.join(combo3Mesas, 'KlikPOS_Tablet_Standalone.apk'),
       path.join(combo3Mesas, 'KlikPOS_Tablet_Standalone_Mesas.apk'),
+      path.join(distFolder, 'Kliko_Street.apk'),
       path.join(distFolder, 'KlikPOS_Tablet_Standalone.apk')
     ];
     for (const t of targets) {
@@ -394,7 +399,7 @@ function buildStreetApk() {
       console.log('  [✓] Copiado a: ' + t);
     }
 
-    console.log('>>> ¡KLIKPOS STREET RELEASE GENERADA CON ÉXITO!');
+    console.log('>>> ¡KLIKO STREET RELEASE GENERADA CON ÉXITO!');
 
   } finally {
     fs.writeFileSync(appGradle, bakGradle, 'utf8');

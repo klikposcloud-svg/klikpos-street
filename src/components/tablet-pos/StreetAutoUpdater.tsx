@@ -74,11 +74,11 @@ export const StreetAutoUpdater: React.FC<StreetAutoUpdaterProps> = ({
                     version: remoteData.version,
                     buildNumber: remoteData.buildNumber || 1,
                     releaseDate: remoteData.releaseDate || new Date().toISOString(),
-                    title: remoteData.title || `KlikPOS v${remoteData.version} Disponible`,
+                    title: remoteData.title || `Kliko v${remoteData.version} Disponible`,
                     notes: Array.isArray(remoteData.notes) ? remoteData.notes : ['Mejoras de rendimiento y estabilidad'],
-                    apkUrl: remoteData.apkUrl || 'https://github.com/klikposcloud-svg/klikpos-releases/releases/latest/download/KlikPOS_Street.apk',
+                    apkUrl: remoteData.apkUrl || 'https://github.com/klikposcloud-svg/klikpos-releases/releases/latest/download/Kliko_Street.apk',
                     fallbackApkUrl: remoteData.fallbackApkUrl,
-                    windowsUrl: remoteData.windowsUrl || 'https://github.com/klikposcloud-svg/klikpos-releases/releases/latest/download/KlikPOS_Desktop_Full_Setup.exe',
+                    windowsUrl: remoteData.windowsUrl || 'https://github.com/klikposcloud-svg/klikpos-releases/releases/latest/download/Kliko_Desktop_Full_Setup.exe',
                     mandatory: Boolean(remoteData.mandatory),
                     announcement: remoteData.announcement,
                   });
@@ -138,10 +138,10 @@ export const StreetAutoUpdater: React.FC<StreetAutoUpdaterProps> = ({
             parsedManifest = {
               version: verClean,
               releaseDate: raw.published_at || new Date().toISOString(),
-              title: raw.name || `KlikPOS Suite v${verClean}`,
+              title: raw.name || `Kliko Suite v${verClean}`,
               notes: raw.body ? raw.body.split('\n').filter((l: string) => l.trim().length > 0) : ['Nuevas optimizaciones en vivo'],
-              apkUrl: apkAsset?.browser_download_url || 'https://github.com/klikposcloud-svg/klikpos-releases/releases/latest/download/KlikPOS_Street.apk',
-              windowsUrl: exeAsset?.browser_download_url || 'https://github.com/klikposcloud-svg/klikpos-releases/releases/latest/download/KlikPOS_Desktop_Full_Setup.exe'
+              apkUrl: apkAsset?.browser_download_url || 'https://github.com/klikposcloud-svg/klikpos-releases/releases/latest/download/Kliko_Street.apk',
+              windowsUrl: exeAsset?.browser_download_url || 'https://github.com/klikposcloud-svg/klikpos-releases/releases/latest/download/Kliko_Desktop_Full_Setup.exe'
             };
           } else if (raw && raw.version) {
             // Formato estándar version.json
@@ -150,10 +150,10 @@ export const StreetAutoUpdater: React.FC<StreetAutoUpdaterProps> = ({
               version: verClean,
               buildNumber: raw.buildNumber || 1,
               releaseDate: raw.releaseDate || new Date().toISOString(),
-              title: raw.title || `KlikPOS Suite v${verClean}`,
+              title: raw.title || `Kliko Suite v${verClean}`,
               notes: Array.isArray(raw.notes) ? raw.notes : ['Nuevas mejoras de rendimiento y estabilidad'],
-              apkUrl: raw.androidUrl || raw.apkUrl || 'https://github.com/klikposcloud-svg/klikpos-releases/releases/latest/download/KlikPOS_Street.apk',
-              windowsUrl: raw.windowsUrl || 'https://github.com/klikposcloud-svg/klikpos-releases/releases/latest/download/KlikPOS_Desktop_Full_Setup.exe',
+              apkUrl: raw.androidUrl || raw.apkUrl || 'https://github.com/klikposcloud-svg/klikpos-releases/releases/latest/download/Kliko_Street.apk',
+              windowsUrl: raw.windowsUrl || 'https://github.com/klikposcloud-svg/klikpos-releases/releases/latest/download/Kliko_Desktop_Full_Setup.exe',
               mandatory: Boolean(raw.mandatory)
             };
           }
@@ -207,7 +207,7 @@ export const StreetAutoUpdater: React.FC<StreetAutoUpdaterProps> = ({
       // 2. Disparar descarga directa del archivo sin fricción
       const link = document.createElement('a');
       link.href = downloadTarget;
-      link.download = isAndroid ? `KlikPOS_Street_v${manifest.version}.apk` : `KlikPOS_Desktop_v${manifest.version}.exe`;
+      link.download = isAndroid ? `Kliko_Street_v${manifest.version}.apk` : `Kliko_Desktop_v${manifest.version}.exe`;
       link.target = '_blank';
       document.body.appendChild(link);
       link.click();
@@ -270,7 +270,7 @@ export const StreetAutoUpdater: React.FC<StreetAutoUpdaterProps> = ({
               <h4 className={`text-sm font-black tracking-tight mt-1 truncate ${
                 isLight ? 'text-slate-950' : 'text-white'
               }`}>
-                {manifest.title || `KlikPOS v${manifest.version} Lista`}
+                {manifest.title || `Kliko v${manifest.version} Lista`}
               </h4>
               <p className={`text-xs mt-0.5 leading-snug line-clamp-2 ${
                 isLight ? 'text-slate-600 font-medium' : 'text-slate-300 font-normal'
@@ -355,7 +355,7 @@ export const StreetAutoUpdater: React.FC<StreetAutoUpdaterProps> = ({
                 <h3 className={`font-black text-base tracking-tight ${
                   isLight ? 'text-slate-950' : 'text-white'
                 }`}>
-                  KlikPOS Suite v{manifest.version}
+                  Kliko Suite v{manifest.version}
                 </h3>
               </div>
               <button

@@ -1582,28 +1582,28 @@ export default function TabletMobilePosPage() {
       >
         {/* LADO IZQUIERDO: Logo estilizado + Separador + Píldora BCV + Tema */}
         <div className="flex items-center gap-2.5 sm:gap-3.5 shrink-0">
-          {/* Logo KlikPOS Street Food Limpio (Sin recuadro, integración pura en header) */}
+          {/* Logo Kliko Street Food Limpio (Sin recuadro, integración pura en header) */}
           <div 
             onClick={() => setIsLeftDrawerOpen(true)}
             className="flex flex-col leading-none select-none cursor-pointer group shrink-0"
-            title="KlikPOS Street Food"
+            title="Kliko Street Food"
           >
             <div className="flex items-baseline font-black text-lg tracking-tight leading-none">
               <span 
-                className="klikpos-brand-klik"
+                className="kliko-brand-kliko klikpos-brand-klik"
                 style={{ 
-                  color: '#0f172a',
+                  color: isLight ? '#0f172a' : '#ffffff',
                   WebkitTextStroke: isLight ? '0px transparent' : '0.6px rgba(255, 255, 255, 0.45)',
                   paintOrder: 'stroke fill',
                   textShadow: 'none'
                 }}
               >
-                Klik
+                Kliko
               </span>
-              <span className="font-black" style={{ color: '#ef4444' }}>POS</span>
+              <span className="font-black ml-1 text-sm uppercase tracking-wider" style={{ color: '#ef4444' }}>Street</span>
             </div>
             <span 
-              className="klikpos-brand-street-food font-caveat text-[13px] font-bold tracking-normal leading-none -mt-0.5 select-none whitespace-nowrap inline-block"
+              className="kliko-brand-street-food klikpos-brand-street-food font-caveat text-[13px] font-bold tracking-normal leading-none -mt-0.5 select-none whitespace-nowrap inline-block"
               style={{ 
                 fontFamily: "'Caveat', cursive, sans-serif",
                 color: '#ef4444',
@@ -1612,7 +1612,7 @@ export default function TabletMobilePosPage() {
                 whiteSpace: 'nowrap'
               }}
             >
-              Street Food
+              Street Food & POS
             </span>
           </div>
 
@@ -4242,7 +4242,7 @@ export default function TabletMobilePosPage() {
         }}
         isLight={isLight}
         primaryColor={currentPal.primary}
-        storeName={companyInfo?.name || "KlikPOS Street Negocio"}
+        storeName={companyInfo?.name || "Kliko Street Negocio"}
         rif={companyInfo?.rif || "STREET"}
         initialTab={ambassadorInitialTab}
         isLocked={Boolean(trialState?.isExpired && !trialState?.isLicensed)}

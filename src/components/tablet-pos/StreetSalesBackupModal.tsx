@@ -386,12 +386,12 @@ export default function StreetSalesBackupModal({
   // Respaldo en la nube / Sincronización silenciosa con Firestore
   const handleCloudSync = async () => {
     setCloudSyncStatus('syncing');
-    setBackupStatusMsg('Conectando con Klikpos Cloud y respaldando datos...');
+    setBackupStatusMsg('Conectando con Kliko Cloud y respaldando datos...');
     try {
       const result = await cloudSyncService.syncAll();
       playSuccessChime();
       setCloudSyncStatus('synced');
-      setBackupStatusMsg(`¡Sincronización Cloud Exitosa! ${result.sales} ventas y ${result.productsUploaded} productos respaldados en Klikpos Cloud.`);
+      setBackupStatusMsg(`¡Sincronización Cloud Exitosa! ${result.sales} ventas y ${result.productsUploaded} productos respaldados en Kliko Cloud.`);
     } catch (err: any) {
       console.warn('[StreetBackup] Error en sync cloud:', err);
       setCloudSyncStatus('idle');
@@ -1343,10 +1343,10 @@ export default function StreetSalesBackupModal({
                 <Database className="w-5 h-5 text-sky-500 shrink-0 mt-0.5" />
                 <div className="space-y-1">
                   <h4 className="font-black text-slate-900 dark:text-white text-xs">
-                    Centro de Seguridad & Copias de Respaldo KlikPOS
+                    Centro de Seguridad & Copias de Respaldo Kliko
                   </h4>
                   <p className="text-[11px] leading-relaxed">
-                    Tus ventas están 100% resguardadas localmente en este equipo. Puedes descargar copias de seguridad en formato JSON (se guardan automáticamente en tu carpeta <strong className="text-sky-600 dark:text-sky-400">Descargas / Downloads</strong>) para llevarlas a otra tablet o PC, o sincronizar directamente con Klikpos Cloud.
+                    Tus ventas están 100% resguardadas localmente en este equipo. Puedes descargar copias de seguridad en formato JSON (se guardan automáticamente en tu carpeta <strong className="text-sky-600 dark:text-sky-400">Descargas / Downloads</strong>) para llevarlas a otra tablet o PC, o sincronizar directamente con Kliko Cloud.
                   </p>
                 </div>
               </div>
@@ -1427,7 +1427,7 @@ export default function StreetSalesBackupModal({
                       <Cloud className={`w-5 h-5 ${cloudSyncStatus === 'syncing' ? 'animate-bounce text-amber-400' : ''}`} />
                     </div>
                     <h5 className={`text-sm font-black ${isLight ? 'text-slate-900' : 'text-white'}`}>
-                      Nube KlikPOS Cloud
+                      Nube Kliko Cloud
                     </h5>
                     <p className={`text-[11px] ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
                       Sincroniza y respalda tus comprobantes de forma remota en los servidores de la nube.
@@ -1445,7 +1445,7 @@ export default function StreetSalesBackupModal({
                     }`}
                   >
                     <Cloud className={`w-4 h-4 ${cloudSyncStatus === 'syncing' ? 'animate-spin text-amber-400' : ''}`} />
-                    <span>{cloudSyncStatus === 'syncing' ? 'Sincronizando con Klikpos Cloud...' : 'Sincronizar Ahora'}</span>
+                    <span>{cloudSyncStatus === 'syncing' ? 'Sincronizando con Kliko Cloud...' : 'Sincronizar Ahora'}</span>
                   </button>
                 </div>
               </div>

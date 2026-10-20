@@ -96,8 +96,8 @@ export const SoftwareUpdateModal: React.FC<SoftwareUpdateModalProps> = ({
             published_at: rawData.releaseDate || new Date().toISOString(),
             html_url: 'https://github.com/klikposcloud-svg/klikpos-releases/releases',
             assets: [
-              { name: 'KlikPOS_Street.apk', browser_download_url: rawData.androidUrl || 'https://github.com/klikposcloud-svg/klikpos-releases/releases/latest/download/KlikPOS_Street.apk', size: 15000000 },
-              { name: 'KlikPOS_Desktop_Full_Setup.exe', browser_download_url: rawData.windowsUrl || 'https://github.com/klikposcloud-svg/klikpos-releases/releases/latest/download/KlikPOS_Desktop_Full_Setup.exe', size: 65000000 }
+              { name: 'Kliko_Street.apk', browser_download_url: rawData.androidUrl || 'https://github.com/klikposcloud-svg/klikpos-releases/releases/latest/download/Kliko_Street.apk', size: 15000000 },
+              { name: 'Kliko_Desktop_Full_Setup.exe', browser_download_url: rawData.windowsUrl || 'https://github.com/klikposcloud-svg/klikpos-releases/releases/latest/download/Kliko_Desktop_Full_Setup.exe', size: 65000000 }
             ]
           });
           setHasUpdate(rawData.version !== currentVersion.replace(/^v/i, ''));
@@ -120,8 +120,8 @@ export const SoftwareUpdateModal: React.FC<SoftwareUpdateModalProps> = ({
   const apkAsset = streetApk || releaseInfo?.assets?.find(a => a.name.toLowerCase().endsWith('.apk'));
   const exeAsset = releaseInfo?.assets?.find(a => a.name.toLowerCase().endsWith('.exe'));
 
-  const apkUrl = apkAsset?.browser_download_url || 'https://github.com/klikposcloud-svg/klikpos-releases/releases/latest/download/KlikPOS_Street.apk';
-  const exeUrl = exeAsset?.browser_download_url || 'https://github.com/klikposcloud-svg/klikpos-releases/releases/latest/download/KlikPOS_Desktop_Full_Setup.exe';
+  const apkUrl = apkAsset?.browser_download_url || 'https://github.com/klikposcloud-svg/klikpos-releases/releases/latest/download/Kliko_Street.apk';
+  const exeUrl = exeAsset?.browser_download_url || 'https://github.com/klikposcloud-svg/klikpos-releases/releases/latest/download/Kliko_Desktop_Full_Setup.exe';
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-sm animate-in fade-in duration-200">
@@ -149,7 +149,7 @@ export const SoftwareUpdateModal: React.FC<SoftwareUpdateModalProps> = ({
               <p className={`text-xs font-semibold ${
                 isLight ? 'text-slate-700' : 'text-slate-300'
               }`}>
-                Canal Oficial de Distribución y Mantenimiento KlikPOS Cloud
+                Canal Oficial de Distribución y Mantenimiento Kliko Cloud
               </p>
             </div>
           </div>
@@ -214,7 +214,7 @@ export const SoftwareUpdateModal: React.FC<SoftwareUpdateModalProps> = ({
               <p className={`text-sm font-black ${
                 isLight ? 'text-slate-950' : 'text-white'
               }`}>
-                Verificando actualizaciones en KlikPOS Cloud...
+                Verificando actualizaciones en Kliko Cloud...
               </p>
               <span className={`text-xs font-semibold ${
                 isLight ? 'text-slate-600' : 'text-slate-300'
@@ -313,7 +313,7 @@ export const SoftwareUpdateModal: React.FC<SoftwareUpdateModalProps> = ({
             <h4 className={`text-xs font-black uppercase tracking-wider ${
               isLight ? 'text-slate-800' : 'text-slate-300'
             }`}>
-              Descargas Oficiales desde KlikPOS Cloud:
+              Descargas Oficiales desde Kliko Cloud:
             </h4>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {/* Botón APK */}

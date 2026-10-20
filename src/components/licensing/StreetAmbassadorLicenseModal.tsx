@@ -268,7 +268,7 @@ export default function StreetAmbassadorLicenseModal({
         storeName: storeName || 'Negocio Móvil',
         productKey: licenseKeyInput.trim(),
         plan: verification.plan || 'vitalicia',
-        appVersion: 'KlikPOS Street v1.0',
+        appVersion: 'Kliko Street v1.0',
       }).catch(() => {});
 
       setActivationSuccess(true);
@@ -794,7 +794,7 @@ export default function StreetAmbassadorLicenseModal({
 
         {/* PIE DEL MODAL */}
         <div className="px-6 py-3 border-t border-slate-800 flex items-center justify-between bg-[#090d16] text-xs text-slate-200">
-          <span>KlikPOS Street Comercial v1.0</span>
+          <span>Kliko Street Comercial v1.0</span>
           <button
             onClick={onClose}
             className="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold transition-all cursor-pointer active:scale-95"

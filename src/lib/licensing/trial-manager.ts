@@ -109,13 +109,13 @@ export async function notifyTelegramInstallation(data: {
     else devType = '🌐 Web Client';
 
     const editionName = data.edition === 'street'
-      ? 'KlikPOS Street Food'
+      ? 'Kliko Street Food'
       : data.edition === 'movil'
-      ? 'KlikPOS Móvil Full'
-      : 'KlikPOS Suite Desktop';
+      ? 'Kliko Móvil Full'
+      : 'Kliko POS Suite Desktop';
 
     const msg = [
-      `🎉 *¡NUEVA INSTALACIÓN KLIKPOS DETECTADA!*`,
+      `🎉 *¡NUEVA INSTALACIÓN KLIKO DETECTADA!*`,
       `📦 *Edición:* ${editionName}`,
       `🆔 *Terminal ID:* \`${data.hwid}\``,
       `🏪 *Negocio:* ${data.storeName}`,

@@ -84,7 +84,7 @@ const darkShieldHeadStyle = `
 
 // 2. Leer tablet-pos.html e inyectar blindaje dark
 let html = fs.readFileSync(tabletHtmlSrc, 'utf8');
-html = html.replace(/<title>.*?<\/title>/, '<title>KlikPOS Street v1.0</title>');
+html = html.replace(/<title>.*?<\/title>/, '<title>Kliko Street v1.0</title>');
 html = html.replace('</head>', darkShieldHeadStyle);
 
 // Guardar como index.html y tablet-pos.html

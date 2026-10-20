@@ -357,7 +357,7 @@ export const ProductImageSelector: React.FC<ProductImageSelectorProps> = ({
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse" />
               <span className="text-white text-xs font-black uppercase tracking-wider">
-                Cámara en Vivo • KlikPOS Street
+                Cámara en Vivo • Kliko Street
               </span>
             </div>
             <button
