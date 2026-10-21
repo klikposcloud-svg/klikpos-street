@@ -98,7 +98,11 @@ async function main() {
     { name: 'KlikPOS_Lite_Setup.exe', relPath: 'KlikPOS Release/01_KlikPOS_Lite_Desktop/KlikPOS_Lite_Setup.exe' },
     { name: 'KlikPOS_Pro_Setup.exe', relPath: 'KlikPOS Release/02_KlikPOS_Pro_Desktop/KlikPOS_Pro_Setup.exe' },
     { name: 'KlikPOS_Elite_Setup.exe', relPath: 'KlikPOS Release/03_KlikPOS_Elite_Desktop/KlikPOS_Elite_Setup.exe' },
-    { name: 'KlikPOS_Desktop_Full_Setup.exe', relPath: 'KlikPOS Release/03_KlikPOS_Elite_Desktop/KlikPOS_Elite_Setup.exe' }
+    { name: 'KlikPOS_Desktop_Full_Setup.exe', relPath: 'KlikPOS Release/03_KlikPOS_Elite_Desktop/KlikPOS_Elite_Setup.exe' },
+    { name: 'KlikPOS_Street_v3.0.25_Setup.exe', relPath: 'KlikPOS Release/03_KlikPOS_Street_Desktop/KlikPOS_Street_v3.0.25_Setup.exe' },
+    { name: 'KlikPOS_Street_Setup.exe', relPath: 'KlikPOS Release/03_KlikPOS_Street_Desktop/KlikPOS_Street_v3.0.25_Setup.exe' },
+    { name: 'Kliko_Street_Setup.exe', relPath: 'KlikPOS Release/03_KlikPOS_Street_Desktop/KlikPOS_Street_v3.0.25_Setup.exe' },
+    { name: 'Kliko_Street_v3.0.25_Setup.exe', relPath: 'KlikPOS Release/03_KlikPOS_Street_Desktop/KlikPOS_Street_v3.0.25_Setup.exe' }
   ];
 
   for (const win of windowsAssets) {
@@ -112,7 +116,9 @@ async function main() {
   // 3. Subir APKs Android Oficiales desde 'KlikPOS Release'
   const androidAssets = [
     { name: 'Kliko_Street.apk', relPath: 'KlikPOS Release/04_Apps_Moviles_Android/Kliko_Street.apk' },
+    { name: 'Kliko_Street_v3.0.25.apk', relPath: 'KlikPOS Release/04_Apps_Moviles_Android/Kliko_Street_v3.0.25.apk' },
     { name: 'KlikPOS_Street.apk', relPath: 'KlikPOS Release/04_Apps_Moviles_Android/KlikPOS_Street.apk' },
+    { name: 'KlikPOS_Street_v3.0.25.apk', relPath: 'KlikPOS Release/04_Apps_Moviles_Android/Kliko_Street_v3.0.25.apk' },
     { name: 'KlikPOS_Tablet_Standalone_Mesas.apk', relPath: 'KlikPOS Release/04_Apps_Moviles_Android/KlikPOS_Street.apk' },
     { name: 'KlikPOS_Movil.apk', relPath: 'KlikPOS Release/04_Apps_Moviles_Android/KlikPOS_Movil.apk' },
     { name: 'KlikPOS_Movil_Full.apk', relPath: 'KlikPOS Release/04_Apps_Moviles_Android/KlikPOS_Movil.apk' },
