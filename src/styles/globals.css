@@ -342,6 +342,20 @@ html:not(.dark) .text-slate-800 {
   -webkit-text-fill-color: currentColor !important;
 }
 
+/* Blindaje Total para Contenedores Oscuros y Modales (Previene texto oscuro invisible sobre fondos oscuros) */
+.bg-slate-900,
+.bg-slate-950,
+.bg-black,
+.bg-zinc-900,
+.bg-zinc-950,
+[style*="background-color: #0f172a"],
+[style*="background-color: rgb(15, 23, 42)"],
+[style*="background-color:#0f172a"],
+[style*="background-color: #090d16"],
+[style*="background-color:#090d16"] {
+  -webkit-text-fill-color: initial !important;
+}
+
 /* ========================================================================= */
 /* MÃXIMA PRIORIDAD PARA BADGES DE TECLAS F (F1 - F12) Y TEXTO BLANCO       */
 /* Supera cualquier selector de Modo Industrial, Profesional o Modo Blanco   */

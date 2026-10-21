@@ -65,6 +65,8 @@ import {
   Link2,
   Unlink,
   Package,
+  LayoutGrid,
+  ChevronRight,
 } from 'lucide-react';
 import { removeBackgroundToWhiteCanvas } from '@/lib/background-remover';
 import { Icon } from '@iconify/react';
@@ -599,6 +601,7 @@ export default function MobileScannerPage() {
   const [aiDetectedToast, setAiDetectedToast] = useState<string | null>(null);
 
   // Floating Docker y Modales de Escritorio en Móvil
+  const [isMobileToolsDockOpen, setIsMobileToolsDockOpen] = useState(false);
   const [showMobileSalesModal, setShowMobileSalesModal] = useState(false);
   const [showMobileCustomersModal, setShowMobileCustomersModal] = useState(false);
   const [showMobileClosureModal, setShowMobileClosureModal] = useState(false);
@@ -2173,7 +2176,7 @@ export default function MobileScannerPage() {
   };
 
   return (
-    <div className="h-[100dvh] max-h-[100dvh] w-full bg-[var(--industrial-bg,#ffffff)] flex flex-col font-sans text-slate-900 select-none overflow-hidden pb-[60px]">
+    <div className="h-[100dvh] max-h-[100dvh] w-full bg-[var(--industrial-bg,#ffffff)] flex flex-col font-sans select-none overflow-hidden pb-[60px]">
       {/* Top Mobile Bar */}
       <header className="bg-white border-b border-slate-300 px-3.5 py-2 sticky top-0 z-40 flex items-center justify-between shadow-xs shrink-0">
         <div className="flex items-center gap-2">
@@ -2182,7 +2185,7 @@ export default function MobileScannerPage() {
           </div>
           <div>
             <h1 className="text-sm font-black text-slate-900 leading-tight tracking-tight">
-              KlikPOS Móvil
+              Kliko Móvil
             </h1>
             <div className="flex items-center gap-1.5 text-[10px] text-slate-500 font-medium">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -2252,9 +2255,9 @@ export default function MobileScannerPage() {
 
       {/* Subheader: Estado del Sistema Dual y Accesos Rápidos de Gestión */}
       <div className="px-3 py-1.5 bg-slate-900 text-white flex items-center justify-between shadow-xs text-xs sticky top-12 z-30 shrink-0">
-        <div className="flex items-center gap-1.5">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-          <span className="font-extrabold text-xs uppercase tracking-wider text-slate-200">
+        <div className="flex items-center gap-1.5 min-w-0">
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+          <span className="font-extrabold text-xs uppercase tracking-wider text-slate-200 truncate">
             {activeTab === 'pos' && '🛒 POS Móvil'}
             {activeTab === 'scale' && '⚖️ Balanza'}
             {activeTab === 'gun' && '⚡ Escáner'}
@@ -2262,7 +2265,7 @@ export default function MobileScannerPage() {
             {activeTab === 'inventory' && '📦 Stock'}
           </span>
         </div>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1.5 shrink-0">
           <button
             type="button"
             onClick={() => {
@@ -2281,181 +2284,26 @@ export default function MobileScannerPage() {
             type="button"
             onClick={() => {
               safeVibrate(20);
-              loadSavedCustomers();
-              setShowMobileCustomersModal(true);
+              setIsMobileToolsDockOpen(true);
             }}
-            className="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 active:scale-95 rounded-lg text-[11px] font-bold flex items-center gap-1 border border-slate-700 transition-all cursor-pointer"
-            title="Clientes y Cuentas por Cobrar"
+            className="px-2.5 py-1 bg-gradient-to-r from-sky-600 via-indigo-600 to-purple-600 hover:opacity-95 text-white active:scale-95 rounded-lg text-[11px] font-black flex items-center gap-1.5 shadow-xs transition-all cursor-pointer ring-1 ring-white/20"
+            style={{ color: '#ffffff', WebkitTextFillColor: '#ffffff' }}
+            title="Abrir Docker de Gestión y Herramientas"
           >
-            <Users className="w-3.5 h-3.5 text-amber-400" />
-            <span className="hidden xs:inline">Clientes</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              safeVibrate(20);
-              loadSavedSales();
-              setShowMobileClosureModal(true);
-            }}
-            className="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 active:scale-95 rounded-lg text-[11px] font-bold flex items-center gap-1 border border-slate-700 transition-all cursor-pointer"
-            title="Cierre de Caja Z / X"
-          >
-            <TrendingUp className="w-3.5 h-3.5 text-purple-400" />
-            <span className="hidden xs:inline">Cierre</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              safeVibrate(20);
-              setShowMobileSettingsModal(true);
-            }}
-            className="p-1 bg-slate-800 hover:bg-slate-700 text-slate-300 active:scale-95 rounded-lg border border-slate-700 transition-all cursor-pointer"
-            title="Configuración"
-          >
-            <Settings className="w-3.5 h-3.5" />
+            <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+            <span>Herramientas</span>
           </button>
         </div>
       </div>
 
       {/* ========================================================================= */}
-      {/* PESTAÑA 1 (NAV DOCK 1): POS AUTÓNOMO CON CASHIER DISPLAY FRAME & 2-ROW GRID */}
+      {/* PESTAÑA 1 (NAV DOCK 1): POS AUTÓNOMO (MÁXIMO ESPACIO PARA CATÁLOGO)       */}
       {/* ========================================================================= */}
       {activeTab === 'pos' && (
         <main className="flex-1 min-h-0 flex flex-col overflow-hidden relative bg-slate-100">
           
-          {/* 1. FRAME / MOCKUP DEL DISPLAY DE CAJA REGISTRADORA DIGITAL */}
-          <div className="p-2.5 pb-1 shrink-0">
-            <div className="bg-gradient-to-b from-slate-900 via-[#0a192f] to-slate-950 rounded-2xl p-3 border-2 border-slate-700/80 shadow-xl text-white relative overflow-hidden">
-              {/* Luz sutil de reflejo del display */}
-              <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent" />
-
-              {/* Barra Superior del Display */}
-              <div className="flex items-center justify-between pb-1.5 border-b border-slate-800/80 text-[10px] font-mono text-cyan-300">
-                <div className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-                  <span className="font-black uppercase tracking-wider text-emerald-400">DISPLAY DE CAJA</span>
-                  <span className="text-slate-500">|</span>
-                  <span className="text-slate-300">TICKET ACTIVO</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="px-2 py-0.5 rounded-md bg-white/10 text-[10px] font-bold text-slate-200">
-                    {mobileCart.reduce((s, i) => s + i.qty, 0)} arts
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setTempMobileBcvRate(inventoryBcvRate.toFixed(2));
-                      setShowMobileBcvModal(true);
-                    }}
-                    className="text-amber-300 font-bold hover:underline"
-                  >
-                    BCV: Bs. {inventoryBcvRate.toFixed(2)}
-                  </button>
-                </div>
-              </div>
-
-              {/* LECTURA DIGITAL GIGANTE TIPO LED/LCD */}
-              <div className="py-2.5 flex items-center justify-between">
-                <div>
-                  <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400 block font-semibold">
-                    TOTAL VENTA
-                  </span>
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-cyan-400 font-mono text-xl font-bold">$</span>
-                    <span
-                      className="font-mono font-black text-3xl sm:text-4xl text-white tracking-tight tabular-numbers"
-                      style={{ textShadow: '0 0 15px rgba(34, 211, 238, 0.4)' }}
-                    >
-                      {mobileTotalUSD.toFixed(2)}
-                    </span>
-                    <span className="text-[11px] font-mono text-slate-400 uppercase ml-1">USD</span>
-                  </div>
-                </div>
-
-                <div className="text-right">
-                  <span className="text-[10px] font-mono uppercase tracking-widest text-emerald-400 block font-semibold">
-                    EN BOLÍVARES (BCV)
-                  </span>
-                  <span className="font-mono font-black text-lg sm:text-xl text-emerald-400 tracking-tight tabular-numbers block">
-                    Bs. {mobileTotalVES.toFixed(2)}
-                  </span>
-                </div>
-              </div>
-
-              {/* MARQUEE / TICKER DEL ÚLTIMO PRODUCTO AGREGADO O ESTADO */}
-              <div className="bg-black/50 border border-slate-800 rounded-xl px-2.5 py-1.5 flex items-center justify-between text-[11px] font-mono">
-                <div className="flex items-center gap-1.5 truncate">
-                  <span className="text-cyan-400 font-bold">►</span>
-                  {mobileCart.length > 0 ? (
-                    <span className="text-slate-200 truncate font-bold">
-                      Último: {mobileCart[mobileCart.length - 1]?.name} (${mobileCart[mobileCart.length - 1]?.priceUSD.toFixed(2)})
-                    </span>
-                  ) : (
-                    <span className="text-slate-400 italic">Listo • Toca un producto abajo o escanea</span>
-                  )}
-                </div>
-
-                {mobileCart.length > 0 && (
-                  <button
-                    type="button"
-                    onClick={() => setShowCartDrawer(true)}
-                    className="text-cyan-300 hover:text-cyan-200 font-bold underline shrink-0 ml-2 text-[10px]"
-                  >
-                    Ver Renglones ({mobileCart.length})
-                  </button>
-                )}
-              </div>
-
-              {/* ACCIONES RÁPIDAS DEL DISPLAY */}
-              <div className="grid grid-cols-4 gap-1.5 pt-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (mobileCart.length === 0) {
-                      alert('El carrito está vacío. Agrega productos abajo.');
-                      return;
-                    }
-                    setShowMobilePaymentModal(true);
-                  }}
-                  disabled={mobileCart.length === 0}
-                  className="col-span-2 py-2 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 disabled:opacity-40 text-white font-black text-xs rounded-xl shadow-lg flex items-center justify-center gap-1.5 active:scale-95 transition-all"
-                >
-                  <CreditCard className="w-4 h-4" />
-                  <span>COBRAR (${mobileTotalUSD.toFixed(2)})</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setShowQuickSaleModal(true)}
-                  className="py-2 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 font-bold text-[11px] rounded-xl flex items-center justify-center gap-1 active:scale-95 transition-all"
-                  title="Cobro rápido por monto"
-                >
-                  <span>⚡ Rápido</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (mobileCart.length === 0) return;
-                    if (confirm('¿Vaciar los productos de la venta actual?')) {
-                      clearMobileCart();
-                    }
-                  }}
-                  disabled={mobileCart.length === 0}
-                  className="py-2 bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 disabled:opacity-30 font-bold text-[11px] rounded-xl flex items-center justify-center gap-1 active:scale-95 transition-all"
-                  title="Vaciar carrito"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                  <span>Vaciar</span>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* 2. BARRA DE CATEGORÍAS & BÚSQUEDA RÁPIDA */}
-          <div className="px-2.5 py-1 shrink-0 space-y-1.5">
+          {/* BARRA DE CATEGORÍAS & BÚSQUEDA RÁPIDA (SUBIDA AL TOPE PARA MÁXIMO ESPACIO DE CATÁLOGO) */}
+          <div className="px-2.5 pt-2 pb-1 shrink-0 space-y-1.5 bg-slate-100 border-b border-slate-200/80">
             {/* Buscador Rápido */}
             <div className="relative">
               <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -2611,24 +2459,38 @@ export default function MobileScannerPage() {
           </div>
 
           {/* CONTENEDOR FIJADO EN LA PARTE INFERIOR: MONTO TOTAL Y COBRAR VENTA */}
-          {mobileCart.length > 0 && (
-            <div className="shrink-0 bg-slate-950 text-white p-3 border-t border-slate-800 shadow-[0_-8px_30px_rgba(0,0,0,0.5)] z-20 space-y-2.5">
-              {/* Fila del Monto Total */}
+          {mobileCart.length > 0 ? (
+            <div className="shrink-0 bg-slate-950 text-white p-3 border-t border-slate-800 shadow-[0_-8px_30px_rgba(0,0,0,0.5)] z-20 space-y-2">
+              {/* Fila del Monto Total y Botón de Ver Carrito */}
               <div className="flex items-center justify-between">
-                <div>
-                  <span className="text-xs font-bold text-slate-400 uppercase tracking-wide block">
-                    Total a Cobrar ({mobileCart.reduce((sum, i) => sum + i.qty, 0)} arts)
-                  </span>
-                  <span className="text-xs text-slate-400 block font-mono">
-                    Tasa BCV: Bs. {inventoryBcvRate.toFixed(2)}
-                  </span>
-                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowCartDrawer(true)}
+                  className="flex items-center gap-1.5 px-2.5 py-1 bg-slate-900 hover:bg-slate-800 border border-slate-700 rounded-xl text-left transition-all active:scale-95"
+                >
+                  <div className="w-6 h-6 rounded-lg bg-emerald-500 text-slate-950 flex items-center justify-center font-black text-xs">
+                    {mobileCart.reduce((sum, i) => sum + i.qty, 0)}
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-bold text-slate-400 block uppercase leading-none">Ticket</span>
+                    <span className="text-[11px] font-bold text-emerald-400 flex items-center gap-0.5">
+                      Ver detalle <ChevronRight className="w-3 h-3" />
+                    </span>
+                  </div>
+                </button>
+
                 <div className="text-right">
-                  <span className="font-mono font-black text-2xl text-white block tabular-numbers leading-tight" style={{ textShadow: '0 0 10px var(--brand-glow, rgba(2,132,199,0.35))' }}>
+                  <span
+                    className="font-mono font-black text-2xl text-white block tabular-numbers leading-tight"
+                    style={{ textShadow: '0 0 10px rgba(56, 189, 248, 0.4)', color: '#ffffff', WebkitTextFillColor: '#ffffff' }}
+                  >
                     ${mobileTotalUSD.toFixed(2)}
                   </span>
-                  <span className="font-mono font-bold text-xs text-slate-300 block tabular-numbers">
-                    ≈ Bs. {mobileTotalVES.toFixed(2)}
+                  <span
+                    className="font-mono font-bold text-xs text-emerald-400 block tabular-numbers"
+                    style={{ color: '#4ade80', WebkitTextFillColor: '#4ade80' }}
+                  >
+                    ≈ Bs. {mobileTotalVES.toFixed(2)} <span className="text-[10px] text-slate-400">({inventoryBcvRate.toFixed(2)})</span>
                   </span>
                 </div>
               </div>
@@ -2636,36 +2498,70 @@ export default function MobileScannerPage() {
               {/* Botón Principal Fijado: Cobrar Venta */}
               <button
                 type="button"
-                onClick={() => setShowMobilePaymentModal(true)}
-                className="w-full py-3 bg-gradient-to-r from-[var(--brand-primary,#0369a1)] to-[var(--brand-hover,#075985)] hover:opacity-90 active:scale-[0.98] text-white font-black text-sm rounded-xl shadow-lg flex items-center justify-center gap-2 transition-all ring-2 ring-white/20"
+                onClick={() => {
+                  safeVibrate(30);
+                  setShowMobilePaymentModal(true);
+                }}
+                className="w-full py-3 bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-600 hover:opacity-95 active:scale-[0.98] text-white font-black text-sm rounded-xl shadow-lg flex items-center justify-center gap-2 transition-all ring-2 ring-emerald-400/30"
+                style={{ color: '#ffffff', WebkitTextFillColor: '#ffffff' }}
               >
-                <Banknote className="w-5 h-5" />
-                <span>Cobrar Venta (${mobileTotalUSD.toFixed(2)} / Bs. {mobileTotalVES.toFixed(2)})</span>
+                <Banknote className="w-5 h-5 text-white" />
+                <span>COBRAR (${mobileTotalUSD.toFixed(2)} / Bs. {mobileTotalVES.toFixed(2)})</span>
               </button>
 
               {/* Acciones Rápidas para seguir sumando */}
-              <div className="grid grid-cols-3 gap-1.5">
+              <div className="grid grid-cols-3 gap-1.5 pt-0.5">
                 <button
                   type="button"
                   onClick={() => setShowQuickSaleModal(true)}
-                  className="py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-black text-[11px] rounded-lg flex items-center justify-center gap-1 transition-all active:scale-95 shadow-xs"
+                  className="py-1.5 bg-amber-600 hover:bg-amber-500 text-white font-black text-[11px] rounded-lg flex items-center justify-center gap-1 transition-all active:scale-95 shadow-xs"
+                  style={{ color: '#ffffff', WebkitTextFillColor: '#ffffff' }}
                 >
                   <span>⚡ Monto Libre</span>
                 </button>
                 <button
                   type="button"
-                  onClick={() => setActiveTab('inventory')}
-                  className="py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs rounded-lg flex items-center justify-center gap-1.5 transition-all active:scale-95"
+                  onClick={() => setActiveTab('scale')}
+                  className="py-1.5 bg-slate-800 hover:bg-slate-700 text-cyan-300 font-bold text-xs rounded-lg flex items-center justify-center gap-1 transition-all active:scale-95"
                 >
-                  <Plus className="w-3.5 h-3.5 text-[var(--brand-border,#7dd3fc)]" />
-                  <span>+ Stock</span>
+                  <Scale className="w-3.5 h-3.5" />
+                  <span>Balanza</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (confirm('¿Vaciar todos los artículos del ticket?')) {
+                      clearMobileCart();
+                    }
+                  }}
+                  className="py-1.5 bg-rose-950/60 hover:bg-rose-900 border border-rose-800/60 text-rose-300 font-bold text-xs rounded-lg flex items-center justify-center gap-1 transition-all active:scale-95"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Vaciar</span>
+                </button>
+              </div>
+            </div>
+          ) : (
+            /* BARRA SLIM CUANDO EL CARRITO ESTÁ VACÍO (MÁXIMO ESPACIO PARA CATÁLOGO) */
+            <div className="shrink-0 bg-white border-t border-slate-200 px-3 py-2 flex items-center justify-between text-xs shadow-xs z-20">
+              <div className="flex items-center gap-1.5 text-slate-500 text-[11px] font-medium truncate">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+                <span className="truncate">Ticket listo • Toca productos para sumar</span>
+              </div>
+              <div className="flex items-center gap-1.5 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setShowQuickSaleModal(true)}
+                  className="px-2.5 py-1 bg-amber-500 hover:bg-amber-600 active:scale-95 text-slate-950 font-black text-[11px] rounded-lg flex items-center gap-1 shadow-2xs transition-all"
+                >
+                  <span>⚡ Monto Libre</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setActiveTab('scale')}
-                  className="py-1.5 bg-slate-800 hover:bg-slate-700 text-cyan-300 font-bold text-xs rounded-lg flex items-center justify-center gap-1.5 transition-all active:scale-95"
+                  className="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-[11px] rounded-lg flex items-center gap-1 transition-all"
                 >
-                  <Scale className="w-3.5 h-3.5" />
+                  <Scale className="w-3.5 h-3.5 text-sky-600" />
                   <span>Balanza</span>
                 </button>
               </div>
@@ -2856,43 +2752,47 @@ export default function MobileScannerPage() {
               </button>
             </div>
 
-            {/* Total a Pagar Destacado - Readout digital con acentos de marca */}
+            {/* Total a Pagar Destacado - Readout digital de Alto Contraste WCAG AAA */}
             <div
               style={{
-                backgroundColor: '#0f172a',
-                borderColor: 'var(--brand-border, #7dd3fc)',
-                boxShadow: 'inset 0 2px 12px rgba(0,0,0,0.6), 0 0 25px var(--brand-glow, rgba(2,132,199,0.35))',
+                backgroundColor: '#090d16',
+                borderColor: '#38bdf8',
+                boxShadow: 'inset 0 2px 12px rgba(0,0,0,0.8), 0 0 25px rgba(2,132,199,0.25)',
               }}
-              className="p-4 rounded-2xl text-center space-y-1 border-2 relative overflow-hidden"
+              className="p-3.5 rounded-2xl text-center space-y-1 border-2 relative overflow-hidden"
             >
               <span
-                style={{ color: 'var(--brand-border, #7dd3fc)', letterSpacing: '0.15em' }}
-                className="text-xs uppercase font-mono font-black block"
+                style={{ color: '#38bdf8', letterSpacing: '0.15em', WebkitTextFillColor: '#38bdf8' }}
+                className="text-[11px] uppercase font-mono font-black block"
               >
-                TOTAL DE LA VENTA
+                TOTAL A COBRAR
               </span>
               <p
                 style={{
                   color: '#ffffff',
-                  textShadow: '0 0 12px var(--brand-glow, rgba(2,132,199,0.35))',
+                  WebkitTextFillColor: '#ffffff',
+                  textShadow: '0 0 16px rgba(56, 189, 248, 0.4)',
                 }}
                 className="font-mono font-black text-4xl tabular-numbers tracking-tight leading-none my-1"
               >
-                <span>
-                  ${mobileTotalUSD.toFixed(2)}
-                </span>
+                ${mobileTotalUSD.toFixed(2)}
               </p>
               <div
                 style={{
-                  color: '#cbd5e1',
                   borderColor: 'rgba(148, 163, 184, 0.25)',
                 }}
                 className="flex items-center justify-center gap-1.5 font-mono text-sm font-bold pt-1.5 border-t"
               >
-                <span>
+                <span
+                  style={{ color: '#4ade80', WebkitTextFillColor: '#4ade80' }}
+                  className="font-mono font-black text-base"
+                >
                   ≈ Bs. {mobileTotalVES.toFixed(2)}
                 </span>
-                <span className="text-xs font-semibold text-slate-400">
+                <span
+                  style={{ color: '#94a3b8', WebkitTextFillColor: '#94a3b8' }}
+                  className="text-xs font-semibold"
+                >
                   (Tasa: {inventoryBcvRate.toFixed(2)})
                 </span>
               </div>
@@ -4895,7 +4795,7 @@ export default function MobileScannerPage() {
       <nav className="fixed bottom-0 inset-x-0 z-50 bg-slate-950 border-t border-slate-800/90 shadow-[0_-4px_25px_rgba(0,0,0,0.5)] select-none pb-[max(env(safe-area-inset-bottom,0px),4px)]">
         <div className="max-w-md mx-auto px-1 flex items-center justify-around h-14">
           
-          {/* 1. IZQUIERDA: POS */}
+          {/* 1. POS (Catálogo de Venta y Carrito) */}
           <button
             type="button"
             onClick={() => {
@@ -4921,25 +4821,25 @@ export default function MobileScannerPage() {
             )}
           </button>
 
-          {/* 2. IZQUIERDA: BALANZA DIGITAL */}
+          {/* 2. STOCK / INVENTARIO RÁPIDO */}
           <button
             type="button"
             onClick={() => {
               safeVibrate(25);
-              setActiveTab('scale');
+              setActiveTab('inventory');
             }}
             className={`flex flex-col items-center justify-center py-1 px-2.5 rounded-xl transition-all duration-150 relative ${
-              activeTab === 'scale'
+              activeTab === 'inventory'
                 ? 'text-[var(--brand-border,#7dd3fc)] font-extrabold'
                 : 'text-slate-400 hover:text-white active:scale-95'
             }`}
           >
             <div className={`p-1 rounded-lg transition-all ${
-              activeTab === 'scale' ? 'bg-white/10' : ''
+              activeTab === 'inventory' ? 'bg-white/10' : ''
             }`}>
-              <Scale className="w-5 h-5" />
+              <ShoppingBag className="w-5 h-5" />
             </div>
-            <span className="text-xs font-bold tracking-tight">Balanza</span>
+            <span className="text-xs font-bold tracking-tight">Stock</span>
           </button>
 
           {/* 3. CENTRO: ESCÁNER DE CÓDIGOS DE BARRAS */}
@@ -4969,46 +4869,47 @@ export default function MobileScannerPage() {
             </span>
           </button>
 
-          {/* 4. DERECHA: STOCK */}
+          {/* 4. BALANZA DIGITAL DE PESAJE */}
           <button
             type="button"
             onClick={() => {
               safeVibrate(25);
-              setActiveTab('inventory');
+              setActiveTab('scale');
             }}
             className={`flex flex-col items-center justify-center py-1 px-2.5 rounded-xl transition-all duration-150 relative ${
-              activeTab === 'inventory'
+              activeTab === 'scale'
                 ? 'text-[var(--brand-border,#7dd3fc)] font-extrabold'
                 : 'text-slate-400 hover:text-white active:scale-95'
             }`}
           >
             <div className={`p-1 rounded-lg transition-all ${
-              activeTab === 'inventory' ? 'bg-white/10' : ''
+              activeTab === 'scale' ? 'bg-white/10' : ''
             }`}>
-              <ShoppingBag className="w-5 h-5" />
+              <Scale className="w-5 h-5" />
             </div>
-            <span className="text-xs font-bold tracking-tight">Stock</span>
+            <span className="text-xs font-bold tracking-tight">Balanza</span>
           </button>
 
-          {/* 5. DERECHA: +ARTÍCULO */}
+          {/* 5. GESTIÓN: DOCKER DE HERRAMIENTAS Y ADMINISTRACIÓN */}
           <button
             type="button"
             onClick={() => {
               safeVibrate(25);
-              setActiveTab('create');
+              setIsMobileToolsDockOpen(true);
             }}
             className={`flex flex-col items-center justify-center py-1 px-2.5 rounded-xl transition-all duration-150 relative ${
-              activeTab === 'create'
-                ? 'text-[var(--brand-border,#7dd3fc)] font-extrabold'
+              isMobileToolsDockOpen
+                ? 'text-amber-400 font-extrabold'
                 : 'text-slate-400 hover:text-white active:scale-95'
             }`}
+            title="Abrir Docker de Gestión y Herramientas"
           >
             <div className={`p-1 rounded-lg transition-all ${
-              activeTab === 'create' ? 'bg-white/10' : ''
+              isMobileToolsDockOpen ? 'bg-amber-400/20 text-amber-300' : ''
             }`}>
-              <Camera className="w-5 h-5" />
+              <LayoutGrid className="w-5 h-5" />
             </div>
-            <span className="text-xs font-bold tracking-tight">+Artículo</span>
+            <span className="text-xs font-bold tracking-tight">Gestión</span>
           </button>
 
         </div>
@@ -5273,6 +5174,271 @@ export default function MobileScannerPage() {
                 className="flex-1 py-2 bg-sky-700 hover:bg-sky-800 text-white font-black text-xs rounded-xl shadow-md"
               >
                 Guardar Tasa
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* DOCKER DE GESTIÓN Y HERRAMIENTAS MÓVILES (KLIKO STREET BEST PRACTICES)    */}
+      {/* ========================================================================= */}
+      {isMobileToolsDockOpen && (
+        <div
+          className="fixed inset-0 z-[130] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-150"
+          onClick={() => setIsMobileToolsDockOpen(false)}
+        >
+          <div
+            className="w-full max-w-md rounded-t-3xl sm:rounded-3xl p-5 space-y-4 shadow-2xl border border-slate-700/80 animate-in slide-in-from-bottom duration-200 max-h-[85vh] overflow-y-auto"
+            style={{
+              backgroundColor: '#090d16',
+              boxShadow: '0 -10px 40px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.1)',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header del Docker */}
+            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-sky-600 to-indigo-600 text-white flex items-center justify-center shadow-lg">
+                  <LayoutGrid className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="font-black text-sm text-white tracking-wide flex items-center gap-1.5" style={{ color: '#ffffff', WebkitTextFillColor: '#ffffff' }}>
+                    <span>Panel de Gestión Kliko</span>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-sky-500/20 text-sky-300 font-mono border border-sky-500/40">
+                      Móvil
+                    </span>
+                  </h3>
+                  <p className="text-[11px] text-slate-400">Herramientas operativas y administrativas</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsMobileToolsDockOpen(false)}
+                className="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center font-bold text-sm active:scale-95 transition-transform"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Fila de Métricas Rápidas en Vivo */}
+            <div className="grid grid-cols-3 gap-2 py-1">
+              <div
+                onClick={() => {
+                  setIsMobileToolsDockOpen(false);
+                  setTempMobileBcvRate(inventoryBcvRate.toFixed(2));
+                  setShowMobileBcvModal(true);
+                }}
+                className="bg-slate-900/90 border border-slate-800 hover:border-sky-500/50 p-2 rounded-xl text-center cursor-pointer active:scale-95 transition-all"
+              >
+                <span className="text-[9px] uppercase tracking-wider text-slate-400 font-bold block">TASA BCV</span>
+                <span className="font-mono font-black text-xs text-sky-400 block tabular-numbers">
+                  Bs. {inventoryBcvRate.toFixed(2)}
+                </span>
+              </div>
+
+              <div
+                onClick={() => {
+                  setIsMobileToolsDockOpen(false);
+                  loadSavedSales();
+                  setShowMobileSalesModal(true);
+                }}
+                className="bg-slate-900/90 border border-slate-800 hover:border-emerald-500/50 p-2 rounded-xl text-center cursor-pointer active:scale-95 transition-all"
+              >
+                <span className="text-[9px] uppercase tracking-wider text-slate-400 font-bold block">VENTAS HOY</span>
+                <span className="font-mono font-black text-xs text-emerald-400 block tabular-numbers">
+                  {savedSalesList.length} tickets
+                </span>
+              </div>
+
+              <div
+                onClick={() => {
+                  setIsMobileToolsDockOpen(false);
+                  setTempPcIp(pcServerUrl || '');
+                  setShowPcSyncModal(true);
+                }}
+                className="bg-slate-900/90 border border-slate-800 hover:border-amber-500/50 p-2 rounded-xl text-center cursor-pointer active:scale-95 transition-all"
+              >
+                <span className="text-[9px] uppercase tracking-wider text-slate-400 font-bold block">ENLACE PC</span>
+                <span className={`font-mono font-bold text-[10px] block truncate ${pcConnectionStatus === 'connected' ? 'text-emerald-400' : 'text-amber-400'}`}>
+                  {pcConnectionStatus === 'connected' ? '● Enlazado' : '○ Sin enlace'}
+                </span>
+              </div>
+            </div>
+
+            {/* Grid 2 Columnas de Módulos Operativos de Calle */}
+            <div className="grid grid-cols-2 gap-2.5 pt-1">
+              {/* 1. Historial de Ventas */}
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMobileToolsDockOpen(false);
+                  safeVibrate(20);
+                  loadSavedSales();
+                  setShowMobileSalesModal(true);
+                }}
+                className="p-3 rounded-2xl bg-slate-900/90 hover:bg-slate-800/90 border border-slate-800 hover:border-sky-500/50 flex items-center gap-3 text-left transition-all active:scale-95 group shadow-sm cursor-pointer"
+              >
+                <div className="w-10 h-10 rounded-xl bg-sky-600/20 border border-sky-500/40 text-sky-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                  <Receipt className="w-5 h-5" />
+                </div>
+                <div className="min-w-0">
+                  <span className="font-black text-xs text-white block truncate" style={{ color: '#ffffff', WebkitTextFillColor: '#ffffff' }}>
+                    Ventas del Día
+                  </span>
+                  <span className="text-[10px] text-slate-400 block truncate">Tickets & WhatsApp</span>
+                </div>
+              </button>
+
+              {/* 2. Clientes y Fiados */}
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMobileToolsDockOpen(false);
+                  safeVibrate(20);
+                  loadSavedCustomers();
+                  setShowMobileCustomersModal(true);
+                }}
+                className="p-3 rounded-2xl bg-slate-900/90 hover:bg-slate-800/90 border border-slate-800 hover:border-amber-500/50 flex items-center gap-3 text-left transition-all active:scale-95 group shadow-sm cursor-pointer"
+              >
+                <div className="w-10 h-10 rounded-xl bg-amber-600/20 border border-amber-500/40 text-amber-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                  <Users className="w-5 h-5" />
+                </div>
+                <div className="min-w-0">
+                  <span className="font-black text-xs text-white block truncate" style={{ color: '#ffffff', WebkitTextFillColor: '#ffffff' }}>
+                    Clientes & Fiado
+                  </span>
+                  <span className="text-[10px] text-slate-400 block truncate">Cuentas por cobrar</span>
+                </div>
+              </button>
+
+              {/* 3. Arqueo / Cierre Z y X */}
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMobileToolsDockOpen(false);
+                  safeVibrate(20);
+                  loadSavedSales();
+                  setShowMobileClosureModal(true);
+                }}
+                className="p-3 rounded-2xl bg-slate-900/90 hover:bg-slate-800/90 border border-slate-800 hover:border-purple-500/50 flex items-center gap-3 text-left transition-all active:scale-95 group shadow-sm cursor-pointer"
+              >
+                <div className="w-10 h-10 rounded-xl bg-purple-600/20 border border-purple-500/40 text-purple-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                  <TrendingUp className="w-5 h-5" />
+                </div>
+                <div className="min-w-0">
+                  <span className="font-black text-xs text-white block truncate" style={{ color: '#ffffff', WebkitTextFillColor: '#ffffff' }}>
+                    Cierre de Caja
+                  </span>
+                  <span className="text-[10px] text-slate-400 block truncate">Arqueo Z / X turno</span>
+                </div>
+              </button>
+
+              {/* 4. Tasa Oficial BCV */}
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMobileToolsDockOpen(false);
+                  safeVibrate(20);
+                  setTempMobileBcvRate(inventoryBcvRate.toFixed(2));
+                  setShowMobileBcvModal(true);
+                }}
+                className="p-3 rounded-2xl bg-slate-900/90 hover:bg-slate-800/90 border border-slate-800 hover:border-emerald-500/50 flex items-center gap-3 text-left transition-all active:scale-95 group shadow-sm cursor-pointer"
+              >
+                <div className="w-10 h-10 rounded-xl bg-emerald-600/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                  <Coins className="w-5 h-5" />
+                </div>
+                <div className="min-w-0">
+                  <span className="font-black text-xs text-white block truncate" style={{ color: '#ffffff', WebkitTextFillColor: '#ffffff' }}>
+                    Tasa Oficial BCV
+                  </span>
+                  <span className="text-[10px] text-slate-400 block truncate">Ajustar o Scraping</span>
+                </div>
+              </button>
+
+              {/* 5. Impresora Térmica & Empresa */}
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMobileToolsDockOpen(false);
+                  safeVibrate(20);
+                  setShowMobileSettingsModal(true);
+                }}
+                className="p-3 rounded-2xl bg-slate-900/90 hover:bg-slate-800/90 border border-slate-800 hover:border-blue-500/50 flex items-center gap-3 text-left transition-all active:scale-95 group shadow-sm cursor-pointer"
+              >
+                <div className="w-10 h-10 rounded-xl bg-blue-600/20 border border-blue-500/40 text-blue-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                  <Printer className="w-5 h-5" />
+                </div>
+                <div className="min-w-0">
+                  <span className="font-black text-xs text-white block truncate" style={{ color: '#ffffff', WebkitTextFillColor: '#ffffff' }}>
+                    Impresora & Datos
+                  </span>
+                  <span className="text-[10px] text-slate-400 block truncate">Bluetooth, Red y RIF</span>
+                </div>
+              </button>
+
+              {/* 6. Enlace Inalámbrico con PC */}
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMobileToolsDockOpen(false);
+                  safeVibrate(20);
+                  setTempPcIp(pcServerUrl || '');
+                  setShowPcSyncModal(true);
+                }}
+                className="p-3 rounded-2xl bg-slate-900/90 hover:bg-slate-800/90 border border-slate-800 hover:border-indigo-500/50 flex items-center gap-3 text-left transition-all active:scale-95 group shadow-sm cursor-pointer"
+              >
+                <div className="w-10 h-10 rounded-xl bg-indigo-600/20 border border-indigo-500/40 text-indigo-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                  <Laptop className="w-5 h-5" />
+                </div>
+                <div className="min-w-0">
+                  <span className="font-black text-xs text-white block truncate" style={{ color: '#ffffff', WebkitTextFillColor: '#ffffff' }}>
+                    Sincronizar PC
+                  </span>
+                  <span className="text-[10px] text-slate-400 block truncate">Enlace WiFi LAN</span>
+                </div>
+              </button>
+
+              {/* 7. Cobro Rápido / Monto Libre */}
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMobileToolsDockOpen(false);
+                  safeVibrate(20);
+                  setShowQuickSaleModal(true);
+                }}
+                className="p-3 rounded-2xl bg-slate-900/90 hover:bg-slate-800/90 border border-slate-800 hover:border-yellow-500/50 flex items-center gap-3 text-left transition-all active:scale-95 group shadow-sm cursor-pointer"
+              >
+                <div className="w-10 h-10 rounded-xl bg-yellow-600/20 border border-yellow-500/40 text-yellow-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                  <Sparkles className="w-5 h-5" />
+                </div>
+                <div className="min-w-0">
+                  <span className="font-black text-xs text-white block truncate" style={{ color: '#ffffff', WebkitTextFillColor: '#ffffff' }}>
+                    Cobro Libre
+                  </span>
+                  <span className="text-[10px] text-slate-400 block truncate">Sin inventario previo</span>
+                </div>
+              </button>
+
+              {/* 8. Captura IA y Nuevo Producto */}
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMobileToolsDockOpen(false);
+                  safeVibrate(20);
+                  setActiveTab('create');
+                }}
+                className="p-3 rounded-2xl bg-slate-900/90 hover:bg-slate-800/90 border border-slate-800 hover:border-rose-500/50 flex items-center gap-3 text-left transition-all active:scale-95 group shadow-sm cursor-pointer"
+              >
+                <div className="w-10 h-10 rounded-xl bg-rose-600/20 border border-rose-500/40 text-rose-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                  <Camera className="w-5 h-5" />
+                </div>
+                <div className="min-w-0">
+                  <span className="font-black text-xs text-white block truncate" style={{ color: '#ffffff', WebkitTextFillColor: '#ffffff' }}>
+                    Captura IA + Foto
+                  </span>
+                  <span className="text-[10px] text-slate-400 block truncate">+ Nuevo Artículo</span>
+                </div>
               </button>
             </div>
           </div>
