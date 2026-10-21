@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { deliveryOrders } from '@/lib/delivery-store'
 import { INITIAL_MARKETPLACE_STORES } from '@/lib/delivery/marketplace-engine'
 import type { DeliveryOrder, DeliveryOrderStatus } from '@/types/delivery'
+import { getSharedBcvState } from '@/lib/services/bcv-service'
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
@@ -38,7 +39,7 @@ export async function POST(request: Request) {
       paymentReference,
       orderType = 'delivery',
       deliveryFeeUSD = 2.0,
-      bcvRate = 848.55,
+      bcvRate = getSharedBcvState().rate,
     } = body
 
     if (!customerName || !customerPhone || !deliveryAddress || !items || !Array.isArray(items) || items.length === 0) {

@@ -1,0 +1,1820 @@
+- generic [ref=f2e2]:
+  - banner [ref=f2e3]:
+    - generic [ref=f2e4]:
+      - generic [ref=f2e5]: K
+      - generic [ref=f2e6]:
+        - heading "Kliko Móvil" [level=1] [ref=f2e7]
+        - generic [ref=f2e8]: Caja caja-1
+    - generic [ref=f2e11]:
+      - button "BCV Bs. 848.55" [ref=f2e12] [cursor=pointer]:
+        - generic [ref=f2e14]:
+          - generic [ref=f2e15]: BCV
+          - generic [ref=f2e16]: Bs. 848.55
+      - button "Configuración de Enlace Inalámbrico con PC" [ref=f2e17] [cursor=pointer]
+  - generic [ref=f2e21]:
+    - generic [ref=f2e22]: 🛒 POS Móvil
+    - generic [ref=f2e25]:
+      - button "Historial de Ventas y Tickets" [ref=f2e26] [cursor=pointer]
+      - button "Herramientas" [ref=f2e30] [cursor=pointer]
+  - main [ref=f2e35]:
+    - generic [ref=f2e36]:
+      - textbox "Buscar en el catálogo por nombre o código..." [ref=f2e41]
+      - generic [ref=f2e42]:
+        - button "Todos" [ref=f2e43] [cursor=pointer]
+        - button "Víveres" [ref=f2e44] [cursor=pointer]
+        - button "Charcutería y Lácteos" [ref=f2e45] [cursor=pointer]
+        - button "Salsas y Condimentos" [ref=f2e46] [cursor=pointer]
+        - button "Enlatados" [ref=f2e47] [cursor=pointer]
+        - button "Lácteos" [ref=f2e48] [cursor=pointer]
+        - button "Limpieza del Hogar" [ref=f2e49] [cursor=pointer]
+        - button "Analgésicos" [ref=f2e50] [cursor=pointer]
+        - button "Antiinflamatorios" [ref=f2e51] [cursor=pointer]
+        - button "Gastrointestinal" [ref=f2e52] [cursor=pointer]
+        - button "Antialérgicos" [ref=f2e53] [cursor=pointer]
+        - button "Primeros Auxilios" [ref=f2e54] [cursor=pointer]
+        - button "Antigripales" [ref=f2e55] [cursor=pointer]
+        - button "Nutrición e Hidratación" [ref=f2e56] [cursor=pointer]
+        - button "Vitaminas y Suplementos" [ref=f2e57] [cursor=pointer]
+        - button "Equipos Médicos" [ref=f2e58] [cursor=pointer]
+        - button "Higiene Personal" [ref=f2e59] [cursor=pointer]
+        - button "Rones y Destilados" [ref=f2e60] [cursor=pointer]
+        - button "Rones Premium" [ref=f2e61] [cursor=pointer]
+        - button "Cervezas" [ref=f2e62] [cursor=pointer]
+        - button "Cervezas Especiales" [ref=f2e63] [cursor=pointer]
+        - button "Whisky" [ref=f2e64] [cursor=pointer]
+        - button "Vinos y Sangrías" [ref=f2e65] [cursor=pointer]
+        - button "Bebidas no alcohólicas" [ref=f2e66] [cursor=pointer]
+        - button "Hielo y Mezcladores" [ref=f2e67] [cursor=pointer]
+        - button "Snacks y Pasapalos" [ref=f2e68] [cursor=pointer]
+        - button "Licores Secos" [ref=f2e69] [cursor=pointer]
+        - button "Panes Frescos" [ref=f2e70] [cursor=pointer]
+        - button "Salados y Desayunos" [ref=f2e71] [cursor=pointer]
+        - button "Dulces y Pastelería" [ref=f2e72] [cursor=pointer]
+        - button "Cafetería" [ref=f2e73] [cursor=pointer]
+        - button "Bebidas Frescas" [ref=f2e74] [cursor=pointer]
+        - button "Cuadernos" [ref=f2e75] [cursor=pointer]
+        - button "Útiles Escolares" [ref=f2e76] [cursor=pointer]
+        - button "Papelería y Resmas" [ref=f2e77] [cursor=pointer]
+        - button "Arte y Dibujo" [ref=f2e78] [cursor=pointer]
+        - button "Oficina y Archivo" [ref=f2e79] [cursor=pointer]
+        - button "Barquillas" [ref=f2e80] [cursor=pointer]
+        - button "Tinitas" [ref=f2e81] [cursor=pointer]
+        - button "Especialidades" [ref=f2e82] [cursor=pointer]
+        - button "Litros para Llevar" [ref=f2e83] [cursor=pointer]
+        - button "Paletas" [ref=f2e84] [cursor=pointer]
+        - button "Malteadas" [ref=f2e85] [cursor=pointer]
+        - button "Toppings y Adicionales" [ref=f2e86] [cursor=pointer]
+        - button "Bebidas" [ref=f2e87] [cursor=pointer]
+        - button "Hamburguesas" [ref=f2e88] [cursor=pointer]
+        - button "Pizzas" [ref=f2e89] [cursor=pointer]
+        - button "Entradas y Pasapalos" [ref=f2e90] [cursor=pointer]
+        - button "Desayunos Criollos" [ref=f2e91] [cursor=pointer]
+        - button "Almuerzos Ejecutivos" [ref=f2e92] [cursor=pointer]
+        - button "Sandwiches" [ref=f2e93] [cursor=pointer]
+        - button "Acompañantes" [ref=f2e94] [cursor=pointer]
+        - button "Bebidas Tradicionales" [ref=f2e95] [cursor=pointer]
+        - button "Franelas y Camisas" [ref=f2e96] [cursor=pointer]
+        - button "Pantalones y Jeans" [ref=f2e97] [cursor=pointer]
+        - button "Ropa Deportiva" [ref=f2e98] [cursor=pointer]
+        - button "Ropa Interior y Medias" [ref=f2e99] [cursor=pointer]
+        - button "Accesorios y Gorras" [ref=f2e100] [cursor=pointer]
+        - button "Abrigos y Chaquetas" [ref=f2e101] [cursor=pointer]
+        - button "Vestidos" [ref=f2e102] [cursor=pointer]
+        - button "Cables y Adaptadores" [ref=f2e103] [cursor=pointer]
+        - button "Cargadores" [ref=f2e104] [cursor=pointer]
+        - button "Audio y Música" [ref=f2e105] [cursor=pointer]
+        - button "Baterías y Energía" [ref=f2e106] [cursor=pointer]
+        - button "Protección y Fundas" [ref=f2e107] [cursor=pointer]
+        - button "Accesorios para Autos" [ref=f2e108] [cursor=pointer]
+        - button "Almacenamiento" [ref=f2e109] [cursor=pointer]
+        - button "Computación y Oficina" [ref=f2e110] [cursor=pointer]
+        - button "Fotografía y Video" [ref=f2e111] [cursor=pointer]
+    - generic [ref=f2e113]:
+      - generic [ref=f2e114] [cursor=pointer]:
+        - generic [ref=f2e115]:
+          - img "Harina PAN Maíz Blanco 1kg" [ref=f2e116]
+          - generic [ref=f2e117]: Víveres
+        - generic [ref=f2e118]:
+          - generic [ref=f2e119]:
+            - heading "Harina PAN Maíz Blanco 1kg" [level=4] [ref=f2e120]
+            - generic [ref=f2e121]: "7591001000101"
+          - generic [ref=f2e122]:
+            - generic [ref=f2e123]:
+              - generic [ref=f2e124]: $1.25
+              - generic [ref=f2e125]: Bs. 1060.69
+            - button "Añadir a la venta" [ref=f2e126]
+      - generic [ref=f2e128] [cursor=pointer]:
+        - generic [ref=f2e129]:
+          - img "Harina PAN Maíz Amarillo 1kg" [ref=f2e130]
+          - generic [ref=f2e131]: Víveres
+        - generic [ref=f2e132]:
+          - generic [ref=f2e133]:
+            - heading "Harina PAN Maíz Amarillo 1kg" [level=4] [ref=f2e134]
+            - generic [ref=f2e135]: "7591001000102"
+          - generic [ref=f2e136]:
+            - generic [ref=f2e137]:
+              - generic [ref=f2e138]: $1.30
+              - generic [ref=f2e139]: Bs. 1103.12
+            - button "Añadir a la venta" [ref=f2e140]
+      - generic [ref=f2e142] [cursor=pointer]:
+        - generic [ref=f2e143]:
+          - img "Arroz Mary Tradicional Grano Entero 1kg" [ref=f2e144]
+          - generic [ref=f2e145]: Víveres
+        - generic [ref=f2e146]:
+          - generic [ref=f2e147]:
+            - heading "Arroz Mary Tradicional Grano Entero 1kg" [level=4] [ref=f2e148]
+            - generic [ref=f2e149]: "7591001000103"
+          - generic [ref=f2e150]:
+            - generic [ref=f2e151]:
+              - generic [ref=f2e152]: $1.40
+              - generic [ref=f2e153]: Bs. 1187.97
+            - button "Añadir a la venta" [ref=f2e154]
+      - generic [ref=f2e156] [cursor=pointer]:
+        - generic [ref=f2e157]:
+          - img "Pasta Ronco Spagetti Especial 1kg" [ref=f2e158]
+          - generic [ref=f2e159]: Víveres
+        - generic [ref=f2e160]:
+          - generic [ref=f2e161]:
+            - heading "Pasta Ronco Spagetti Especial 1kg" [level=4] [ref=f2e162]
+            - generic [ref=f2e163]: "7591001000104"
+          - generic [ref=f2e164]:
+            - generic [ref=f2e165]:
+              - generic [ref=f2e166]: $1.85
+              - generic [ref=f2e167]: Bs. 1569.82
+            - button "Añadir a la venta" [ref=f2e168]
+      - generic [ref=f2e170] [cursor=pointer]:
+        - generic [ref=f2e171]:
+          - img "Pasta Capri Plumitas / Corta 500g" [ref=f2e172]
+          - generic [ref=f2e173]: Víveres
+        - generic [ref=f2e174]:
+          - generic [ref=f2e175]:
+            - heading "Pasta Capri Plumitas / Corta 500g" [level=4] [ref=f2e176]
+            - generic [ref=f2e177]: "7591001000105"
+          - generic [ref=f2e178]:
+            - generic [ref=f2e179]:
+              - generic [ref=f2e180]: $1.10
+              - generic [ref=f2e181]: Bs. 933.40
+            - button "Añadir a la venta" [ref=f2e182]
+      - generic [ref=f2e184] [cursor=pointer]:
+        - generic [ref=f2e185]:
+          - img "Aceite Vegetal Diana Clásico 1L" [ref=f2e186]
+          - generic [ref=f2e187]: Víveres
+        - generic [ref=f2e188]:
+          - generic [ref=f2e189]:
+            - heading "Aceite Vegetal Diana Clásico 1L" [level=4] [ref=f2e190]
+            - generic [ref=f2e191]: "7591001000106"
+          - generic [ref=f2e192]:
+            - generic [ref=f2e193]:
+              - generic [ref=f2e194]: $2.80
+              - generic [ref=f2e195]: Bs. 2375.94
+            - button "Añadir a la venta" [ref=f2e196]
+      - generic [ref=f2e198] [cursor=pointer]:
+        - generic [ref=f2e199]:
+          - img "Aceite de Maíz Mazeite 1L" [ref=f2e200]
+          - generic [ref=f2e201]: Víveres
+        - generic [ref=f2e202]:
+          - generic [ref=f2e203]:
+            - heading "Aceite de Maíz Mazeite 1L" [level=4] [ref=f2e204]
+            - generic [ref=f2e205]: "7591001000107"
+          - generic [ref=f2e206]:
+            - generic [ref=f2e207]:
+              - generic [ref=f2e208]: $3.50
+              - generic [ref=f2e209]: Bs. 2969.92
+            - button "Añadir a la venta" [ref=f2e210]
+      - generic [ref=f2e212] [cursor=pointer]:
+        - generic [ref=f2e213]:
+          - img "Azúcar Blanca Refinada Montalbán 1kg" [ref=f2e214]
+          - generic [ref=f2e215]: Víveres
+        - generic [ref=f2e216]:
+          - generic [ref=f2e217]:
+            - heading "Azúcar Blanca Refinada Montalbán 1kg" [level=4] [ref=f2e218]
+            - generic [ref=f2e219]: "7591001000108"
+          - generic [ref=f2e220]:
+            - generic [ref=f2e221]:
+              - generic [ref=f2e222]: $1.50
+              - generic [ref=f2e223]: Bs. 1272.82
+            - button "Añadir a la venta" [ref=f2e224]
+      - generic [ref=f2e226] [cursor=pointer]:
+        - generic [ref=f2e227]:
+          - img "Caraotas Negras Seleccionadas Mary 500g" [ref=f2e228]
+          - generic [ref=f2e229]: Víveres
+        - generic [ref=f2e230]:
+          - generic [ref=f2e231]:
+            - heading "Caraotas Negras Seleccionadas Mary 500g" [level=4] [ref=f2e232]
+            - generic [ref=f2e233]: "7591001000109"
+          - generic [ref=f2e234]:
+            - generic [ref=f2e235]:
+              - generic [ref=f2e236]: $1.60
+              - generic [ref=f2e237]: Bs. 1357.68
+            - button "Añadir a la venta" [ref=f2e238]
+      - generic [ref=f2e240] [cursor=pointer]:
+        - generic [ref=f2e241]:
+          - img "Harina de Trigo Robin Hood Todo Uso 1kg" [ref=f2e242]
+          - generic [ref=f2e243]: Víveres
+        - generic [ref=f2e244]:
+          - generic [ref=f2e245]:
+            - heading "Harina de Trigo Robin Hood Todo Uso 1kg" [level=4] [ref=f2e246]
+            - generic [ref=f2e247]: "7591001000110"
+          - generic [ref=f2e248]:
+            - generic [ref=f2e249]:
+              - generic [ref=f2e250]: $1.75
+              - generic [ref=f2e251]: Bs. 1484.96
+            - button "Añadir a la venta" [ref=f2e252]
+      - generic [ref=f2e254] [cursor=pointer]:
+        - generic [ref=f2e255]:
+          - img "Mantequilla Margarina Mavesa con Sal 500g" [ref=f2e256]
+          - generic [ref=f2e257]: Charcutería y Lácteos
+        - generic [ref=f2e258]:
+          - generic [ref=f2e259]:
+            - heading "Mantequilla Margarina Mavesa con Sal 500g" [level=4] [ref=f2e260]
+            - generic [ref=f2e261]: "7591001000111"
+          - generic [ref=f2e262]:
+            - generic [ref=f2e263]:
+              - generic [ref=f2e264]: $2.40
+              - generic [ref=f2e265]: Bs. 2036.52
+            - button "Añadir a la venta" [ref=f2e266]
+      - generic [ref=f2e268] [cursor=pointer]:
+        - generic [ref=f2e269]:
+          - img "Mayonesa Mavesa Tradicional 445g" [ref=f2e270]
+          - generic [ref=f2e271]: Salsas y Condimentos
+        - generic [ref=f2e272]:
+          - generic [ref=f2e273]:
+            - heading "Mayonesa Mavesa Tradicional 445g" [level=4] [ref=f2e274]
+            - generic [ref=f2e275]: "7591001000112"
+          - generic [ref=f2e276]:
+            - generic [ref=f2e277]:
+              - generic [ref=f2e278]: $2.60
+              - generic [ref=f2e279]: Bs. 2206.23
+            - button "Añadir a la venta" [ref=f2e280]
+      - generic [ref=f2e282] [cursor=pointer]:
+        - generic [ref=f2e283]:
+          - img "Salsa de Tomate Ketchup Pampero 397g" [ref=f2e284]
+          - generic [ref=f2e285]: Salsas y Condimentos
+        - generic [ref=f2e286]:
+          - generic [ref=f2e287]:
+            - heading "Salsa de Tomate Ketchup Pampero 397g" [level=4] [ref=f2e288]
+            - generic [ref=f2e289]: "7591001000113"
+          - generic [ref=f2e290]:
+            - generic [ref=f2e291]:
+              - generic [ref=f2e292]: $1.90
+              - generic [ref=f2e293]: Bs. 1612.24
+            - button "Añadir a la venta" [ref=f2e294]
+      - generic [ref=f2e296] [cursor=pointer]:
+        - generic [ref=f2e297]:
+          - img "Atún en Aceite Margarita 140g" [ref=f2e298]
+          - generic [ref=f2e299]: Enlatados
+        - generic [ref=f2e300]:
+          - generic [ref=f2e301]:
+            - heading "Atún en Aceite Margarita 140g" [level=4] [ref=f2e302]
+            - generic [ref=f2e303]: "7591001000114"
+          - generic [ref=f2e304]:
+            - generic [ref=f2e305]:
+              - generic [ref=f2e306]: $2.10
+              - generic [ref=f2e307]: Bs. 1781.95
+            - button "Añadir a la venta" [ref=f2e308]
+      - generic [ref=f2e310] [cursor=pointer]:
+        - generic [ref=f2e311]:
+          - img "Leche en Polvo Completa La Campiña 900g" [ref=f2e312]
+          - generic [ref=f2e313]: Lácteos
+        - generic [ref=f2e314]:
+          - generic [ref=f2e315]:
+            - heading "Leche en Polvo Completa La Campiña 900g" [level=4] [ref=f2e316]
+            - generic [ref=f2e317]: "7591001000115"
+          - generic [ref=f2e318]:
+            - generic [ref=f2e319]:
+              - generic [ref=f2e320]: $8.50
+              - generic [ref=f2e321]: Bs. 7212.67
+            - button "Añadir a la venta" [ref=f2e322]
+      - generic [ref=f2e324] [cursor=pointer]:
+        - generic [ref=f2e325]:
+          - img "Café Molido Fama de América 250g" [ref=f2e326]
+          - generic [ref=f2e327]: Víveres
+        - generic [ref=f2e328]:
+          - generic [ref=f2e329]:
+            - heading "Café Molido Fama de América 250g" [level=4] [ref=f2e330]
+            - generic [ref=f2e331]: "7591001000116"
+          - generic [ref=f2e332]:
+            - generic [ref=f2e333]:
+              - generic [ref=f2e334]: $2.50
+              - generic [ref=f2e335]: Bs. 2121.38
+            - button "Añadir a la venta" [ref=f2e336]
+      - generic [ref=f2e338] [cursor=pointer]:
+        - generic [ref=f2e339]:
+          - img "Queso Paisa Pasteurizado Rebanado 400g" [ref=f2e340]
+          - generic [ref=f2e341]: Charcutería y Lácteos
+        - generic [ref=f2e342]:
+          - generic [ref=f2e343]:
+            - heading "Queso Paisa Pasteurizado Rebanado 400g" [level=4] [ref=f2e344]
+            - generic [ref=f2e345]: "7591001000117"
+          - generic [ref=f2e346]:
+            - generic [ref=f2e347]:
+              - generic [ref=f2e348]: $4.80
+              - generic [ref=f2e349]: Bs. 4073.04
+            - button "Añadir a la venta" [ref=f2e350]
+      - generic [ref=f2e352] [cursor=pointer]:
+        - generic [ref=f2e353]:
+          - img "Jamón Cocido Superior Plumrose 1kg" [ref=f2e354]
+          - generic [ref=f2e355]: Charcutería y Lácteos
+        - generic [ref=f2e356]:
+          - generic [ref=f2e357]:
+            - heading "Jamón Cocido Superior Plumrose 1kg" [level=4] [ref=f2e358]
+            - generic [ref=f2e359]: "7591001000118"
+          - generic [ref=f2e360]:
+            - generic [ref=f2e361]:
+              - generic [ref=f2e362]: $9.80
+              - generic [ref=f2e363]: Bs. 8315.79
+            - button "Añadir a la venta" [ref=f2e364]
+      - generic [ref=f2e366] [cursor=pointer]:
+        - generic [ref=f2e367]:
+          - img "Cloro Desinfectante Nevex 1L" [ref=f2e368]
+          - generic [ref=f2e369]: Limpieza del Hogar
+        - generic [ref=f2e370]:
+          - generic [ref=f2e371]:
+            - heading "Cloro Desinfectante Nevex 1L" [level=4] [ref=f2e372]
+            - generic [ref=f2e373]: "7591001000119"
+          - generic [ref=f2e374]:
+            - generic [ref=f2e375]:
+              - generic [ref=f2e376]: $1.60
+              - generic [ref=f2e377]: Bs. 1357.68
+            - button "Añadir a la venta" [ref=f2e378]
+      - generic [ref=f2e380] [cursor=pointer]:
+        - generic [ref=f2e381]:
+          - img "Detergente en Polvo ACE Blancura Floral 1kg" [ref=f2e382]
+          - generic [ref=f2e383]: Limpieza del Hogar
+        - generic [ref=f2e384]:
+          - generic [ref=f2e385]:
+            - heading "Detergente en Polvo ACE Blancura Floral 1kg" [level=4] [ref=f2e386]
+            - generic [ref=f2e387]: "7591001000120"
+          - generic [ref=f2e388]:
+            - generic [ref=f2e389]:
+              - generic [ref=f2e390]: $2.80
+              - generic [ref=f2e391]: Bs. 2375.94
+            - button "Añadir a la venta" [ref=f2e392]
+      - generic [ref=f2e394] [cursor=pointer]:
+        - generic [ref=f2e395]:
+          - img "Acetaminofén (Paracetamol) 500mg 10 Tabletas" [ref=f2e396]
+          - generic [ref=f2e397]: Analgésicos
+        - generic [ref=f2e398]:
+          - generic [ref=f2e399]:
+            - heading "Acetaminofén (Paracetamol) 500mg 10 Tabletas" [level=4] [ref=f2e400]
+            - generic [ref=f2e401]: "7592001000201"
+          - generic [ref=f2e402]:
+            - generic [ref=f2e403]:
+              - generic [ref=f2e404]: $1.50
+              - generic [ref=f2e405]: Bs. 1272.82
+            - button "Añadir a la venta" [ref=f2e406]
+      - generic [ref=f2e408] [cursor=pointer]:
+        - generic [ref=f2e409]:
+          - img "Ibuprofeno 400mg 10 Cápsulas Blandas" [ref=f2e410]
+          - generic [ref=f2e411]: Antiinflamatorios
+        - generic [ref=f2e412]:
+          - generic [ref=f2e413]:
+            - heading "Ibuprofeno 400mg 10 Cápsulas Blandas" [level=4] [ref=f2e414]
+            - generic [ref=f2e415]: "7592001000202"
+          - generic [ref=f2e416]:
+            - generic [ref=f2e417]:
+              - generic [ref=f2e418]: $2.20
+              - generic [ref=f2e419]: Bs. 1866.81
+            - button "Añadir a la venta" [ref=f2e420]
+      - generic [ref=f2e422] [cursor=pointer]:
+        - generic [ref=f2e423]:
+          - img "Omeprazol 20mg 14 Cápsulas" [ref=f2e424]
+          - generic [ref=f2e425]: Gastrointestinal
+        - generic [ref=f2e426]:
+          - generic [ref=f2e427]:
+            - heading "Omeprazol 20mg 14 Cápsulas" [level=4] [ref=f2e428]
+            - generic [ref=f2e429]: "7592001000203"
+          - generic [ref=f2e430]:
+            - generic [ref=f2e431]:
+              - generic [ref=f2e432]: $2.80
+              - generic [ref=f2e433]: Bs. 2375.94
+            - button "Añadir a la venta" [ref=f2e434]
+      - generic [ref=f2e436] [cursor=pointer]:
+        - generic [ref=f2e437]:
+          - img "Loratadina 10mg Antialérgico 10 Tabletas" [ref=f2e438]
+          - generic [ref=f2e439]: Antialérgicos
+        - generic [ref=f2e440]:
+          - generic [ref=f2e441]:
+            - heading "Loratadina 10mg Antialérgico 10 Tabletas" [level=4] [ref=f2e442]
+            - generic [ref=f2e443]: "7592001000204"
+          - generic [ref=f2e444]:
+            - generic [ref=f2e445]:
+              - generic [ref=f2e446]: $1.80
+              - generic [ref=f2e447]: Bs. 1527.39
+            - button "Añadir a la venta" [ref=f2e448]
+      - generic [ref=f2e450] [cursor=pointer]:
+        - generic [ref=f2e451]:
+          - img "Alcohol Antiséptico 70% Solución 500ml" [ref=f2e452]
+          - generic [ref=f2e453]: Primeros Auxilios
+        - generic [ref=f2e454]:
+          - generic [ref=f2e455]:
+            - heading "Alcohol Antiséptico 70% Solución 500ml" [level=4] [ref=f2e456]
+            - generic [ref=f2e457]: "7592001000205"
+          - generic [ref=f2e458]:
+            - generic [ref=f2e459]:
+              - generic [ref=f2e460]: $1.90
+              - generic [ref=f2e461]: Bs. 1612.24
+            - button "Añadir a la venta" [ref=f2e462]
+      - generic [ref=f2e464] [cursor=pointer]:
+        - generic [ref=f2e465]:
+          - img "Agua Oxigenada 10 Volúmenes 120ml" [ref=f2e466]
+          - generic [ref=f2e467]: Primeros Auxilios
+        - generic [ref=f2e468]:
+          - generic [ref=f2e469]:
+            - heading "Agua Oxigenada 10 Volúmenes 120ml" [level=4] [ref=f2e470]
+            - generic [ref=f2e471]: "7592001000206"
+          - generic [ref=f2e472]:
+            - generic [ref=f2e473]:
+              - generic [ref=f2e474]: $1.20
+              - generic [ref=f2e475]: Bs. 1018.26
+            - button "Añadir a la venta" [ref=f2e476]
+      - generic [ref=f2e478] [cursor=pointer]:
+        - generic [ref=f2e479]:
+          - img "Curitas Banditas Adhesivas Caja 20 uds" [ref=f2e480]
+          - generic [ref=f2e481]: Primeros Auxilios
+        - generic [ref=f2e482]:
+          - generic [ref=f2e483]:
+            - heading "Curitas Banditas Adhesivas Caja 20 uds" [level=4] [ref=f2e484]
+            - generic [ref=f2e485]: "7592001000207"
+          - generic [ref=f2e486]:
+            - generic [ref=f2e487]:
+              - generic [ref=f2e488]: $1.50
+              - generic [ref=f2e489]: Bs. 1272.82
+            - button "Añadir a la venta" [ref=f2e490]
+      - generic [ref=f2e492] [cursor=pointer]:
+        - generic [ref=f2e493]:
+          - img "VapoRub Ungüento Mentolado Frasco 50g" [ref=f2e494]
+          - generic [ref=f2e495]: Antigripales
+        - generic [ref=f2e496]:
+          - generic [ref=f2e497]:
+            - heading "VapoRub Ungüento Mentolado Frasco 50g" [level=4] [ref=f2e498]
+            - generic [ref=f2e499]: "7592001000208"
+          - generic [ref=f2e500]:
+            - generic [ref=f2e501]:
+              - generic [ref=f2e502]: $3.40
+              - generic [ref=f2e503]: Bs. 2885.07
+            - button "Añadir a la venta" [ref=f2e504]
+      - generic [ref=f2e506] [cursor=pointer]:
+        - generic [ref=f2e507]:
+          - img "Suero Oral Rehidratante Manzana 500ml" [ref=f2e508]
+          - generic [ref=f2e509]: Nutrición e Hidratación
+        - generic [ref=f2e510]:
+          - generic [ref=f2e511]:
+            - heading "Suero Oral Rehidratante Manzana 500ml" [level=4] [ref=f2e512]
+            - generic [ref=f2e513]: "7592001000209"
+          - generic [ref=f2e514]:
+            - generic [ref=f2e515]:
+              - generic [ref=f2e516]: $2.10
+              - generic [ref=f2e517]: Bs. 1781.95
+            - button "Añadir a la venta" [ref=f2e518]
+      - generic [ref=f2e520] [cursor=pointer]:
+        - generic [ref=f2e521]:
+          - img "Vitamina C 1000mg Efervescente 10 Tabletas" [ref=f2e522]
+          - generic [ref=f2e523]: Vitaminas y Suplementos
+        - generic [ref=f2e524]:
+          - generic [ref=f2e525]:
+            - heading "Vitamina C 1000mg Efervescente 10 Tabletas" [level=4] [ref=f2e526]
+            - generic [ref=f2e527]: "7592001000210"
+          - generic [ref=f2e528]:
+            - generic [ref=f2e529]:
+              - generic [ref=f2e530]: $3.90
+              - generic [ref=f2e531]: Bs. 3309.34
+            - button "Añadir a la venta" [ref=f2e532]
+      - generic [ref=f2e534] [cursor=pointer]:
+        - generic [ref=f2e535]:
+          - img "Termómetro Digital Corporal Precisión" [ref=f2e536]
+          - generic [ref=f2e537]: Equipos Médicos
+        - generic [ref=f2e538]:
+          - generic [ref=f2e539]:
+            - heading "Termómetro Digital Corporal Precisión" [level=4] [ref=f2e540]
+            - generic [ref=f2e541]: "7592001000211"
+          - generic [ref=f2e542]:
+            - generic [ref=f2e543]:
+              - generic [ref=f2e544]: $4.50
+              - generic [ref=f2e545]: Bs. 3818.47
+            - button "Añadir a la venta" [ref=f2e546]
+      - generic [ref=f2e548] [cursor=pointer]:
+        - generic [ref=f2e549]:
+          - img "Crema Dental Colgate Triple Acción 100ml" [ref=f2e550]
+          - generic [ref=f2e551]: Higiene Personal
+        - generic [ref=f2e552]:
+          - generic [ref=f2e553]:
+            - heading "Crema Dental Colgate Triple Acción 100ml" [level=4] [ref=f2e554]
+            - generic [ref=f2e555]: "7592001000212"
+          - generic [ref=f2e556]:
+            - generic [ref=f2e557]:
+              - generic [ref=f2e558]: $2.20
+              - generic [ref=f2e559]: Bs. 1866.81
+            - button "Añadir a la venta" [ref=f2e560]
+      - generic [ref=f2e562] [cursor=pointer]:
+        - generic [ref=f2e563]:
+          - img "Jabón Antibacterial Protex Avena 110g" [ref=f2e564]
+          - generic [ref=f2e565]: Higiene Personal
+        - generic [ref=f2e566]:
+          - generic [ref=f2e567]:
+            - heading "Jabón Antibacterial Protex Avena 110g" [level=4] [ref=f2e568]
+            - generic [ref=f2e569]: "7592001000213"
+          - generic [ref=f2e570]:
+            - generic [ref=f2e571]:
+              - generic [ref=f2e572]: $1.30
+              - generic [ref=f2e573]: Bs. 1103.12
+            - button "Añadir a la venta" [ref=f2e574]
+      - generic [ref=f2e576] [cursor=pointer]:
+        - generic [ref=f2e577]:
+          - img "Desodorante Rexona Clinical Aerosol 150ml" [ref=f2e578]
+          - generic [ref=f2e579]: Higiene Personal
+        - generic [ref=f2e580]:
+          - generic [ref=f2e581]:
+            - heading "Desodorante Rexona Clinical Aerosol 150ml" [level=4] [ref=f2e582]
+            - generic [ref=f2e583]: "7592001000214"
+          - generic [ref=f2e584]:
+            - generic [ref=f2e585]:
+              - generic [ref=f2e586]: $4.80
+              - generic [ref=f2e587]: Bs. 4073.04
+            - button "Añadir a la venta" [ref=f2e588]
+      - generic [ref=f2e590] [cursor=pointer]:
+        - generic [ref=f2e591]:
+          - img "Gasas Estériles Quirúrgicas 5x5cm Paquete 10" [ref=f2e592]
+          - generic [ref=f2e593]: Primeros Auxilios
+        - generic [ref=f2e594]:
+          - generic [ref=f2e595]:
+            - heading "Gasas Estériles Quirúrgicas 5x5cm Paquete 10" [level=4] [ref=f2e596]
+            - generic [ref=f2e597]: "7592001000215"
+          - generic [ref=f2e598]:
+            - generic [ref=f2e599]:
+              - generic [ref=f2e600]: $1.40
+              - generic [ref=f2e601]: Bs. 1187.97
+            - button "Añadir a la venta" [ref=f2e602]
+      - generic [ref=f2e604] [cursor=pointer]:
+        - generic [ref=f2e605]:
+          - img "Ron Santa Teresa Gran Reserva 0.75L" [ref=f2e606]
+          - generic [ref=f2e607]: Rones y Destilados
+        - generic [ref=f2e608]:
+          - generic [ref=f2e609]:
+            - heading "Ron Santa Teresa Gran Reserva 0.75L" [level=4] [ref=f2e610]
+            - generic [ref=f2e611]: "7593001000301"
+          - generic [ref=f2e612]:
+            - generic [ref=f2e613]:
+              - generic [ref=f2e614]: $9.50
+              - generic [ref=f2e615]: Bs. 8061.22
+            - button "Añadir a la venta" [ref=f2e616]
+      - generic [ref=f2e618] [cursor=pointer]:
+        - generic [ref=f2e619]:
+          - img "Ron Cacique Añejo Superior 0.75L" [ref=f2e620]
+          - generic [ref=f2e621]: Rones y Destilados
+        - generic [ref=f2e622]:
+          - generic [ref=f2e623]:
+            - heading "Ron Cacique Añejo Superior 0.75L" [level=4] [ref=f2e624]
+            - generic [ref=f2e625]: "7593001000302"
+          - generic [ref=f2e626]:
+            - generic [ref=f2e627]:
+              - generic [ref=f2e628]: $8.80
+              - generic [ref=f2e629]: Bs. 7467.24
+            - button "Añadir a la venta" [ref=f2e630]
+      - generic [ref=f2e632] [cursor=pointer]:
+        - generic [ref=f2e633]:
+          - img "Ron Diplomático Mantuano 0.75L" [ref=f2e634]
+          - generic [ref=f2e635]: Rones Premium
+        - generic [ref=f2e636]:
+          - generic [ref=f2e637]:
+            - heading "Ron Diplomático Mantuano 0.75L" [level=4] [ref=f2e638]
+            - generic [ref=f2e639]: "7593001000303"
+          - generic [ref=f2e640]:
+            - generic [ref=f2e641]:
+              - generic [ref=f2e642]: $15.00
+              - generic [ref=f2e643]: Bs. 12728.25
+            - button "Añadir a la venta" [ref=f2e644]
+      - generic [ref=f2e646] [cursor=pointer]:
+        - generic [ref=f2e647]:
+          - img "Cerveza Polar Pilsen Botella 222ml" [ref=f2e648]
+          - generic [ref=f2e649]: Cervezas
+        - generic [ref=f2e650]:
+          - generic [ref=f2e651]:
+            - heading "Cerveza Polar Pilsen Botella 222ml" [level=4] [ref=f2e652]
+            - generic [ref=f2e653]: "7593001000304"
+          - generic [ref=f2e654]:
+            - generic [ref=f2e655]:
+              - generic [ref=f2e656]: $1.00
+              - generic [ref=f2e657]: Bs. 848.55
+            - button "Añadir a la venta" [ref=f2e658]
+      - generic [ref=f2e660] [cursor=pointer]:
+        - generic [ref=f2e661]:
+          - img "Cerveza Polar Light Lata 355ml" [ref=f2e662]
+          - generic [ref=f2e663]: Cervezas
+        - generic [ref=f2e664]:
+          - generic [ref=f2e665]:
+            - heading "Cerveza Polar Light Lata 355ml" [level=4] [ref=f2e666]
+            - generic [ref=f2e667]: "7593001000305"
+          - generic [ref=f2e668]:
+            - generic [ref=f2e669]:
+              - generic [ref=f2e670]: $1.25
+              - generic [ref=f2e671]: Bs. 1060.69
+            - button "Añadir a la venta" [ref=f2e672]
+      - generic [ref=f2e674] [cursor=pointer]:
+        - generic [ref=f2e675]:
+          - img "Cerveza Solera Premium Verde 222ml" [ref=f2e676]
+          - generic [ref=f2e677]: Cervezas Especiales
+        - generic [ref=f2e678]:
+          - generic [ref=f2e679]:
+            - heading "Cerveza Solera Premium Verde 222ml" [level=4] [ref=f2e680]
+            - generic [ref=f2e681]: "7593001000306"
+          - generic [ref=f2e682]:
+            - generic [ref=f2e683]:
+              - generic [ref=f2e684]: $1.40
+              - generic [ref=f2e685]: Bs. 1187.97
+            - button "Añadir a la venta" [ref=f2e686]
+      - generic [ref=f2e688] [cursor=pointer]:
+        - generic [ref=f2e689]:
+          - img "Whisky Buchanan's 12 Años De Luxe 0.75L" [ref=f2e690]
+          - generic [ref=f2e691]: Whisky
+        - generic [ref=f2e692]:
+          - generic [ref=f2e693]:
+            - heading "Whisky Buchanan's 12 Años De Luxe 0.75L" [level=4] [ref=f2e694]
+            - generic [ref=f2e695]: "7593001000307"
+          - generic [ref=f2e696]:
+            - generic [ref=f2e697]:
+              - generic [ref=f2e698]: $32.00
+              - generic [ref=f2e699]: Bs. 27153.60
+            - button "Añadir a la venta" [ref=f2e700]
+      - generic [ref=f2e702] [cursor=pointer]:
+        - generic [ref=f2e703]:
+          - img "Whisky Old Parr 12 Años 0.75L" [ref=f2e704]
+          - generic [ref=f2e705]: Whisky
+        - generic [ref=f2e706]:
+          - generic [ref=f2e707]:
+            - heading "Whisky Old Parr 12 Años 0.75L" [level=4] [ref=f2e708]
+            - generic [ref=f2e709]: "7593001000308"
+          - generic [ref=f2e710]:
+            - generic [ref=f2e711]:
+              - generic [ref=f2e712]: $34.00
+              - generic [ref=f2e713]: Bs. 28850.70
+            - button "Añadir a la venta" [ref=f2e714]
+      - generic [ref=f2e716] [cursor=pointer]:
+        - generic [ref=f2e717]:
+          - img "Sangría Caroreña Tinto Verano 1.75L" [ref=f2e718]
+          - generic [ref=f2e719]: Vinos y Sangrías
+        - generic [ref=f2e720]:
+          - generic [ref=f2e721]:
+            - heading "Sangría Caroreña Tinto Verano 1.75L" [level=4] [ref=f2e722]
+            - generic [ref=f2e723]: "7593001000309"
+          - generic [ref=f2e724]:
+            - generic [ref=f2e725]:
+              - generic [ref=f2e726]: $5.50
+              - generic [ref=f2e727]: Bs. 4667.02
+            - button "Añadir a la venta" [ref=f2e728]
+      - generic [ref=f2e730] [cursor=pointer]:
+        - generic [ref=f2e731]:
+          - img "Vino Tinto Concha y Toro Cabernet 750ml" [ref=f2e732]
+          - generic [ref=f2e733]: Vinos y Sangrías
+        - generic [ref=f2e734]:
+          - generic [ref=f2e735]:
+            - heading "Vino Tinto Concha y Toro Cabernet 750ml" [level=4] [ref=f2e736]
+            - generic [ref=f2e737]: "7593001000310"
+          - generic [ref=f2e738]:
+            - generic [ref=f2e739]:
+              - generic [ref=f2e740]: $7.50
+              - generic [ref=f2e741]: Bs. 6364.13
+            - button "Añadir a la venta" [ref=f2e742]
+      - generic [ref=f2e744] [cursor=pointer]:
+        - generic [ref=f2e745]:
+          - img "Malta Polar Tradicional Botella 222ml" [ref=f2e746]
+          - generic [ref=f2e747]: Bebidas no alcohólicas
+        - generic [ref=f2e748]:
+          - generic [ref=f2e749]:
+            - heading "Malta Polar Tradicional Botella 222ml" [level=4] [ref=f2e750]
+            - generic [ref=f2e751]: "7593001000311"
+          - generic [ref=f2e752]:
+            - generic [ref=f2e753]:
+              - generic [ref=f2e754]: $0.90
+              - generic [ref=f2e755]: Bs. 763.69
+            - button "Añadir a la venta" [ref=f2e756]
+      - generic [ref=f2e758] [cursor=pointer]:
+        - generic [ref=f2e759]:
+          - img "Hielo en Cubos Cristal Bolsa 3kg" [ref=f2e760]
+          - generic [ref=f2e761]: Hielo y Mezcladores
+        - generic [ref=f2e762]:
+          - generic [ref=f2e763]:
+            - heading "Hielo en Cubos Cristal Bolsa 3kg" [level=4] [ref=f2e764]
+            - generic [ref=f2e765]: "7593001000312"
+          - generic [ref=f2e766]:
+            - generic [ref=f2e767]:
+              - generic [ref=f2e768]: $1.50
+              - generic [ref=f2e769]: Bs. 1272.82
+            - button "Añadir a la venta" [ref=f2e770]
+      - generic [ref=f2e772] [cursor=pointer]:
+        - generic [ref=f2e773]:
+          - img "Refresco Coca Cola Original 2 Litros" [ref=f2e774]
+          - generic [ref=f2e775]: Hielo y Mezcladores
+        - generic [ref=f2e776]:
+          - generic [ref=f2e777]:
+            - heading "Refresco Coca Cola Original 2 Litros" [level=4] [ref=f2e778]
+            - generic [ref=f2e779]: "7593001000313"
+          - generic [ref=f2e780]:
+            - generic [ref=f2e781]:
+              - generic [ref=f2e782]: $2.50
+              - generic [ref=f2e783]: Bs. 2121.38
+            - button "Añadir a la venta" [ref=f2e784]
+      - generic [ref=f2e786] [cursor=pointer]:
+        - generic [ref=f2e787]:
+          - img "Snack Doritos Mega Queso Fiesta 145g" [ref=f2e788]
+          - generic [ref=f2e789]: Snacks y Pasapalos
+        - generic [ref=f2e790]:
+          - generic [ref=f2e791]:
+            - heading "Snack Doritos Mega Queso Fiesta 145g" [level=4] [ref=f2e792]
+            - generic [ref=f2e793]: "7593001000314"
+          - generic [ref=f2e794]:
+            - generic [ref=f2e795]:
+              - generic [ref=f2e796]: $2.40
+              - generic [ref=f2e797]: Bs. 2036.52
+            - button "Añadir a la venta" [ref=f2e798]
+      - generic [ref=f2e800] [cursor=pointer]:
+        - generic [ref=f2e801]:
+          - img "Vodka Glacial Clásico 0.70L" [ref=f2e802]
+          - generic [ref=f2e803]: Licores Secos
+        - generic [ref=f2e804]:
+          - generic [ref=f2e805]:
+            - heading "Vodka Glacial Clásico 0.70L" [level=4] [ref=f2e806]
+            - generic [ref=f2e807]: "7593001000315"
+          - generic [ref=f2e808]:
+            - generic [ref=f2e809]:
+              - generic [ref=f2e810]: $6.50
+              - generic [ref=f2e811]: Bs. 5515.57
+            - button "Añadir a la venta" [ref=f2e812]
+      - generic [ref=f2e814] [cursor=pointer]:
+        - generic [ref=f2e815]:
+          - img "Pan Canilla Tradicional Caliente" [ref=f2e816]
+          - generic [ref=f2e817]: Panes Frescos
+        - generic [ref=f2e818]:
+          - generic [ref=f2e819]:
+            - heading "Pan Canilla Tradicional Caliente" [level=4] [ref=f2e820]
+            - generic [ref=f2e821]: "7594001000401"
+          - generic [ref=f2e822]:
+            - generic [ref=f2e823]:
+              - generic [ref=f2e824]: $0.60
+              - generic [ref=f2e825]: Bs. 509.13
+            - button "Añadir a la venta" [ref=f2e826]
+      - generic [ref=f2e828] [cursor=pointer]:
+        - generic [ref=f2e829]:
+          - img "Pan Campesino Rústico de Masa Madre" [ref=f2e830]
+          - generic [ref=f2e831]: Panes Frescos
+        - generic [ref=f2e832]:
+          - generic [ref=f2e833]:
+            - heading "Pan Campesino Rústico de Masa Madre" [level=4] [ref=f2e834]
+            - generic [ref=f2e835]: "7594001000402"
+          - generic [ref=f2e836]:
+            - generic [ref=f2e837]:
+              - generic [ref=f2e838]: $1.50
+              - generic [ref=f2e839]: Bs. 1272.82
+            - button "Añadir a la venta" [ref=f2e840]
+      - generic [ref=f2e842] [cursor=pointer]:
+        - generic [ref=f2e843]:
+          - img "Pan Andino Dulce Tradicional" [ref=f2e844]
+          - generic [ref=f2e845]: Panes Frescos
+        - generic [ref=f2e846]:
+          - generic [ref=f2e847]:
+            - heading "Pan Andino Dulce Tradicional" [level=4] [ref=f2e848]
+            - generic [ref=f2e849]: "7594001000403"
+          - generic [ref=f2e850]:
+            - generic [ref=f2e851]:
+              - generic [ref=f2e852]: $2.20
+              - generic [ref=f2e853]: Bs. 1866.81
+            - button "Añadir a la venta" [ref=f2e854]
+      - generic [ref=f2e856] [cursor=pointer]:
+        - generic [ref=f2e857]:
+          - img "Cachito de Jamón Ahumado Superior" [ref=f2e858]
+          - generic [ref=f2e859]: Salados y Desayunos
+        - generic [ref=f2e860]:
+          - generic [ref=f2e861]:
+            - heading "Cachito de Jamón Ahumado Superior" [level=4] [ref=f2e862]
+            - generic [ref=f2e863]: "7594001000404"
+          - generic [ref=f2e864]:
+            - generic [ref=f2e865]:
+              - generic [ref=f2e866]: $1.80
+              - generic [ref=f2e867]: Bs. 1527.39
+            - button "Añadir a la venta" [ref=f2e868]
+      - generic [ref=f2e870] [cursor=pointer]:
+        - generic [ref=f2e871]:
+          - img "Cachito de Jamón y Queso Crema Especial" [ref=f2e872]
+          - generic [ref=f2e873]: Salados y Desayunos
+        - generic [ref=f2e874]:
+          - generic [ref=f2e875]:
+            - heading "Cachito de Jamón y Queso Crema Especial" [level=4] [ref=f2e876]
+            - generic [ref=f2e877]: "7594001000405"
+          - generic [ref=f2e878]:
+            - generic [ref=f2e879]:
+              - generic [ref=f2e880]: $2.20
+              - generic [ref=f2e881]: Bs. 1866.81
+            - button "Añadir a la venta" [ref=f2e882]
+      - generic [ref=f2e884] [cursor=pointer]:
+        - generic [ref=f2e885]:
+          - img "Pastelito de Carne Molida Hojaldrado" [ref=f2e886]
+          - generic [ref=f2e887]: Salados y Desayunos
+        - generic [ref=f2e888]:
+          - generic [ref=f2e889]:
+            - heading "Pastelito de Carne Molida Hojaldrado" [level=4] [ref=f2e890]
+            - generic [ref=f2e891]: "7594001000406"
+          - generic [ref=f2e892]:
+            - generic [ref=f2e893]:
+              - generic [ref=f2e894]: $1.40
+              - generic [ref=f2e895]: Bs. 1187.97
+            - button "Añadir a la venta" [ref=f2e896]
+      - generic [ref=f2e898] [cursor=pointer]:
+        - generic [ref=f2e899]:
+          - img "Golfeado Criollo con Queso de Mano" [ref=f2e900]
+          - generic [ref=f2e901]: Dulces y Pastelería
+        - generic [ref=f2e902]:
+          - generic [ref=f2e903]:
+            - heading "Golfeado Criollo con Queso de Mano" [level=4] [ref=f2e904]
+            - generic [ref=f2e905]: "7594001000407"
+          - generic [ref=f2e906]:
+            - generic [ref=f2e907]:
+              - generic [ref=f2e908]: $2.50
+              - generic [ref=f2e909]: Bs. 2121.38
+            - button "Añadir a la venta" [ref=f2e910]
+      - generic [ref=f2e912] [cursor=pointer]:
+        - generic [ref=f2e913]:
+          - img "Torta Selva Negra Porción Grande" [ref=f2e914]
+          - generic [ref=f2e915]: Dulces y Pastelería
+        - generic [ref=f2e916]:
+          - generic [ref=f2e917]:
+            - heading "Torta Selva Negra Porción Grande" [level=4] [ref=f2e918]
+            - generic [ref=f2e919]: "7594001000408"
+          - generic [ref=f2e920]:
+            - generic [ref=f2e921]:
+              - generic [ref=f2e922]: $3.50
+              - generic [ref=f2e923]: Bs. 2969.92
+            - button "Añadir a la venta" [ref=f2e924]
+      - generic [ref=f2e926] [cursor=pointer]:
+        - generic [ref=f2e927]:
+          - img "Galletas de Pasta Seca Surtidas 250g" [ref=f2e928]
+          - generic [ref=f2e929]: Dulces y Pastelería
+        - generic [ref=f2e930]:
+          - generic [ref=f2e931]:
+            - heading "Galletas de Pasta Seca Surtidas 250g" [level=4] [ref=f2e932]
+            - generic [ref=f2e933]: "7594001000409"
+          - generic [ref=f2e934]:
+            - generic [ref=f2e935]:
+              - generic [ref=f2e936]: $3.00
+              - generic [ref=f2e937]: Bs. 2545.65
+            - button "Añadir a la venta" [ref=f2e938]
+      - generic [ref=f2e940] [cursor=pointer]:
+        - generic [ref=f2e941]:
+          - img "Café Espresso Italiano Doble" [ref=f2e942]
+          - generic [ref=f2e943]: Cafetería
+        - generic [ref=f2e944]:
+          - generic [ref=f2e945]:
+            - heading "Café Espresso Italiano Doble" [level=4] [ref=f2e946]
+            - generic [ref=f2e947]: "7594001000410"
+          - generic [ref=f2e948]:
+            - generic [ref=f2e949]:
+              - generic [ref=f2e950]: $1.20
+              - generic [ref=f2e951]: Bs. 1018.26
+            - button "Añadir a la venta" [ref=f2e952]
+      - generic [ref=f2e954] [cursor=pointer]:
+        - generic [ref=f2e955]:
+          - img "Café con Leche Grande Especial 12oz" [ref=f2e956]
+          - generic [ref=f2e957]: Cafetería
+        - generic [ref=f2e958]:
+          - generic [ref=f2e959]:
+            - heading "Café con Leche Grande Especial 12oz" [level=4] [ref=f2e960]
+            - generic [ref=f2e961]: "7594001000411"
+          - generic [ref=f2e962]:
+            - generic [ref=f2e963]:
+              - generic [ref=f2e964]: $1.80
+              - generic [ref=f2e965]: Bs. 1527.39
+            - button "Añadir a la venta" [ref=f2e966]
+      - generic [ref=f2e968] [cursor=pointer]:
+        - generic [ref=f2e969]:
+          - img "Jugo Natural de Naranja Recién Exprimido" [ref=f2e970]
+          - generic [ref=f2e971]: Bebidas Frescas
+        - generic [ref=f2e972]:
+          - generic [ref=f2e973]:
+            - heading "Jugo Natural de Naranja Recién Exprimido" [level=4] [ref=f2e974]
+            - generic [ref=f2e975]: "7594001000412"
+          - generic [ref=f2e976]:
+            - generic [ref=f2e977]:
+              - generic [ref=f2e978]: $2.00
+              - generic [ref=f2e979]: Bs. 1697.10
+            - button "Añadir a la venta" [ref=f2e980]
+      - generic [ref=f2e982] [cursor=pointer]:
+        - generic [ref=f2e983]:
+          - img "Croissant Francés de Mantequilla" [ref=f2e984]
+          - generic [ref=f2e985]: Panes Frescos
+        - generic [ref=f2e986]:
+          - generic [ref=f2e987]:
+            - heading "Croissant Francés de Mantequilla" [level=4] [ref=f2e988]
+            - generic [ref=f2e989]: "7594001000413"
+          - generic [ref=f2e990]:
+            - generic [ref=f2e991]:
+              - generic [ref=f2e992]: $1.60
+              - generic [ref=f2e993]: Bs. 1357.68
+            - button "Añadir a la venta" [ref=f2e994]
+      - generic [ref=f2e996] [cursor=pointer]:
+        - generic [ref=f2e997]:
+          - img "Palmeritas Crujientes de Hojaldre 150g" [ref=f2e998]
+          - generic [ref=f2e999]: Dulces y Pastelería
+        - generic [ref=f2e1000]:
+          - generic [ref=f2e1001]:
+            - heading "Palmeritas Crujientes de Hojaldre 150g" [level=4] [ref=f2e1002]
+            - generic [ref=f2e1003]: "7594001000414"
+          - generic [ref=f2e1004]:
+            - generic [ref=f2e1005]:
+              - generic [ref=f2e1006]: $2.00
+              - generic [ref=f2e1007]: Bs. 1697.10
+            - button "Añadir a la venta" [ref=f2e1008]
+      - generic [ref=f2e1010] [cursor=pointer]:
+        - generic [ref=f2e1011]:
+          - img "Queso de Mano Fresco Artesanal" [ref=f2e1012]
+          - generic [ref=f2e1013]: Charcutería y Lácteos
+        - generic [ref=f2e1014]:
+          - generic [ref=f2e1015]:
+            - heading "Queso de Mano Fresco Artesanal" [level=4] [ref=f2e1016]
+            - generic [ref=f2e1017]: "7594001000415"
+          - generic [ref=f2e1018]:
+            - generic [ref=f2e1019]:
+              - generic [ref=f2e1020]: $4.00
+              - generic [ref=f2e1021]: Bs. 3394.20
+            - button "Añadir a la venta" [ref=f2e1022]
+      - generic [ref=f2e1024] [cursor=pointer]:
+        - generic [ref=f2e1025]:
+          - img "Cuaderno Cosido Doble Línea 100 Hojas" [ref=f2e1026]
+          - generic [ref=f2e1027]: Cuadernos
+        - generic [ref=f2e1028]:
+          - generic [ref=f2e1029]:
+            - heading "Cuaderno Cosido Doble Línea 100 Hojas" [level=4] [ref=f2e1030]
+            - generic [ref=f2e1031]: "7595001000501"
+          - generic [ref=f2e1032]:
+            - generic [ref=f2e1033]:
+              - generic [ref=f2e1034]: $1.80
+              - generic [ref=f2e1035]: Bs. 1527.39
+            - button "Añadir a la venta" [ref=f2e1036]
+      - generic [ref=f2e1038] [cursor=pointer]:
+        - generic [ref=f2e1039]:
+          - img "Cuaderno Cuadriculado 100 Hojas Escolar" [ref=f2e1040]
+          - generic [ref=f2e1041]: Cuadernos
+        - generic [ref=f2e1042]:
+          - generic [ref=f2e1043]:
+            - heading "Cuaderno Cuadriculado 100 Hojas Escolar" [level=4] [ref=f2e1044]
+            - generic [ref=f2e1045]: "7595001000502"
+          - generic [ref=f2e1046]:
+            - generic [ref=f2e1047]:
+              - generic [ref=f2e1048]: $1.80
+              - generic [ref=f2e1049]: Bs. 1527.39
+            - button "Añadir a la venta" [ref=f2e1050]
+      - generic [ref=f2e1052] [cursor=pointer]:
+        - generic [ref=f2e1053]:
+          - img "Caja de Lápices Grafito Mongol HB (12 uds)" [ref=f2e1054]
+          - generic [ref=f2e1055]: Útiles Escolares
+        - generic [ref=f2e1056]:
+          - generic [ref=f2e1057]:
+            - heading "Caja de Lápices Grafito Mongol HB (12 uds)" [level=4] [ref=f2e1058]
+            - generic [ref=f2e1059]: "7595001000503"
+          - generic [ref=f2e1060]:
+            - generic [ref=f2e1061]:
+              - generic [ref=f2e1062]: $2.60
+              - generic [ref=f2e1063]: Bs. 2206.23
+            - button "Añadir a la venta" [ref=f2e1064]
+      - generic [ref=f2e1066] [cursor=pointer]:
+        - generic [ref=f2e1067]:
+          - img "Resma de Papel Bond Carta 75g (500 Hojas)" [ref=f2e1068]
+          - generic [ref=f2e1069]: Papelería y Resmas
+        - generic [ref=f2e1070]:
+          - generic [ref=f2e1071]:
+            - heading "Resma de Papel Bond Carta 75g (500 Hojas)" [level=4] [ref=f2e1072]
+            - generic [ref=f2e1073]: "7595001000504"
+          - generic [ref=f2e1074]:
+            - generic [ref=f2e1075]:
+              - generic [ref=f2e1076]: $5.50
+              - generic [ref=f2e1077]: Bs. 4667.02
+            - button "Añadir a la venta" [ref=f2e1078]
+      - generic [ref=f2e1080] [cursor=pointer]:
+        - generic [ref=f2e1081]:
+          - img "Bolígrafo Kilométrico Azul Punta Fina" [ref=f2e1082]
+          - generic [ref=f2e1083]: Útiles Escolares
+        - generic [ref=f2e1084]:
+          - generic [ref=f2e1085]:
+            - heading "Bolígrafo Kilométrico Azul Punta Fina" [level=4] [ref=f2e1086]
+            - generic [ref=f2e1087]: "7595001000505"
+          - generic [ref=f2e1088]:
+            - generic [ref=f2e1089]:
+              - generic [ref=f2e1090]: $0.40
+              - generic [ref=f2e1091]: Bs. 339.42
+            - button "Añadir a la venta" [ref=f2e1092]
+      - generic [ref=f2e1094] [cursor=pointer]:
+        - generic [ref=f2e1095]:
+          - img "Bolígrafo Kilométrico Negro Punta Fina" [ref=f2e1096]
+          - generic [ref=f2e1097]: Útiles Escolares
+        - generic [ref=f2e1098]:
+          - generic [ref=f2e1099]:
+            - heading "Bolígrafo Kilométrico Negro Punta Fina" [level=4] [ref=f2e1100]
+            - generic [ref=f2e1101]: "7595001000506"
+          - generic [ref=f2e1102]:
+            - generic [ref=f2e1103]:
+              - generic [ref=f2e1104]: $0.40
+              - generic [ref=f2e1105]: Bs. 339.42
+            - button "Añadir a la venta" [ref=f2e1106]
+      - generic [ref=f2e1108] [cursor=pointer]:
+        - generic [ref=f2e1109]:
+          - img "Set de Marcadores Punta Fina (24 Colores)" [ref=f2e1110]
+          - generic [ref=f2e1111]: Arte y Dibujo
+        - generic [ref=f2e1112]:
+          - generic [ref=f2e1113]:
+            - heading "Set de Marcadores Punta Fina (24 Colores)" [level=4] [ref=f2e1114]
+            - generic [ref=f2e1115]: "7595001000507"
+          - generic [ref=f2e1116]:
+            - generic [ref=f2e1117]:
+              - generic [ref=f2e1118]: $4.80
+              - generic [ref=f2e1119]: Bs. 4073.04
+            - button "Añadir a la venta" [ref=f2e1120]
+      - generic [ref=f2e1122] [cursor=pointer]:
+        - generic [ref=f2e1123]:
+          - img "Juego de Geometría Escolar 4 Piezas" [ref=f2e1124]
+          - generic [ref=f2e1125]: Útiles Escolares
+        - generic [ref=f2e1126]:
+          - generic [ref=f2e1127]:
+            - heading "Juego de Geometría Escolar 4 Piezas" [level=4] [ref=f2e1128]
+            - generic [ref=f2e1129]: "7595001000508"
+          - generic [ref=f2e1130]:
+            - generic [ref=f2e1131]:
+              - generic [ref=f2e1132]: $2.20
+              - generic [ref=f2e1133]: Bs. 1866.81
+            - button "Añadir a la venta" [ref=f2e1134]
+      - generic [ref=f2e1136] [cursor=pointer]:
+        - generic [ref=f2e1137]:
+          - img "Pega Blanca Líquida Escolar 250ml" [ref=f2e1138]
+          - generic [ref=f2e1139]: Útiles Escolares
+        - generic [ref=f2e1140]:
+          - generic [ref=f2e1141]:
+            - heading "Pega Blanca Líquida Escolar 250ml" [level=4] [ref=f2e1142]
+            - generic [ref=f2e1143]: "7595001000509"
+          - generic [ref=f2e1144]:
+            - generic [ref=f2e1145]:
+              - generic [ref=f2e1146]: $1.40
+              - generic [ref=f2e1147]: Bs. 1187.97
+            - button "Añadir a la venta" [ref=f2e1148]
+      - generic [ref=f2e1150] [cursor=pointer]:
+        - generic [ref=f2e1151]:
+          - img "Borrador de Nata Escolar Suave" [ref=f2e1152]
+          - generic [ref=f2e1153]: Útiles Escolares
+        - generic [ref=f2e1154]:
+          - generic [ref=f2e1155]:
+            - heading "Borrador de Nata Escolar Suave" [level=4] [ref=f2e1156]
+            - generic [ref=f2e1157]: "7595001000510"
+          - generic [ref=f2e1158]:
+            - generic [ref=f2e1159]:
+              - generic [ref=f2e1160]: $0.50
+              - generic [ref=f2e1161]: Bs. 424.27
+            - button "Añadir a la venta" [ref=f2e1162]
+      - generic [ref=f2e1164] [cursor=pointer]:
+        - generic [ref=f2e1165]:
+          - img "Sacapuntas Metálico con Depósito" [ref=f2e1166]
+          - generic [ref=f2e1167]: Útiles Escolares
+        - generic [ref=f2e1168]:
+          - generic [ref=f2e1169]:
+            - heading "Sacapuntas Metálico con Depósito" [level=4] [ref=f2e1170]
+            - generic [ref=f2e1171]: "7595001000511"
+          - generic [ref=f2e1172]:
+            - generic [ref=f2e1173]:
+              - generic [ref=f2e1174]: $1.00
+              - generic [ref=f2e1175]: Bs. 848.55
+            - button "Añadir a la venta" [ref=f2e1176]
+      - generic [ref=f2e1178] [cursor=pointer]:
+        - generic [ref=f2e1179]:
+          - img "Tijera Escolar Punta Roma Acero" [ref=f2e1180]
+          - generic [ref=f2e1181]: Útiles Escolares
+        - generic [ref=f2e1182]:
+          - generic [ref=f2e1183]:
+            - heading "Tijera Escolar Punta Roma Acero" [level=4] [ref=f2e1184]
+            - generic [ref=f2e1185]: "7595001000512"
+          - generic [ref=f2e1186]:
+            - generic [ref=f2e1187]:
+              - generic [ref=f2e1188]: $1.20
+              - generic [ref=f2e1189]: Bs. 1018.26
+            - button "Añadir a la venta" [ref=f2e1190]
+      - generic [ref=f2e1192] [cursor=pointer]:
+        - generic [ref=f2e1193]:
+          - img "Carpeta de Archivo de Palanca Oficio" [ref=f2e1194]
+          - generic [ref=f2e1195]: Oficina y Archivo
+        - generic [ref=f2e1196]:
+          - generic [ref=f2e1197]:
+            - heading "Carpeta de Archivo de Palanca Oficio" [level=4] [ref=f2e1198]
+            - generic [ref=f2e1199]: "7595001000513"
+          - generic [ref=f2e1200]:
+            - generic [ref=f2e1201]:
+              - generic [ref=f2e1202]: $3.40
+              - generic [ref=f2e1203]: Bs. 2885.07
+            - button "Añadir a la venta" [ref=f2e1204]
+      - generic [ref=f2e1206] [cursor=pointer]:
+        - generic [ref=f2e1207]:
+          - img "Block de Dibujo Bristol Espiral 20 Hojas" [ref=f2e1208]
+          - generic [ref=f2e1209]: Arte y Dibujo
+        - generic [ref=f2e1210]:
+          - generic [ref=f2e1211]:
+            - heading "Block de Dibujo Bristol Espiral 20 Hojas" [level=4] [ref=f2e1212]
+            - generic [ref=f2e1213]: "7595001000514"
+          - generic [ref=f2e1214]:
+            - generic [ref=f2e1215]:
+              - generic [ref=f2e1216]: $3.80
+              - generic [ref=f2e1217]: Bs. 3224.49
+            - button "Añadir a la venta" [ref=f2e1218]
+      - generic [ref=f2e1220] [cursor=pointer]:
+        - generic [ref=f2e1221]:
+          - img "Caja de Plastilina Escolar (10 Colores)" [ref=f2e1222]
+          - generic [ref=f2e1223]: Arte y Dibujo
+        - generic [ref=f2e1224]:
+          - generic [ref=f2e1225]:
+            - heading "Caja de Plastilina Escolar (10 Colores)" [level=4] [ref=f2e1226]
+            - generic [ref=f2e1227]: "7595001000515"
+          - generic [ref=f2e1228]:
+            - generic [ref=f2e1229]:
+              - generic [ref=f2e1230]: $2.00
+              - generic [ref=f2e1231]: Bs. 1697.10
+            - button "Añadir a la venta" [ref=f2e1232]
+      - generic [ref=f2e1234] [cursor=pointer]:
+        - generic [ref=f2e1235]:
+          - img "Barquilla Simple 1 Bola (Mantecado / Chocolate)" [ref=f2e1236]
+          - generic [ref=f2e1237]: Barquillas
+        - generic [ref=f2e1238]:
+          - generic [ref=f2e1239]:
+            - heading "Barquilla Simple 1 Bola (Mantecado / Chocolate)" [level=4] [ref=f2e1240]
+            - generic [ref=f2e1241]: "7596001000601"
+          - generic [ref=f2e1242]:
+            - generic [ref=f2e1243]:
+              - generic [ref=f2e1244]: $1.50
+              - generic [ref=f2e1245]: Bs. 1272.82
+            - button "Añadir a la venta" [ref=f2e1246]
+      - generic [ref=f2e1248] [cursor=pointer]:
+        - generic [ref=f2e1249]:
+          - img "Barquilla Doble Especial 2 Bolas a Elegir" [ref=f2e1250]
+          - generic [ref=f2e1251]: Barquillas
+        - generic [ref=f2e1252]:
+          - generic [ref=f2e1253]:
+            - heading "Barquilla Doble Especial 2 Bolas a Elegir" [level=4] [ref=f2e1254]
+            - generic [ref=f2e1255]: "7596001000602"
+          - generic [ref=f2e1256]:
+            - generic [ref=f2e1257]:
+              - generic [ref=f2e1258]: $2.50
+              - generic [ref=f2e1259]: Bs. 2121.38
+            - button "Añadir a la venta" [ref=f2e1260]
+      - generic [ref=f2e1262] [cursor=pointer]:
+        - generic [ref=f2e1263]:
+          - img "Tinita Mediana con Topping y Sirope" [ref=f2e1264]
+          - generic [ref=f2e1265]: Tinitas
+        - generic [ref=f2e1266]:
+          - generic [ref=f2e1267]:
+            - heading "Tinita Mediana con Topping y Sirope" [level=4] [ref=f2e1268]
+            - generic [ref=f2e1269]: "7596001000603"
+          - generic [ref=f2e1270]:
+            - generic [ref=f2e1271]:
+              - generic [ref=f2e1272]: $2.80
+              - generic [ref=f2e1273]: Bs. 2375.94
+            - button "Añadir a la venta" [ref=f2e1274]
+      - generic [ref=f2e1276] [cursor=pointer]:
+        - generic [ref=f2e1277]:
+          - img "Copa Brownie Caliente con Helado y Nuez" [ref=f2e1278]
+          - generic [ref=f2e1279]: Especialidades
+        - generic [ref=f2e1280]:
+          - generic [ref=f2e1281]:
+            - heading "Copa Brownie Caliente con Helado y Nuez" [level=4] [ref=f2e1282]
+            - generic [ref=f2e1283]: "7596001000604"
+          - generic [ref=f2e1284]:
+            - generic [ref=f2e1285]:
+              - generic [ref=f2e1286]: $4.50
+              - generic [ref=f2e1287]: Bs. 3818.47
+            - button "Añadir a la venta" [ref=f2e1288]
+      - generic [ref=f2e1290] [cursor=pointer]:
+        - generic [ref=f2e1291]:
+          - img "Helado Familiar Mantecado 1 Litro" [ref=f2e1292]
+          - generic [ref=f2e1293]: Litros para Llevar
+        - generic [ref=f2e1294]:
+          - generic [ref=f2e1295]:
+            - heading "Helado Familiar Mantecado 1 Litro" [level=4] [ref=f2e1296]
+            - generic [ref=f2e1297]: "7596001000605"
+          - generic [ref=f2e1298]:
+            - generic [ref=f2e1299]:
+              - generic [ref=f2e1300]: $6.50
+              - generic [ref=f2e1301]: Bs. 5515.57
+            - button "Añadir a la venta" [ref=f2e1302]
+      - generic [ref=f2e1304] [cursor=pointer]:
+        - generic [ref=f2e1305]:
+          - img "Helado Familiar Chocolate Suizo 1 Litro" [ref=f2e1306]
+          - generic [ref=f2e1307]: Litros para Llevar
+        - generic [ref=f2e1308]:
+          - generic [ref=f2e1309]:
+            - heading "Helado Familiar Chocolate Suizo 1 Litro" [level=4] [ref=f2e1310]
+            - generic [ref=f2e1311]: "7596001000606"
+          - generic [ref=f2e1312]:
+            - generic [ref=f2e1313]:
+              - generic [ref=f2e1314]: $6.80
+              - generic [ref=f2e1315]: Bs. 5770.14
+            - button "Añadir a la venta" [ref=f2e1316]
+      - generic [ref=f2e1318] [cursor=pointer]:
+        - generic [ref=f2e1319]:
+          - img "Paleta Artesanal Rellena de Leche Condensada" [ref=f2e1320]
+          - generic [ref=f2e1321]: Paletas
+        - generic [ref=f2e1322]:
+          - generic [ref=f2e1323]:
+            - heading "Paleta Artesanal Rellena de Leche Condensada" [level=4] [ref=f2e1324]
+            - generic [ref=f2e1325]: "7596001000607"
+          - generic [ref=f2e1326]:
+            - generic [ref=f2e1327]:
+              - generic [ref=f2e1328]: $2.00
+              - generic [ref=f2e1329]: Bs. 1697.10
+            - button "Añadir a la venta" [ref=f2e1330]
+      - generic [ref=f2e1332] [cursor=pointer]:
+        - generic [ref=f2e1333]:
+          - img "Banana Split Suprema 3 Sabores" [ref=f2e1334]
+          - generic [ref=f2e1335]: Especialidades
+        - generic [ref=f2e1336]:
+          - generic [ref=f2e1337]:
+            - heading "Banana Split Suprema 3 Sabores" [level=4] [ref=f2e1338]
+            - generic [ref=f2e1339]: "7596001000608"
+          - generic [ref=f2e1340]:
+            - generic [ref=f2e1341]:
+              - generic [ref=f2e1342]: $5.50
+              - generic [ref=f2e1343]: Bs. 4667.02
+            - button "Añadir a la venta" [ref=f2e1344]
+      - generic [ref=f2e1346] [cursor=pointer]:
+        - generic [ref=f2e1347]:
+          - img "Malteada Espesa de Fresa con Crema Chantilly" [ref=f2e1348]
+          - generic [ref=f2e1349]: Malteadas
+        - generic [ref=f2e1350]:
+          - generic [ref=f2e1351]:
+            - heading "Malteada Espesa de Fresa con Crema Chantilly" [level=4] [ref=f2e1352]
+            - generic [ref=f2e1353]: "7596001000609"
+          - generic [ref=f2e1354]:
+            - generic [ref=f2e1355]:
+              - generic [ref=f2e1356]: $3.80
+              - generic [ref=f2e1357]: Bs. 3224.49
+            - button "Añadir a la venta" [ref=f2e1358]
+      - generic [ref=f2e1360] [cursor=pointer]:
+        - generic [ref=f2e1361]:
+          - img "Topping Adicional de Nutella Avellana" [ref=f2e1362]
+          - generic [ref=f2e1363]: Toppings y Adicionales
+        - generic [ref=f2e1364]:
+          - generic [ref=f2e1365]:
+            - heading "Topping Adicional de Nutella Avellana" [level=4] [ref=f2e1366]
+            - generic [ref=f2e1367]: "7596001000610"
+          - generic [ref=f2e1368]:
+            - generic [ref=f2e1369]:
+              - generic [ref=f2e1370]: $1.00
+              - generic [ref=f2e1371]: Bs. 848.55
+            - button "Añadir a la venta" [ref=f2e1372]
+      - generic [ref=f2e1374] [cursor=pointer]:
+        - generic [ref=f2e1375]:
+          - img "Topping Adicional Lluvia de Chocolate" [ref=f2e1376]
+          - generic [ref=f2e1377]: Toppings y Adicionales
+        - generic [ref=f2e1378]:
+          - generic [ref=f2e1379]:
+            - heading "Topping Adicional Lluvia de Chocolate" [level=4] [ref=f2e1380]
+            - generic [ref=f2e1381]: "7596001000611"
+          - generic [ref=f2e1382]:
+            - generic [ref=f2e1383]:
+              - generic [ref=f2e1384]: $0.60
+              - generic [ref=f2e1385]: Bs. 509.13
+            - button "Añadir a la venta" [ref=f2e1386]
+      - generic [ref=f2e1388] [cursor=pointer]:
+        - generic [ref=f2e1389]:
+          - img "Agua Mineral Sin Gas Fría 500ml" [ref=f2e1390]
+          - generic [ref=f2e1391]: Bebidas
+        - generic [ref=f2e1392]:
+          - generic [ref=f2e1393]:
+            - heading "Agua Mineral Sin Gas Fría 500ml" [level=4] [ref=f2e1394]
+            - generic [ref=f2e1395]: "7596001000612"
+          - generic [ref=f2e1396]:
+            - generic [ref=f2e1397]:
+              - generic [ref=f2e1398]: $1.00
+              - generic [ref=f2e1399]: Bs. 848.55
+            - button "Añadir a la venta" [ref=f2e1400]
+      - generic [ref=f2e1402] [cursor=pointer]:
+        - generic [ref=f2e1403]:
+          - img "Hamburguesa Especial Doble Carne con Papas" [ref=f2e1404]
+          - generic [ref=f2e1405]: Hamburguesas
+        - generic [ref=f2e1406]:
+          - generic [ref=f2e1407]:
+            - heading "Hamburguesa Especial Doble Carne con Papas" [level=4] [ref=f2e1408]
+            - generic [ref=f2e1409]: "7597001000701"
+          - generic [ref=f2e1410]:
+            - generic [ref=f2e1411]:
+              - generic [ref=f2e1412]: $6.50
+              - generic [ref=f2e1413]: Bs. 5515.57
+            - button "Añadir a la venta" [ref=f2e1414]
+      - generic [ref=f2e1416] [cursor=pointer]:
+        - generic [ref=f2e1417]:
+          - img "Hamburguesa de Pollo Crispy con Queso Cheddar" [ref=f2e1418]
+          - generic [ref=f2e1419]: Hamburguesas
+        - generic [ref=f2e1420]:
+          - generic [ref=f2e1421]:
+            - heading "Hamburguesa de Pollo Crispy con Queso Cheddar" [level=4] [ref=f2e1422]
+            - generic [ref=f2e1423]: "7597001000702"
+          - generic [ref=f2e1424]:
+            - generic [ref=f2e1425]:
+              - generic [ref=f2e1426]: $5.80
+              - generic [ref=f2e1427]: Bs. 4921.59
+            - button "Añadir a la venta" [ref=f2e1428]
+      - generic [ref=f2e1430] [cursor=pointer]:
+        - generic [ref=f2e1431]:
+          - img "Pizza Familiar Pepperoni y Queso Mozzarella" [ref=f2e1432]
+          - generic [ref=f2e1433]: Pizzas
+        - generic [ref=f2e1434]:
+          - generic [ref=f2e1435]:
+            - heading "Pizza Familiar Pepperoni y Queso Mozzarella" [level=4] [ref=f2e1436]
+            - generic [ref=f2e1437]: "7597001000703"
+          - generic [ref=f2e1438]:
+            - generic [ref=f2e1439]:
+              - generic [ref=f2e1440]: $12.00
+              - generic [ref=f2e1441]: Bs. 10182.60
+            - button "Añadir a la venta" [ref=f2e1442]
+      - generic [ref=f2e1444] [cursor=pointer]:
+        - generic [ref=f2e1445]:
+          - img "Pizza Mediana Margarita Clásica" [ref=f2e1446]
+          - generic [ref=f2e1447]: Pizzas
+        - generic [ref=f2e1448]:
+          - generic [ref=f2e1449]:
+            - heading "Pizza Mediana Margarita Clásica" [level=4] [ref=f2e1450]
+            - generic [ref=f2e1451]: "7597001000704"
+          - generic [ref=f2e1452]:
+            - generic [ref=f2e1453]:
+              - generic [ref=f2e1454]: $8.50
+              - generic [ref=f2e1455]: Bs. 7212.67
+            - button "Añadir a la venta" [ref=f2e1456]
+      - generic [ref=f2e1458] [cursor=pointer]:
+        - generic [ref=f2e1459]:
+          - img "Ración de Tequeños de Queso (6 uds) con Tártara" [ref=f2e1460]
+          - generic [ref=f2e1461]: Entradas y Pasapalos
+        - generic [ref=f2e1462]:
+          - generic [ref=f2e1463]:
+            - heading "Ración de Tequeños de Queso (6 uds) con Tártara" [level=4] [ref=f2e1464]
+            - generic [ref=f2e1465]: "7597001000705"
+          - generic [ref=f2e1466]:
+            - generic [ref=f2e1467]:
+              - generic [ref=f2e1468]: $4.00
+              - generic [ref=f2e1469]: Bs. 3394.20
+            - button "Añadir a la venta" [ref=f2e1470]
+      - generic [ref=f2e1472] [cursor=pointer]:
+        - generic [ref=f2e1473]:
+          - img "Empanada Criolla de Cazón Margariteña" [ref=f2e1474]
+          - generic [ref=f2e1475]: Desayunos Criollos
+        - generic [ref=f2e1476]:
+          - generic [ref=f2e1477]:
+            - heading "Empanada Criolla de Cazón Margariteña" [level=4] [ref=f2e1478]
+            - generic [ref=f2e1479]: "7597001000706"
+          - generic [ref=f2e1480]:
+            - generic [ref=f2e1481]:
+              - generic [ref=f2e1482]: $1.80
+              - generic [ref=f2e1483]: Bs. 1527.39
+            - button "Añadir a la venta" [ref=f2e1484]
+      - generic [ref=f2e1486] [cursor=pointer]:
+        - generic [ref=f2e1487]:
+          - img "Empanada de Carne Mechada con Queso Amarillo" [ref=f2e1488]
+          - generic [ref=f2e1489]: Desayunos Criollos
+        - generic [ref=f2e1490]:
+          - generic [ref=f2e1491]:
+            - heading "Empanada de Carne Mechada con Queso Amarillo" [level=4] [ref=f2e1492]
+            - generic [ref=f2e1493]: "7597001000707"
+          - generic [ref=f2e1494]:
+            - generic [ref=f2e1495]:
+              - generic [ref=f2e1496]: $1.80
+              - generic [ref=f2e1497]: Bs. 1527.39
+            - button "Añadir a la venta" [ref=f2e1498]
+      - generic [ref=f2e1500] [cursor=pointer]:
+        - generic [ref=f2e1501]:
+          - img "Pabellón Criollo Completo (Carne, Caraotas, Arroz, Tajadas)" [ref=f2e1502]
+          - generic [ref=f2e1503]: Almuerzos Ejecutivos
+        - generic [ref=f2e1504]:
+          - generic [ref=f2e1505]:
+            - heading "Pabellón Criollo Completo (Carne, Caraotas, Arroz, Tajadas)" [level=4] [ref=f2e1506]
+            - generic [ref=f2e1507]: "7597001000708"
+          - generic [ref=f2e1508]:
+            - generic [ref=f2e1509]:
+              - generic [ref=f2e1510]: $7.50
+              - generic [ref=f2e1511]: Bs. 6364.13
+            - button "Añadir a la venta" [ref=f2e1512]
+      - generic [ref=f2e1514] [cursor=pointer]:
+        - generic [ref=f2e1515]:
+          - img "Pechuga de Pollo a la Plancha con Ensalada y Papas" [ref=f2e1516]
+          - generic [ref=f2e1517]: Almuerzos Ejecutivos
+        - generic [ref=f2e1518]:
+          - generic [ref=f2e1519]:
+            - heading "Pechuga de Pollo a la Plancha con Ensalada y Papas" [level=4] [ref=f2e1520]
+            - generic [ref=f2e1521]: "7597001000709"
+          - generic [ref=f2e1522]:
+            - generic [ref=f2e1523]:
+              - generic [ref=f2e1524]: $7.00
+              - generic [ref=f2e1525]: Bs. 5939.85
+            - button "Añadir a la venta" [ref=f2e1526]
+      - generic [ref=f2e1528] [cursor=pointer]:
+        - generic [ref=f2e1529]:
+          - img "Club House Sandwich 4 Pisos con Papas Fritas" [ref=f2e1530]
+          - generic [ref=f2e1531]: Sandwiches
+        - generic [ref=f2e1532]:
+          - generic [ref=f2e1533]:
+            - heading "Club House Sandwich 4 Pisos con Papas Fritas" [level=4] [ref=f2e1534]
+            - generic [ref=f2e1535]: "7597001000710"
+          - generic [ref=f2e1536]:
+            - generic [ref=f2e1537]:
+              - generic [ref=f2e1538]: $7.20
+              - generic [ref=f2e1539]: Bs. 6109.56
+            - button "Añadir a la venta" [ref=f2e1540]
+      - generic [ref=f2e1542] [cursor=pointer]:
+        - generic [ref=f2e1543]:
+          - img "Papas Fritas Ración Grande con Queso y Tocineta" [ref=f2e1544]
+          - generic [ref=f2e1545]: Acompañantes
+        - generic [ref=f2e1546]:
+          - generic [ref=f2e1547]:
+            - heading "Papas Fritas Ración Grande con Queso y Tocineta" [level=4] [ref=f2e1548]
+            - generic [ref=f2e1549]: "7597001000711"
+          - generic [ref=f2e1550]:
+            - generic [ref=f2e1551]:
+              - generic [ref=f2e1552]: $4.50
+              - generic [ref=f2e1553]: Bs. 3818.47
+            - button "Añadir a la venta" [ref=f2e1554]
+      - generic [ref=f2e1556] [cursor=pointer]:
+        - generic [ref=f2e1557]:
+          - img "Papelón con Limón Vaso Grande 16oz" [ref=f2e1558]
+          - generic [ref=f2e1559]: Bebidas Tradicionales
+        - generic [ref=f2e1560]:
+          - generic [ref=f2e1561]:
+            - heading "Papelón con Limón Vaso Grande 16oz" [level=4] [ref=f2e1562]
+            - generic [ref=f2e1563]: "7597001000712"
+          - generic [ref=f2e1564]:
+            - generic [ref=f2e1565]:
+              - generic [ref=f2e1566]: $1.50
+              - generic [ref=f2e1567]: Bs. 1272.82
+            - button "Añadir a la venta" [ref=f2e1568]
+      - generic [ref=f2e1570] [cursor=pointer]:
+        - generic [ref=f2e1571]:
+          - img "Refresco en Lata 355ml Frío Surtido" [ref=f2e1572]
+          - generic [ref=f2e1573]: Bebidas
+        - generic [ref=f2e1574]:
+          - generic [ref=f2e1575]:
+            - heading "Refresco en Lata 355ml Frío Surtido" [level=4] [ref=f2e1576]
+            - generic [ref=f2e1577]: "7597001000713"
+          - generic [ref=f2e1578]:
+            - generic [ref=f2e1579]:
+              - generic [ref=f2e1580]: $1.50
+              - generic [ref=f2e1581]: Bs. 1272.82
+            - button "Añadir a la venta" [ref=f2e1582]
+      - generic [ref=f2e1584] [cursor=pointer]:
+        - generic [ref=f2e1585]:
+          - img "Café Guayoyo Criollo Caliente" [ref=f2e1586]
+          - generic [ref=f2e1587]: Cafetería
+        - generic [ref=f2e1588]:
+          - generic [ref=f2e1589]:
+            - heading "Café Guayoyo Criollo Caliente" [level=4] [ref=f2e1590]
+            - generic [ref=f2e1591]: "7597001000714"
+          - generic [ref=f2e1592]:
+            - generic [ref=f2e1593]:
+              - generic [ref=f2e1594]: $1.00
+              - generic [ref=f2e1595]: Bs. 848.55
+            - button "Añadir a la venta" [ref=f2e1596]
+      - generic [ref=f2e1598] [cursor=pointer]:
+        - generic [ref=f2e1599]:
+          - img "Franela de Algodón Cuello Redondo Básica" [ref=f2e1600]
+          - generic [ref=f2e1601]: Franelas y Camisas
+        - generic [ref=f2e1602]:
+          - generic [ref=f2e1603]:
+            - heading "Franela de Algodón Cuello Redondo Básica" [level=4] [ref=f2e1604]
+            - generic [ref=f2e1605]: "7598001000801"
+          - generic [ref=f2e1606]:
+            - generic [ref=f2e1607]:
+              - generic [ref=f2e1608]: $8.00
+              - generic [ref=f2e1609]: Bs. 6788.40
+            - button "Añadir a la venta" [ref=f2e1610]
+      - generic [ref=f2e1612] [cursor=pointer]:
+        - generic [ref=f2e1613]:
+          - img "Franela Oversize Streetwear Estampada" [ref=f2e1614]
+          - generic [ref=f2e1615]: Franelas y Camisas
+        - generic [ref=f2e1616]:
+          - generic [ref=f2e1617]:
+            - heading "Franela Oversize Streetwear Estampada" [level=4] [ref=f2e1618]
+            - generic [ref=f2e1619]: "7598001000802"
+          - generic [ref=f2e1620]:
+            - generic [ref=f2e1621]:
+              - generic [ref=f2e1622]: $14.00
+              - generic [ref=f2e1623]: Bs. 11879.70
+            - button "Añadir a la venta" [ref=f2e1624]
+      - generic [ref=f2e1626] [cursor=pointer]:
+        - generic [ref=f2e1627]:
+          - img "Pantalón Jean Clásico Slim Fit Caballero" [ref=f2e1628]
+          - generic [ref=f2e1629]: Pantalones y Jeans
+        - generic [ref=f2e1630]:
+          - generic [ref=f2e1631]:
+            - heading "Pantalón Jean Clásico Slim Fit Caballero" [level=4] [ref=f2e1632]
+            - generic [ref=f2e1633]: "7598001000803"
+          - generic [ref=f2e1634]:
+            - generic [ref=f2e1635]:
+              - generic [ref=f2e1636]: $22.00
+              - generic [ref=f2e1637]: Bs. 18668.10
+            - button "Añadir a la venta" [ref=f2e1638]
+      - generic [ref=f2e1640] [cursor=pointer]:
+        - generic [ref=f2e1641]:
+          - img "Jean Dama Tiro Alto Stretch Azul" [ref=f2e1642]
+          - generic [ref=f2e1643]: Pantalones y Jeans
+        - generic [ref=f2e1644]:
+          - generic [ref=f2e1645]:
+            - heading "Jean Dama Tiro Alto Stretch Azul" [level=4] [ref=f2e1646]
+            - generic [ref=f2e1647]: "7598001000804"
+          - generic [ref=f2e1648]:
+            - generic [ref=f2e1649]:
+              - generic [ref=f2e1650]: $24.00
+              - generic [ref=f2e1651]: Bs. 20365.20
+            - button "Añadir a la venta" [ref=f2e1652]
+      - generic [ref=f2e1654] [cursor=pointer]:
+        - generic [ref=f2e1655]:
+          - img "Bermuda Deportiva Dry-Fit con Bolsillos" [ref=f2e1656]
+          - generic [ref=f2e1657]: Ropa Deportiva
+        - generic [ref=f2e1658]:
+          - generic [ref=f2e1659]:
+            - heading "Bermuda Deportiva Dry-Fit con Bolsillos" [level=4] [ref=f2e1660]
+            - generic [ref=f2e1661]: "7598001000805"
+          - generic [ref=f2e1662]:
+            - generic [ref=f2e1663]:
+              - generic [ref=f2e1664]: $12.00
+              - generic [ref=f2e1665]: Bs. 10182.60
+            - button "Añadir a la venta" [ref=f2e1666]
+      - generic [ref=f2e1668] [cursor=pointer]:
+        - generic [ref=f2e1669]:
+          - img "Licra Deportiva Dama Ajuste Cómodo" [ref=f2e1670]
+          - generic [ref=f2e1671]: Ropa Deportiva
+        - generic [ref=f2e1672]:
+          - generic [ref=f2e1673]:
+            - heading "Licra Deportiva Dama Ajuste Cómodo" [level=4] [ref=f2e1674]
+            - generic [ref=f2e1675]: "7598001000806"
+          - generic [ref=f2e1676]:
+            - generic [ref=f2e1677]:
+              - generic [ref=f2e1678]: $15.00
+              - generic [ref=f2e1679]: Bs. 12728.25
+            - button "Añadir a la venta" [ref=f2e1680]
+      - generic [ref=f2e1682] [cursor=pointer]:
+        - generic [ref=f2e1683]:
+          - img "Pack 3 Medias Tobilleras Deportivas" [ref=f2e1684]
+          - generic [ref=f2e1685]: Ropa Interior y Medias
+        - generic [ref=f2e1686]:
+          - generic [ref=f2e1687]:
+            - heading "Pack 3 Medias Tobilleras Deportivas" [level=4] [ref=f2e1688]
+            - generic [ref=f2e1689]: "7598001000807"
+          - generic [ref=f2e1690]:
+            - generic [ref=f2e1691]:
+              - generic [ref=f2e1692]: $4.50
+              - generic [ref=f2e1693]: Bs. 3818.47
+            - button "Añadir a la venta" [ref=f2e1694]
+      - generic [ref=f2e1696] [cursor=pointer]:
+        - generic [ref=f2e1697]:
+          - img "Gorra Urbana Ajustable Trucker Cap" [ref=f2e1698]
+          - generic [ref=f2e1699]: Accesorios y Gorras
+        - generic [ref=f2e1700]:
+          - generic [ref=f2e1701]:
+            - heading "Gorra Urbana Ajustable Trucker Cap" [level=4] [ref=f2e1702]
+            - generic [ref=f2e1703]: "7598001000808"
+          - generic [ref=f2e1704]:
+            - generic [ref=f2e1705]:
+              - generic [ref=f2e1706]: $9.00
+              - generic [ref=f2e1707]: Bs. 7636.95
+            - button "Añadir a la venta" [ref=f2e1708]
+      - generic [ref=f2e1710] [cursor=pointer]:
+        - generic [ref=f2e1711]:
+          - img "Chaqueta Cortaviento Ligera Impermeable" [ref=f2e1712]
+          - generic [ref=f2e1713]: Abrigos y Chaquetas
+        - generic [ref=f2e1714]:
+          - generic [ref=f2e1715]:
+            - heading "Chaqueta Cortaviento Ligera Impermeable" [level=4] [ref=f2e1716]
+            - generic [ref=f2e1717]: "7598001000809"
+          - generic [ref=f2e1718]:
+            - generic [ref=f2e1719]:
+              - generic [ref=f2e1720]: $26.00
+              - generic [ref=f2e1721]: Bs. 22062.30
+            - button "Añadir a la venta" [ref=f2e1722]
+      - generic [ref=f2e1724] [cursor=pointer]:
+        - generic [ref=f2e1725]:
+          - img "Cinturón de Cuero Sintético Clásico" [ref=f2e1726]
+          - generic [ref=f2e1727]: Accesorios y Gorras
+        - generic [ref=f2e1728]:
+          - generic [ref=f2e1729]:
+            - heading "Cinturón de Cuero Sintético Clásico" [level=4] [ref=f2e1730]
+            - generic [ref=f2e1731]: "7598001000810"
+          - generic [ref=f2e1732]:
+            - generic [ref=f2e1733]:
+              - generic [ref=f2e1734]: $6.50
+              - generic [ref=f2e1735]: Bs. 5515.57
+            - button "Añadir a la venta" [ref=f2e1736]
+      - generic [ref=f2e1738] [cursor=pointer]:
+        - generic [ref=f2e1739]:
+          - img "Vestido Casual Estampado Floreado" [ref=f2e1740]
+          - generic [ref=f2e1741]: Vestidos
+        - generic [ref=f2e1742]:
+          - generic [ref=f2e1743]:
+            - heading "Vestido Casual Estampado Floreado" [level=4] [ref=f2e1744]
+            - generic [ref=f2e1745]: "7598001000811"
+          - generic [ref=f2e1746]:
+            - generic [ref=f2e1747]:
+              - generic [ref=f2e1748]: $18.00
+              - generic [ref=f2e1749]: Bs. 15273.90
+            - button "Añadir a la venta" [ref=f2e1750]
+      - generic [ref=f2e1752] [cursor=pointer]:
+        - generic [ref=f2e1753]:
+          - img "Boxer Algodón Caballero Pack 2 uds" [ref=f2e1754]
+          - generic [ref=f2e1755]: Ropa Interior y Medias
+        - generic [ref=f2e1756]:
+          - generic [ref=f2e1757]:
+            - heading "Boxer Algodón Caballero Pack 2 uds" [level=4] [ref=f2e1758]
+            - generic [ref=f2e1759]: "7598001000812"
+          - generic [ref=f2e1760]:
+            - generic [ref=f2e1761]:
+              - generic [ref=f2e1762]: $7.00
+              - generic [ref=f2e1763]: Bs. 5939.85
+            - button "Añadir a la venta" [ref=f2e1764]
+      - generic [ref=f2e1766] [cursor=pointer]:
+        - generic [ref=f2e1767]:
+          - img "Cable USB-C a USB-C Carga Rápida 60W 1m" [ref=f2e1768]
+          - generic [ref=f2e1769]: Cables y Adaptadores
+        - generic [ref=f2e1770]:
+          - generic [ref=f2e1771]:
+            - heading "Cable USB-C a USB-C Carga Rápida 60W 1m" [level=4] [ref=f2e1772]
+            - generic [ref=f2e1773]: "7599001000901"
+          - generic [ref=f2e1774]:
+            - generic [ref=f2e1775]:
+              - generic [ref=f2e1776]: $4.50
+              - generic [ref=f2e1777]: Bs. 3818.47
+            - button "Añadir a la venta" [ref=f2e1778]
+      - generic [ref=f2e1780] [cursor=pointer]:
+        - generic [ref=f2e1781]:
+          - img "Cable Lightning para iPhone Carga Rápida 1m" [ref=f2e1782]
+          - generic [ref=f2e1783]: Cables y Adaptadores
+        - generic [ref=f2e1784]:
+          - generic [ref=f2e1785]:
+            - heading "Cable Lightning para iPhone Carga Rápida 1m" [level=4] [ref=f2e1786]
+            - generic [ref=f2e1787]: "7599001000902"
+          - generic [ref=f2e1788]:
+            - generic [ref=f2e1789]:
+              - generic [ref=f2e1790]: $4.50
+              - generic [ref=f2e1791]: Bs. 3818.47
+            - button "Añadir a la venta" [ref=f2e1792]
+      - generic [ref=f2e1794] [cursor=pointer]:
+        - generic [ref=f2e1795]:
+          - img "Cargador de Pared Rápido 20W USB-C PD" [ref=f2e1796]
+          - generic [ref=f2e1797]: Cargadores
+        - generic [ref=f2e1798]:
+          - generic [ref=f2e1799]:
+            - heading "Cargador de Pared Rápido 20W USB-C PD" [level=4] [ref=f2e1800]
+            - generic [ref=f2e1801]: "7599001000903"
+          - generic [ref=f2e1802]:
+            - generic [ref=f2e1803]:
+              - generic [ref=f2e1804]: $9.00
+              - generic [ref=f2e1805]: Bs. 7636.95
+            - button "Añadir a la venta" [ref=f2e1806]
+      - generic [ref=f2e1808] [cursor=pointer]:
+        - generic [ref=f2e1809]:
+          - img "Cargador Doble Puerto USB + USB-C 30W" [ref=f2e1810]
+          - generic [ref=f2e1811]: Cargadores
+        - generic [ref=f2e1812]:
+          - generic [ref=f2e1813]:
+            - heading "Cargador Doble Puerto USB + USB-C 30W" [level=4] [ref=f2e1814]
+            - generic [ref=f2e1815]: "7599001000904"
+          - generic [ref=f2e1816]:
+            - generic [ref=f2e1817]:
+              - generic [ref=f2e1818]: $12.00
+              - generic [ref=f2e1819]: Bs. 10182.60
+            - button "Añadir a la venta" [ref=f2e1820]
+      - generic [ref=f2e1822] [cursor=pointer]:
+        - generic [ref=f2e1823]:
+          - img "Audífonos Bluetooth Inalámbricos TWS con Estuche" [ref=f2e1824]
+          - generic [ref=f2e1825]: Audio y Música
+        - generic [ref=f2e1826]:
+          - generic [ref=f2e1827]:
+            - heading "Audífonos Bluetooth Inalámbricos TWS con Estuche" [level=4] [ref=f2e1828]
+            - generic [ref=f2e1829]: "7599001000905"
+          - generic [ref=f2e1830]:
+            - generic [ref=f2e1831]:
+              - generic [ref=f2e1832]: $16.50
+              - generic [ref=f2e1833]: Bs. 14001.07
+            - button "Añadir a la venta" [ref=f2e1834]
+      - generic [ref=f2e1836] [cursor=pointer]:
+        - generic [ref=f2e1837]:
+          - img "Audífonos de Diadema Bluetooth con Cancelación de Ruido" [ref=f2e1838]
+          - generic [ref=f2e1839]: Audio y Música
+        - generic [ref=f2e1840]:
+          - generic [ref=f2e1841]:
+            - heading "Audífonos de Diadema Bluetooth con Cancelación de Ruido" [level=4] [ref=f2e1842]
+            - generic [ref=f2e1843]: "7599001000906"
+          - generic [ref=f2e1844]:
+            - generic [ref=f2e1845]:
+              - generic [ref=f2e1846]: $24.00
+              - generic [ref=f2e1847]: Bs. 20365.20
+            - button "Añadir a la venta" [ref=f2e1848]
+      - generic [ref=f2e1850] [cursor=pointer]:
+        - generic [ref=f2e1851]:
+          - img "Power Bank Batería Portátil 10.000 mAh Slim" [ref=f2e1852]
+          - generic [ref=f2e1853]: Baterías y Energía
+        - generic [ref=f2e1854]:
+          - generic [ref=f2e1855]:
+            - heading "Power Bank Batería Portátil 10.000 mAh Slim" [level=4] [ref=f2e1856]
+            - generic [ref=f2e1857]: "7599001000907"
+          - generic [ref=f2e1858]:
+            - generic [ref=f2e1859]:
+              - generic [ref=f2e1860]: $18.00
+              - generic [ref=f2e1861]: Bs. 15273.90
+            - button "Añadir a la venta" [ref=f2e1862]
+      - generic [ref=f2e1864] [cursor=pointer]:
+        - generic [ref=f2e1865]:
+          - img "Vidrio Templado Protector de Pantalla 9D Universal" [ref=f2e1866]
+          - generic [ref=f2e1867]: Protección y Fundas
+        - generic [ref=f2e1868]:
+          - generic [ref=f2e1869]:
+            - heading "Vidrio Templado Protector de Pantalla 9D Universal" [level=4] [ref=f2e1870]
+            - generic [ref=f2e1871]: "7599001000908"
+          - generic [ref=f2e1872]:
+            - generic [ref=f2e1873]:
+              - generic [ref=f2e1874]: $3.50
+              - generic [ref=f2e1875]: Bs. 2969.92
+            - button "Añadir a la venta" [ref=f2e1876]
+      - generic [ref=f2e1878] [cursor=pointer]:
+        - generic [ref=f2e1879]:
+          - img "Soporte Celular Magnético para Automóvil" [ref=f2e1880]
+          - generic [ref=f2e1881]: Accesorios para Autos
+        - generic [ref=f2e1882]:
+          - generic [ref=f2e1883]:
+            - heading "Soporte Celular Magnético para Automóvil" [level=4] [ref=f2e1884]
+            - generic [ref=f2e1885]: "7599001000909"
+          - generic [ref=f2e1886]:
+            - generic [ref=f2e1887]:
+              - generic [ref=f2e1888]: $6.00
+              - generic [ref=f2e1889]: Bs. 5091.30
+            - button "Añadir a la venta" [ref=f2e1890]
+      - generic [ref=f2e1892] [cursor=pointer]:
+        - generic [ref=f2e1893]:
+          - img "Memoria MicroSD Kingston 64GB Clase 10" [ref=f2e1894]
+          - generic [ref=f2e1895]: Almacenamiento
+        - generic [ref=f2e1896]:
+          - generic [ref=f2e1897]:
+            - heading "Memoria MicroSD Kingston 64GB Clase 10" [level=4] [ref=f2e1898]
+            - generic [ref=f2e1899]: "7599001000910"
+          - generic [ref=f2e1900]:
+            - generic [ref=f2e1901]:
+              - generic [ref=f2e1902]: $8.50
+              - generic [ref=f2e1903]: Bs. 7212.67
+            - button "Añadir a la venta" [ref=f2e1904]
+      - generic [ref=f2e1906] [cursor=pointer]:
+        - generic [ref=f2e1907]:
+          - img "Pendrive USB 3.0 Kingston 32GB Metálico" [ref=f2e1908]
+          - generic [ref=f2e1909]: Almacenamiento
+        - generic [ref=f2e1910]:
+          - generic [ref=f2e1911]:
+            - heading "Pendrive USB 3.0 Kingston 32GB Metálico" [level=4] [ref=f2e1912]
+            - generic [ref=f2e1913]: "7599001000911"
+          - generic [ref=f2e1914]:
+            - generic [ref=f2e1915]:
+              - generic [ref=f2e1916]: $7.00
+              - generic [ref=f2e1917]: Bs. 5939.85
+            - button "Añadir a la venta" [ref=f2e1918]
+      - generic [ref=f2e1920] [cursor=pointer]:
+        - generic [ref=f2e1921]:
+          - img "Mouse Inalámbrico Óptico Ergonómico 2.4GHz" [ref=f2e1922]
+          - generic [ref=f2e1923]: Computación y Oficina
+        - generic [ref=f2e1924]:
+          - generic [ref=f2e1925]:
+            - heading "Mouse Inalámbrico Óptico Ergonómico 2.4GHz" [level=4] [ref=f2e1926]
+            - generic [ref=f2e1927]: "7599001000912"
+          - generic [ref=f2e1928]:
+            - generic [ref=f2e1929]:
+              - generic [ref=f2e1930]: $8.00
+              - generic [ref=f2e1931]: Bs. 6788.40
+            - button "Añadir a la venta" [ref=f2e1932]
+      - generic [ref=f2e1934] [cursor=pointer]:
+        - generic [ref=f2e1935]:
+          - img "Corneta Parlante Bluetooth Portátil Resistente al Agua" [ref=f2e1936]
+          - generic [ref=f2e1937]: Audio y Música
+        - generic [ref=f2e1938]:
+          - generic [ref=f2e1939]:
+            - heading "Corneta Parlante Bluetooth Portátil Resistente al Agua" [level=4] [ref=f2e1940]
+            - generic [ref=f2e1941]: "7599001000913"
+          - generic [ref=f2e1942]:
+            - generic [ref=f2e1943]:
+              - generic [ref=f2e1944]: $19.50
+              - generic [ref=f2e1945]: Bs. 16546.72
+            - button "Añadir a la venta" [ref=f2e1946]
+      - generic [ref=f2e1948] [cursor=pointer]:
+        - generic [ref=f2e1949]:
+          - img "Aro de Luz LED 26cm con Trípode para Celular" [ref=f2e1950]
+          - generic [ref=f2e1951]: Fotografía y Video
+        - generic [ref=f2e1952]:
+          - generic [ref=f2e1953]:
+            - heading "Aro de Luz LED 26cm con Trípode para Celular" [level=4] [ref=f2e1954]
+            - generic [ref=f2e1955]: "7599001000914"
+          - generic [ref=f2e1956]:
+            - generic [ref=f2e1957]:
+              - generic [ref=f2e1958]: $14.00
+              - generic [ref=f2e1959]: Bs. 11879.70
+            - button "Añadir a la venta" [ref=f2e1960]
+    - generic [ref=f2e1962]:
+      - generic [ref=f2e1963]: Ticket listo • Toca productos para sumar
+      - generic [ref=f2e1966]:
+        - button "⚡ Monto Libre" [ref=f2e1967] [cursor=pointer]
+        - button "Balanza" [ref=f2e1969] [cursor=pointer]
+  - navigation [ref=f2e1975]:
+    - generic [ref=f2e1976]:
+      - button "POS" [ref=f2e1977] [cursor=pointer]
+      - button "Stock" [ref=f2e1985] [cursor=pointer]
+      - button "Escanear" [ref=f2e1991] [cursor=pointer]
+      - button "Balanza" [ref=f2e1999] [cursor=pointer]
+      - button "Gestión" [ref=f2e2006] [cursor=pointer]

@@ -74,6 +74,7 @@ import { db } from '@/lib/db';
 import masterCatalogData from '@/lib/data/master-catalog.json';
 import VisualPacksModal from '@/components/marketplace/VisualPacksModal';
 import { registerTrialInstallation } from '@/lib/licensing/trial-manager';
+import { cloudSyncService } from '@/lib/firebase/cloud-sync-service';
 
 interface ScannedHistoryItem {
   barcode: string;
@@ -581,7 +582,16 @@ export default function MobileScannerPage() {
     return Array.isArray(masterCatalogData) ? (masterCatalogData as MobileCatalogItem[]) : [];
   });
   const [inventorySearch, setInventorySearch] = useState('');
-  const [inventoryBcvRate, setInventoryBcvRate] = useState(848.55);
+  const [inventoryBcvRate, setInventoryBcvRate] = useState<number>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('klikpos_bcv_rate') || localStorage.getItem('venematic_offline_bcv');
+      if (saved) {
+        const parsed = parseFloat(saved);
+        if (!isNaN(parsed) && parsed > 0) return parsed;
+      }
+    }
+    return 883.40;
+  });
   const [isLoadingInventory, setIsLoadingInventory] = useState(false);
 
   // Form State for "Agregar Producto con Foto"
@@ -888,8 +898,11 @@ export default function MobileScannerPage() {
             setInventoryList(parsed);
           }
         }
-        const cachedBcv = localStorage.getItem('venematic_offline_bcv');
-        if (cachedBcv) setInventoryBcvRate(parseFloat(cachedBcv));
+        const cachedBcv = localStorage.getItem('klikpos_bcv_rate') || localStorage.getItem('venematic_offline_bcv');
+        if (cachedBcv) {
+          const parsedBcv = parseFloat(cachedBcv);
+          if (!isNaN(parsedBcv) && parsedBcv > 0) setInventoryBcvRate(parsedBcv);
+        }
       } catch {}
 
       // 2. Si aún no hay inventario en memoria, pre-poblar de inmediato con el Catálogo Maestro (+130 productos)
@@ -925,10 +938,12 @@ export default function MobileScannerPage() {
             }
           } catch {}
         }
-        if (typeof data.bcvRate === 'number') {
+        if (typeof data.bcvRate === 'number' && data.bcvRate > 0) {
           setInventoryBcvRate(data.bcvRate);
           try {
+            localStorage.setItem('klikpos_bcv_rate', String(data.bcvRate));
             localStorage.setItem('venematic_offline_bcv', String(data.bcvRate));
+            db.settings?.put?.({ key: 'bcv_rate', value: data.bcvRate }).catch(() => {});
           } catch {}
         }
         return !data.needsSync;
@@ -972,7 +987,11 @@ export default function MobileScannerPage() {
             const d = JSON.parse(e.data);
             if (typeof d.bcvRate === 'number' && d.bcvRate > 0) {
               setInventoryBcvRate(d.bcvRate);
-              try { localStorage.setItem('venematic_offline_bcv', String(d.bcvRate)); } catch {}
+              try {
+                localStorage.setItem('klikpos_bcv_rate', String(d.bcvRate));
+                localStorage.setItem('venematic_offline_bcv', String(d.bcvRate));
+                db.settings?.put?.({ key: 'bcv_rate', value: d.bcvRate }).catch(() => {});
+              } catch {}
             }
           }
         } catch {}
@@ -983,6 +1002,28 @@ export default function MobileScannerPage() {
         }
       });
     } catch {}
+
+    // Escuchar eventos globales de actualización de tasa entre pestañas o módulos
+    const handleBcvEvent = (e: any) => {
+      const val = typeof e.detail === 'number' ? e.detail : parseFloat(e.detail);
+      if (!isNaN(val) && val > 0) {
+        setInventoryBcvRate(val);
+      }
+    };
+    window.addEventListener('pos:bcv_updated', handleBcvEvent);
+    window.addEventListener('venematic:bcv_updated', handleBcvEvent);
+
+    // Consultar tasa oficial de Firestore o API en segundo plano al montar
+    cloudSyncService.fetchLatestBcvRate().then((cloudBcv) => {
+      if (cloudBcv && cloudBcv.rate > 0) {
+        setInventoryBcvRate(cloudBcv.rate);
+        try {
+          localStorage.setItem('klikpos_bcv_rate', String(cloudBcv.rate));
+          localStorage.setItem('venematic_offline_bcv', String(cloudBcv.rate));
+          db.settings?.put?.({ key: 'bcv_rate', value: cloudBcv.rate }).catch(() => {});
+        } catch {}
+      }
+    }).catch(() => {});
 
     // Reintentar cada 4 segundos si el inventario sigue vacío (esperando que desktop responda)
     retryInterval = setInterval(async () => {
@@ -1007,6 +1048,8 @@ export default function MobileScannerPage() {
       sseSource?.close();
       if (retryInterval) clearInterval(retryInterval);
       clearTimeout(stopRetry);
+      window.removeEventListener('pos:bcv_updated', handleBcvEvent);
+      window.removeEventListener('venematic:bcv_updated', handleBcvEvent);
     };
   }, [pcServerUrl]);
 
@@ -1094,6 +1137,9 @@ export default function MobileScannerPage() {
       } catch {}
       window.dispatchEvent(new CustomEvent('pos:bcv_updated', { detail: parsed }));
       window.dispatchEvent(new CustomEvent('venematic:bcv_updated', { detail: parsed }));
+      
+      // Sincronizar en Firestore Cloud y en el servidor local
+      cloudSyncService.pushBcvRate(parsed, 'Ajuste Manual en Celular').catch(() => {});
       safeApiFetch('/api/bcv/rate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1115,16 +1161,29 @@ export default function MobileScannerPage() {
       if (res.ok) {
         const data = await res.json();
         if (data.success && typeof data.rate === 'number' && data.rate > 0) {
-          setInventoryBcvRate(data.rate);
-          setTempMobileBcvRate(data.rate.toFixed(2));
+          const newRate = data.rate;
+          setInventoryBcvRate(newRate);
+          setTempMobileBcvRate(newRate.toFixed(2));
           try {
-            localStorage.setItem('klikpos_bcv_rate', String(data.rate));
-            localStorage.setItem('venematic_offline_bcv', String(data.rate));
-            await db.settings?.put?.({ key: 'bcv_rate', value: data.rate });
+            localStorage.setItem('klikpos_bcv_rate', String(newRate));
+            localStorage.setItem('venematic_offline_bcv', String(newRate));
+            await db.settings?.put?.({ key: 'bcv_rate', value: newRate });
           } catch {}
-          window.dispatchEvent(new CustomEvent('pos:bcv_updated', { detail: data.rate }));
-          window.dispatchEvent(new CustomEvent('venematic:bcv_updated', { detail: data.rate }));
-          setMobileBcvMsg(`✓ Tasa BCV Oficial obtenida: Bs. ${data.rate.toFixed(2)} (${data.source || 'Scraping'})`);
+          window.dispatchEvent(new CustomEvent('pos:bcv_updated', { detail: newRate }));
+          window.dispatchEvent(new CustomEvent('venematic:bcv_updated', { detail: newRate }));
+
+          // Sincronizar a Firestore Cloud y al servidor local
+          cloudSyncService.pushBcvRate(newRate, data.source || 'Portal Oficial BCV').catch(() => {});
+          safeApiFetch('/api/scanner/inventory', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ bcvRate: newRate }),
+          }).catch(() => {});
+
+          setMobileBcvMsg(`✓ Tasa BCV Oficial obtenida: Bs. ${newRate.toFixed(2)} (${data.source || 'Portal BCV'})`);
+          setTimeout(() => {
+            setShowMobileBcvModal(false);
+          }, 1400);
         } else {
           setMobileBcvMsg('No se pudo obtener tasa en vivo. Verifica tu conexión.');
         }
@@ -4468,15 +4527,26 @@ export default function MobileScannerPage() {
               <button
                 type="button"
                 onClick={async () => {
-                  setStatusMessage('Sincronizando tasa BCV...');
+                  setStatusMessage('Sincronizando tasa BCV oficial...');
                   try {
                     const res = await safeApiFetch('/api/bcv/rate?refresh=true');
                     if (res.ok) {
                       const data = await res.json();
                       if (typeof data.rate === 'number' && data.rate > 0) {
-                        setInventoryBcvRate(data.rate);
-                        localStorage.setItem('venematic_offline_bcv', String(data.rate));
-                        setStatusMessage(`✓ Tasa BCV actualizada: Bs. ${data.rate.toFixed(2)}`);
+                        const newRate = data.rate;
+                        setInventoryBcvRate(newRate);
+                        localStorage.setItem('klikpos_bcv_rate', String(newRate));
+                        localStorage.setItem('venematic_offline_bcv', String(newRate));
+                        db.settings?.put?.({ key: 'bcv_rate', value: newRate }).catch(() => {});
+                        cloudSyncService.pushBcvRate(newRate, data.source || 'Scraping Oficial BCV').catch(() => {});
+                        safeApiFetch('/api/scanner/inventory', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ bcvRate: newRate }),
+                        }).catch(() => {});
+                        window.dispatchEvent(new CustomEvent('pos:bcv_updated', { detail: newRate }));
+                        window.dispatchEvent(new CustomEvent('venematic:bcv_updated', { detail: newRate }));
+                        setStatusMessage(`✓ Tasa BCV actualizada: Bs. ${newRate.toFixed(2)}`);
                         setTimeout(() => setStatusMessage('Listo para escanear'), 2500);
                       }
                     }

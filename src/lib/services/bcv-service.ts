@@ -15,7 +15,40 @@ export interface BcvRateResult {
   isFallback?: boolean;
 }
 
-const DEFAULT_RATE = 873.87;
+export interface SharedBcvState {
+  rate: number;
+  date: string;
+  source: string;
+  lastUpdated: string;
+  updatedAt: number;
+  isManual: boolean;
+}
+
+const DEFAULT_RATE = 883.40;
+
+export function getSharedBcvState(): SharedBcvState {
+  if (!(globalThis as any).__klikpos_bcv_state) {
+    (globalThis as any).__klikpos_bcv_state = {
+      rate: DEFAULT_RATE,
+      date: new Date().toISOString().split('T')[0],
+      source: 'Predeterminada',
+      lastUpdated: new Date().toISOString(),
+      updatedAt: 0,
+      isManual: false,
+    };
+  }
+  return (globalThis as any).__klikpos_bcv_state;
+}
+
+export function setSharedBcvState(partial: Partial<SharedBcvState>): SharedBcvState {
+  const current = getSharedBcvState();
+  (globalThis as any).__klikpos_bcv_state = {
+    ...current,
+    ...partial,
+    updatedAt: Date.now(),
+  };
+  return (globalThis as any).__klikpos_bcv_state;
+}
 
 /**
  * Intento de scraping directo al Portal Oficial del Banco Central de Venezuela

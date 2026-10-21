@@ -183,7 +183,14 @@ export abstract class KlikposEditionBaseSync {
    * Consulta APIs en vivo (DolarAPI / Fallbacks) y sincroniza a Firestore
    */
   public async fetchAndSyncBcvRate(): Promise<SyncRateBCV> {
-    let rate = 848.55;
+    let rate = 883.40;
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('klikpos_bcv_rate') || localStorage.getItem('venematic_offline_bcv');
+      if (saved) {
+        const parsed = parseFloat(saved);
+        if (!isNaN(parsed) && parsed > 0) rate = parsed;
+      }
+    }
     let source = 'offline_default';
 
     try {

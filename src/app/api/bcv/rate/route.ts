@@ -1,21 +1,6 @@
 import { NextResponse } from 'next/server';
-import { fetchLiveBcvRate } from '@/lib/services/bcv-service';
+import { fetchLiveBcvRate, getSharedBcvState, setSharedBcvState } from '@/lib/services/bcv-service';
 import { scannerEmitter } from '@/lib/scanner-events';
-
-// In-memory cache for server lifecycle
-let latestBcvData: {
-  rate: number;
-  date: string;
-  source: string;
-  lastUpdated: string;
-  isManual?: boolean;
-} = {
-  rate: 871.37,
-  date: '',
-  source: 'Predeterminada',
-  lastUpdated: '',
-  isManual: false,
-};
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
@@ -31,24 +16,24 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const forceLive = searchParams.get('refresh') === 'true';
 
-  // Si se solicita refresco forzado, no ha sido sincronizado hoy, o aún tiene valores por defecto
+  let shared = getSharedBcvState();
   const todayStr = new Date().toISOString().split('T')[0];
-  const needsSync = forceLive || latestBcvData.date !== todayStr || latestBcvData.source === 'Predeterminada' || !latestBcvData.lastUpdated;
+  const needsSync = forceLive || shared.date !== todayStr || shared.source === 'Predeterminada' || shared.updatedAt === 0;
 
-  // Si se solicita refresco forzado (clic del usuario), forzar consulta en vivo sin importar el estado manual
-  if (forceLive || (needsSync && !latestBcvData.isManual)) {
+  // Si se solicita refresco forzado (clic del usuario) o no está sincronizado hoy
+  if (forceLive || (needsSync && !shared.isManual)) {
     try {
       const live = await fetchLiveBcvRate();
       if (live.success && live.rate > 0) {
-        latestBcvData = {
+        shared = setSharedBcvState({
           rate: live.rate,
           date: live.date,
           source: live.source,
           lastUpdated: live.lastUpdated,
           isManual: false,
-        };
+        });
         scannerEmitter.emit('inventory_updated', {
-          bcvRate: latestBcvData.rate,
+          bcvRate: shared.rate,
           timestamp: Date.now(),
         });
       }
@@ -59,7 +44,11 @@ export async function GET(request: Request) {
 
   return NextResponse.json({
     success: true,
-    ...latestBcvData,
+    rate: shared.rate,
+    date: shared.date,
+    source: shared.source,
+    lastUpdated: shared.lastUpdated,
+    isManual: shared.isManual,
   }, { headers: CORS_HEADERS });
 }
 
@@ -71,35 +60,35 @@ export async function POST(request: Request) {
     if (forceScrape) {
       const live = await fetchLiveBcvRate();
       if (live.success && live.rate > 0) {
-        latestBcvData = {
+        const shared = setSharedBcvState({
           rate: live.rate,
           date: live.date,
           source: live.source,
           lastUpdated: live.lastUpdated,
           isManual: false,
-        };
+        });
         scannerEmitter.emit('inventory_updated', {
-          bcvRate: latestBcvData.rate,
+          bcvRate: shared.rate,
           timestamp: Date.now(),
         });
-        return NextResponse.json({ success: true, ...latestBcvData }, { headers: CORS_HEADERS });
+        return NextResponse.json({ success: true, ...shared }, { headers: CORS_HEADERS });
       }
     }
 
     const numRate = Number(rate);
     if (Number.isFinite(numRate) && numRate >= 1 && numRate <= 10000000) {
-      latestBcvData = {
+      const shared = setSharedBcvState({
         rate: Math.round(numRate * 100) / 100,
         date: new Date().toISOString().split('T')[0],
         source: body.source || 'Ajuste Manual en Terminal',
         lastUpdated: new Date().toISOString(),
         isManual: true,
-      };
+      });
       scannerEmitter.emit('inventory_updated', {
-        bcvRate: latestBcvData.rate,
+        bcvRate: shared.rate,
         timestamp: Date.now(),
       });
-      return NextResponse.json({ success: true, ...latestBcvData }, { headers: CORS_HEADERS });
+      return NextResponse.json({ success: true, ...shared }, { headers: CORS_HEADERS });
     }
 
     return NextResponse.json(

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { doc, setDoc } from 'firebase/firestore';
 import { db as firestoreDb, isFirebaseConfigured } from '@/lib/firebase/config';
 import { cloudSyncService } from '@/lib/firebase/cloud-sync-service';
@@ -28,10 +28,19 @@ export interface UseBcvRateReturn {
   handleSaveManualBcv: () => void;
 }
 
-const FALLBACK_RATE = 871.37;
+const FALLBACK_RATE = 883.40;
 
 export function useBcvRate(initialRate = FALLBACK_RATE): UseBcvRateReturn {
-  const [bcvRate, setBcvRate] = useState(initialRate);
+  const [bcvRate, setBcvRate] = useState<number>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('klikpos_bcv_rate') || localStorage.getItem('venematic_offline_bcv');
+      if (saved) {
+        const parsed = parseFloat(saved);
+        if (!isNaN(parsed) && parsed > 0) return parsed;
+      }
+    }
+    return initialRate;
+  });
   const [bcvMode, setBcvMode] = useState<BcvMode>('auto');
   const [isBcvEditing, setIsBcvEditing] = useState(false);
   const [customBcvInput, setCustomBcvInput] = useState(String(initialRate));
@@ -46,6 +55,7 @@ export function useBcvRate(initialRate = FALLBACK_RATE): UseBcvRateReturn {
   const persistRate = useCallback((rate: number, source: string) => {
     try {
       localStorage.setItem('klikpos_bcv_rate', String(rate));
+      localStorage.setItem('venematic_offline_bcv', String(rate));
       localStorage.setItem('klikpos_bcv_mode', 'auto');
       if (isFirebaseConfigured()) {
         cloudSyncService.pushBcvRate(rate, source).catch(() => {});
@@ -55,6 +65,20 @@ export function useBcvRate(initialRate = FALLBACK_RATE): UseBcvRateReturn {
           updatedAt: new Date().toISOString(),
         }, { merge: true }).catch(() => {});
       }
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('pos:bcv_updated', { detail: rate }));
+        window.dispatchEvent(new CustomEvent('venematic:bcv_updated', { detail: rate }));
+      }
+      fetch('/api/scanner/inventory', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bcvRate: rate }),
+      }).catch(() => {});
+      fetch('/api/bcv/rate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rate, source }),
+      }).catch(() => {});
     } catch {}
   }, []);
 
@@ -197,6 +221,7 @@ export function useBcvRate(initialRate = FALLBACK_RATE): UseBcvRateReturn {
       setIsBcvEditing(false);
       try {
         localStorage.setItem('klikpos_bcv_rate', String(rounded));
+        localStorage.setItem('venematic_offline_bcv', String(rounded));
         localStorage.setItem('klikpos_bcv_mode', 'manual');
         if (isFirebaseConfigured()) {
           cloudSyncService.pushBcvRate(rounded, 'Ajuste Manual en Terminal').catch(() => {});
@@ -206,11 +231,54 @@ export function useBcvRate(initialRate = FALLBACK_RATE): UseBcvRateReturn {
             updatedAt: new Date().toISOString(),
           }, { merge: true }).catch(() => {});
         }
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('pos:bcv_updated', { detail: rounded }));
+          window.dispatchEvent(new CustomEvent('venematic:bcv_updated', { detail: rounded }));
+        }
+        fetch('/api/scanner/inventory', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ bcvRate: rounded }),
+        }).catch(() => {});
+        fetch('/api/bcv/rate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ rate: rounded, source: 'Ajuste Manual en Terminal' }),
+        }).catch(() => {});
       } catch {}
 
       showToast({ message: `✅ Tasa manual fijada: Bs. ${rounded.toFixed(2)}`, type: 'info' });
     }
   }, [customBcvInput, showToast]);
+
+  // Sincronización reactiva bidireccional en tiempo real
+  useEffect(() => {
+    const handleBcvUpdate = (e: any) => {
+      const val = typeof e.detail === 'number' ? e.detail : parseFloat(e.detail);
+      if (!isNaN(val) && val > 0) {
+        setBcvRate(val);
+        setCustomBcvInput(val.toFixed(2));
+      }
+    };
+    window.addEventListener('pos:bcv_updated', handleBcvUpdate);
+    window.addEventListener('venematic:bcv_updated', handleBcvUpdate);
+    const handleStorage = (e: StorageEvent) => {
+      if ((e.key === 'klikpos_bcv_rate' || e.key === 'venematic_offline_bcv') && e.newValue) {
+        const val = parseFloat(e.newValue);
+        if (!isNaN(val) && val > 0) {
+          setBcvRate(val);
+          setCustomBcvInput(val.toFixed(2));
+        }
+      }
+    };
+    window.addEventListener('storage', handleStorage);
+
+    return () => {
+      window.removeEventListener('pos:bcv_updated', handleBcvUpdate);
+      window.removeEventListener('venematic:bcv_updated', handleBcvUpdate);
+      window.removeEventListener('storage', handleStorage);
+    };
+  }, []);
 
   return {
     bcvRate,

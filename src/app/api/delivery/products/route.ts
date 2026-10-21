@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { searchMarketplaceProducts, STORE_INVENTORIES, INITIAL_MARKETPLACE_STORES } from '@/lib/delivery/marketplace-engine'
+import { getSharedBcvState } from '@/lib/services/bcv-service'
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
@@ -11,16 +12,7 @@ export async function GET(request: Request) {
   const userLat = searchParams.get('lat') ? parseFloat(searchParams.get('lat')!) : undefined
   const userLng = searchParams.get('lng') ? parseFloat(searchParams.get('lng')!) : undefined
 
-  let rate = 848.55
-  try {
-    const res = await fetch('http://localhost:3000/api/bcv-rate')
-    if (res.ok) {
-      const data = await res.json()
-      if (data.rate) rate = data.rate
-    }
-  } catch {
-    // fallback rate
-  }
+  let rate = getSharedBcvState().rate;
 
   // Si se solicita el catálogo de una tienda en específico
   if (storeId) {

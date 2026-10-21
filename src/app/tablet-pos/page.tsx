@@ -477,7 +477,7 @@ export default function TabletMobilePosPage() {
       // 6. Tasa BCV
       const savedBcvMode = localStorage.getItem('klikpos_bcv_mode') as 'auto' | 'manual';
       if (savedBcvMode) setBcvMode(savedBcvMode);
-      const savedRate = localStorage.getItem('klikpos_bcv_rate');
+      const savedRate = localStorage.getItem('klikpos_bcv_rate') || localStorage.getItem('venematic_offline_bcv');
       if (savedRate) {
         const val = parseFloat(savedRate);
         if (!isNaN(val) && val > 0) {

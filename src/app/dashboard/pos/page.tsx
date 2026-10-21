@@ -50,7 +50,16 @@ export default function DesktopPosPage() {
   const [categories, setCategories] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('Todos');
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [bcvRate, setBcvRate] = useState<number>(SYSTEM_DEFAULTS.DEFAULT_BCV_RATE);
+  const [bcvRate, setBcvRate] = useState<number>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('klikpos_bcv_rate') || localStorage.getItem('venematic_offline_bcv');
+      if (saved) {
+        const parsed = parseFloat(saved);
+        if (!isNaN(parsed) && parsed > 0) return parsed;
+      }
+    }
+    return SYSTEM_DEFAULTS.DEFAULT_BCV_RATE;
+  });
   const [primaryCurrency, setPrimaryCurrency] = useState<'VES' | 'USD'>('VES');
   const [showImages] = useState<boolean>(true);
 
@@ -260,9 +269,37 @@ export default function DesktopPosPage() {
     setCategories(cats);
 
     const bcvSetting = await db.settings.get('bcv_rate');
-    if (bcvSetting && typeof bcvSetting.value === 'number') {
+    if (bcvSetting && typeof bcvSetting.value === 'number' && bcvSetting.value > 0) {
       setBcvRate(bcvSetting.value);
+    } else {
+      const saved = localStorage.getItem('klikpos_bcv_rate') || localStorage.getItem('venematic_offline_bcv');
+      if (saved) {
+        const parsed = parseFloat(saved);
+        if (!isNaN(parsed) && parsed > 0) setBcvRate(parsed);
+      }
     }
+
+    // Consultar tasa oficial actualizada (Firestore Cloud / API de respaldo)
+    cloudSyncService.fetchLatestBcvRate().then(async (cloudRate) => {
+      if (cloudRate && cloudRate.rate > 0) {
+        setBcvRate(cloudRate.rate);
+        localStorage.setItem('klikpos_bcv_rate', String(cloudRate.rate));
+        localStorage.setItem('venematic_offline_bcv', String(cloudRate.rate));
+        await db.settings.put({ key: 'bcv_rate', value: cloudRate.rate });
+      } else {
+        fetch('/api/bcv/rate')
+          .then((r) => r.json())
+          .then(async (d) => {
+            if (d && typeof d.rate === 'number' && d.rate > 0) {
+              setBcvRate(d.rate);
+              localStorage.setItem('klikpos_bcv_rate', String(d.rate));
+              localStorage.setItem('venematic_offline_bcv', String(d.rate));
+              await db.settings.put({ key: 'bcv_rate', value: d.rate });
+            }
+          })
+          .catch(() => {});
+      }
+    }).catch(() => {});
 
     const sliderSetting = await db.settings.get('pos_quick_access_ids');
     if (sliderSetting && Array.isArray(sliderSetting.value)) {
@@ -282,6 +319,29 @@ export default function DesktopPosPage() {
 
   useEffect(() => {
     loadData();
+
+    // Sincronizar tasa BCV en tiempo real cuando cualquier otro módulo (celular, tablet, modal) la actualice
+    const handleBcvUpdate = (e: any) => {
+      const val = typeof e.detail === 'number' ? e.detail : parseFloat(e.detail);
+      if (!isNaN(val) && val > 0) {
+        setBcvRate(val);
+      }
+    };
+    window.addEventListener('pos:bcv_updated', handleBcvUpdate);
+    window.addEventListener('venematic:bcv_updated', handleBcvUpdate);
+    const handleStorage = (e: StorageEvent) => {
+      if ((e.key === 'klikpos_bcv_rate' || e.key === 'venematic_offline_bcv') && e.newValue) {
+        const val = parseFloat(e.newValue);
+        if (!isNaN(val) && val > 0) setBcvRate(val);
+      }
+    };
+    window.addEventListener('storage', handleStorage);
+
+    return () => {
+      window.removeEventListener('pos:bcv_updated', handleBcvUpdate);
+      window.removeEventListener('venematic:bcv_updated', handleBcvUpdate);
+      window.removeEventListener('storage', handleStorage);
+    };
   }, [loadData]);
 
   // Productos filtrados
@@ -514,6 +574,31 @@ export default function DesktopPosPage() {
       else showToast('Agrega productos al carrito antes de cobrar (F12)', 'error');
     },
   });
+
+  const handleQuickRefreshBcv = async () => {
+    showToast('Consultando tasa BCV oficial en vivo...', 'info');
+    try {
+      const res = await fetch('/api/bcv/rate?refresh=true');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && typeof data.rate === 'number' && data.rate > 0) {
+          const newRate = data.rate;
+          setBcvRate(newRate);
+          localStorage.setItem('klikpos_bcv_rate', String(newRate));
+          localStorage.setItem('venematic_offline_bcv', String(newRate));
+          await db.settings.put({ key: 'bcv_rate', value: newRate });
+          cloudSyncService.pushBcvRate(newRate, data.source || 'Portal Oficial BCV').catch(() => {});
+          window.dispatchEvent(new CustomEvent('pos:bcv_updated', { detail: newRate }));
+          window.dispatchEvent(new CustomEvent('venematic:bcv_updated', { detail: newRate }));
+          showToast(`✓ Tasa BCV Oficial actualizada: Bs. ${newRate.toFixed(2)}`, 'success');
+          return;
+        }
+      }
+      showToast('No se pudo obtener tasa en vivo del BCV', 'error');
+    } catch {
+      showToast('Error de conexión al consultar BCV', 'error');
+    }
+  };
 
   return (
     <div className="flex h-screen max-h-screen bg-slate-100 dark:bg-slate-950 p-2 sm:p-3 gap-2.5 overflow-hidden select-none">
@@ -755,6 +840,7 @@ export default function DesktopPosPage() {
           totalVES={cartHook.totalVES}
           shiftSales={shiftSales}
           onOpenPaymentModal={openPaymentModal}
+          onRefreshBcv={handleQuickRefreshBcv}
         />
 
         <PosTouchKeypad

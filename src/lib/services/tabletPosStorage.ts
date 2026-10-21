@@ -146,10 +146,10 @@ export const TabletPosStorage = {
   },
 
   // Tasa BCV
-  getBcvRate(defaultVal: number = 848.55): number {
+  getBcvRate(defaultVal: number = 883.40): number {
     if (typeof window === 'undefined') return defaultVal;
     try {
-      const raw = localStorage.getItem(STORAGE_KEYS.BCV_RATE);
+      const raw = localStorage.getItem(STORAGE_KEYS.BCV_RATE) || localStorage.getItem('venematic_offline_bcv');
       const val = raw ? parseFloat(raw) : defaultVal;
       return !isNaN(val) && val > 0 ? val : defaultVal;
     } catch {
@@ -161,6 +161,7 @@ export const TabletPosStorage = {
     if (typeof window === 'undefined') return;
     try {
       localStorage.setItem(STORAGE_KEYS.BCV_RATE, String(rate));
+      localStorage.setItem('venematic_offline_bcv', String(rate));
       localStorage.setItem(STORAGE_KEYS.BCV_MODE, mode);
     } catch {}
   }

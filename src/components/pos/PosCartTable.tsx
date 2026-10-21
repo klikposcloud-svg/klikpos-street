@@ -3,6 +3,7 @@
 import React from 'react';
 import { formatUSD, formatVES } from '@/lib/formatters';
 import { SaleItem, LocalSale } from '@/lib/db';
+import { RefreshCw } from 'lucide-react';
 
 interface CartItem extends SaleItem {
   stock: number;
@@ -22,6 +23,7 @@ interface PosCartTableProps {
   totalVES: number;
   shiftSales: LocalSale[];
   onOpenPaymentModal: () => void;
+  onRefreshBcv?: () => void;
 }
 
 export default function PosCartTable({
@@ -38,6 +40,7 @@ export default function PosCartTable({
   totalVES,
   shiftSales,
   onOpenPaymentModal,
+  onRefreshBcv,
 }: PosCartTableProps) {
   return (
     <>
@@ -196,9 +199,15 @@ export default function PosCartTable({
                 <span className="text-[11px] sm:text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-200">
                   TOTAL A COBRAR (BS)
                 </span>
-                <span className="text-xs font-mono font-black text-sky-900 dark:text-sky-300 bg-sky-100 dark:bg-sky-950/80 px-2 py-0.5 rounded border border-sky-300 dark:border-sky-800">
-                  Tasa: Bs. {bcvRate.toFixed(2)}
-                </span>
+                <button
+                  type="button"
+                  onClick={onRefreshBcv}
+                  className="group flex items-center gap-1.5 text-xs font-mono font-black text-sky-950 dark:text-sky-200 bg-sky-100 hover:bg-sky-200 dark:bg-sky-950/80 dark:hover:bg-sky-900 px-2 py-0.5 rounded-md border border-sky-300 dark:border-sky-700 transition-all cursor-pointer active:scale-95 shadow-2xs"
+                  title="Clic para sincronizar tasa oficial BCV en vivo"
+                >
+                  <RefreshCw className="w-2.5 h-2.5 text-sky-700 dark:text-sky-400 group-hover:rotate-180 transition-transform duration-500" />
+                  <span>Tasa: Bs. {bcvRate.toFixed(2)}</span>
+                </button>
               </div>
               <div className="flex items-baseline justify-between gap-2">
                 <span className="text-xl sm:text-2xl font-black font-sans text-emerald-700 dark:text-emerald-400 tracking-tight tabular-numbers break-all leading-tight">

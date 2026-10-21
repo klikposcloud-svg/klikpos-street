@@ -63,7 +63,7 @@ export async function GET(request: Request) {
 
   const today = new Date().toISOString().split('T')[0];
   return NextResponse.json({
-    rate: 854.46,
+    rate: 883.40,
     date: today,
     source: 'Tasa BCV Referencial',
     updatedAt: new Date().toISOString(),

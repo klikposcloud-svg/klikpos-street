@@ -9,7 +9,7 @@ export const SYSTEM_DEFAULTS = {
   IGTF_RATE: 0.03, // 3% Impuesto a Grandes Transacciones Financieras en divisas
 
   // Tasa de cambio BCV de contingencia (se actualiza automáticamente al iniciar la app)
-  DEFAULT_BCV_RATE: 857.01,
+  DEFAULT_BCV_RATE: 883.40,
 
   // Información fiscal y comercial por defecto
   DEFAULT_STORE: {
