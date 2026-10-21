@@ -1,0 +1,35 @@
+﻿================================================================================
+GUIA OFICIAL DE DISTRIBUCION - KLIKO ECOSYSTEM 2026
+================================================================================
+
+Este directorio contiene las ediciones comerciales oficiales de KLIKO:
+
+[01] 01_Combo_Basico_Desktop_Satelite / 01_KlikPOS_Satelite_PC_Contingencia
+     -> INSTALAR_KLIKO.bat + Kliko_Desktop_Setup.exe
+     -> Kliko_Movil_Satelite.apk
+     -> Companion para PC: cobro con escaner, inventario anaquel y contingencia sin luz.
+     -> Boton central: ESCANER.
+
+[02] 02_Combo_Empresarial_Full
+     -> INSTALAR_KLIKO_FULL.bat + Kliko_Desktop_Full_Setup.exe
+     -> Version Windows completa con balanza, lector, impresora y servidor local.
+     -> Modo Oscuro personalizable (OLED, Carbon, Esmeralda, Purpura, Azul o Hex Libre).
+
+[03] 03_KlikPOS_Tablet_Standalone_Mesas
+     -> KlikPOS_Tablet_Standalone.apk / Kliko_Tablet_Standalone.apk
+     -> 100% independiente de PC. Restaurantes, comanda, mesas, clientes y Pago Movil.
+     -> Boton central: COBRAR.
+
+[04] 04_KlikPOS_Movil_Full_Autonomo_Nube
+     -> KlikPOS_Movil_Full_Autonomo.apk
+     -> (Modulo en proceso de renovacion UI segun plan estrategico).
+
+[05] Kliko Street (Ambulantes, Ferias, Carros de Comida)
+     -> Kliko_Street.apk
+     -> 100% Offline, balanza, tasa BCV, calculo de vuelto bimoneda instantaneo.
+
+[06] Kliko Board (Digital Menu Boards para TVs)
+     -> Kliko_Board.exe + Iniciar_Kliko_Board.bat
+     -> Ubicado en: Documents\Menu Composer (Visual Studio + Web Player 4K).
+
+================================================================================

@@ -1,4 +1,4 @@
-﻿$ErrorActionPreference = "Stop"
+$ErrorActionPreference = "Stop"
 
 $root = "c:\Users\pcpro\OneDrive\Documents\venematic-master\venematic-master"
 $androidDir = "$root\venematic-desktop\android"
@@ -31,11 +31,15 @@ Write-Host ">>> [3/3] Distribuyendo APKs a dist-apk y DISTRIBUCION_KLIKPOS..." -
 $targets = @(
     "$distDir\KlikPOS_Movil_Full.apk",
     "$distDir\KlikPOS_Movil_Satelite.apk",
+    "$distDir\Kliko_Movil_Satelite.apk",
     "$distDir\VenematicPOS-Full-Mobile.apk",
     "$distDir\VenematicPOS-Caja-Mobile.apk",
     "$distFolder\03_Movil_Full_Autonomo\KlikPOS_Movil_Full.apk",
     "$distFolder\01_Combo_Basico_Desktop_Satelite\KlikPOS_Movil_Satelite.apk",
-    "$distFolder\02_Combo_Empresarial_Full\KlikPOS_Movil_Satelite.apk"
+    "$distFolder\01_Combo_Basico_Desktop_Satelite\Kliko_Movil_Satelite.apk",
+    "$distFolder\02_Combo_Empresarial_Full\KlikPOS_Movil_Satelite.apk",
+    "$distFolder\02_Combo_Empresarial_Full\Kliko_Movil_Satelite.apk",
+    "$distFolder\Kliko_Movil_Satelite.apk"
 )
 
 foreach ($tgt in $targets) {

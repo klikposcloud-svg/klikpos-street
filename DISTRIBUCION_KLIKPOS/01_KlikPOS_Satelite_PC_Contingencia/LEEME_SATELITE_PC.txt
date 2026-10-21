@@ -1,5 +1,5 @@
 ﻿================================================================================
-EDICION 1: KLIKPOS MOVIL SATELITE PC (CONTINGENCIA Y ESCANER)
+EDICION 1: KLIKO MOVIL SATELITE PC (CONTINGENCIA Y ESCANER)
 ================================================================================
 * Proposito: Companion complementario de la PC para cobro con camara, auditoria 
   de inventario en anaquel y venta de contingencia cuando se corta la luz.
