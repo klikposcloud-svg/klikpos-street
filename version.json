@@ -1,14 +1,17 @@
 {
-  "version": "3.0.25",
-  "releaseDate": "2026-10-18",
-  "title": "KlikPOS Suite v3.0.25 - Rebranding Klikpos Cloud, Alto Contraste WCAG AAA y Ergonomía POS",
+  "version": "3.0.29",
+  "buildNumber": 29,
+  "releaseDate": "2026-11-02",
+  "title": "Kliko Street Food & POS v3.0.29 - Actualización Disponible",
   "notes": [
-    "Rebranding Oficial a Klikpos Cloud: Sincronización en la nube renombrada y unificada bajo la marca maestra Klikpos Cloud.",
-    "Corrección de Contraste WCAG AAA en Licenciamiento: Botón y enlaces de WhatsApp con fondo blanco blindado y tipografía oscura profunda (#0f172a, ratio 18.7:1), eliminando texto blanco sobre blanco.",
-    "Optimización Ergonómica de Catálogo POS: Contenedores con auto-fill responsivo de 6 a 8 columnas e imágenes completas centradas con ajuste contain, maximizando la visibilidad de productos.",
-    "Barra de Acciones Compacta: Reducción de altura a 30px en barra superior para aprovechar el espacio vertical de venta."
+    "Facturación Fiscal SENIAT Oficial y Ticket Mixto en tiempo real.",
+    "App 100% Gratuita e Ilimitada: Sin expiración ni restricciones.",
+    "Respaldo Kliko Cloud opcional ($5/mes).",
+    "Optimización táctil de cobro y cálculo instantáneo de vuelto en divisas y bolívares."
   ],
-  "windowsUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.25/Kliko_Desktop_Full_Setup.exe",
-  "androidUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.25/KlikPOS_Movil_Full.apk",
+  "androidUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.29/KlikPOS_Street.apk",
+  "apkUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.29/KlikPOS_Street.apk",
+  "fallbackApkUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.28/KlikPOS_Street.apk",
+  "windowsUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.27/Kliko_Business_Full_Setup.exe",
   "mandatory": false
 }
