@@ -1,16 +1,17 @@
 {
-  "version": "1.0.0",
-  "buildNumber": 1,
-  "releaseDate": "2026-10-02",
-  "title": "KlikPOS Street v1.0.0 - Full Dark Monolítico & Auto-Update Móvil",
+  "version": "3.0.29",
+  "buildNumber": 29,
+  "releaseDate": "2026-11-02",
+  "title": "Kliko Street Food & POS v3.0.29 - Actualización Disponible",
   "notes": [
-    "Diseño Full Dark Monolítico (#090d16) unificado en Header, Canvas, Dock y Barra Inferior.",
-    "Botón Central de Acciones en color Ámbar Neón (#f59e0b) de alto contraste.",
-    "Cards con feedback táctil (efecto botón presionado) y sonido de caja registradora al agregar.",
-    "Motor de Auto-Actualización en Vivo integrado para sincronizar cambios automáticamente.",
-    "Almacenamiento local 100% autónomo y fuera de línea con IndexedDB/Dexie ultra-rápido."
+    "Facturación Fiscal SENIAT Oficial y Ticket Mixto en tiempo real.",
+    "App 100% Gratuita e Ilimitada: Sin expiración ni restricciones.",
+    "Respaldo Kliko Cloud opcional ($5/mes).",
+    "Optimización táctil de cobro y cálculo instantáneo de vuelto en divisas y bolívares."
   ],
-  "apkUrl": "https://github.com/klikposcloud-svg/klikpos-street/releases/download/v1.0.0/KlikPOS_Street_v1.0.apk",
-  "fallbackApkUrl": "https://raw.githubusercontent.com/klikposcloud-svg/klikpos-street/main/dist/KlikPOS_Street_v1.0.apk",
+  "androidUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.29/KlikPOS_Street.apk",
+  "apkUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.29/KlikPOS_Street.apk",
+  "fallbackApkUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.28/KlikPOS_Street.apk",
+  "windowsUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.27/Kliko_Business_Full_Setup.exe",
   "mandatory": false
 }
