@@ -1,17 +1,17 @@
 {
-  "version": "3.0.29",
-  "buildNumber": 29,
-  "releaseDate": "2026-11-02",
-  "title": "Kliko Street Food & POS v3.0.29 - Actualización Disponible",
+  "version": "4.0.1",
+  "buildNumber": 41,
+  "releaseDate": "2026-11-12",
+  "title": "Klikos Enterprise Version 4.0.1 (Oficial) - Margen Real sobre Venta, Facturación SENIAT y Catálogo Completo",
   "notes": [
-    "Facturación Fiscal SENIAT Oficial y Ticket Mixto en tiempo real.",
-    "App 100% Gratuita e Ilimitada: Sin expiración ni restricciones.",
-    "Respaldo Kliko Cloud opcional ($5/mes).",
-    "Optimización táctil de cobro y cálculo instantáneo de vuelto en divisas y bolívares."
+    "Fórmula matemática oficial de margen de ganancia real sobre precio de venta: P = C / (1 - M/100).",
+    "Balanza Digital COM (RS-232): Lectura al gramo en tiempo real integrada al Punto de Venta.",
+    "368 Productos Precargados: Catálogo completo con fotos reales, marcas y códigos de barras.",
+    "Facturación Electrónica e Imprentas Digitales SENIAT 100% Offline.",
+    "Soporte oficial para Tablet Retail (K Roja) y Móvil Satélite (K Verde)."
   ],
-  "androidUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.29/KlikPOS_Street.apk",
-  "apkUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.29/KlikPOS_Street.apk",
-  "fallbackApkUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.28/KlikPOS_Street.apk",
-  "windowsUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v3.0.27/Kliko_Business_Full_Setup.exe",
+  "windowsUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v4.0.1/Klikos_Enterprise_Version_4.0.1_Setup.exe",
+  "androidUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v4.0.1/KlikPOS_Tablet_Retail_v4.0.1.apk",
+  "apkUrl": "https://github.com/klikposcloud-svg/klikpos-releases/releases/download/v4.0.1/KlikPOS_Tablet_Retail_v4.0.1.apk",
   "mandatory": false
 }
